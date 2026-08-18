@@ -11,15 +11,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+
       - name: Materialize latest Sol scratch layer
         shell: bash
         run: |
           set -euo pipefail
           SRC="ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
           find "$SRC" -maxdepth 1 -type f -name '*.lean' ! -name 'ErdosTernary2.lean' -exec cp '{}' . \;
+
       - name: Normalize injected chronology headers only
         shell: bash
         run: |
+          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           for p in Path('.').glob('*.lean'):
@@ -34,9 +37,11 @@ jobs:
                   p.write_text(''.join(lines),encoding='utf-8')
                   print(p, 'normalized', changed, 'header lines')
           PY
-      - name: Restore comparator Lean workspace metadata
+
+      - name: Restore exact comparator workspace metadata
         shell: bash
         run: |
+          set -euo pipefail
           cat > lean-toolchain <<'EOF'
           leanprover/lean4:v4.33.0-rc2
           EOF
@@ -57,4 +62,29 @@ jobs:
           name = "ErdosTernary2"
           EOF
           rm -f lake-manifest.json
-      - uses: leanprover/lean-action@v1
+
+      - name: Install pinned rc2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          source "$HOME/.elan/env"
+          elan toolchain install "$(cat lean-toolchain)"
+          elan default "$(cat lean-toolchain)"
+          lean --version
+          lake --version
+
+      - name: Resolve pinned Mathlib and cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$HOME/.elan/env"
+          lake update
+          lake exe cache get || true
+
+      - name: Atomic monolith build
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$HOME/.elan/env"
+          lake build GSTTactic ErdosTernary2
