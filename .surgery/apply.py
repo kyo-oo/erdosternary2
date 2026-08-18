@@ -30,38 +30,76 @@ if qstart_tag not in text:
     text = text.replace(legacy_end, legacy_end + qend_tag, 1)
 
 # ---------------------------------------------------------------------------
-# Atomic attachment only.
-#
-# Do NOT recursively paste the research snapshot DAG into the production
-# monolith. Several scratch files deliberately contain RED experiments. We
-# attach only the already-kernel-checked atomic reduction, and strip all
-# chronology metadata by starting strictly after its import line.
+# Attach the theorem-grade BIG-N/origin/right-chord stack before the production
+# seam.  We follow only local snapshot imports, strip every import/header, and
+# emit each module once in dependency order.  These are proof ingredients;
+# ErdosTernary2.lean remains the sole production theorem file.
 # ---------------------------------------------------------------------------
-attach_marker = '-- BEGIN ATTACHED ATOMIC PREFIX-ONE REDUCTION\n'
-attach_end = '-- END ATTACHED ATOMIC PREFIX-ONE REDUCTION\n\n'
+attach_marker = '-- BEGIN ATTACHED SOL BIG-N CLOSURE STACK\n'
+attach_end = '-- END ATTACHED SOL BIG-N CLOSURE STACK\n\n'
 anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
 if attach_marker not in text:
     snap = Path('ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic')
-    src_lines = (snap / 'AtomicPrefixOneReductionScratch.lean').read_text(encoding='utf-8').splitlines()
-    import_idx = next(
-        i for i, line in enumerate(src_lines)
-        if line.strip() == 'import ErdosTernary2'
-    )
-    body = '\n'.join(src_lines[import_idx + 1:]).strip() + '\n'
-    attached = (
-        attach_marker
-        + '-- BEGIN ATTACHED AtomicPrefixOneReductionScratch.lean\n'
-        + body
-        + '-- END ATTACHED AtomicPrefixOneReductionScratch.lean\n'
-        + attach_end
-    )
+    roots = [
+        'AtomicPrefixOneReductionScratch',
+        'CanonicalCausalityScratch',
+        'CanonicalOriginCutIntersectionScratch',
+        'ResidualNullBranchReductionScratch',
+        'ResidualNullTerminalScratch',
+        'ResidualNullPrefixFourCutScratch',
+        'CanonicalOriginTritForcingScratch',
+        'CanonicalResidualInfiniteSupportBridgeScratch',
+        'PrefixOneTwoDigitChordScratch',
+        'RightChordCanonicalGateScratch',
+        'CanonicalRightChordTrapScratch',
+        'CanonicalPhaseCrossingSurgeryScratch',
+        'InformationFluxScratch',
+        'StripConservationScratch',
+        'HandwrittenSignedKernelFluxScratch',
+        'HandwrittenBigNOmegaScratch',
+        'HandwrittenBigNBinaryFactorScratch',
+        'HandwrittenBig1PathProjectorScratch',
+        'HandwrittenOmegaOriginCommutingSquareScratch',
+    ]
+    seen = set()
+    chunks = []
+
+    def visit(mod: str):
+        if mod in seen or mod in {'Mathlib', 'ErdosTernary2'}:
+            return
+        path = snap / f'{mod}.lean'
+        if not path.exists():
+            return
+        seen.add(mod)
+        src_lines = path.read_text(encoding='utf-8').splitlines()
+        deps = []
+        last_import = -1
+        for i, line in enumerate(src_lines):
+            stripped = line.strip()
+            if stripped.startswith('import '):
+                deps.extend(stripped[len('import '):].split())
+                last_import = i
+        for dep in deps:
+            visit(dep)
+        body_lines = src_lines[last_import + 1:] if last_import >= 0 else src_lines
+        # Drop chronological metadata that precedes imports in snapshot files.
+        body = '\n'.join(body_lines).strip() + '\n'
+        chunks.append(
+            f'-- BEGIN ATTACHED {mod}.lean\n'
+            + body
+            + f'-- END ATTACHED {mod}.lean\n\n'
+        )
+
+    for root in roots:
+        visit(root)
+
+    attached = attach_marker + ''.join(chunks) + attach_end
     if anchor not in text:
-        raise RuntimeError('inline integration anchor missing for atomic attachment')
+        raise RuntimeError('inline integration anchor missing for BIG-N attachment')
     text = text.replace(anchor, attached + anchor, 1)
 
-# BIG-N finite endpoint, kept deliberately tiny. This is the actual finite
-# I=N case: a carry-three start cannot reach carry one through an all-BIG1
-# information interval.
+# BIG-N finite endpoint. This is the literal finite i=N case: a carry-three
+# start cannot reach carry one through an all-BIG1 information interval.
 bign_code = r'''/-- BIG-N finite endpoint adapter. -/
 theorem gst_bigN_seed3_endpoint_forces_non_one_inline
     (R start N : Nat) (hstart_lt : start < N)
@@ -79,6 +117,18 @@ theorem gst_bigN_seed3_endpoint_forces_non_one_inline
     (by simpa [gstCarry] using hC_start_3)
     (by simpa [gstCarry] using hC_N_1) hall
 
+/-- Literal BIG-N finite-support horizon for the canonical child information. -/
+theorem gst_prefix_one_bigN_future_zero_inline
+    (s n : Nat) (hs : 1 ≤ s) :
+    let N := gstNavigationConstant (s+1) n
+    N / 3^N = 0 := by
+  dsimp only
+  by_cases hN0 : gstNavigationConstant (s+1) n = 0
+  · rw [hN0]
+    decide
+  · exact gst_navigation_self_horizon_zeroS
+      (gstNavigationConstant (s+1) n) (by omega)
+
 '''
 if 'theorem gst_bigN_seed3_endpoint_forces_non_one_inline' not in text:
     if anchor not in text:
@@ -86,8 +136,8 @@ if 'theorem gst_bigN_seed3_endpoint_forces_non_one_inline' not in text:
     text = text.replace(anchor, bign_code + anchor, 1)
 
 # Factor the child origin n = 3^r*m. Every already-closed origin class now
-# contradicts parent Omega badness immediately. Therefore the remaining goal
-# is exactly the 3-free young residual where BIG-N/right-chord attaches.
+# contradicts parent Omega badness immediately. The only remaining point is the
+# genuine 3-free young residual where the attached BIG-N/right-chord stack acts.
 info_start_marker = 'theorem gst_prefix_one_information_bad_descends_inline'
 info_end_marker = '\n\n/-- Corrected information-wave closure:'
 info_start = text.index(info_start_marker)
@@ -157,8 +207,9 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   have hboundary : GSTResidualBoundary s k (m % 3) :=
     gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
 
-  -- TRUE RED SEAM: all mature origins have been removed. Context now has
-  -- hchildCore, hBad and the exact finite young boundary for BIG-N crossing.
+  -- TRUE RED SEAM.  Everything used by BIG-N Step 6 is now physically in the
+  -- monolith: hchildCore, hBad, hboundary, right-chord, physical rectangle,
+  -- signed flux, origin recursion/cuts and the finite i=N horizon.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
 
