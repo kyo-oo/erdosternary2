@@ -1,0 +1,33 @@
+name: Sol Generate Comparator Manifest
+
+on:
+  push:
+    branches:
+      - sol/gpt56-close-one-error
+    paths:
+      - .github/workflows/sol_generate_manifest.yml
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-close-one-error
+      - name: Generate rc2 Mathlib manifest
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          export PATH="$HOME/.elan/bin:$PATH"
+          elan toolchain install leanprover/lean4:v4.33.0-rc2
+          lake update
+          test -f lake-manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lake-manifest.json
+          git commit -m "build: regenerate rc2 Mathlib lake manifest"
+          git push origin HEAD:sol/gpt56-close-one-error
