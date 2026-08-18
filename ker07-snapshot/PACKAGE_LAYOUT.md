@@ -26,3 +26,28 @@ Binary/JSON (no in-file annotation): 60
 /- ============================================================ -/
 (original file content)
 ```
+
+## SOL Branch Renaming (chronological)
+
+All 16 SOL branch directories have been renamed with chronological time-word descriptors.
+See `SOL_BRANCHES_CHRONOLOGY.md` for the full table.
+
+Naming format: `NN_sol_<time_word>__<original-branch-name>/`
+
+Time words (oldest → latest):
+- 01. `sol_origin` (was: `sol_engineering-repair-run62`)
+- 02. `sol_ancient` (was: `sol_run264-atomic-final`)
+- 03. `sol_oldest` (was: `sol_phase-crossing-red-test`)
+- 04. `sol_older` (was: `sol_comparator-surgery`)
+- 05. `sol_old` (was: `sol_phase-crossing-surgery-2`)
+- 06. `sol_early` (was: `sol_phase-crossing-surgery`)
+- 07. `sol_former` (was: `sol_right-chord-firepower-base`)
+- 08. `sol_past` (was: `sol_physical-phase-crossing-surgery-plan`)
+- 09. `sol_prior` (was: `sol_physical-phase-crossing-implementation`)
+- 10. `sol_historic` (was: `sol_global-flux-surgery`)
+- 11. `sol_recent` (was: `sol_5c579-big1-chord-surgery`)
+- 12. `sol_present` (was: `sol_one-error-chord-surgery`)
+- 13. `sol_current` (was: `sol_5c579-big1-two-digit-surgery`)
+- 14. `sol_modern` (was: `sol_5c579-right-chord-surgery`)
+- 15. `sol_new` (was: `sol_physical-phase-crossing-surgery`)
+- 16. `sol_latest` (was: `sol_5c579-final-bigN-right-chord-atomic`)

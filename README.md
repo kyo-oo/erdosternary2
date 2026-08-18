@@ -72,3 +72,33 @@ Every annotatable file in this repo starts with a chronological label header:
 /-        commit message
 /- ====================================================================== -/
 ```
+
+
+## SOL branches — chronological naming
+
+All 16 SOL branches in `ker07-snapshot/branches/` are renamed with chronological time-word descriptors:
+
+| Rank | Time word | Original branch | Tip commit |
+|---|---|---|---|
+| 01 | `sol_origin` | `origin/sol/engineering-repair-run62` | 2026-08-15 05:12:01 +0530 |
+| 02 | `sol_ancient` | `origin/sol/run264-atomic-final` | 2026-08-16 17:05:03 +0530 |
+| 03 | `sol_oldest` | `origin/sol/phase-crossing-red-test` | 2026-08-16 14:01:10 +0000 |
+| 04 | `sol_older` | `origin/sol/comparator-surgery` | 2026-08-16 20:46:05 +0530 |
+| 05 | `sol_old` | `origin/sol/phase-crossing-surgery-2` | 2026-08-17 00:18:29 +0530 |
+| 06 | `sol_early` | `origin/sol/phase-crossing-surgery` | 2026-08-17 00:30:42 +0530 |
+| 07 | `sol_former` | `origin/sol/right-chord-firepower-base` | 2026-08-17 12:47:10 +0530 |
+| 08 | `sol_past` | `origin/sol/physical-phase-crossing-surgery-plan` | 2026-08-17 13:50:53 +0530 |
+| 09 | `sol_prior` | `origin/sol/physical-phase-crossing-implementation` | 2026-08-17 13:55:35 +0530 |
+| 10 | `sol_historic` | `origin/sol/global-flux-surgery` | 2026-08-17 14:31:15 +0530 |
+| 11 | `sol_recent` | `origin/sol/5c579-big1-chord-surgery` | 2026-08-17 21:03:12 +0530 |
+| 12 | `sol_present` | `origin/sol/one-error-chord-surgery` | 2026-08-17 21:05:12 +0530 |
+| 13 | `sol_current` | `origin/sol/5c579-big1-two-digit-surgery` | 2026-08-17 21:16:02 +0530 |
+| 14 | `sol_modern` | `origin/sol/5c579-right-chord-surgery` | 2026-08-17 21:32:57 +0530 |
+| 15 | `sol_new` | `origin/sol/physical-phase-crossing-surgery` | 2026-08-17 21:34:52 +0530 |
+| 16 | `sol_latest` | `origin/sol/5c579-final-bigN-right-chord-atomic` | 2026-08-18 01:39:21 +0530 |
+
+**Time-word progression:** `origin → ancient → oldest → older → old → early → former → past → prior → historic → recent → present → current → modern → new → latest`
+
+Example: `branches/16_sol_latest__5c579-final-bigN-right-chord-atomic/` is the most recent SOL branch.
+
+See `ker07-snapshot/SOL_BRANCHES_CHRONOLOGY.md` for the full chronological table.
