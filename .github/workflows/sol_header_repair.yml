@@ -1,0 +1,43 @@
+name: Sol Header Repair
+
+on:
+  push:
+    branches:
+      - sol/gpt56-close-one-error
+    paths:
+      - .github/workflows/sol_header_repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-close-one-error
+      - name: Repair malformed chronology header only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          text = p.read_text(encoding='utf-8')
+          lines = text.splitlines(keepends=True)
+          assert len(lines) >= 24
+          changed = 0
+          for i in range(24):
+              if lines[i].startswith('/-'):
+                  lines[i] = '--' + lines[i][2:]
+                  changed += 1
+          assert changed == 24, f'expected 24 malformed header openers, changed {changed}'
+          p.write_text(''.join(lines), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- ErdosTernary2.lean
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ErdosTernary2.lean
+          git commit -m "fix: close malformed chronology header comments"
+          git push origin HEAD:sol/gpt56-close-one-error
