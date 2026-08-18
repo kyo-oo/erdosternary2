@@ -1,0 +1,1 @@
+Diagnostic-only CI trigger. Canonical proof source is unchanged.
