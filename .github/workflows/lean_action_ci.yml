@@ -71,5 +71,9 @@ jobs:
         run: lake update
       - name: Fetch mathlib cache
         run: lake exe cache get
+      - name: Compile infinite GST Graph V2 blade
+        run: lake env lean GSTGraphV2InfiniteExperiment.lean
       - name: Build canonical library
         run: lake build ErdosTernary2
+      - name: Run comparator
+        run: bash scripts/comparator.sh
