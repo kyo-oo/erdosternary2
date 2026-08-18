@@ -35,7 +35,7 @@ jobs:
             | grep -Ei 'scratch|hand|origin|omega|residual|navigation|finite|carry|information|chord|graphv2' \
             | sort > .surgery/scratch-index.txt || true
           grep -RIl --include='*.lean' --exclude-dir=.lake \
-            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant|CanonicalPhaseCrossingTarget' . \
+            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant|CanonicalPhaseCrossingTarget|MacroRoutingTarget' . \
             | sort > .surgery/formula-index.txt || true
 
       - name: Setup Lean only
@@ -58,14 +58,19 @@ jobs:
             code=$?
             lake env lean GSTGraphV2CanonicalExperiment.lean > .surgery/v2-build.txt 2>&1
             v2code=$?
+            lake env lean GSTGraphV2MacroExperiment.lean > .surgery/v2macro-build.txt 2>&1
+            v2macrocode=$?
           else
             cp .surgery/update.txt .surgery/build.txt
             cp .surgery/update.txt .surgery/v2-build.txt
+            cp .surgery/update.txt .surgery/v2macro-build.txt
             code=$update_code
             v2code=$update_code
+            v2macrocode=$update_code
           fi
           echo "$code" > .surgery/build.exit
           echo "$v2code" > .surgery/v2-build.exit
+          echo "$v2macrocode" > .surgery/v2macro-build.exit
           exit 0
 
       - name: Commit source and diagnostics
@@ -77,6 +82,7 @@ jobs:
           git add ErdosTernary2.lean lake-manifest.json \
             .surgery/update.txt .surgery/build.txt .surgery/build.exit \
             .surgery/v2-build.txt .surgery/v2-build.exit \
+            .surgery/v2macro-build.txt .surgery/v2macro-build.exit \
             .surgery/scratch-index.txt .surgery/formula-index.txt
           if ! git diff --cached --quiet; then
             git commit -m 'Persist canonical library diagnostics'
