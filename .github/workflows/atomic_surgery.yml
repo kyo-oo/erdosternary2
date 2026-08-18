@@ -32,10 +32,10 @@ jobs:
           mkdir -p .surgery
           find . -type f -name '*.lean' \
             | grep -Ev '^./\.lake/' \
-            | grep -Ei 'scratch|hand|origin|omega|residual|navigation|finite|carry|information|chord' \
+            | grep -Ei 'scratch|hand|origin|omega|residual|navigation|finite|carry|information|chord|graphv2' \
             | sort > .surgery/scratch-index.txt || true
           grep -RIl --include='*.lean' --exclude-dir=.lake \
-            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant' . \
+            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant|CanonicalPhaseCrossingTarget' . \
             | sort > .surgery/formula-index.txt || true
 
       - name: Setup Lean only
@@ -56,11 +56,16 @@ jobs:
             lake exe cache get >> .surgery/update.txt 2>&1
             lake build ErdosTernary2 > .surgery/build.txt 2>&1
             code=$?
+            lake env lean GSTGraphV2CanonicalExperiment.lean > .surgery/v2-build.txt 2>&1
+            v2code=$?
           else
             cp .surgery/update.txt .surgery/build.txt
+            cp .surgery/update.txt .surgery/v2-build.txt
             code=$update_code
+            v2code=$update_code
           fi
           echo "$code" > .surgery/build.exit
+          echo "$v2code" > .surgery/v2-build.exit
           exit 0
 
       - name: Commit source and diagnostics
@@ -69,7 +74,10 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean lake-manifest.json .surgery/update.txt .surgery/build.txt .surgery/build.exit .surgery/scratch-index.txt .surgery/formula-index.txt
+          git add ErdosTernary2.lean lake-manifest.json \
+            .surgery/update.txt .surgery/build.txt .surgery/build.exit \
+            .surgery/v2-build.txt .surgery/v2-build.exit \
+            .surgery/scratch-index.txt .surgery/formula-index.txt
           if ! git diff --cached --quiet; then
             git commit -m 'Persist canonical library diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
