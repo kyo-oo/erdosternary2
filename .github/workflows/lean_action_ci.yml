@@ -11,4 +11,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Materialize latest Sol scratch layer for isolated surgery probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
+          find "$SRC" -maxdepth 1 -type f -name '*.lean' ! -name 'ErdosTernary2.lean' -exec cp '{}' . \;
       - uses: leanprover/lean-action@v1
