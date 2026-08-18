@@ -31,9 +31,8 @@ if qstart_tag not in text:
 
 # ---------------------------------------------------------------------------
 # Attach the theorem-grade BIG-N/origin/right-chord stack before the production
-# seam.  We follow only local snapshot imports, strip every import/header, and
-# emit each module once in dependency order.  These are proof ingredients;
-# ErdosTernary2.lean remains the sole production theorem file.
+# seam. We follow only local snapshot imports, strip imports/headers, and emit
+# each module once in dependency order. ErdosTernary2.lean stays the sole target.
 # ---------------------------------------------------------------------------
 attach_marker = '-- BEGIN ATTACHED SOL BIG-N CLOSURE STACK\n'
 attach_end = '-- END ATTACHED SOL BIG-N CLOSURE STACK\n\n'
@@ -47,6 +46,7 @@ if attach_marker not in text:
         'ResidualNullBranchReductionScratch',
         'ResidualNullTerminalScratch',
         'ResidualNullPrefixFourCutScratch',
+        'RetainedOffsetUStateScratch',
         'CanonicalOriginTritForcingScratch',
         'CanonicalResidualInfiniteSupportBridgeScratch',
         'PrefixOneTwoDigitChordScratch',
@@ -82,7 +82,6 @@ if attach_marker not in text:
         for dep in deps:
             visit(dep)
         body_lines = src_lines[last_import + 1:] if last_import >= 0 else src_lines
-        # Drop chronological metadata that precedes imports in snapshot files.
         body = '\n'.join(body_lines).strip() + '\n'
         chunks.append(
             f'-- BEGIN ATTACHED {mod}.lean\n'
@@ -207,9 +206,9 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   have hboundary : GSTResidualBoundary s k (m % 3) :=
     gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
 
-  -- TRUE RED SEAM.  Everything used by BIG-N Step 6 is now physically in the
-  -- monolith: hchildCore, hBad, hboundary, right-chord, physical rectangle,
-  -- signed flux, origin recursion/cuts and the finite i=N horizon.
+  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
+  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
+  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
 
