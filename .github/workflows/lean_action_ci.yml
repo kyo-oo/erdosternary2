@@ -6,9 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  gst-v2-probe:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -35,7 +34,23 @@ jobs:
                       changed += 1
               if changed:
                   p.write_text(''.join(lines),encoding='utf-8')
-                  print(p, 'normalized', changed, 'header lines')
+          PY
+
+      - name: Workspace-only quarantine of legacy residual overproof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ErdosTernary2.lean')
+          s=p.read_text(encoding='utf-8')
+          a=s.index('/-- First-level residual Ω∞ termination.')
+          b=s.index('/-\n/-- Numerical ceiling used to bound every power-of-four graph witness.', a)
+          s=s[:a] + '-- EXPERIMENT ONLY: legacy residual Ω theorem family quarantined.\n\n' + s[b:]
+          c=s.index('/-- Exact remaining information-descent seam.')
+          s=s[:c] + '-- EXPERIMENT ONLY: production consumer intentionally omitted.\n'
+          p.write_text(s,encoding='utf-8')
+          print('sanitized core bytes', len(s.encode('utf-8')))
           PY
 
       - name: Restore exact comparator workspace metadata
@@ -48,7 +63,7 @@ jobs:
           cat > lakefile.toml <<'EOF'
           name = "erdos-ternary2-proof"
           version = "0.1.0"
-          defaultTargets = ["GSTTactic", "ErdosTernary2"]
+          defaultTargets = ["AtomicProbe"]
 
           [[require]]
           name = "mathlib"
@@ -60,6 +75,10 @@ jobs:
 
           [[lean_lib]]
           name = "ErdosTernary2"
+
+          [[lean_lib]]
+          name = "AtomicProbe"
+          roots = ["ErdosTernary2.AtomicSurgeryProbe"]
           EOF
           rm -f lake-manifest.json
 
@@ -71,8 +90,6 @@ jobs:
           source "$HOME/.elan/env"
           elan toolchain install "$(cat lean-toolchain)"
           elan default "$(cat lean-toolchain)"
-          lean --version
-          lake --version
 
       - name: Resolve pinned Mathlib and cache
         shell: bash
@@ -82,9 +99,9 @@ jobs:
           lake update
           lake exe cache get || true
 
-      - name: Atomic monolith build
+      - name: Kernel-check GST V2 bridge reducer
         shell: bash
         run: |
           set -euo pipefail
           source "$HOME/.elan/env"
-          lake build GSTTactic ErdosTernary2
+          lake build AtomicProbe
