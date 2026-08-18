@@ -80,11 +80,12 @@ jobs:
               col += 1
           print("UNMATCHED_BLOCK_COMMENT_STACK=", stack)
           if stack:
-              for ln, cl in stack:
-                  lo = max(1, ln-4)
-                  hi = ln+8
-                  lines = s.splitlines()
-                  print(f"--- context for opener {ln}:{cl} ---")
-                  for n in range(lo, min(hi, len(lines))+1):
-                      print(f"{n:5}: {lines[n-1]}")
-      - uses: leanprover/lean-action@v1
+              raise SystemExit(1)
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+      - name: Resolve Lake dependencies
+        run: lake update
+      - name: Build canonical library
+        run: lake build ErdosTernary2
