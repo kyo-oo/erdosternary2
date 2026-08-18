@@ -1,4 +1,4 @@
-⚠ [8697/8699] Built GSTTactic (6.5s)
+⚠ [8697/8699] Built GSTTactic (6.9s)
 warning: GSTTactic.lean:69:5: Variable name `hd2` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
