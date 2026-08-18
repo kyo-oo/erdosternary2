@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Apply staged canonical GST surgery
+        run: python3 .surgery/apply.py
       - name: Locate unmatched Lean block comments
         shell: python
         run: |
