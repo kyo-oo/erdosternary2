@@ -26,71 +26,63 @@ jobs:
         shell: bash
         run: python3 .surgery/apply.py
 
-      - name: Index existing scratch proof material
-        shell: bash
-        run: |
-          mkdir -p .surgery
-          find . -type f -name '*.lean' \
-            | grep -Ev '^./\.lake/' \
-            | grep -Ei 'scratch|hand|origin|omega|residual|navigation|finite|carry|information|chord|graphv2' \
-            | sort > .surgery/scratch-index.txt || true
-          grep -RIl --include='*.lean' --exclude-dir=.lake \
-            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant|CanonicalPhaseCrossingTarget|MacroRoutingTarget' . \
-            | sort > .surgery/formula-index.txt || true
-
-      - name: Setup Lean only
+      - name: Setup Lean
         uses: leanprover/lean-action@v1
         continue-on-error: true
         with:
           build: false
 
-      - name: Resolve dependencies and capture canonical library build
+      - name: Compile experiments and canonical target
         if: always()
         shell: bash
         run: |
           mkdir -p .surgery
           set +e
-          lake update > .surgery/update.txt 2>&1
+          lake update > .surgery/fresh-update.txt 2>&1
           update_code=$?
           if [ "$update_code" -eq 0 ]; then
-            lake exe cache get >> .surgery/update.txt 2>&1
-            lake build ErdosTernary2 > .surgery/build.txt 2>&1
-            code=$?
-            lake env lean GSTGraphV2CanonicalExperiment.lean > .surgery/v2-build.txt 2>&1
-            v2code=$?
-            lake env lean GSTGraphV2MacroExperiment.lean > .surgery/v2macro-build.txt 2>&1
-            v2macrocode=$?
-            lake env lean GSTGraphV2InfiniteExperiment.lean > .surgery/v2inf-build.txt 2>&1
-            v2infcode=$?
+            lake exe cache get >> .surgery/fresh-update.txt 2>&1
+
+            lake env lean GSTGraphV2InfiniteExperiment.lean > .surgery/fresh-infinite.txt 2>&1
+            inf_code=$?
+            echo "$inf_code" > .surgery/fresh-infinite.exit
+
+            lake env lean GSTGraphV2RectangleExperiment.lean > .surgery/fresh-rectangle.txt 2>&1
+            rect_code=$?
+            echo "$rect_code" > .surgery/fresh-rectangle.exit
+
+            lake build ErdosTernary2 > .surgery/fresh-build.txt 2>&1
+            build_code=$?
+            echo "$build_code" > .surgery/fresh-build.exit
+
+            bash scripts/comparator.sh > .surgery/fresh-comparator.txt 2>&1
+            comp_code=$?
+            echo "$comp_code" > .surgery/fresh-comparator.exit
           else
-            cp .surgery/update.txt .surgery/build.txt
-            cp .surgery/update.txt .surgery/v2-build.txt
-            cp .surgery/update.txt .surgery/v2macro-build.txt
-            cp .surgery/update.txt .surgery/v2inf-build.txt
-            code=$update_code
-            v2code=$update_code
-            v2macrocode=$update_code
-            v2infcode=$update_code
+            cp .surgery/fresh-update.txt .surgery/fresh-infinite.txt
+            cp .surgery/fresh-update.txt .surgery/fresh-rectangle.txt
+            cp .surgery/fresh-update.txt .surgery/fresh-build.txt
+            cp .surgery/fresh-update.txt .surgery/fresh-comparator.txt
+            echo "$update_code" > .surgery/fresh-infinite.exit
+            echo "$update_code" > .surgery/fresh-rectangle.exit
+            echo "$update_code" > .surgery/fresh-build.exit
+            echo "$update_code" > .surgery/fresh-comparator.exit
           fi
-          echo "$code" > .surgery/build.exit
-          echo "$v2code" > .surgery/v2-build.exit
-          echo "$v2macrocode" > .surgery/v2macro-build.exit
-          echo "$v2infcode" > .surgery/v2inf-build.exit
           exit 0
 
-      - name: Commit source and diagnostics
+      - name: Commit fresh diagnostics
         if: always()
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ErdosTernary2.lean lake-manifest.json \
-            .surgery/update.txt .surgery/build.txt .surgery/build.exit \
-            .surgery/v2-build.txt .surgery/v2-build.exit \
-            .surgery/v2macro-build.txt .surgery/v2macro-build.exit \
-            .surgery/v2inf-build.txt .surgery/v2inf-build.exit \
-            .surgery/scratch-index.txt .surgery/formula-index.txt
+            .surgery/fresh-update.txt \
+            .surgery/fresh-infinite.txt .surgery/fresh-infinite.exit \
+            .surgery/fresh-rectangle.txt .surgery/fresh-rectangle.exit \
+            .surgery/fresh-build.txt .surgery/fresh-build.exit \
+            .surgery/fresh-comparator.txt .surgery/fresh-comparator.exit
           if ! git diff --cached --quiet; then
-            git commit -m 'Persist canonical library diagnostics'
+            git commit -m 'Persist fresh atomic diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
           fi
