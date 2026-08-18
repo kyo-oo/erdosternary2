@@ -1,4 +1,4 @@
-name: Lean Action CI
+name: Lean Comparator Surgery CI
 
 on:
   push:
@@ -8,7 +8,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve exact comparator dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake update
+          lake exe cache get
+      - name: Build proof workspace
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake build
