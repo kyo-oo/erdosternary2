@@ -11,4 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Reconstruct locked canonical sources
+        run: python3 .canonical/apply.py
       - uses: leanprover/lean-action@v1
