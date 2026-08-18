@@ -112,4 +112,46 @@ theorem binary_infinite_big1_free_forces_big2
   exact binary_big1_free_path_forces_all_big2 a d i hpath h0
     (fun j _ => hclear j) i (by omega)
 
+/-! ## Physical x4 classification at a bad BIG2 cell -/
+
+def microHighBit (C : Nat) : Nat := C / 2
+def microLowBit (C : Nat) : Nat := C % 2
+def firstMicroMass (C d : Nat) : Nat := microHighBit C + 2*d
+def firstMicroOutput (C d : Nat) : Nat := firstMicroMass C d % 3
+def secondMicroMass (C d : Nat) : Nat := microLowBit C + 2*firstMicroOutput C d
+def secondMicroOutput (C d : Nat) : Nat := secondMicroMass C d % 3
+
+/-- At a physical BIG2 input, excluding both Happy carries 0 and 3 leaves
+exactly two ALT-minus escape cells.  They expose BIG1 on one of the two
+microscopic information vertices; there is no third bad BIG2 orientation. -/
+theorem physical_bad_big2_exact_two_escapes
+    (C : Nat) (hC : C < 4) (hbad : C ≠ 0 ∧ C ≠ 3) :
+    (C = 1 ∧
+      firstMicroMass C 2 = 4 ∧ secondMicroMass C 2 = 3 ∧
+      firstMicroOutput C 2 = 1 ∧ secondMicroOutput C 2 = 0) ∨
+    (C = 2 ∧
+      firstMicroMass C 2 = 5 ∧ secondMicroMass C 2 = 4 ∧
+      firstMicroOutput C 2 = 2 ∧ secondMicroOutput C 2 = 1) := by
+  have hcases : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  rcases hcases with h0 | h1 | h2 | h3
+  · exact False.elim (hbad.1 h0)
+  · subst C
+    left
+    norm_num [firstMicroMass, secondMicroMass, firstMicroOutput,
+      secondMicroOutput, microHighBit, microLowBit]
+  · subst C
+    right
+    norm_num [firstMicroMass, secondMicroMass, firstMicroOutput,
+      secondMicroOutput, microHighBit, microLowBit]
+  · exact False.elim (hbad.2 h3)
+
+/-- Therefore every bad physical BIG2 cell necessarily crosses BIG1 within
+its two microscopic x2 layers. -/
+theorem physical_bad_big2_forces_big1_micro_vertex
+    (C : Nat) (hC : C < 4) (hbad : C ≠ 0 ∧ C ≠ 3) :
+    firstMicroOutput C 2 = 1 ∨ secondMicroOutput C 2 = 1 := by
+  rcases physical_bad_big2_exact_two_escapes C hC hbad with h1 | h2
+  · exact Or.inl h1.2.2.2.1
+  · exact Or.inr h2.2.2.2.2
+
 end GSTGraphV2Experiment
