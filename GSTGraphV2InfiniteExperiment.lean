@@ -76,6 +76,20 @@ theorem binary_path_big1_or_all_big2
     intro i hi hi1
     exact hbig1 ⟨i, hi, hi1⟩
 
+/-- Boss's `i = N` endpoint collapse in its exact finite form.  If the path
+starts at BIG2 but the chosen finite information horizon is zero, a BIG1
+crossing must occur somewhere before or at that horizon. -/
+theorem binary_big2_to_zero_forces_big1
+    (a d : Nat → Nat) (K : Nat)
+    (hpath : BinaryInfoPath a d K)
+    (h0 : d 0 = 2)
+    (hK : d K = 0) :
+    ∃ i, i ≤ K ∧ d i = 1 := by
+  rcases binary_path_big1_or_all_big2 a d K hpath h0 with hbig1 | hall
+  · exact hbig1
+  · have htwo : d K = 2 := hall K (by omega)
+    omega
+
 /-- Infinite form: excluding BIG1 at every natural information position forces
 BIG2 at every natural information position. -/
 theorem binary_infinite_big1_free_forces_big2
