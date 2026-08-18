@@ -32,14 +32,21 @@ jobs:
         with:
           build: false
 
-      - name: Capture canonical library build
+      - name: Resolve dependencies and capture canonical library build
         if: always()
         shell: bash
         run: |
           mkdir -p .surgery
           set +e
-          lake build ErdosTernary2 > .surgery/build.txt 2>&1
-          code=$?
+          lake update > .surgery/update.txt 2>&1
+          update_code=$?
+          if [ "$update_code" -eq 0 ]; then
+            lake build ErdosTernary2 > .surgery/build.txt 2>&1
+            code=$?
+          else
+            cp .surgery/update.txt .surgery/build.txt
+            code=$update_code
+          fi
           echo "$code" > .surgery/build.exit
           exit 0
 
@@ -49,7 +56,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean .surgery/build.txt .surgery/build.exit
+          git add ErdosTernary2.lean lake-manifest.json .surgery/update.txt .surgery/build.txt .surgery/build.exit
           if ! git diff --cached --quiet; then
             git commit -m 'Persist canonical library diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
