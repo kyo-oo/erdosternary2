@@ -78,7 +78,11 @@ jobs:
 
           [[lean_lib]]
           name = "AtomicProbe"
-          roots = ["ErdosTernary2.AtomicSurgeryProbe"]
+          roots = [
+            "CanonicalOriginTritForcingScratch",
+            "CanonicalResidualInfiniteSupportBridgeScratch",
+            "ErdosTernary2.AtomicSurgeryProbe"
+          ]
           EOF
           rm -f lake-manifest.json
 
