@@ -11,4 +11,80 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Locate unmatched Lean block comments
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("ErdosTernary2.lean")
+          s = p.read_text(encoding="utf-8")
+          stack = []
+          i = 0
+          line = 1
+          col = 1
+          in_string = False
+          escaped = False
+          in_line_comment = False
+          while i < len(s):
+              ch = s[i]
+              nxt = s[i:i+2]
+              if ch == "\n":
+                  line += 1
+                  col = 1
+                  in_line_comment = False
+                  i += 1
+                  continue
+              if in_line_comment:
+                  i += 1
+                  col += 1
+                  continue
+              if stack:
+                  if nxt == "/-":
+                      stack.append((line, col))
+                      i += 2
+                      col += 2
+                      continue
+                  if nxt == "-/":
+                      stack.pop()
+                      i += 2
+                      col += 2
+                      continue
+                  i += 1
+                  col += 1
+                  continue
+              if in_string:
+                  if escaped:
+                      escaped = False
+                  elif ch == "\\":
+                      escaped = True
+                  elif ch == '"':
+                      in_string = False
+                  i += 1
+                  col += 1
+                  continue
+              if nxt == "--":
+                  in_line_comment = True
+                  i += 2
+                  col += 2
+                  continue
+              if nxt == "/-":
+                  stack.append((line, col))
+                  i += 2
+                  col += 2
+                  continue
+              if ch == '"':
+                  in_string = True
+                  i += 1
+                  col += 1
+                  continue
+              i += 1
+              col += 1
+          print("UNMATCHED_BLOCK_COMMENT_STACK=", stack)
+          if stack:
+              for ln, cl in stack:
+                  lo = max(1, ln-4)
+                  hi = ln+8
+                  lines = s.splitlines()
+                  print(f"--- context for opener {ln}:{cl} ---")
+                  for n in range(lo, min(hi, len(lines))+1):
+                      print(f"{n:5}: {lines[n-1]}")
       - uses: leanprover/lean-action@v1
