@@ -53,15 +53,49 @@ jobs:
           print('sanitized core bytes', len(s.encode('utf-8')))
           PY
 
-      - name: Restore exact comparator workspace metadata
+      - name: Restore exact comparator workspace and recursive scratch closure
         shell: bash
         run: |
           set -euo pipefail
           cat > lean-toolchain <<'EOF'
           leanprover/lean4:v4.33.0-rc2
           EOF
-          cat > lakefile.toml <<'EOF'
-          name = "erdos-ternary2-proof"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          seeds = [
+              'CanonicalOriginTritForcingScratch',
+              'CanonicalResidualInfiniteSupportBridgeScratch',
+          ]
+          excluded = {'ErdosTernary2', 'GSTTactic'}
+          seen = set()
+          stack = list(seeds)
+          while stack:
+              mod = stack.pop()
+              if mod in seen or mod in excluded:
+                  continue
+              path = Path(mod.replace('.', '/') + '.lean')
+              if not path.exists():
+                  # External/mathlib module: Lake resolves it from dependencies.
+                  continue
+              seen.add(mod)
+              text = path.read_text(encoding='utf-8')
+              for line in text.splitlines():
+                  m = re.match(r'^\s*import\s+([A-Za-z0-9_.]+)\s*$', line)
+                  if m:
+                      dep = m.group(1)
+                      dep_path = Path(dep.replace('.', '/') + '.lean')
+                      if dep not in excluded and dep_path.exists():
+                          stack.append(dep)
+
+          roots = sorted(seen) + ['ErdosTernary2.AtomicSurgeryProbe']
+          print('SCRATCH IMPORT CLOSURE:', len(seen), 'modules')
+          for r in roots:
+              print('  ', r)
+
+          quoted = ',\n    '.join('"' + r + '"' for r in roots)
+          lake = f'''name = "erdos-ternary2-proof"
           version = "0.1.0"
           defaultTargets = ["AtomicProbe"]
 
@@ -79,11 +113,11 @@ jobs:
           [[lean_lib]]
           name = "AtomicProbe"
           roots = [
-            "CanonicalOriginTritForcingScratch",
-            "CanonicalResidualInfiniteSupportBridgeScratch",
-            "ErdosTernary2.AtomicSurgeryProbe"
+            {quoted}
           ]
-          EOF
+          '''
+          Path('lakefile.toml').write_text(lake, encoding='utf-8')
+          PY
           rm -f lake-manifest.json
 
       - name: Install pinned rc2 toolchain
