@@ -11,17 +11,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - name: Normalize chronology header in diagnostic checkout
+      - name: Materialize canonical sources in diagnostic checkout
         shell: python
         run: |
           from pathlib import Path
-          p = Path('ErdosTernary2.lean')
-          lines = p.read_text(encoding='utf-8').splitlines(keepends=True)
-          for i in range(min(24, len(lines))):
-              if lines[i].startswith('/-'):
-                  lines[i] = '--' + lines[i][2:]
-              if i == 23 and lines[i].rstrip().endswith('-/'):
-                  lines[i] = lines[i].rstrip()[:-2].rstrip() + '\n'
-          p.write_text(''.join(lines), encoding='utf-8')
-          print('DIAGNOSTIC_HEADER_NORMALIZED')
+
+          main = Path('ErdosTernary2.lean')
+          text = main.read_text(encoding='utf-8')
+          marker = 'import GSTTactic'
+          k = text.index(marker)
+          main.write_text(text[k:], encoding='utf-8')
+
+          archived = Path('modules/0030_GSTTactic.lean').read_text(encoding='utf-8')
+          marker2 = 'import Lean.Elab.Tactic'
+          j = archived.index(marker2)
+          Path('GSTTactic.lean').write_text(archived[j:], encoding='utf-8')
+
+          print('DIAGNOSTIC_MAIN_HEADER_STRIPPED')
+          print('DIAGNOSTIC_GSTTACTIC_MATERIALIZED')
       - uses: leanprover/lean-action@v1
