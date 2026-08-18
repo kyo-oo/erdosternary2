@@ -280,6 +280,136 @@ def validate_graph_sample(s: int, n: int) -> None:
     exhaust_origin(s, n)
 
 
+# ---------------------------------------------------------------------------
+# Deep modular terminal evaluator
+# ---------------------------------------------------------------------------
+#
+# The exact terminal state after L origin trits only needs a finite ternary
+# prefix of H_s(n).  Therefore huge natural origins can be tested without ever
+# materializing Q_(s+1)(n) or 4^(3^s(1+3n)).
+#
+# Q_s(n) = (4^(3^s n)-1)/3^(s+1).
+# To know Q_s(n) modulo 3^K it is enough to compute the numerator modulo
+# 3^(s+1+K), then divide the exact divisible residue by 3^(s+1).
+
+
+def Q_mod3pow(s: int, n: int, K: int) -> int:
+    if K <= 0:
+        return 0
+    den = 3 ** (s + 1)
+    modulus = 3 ** (s + 1 + K)
+    r = pow(4, (3**s) * n, modulus)
+    assert (r - 1) % den == 0
+    return ((r - 1) // den) % (3**K)
+
+
+def z_mod3pow(s: int, K: int) -> int:
+    cm = Q_mod3pow(s, 1, K + 1)
+    assert cm % 3 == 1
+    return ((cm - 1) // 3) % (3**K)
+
+
+def hard_tail_mod3pow(s: int, n: int, K: int) -> int:
+    if K <= 0:
+        return 0
+    M = 3**K
+    return (
+        z_mod3pow(s, K)
+        + pow(4, 3**s, M) * Q_mod3pow(s + 1, n, K)
+    ) % M
+
+
+def ternary_length(n: int) -> int:
+    L = 0
+    while n:
+        n //= 3
+        L += 1
+    return L
+
+
+def terminal_prefix_mod(s: int, n: int, W: int) -> tuple[int, int]:
+    """Exact terminal seed and terminal alpha modulo 3^W."""
+    L = ternary_length(n)
+    assert L >= 1
+    Hmod = hard_tail_mod3pow(s, n, L + W)
+    alpha_mod = (Hmod // (3**L)) % (3**W)
+    low = Hmod % (3**L)
+    seed = (1 + 4 * low) // (3**L)
+    assert 0 <= seed < 4
+    return seed, alpha_mod
+
+
+def first_happy_from_prefix(seed: int, x_mod: int, W: int) -> Optional[int]:
+    for q in range(W):
+        if seeded_happy(seed, x_mod, q):
+            return q
+    return None
+
+
+def validate_modular_terminal_against_exact() -> None:
+    for s in (1, 2, 3):
+        for n in range(1, 30):
+            if n % 3 == 0:
+                continue
+            st, _ = exhaust_origin(s, n)
+            seed, alpha_mod = terminal_prefix_mod(s, n, 64)
+            assert seed == st.seed
+            assert alpha_mod == st.alpha % (3**64)
+            assert first_happy_from_prefix(seed, alpha_mod, 64) == first_seeded_happy(st.seed, st.alpha, 63)
+
+
+def deterministic_large_origin(L: int, salt: int) -> int:
+    assert L >= 1
+    n = 0
+    p = 1
+    x = (salt + 1) * 1103515245 + 12345
+    for i in range(L):
+        x = (1103515245 * x + 12345) & ((1 << 63) - 1)
+        d = x % 3
+        if i == 0 and d == 0:
+            d = 1 + (salt & 1)
+        if i == L - 1 and d == 0:
+            d = 1 + ((salt >> 1) & 1)
+        n += d * p
+        p *= 3
+    assert n % 3 != 0
+    assert ternary_length(n) == L
+    return n
+
+
+def deep_modular_scan(
+    s_values=(1, 2, 3, 4, 5),
+    lengths=(20, 100, 500, 1000),
+    samples_per_cell: int = 64,
+    W: int = 384,
+) -> list[dict]:
+    rows = []
+    for s in s_values:
+        for L in lengths:
+            missing = 0
+            max_gate = -1
+            argmax = None
+            for salt in range(samples_per_cell):
+                n = deterministic_large_origin(L, salt + 1009 * s + 65537 * L)
+                seed, alpha_mod = terminal_prefix_mod(s, n, W)
+                j = first_happy_from_prefix(seed, alpha_mod, W)
+                if j is None:
+                    missing += 1
+                elif j > max_gate:
+                    max_gate = j
+                    argmax = (n, seed, alpha_mod % 35, alpha_mod % 455)
+            rows.append({
+                "s": s,
+                "ternary_digits": L,
+                "samples": samples_per_cell,
+                "window": W,
+                "missing": missing,
+                "max_first_gate": max_gate,
+                "argmax": argmax,
+            })
+    return rows
+
+
 def main() -> None:
     print("GST Graph V2 canonical-origin experiment")
     print("========================================")
@@ -289,7 +419,8 @@ def main() -> None:
             if n % 3:
                 validate_graph_sample(s, n)
 
-    print("\nExact identities: PASS")
+    validate_modular_terminal_against_exact()
+    print("\nExact identities + modular/exact agreement: PASS")
 
     for s in (1, 2):
         print(f"\nExhaustive residual terminal scan, s={s}")
@@ -305,6 +436,14 @@ def main() -> None:
                     f"      argmax n={p['n']}, seed={p['terminal_seed']}, "
                     f"mod35={p['terminal_mod35']}, mod455={p['terminal_mod455']}"
                 )
+
+    print("\nDeep modular terminal scan:")
+    for row in deep_modular_scan():
+        print(
+            f"  s={row['s']}, L={row['ternary_digits']}: "
+            f"samples={row['samples']}, missing={row['missing']}, "
+            f"max-first-gate={row['max_first_gate']}"
+        )
 
     print(
         "\nSTATUS: experimental evidence only. "
