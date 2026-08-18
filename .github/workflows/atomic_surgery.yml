@@ -41,6 +41,7 @@ jobs:
           lake update > .surgery/update.txt 2>&1
           update_code=$?
           if [ "$update_code" -eq 0 ]; then
+            lake exe cache get >> .surgery/update.txt 2>&1
             lake build ErdosTernary2 > .surgery/build.txt 2>&1
             code=$?
           else
