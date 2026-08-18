@@ -1,6 +1,7 @@
 import ErdosTernary2
 import CanonicalOriginTritForcingScratch
 import CanonicalResidualInfiniteSupportBridgeScratch
+import InformationIterationScratch
 
 /- CI probe for the isolated 2026-08-18 GST V2 atomic surgery branch.
    No axiom, sorry, admit, native_decide, or proof shortcut is introduced. -/
@@ -56,7 +57,40 @@ theorem gst_canonical_residual_infinite_support_bridge_of_good_prefix_cutsS
       s n q hs hbad hcarry hbig2
   simpa [ternaryOriginDigitS, gstDigitS] using hnz
 
+/-- Repeated coupled regeneration really is a well-founded finite descent.
+The parent BAD trace, the exact two-endpoint shared-information equation, and
+its bounded high remainder survive until the natural-origin variable is zero.
+This theorem intentionally makes no terminal contradiction claim. -/
+theorem gst_coupled_bad_information_reaches_zeroS
+    (A D Z W C Y : Nat)
+    (hA : 0 < A) (hW : W < A)
+    (hEq : D + 4*Z = W + A*C)
+    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
+    ∃ D0 Z0 W0 C0,
+      GSTSeededBadTraceS D0 Z0 ∧
+      D0 + 4*Z0 = W0 + A*C0 ∧
+      W0 < A := by
+  induction Y using Nat.strong_induction_on generalizing D Z W C with
+  | h Y ih =>
+      by_cases hY : Y = 0
+      · subst Y
+        refine ⟨D, Z, W, C, ?_, hEq, hW⟩
+        simpa using hbad
+      · have hYpos : 0 < Y := Nat.pos_of_ne_zero hY
+        have hlt : Y / 3 < Y := Nat.div_lt_self hYpos (by decide)
+        have hstep :=
+          gst_coupled_bad_information_regeneratesS
+            A D Z W C Y hA hW hEq hbad
+        dsimp only at hstep
+        exact ih (Y / 3) hlt
+          (gstStepCarryS D ((Z + A * (Y % 3)) % 3))
+          ((Z + A * (Y % 3)) / 3)
+          ((W + A * gstOutputDigitS C (Y % 3)) / 3)
+          (gstStepCarryS C (Y % 3))
+          hstep.2.2 hstep.2.1 hstep.1
+
 #check gst_canonical_residual_infinite_support_bridge_of_good_prefix_cutsS
+#check gst_coupled_bad_information_reaches_zeroS
 #check gst_last_child_gate_right_chordS
 
 example (n : Nat) : n = n := rfl
