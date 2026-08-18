@@ -1,4 +1,6 @@
 ./ErdosTernary2.lean
+./GSTGraphV2CanonicalExperiment.lean
+./GSTGraphV2MacroExperiment.lean
 ./GSTTactic.lean
 ./ker07-snapshot/GSTTactic.lean
 ./ker07-snapshot/branches/02_sol_ancient__run264-atomic-final/AtomicPrefixOneReductionScratch.lean
