@@ -59,7 +59,7 @@ jobs:
           lake env lean HandwrittenKernelV2Scratch.lean
           lake env lean HandwrittenSignedKernelFluxScratch.lean
           lake env lean HandwrittenUniversalParadoxPotentialScratch.lean
-      - name: Compile canonical right-chord and origin descent chain
+      - name: Compile full Aug-17 canonical surgery chain
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -69,3 +69,5 @@ jobs:
           lake env lean CanonicalRightChordTrapScratch.lean
           lake env lean ResidualNullTerminalScratch.lean
           lake env lean RetainedOffsetUStateScratch.lean
+          lake env lean CanonicalPhaseCrossingSurgeryScratch.lean
+          lake env lean CanonicalOriginTritForcingScratch.lean
