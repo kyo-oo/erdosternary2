@@ -1,17 +1,3 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0030 / 1132
-/-    Path         : GSTTactic.lean
-/-    Ref          : main
-/-    First-commit : 2026-08-14 21:44:31 +0530  (83dd56f)
-/-    Last-commit  : 2026-08-14 21:44:31 +0530  (83dd56f)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-14 21:44:31 +0530  83dd56f  (ker07-dev)
-/-        Import Sol inline surgery handoff and GST graph workspace
-/- ====================================================================== -/
-
 import Lean.Elab.Tactic
 import Lean.Meta.Basic
 
