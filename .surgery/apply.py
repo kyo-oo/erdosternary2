@@ -33,18 +33,21 @@ if qstart_tag not in text:
 # Atomic attachment only.
 #
 # Do NOT recursively paste the research snapshot DAG into the production
-# monolith.  Several scratch files deliberately contain RED experiments and
-# namespace-local variants.  We attach only the already-kernel-checked atomic
-# reduction whose sole import is ErdosTernary2 itself.
+# monolith. Several scratch files deliberately contain RED experiments. We
+# attach only the already-kernel-checked atomic reduction, and strip all
+# chronology metadata by starting strictly after its import line.
 # ---------------------------------------------------------------------------
 attach_marker = '-- BEGIN ATTACHED ATOMIC PREFIX-ONE REDUCTION\n'
 attach_end = '-- END ATTACHED ATOMIC PREFIX-ONE REDUCTION\n\n'
 anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
 if attach_marker not in text:
     snap = Path('ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic')
-    src = (snap / 'AtomicPrefixOneReductionScratch.lean').read_text(encoding='utf-8')
-    body_lines = [line for line in src.splitlines() if not line.strip().startswith('import ')]
-    body = '\n'.join(body_lines).strip() + '\n'
+    src_lines = (snap / 'AtomicPrefixOneReductionScratch.lean').read_text(encoding='utf-8').splitlines()
+    import_idx = next(
+        i for i, line in enumerate(src_lines)
+        if line.strip() == 'import ErdosTernary2'
+    )
+    body = '\n'.join(src_lines[import_idx + 1:]).strip() + '\n'
     attached = (
         attach_marker
         + '-- BEGIN ATTACHED AtomicPrefixOneReductionScratch.lean\n'
@@ -56,7 +59,7 @@ if attach_marker not in text:
         raise RuntimeError('inline integration anchor missing for atomic attachment')
     text = text.replace(anchor, attached + anchor, 1)
 
-# BIG-N finite endpoint, kept deliberately tiny.  This is the actual finite
+# BIG-N finite endpoint, kept deliberately tiny. This is the actual finite
 # I=N case: a carry-three start cannot reach carry one through an all-BIG1
 # information interval.
 bign_code = r'''/-- BIG-N finite endpoint adapter. -/
@@ -82,10 +85,9 @@ if 'theorem gst_bigN_seed3_endpoint_forces_non_one_inline' not in text:
         raise RuntimeError('BIG-N insertion anchor missing')
     text = text.replace(anchor, bign_code + anchor, 1)
 
-# Factor the child origin n = 3^r*m.  Every already-closed origin class now
-# contradicts parent Omega badness immediately.  Therefore the remaining goal
-# is exactly the 3-free young residual where the BIG-N/right-chord blade must
-# be attached.
+# Factor the child origin n = 3^r*m. Every already-closed origin class now
+# contradicts parent Omega badness immediately. Therefore the remaining goal
+# is exactly the 3-free young residual where BIG-N/right-chord attaches.
 info_start_marker = 'theorem gst_prefix_one_information_bad_descends_inline'
 info_end_marker = '\n\n/-- Corrected information-wave closure:'
 info_start = text.index(info_start_marker)
@@ -155,7 +157,7 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   have hboundary : GSTResidualBoundary s k (m % 3) :=
     gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
 
-  -- TRUE RED SEAM: all mature origins have been removed.  Context now has
+  -- TRUE RED SEAM: all mature origins have been removed. Context now has
   -- hchildCore, hBad and the exact finite young boundary for BIG-N crossing.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
