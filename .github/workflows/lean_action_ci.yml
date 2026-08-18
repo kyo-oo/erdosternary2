@@ -11,24 +11,51 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - name: Materialize latest Sol scratch layer for isolated surgery probe
+      - name: Materialize latest Sol scratch layer
         shell: bash
         run: |
           set -euo pipefail
           SRC="ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
           find "$SRC" -maxdepth 1 -type f -name '*.lean' ! -name 'ErdosTernary2.lean' -exec cp '{}' . \;
-      - name: Normalize malformed chronology banner in workspace
+      - name: Normalize injected chronology headers only
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('ErdosTernary2.lean')
-          lines=p.read_text(encoding='utf-8').splitlines(True)
-          assert len(lines) >= 25
-          for i in range(25):
-              if lines[i].startswith('/-'):
-                  lines[i] = '--' + lines[i][2:]
-          p.write_text(''.join(lines), encoding='utf-8')
-          print('normalized chronology banner lines 1..25 only')
+          for p in Path('.').glob('*.lean'):
+              lines=p.read_text(encoding='utf-8').splitlines(True)
+              first_import=next((i for i,l in enumerate(lines) if l.startswith('import ')), 0)
+              changed=0
+              for i in range(first_import):
+                  if lines[i].startswith('/-'):
+                      lines[i]='--'+lines[i][2:]
+                      changed += 1
+              if changed:
+                  p.write_text(''.join(lines),encoding='utf-8')
+                  print(p, 'normalized', changed, 'header lines')
           PY
+      - name: Restore comparator Lean workspace
+        shell: bash
+        run: |
+          cat > lean-toolchain <<'EOF'
+          leanprover/lean4:v4.33.0-rc2
+          EOF
+          cat > lakefile.toml <<'EOF'
+          name = "erdos-ternary2-proof"
+          version = "0.1.0"
+          defaultTargets = ["GSTTactic", "ErdosTernary2"]
+
+          [[require]]
+          name = "mathlib"
+          scope = "leanprover-community"
+          rev = "v4.33.0-rc2"
+
+          [[lean_lib]]
+          name = "GSTTactic"
+
+          [[lean_lib]]
+          name = "ErdosTernary2"
+          EOF
+          rm -f lake-manifest.json
+          lake update
       - uses: leanprover/lean-action@v1
