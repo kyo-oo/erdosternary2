@@ -11,4 +11,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Locate unmatched Lean block comments
+        shell: python
+        run: |
+          from pathlib import Path
+          s = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          stack = []
+          line = 1
+          i = 0
+          while i + 1 < len(s):
+              pair = s[i:i+2]
+              if pair == '/-':
+                  stack.append(line)
+                  i += 2
+                  continue
+              if pair == '-/':
+                  if stack:
+                      stack.pop()
+                  else:
+                      print(f'UNMATCHED_CLOSE line={line}')
+                  i += 2
+                  continue
+              if s[i] == '\n':
+                  line += 1
+              i += 1
+          print('OPEN_COMMENT_STACK=', stack)
       - uses: leanprover/lean-action@v1
