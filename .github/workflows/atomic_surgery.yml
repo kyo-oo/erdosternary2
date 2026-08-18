@@ -60,17 +60,22 @@ jobs:
             v2code=$?
             lake env lean GSTGraphV2MacroExperiment.lean > .surgery/v2macro-build.txt 2>&1
             v2macrocode=$?
+            lake env lean GSTGraphV2InfiniteExperiment.lean > .surgery/v2inf-build.txt 2>&1
+            v2infcode=$?
           else
             cp .surgery/update.txt .surgery/build.txt
             cp .surgery/update.txt .surgery/v2-build.txt
             cp .surgery/update.txt .surgery/v2macro-build.txt
+            cp .surgery/update.txt .surgery/v2inf-build.txt
             code=$update_code
             v2code=$update_code
             v2macrocode=$update_code
+            v2infcode=$update_code
           fi
           echo "$code" > .surgery/build.exit
           echo "$v2code" > .surgery/v2-build.exit
           echo "$v2macrocode" > .surgery/v2macro-build.exit
+          echo "$v2infcode" > .surgery/v2inf-build.exit
           exit 0
 
       - name: Commit source and diagnostics
@@ -83,6 +88,7 @@ jobs:
             .surgery/update.txt .surgery/build.txt .surgery/build.exit \
             .surgery/v2-build.txt .surgery/v2-build.exit \
             .surgery/v2macro-build.txt .surgery/v2macro-build.exit \
+            .surgery/v2inf-build.txt .surgery/v2inf-build.exit \
             .surgery/scratch-index.txt .surgery/formula-index.txt
           if ! git diff --cached --quiet; then
             git commit -m 'Persist canonical library diagnostics'
