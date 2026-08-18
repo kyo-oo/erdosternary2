@@ -154,4 +154,80 @@ theorem physical_bad_big2_forces_big1_micro_vertex
   · exact Or.inl h1.2.2.2.1
   · exact Or.inr h2.2.2.2.2
 
+/-! ## Real integer x2 path constructor -/
+
+/-- Incoming binary carry at ternary row `p` when multiplying `R` by two. -/
+def binaryCarryAt (R p : Nat) : Nat :=
+  (2 * (R % 3^p)) / 3^p
+
+/-- Ordinary ternary input digit at row `p`. -/
+def ternaryDigitAt (R p : Nat) : Nat := R / 3^p % 3
+
+/-- Every physical x2 carry is a legal bit. -/
+theorem binaryCarryAt_lt_two (R p : Nat) : binaryCarryAt R p < 2 := by
+  unfold binaryCarryAt
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hr : R % 3^p < 3^p := Nat.mod_lt _ hp
+  have hmul : 2 * (R % 3^p) < 3^p * 2 := by omega
+  exact Nat.div_lt_of_lt_mul hmul
+
+/-- Exact physical x2 output digit. -/
+theorem ternaryDigitAt_mul_two
+    (R p : Nat) :
+    ternaryDigitAt (2*R) p =
+      binaryInfoOutput (binaryCarryAt R p) (ternaryDigitAt R p) := by
+  unfold ternaryDigitAt binaryCarryAt binaryInfoOutput
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hsplit :
+      (2*R) / 3^p =
+        (2 * (R % 3^p)) / 3^p + 2 * (R / 3^p) := by
+    have hdiv : R = 3^p * (R / 3^p) + R % 3^p :=
+      (Nat.div_add_mod R (3^p)).symm
+    rw [hdiv, Nat.mul_add]
+    rw [show 2 * (3^p * (R / 3^p)) =
+      3^p * (2 * (R / 3^p)) by ac_rfl]
+    rw [show 3^p * (2 * (R / 3^p)) + 2 * (R % 3^p) =
+      2 * (R % 3^p) + 3^p * (2 * (R / 3^p)) by ac_rfl]
+    rw [Nat.add_mul_div_left _ _ hp]
+  rw [hsplit, Nat.add_mod]
+  have hmulmod : (2 * (R / 3^p)) % 3 =
+      (2 * (R / 3^p % 3)) % 3 := by
+    rw [Nat.mul_mod]
+  rw [hmulmod]
+
+/-- The actual powers-of-two orbit at one ternary row is a legal microscopic
+bridge path, with no abstract transition assumption. -/
+theorem physical_binary_orbit_is_path
+    (R p K : Nat) :
+    BinaryInfoPath
+      (fun i => binaryCarryAt (2^i * R) p)
+      (fun i => ternaryDigitAt (2^i * R) p) K := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i hi
+    exact binaryCarryAt_lt_two (2^i * R) p
+  · intro i hi
+    unfold ternaryDigitAt
+    exact Nat.mod_lt _ (by decide)
+  · intro i hi
+    have hstep := ternaryDigitAt_mul_two (2^i * R) p
+    have hpows : 2 * (2^i * R) = 2^(i+1) * R := by
+      rw [Nat.pow_succ]
+      ac_rfl
+    rw [hpows] at hstep
+    exact hstep.symm
+
+/-- Concrete BIG-N/finite-horizon form: if a real powers-of-two information
+orbit starts at BIG2 and is zero at finite depth K, it must physically cross
+BIG1 at some intermediate microscopic phase. -/
+theorem physical_binary_big2_to_zero_forces_big1
+    (R p K : Nat)
+    (h0 : ternaryDigitAt R p = 2)
+    (hK : ternaryDigitAt (2^K * R) p = 0) :
+    ∃ i, i ≤ K ∧ ternaryDigitAt (2^i * R) p = 1 := by
+  have hpath := physical_binary_orbit_is_path R p K
+  exact binary_big2_to_zero_forces_big1
+    (fun i => binaryCarryAt (2^i * R) p)
+    (fun i => ternaryDigitAt (2^i * R) p)
+    K hpath (by simpa using h0) (by simpa using hK)
+
 end GSTGraphV2Experiment
