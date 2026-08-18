@@ -32,13 +32,13 @@ jobs:
         with:
           build: false
 
-      - name: Capture canonical Lean elaboration
+      - name: Capture canonical library build
         if: always()
         shell: bash
         run: |
           mkdir -p .surgery
           set +e
-          lake env lean ErdosTernary2.lean > .surgery/build.txt 2>&1
+          lake build ErdosTernary2 > .surgery/build.txt 2>&1
           code=$?
           echo "$code" > .surgery/build.exit
           exit 0
@@ -51,6 +51,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ErdosTernary2.lean .surgery/build.txt .surgery/build.exit
           if ! git diff --cached --quiet; then
-            git commit -m 'Persist atomic Lean diagnostics'
+            git commit -m 'Persist canonical library diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
           fi
