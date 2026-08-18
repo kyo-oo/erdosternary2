@@ -1,5 +1,6 @@
 import ErdosTernary2
 import CanonicalOriginTritForcingScratch
+import CanonicalResidualInfiniteSupportBridgeScratch
 
 /- CI probe for the isolated 2026-08-18 GST V2 atomic surgery branch.
    This deliberately adds no axiom, sorry, admit, native_decide, or proof shortcut.
