@@ -39,18 +39,10 @@ jobs:
                   continue
               if stack:
                   if nxt == "/-":
-                      stack.append((line, col))
-                      i += 2
-                      col += 2
-                      continue
+                      stack.append((line, col)); i += 2; col += 2; continue
                   if nxt == "-/":
-                      stack.pop()
-                      i += 2
-                      col += 2
-                      continue
-                  i += 1
-                  col += 1
-                  continue
+                      stack.pop(); i += 2; col += 2; continue
+                  i += 1; col += 1; continue
               if in_string:
                   if escaped:
                       escaped = False
@@ -58,26 +50,14 @@ jobs:
                       escaped = True
                   elif ch == '"':
                       in_string = False
-                  i += 1
-                  col += 1
-                  continue
+                  i += 1; col += 1; continue
               if nxt == "--":
-                  in_line_comment = True
-                  i += 2
-                  col += 2
-                  continue
+                  in_line_comment = True; i += 2; col += 2; continue
               if nxt == "/-":
-                  stack.append((line, col))
-                  i += 2
-                  col += 2
-                  continue
+                  stack.append((line, col)); i += 2; col += 2; continue
               if ch == '"':
-                  in_string = True
-                  i += 1
-                  col += 1
-                  continue
-              i += 1
-              col += 1
+                  in_string = True; i += 1; col += 1; continue
+              i += 1; col += 1
           print("UNMATCHED_BLOCK_COMMENT_STACK=", stack)
           if stack:
               raise SystemExit(1)
@@ -87,5 +67,7 @@ jobs:
           build: false
       - name: Resolve Lake dependencies
         run: lake update
+      - name: Fetch mathlib cache
+        run: lake exe cache get
       - name: Build canonical library
         run: lake build ErdosTernary2
