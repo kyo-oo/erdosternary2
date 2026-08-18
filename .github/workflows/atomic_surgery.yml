@@ -32,38 +32,25 @@ jobs:
         with:
           build: false
 
-      - name: Run and stream canonical Lean elaboration
+      - name: Capture canonical Lean elaboration
         if: always()
         shell: bash
         run: |
           mkdir -p .surgery
-          : > .surgery/build.log
-          rm -f .surgery/build.exit
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
           set +e
-          lake env lean ErdosTernary2.lean > .surgery/build.log 2>&1 &
-          pid=$!
-
-          for round in $(seq 1 90); do
-            sleep 10
-            git add ErdosTernary2.lean .surgery/build.log
-            if ! git diff --cached --quiet; then
-              git commit -m "Stream atomic Lean diagnostics ${round}"
-              git push origin HEAD:diagnostics/atomic-two-errors-20260818
-            fi
-            if ! kill -0 "$pid" 2>/dev/null; then
-              break
-            fi
-          done
-
-          wait "$pid"
+          lake env lean ErdosTernary2.lean > .surgery/build.txt 2>&1
           code=$?
           echo "$code" > .surgery/build.exit
-          git add ErdosTernary2.lean .surgery/build.log .surgery/build.exit
+          exit 0
+
+      - name: Commit source and diagnostics
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean .surgery/build.txt .surgery/build.exit
           if ! git diff --cached --quiet; then
-            git commit -m 'Finalize atomic Lean diagnostics'
+            git commit -m 'Persist atomic Lean diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
           fi
-          exit 0
