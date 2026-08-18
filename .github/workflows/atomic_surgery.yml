@@ -26,6 +26,18 @@ jobs:
         shell: bash
         run: python3 .surgery/apply.py
 
+      - name: Index existing scratch proof material
+        shell: bash
+        run: |
+          mkdir -p .surgery
+          find . -type f -name '*.lean' \
+            | grep -Ev '^./\.lake/' \
+            | grep -Ei 'scratch|hand|origin|omega|residual|navigation|finite|carry|information|chord' \
+            | sort > .surgery/scratch-index.txt || true
+          grep -RIl --include='*.lean' --exclude-dir=.lake \
+            -E 'GSTCanonicalResidualInfiniteSupportBridgeS|finite_origin_contradictionS|InfiniteTernarySupportS|gst_origin|digit_3|GSTOmegaInfiniteBadTrace|gstNavigationConstant' . \
+            | sort > .surgery/formula-index.txt || true
+
       - name: Setup Lean only
         uses: leanprover/lean-action@v1
         continue-on-error: true
@@ -57,7 +69,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean lake-manifest.json .surgery/update.txt .surgery/build.txt .surgery/build.exit
+          git add ErdosTernary2.lean lake-manifest.json .surgery/update.txt .surgery/build.txt .surgery/build.exit .surgery/scratch-index.txt .surgery/formula-index.txt
           if ! git diff --cached --quiet; then
             git commit -m 'Persist canonical library diagnostics'
             git push origin HEAD:diagnostics/atomic-two-errors-20260818
