@@ -1,6 +1,7 @@
 ./GSTGraphV2CanonicalExperiment.lean
 ./GSTGraphV2InfiniteExperiment.lean
 ./GSTGraphV2MacroExperiment.lean
+./GSTGraphV2RectangleExperiment.lean
 ./ker07-snapshot/branches/02_sol_ancient__run264-atomic-final/AtomicPrefixOneReductionScratch.lean
 ./ker07-snapshot/branches/02_sol_ancient__run264-atomic-final/BadLanguageMagnitudeScratch.lean
 ./ker07-snapshot/branches/02_sol_ancient__run264-atomic-final/CanonicalCausalityScratch.lean
