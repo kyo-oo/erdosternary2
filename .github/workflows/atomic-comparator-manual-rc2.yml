@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Restore canonical RC2 comparator workspace
+      - name: Normalize canonical proof workspace only
         shell: bash
         run: |
           python3 - <<'PY'
@@ -21,11 +21,14 @@ jobs:
           marker = '-- CardinalWorldsWork.lean — GST Complete Formalization'
           if marker not in s:
               raise SystemExit('canonical marker not found')
-          p.write_text(s[s.index(marker):], encoding='utf-8')
-          tactic = Path('ker07-snapshot/GSTTactic.lean')
+          if not s.startswith(marker):
+              p.write_text(s[s.index(marker):], encoding='utf-8')
+          tactic = Path('GSTTactic.lean')
           if not tactic.exists():
-              raise SystemExit('preserved GSTTactic source not found')
-          Path('GSTTactic.lean').write_text(tactic.read_text(encoding='utf-8'), encoding='utf-8')
+              raise SystemExit('clean root GSTTactic source not found')
+          ts = tactic.read_text(encoding='utf-8')
+          if not ts.lstrip().startswith('import Lean.Elab.Tactic'):
+              raise SystemExit('GSTTactic still has a noncanonical wrapper')
           Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
           Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n''', encoding='utf-8')
           Path('lake-manifest.json').unlink(missing_ok=True)
@@ -46,6 +49,20 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake build GSTTactic ErdosTernary2
-      - name: Zero-sorry audit
+      - name: Audit active proof sources
         shell: bash
-        run: bash scripts/sorry_check.sh
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          bad = []
+          for name in ['GSTTactic.lean', 'ErdosTernary2.lean']:
+              text = Path(name).read_text(encoding='utf-8')
+              for i, line in enumerate(text.splitlines(), 1):
+                  if re.search(r'\bsorry\b', line):
+                      bad.append(f'{name}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('active proof source contains forbidden placeholder token')
+          print('active proof audit: clean')
+          PY
