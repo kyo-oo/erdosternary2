@@ -17,55 +17,18 @@ jobs:
           set -euo pipefail
           SRC="ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
           find "$SRC" -maxdepth 1 -type f -name '*.lean' ! -name 'ErdosTernary2.lean' -exec cp '{}' . \;
-      - name: Pinpoint unmatched Lean block comments
+      - name: Normalize malformed chronology banner in workspace
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('ErdosTernary2.lean')
-          s = p.read_text(encoding='utf-8')
-          stack=[]
-          i=0
-          line=1
-          in_string=False
-          while i < len(s):
-              c=s[i]
-              if c == '\n':
-                  line += 1
-              if in_string:
-                  if c == '\\':
-                      i += 2
-                      continue
-                  if c == '"':
-                      in_string=False
-                  i += 1
-                  continue
-              if not stack and c == '"':
-                  in_string=True
-                  i += 1
-                  continue
-              if not stack and s.startswith('--', i):
-                  j=s.find('\n', i+2)
-                  if j < 0: break
-                  i=j
-                  continue
-              if s.startswith('/-', i):
-                  stack.append((line, i))
-                  i += 2
-                  continue
-              if s.startswith('-/', i) and stack:
-                  stack.pop()
-                  i += 2
-                  continue
-              i += 1
-          print('BLOCK_COMMENT_DEPTH', len(stack))
-          print('UNMATCHED_OPENERS', stack[-20:])
-          if stack:
-              ln, pos = stack[-1]
-              lines=s.splitlines()
-              lo=max(1, ln-4); hi=min(len(lines), ln+12)
-              print(f'=== CONTEXT {lo}:{hi} ===')
-              for n in range(lo, hi+1):
-                  print(f'{n}: {lines[n-1]}')
+          p=Path('ErdosTernary2.lean')
+          lines=p.read_text(encoding='utf-8').splitlines(True)
+          assert len(lines) >= 25
+          for i in range(25):
+              if lines[i].startswith('/-'):
+                  lines[i] = '--' + lines[i][2:]
+          p.write_text(''.join(lines), encoding='utf-8')
+          print('normalized chronology banner lines 1..25 only')
           PY
       - uses: leanprover/lean-action@v1
