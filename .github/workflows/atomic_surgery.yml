@@ -22,12 +22,12 @@ jobs:
         shell: bash
         run: python3 .surgery/apply.py
 
-      - name: Setup Lean
+      - name: Install Lean and run baseline build
         uses: leanprover/lean-action@v1
-        with:
-          build: false
+        continue-on-error: true
 
       - name: Capture lake build
+        if: always()
         shell: bash
         run: |
           mkdir -p .surgery
@@ -38,6 +38,7 @@ jobs:
           exit 0
 
       - name: Capture live comparator
+        if: always()
         shell: bash
         run: |
           set +e
@@ -47,6 +48,7 @@ jobs:
           exit 0
 
       - name: Commit surgery result and diagnostics
+        if: always()
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
