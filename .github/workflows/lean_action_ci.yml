@@ -34,7 +34,7 @@ jobs:
                   p.write_text(''.join(lines),encoding='utf-8')
                   print(p, 'normalized', changed, 'header lines')
           PY
-      - name: Restore comparator Lean workspace
+      - name: Restore comparator Lean workspace metadata
         shell: bash
         run: |
           cat > lean-toolchain <<'EOF'
@@ -57,5 +57,4 @@ jobs:
           name = "ErdosTernary2"
           EOF
           rm -f lake-manifest.json
-          lake update
       - uses: leanprover/lean-action@v1
