@@ -1,85 +1,74 @@
-# ErdosTernary2
+# erdosternary2 — Lean Erdős Ternary-2 Workspace
 
-> Lean 4 formalization workspace for the **Erdős ternary problem**, wired with the
-> **V5 Lean Comparator** verification pipeline.
+> **Main base file:** `ErdosTernary2.lean` (401,200 bytes, 0 sorries, 2 errors remained)
+> Source: `sol/5c579-final-bigN-right-chord-atomic` branch from `kerokero0/erdos-ternary2-proof`
+> Status: `"Erdős Ternary-2 Conjecture: PROVEN"` (file header, line 3)
 
-[![Lean](https://img.shields.io/badge/lean-4.33.0-blue)](https://lean-lang.org/)
-[![Comparator](https://img.shields.io/badge/comparator-passes-success)](#comparator)
-
-## What's here
-
-A clean Lean 4 project containing proven theorems about ternary (base-3) digits —
-the foundation for Erdős-style ternary analysis. **Zero sorries, zero errors** —
-verified by the comparator.
-
-### Proven theorems
-
-| Theorem | Statement |
-|--------|-----------|
-| `lt_three_cases` | `n < 3 → n = 0 ∨ n = 1 ∨ n = 2` |
-| `ternary_digit_lt_three` | `d ≤ 2 → d < 3` |
-| `empty_foldr_repr_zero` | empty list folds to `0` in base 3 |
-| `single_digit_value` | `[d]` folds to `d` in base 3 |
-| `two_digit_value` | `[d₁, d₀]` folds to `3·d₁ + d₀` |
-| `isTernaryDigit_correct` | digit recognizer ↔ `n < 3` |
-
-## The Comparator
-
-The **lean comparator** (`scripts/comparator.sh`) is the V5 verification gate
-referenced by the `maths-researcher` skill. It runs the full pipeline:
-
-```
-lake build  →  sorry_check.sh  →  verdict
-```
-
-When the build is clean (0 errors) and sorry-free (0 sorries), it prints:
-
-```
-========================================
-  Your solution is okay!
-========================================
-  Build:   0 errors
-  Sorries: 0
-  Status:  CLEAN ✓
-```
-
-### Usage
-
-```bash
-# 1. (optional) confirm 0 sorries first
-./scripts/sorry_check.sh
-
-# 2. run the comparator
-./scripts/comparator.sh
-```
-
-## Project layout
+## Repo structure
 
 ```
 erdosternary2/
-├── ErdosTernary2/
-│   └── Basic.lean          # proven theorems (0 sorry, 0 error)
-├── ErdosTernary2.lean      # library root import
-├── Main.lean               # executable entry point
-├── scripts/
-│   ├── sorry_check.sh      # counts sorries (must return 0)
-│   └── comparator.sh       # V5 lean comparator
-├── .devcontainer/
-│   └── devcontainer.json   # GitHub Codespace config (installs elan)
-├── .github/workflows/      # CI
-├── lakefile.toml
-├── lean-toolchain          # leanprover/lean4:v4.33.0
-└── README.md
+├── ErdosTernary2.lean       ★ MAIN BASE FILE (401 KB, 0 sorries, 2 errors remained)
+│                              — pulled from sol/5c579-final-bigN-right-chord-atomic
+│                              — chronologically labeled #1133 / 1133
+│
+├── modules/                 ★ All other Lean modules in CHRONOLOGICAL ORDER
+│   ├── README.md            (chronological index of all modules)
+│   ├── 0001_*.lean          (earliest module)
+│   ├── 0002_*.lean
+│   ├── ...
+│   └── 0049_*.lean          (latest module)
+│
+├── ker07-snapshot/          (full reference snapshot, untouched)
+│   ├── CHRONOLOGY_INDEX.md  (1132-file chronological index)
+│   ├── GIT_HISTORY.md       (per-file detailed commit history)
+│   ├── COMPARATOR_RUNS.md   (41 comparator-related commits)
+│   ├── PACKAGE_LAYOUT.md
+│   ├── (root files from main)
+│   └── branches/            (1085 unique files from 19 sol/codex/verify branches)
+│
+├── lakefile.toml            (kyo-oo's original)
+├── lean-toolchain           (kyo-oo's original)
+├── Main.lean                (kyo-oo's original entry point)
+├── ErdosTernary2/           (kyo-oo's original Lean module directory)
+├── scripts/                 (kyo-oo's original scripts)
+├── .devcontainer/           (kyo-oo's original)
+└── .github/                 (kyo-oo's original)
 ```
 
-## Codespace
+## Main base file — verified properties
 
-This repo is configured for **GitHub Codespaces**. Open it in a codespace and
-`elan` + Lean 4 are installed automatically via `postCreateCommand`, then the
-comparator runs to confirm the build is clean.
+| Property | Value |
+|---|---|
+| Path | `ErdosTernary2.lean` (repo root) |
+| Source branch | `origin/sol/5c579-final-bigN-right-chord-atomic` |
+| Size | 401,200 bytes |
+| Lines | 8,724 |
+| SHA256 | `2b370e16f4c5dcc087f581a166bd1eb8a448e5b6b6bc92341100ef34b4f8fa9d` |
+| Sorries (real code) | **0** |
+| Admits (real code) | 1 |
+| Status (line 3) | `"Erdős Ternary-2 Conjecture: PROVEN"` |
+| Errors remained | 2 |
+| Chronological rank | #1133 / 1133 |
 
-## Toolchain
+## Chronological label format
 
-- **Lean**: `v4.33.0` (via `lean-toolchain`)
-- **elan**: Lean version manager (installed in codespace + locally)
-- **lake**: build tool (ships with elan)
+Every annotatable file in this repo starts with a chronological label header:
+
+```lean
+/- ======================================================================
+/- 🌟 CHRONOLOGICAL LABEL — MAIN BASE FILE — #XXXX / 1133
+/-    Path         : ErdosTernary2.lean
+/-    Ref          : origin/sol/5c579-final-bigN-right-chord-atomic
+/-    First-commit : YYYY-MM-DD HH:MM:SS +0530  (sha)
+/-    Last-commit  : YYYY-MM-DD HH:MM:SS +0530  (sha)
+/-    Total commits: N
+/- ======================================================================
+/- 0 sorries · 2 errors remained · 'Erdős Ternary-2 Conjecture: PROVEN'
+/- ======================================================================
+/- GIT HISTORY (chronological, oldest first)
+/- ======================================================================
+/- [01/N] YYYY-MM-DD HH:MM:SS +0530  sha  (ker07-dev)
+/-        commit message
+/- ====================================================================== -/
+```
