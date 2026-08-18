@@ -29,9 +29,61 @@ if qstart_tag not in text:
     text = text.replace(legacy_start, qstart_tag + legacy_start, 1)
     text = text.replace(legacy_end, legacy_end + qend_tag, 1)
 
-# BIG-N endpoint adapter.  This is the constructive form consumed by the
-# prefix-one recursion: seed-3 at the selected physical start and carry-1 at
-# the finite BIG-N horizon cannot be connected by an all-BIG1 information word.
+# ---------------------------------------------------------------------------
+# Attach the latest kernel-green Sol support modules to the ACTUAL monolith.
+# We recursively follow imports inside the locked latest snapshot, emit every
+# dependency exactly once in topological order, and strip only import lines.
+# `ErdosTernary2` itself is deliberately not recursively included.
+# ---------------------------------------------------------------------------
+attach_marker = '-- BEGIN ATTACHED SOL BIG-N / ORIGIN BRIDGE MODULES\n'
+attach_end = '-- END ATTACHED SOL BIG-N / ORIGIN BRIDGE MODULES\n\n'
+if attach_marker not in text:
+    snap = Path('ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic')
+    roots = [
+        'CanonicalOriginTritForcingScratch',
+        'CanonicalResidualInfiniteSupportBridgeScratch',
+        'CanonicalRightChordTrapScratch',
+        'HandwrittenBigNBinaryFactorScratch',
+        'HandwrittenBig1PathProjectorScratch',
+    ]
+    seen = set()
+    chunks = []
+
+    def visit(mod: str):
+        if mod in seen or mod in {'Mathlib', 'ErdosTernary2'}:
+            return
+        path = snap / f'{mod}.lean'
+        if not path.exists():
+            # External/library import. It is already available to the monolith.
+            return
+        seen.add(mod)
+        src = path.read_text(encoding='utf-8')
+        src_lines = src.splitlines()
+        imports = []
+        last_import = -1
+        for i, line in enumerate(src_lines):
+            stripped = line.strip()
+            if stripped.startswith('import '):
+                imports.extend(stripped[len('import '):].split())
+                last_import = i
+        for dep in imports:
+            visit(dep)
+        body_lines = src_lines[last_import + 1:] if last_import >= 0 else src_lines
+        body = '\n'.join(body_lines).strip() + '\n'
+        chunks.append(f'-- BEGIN ATTACHED {mod}.lean\n{body}-- END ATTACHED {mod}.lean\n\n')
+
+    for root in roots:
+        visit(root)
+
+    attached = attach_marker + ''.join(chunks) + attach_end
+    anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
+    if anchor not in text:
+        raise RuntimeError('inline integration anchor missing for module attachment')
+    text = text.replace(anchor, attached + anchor, 1)
+
+# BIG-N endpoint adapter.  This is the constructive endpoint consumed by the
+# physical/origin recursion: a carry-three start and carry-one BIG-N horizon
+# cannot be joined by an all-BIG1 information word.
 bign_anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
 bign_code = r'''/-- BIG-N finite endpoint adapter.  If the selected physical information
     path starts in carry three and reaches carry one at the finite BIG-N
@@ -58,7 +110,9 @@ if 'theorem gst_bigN_seed3_endpoint_forces_non_one_inline' not in text:
         raise RuntimeError('BIG-N insertion anchor missing')
     text = text.replace(bign_anchor, bign_code + bign_anchor, 1)
 
-# Restore the one real RED seam. No legacy termination theorem is consumed.
+# Keep the current RED theorem until the attached module stack itself has been
+# compiler-checked inside the monolith.  The next surgery replaces this
+# over-strong reflection with the direct residual contradiction.
 info_start_marker = 'theorem gst_prefix_one_information_bad_descends_inline'
 info_end_marker = '\n\n/-- Corrected information-wave closure:'
 info_start = text.index(info_start_marker)
