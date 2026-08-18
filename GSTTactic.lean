@@ -1,51 +1,29 @@
-import Lean.Elab.Tactic
-import Lean.Meta.Basic
+import Mathlib
 
 /-- If n < 4, then n = 0 or n = 1 or n = 2 or n = 3. -/
 theorem nat_lt_four_cases (n : Nat) (hn : n < 4) :
     n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 := by
-  match n with
-  | 0 => exact Or.inl rfl
-  | 1 => exact Or.inr (Or.inl rfl)
-  | 2 => exact Or.inr (Or.inr (Or.inl rfl))
-  | 3 => exact Or.inr (Or.inr (Or.inr rfl))
-  | n+4 => exact absurd hn (Nat.not_lt_of_ge (Nat.le_add_left 4 n))
+  omega
 
 /-- If `d < 3`, then `d` is one of the three exact ternary digits. -/
 theorem nat_lt_three_cases (d : Nat) (hd : d < 3) :
     d = 0 ∨ d = 1 ∨ d = 2 := by
-  match d with
-  | 0 => exact Or.inl rfl
-  | 1 => exact Or.inr (Or.inl rfl)
-  | 2 => exact Or.inr (Or.inr rfl)
-  | d+3 => exact absurd hd (Nat.not_lt_of_ge (Nat.le_add_left 3 d))
+  omega
 
 /-- If n < m, then n+1 < m or n+1 = m. -/
 theorem nat_succ_lt_or_eq (n m : Nat) (hn : n < m) :
     n + 1 < m ∨ n + 1 = m := by
-  by_cases h : n + 1 < m
-  · exact Or.inl h
-  · apply Or.inr
-    have : m ≤ n + 1 := Nat.le_of_not_lt h
-    exact Nat.le_antisymm (Nat.succ_le_of_lt hn) this
+  omega
 
 /-- If n < 4 and n ≠ 0 and n ≠ 1 and n ≠ 3, then n = 2. -/
 theorem nat_lt_four_imp_eq_two (n : Nat) (hn : n < 4)
     (hne0 : n ≠ 0) (hne1 : n ≠ 1) (hne3 : n ≠ 3) : n = 2 := by
-  rcases nat_lt_four_cases n hn with h0 | h1 | h2 | h3
-  · exact absurd h0 hne0
-  · exact absurd h1 hne1
-  · exact h2
-  · exact absurd h3 hne3
+  omega
 
 /-- If n < 4 and n ≠ 0 and n ≠ 3, then n = 1 or n = 2. -/
 theorem nat_lt_four_imp_one_or_two (n : Nat) (hn : n < 4)
     (hne0 : n ≠ 0) (hne3 : n ≠ 3) : n = 1 ∨ n = 2 := by
-  rcases nat_lt_four_cases n hn with h0 | h1 | h2 | h3
-  · exact absurd h0 hne0
-  · exact Or.inl h1
-  · exact Or.inr h2
-  · exact absurd h3 hne3
+  omega
 
 /-- 3 ≠ 0 (decidable) -/
 theorem gst_three_ne_zero : (3 : Nat) ≠ 0 := by decide
@@ -54,8 +32,7 @@ theorem gst_three_ne_zero : (3 : Nat) ≠ 0 := by decide
 theorem carry3_at_bridge_contradicts (R N : Nat)
     (hC1_3 : (4 * (R % 3^N)) / 3^N = 3)
     (h_bridge : (4 * (R % 3^N)) / 3^N = 0) : False := by
-  rw [hC1_3] at h_bridge
-  exact absurd h_bridge gst_three_ne_zero
+  omega
 
 /-- GST+ space: C(p) % 3 = 0. -/
 def is_gst_positive (R p : Nat) : Prop :=
@@ -85,8 +62,7 @@ theorem gst_or_alt (R p : Nat) :
 theorem null_imp_gst_positive (R p : Nat)
     (h_null : is_null_space R p) :
     is_gst_positive R p := by
-  rw [is_null_space] at h_null
-  rw [is_gst_positive, h_null, Nat.zero_mod]
+  simpa [is_null_space, is_gst_positive] using congrArg (fun x => x % 3) h_null
 
 /-- A witness lies in GST+. -/
 theorem witness_is_gst_positive (R p : Nat)
@@ -101,23 +77,43 @@ theorem cascade_is_alt_negative (R p : Nat)
     is_alt_negative R p := hc_ne0
 
 /-- n + 1 ≤ m → n < m. -/
-theorem nat_lt_of_add_one_le (n m : Nat) (h : n + 1 ≤ m) : n < m := h
+theorem nat_lt_of_add_one_le (n m : Nat) (h : n + 1 ≤ m) : n < m := by omega
 
 /-- n ≤ m → n < m + 1. -/
-theorem nat_lt_succ_of_le' (n m : Nat) (h : n ≤ m) : n < m + 1 := Nat.lt_succ_of_le h
+theorem nat_lt_succ_of_le' (n m : Nat) (h : n ≤ m) : n < m + 1 := by omega
 
+/-!
+`gst_omega` has two jobs.
+
+1. Preserve the original decreasing-goal solver used by recursive GST definitions.
+2. At the residual Ω seam, stop treating `False` like a termination side-goal:
+   normalize the finite residual boundary and all already-certified local state,
+   then let `aesop`/`omega` combine those kernel lemmas.
+
+The second phase deliberately contains no axiom, `sorry`, `native_decide`, or
+unsafe escape hatch.  It only composes declarations already present at the
+call site, so every success still produces an ordinary kernel proof term.
+-/
 elab "gst_omega" : tactic => do
   Lean.Elab.Tactic.evalTactic (← `(tactic|
-    simp_wf
-    <;> first
-      | exact Nat.sub_lt_sub_left (nat_lt_of_add_one_le _ _ (by assumption)) (by assumption)
-      | exact Nat.sub_lt_sub_left (by assumption) (by assumption)
-      | assumption
-      | exact Nat.sub_succ_lt_self _ _ (by assumption)
-      | exact Nat.sub_lt_self (by assumption) (by assumption)
-      | exact Nat.lt_succ_of_le (by assumption)
-      | decreasing_trivial_pre_omega
-      | decreasing_trivial
+    first
+      | (simp_wf
+         <;> first
+           | exact Nat.sub_lt_sub_left (nat_lt_of_add_one_le _ _ (by assumption)) (by assumption)
+           | exact Nat.sub_lt_sub_left (by assumption) (by assumption)
+           | assumption
+           | exact Nat.sub_succ_lt_self _ _ (by assumption)
+           | exact Nat.sub_lt_self (by assumption) (by assumption)
+           | exact Nat.lt_succ_of_le (by assumption)
+           | decreasing_trivial_pre_omega
+           | decreasing_trivial)
+      | contradiction
+      | omega
+      | (simp_all only [GSTResidualBoundary, GSTOmegaChildZeroSet,
+            GSTOmegaBadSet, GSTOmegaBadBlock, GSTSeededAffineBadTrace,
+            Set.mem_setOf_eq]
+         <;> first | contradiction | omega | aesop)
+      | (aesop (add safe (by omega)))
   ))
 
 syntax "gst_carry_cases " ident : tactic
