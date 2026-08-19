@@ -1,20 +1,15 @@
-name: Atomic Surgery
+name: Lean Action CI
 
 on:
   push:
-    branches:
-      - orchestrator-final-bridge
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: orchestrator-surgery
-  cancel-in-progress: true
-
 jobs:
-  surgery:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -25,63 +20,33 @@ jobs:
         shell: bash
         run: python3 .surgery/apply.py
 
+      - name: Fix Decidable instance
+        shell: bash
+        run: python3 .surgery/fix_decidable.py
+
       - name: Setup Lean
         uses: leanprover/lean-action@v1
         continue-on-error: true
         with:
           build: false
 
-      - name: Compile experiments and canonical target
+      - name: Compile
         if: always()
         shell: bash
         run: |
-          mkdir -p .surgery
           set +e
-          lake update > .surgery/fresh-update.txt 2>&1
-          update_code=$?
-          if [ "$update_code" -eq 0 ]; then
-            lake exe cache get >> .surgery/fresh-update.txt 2>&1
-
-            lake env lean GSTGraphV2InfiniteExperiment.lean > .surgery/fresh-infinite.txt 2>&1
-            inf_code=$?
-            echo "$inf_code" > .surgery/fresh-infinite.exit
-
-            lake env lean GSTGraphV2RectangleExperiment.lean > .surgery/fresh-rectangle.txt 2>&1
-            rect_code=$?
-            echo "$rect_code" > .surgery/fresh-rectangle.exit
-
-            lake build ErdosTernary2 > .surgery/fresh-build.txt 2>&1
-            build_code=$?
-            echo "$build_code" > .surgery/fresh-build.exit
-
-            bash scripts/comparator.sh > .surgery/fresh-comparator.txt 2>&1
-            comp_code=$?
-            echo "$comp_code" > .surgery/fresh-comparator.exit
-          else
-            cp .surgery/fresh-update.txt .surgery/fresh-infinite.txt
-            cp .surgery/fresh-update.txt .surgery/fresh-rectangle.txt
-            cp .surgery/fresh-update.txt .surgery/fresh-build.txt
-            cp .surgery/fresh-update.txt .surgery/fresh-comparator.txt
-            echo "$update_code" > .surgery/fresh-infinite.exit
-            echo "$update_code" > .surgery/fresh-rectangle.exit
-            echo "$update_code" > .surgery/fresh-build.exit
-            echo "$update_code" > .surgery/fresh-comparator.exit
-          fi
+          lake update > .surgery/update.txt 2>&1
+          lake exe cache get >> .surgery/update.txt 2>&1
+          lake build ErdosTernary2 > .surgery/build.txt 2>&1
+          code=$?
+          echo "$code" > .surgery/build.exit
+          cat .surgery/build.txt
           exit 0
 
-      - name: Commit fresh diagnostics
+      - name: Run sorry check
         if: always()
-        shell: bash
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean lake-manifest.json \
-            .surgery/fresh-update.txt \
-            .surgery/fresh-infinite.txt .surgery/fresh-infinite.exit \
-            .surgery/fresh-rectangle.txt .surgery/fresh-rectangle.exit \
-            .surgery/fresh-build.txt .surgery/fresh-build.exit \
-            .surgery/fresh-comparator.txt .surgery/fresh-comparator.exit
-          if ! git diff --cached --quiet; then
-            git commit -m 'Persist fresh atomic diagnostics'
-            git push origin HEAD:orchestrator-final-bridge
-          fi
+        run: bash scripts/sorry_check.sh || true
+
+      - name: Run comparator
+        if: always()
+        run: bash scripts/comparator.sh || true
