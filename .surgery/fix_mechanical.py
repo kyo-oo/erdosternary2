@@ -71,17 +71,27 @@ text = text.replace(
     '7 / (13 - 6) = 1 := by\n  norm_num'
 )
 
-# 8. Replace ALL remaining standalone decide with simp only [...] <;> omega
-lines = text.split('\n')
-new_lines = []
-for line in lines:
-    stripped = line.strip()
-    if stripped == 'decide':
-        indent = len(line) - len(line.lstrip())
-        new_lines.append(' ' * indent + 'simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega')
-    else:
-        new_lines.append(line)
-text = '\n'.join(new_lines)
+# 8. Replace standalone decide ONLY in the inlined modules (after BEGIN ATTACHED)
+# The original file's decide calls (before BEGIN ATTACHED) work fine — they
+# prove simple Nat equalities with native Decidable instances.
+# The inlined modules' decide calls need replacement because they reference
+# custom defs (GSTBadPairS, etc.) that don't have Decidable without open scoped Classical.
+attached_marker = '-- BEGIN ATTACHED'
+if attached_marker in text:
+    parts = text.split(attached_marker, 1)
+    before = parts[0]  # original file (keep decide as-is)
+    after = attached_marker + parts[1]  # inlined modules (replace decide)
+    
+    lines = after.split('\n')
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped == 'decide':
+            indent = len(line) - len(line.lstrip())
+            new_lines.append(' ' * indent + 'simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega')
+        else:
+            new_lines.append(line)
+    text = before + '\n'.join(new_lines)
 
 p.write_text(text, encoding='utf-8')
 print("fix_mechanical.py: ALL mechanical fixes applied")

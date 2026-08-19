@@ -1599,7 +1599,7 @@ theorem non_cantor_product_b_mod3_2 (b : Nat) (_hb : 2 ≤ b) (hb3 : b % 3 = 2) 
     rw [hc1, Nat.mul_one, Nat.pow_one]
   rw [hmod, hb3]
   rw [hasTwoInFirstK_eq_struct]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 theorem non_cantor_product_b_mod9_1 (b : Nat) (_hb : 2 ≤ b) (hb9 : b % 9 = 1) :
     ∃ k i : Nat, i < k ∧ hasTwoInFirstK ((b * c_stable k) % (3^k)) k := by
@@ -1611,7 +1611,7 @@ theorem non_cantor_product_b_mod9_1 (b : Nat) (_hb : 2 ≤ b) (hb9 : b % 9 = 1) 
     rw [show (3^2 : Nat) = 9 from by decide]; exact hprod9
   rw [hmod]
   rw [hasTwoInFirstK_eq_struct]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 
 
@@ -4327,7 +4327,7 @@ theorem bridge_carry_zero (k : Nat) (hk : 2 ≤ k) :
         rw [Nat.pow_succ, Nat.pow_succ]
         by_cases hm : m = 0
         · simp only [hm, Nat.pow_zero]
-          simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+          decide
         · have hm1 : 1 ≤ m := by omega
           have ih' : 4^m < 9^m := ih hm1
           have h9m : 0 < 9^m := Nat.pow_pos (by decide)
@@ -4931,10 +4931,10 @@ theorem gst_pure_lift_or_forced_cascade (R p : Nat) (hp : 1 ≤ p)
   · exact Or.inl ⟨hout, Or.inl h0⟩
   · refine Or.inr ⟨hout, Or.inl h1, ?_⟩
     rw [gstCarry_forward_exact (4 * R) p hp, hD, h1, hout]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    decide
   · refine Or.inr ⟨hout, Or.inr h2, ?_⟩
     rw [gstCarry_forward_exact (4 * R) p hp, hD, h2, hout]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    decide
   · exact Or.inl ⟨hout, Or.inr h3⟩
 
 /-- Complete finite transition table for the carry coordinate.  This is the
@@ -4944,7 +4944,7 @@ theorem gstStepCarry_table :
     gstStepCarry 1 0 = 0 ∧ gstStepCarry 1 1 = 1 ∧ gstStepCarry 1 2 = 3 ∧
     gstStepCarry 2 0 = 0 ∧ gstStepCarry 2 1 = 2 ∧ gstStepCarry 2 2 = 3 ∧
     gstStepCarry 3 0 = 1 ∧ gstStepCarry 3 1 = 2 ∧ gstStepCarry 3 2 = 3 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 /-- Complete edge table `(digit of 4R, carry at p+1)`. -/
 theorem gstStep_table :
@@ -4952,7 +4952,7 @@ theorem gstStep_table :
     gstStep 1 0 = (1, 0) ∧ gstStep 1 1 = (2, 1) ∧ gstStep 1 2 = (0, 3) ∧
     gstStep 2 0 = (2, 0) ∧ gstStep 2 1 = (0, 2) ∧ gstStep 2 2 = (1, 3) ∧
     gstStep 3 0 = (0, 1) ∧ gstStep 3 1 = (1, 2) ∧ gstStep 3 2 = (2, 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 /-- Product-automaton closure: every legal GST carry/digit pair creates a
     legal next carry.  This proof deliberately exercises the custom state
@@ -5719,12 +5719,12 @@ theorem gst_navigation_constant_cut_k2_b1
   apply gst_navigation_constant_cut_witness s 2 m 1 (by omega) hm (by omega) hm1
   · by_cases hs2 : s = 2
     · subst s
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      decide
     · have h81 := c_mod81_stable s (by omega)
       change ((c s / 3^2 % 3 + 1) % 3) = 2
       rw [digit_identity, show 3^(2+1) = 27 by decide]
       rw [← Nat.mod_mod_of_dvd (c s) (by decide : 27 ∣ 81), h81]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      decide
   · by_cases hs2 : s = 2
     · subst s
       exact Or.inr (by decide)
@@ -5835,7 +5835,7 @@ theorem gst_navigation_constant_one_witness (s : Nat) (hs : 4 ≤ s) :
   · change c s / 3^4 % 3 = 2
     rw [digit_identity (c s) 4]
     rw [show 3^(4+1) = 243 by decide, c_mod243_stable s hs]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    decide
   · change (4 * (c s % 3^4)) / 3^4 = 0
     rw [show 3^4 = 81 by decide, c_mod81_stable s (by omega)]
 
@@ -5875,12 +5875,12 @@ theorem gst_navigation_constant_large_prefix_witness
   rcases hlarge with ⟨rfl, hk⟩ | ⟨hs2, hs3, hk⟩
   · refine ⟨7, gst_affine_prefix_witness (c 3) (4^(3^3))
       (gstNavigationConstant (3+k) m) k 7 (by omega) ?_⟩
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    decide
   · by_cases hs_eq : s = 2
     · subst s
       refine ⟨4, gst_affine_prefix_witness (c 2) (4^(3^2))
         (gstNavigationConstant (2+k) m) k 4 (by omega) ?_⟩
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      decide
     · obtain ⟨hd, hC⟩ := gst_navigation_constant_one_witness s (by omega)
       rw [gstNavigationConstant_one s (by omega)] at hd hC
       refine ⟨4, gst_affine_prefix_witness (c s) (4^(3^s))
@@ -7439,7 +7439,7 @@ theorem gst_four_pow_lt_three_pow_twice (k : Nat) (hk : 1 ≤ k) :
           rw [Nat.pow_succ, Nat.pow_succ]
           by_cases hq : q = 0
           · simp only [hq, Nat.pow_zero]
-            simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+            decide
           · have hq1 : 1 ≤ q := by omega
             have ih' : 4^q < 9^q := ih hq1
             have h9q : 0 < 9^q := Nat.pow_pos (by decide)
@@ -7701,14 +7701,14 @@ theorem gst_null_two_regenerates
     (R p : Nat) (hC : gstCarry R p = 0) (hd : gstDigit R p = 2) :
     gstCarry R (p+1) = 2 := by
   rw [gstCarry_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 /-- At carry three, an expressed digit two propagates the carry-three phase. -/
 theorem gst_plus_two_propagates
     (R p : Nat) (hC : gstCarry R p = 3) (hd : gstDigit R p = 2) :
     gstCarry R (p+1) = 3 := by
   rw [gstCarry_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  decide
 
 /-- Child carry information becomes the explicit incoming affine seed after an
     arbitrary ternary cut. -/
@@ -8994,14 +8994,14 @@ theorem gst_null_two_regeneratesS
     (R p : Nat) (hC : gstCarryS R p = 0) (hd : gstDigitS R p = 2) :
     gstCarryS R (p+1) = 2 := by
   rw [gstCarryS_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- GST+ digit two propagates its carry-three phase. -/
 theorem gst_plus_two_propagatesS
     (R p : Nat) (hC : gstCarryS R p = 3) (hd : gstDigitS R p = 2) :
     gstCarryS R (p+1) = 3 := by
   rw [gstCarryS_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Seeded affine carries compose exactly under a ternary cut. -/
 theorem gst_seeded_affine_carry_semigroupS
@@ -9372,7 +9372,7 @@ theorem gst_handwritten_u_charge_tableS :
     gstHandwrittenUChargeS 1 = 15 ∧
     gstHandwrittenUChargeS 2 = 15 ∧
     gstHandwrittenUChargeS 3 = 21 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Local U-potential characterization of the bad GST language.
 
@@ -9393,7 +9393,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -9414,7 +9414,7 @@ theorem gst_handwritten_u_jump_tableS :
     gstHandwrittenUJumpS 3 0 = 24 ∧
     gstHandwrittenUJumpS 3 1 = 0 ∧
     gstHandwrittenUJumpS 3 2 = -6 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Negative U-potential jump is exactly a physical Happy/SURVIVE cell. -/
 theorem gst_handwritten_u_jump_negative_iff_happyS
@@ -9426,7 +9426,7 @@ theorem gst_handwritten_u_jump_negative_iff_happyS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Exact next ternary-prefix decomposition used by the telescoping potential. -/
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
@@ -9828,7 +9828,7 @@ theorem four_pow_succ_lt_three_pow_doubleS
             ac_rfl
       · have hN2 : N = 2 := by omega
         subst N
-        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The finite shared information word lies below the aligned ternary bridge. -/
 theorem gst_information_bridge_boundS
@@ -10077,14 +10077,14 @@ theorem gst_null_gate_regenerates_seedS
     (Y : Nat) (hd : Y % 3 = 2) :
     gstAffineMulCarryS 4 0 Y 1 = 2 := by
   rw [gst_child_seed_after_regenerationS, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- A GST+ child digit two similarly regenerates with carry three. -/
 theorem gst_plus_gate_regenerates_seedS
     (Y : Nat) (hd : Y % 3 = 2) :
     gstAffineMulCarryS 4 3 Y 1 = 3 := by
   rw [gst_child_seed_after_regenerationS, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED InformationRegenerationScratch.lean
 
 -- BEGIN ATTACHED PrefixOneOriginPhaseRecursionScratch.lean
@@ -10260,7 +10260,7 @@ theorem gst_bad_hard_tail_origin_one_regeneratesS
   have hseed :
       gstAffineMulCarryS 4 1 (GSTHardPrefixOneTailS Q z t (3*u+1)) 1 = 0 := by
     rw [gst_parent_seed_after_regenerationS, hd0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   rw [hseed, gst_hard_tail_origin_one_div3S Q hQ z hunit t u ht] at hsuffix
   exact hsuffix
 
@@ -10284,7 +10284,7 @@ theorem gst_bad_hard_tail_origin_two_regeneratesS
   have hseed :
       gstAffineMulCarryS 4 1 (GSTHardPrefixOneTailS Q z t (3*u+2)) 1 = 1 := by
     rw [gst_parent_seed_after_regenerationS, hd1]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   rw [hseed, gst_hard_tail_origin_two_div3S Q hQ z hunit t u ht] at hsuffix
   exact hsuffix
 
@@ -10492,7 +10492,7 @@ theorem gst_navigation_constant_four_mod243_stableS
     c_mod81_stable (s+1) (by omega)
   have hprod81 : (4^(3^s) * c (s+1)) % 81 = 16 := by
     rw [Nat.mul_mod, hA81, hcNext81]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   have hprodDecomp :
       4^(3^s) * c (s+1) =
         16 + 81 * ((4^(3^s) * c (s+1)) / 81) := by
@@ -10512,7 +10512,7 @@ theorem gst_navigation_constant_four_mod243_stableS
     norm_num
 
   rw [hrec, Nat.add_mod, hc243, hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Exact regenerated terminal word after the forced prefix and NULL row. -/
 def gstResidualNullTerminalS (s : Nat) : Nat :=
@@ -10565,7 +10565,7 @@ theorem gst_residual_null_terminal_happyS
   · right
     unfold gstAffineMulCarryS
     rw [show (3:Nat)^2 = 9 by decide, h9]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Explicit low-level NULL terminal gates.  These are finite kernel checks,
 not bounded searches used as a universal theorem. -/
@@ -10573,19 +10573,19 @@ theorem gst_residual_null_terminal_happy_s1S :
     gstDigitS (gstResidualNullTerminalS 1) 6 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 1) 6 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 1) 6 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 theorem gst_residual_null_terminal_happy_s2S :
     gstDigitS (gstResidualNullTerminalS 2) 7 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 2) 7 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 2) 7 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 theorem gst_residual_null_terminal_happy_s3S :
     gstDigitS (gstResidualNullTerminalS 3) 5 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 3) 5 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 3) 5 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Every positive canonical level has an explicit terminal NULL gate. -/
 theorem gst_residual_null_terminal_happy_allS
@@ -10728,14 +10728,14 @@ theorem gst_canonical_Q4_mod9S
       (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
     have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
       rw [Nat.mul_mod, hA3, hQnext1_3]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
     have hfactor :
         (3 * 4^(3^t) * Q (t+1) 1) % 9 =
           3 * ((4^(3^t) * Q (t+1) 1) % 3) := by
       omega
     rw [hfactor, hAq3]
   rw [hthree]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
 theorem gst_canonical_Q13_mod27S
@@ -10758,14 +10758,14 @@ theorem gst_canonical_Q13_mod27S
       (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
     have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
       rw [Nat.mul_mod, hA9, hQ4]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
     have hfactor :
         (3 * 4^(3^s) * Q (s+1) 4) % 27 =
           3 * ((4^(3^s) * Q (s+1) 4) % 9) := by
       omega
     rw [hfactor, hAq9]
   rw [hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Canonical origin causality extends the residue-13 calculation to the full
 class b == 13 (mod 27). -/
@@ -10793,7 +10793,7 @@ theorem gst_residue19_is_null_gate2S
     have hdiv : R / 9 % 3 = (R % 27) / 9 := by
       omega
     rw [hdiv, hR]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · unfold gstCarryS
     have hmod9 : R % 9 = 1 := by
       have h := Nat.mod_mod_of_dvd R (by decide : 9 ∣ 27)
@@ -10801,7 +10801,7 @@ theorem gst_residue19_is_null_gate2S
       norm_num at h ⊢
       exact h.symm
     rw [hmod9]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED NavigationResidueCutScratch.lean
 
 -- BEGIN ATTACHED ResidualNullPrefixFourCutScratch.lean
@@ -10823,10 +10823,10 @@ theorem gst_navigation_constant_four_mod27S
     gstNavigationConstant s 4 % 27 = 10 := by
   by_cases hs2 : s = 2
   · subst s
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   by_cases hs3 : s = 3
   · subst s
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · have h243 := gst_navigation_constant_four_mod243_stableS s (by omega)
     have h := Nat.mod_mod_of_dvd (gstNavigationConstant s 4)
       (by decide : 27 ∣ 243)
@@ -10854,7 +10854,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
   have hprod3 :
       (4^(3^s * 4) * gstNavigationConstant (s+2) u) % 3 = 1 := by
     rw [Nat.mul_mod, hA3, hQu3]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   have hprodDecomp :
       4^(3^s * 4) * gstNavigationConstant (s+2) u =
         1 + 3 * ((4^(3^s * 4) * gstNavigationConstant (s+2) u) / 3) := by
@@ -10877,7 +10877,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
     norm_num
 
   rw [hrec, Nat.add_mod, hQ4, hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- In the true NULL residual n=3u+1, a second origin trit one contradicts the
 complete parent Omega bad trace. -/
@@ -11009,7 +11009,7 @@ theorem gst_navigation_constant_mod3_allS
     have hQ0 := gst_canonical_origin_zeroS
       gstNavigationConstant gst_navigation_constant_origin_energyS s hs
     rw [hQ0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   by_cases hm3 : m % 3 = 0
   · have hmshape : m = 3 * (m / 3) := by
       have h := Nat.mod_add_div m 3
@@ -13851,10 +13851,10 @@ theorem gst_localized_gate_forcing_stepS
     rcases hgate.2 with h0 | h3
     · left
       rw [h0]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
     · right
       rw [h3]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   have hshared := gst_shared_word_regenerates_exactS A D Z 2
   refine ⟨hparent, hlatent, ?_⟩
   convert hshared using 1 <;> ring
@@ -13971,9 +13971,9 @@ theorem gst_child_gate_high_realisationS
       (gstStepCarryS C 2 = 2 ∨ gstStepCarryS C 2 = 3) := by
   rcases hC with h0 | h3
   · subst C
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · subst C
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED InformationIterationScratch.lean
 
 -- BEGIN ATTACHED FiniteSupportScratch.lean
@@ -14387,7 +14387,7 @@ theorem gst_self_lt_three_powS : ∀ N : Nat, 1 ≤ N → N < 3^N
   | N+1, hN => by
       by_cases h0 : N = 0
       · subst N
-        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
       · have ih : N < 3^N := gst_self_lt_three_powS N (by omega)
         have hp : 0 < 3^N := Nat.pow_pos (by decide)
         rw [Nat.pow_succ]
@@ -14481,7 +14481,7 @@ theorem gst_handwritten_kernel_normalizes_at_thirteenS :
 /-- The first known nested canonical binary quotient factorization. -/
 theorem gst_first_binary_quotient_factorizationS :
     455 = 5 * 7 * 13 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED HandwrittenSixUniverseScratch.lean
 
 -- BEGIN ATTACHED HandwrittenKernelV2Scratch.lean
@@ -14516,7 +14516,7 @@ theorem gst_micro_rotate6_tableS :
     gstMicroRotate6S 4 = 3 ∧
     gstMicroRotate6S 3 = 1 ∧
     gstMicroRotate6S 5 = 5 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The only fixed bridge masses are the all-zero state and BIG2 SURVIVE. -/
 theorem gst_micro_rotate6_fixed_iffS
@@ -14539,31 +14539,31 @@ theorem gst_micro_rotate6_nonzero_fixedS
 theorem gst_micro_rotate6_four_cycleS :
     gstMicroRotate6S (gstMicroRotate6S
       (gstMicroRotate6S (gstMicroRotate6S 1))) = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Kernel denominators on the active BIG2 masses. -/
 theorem gst_handwritten_kernel_active_denomsS :
     gstHandwrittenKernelDenomS 2 = 4 ∧
     gstHandwrittenKernelDenomS 4 = 2 ∧
     gstHandwrittenKernelDenomS 5 = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- CREATE -> DESTROY doubles the magnitude of 7/(6-m): denominator halves. -/
 theorem gst_handwritten_kernel_create_destroy_doubleS :
     gstHandwrittenKernelDenomS 2 =
       2 * gstHandwrittenKernelDenomS 4 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The reversed DESTROY -> CREATE orientation halves the kernel magnitude. -/
 theorem gst_handwritten_kernel_destroy_create_halfS :
     2 * gstHandwrittenKernelDenomS 4 =
       gstHandwrittenKernelDenomS 2 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- SURVIVE is the nonzero fixed kernel state. -/
 theorem gst_handwritten_kernel_survive_fixedS :
     gstMicroRotate6S 5 = 5 ∧ gstHandwrittenKernelDenomS 5 = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Integer cross-product form of telescoping around the complete nonfixed
 four-cycle.  It is the denominator counterpart of
@@ -14600,26 +14600,26 @@ theorem gst_micro_big2_orientation_tableS :
     (gstFirstMicroMassS 0 1, gstSecondMicroMassS 0 1) = (2,4) ∧
     (gstFirstMicroMassS 0 2, gstSecondMicroMassS 0 2) = (4,2) ∧
     (gstFirstMicroMassS 3 2, gstSecondMicroMassS 3 2) = (5,5) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The kernel orientation associated to phase-one hidden BIG2 is exactly a
 binary factor two in cross-multiplied denominator form. -/
 theorem gst_phase_one_micro_kernel_factor_twoS :
     gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 1) =
       2 * gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 1) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Phase two reverses the same factor. -/
 theorem gst_phase_two_micro_kernel_factor_halfS :
     2 * gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 2) =
       gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 2) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- GST+ SURVIVE is fixed in both microscopic layers. -/
 theorem gst_plus_survive_micro_kernel_fixedS :
     gstFirstMicroMassS 3 2 = 5 ∧
       gstSecondMicroMassS 3 2 = 5 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED HandwrittenKernelV2Scratch.lean
 
 -- BEGIN ATTACHED PhysicalSixBridgeGateScratch.lean
@@ -14854,7 +14854,7 @@ theorem gst_two_layer_big2_information_path_tableS :
     gstFirstMicroOutputS 0 1 = 2 ∧ gstSecondMicroOutputS 0 1 = 1 ∧
     gstFirstMicroOutputS 0 2 = 1 ∧ gstSecondMicroOutputS 0 2 = 2 ∧
     gstFirstMicroOutputS 3 2 = 2 ∧ gstSecondMicroOutputS 3 2 = 2 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Pathwise `I ≠ BIG1`, together with nonzero aligned input, completely
 solves the physical two-layer sector: the only legal x4 cell is GST+ with
@@ -14909,7 +14909,7 @@ theorem gst_big1_projector_two_layer_chord_35S
 (C,w)=(3,8), i.e. carry GST+ and ternary block 22. -/
 theorem gst_aligned_36_max_mass_is_same_chord_35S :
     3 + 4*8 = 35 ∧ 8 = 2 + 3*2 ∧ 35 = 6^2 - 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The world-projection coefficient at cardinality 6^K is the same integer
 selected by the unique nonzero pathwise-BIG1-clear base-six word. -/
@@ -15023,7 +15023,7 @@ theorem gst_physical_two_digit_chord_event_88S
         (gstFirstMicroOutputS (gstCarryS R p) (gstDigitS R p)) = 8 := by
   have h := gst_physical_two_digit_chord_forces_gst_plusS R p hd2 hI
   rw [h.1, hd2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The numerical chord shared by the two-digit projector, the six-state
 bridge universe, and the 36-state V2 boundary. -/
@@ -15035,7 +15035,7 @@ theorem gst_physical_two_digit_chord_35S
         6 * gstSecondMicroMassS (gstCarryS R p) (gstDigitS R p) =
       6^2 - 1 := by
   rw [(gst_physical_two_digit_chord_forces_gst_plusS R p hd2 hI).2.2.2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-! ## Exhaustive local classification at an actual Happy BIG2 cell -/
 
@@ -15052,9 +15052,9 @@ theorem gst_happy_big2_two_digit_clear_iff_plusS
   unfold GSTPhysicalTwoDigitBig1ClearS
   rcases hhappy with h0 | h3
   · rw [h0, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · rw [h3, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- The complementary local branch is exactly NULL.  No information is lost:
 when `I ≠ 1` fails at an already-Happy BIG2 cell, the physical word is 42_6,
@@ -15082,7 +15082,7 @@ theorem gst_happy_big2_two_digit_not_clear_is_nullS
       apply hnot
       exact hiff.mpr hthree
   rw [h0, hd2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Complete right-chord dichotomy.  There is no third physical Happy BIG2
 orientation.  The clear branch is GST+ 55_6 / (8,8) / code 35 / U=-6; the
@@ -15121,7 +15121,7 @@ theorem gst_happy_big2_right_chord_dichotomyS
     refine ⟨hI, hplus.1, hplus.2.1, hevents.1, hevents.2,
       hplus.2.2.2, ?_⟩
     rw [hplus.1, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · right
     have hnull := gst_happy_big2_two_digit_not_clear_is_nullS
       R p hd2 hhappy hI
@@ -15888,7 +15888,7 @@ theorem gst_prefix_one_bad_good_big2_prefix_forces_origin_nonzeroS
       s n q hs hbad hcarry
   apply hforbid
   rw [hprefixBig2, hnzero]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 -- END ATTACHED CanonicalOriginTritForcingScratch.lean
 
 -- BEGIN ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
@@ -16000,7 +16000,7 @@ theorem gst_scoped_two_digit_happy_gate_right_chordS
     C d hC hd hd0 hclear.1 hclear.2.1 hclear.2.2
   have hU : gstHandwrittenUJumpS C d = -6 := by
     rw [hC3, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   exact ⟨hC3, hd2, hmid2, hout2, hM1, hM2, h35, hU⟩
 
 /-- The mixed-radix state selected by the same chord is the maximal legal
@@ -16016,7 +16016,7 @@ theorem gst_scoped_right_chord_is_36_state_35S
   have h := gst_scoped_two_digit_happy_gate_right_chordS
     C d hC hd hhappy hclear
   rw [h.1]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Apply the scoped projector at an actual seed-zero child Happy Gate.
 The current carry is forced from the old NULL/GST+ ambiguity to GST+ carry 3,
@@ -16041,7 +16041,7 @@ theorem gst_scoped_child_gate_forces_plus_and_postseed_threeS
   have hstep := gstAffineS_forward_exact_all 0 T q
   have hpost : gstAffineMulCarryS 4 0 T (q+1) = 3 := by
     rw [hstep, hgate.1, hright.1]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   exact ⟨hright.1, hpost, hright.2.2.2.2.2.2.1⟩
 
 /-- The same last-gate chord lands the conserved shared-information carrier in
@@ -16390,7 +16390,7 @@ theorem gst_micro_event_symbol_tableS :
     gstMicroEventSymbolS 1 0 = 3 ∧
     gstMicroEventSymbolS 1 1 = 1 ∧
     gstMicroEventSymbolS 1 2 = 8 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Six is not a physical microscopic event symbol. -/
 theorem gst_micro_event_symbol_ne_sixS
@@ -16407,7 +16407,7 @@ theorem gst_micro_kernel_twice_active_tableS :
     gstMicroKernelTwiceS 0 1 = 14 ∧
     gstMicroKernelTwiceS 0 2 = -14 ∧
     gstMicroKernelTwiceS 1 2 = 7 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
 
 /-- Cross-multiplied exact form of 2*7/(J-6) on every active BIG2 cell.
 
@@ -16666,7 +16666,7 @@ theorem gst_prefix_one_bigN_future_zero_inline
   dsimp only
   by_cases hN0 : gstNavigationConstant (s+1) n = 0
   · rw [hN0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega
+    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
   · exact gst_navigation_self_horizon_zeroS
       (gstNavigationConstant (s+1) n) (by omega)
 
