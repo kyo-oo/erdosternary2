@@ -21,9 +21,10 @@ jobs:
       - name: Install elan
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --no-modify-path --default-toolchain none
-          ls -la ~/.cargo/bin/
-          ~/.cargo/bin/elan default leanprover/lean4:v4.33.0-rc2
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          find ~ -name elan -type f 2>/dev/null
+          ls -la ~/.elan/bin/ 2>/dev/null || true
+          ls -la ~/.local/bin/ 2>/dev/null || true
+          cat ~/.cargo/env 2>/dev/null || true
 
       - name: Resolve dependencies and compile
         run: |
