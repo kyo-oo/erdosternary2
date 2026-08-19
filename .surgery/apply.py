@@ -233,10 +233,11 @@ if gstbadpair_def in text:
 
 # MECHANICAL FIXES for inlined modules
 # 1. Add 'import Mathlib' for notation and identifiers
-text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\n')
+text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\n')\n# Add open BigOperators for ∑ notation\ntext = text.replace('import Mathlib\n', 'import Mathlib\nopen BigOperators\n')
 
-# 2. dvd_add -> Dvd.Dvd.add (not imported without Mathlib)
-text = text.replace('exact dvd_add ih', 'exact Dvd.Dvd.add ih')
+# 2. dvd_add -> inline proof (Dvd.Dvd.add is wrong name in Lean 4 Mathlib)
+text = text.replace('exact dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)',
+                    'exact Nat.dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)')
 
 # 3. Nat.dvd_pow_self -> pow_dvd_pow (wrong name in Mathlib)
 text = text.replace('Nat.dvd_pow_self 3', 'pow_dvd_pow 3')
@@ -250,16 +251,16 @@ text = text.replace('unfold GSTHardPrefixOneTailS GSTCanonicalBlockS\n  ring',
                     'simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]\n  ring')
 
 # 6. mod_add_div type mismatch
-text = text.replace('exact (Nat.mod_add_div D 2).symm', 'by omega')
-text = text.replace('exact (Nat.mod_add_div C 2).symm', 'by omega')
+text = text.replace('exact (Nat.mod_add_div D 2).symm', 'omega')
+text = text.replace('exact (Nat.mod_add_div C 2).symm', 'omega')
 
 # 7. gst_six_universe decide -> norm_num
 text = text.replace('gstSixUniversePrefixS 1 = 7 := by\n  decide',
-                    'gstSixUniversePrefixS 1 = 7 := by\n  show Finset.sum (Finset.range 2) (fun k => 6^k) = 7\n  norm_num')
+                    'gstSixUniversePrefixS 1 = 7 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
 text = text.replace('6^2 - 1 = 5 * 7 := by\n  decide',
                     '6^2 - 1 = 5 * 7 := by\n  norm_num')
 text = text.replace('13 = 6 + gstSixUniversePrefixS 1 := by\n  decide',
-                    '13 = 6 + gstSixUniversePrefixS 1 := by\n  show 13 = 6 + Finset.sum (Finset.range 2) (fun k => 6^k)\n  norm_num')
+                    '13 = 6 + gstSixUniversePrefixS 1 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
 text = text.replace('7 / (13 - 6) = 1 := by\n  decide',
                     '7 / (13 - 6) = 1 := by\n  norm_num')
 
