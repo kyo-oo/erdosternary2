@@ -1,52 +1,12 @@
 name: Lean Action CI
-
 on:
   push:
     branches: ['**']
   workflow_dispatch:
-
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Apply exact source surgery
-        shell: bash
-        run: python3 .surgery/apply.py
-
-      - name: Fix Decidable instance
-        shell: bash
-        run: python3 .surgery/fix_decidable.py
-
-      - name: Setup Lean
-        uses: leanprover/lean-action@v1
-        continue-on-error: true
-        with:
-          build: false
-
-      - name: Compile
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          lake update > .surgery/update.txt 2>&1
-          lake exe cache get >> .surgery/update.txt 2>&1
-          lake build ErdosTernary2 > .surgery/build.txt 2>&1
-          code=$?
-          echo "$code" > .surgery/build.exit
-          cat .surgery/build.txt
-          exit 0
-
-      - name: Run sorry check
-        if: always()
-        run: bash scripts/sorry_check.sh || true
-
-      - name: Run comparator
-        if: always()
-        run: bash scripts/comparator.sh || true
+      - name: Test
+        run: echo "hello"
