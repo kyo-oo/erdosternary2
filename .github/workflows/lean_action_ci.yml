@@ -27,6 +27,8 @@ jobs:
 
       - name: Apply exact source surgery
         run: python3 .surgery/apply.py
+      - name: Fix Decidable instance
+        run: python3 .surgery/fix_decidable.py
 
       - name: Resolve dependencies and compile
         run: |
