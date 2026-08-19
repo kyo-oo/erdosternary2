@@ -101,7 +101,7 @@ if attach_marker not in text:
     attached = attach_marker + ''.join(chunks) + attach_end
     if anchor not in text:
         raise RuntimeError('inline integration anchor missing for BIG-N attachment')
-    text = text.replace(anchor, "instance : Decidable (GSTBadPairS (C : Nat) (d : Nat)) :=\n  if h : d = 2 \u2227 (C = 0 \u2228 C = 3) then isFalse h else isTrue h\n\n" + attached + anchor, 1)
+    text = text.replace(anchor, attached + anchor, 1)
 
 # BIG-N finite endpoint. This is the literal finite i=N case: a carry-three
 # start cannot reach carry one through an all-BIG1 information interval.
@@ -217,5 +217,17 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
+
+
+# Insert Decidable instance for GSTBadPairS AFTER its definition
+gstbadpair_def = "def GSTBadPairS (C d : Nat) : Prop :="
+if gstbadpair_def in text:
+    # Find the end of the def (the line after ":=")
+    idx = text.index(gstbadpair_def)
+    # Find the next newline after the := line
+    line_end = text.index('\n', idx)
+    # Insert the instance right after the def
+    instance_code = '\ninstance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=\n  match C, d with\n  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])'
+    text = text[:line_end] + '\n' + instance_code + text[line_end:]
 
 p.write_text(text, encoding='utf-8')
