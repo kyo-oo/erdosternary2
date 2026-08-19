@@ -209,7 +209,7 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
   -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
   -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  gst_omega'''
+  gst_end'''
 text = text[:info_start] + new_info + text[info_end:]
 
 p.write_text(text, encoding='utf-8')
