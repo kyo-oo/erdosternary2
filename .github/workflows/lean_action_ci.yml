@@ -13,6 +13,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PATH: ${{ env.PATH }}:/home/runner/.cargo/bin
     steps:
       - uses: actions/checkout@v5
         with:
@@ -21,13 +23,12 @@ jobs:
       - name: Install elan
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          source $HOME/.cargo/env
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          echo "/home/runner/.cargo/bin" >> $GITHUB_PATH
 
       - name: Resolve dependencies and compile
         shell: bash
         run: |
-          source $HOME/.cargo/env
+          export PATH="/home/runner/.cargo/bin:$PATH"
           mkdir -p .surgery
           set +e
           lake update > .surgery/update.txt 2>&1
@@ -47,11 +48,11 @@ jobs:
       - name: Run sorry check
         if: always()
         run: |
-          source $HOME/.cargo/env
+          export PATH="/home/runner/.cargo/bin:$PATH"
           bash scripts/sorry_check.sh || true
 
       - name: Run comparator
         if: always()
         run: |
-          source $HOME/.cargo/env
+          export PATH="/home/runner/.cargo/bin:$PATH"
           bash scripts/comparator.sh || true
