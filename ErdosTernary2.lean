@@ -9651,7 +9651,7 @@ theorem gst_canonical_origin_multiple_dvdS
       have hadd := gst_canonical_origin_addS Q hQ t (q*m) m ht
       have hshape : (q+1)*m = q*m + m := by ring
       rw [hshape, hadd]
-      exact Dvd.Dvd.add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)
+      exact dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)
 
 /-- Universal origin-modulus embedding.
 
@@ -10470,7 +10470,7 @@ theorem gst_canonical_block_mod81_oneS
   have hp : 3^(s+1) % 81 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (81:Nat) = 3^4 by decide]
-    exact Nat.pow_dvd_pow 3 (by omega)
+    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
   rw [hp]
   norm_num
 
@@ -10689,7 +10689,7 @@ theorem gst_canonical_block_unit_mod9S
   have hdiv : 3^(t+1) % 9 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (9:Nat) = 3^2 by decide]
-    exact Nat.pow_dvd_pow 3 (by omega)
+    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
   rw [hdiv]
   norm_num
 
@@ -10704,7 +10704,7 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact Nat.pow_dvd_pow 3 (by omega)
+    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
   rw [hdiv]
   norm_num
 
@@ -11494,7 +11494,7 @@ def gstOmegaNaturalTransferS (t T i : Nat) : Nat :=
 
 theorem gst_omega_natural_transfer_prefixS
     (t T K : Nat) :
-    (∑ i in Finset.range K, gstOmegaNaturalTransferS t T i) =
+    (Finset.sum (Finset.range (K)) (fun i => gstOmegaNaturalTransferS t T i)) =
       3^(t+1) * (T % 3^K) := by
   induction K with
   | zero => simp [gstOmegaNaturalTransferS]
@@ -11511,7 +11511,7 @@ theorem gst_omega_natural_transfer_prefixS
 
 theorem gst_omega_natural_transfer_totalS
     (t T : Nat) :
-    (∑ i in Finset.range (T+1), gstOmegaNaturalTransferS t T i) =
+    (Finset.sum (Finset.range ((T+1))) (fun i => gstOmegaNaturalTransferS t T i)) =
       3^(t+1) * T := by
   rw [gst_omega_natural_transfer_prefixS]
   have hlt : T < 3^(T+1) := gst_three_pow_succ_gt_pressureS T
@@ -11519,7 +11519,7 @@ theorem gst_omega_natural_transfer_totalS
 
 theorem gst_omega_natural_transfer_is_energyS
     (t T : Nat) :
-    1 + (∑ i in Finset.range (T+1), gstOmegaNaturalTransferS t T i) =
+    1 + (Finset.sum (Finset.range ((T+1))) (fun i => gstOmegaNaturalTransferS t T i)) =
       gstOmegaPressureEnergyS t T := by
   rw [gst_omega_natural_transfer_totalS]
   rfl
@@ -11643,7 +11643,7 @@ def gstOriginNaturalTritS (n t : Nat) : Nat := n / 3^t % 3
 
 theorem gst_origin_phase_prefixS
     (s n K : Nat) :
-    (∑ t in Finset.range K, 3^(s+t) * gstOriginNaturalTritS n t) =
+    (Finset.sum (Finset.range (K)) (fun t => 3^(s+t)) * gstOriginNaturalTritS n t) =
       3^s * (n % 3^K) := by
   induction K with
   | zero => simp [gstOriginNaturalTritS]
@@ -14430,7 +14430,7 @@ state-count arithmetic exact before it is coupled to the V2 graph.
 
 /-- Number of bridge states through natural depth i, including depth zero. -/
 def gstSixUniversePrefixS (i : Nat) : Nat :=
-  ∑ k in Finset.range (i+1), 6^k
+  Finset.sum (Finset.range ((i+1))) (fun k => 6^k)
 
 /-- Exact six-ary geometric recurrence. -/
 theorem gst_six_universe_prefix_succS (i : Nat) :
@@ -14455,23 +14455,25 @@ theorem gst_six_universe_prefix_closedS (i : Nat) :
 /-- The first nontrivial cumulative bridge universe has seven states. -/
 theorem gst_six_universe_prefix_oneS :
     gstSixUniversePrefixS 1 = 7 := by
-  decide
+  show Finset.sum (Finset.range 2) (fun k => 6^k) = 7
+  norm_num
 
 /-- The first aligned two-layer modulus factors as (6-1)(6+1). -/
 theorem gst_six_square_boundary_factorS :
     6^2 - 1 = 5 * 7 := by
-  decide
+  norm_num
 
 /-- The exact EQ2 event factor 13 is 6 plus the first cumulative universe 7. -/
 theorem gst_event_factor_thirteen_from_six_sevenS :
     13 = 6 + gstSixUniversePrefixS 1 := by
-  decide
+  show 13 = 6 + Finset.sum (Finset.range 2) (fun k => 6^k)
+  norm_num
 
 /-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
 factor x=13.  Kept as integer division because 13-6 divides 7 exactly. -/
 theorem gst_handwritten_kernel_normalizes_at_thirteenS :
     7 / (13 - 6) = 1 := by
-  decide
+  norm_num
 
 /-- The first known nested canonical binary quotient factorization. -/
 theorem gst_first_binary_quotient_factorizationS :
@@ -14805,7 +14807,7 @@ theorem gst_big1_clear_path_edges_are_surviveS
 /-- Base-six code of the K microscopic bridge states. -/
 def gstBig1ProjectedPathCodeS
     (a d : Nat → Nat) (K : Nat) : Nat :=
-  ∑ j in Finset.range K, gstBinaryBridgeMassS (a j) (d j) * 6^j
+  Finset.sum (Finset.range (K)) (fun j => gstBinaryBridgeMassS (a j)) (d j) * 6^j
 
 /-- A nonzero pathwise-BIG1-clear component is exactly 55...55 in base six,
 therefore its code is 6^K-1. -/
@@ -16436,7 +16438,7 @@ physical x2 columns, `b (r+1)` is the output BIG2 indicator of column r.
 -/
 theorem gst_micro_big2_flux_telescopesS
     (b : Nat → Int) (L : Nat) :
-    (∑ r in Finset.range L, 7 * (b (r+1) - b r)) =
+    (Finset.sum (Finset.range (L)) (fun r => 7 * (b (r+1)) - b r)) =
       7 * (b L - b 0) := by
   induction L with
   | zero => simp
