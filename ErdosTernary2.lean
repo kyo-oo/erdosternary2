@@ -7324,7 +7324,6 @@ theorem gst_omega_seededAffine_block_echo
           3^(s+1) * c s * gstNavigationConstant (s+k) m) := by
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
-/- QUARANTINED LEGACY RESIDUAL OMEGA START
   Legacy residual overproof.  The final digit theorem does not require a pure
   Navigation witness at every exponent; the two-wave theorem below is strictly
   weaker and sufficient.  This block remains as proof archaeology only.
@@ -7422,7 +7421,6 @@ theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
 theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
-QUARANTINED LEGACY RESIDUAL OMEGA END -/
 
 /-
 /-- Numerical ceiling used to bound every power-of-four graph witness. -/
