@@ -18,21 +18,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install elan
-        run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --no-modify-path --default-toolchain none
-          export PATH="$HOME/.elan/bin:$PATH"
-          elan default leanprover/lean4:v4.33.0-rc2
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
       - name: Apply exact source surgery
         run: python3 .surgery/apply.py
+
       - name: Fix Decidable instance
         run: python3 .surgery/fix_decidable.py
 
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        continue-on-error: true
+        with:
+          build: false
+
       - name: Resolve dependencies and compile
+        if: always()
+        shell: bash
         run: |
-          export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .surgery
           set +e
           lake update > .surgery/update.txt 2>&1
@@ -51,12 +52,8 @@ jobs:
 
       - name: Run sorry check
         if: always()
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/sorry_check.sh || true
+        run: bash scripts/sorry_check.sh || true
 
       - name: Run comparator
         if: always()
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/comparator.sh || true
+        run: bash scripts/comparator.sh || true
