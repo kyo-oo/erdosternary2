@@ -1276,10 +1276,10 @@ theorem c_stable_4 : c_stable 4 = 16 := by
 
 
 theorem c_stable_mod3 (k : Nat) (hk : 1 ≤ k) : c_stable k % 3 = 1 := by
-  rw [c_stable, Nat.mod_mod_of_dvd _ (Nat.pow_dvd_pow 3 hk), c_mod3 (k+1) (by omega : 1 ≤ k+1)]
+  rw [c_stable, Nat.mod_mod_of_dvd _ (pow_dvd_pow 3 hk), c_mod3 (k+1) (by omega : 1 ≤ k+1)]
 
 theorem c_stable_mod9 (k : Nat) (hk : 2 ≤ k) : c_stable k % 9 = 7 := by
-  rw [c_stable, Nat.mod_mod_of_dvd _ (Nat.pow_dvd_pow 3 hk), c_mod9 (k+1) (by omega : 1 ≤ k+1)]
+  rw [c_stable, Nat.mod_mod_of_dvd _ (pow_dvd_pow 3 hk), c_mod9 (k+1) (by omega : 1 ≤ k+1)]
 
 
 def hasTwoInFirstK (n k : Nat) : Bool :=
@@ -1572,11 +1572,11 @@ theorem powMod_correct (b e m : Nat) (hm : 1 < m) : powMod b e m = (b^e) % m := 
 --     exact h_struct
 --   obtain ⟨q, hq_lt, hq_digit⟩ := hasTwoInFirstK_pos ((4^a) % (3^12)) 12 h_mod
 --   have h_digit : (4^a) / 3^q % 3 = ((4^a) % (3^12)) / 3^q % 3 := by
---     have hdvd : 3^q ∣ 3^12 := Nat.pow_dvd_pow 3 (Nat.le_of_lt hq_lt)
+--     have hdvd : 3^q ∣ 3^12 := pow_dvd_pow 3 (Nat.le_of_lt hq_lt)
 --     have h1 : (4^a) / 3^q % 3 = ((4^a) / 3^q % 3^12) % 3 := by
 --       rw [Nat.mod_mod_of_dvd _ hdvd]
 --     have h2 : ((4^a) / 3^q % 3^12) = ((4^a) % 3^12) / 3^q := by
---       have hdvd2 : 3^(q+1) ∣ 3^12 := Nat.pow_dvd_pow 3 (by omega : q + 1 ≤ 12)
+--       have hdvd2 : 3^(q+1) ∣ 3^12 := pow_dvd_pow 3 (by omega : q + 1 ≤ 12)
 --       have hmod : (4^a) % 3^(q+1) = ((4^a) % 3^12) % 3^(q+1) := Nat.mod_mod_of_dvd _ hdvd2
 --       have hdig1 : (4^a) / 3^q % 3 = ((4^a) % 3^(q+1)) / 3^q % 3 := by
 --         have : 3^(q+1) = 3^q * 3 := by rw [Nat.pow_succ]; rfl
@@ -2485,7 +2485,7 @@ theorem cubic_h_creation_lift (m p : Nat) (hp1 : 1 ≤ p)
       rw [this]; have : 1 ≤ 3^p := Nat.pow_pos (by decide); omega
     have hmod_p1 : (4^m)^3 % 3^(p+1) = 1 := by
       have hmod_mod : (4^m)^3 % 3^(p+1) = ((4^m)^3 % 3^(p+2)) % 3^(p+1) := by
-        rw [Nat.mod_mod_of_dvd]; exact Nat.pow_dvd_pow 3 (by omega : p+1 ≤ p+2)
+        rw [Nat.mod_mod_of_dvd]; exact pow_dvd_pow 3 (by omega : p+1 ≤ p+2)
       rw [hmod_mod]
       rw [hmod_cube]
       have h2dvd : (3^(p+1)) ∣ 2 * (3^(p+1)) := by
@@ -2746,7 +2746,7 @@ theorem digit_formula (s b k : Nat) (hs1 : 1 ≤ s) (hsk : k ≤ s) (_hk1 : 1 �
   rw [hQ]
   have hX2_mod : ((3^(s+1) * c s) * (3^(s+1) * c s) * Q) % (3^(s+1+k)) = 0 := by
     have hle : s + 1 + k ≤ 2 * (s + 1) := by omega
-    have hfac : 3^(s+1+k) ∣ 3^(2*(s+1)) := Nat.pow_dvd_pow 3 hle
+    have hfac : 3^(s+1+k) ∣ 3^(2*(s+1)) := pow_dvd_pow 3 hle
     have hfac2 : 3^(s+1+k) ∣ 3^(2*(s+1)) * (c s * c s) * Q := by
       obtain ⟨d, hd⟩ := hfac
       exact ⟨d * (c s * c s) * Q, by rw [hd]; ac_rfl⟩
@@ -2781,8 +2781,8 @@ theorem c_tower_stabilizes (s k : Nat) (hsk : k + 1 ≤ s) :
       have h_corr_mod : (3^s * (c (s-1))^2 + 3^(2*(s-1)+1) * (c (s-1))^3) % 3^k = 0 := by
         have h_s_ge_k : k ≤ s := by omega
         have h_2s1_ge_k : k ≤ 2*(s-1)+1 := by omega
-        have h1 : 3^k ∣ 3^s := Nat.pow_dvd_pow 3 h_s_ge_k
-        have h2 : 3^k ∣ 3^(2*(s-1)+1) := Nat.pow_dvd_pow 3 h_2s1_ge_k
+        have h1 : 3^k ∣ 3^s := pow_dvd_pow 3 h_s_ge_k
+        have h2 : 3^k ∣ 3^(2*(s-1)+1) := pow_dvd_pow 3 h_2s1_ge_k
         have h3 : 3^k ∣ 3^s * (c (s-1))^2 := by
           obtain ⟨d, hd⟩ := h1
           refine ⟨d * (c (s-1))^2, ?_⟩
@@ -3047,12 +3047,12 @@ theorem c_mod81_stable (k : Nat) (hk3 : 3 ≤ k) : c k % 81 = 16 := by
     have h3k : 3^k * (c (k-1))^2 % 81 = 0 := by
       apply Nat.mod_eq_zero_of_dvd
       have h81 : 81 = 3^4 := by decide
-      rw [h81]; exact Nat.dvd_trans (Nat.pow_dvd_pow 3 hk_ge4) (Nat.dvd_mul_right _ _)
+      rw [h81]; exact Nat.dvd_trans (pow_dvd_pow 3 hk_ge4) (Nat.dvd_mul_right _ _)
     have h3_2k : 3^(2*(k-1)+1) * (c (k-1))^3 % 81 = 0 := by
       apply Nat.mod_eq_zero_of_dvd
       have h81 : 81 = 3^4 := by decide
       have hexp : 4 ≤ 2*(k-1)+1 := by omega
-      rw [h81]; exact Nat.dvd_trans (Nat.pow_dvd_pow 3 hexp) (Nat.dvd_mul_right _ _)
+      rw [h81]; exact Nat.dvd_trans (pow_dvd_pow 3 hexp) (Nat.dvd_mul_right _ _)
     simp only [Nat.add_mod, h3k, h3_2k, Nat.zero_add, Nat.mod_mod, hih]
 
 -- Navigator constant: c k % 243 = 178 for k ≥ 4
@@ -3072,12 +3072,12 @@ theorem c_mod243_stable (k : Nat) (hk4 : 4 ≤ k) : c k % 243 = 178 := by
     have h3k : 3^k * (c (k-1))^2 % 243 = 0 := by
       apply Nat.mod_eq_zero_of_dvd
       have h243 : 243 = 3^5 := by decide
-      rw [h243]; exact Nat.dvd_trans (Nat.pow_dvd_pow 3 hk_ge5) (Nat.dvd_mul_right _ _)
+      rw [h243]; exact Nat.dvd_trans (pow_dvd_pow 3 hk_ge5) (Nat.dvd_mul_right _ _)
     have h3_2k : 3^(2*(k-1)+1) * (c (k-1))^3 % 243 = 0 := by
       apply Nat.mod_eq_zero_of_dvd
       have h243 : 243 = 3^5 := by decide
       have hexp : 5 ≤ 2*(k-1)+1 := by omega
-      rw [h243]; exact Nat.dvd_trans (Nat.pow_dvd_pow 3 hexp) (Nat.dvd_mul_right _ _)
+      rw [h243]; exact Nat.dvd_trans (pow_dvd_pow 3 hexp) (Nat.dvd_mul_right _ _)
     simp only [Nat.add_mod, h3k, h3_2k, Nat.zero_add, Nat.mod_mod, hih]
 
 theorem cascade_lift (s b k : Nat) (hsk : k + 1 ≤ s) (hk1 : 1 ≤ k)
@@ -9242,7 +9242,7 @@ theorem gst_state_eq_of_prefix_residueS
   · rw [gstDigitS_eq_prefix_residue_divS,
         gstDigitS_eq_prefix_residue_divS, hres]
   · have hdvd : 3^j ∣ 3^(j+1) :=
-      Nat.pow_dvd_pow 3 (by omega)
+      pow_dvd_pow 3 (by omega)
     have hlow : R % 3^j = S % 3^j := by
       calc
         R % 3^j = (R % 3^(j+1)) % 3^j := by
