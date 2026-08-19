@@ -1,28 +1,28 @@
--- ======================================================================
--- 🌟 CHRONOLOGICAL LABEL — MAIN BASE FILE — #1133 / 1133
---    Path         : ErdosTernary2.lean
---    Ref          : origin/sol/5c579-final-bigN-right-chord-atomic
---    First-commit : 2026-08-14 21:44:31 +0530  (83dd56f)
---    Last-commit  : 2026-08-16 14:10:32 +0000  (5c57900)
---    Total commits: 6
--- ======================================================================
--- 0 sorries · 2 errors remained · 'Erdős Ternary-2 Conjecture: PROVEN'
--- ======================================================================
--- GIT HISTORY (chronological, oldest first)
--- ======================================================================
--- [01/6] 2026-08-14 21:44:31 +0530  83dd56f  (ker07-dev)
---        Import Sol inline surgery handoff and GST graph workspace
--- [02/6] 2026-08-16 09:34:27 +0000  940bff0  (github-actions[bot])
---        Normalize ErdosTernary2 source UTF-8
--- [03/6] 2026-08-16 11:23:07 +0000  b32d10c  (github-actions[bot])
---        Promote exact atomic-fixed information-wave source
--- [04/6] 2026-08-16 11:33:55 +0000  e3dd5c7  (github-actions[bot])
---        Fix atomic WIP integration syntax and ring import
--- [05/6] 2026-08-16 14:01:10 +0000  d6e948c  (github-actions[bot])
---        Fix monolithic carry normalization and residual lift call
--- [06/6] 2026-08-16 14:10:32 +0000  5c57900  (github-actions[bot])
---        Activate certified residual omega termination chain
--- ====================================================================== -/
+/- ======================================================================
+/- 🌟 CHRONOLOGICAL LABEL — MAIN BASE FILE — #1133 / 1133
+/-    Path         : ErdosTernary2.lean
+/-    Ref          : origin/sol/5c579-final-bigN-right-chord-atomic
+/-    First-commit : 2026-08-14 21:44:31 +0530  (83dd56f)
+/-    Last-commit  : 2026-08-16 14:10:32 +0000  (5c57900)
+/-    Total commits: 6
+/- ======================================================================
+/- 0 sorries · 2 errors remained · 'Erdős Ternary-2 Conjecture: PROVEN'
+/- ======================================================================
+/- GIT HISTORY (chronological, oldest first)
+/- ======================================================================
+/- [01/6] 2026-08-14 21:44:31 +0530  83dd56f  (ker07-dev)
+/-        Import Sol inline surgery handoff and GST graph workspace
+/- [02/6] 2026-08-16 09:34:27 +0000  940bff0  (github-actions[bot])
+/-        Normalize ErdosTernary2 source UTF-8
+/- [03/6] 2026-08-16 11:23:07 +0000  b32d10c  (github-actions[bot])
+/-        Promote exact atomic-fixed information-wave source
+/- [04/6] 2026-08-16 11:33:55 +0000  e3dd5c7  (github-actions[bot])
+/-        Fix atomic WIP integration syntax and ring import
+/- [05/6] 2026-08-16 14:01:10 +0000  d6e948c  (github-actions[bot])
+/-        Fix monolithic carry normalization and residual lift call
+/- [06/6] 2026-08-16 14:10:32 +0000  5c57900  (github-actions[bot])
+/-        Activate certified residual omega termination chain
+/- ====================================================================== -/
 
 -- CardinalWorldsWork.lean — GST Complete Formalization
 -- 10001 lines, 0 sorry, 0 native_decide
