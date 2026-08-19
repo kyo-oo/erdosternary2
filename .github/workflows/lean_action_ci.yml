@@ -18,10 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply exact source surgery
-        shell: bash
-        run: python3 .surgery/apply.py
-
       - name: Setup Lean
         uses: leanprover/lean-action@v1
         continue-on-error: true
