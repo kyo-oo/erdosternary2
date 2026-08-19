@@ -9389,7 +9389,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;>
-    decide
+    omega
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -9423,7 +9423,7 @@ theorem gst_handwritten_u_jump_negative_iff_happyS
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;>
-    decide
+    omega
 
 /-- Exact next ternary-prefix decomposition used by the telescoping potential. -/
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
@@ -10470,7 +10470,7 @@ theorem gst_canonical_block_mod81_oneS
   have hp : 3^(s+1) % 81 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (81:Nat) = 3^4 by decide]
-    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
+    exact Nat.pow_dvd_pow 3 (by decide) (by omega)
   rw [hp]
   norm_num
 
@@ -10689,7 +10689,7 @@ theorem gst_canonical_block_unit_mod9S
   have hdiv : 3^(t+1) % 9 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (9:Nat) = 3^2 by decide]
-    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
+    exact Nat.pow_dvd_pow 3 (by decide) (by omega)
   rw [hdiv]
   norm_num
 
@@ -10704,7 +10704,7 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact ⟨3^t, by rw [Nat.pow_succ]; ring⟩
+    exact Nat.pow_dvd_pow 3 (by decide) (by omega)
   rw [hdiv]
   norm_num
 
@@ -14802,7 +14802,7 @@ theorem gst_big1_clear_path_edges_are_surviveS
 /-- Base-six code of the K microscopic bridge states. -/
 def gstBig1ProjectedPathCodeS
     (a d : Nat → Nat) (K : Nat) : Nat :=
-  Finset.sum (Finset.range (K)) (fun j => gstBinaryBridgeMassS (a j)) (d j) * 6^j
+  Finset.sum (Finset.range K) (fun j => gstBinaryBridgeMassS (a j) (d j) * 6^j)
 
 /-- A nonzero pathwise-BIG1-clear component is exactly 55...55 in base six,
 therefore its code is 6^K-1. -/
@@ -16566,10 +16566,10 @@ theorem gst_shared_x4_binary_factorS
   have h2 : 0 < (2:Nat) := by decide
   have hDb : D = 2*a + b := by
     dsimp [a, b]
-    by omega
+    omega
   have hCe : C = 2*c + e := by
     dsimp [c, e]
-    by omega
+    omega
   have ha : a < 2 := by
     dsimp [a]
     omega
