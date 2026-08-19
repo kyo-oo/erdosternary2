@@ -1,4 +1,4 @@
-⚠ [8697/8699] Built GSTTactic (6.9s)
+⚠ [8697/8699] Built GSTTactic (7.7s)
 warning: GSTTactic.lean:69:5: Variable name `hd2` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -11,7 +11,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hd2
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-✖ [8698/8699] Building ErdosTernary2 (51s)
+✖ [8698/8699] Building ErdosTernary2 (86s)
 trace: .> LEAN_PATH=/home/runner/work/erdosternary2/erdosternary2/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.33.0-rc2/bin/lean /home/runner/work/erdosternary2/erdosternary2/ErdosTernary2.lean -o /home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean/ErdosTernary2.olean -i /home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean/ErdosTernary2.ilean -c /home/runner/work/erdosternary2/erdosternary2/.lake/build/ir/ErdosTernary2.c --setup /home/runner/work/erdosternary2/erdosternary2/.lake/build/ir/ErdosTernary2.setup.json --json
 warning: ErdosTernary2.lean:239:33: Variable name `hm` is not explicitly referenced.
 
@@ -238,13 +238,688 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hA
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-error: ErdosTernary2.lean:8574:2: Tactic `aesop` failed, made no progress
-Initial goal:
-  s n : ℕ
-  hs : 1 ≤ s
-  hn : 1 ≤ n
-  hBad : GSTOmegaInfiniteBadTrace s 1 n
-  ⊢ GSTCompleteBadTrace (gstNavigationConstant (s + 1) n)
+warning: ErdosTernary2.lean:9129:21: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 0 0 ↔ 24 * 0 + gstHandwrittenUChargeS 0 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 0 0)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 0 1 ↔ 24 * 1 + gstHandwrittenUChargeS 0 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 0 1)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 0 2 ↔ 24 * 2 + gstHandwrittenUChargeS 0 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 0 2)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 1 0 ↔ 24 * 0 + gstHandwrittenUChargeS 1 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 1 0)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 1 1 ↔ 24 * 1 + gstHandwrittenUChargeS 1 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 1 1)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 1 2 ↔ 24 * 2 + gstHandwrittenUChargeS 1 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 1 2)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 2 0 ↔ 24 * 0 + gstHandwrittenUChargeS 2 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 2 0)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 2 1 ↔ 24 * 1 + gstHandwrittenUChargeS 2 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 2 1)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 2 2 ↔ 24 * 2 + gstHandwrittenUChargeS 2 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 2 2)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 3 0 ↔ 24 * 0 + gstHandwrittenUChargeS 3 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 3 0)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 3 1 ↔ 24 * 1 + gstHandwrittenUChargeS 3 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 3 1)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9391:4: Tactic `decide` failed for proposition
+  GSTBadPairS 3 2 ↔ 24 * 2 + gstHandwrittenUChargeS 3 ≤ 3 * gstHandwrittenUChargeS (gstStepCarryS 3 2)
+because its `Decidable` instance
+  instDecidableIff
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableIff` and `Classical.propDecidable`, reduction got stuck at the `Decidable` instance
+  Classical.choice ⋯
+
+Hint: Reduction got stuck on `Classical.choice`, which indicates that a `Decidable` instance is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. The `decide` tactic works by evaluating a decision procedure via reduction, and it cannot make progress with such instances. This can occur due to the `open scoped Classical` command, which enables the instance `Classical.propDecidable`.
+error: ErdosTernary2.lean:9445:9: unsolved goals
+case zero
+D X : ℕ
+hD : D < 4
+hbad : ∀ j < 0, GSTBadPairS (gstAffineMulCarryS 4 D X j) (gstDigitS X j)
+⊢ 24 * (X % 1) + gstHandwrittenUChargeS D ≤ gstHandwrittenUChargeS (D + 4 * (X % 1))
+error: ErdosTernary2.lean:9554:2: Type mismatch: After simplification, term
+  hGate
+ has type
+  (c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) / 3 ^ j % 3 = 2 ∧
+    (1 + 4 * ((c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) % 3 ^ j) < 3 ^ j ∨
+      (1 + 4 * ((c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) % 3 ^ j)) / 3 ^ j = 3)
+but is expected to have type
+  gstDigit (c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) j = 2 ∧
+    (gstAffineMulCarry 4 1 (c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) j = 0 ∨
+      gstAffineMulCarry 4 1 (c s / 3 + 4 ^ 3 ^ s * gstNavigationConstant (s + 1) n) j = 3)
+error: ErdosTernary2.lean:9633:2: Type mismatch
+  origin_navigation_algebraS D A (Q t a) (Q t (a + b)) (Q t b) 1 (Nat.pow_pos (of_decide_eq_true (id (Eq.refl true))))
+    hA hcur
+has type
+  Q t (a + b) = Q t a + 1 * A * Q t b
+but is expected to have type
+  Q t (a + b) = Q t a + 4 ^ (3 ^ t * a) * Q t b
+error: ErdosTernary2.lean:9669:4: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  g ≥ 0
+  f ≥ 0
+  e ≥ 0
+  e - f ≤ 0
+  e - g ≤ -1
+  a ≥ 1
+where
+ a := ↑t
+ e := ↑m * ↑(b / m)
+ f := ↑b
+ g := ↑(b / m) * ↑m
+error: ErdosTernary2.lean:9663:43: unsolved goals
+Q : ℕ → ℕ → ℕ
+hQ : GSTCanonicalOriginEnergyS Q
+t b m : ℕ
+ht : 1 ≤ t
+r : ℕ := b % m
+q : ℕ := b / m
+hb : b = r + q * m
+hadd : Q t (r + q * m) = Q t r + 4 ^ (3 ^ t * r) * Q t (q * m)
+hdvdQ : Q t m ∣ Q t (q * m)
+hdvdTerm : Q t m ∣ 4 ^ (3 ^ t * r) * Q t (q * m)
+⊢ Q t r % Q t m = Q t ((r + q * m) % m) % Q t m
+warning: ErdosTernary2.lean:9933:5: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:9968:2: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+error: ErdosTernary2.lean:10111:31: Tactic `unfold` failed to unfold `GSTCanonicalBlockS` in
+  1 + 3 * z t + 3 * 4 ^ 3 ^ t * Q (t + 1) n = 1 + 3 * (z t + 4 ^ 3 ^ t * Q (t + 1) n)
+warning: ErdosTernary2.lean:10193:23: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+error: ErdosTernary2.lean:10490:4: No goals to be solved
+error: ErdosTernary2.lean:10510:2: No goals to be solved
+warning: ErdosTernary2.lean:10535:21: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+error: ErdosTernary2.lean:10563:4: No goals to be solved
+error: ErdosTernary2.lean:10705:10: Unknown constant `Nat.dvd_pow_self`
+error: ErdosTernary2.lean:10726:6: No goals to be solved
+error: ErdosTernary2.lean:10730:6: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  g ≥ 0
+  f ≥ 0
+  0 ≤ f - 9*h ≤ 2
+  e ≥ 0
+  b ≥ 0
+  9*b + f ≥ -7
+  a ≥ 2
+where
+ a := ↑t
+ b := ↑(Q t 1) / 9
+ e := ↑(Q (t + 1) 1) / 3
+ f := ↑(3 * 4 ^ 3 ^ t) * ↑(Q (t + 1) 1)
+ g := ↑(4 ^ 3 ^ t * Q (t + 1) 1) / 3
+ h := ↑(3 * 4 ^ 3 ^ t * Q (t + 1) 1) / 9
+error: ErdosTernary2.lean:10732:6: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  3 * 4 ^ 3 ^ t * Q (t + 1) 1 % 9
+in the target expression
+  (7 + 3 * 4 ^ 3 ^ t % 9 * (Q (t + 1) 1 % 9) % 9) % 9 = 1
+
+Q : ℕ → ℕ → ℕ
+hQ : GSTCanonicalOriginEnergyS Q
+t : ℕ
+ht : 2 ≤ t
+hQ1_9 : Q t 1 % 9 = 7
+hQnext1_3 : Q (t + 1) 1 % 3 = 1
+hrec : Q t 4 = Q t 1 + 3 * 4 ^ 3 ^ t * Q (t + 1) 1
+hA3 : 4 ^ 3 ^ t % 3 = 1
+hthree : 3 * 4 ^ 3 ^ t * Q (t + 1) 1 % 9 = 3
+⊢ (7 + 3 * 4 ^ 3 ^ t % 9 * (Q (t + 1) 1 % 9) % 9) % 9 = 1
+error: ErdosTernary2.lean:10756:6: No goals to be solved
+error: ErdosTernary2.lean:10760:6: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  i ≥ 0
+  h ≥ 0
+  0 ≤ h - 27*j ≤ 2
+  g ≥ 0
+  f ≥ 0
+  e ≥ 0
+  b ≥ 0
+  27*b + h ≥ -16
+  a ≥ 2
+where
+ a := ↑s
+ b := ↑(Q s 1) / 27
+ e := ↑(Q (s + 1) 1) / 9
+ f := ↑(Q (s + 2) 1) / 3
+ g := ↑(Q (s + 1) 4) / 9
+ h := ↑(3 * 4 ^ 3 ^ s) * ↑(Q (s + 1) 4)
+ i := ↑(4 ^ 3 ^ s * Q (s + 1) 4) / 9
+ j := ↑(3 * 4 ^ 3 ^ s * Q (s + 1) 4) / 27
+error: ErdosTernary2.lean:10762:6: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  3 * 4 ^ 3 ^ s * Q (s + 1) 4 % 27
+in the target expression
+  (16 + 3 * 4 ^ 3 ^ s % 27 * (Q (s + 1) 4 % 27) % 27) % 27 = 19
+
+Q : ℕ → ℕ → ℕ
+hQ : GSTCanonicalOriginEnergyS Q
+s : ℕ
+hs : 2 ≤ s
+hQ1_27 : Q s 1 % 27 = 16
+hQnext1_9 : Q (s + 1) 1 % 9 = 7
+hQnext2_3 : Q (s + 2) 1 % 3 = 1
+hQ4 : Q (s + 1) 4 % 9 = 1
+hrec : Q s 13 = Q s 1 + 3 * 4 ^ 3 ^ s * Q (s + 1) 4
+hA9 : 4 ^ 3 ^ s % 9 = 1
+hterm : 3 * 4 ^ 3 ^ s * Q (s + 1) 4 % 27 = 3
+⊢ (16 + 3 * 4 ^ 3 ^ s % 27 * (Q (s + 1) 4 % 27) % 27) % 27 = 19
+error: ErdosTernary2.lean:10790:8: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  R / 9 % 3
+in the target expression
+  R / 3 ^ 2 % 3 = 2
+
+case left
+R : ℕ
+hR : R % 27 = 19
+hdiv : R / 9 % 3 = R % 27 / 9
+⊢ R / 3 ^ 2 % 3 = 2
+error: ErdosTernary2.lean:10798:8: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  R % 9
+in the target expression
+  4 * (R % 3 ^ 2) / 3 ^ 2 = 0
+
+case right
+R : ℕ
+hR : R % 27 = 19
+hmod9 : R % 9 = 1
+⊢ 4 * (R % 3 ^ 2) / 3 ^ 2 = 0
+error: ErdosTernary2.lean:10852:4: No goals to be solved
+error: ErdosTernary2.lean:10875:2: No goals to be solved
+error: ErdosTernary2.lean:11007:4: No goals to be solved
+warning: ErdosTernary2.lean:11149:34: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:11365:5: Variable name `hDN` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hDN
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:11495:8: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11512:8: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11520:12: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11530:12: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11541:12: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11644:8: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11661:8: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11669:10: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:11718:47: unsolved goals
+t n K : ℕ
+hn : n = n % 3 ^ K + 3 ^ K * (n / 3 ^ K)
+⊢ 3 ^ t * (n % 3 ^ K + 3 ^ K * (n / 3 ^ K)) =
+    3 ^ t * ((n % 3 ^ K + 3 ^ K * (n / 3 ^ K)) % 3 ^ K + 3 ^ K * ((n % 3 ^ K + 3 ^ K * (n / 3 ^ K)) / 3 ^ K))
+error: ErdosTernary2.lean:11709:34: unsolved goals
+t n K : ℕ
+hn : n = n % 3 ^ K + 3 ^ K * (n / 3 ^ K)
+hexp : 3 ^ t * n = 3 ^ t * (n % 3 ^ K) + 3 ^ (t + K) * (n / 3 ^ K)
+⊢ 4 ^ (3 ^ t * (n % 3 ^ K)) * 4 ^ (3 ^ t * 3 ^ K * (n / 3 ^ K)) =
+    4 ^ (3 ^ t * (n % 3 ^ K) + 3 ^ t * 3 ^ K * (n / 3 ^ K))
+error: ErdosTernary2.lean:11799:31: Expected type must not contain free variables
+  t + 1 ≠ 0
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+error: ErdosTernary2.lean:11826:4: Type mismatch
+  hsmall
+has type
+  1 + 3 ^ (t + 1) * (Q t a % 3 ^ K) < 3 ^ (t + 1 + K)
+but is expected to have type
+  (1 + 3 ^ (t + 1) * (Q t a % 3 ^ K)) % (3 ^ (t + 1) * 3 ^ K) = 1 + 3 ^ (t + 1) * (Q t a % 3 ^ K)
+error: ErdosTernary2.lean:11830:2: No goals to be solved
+error: ErdosTernary2.lean:11855:45: Application type mismatch: The argument
+  hrec
+has type
+  Q t n = Q t (n % 3) + 3 * (4 ^ 3 ^ t) ^ (n % 3) * Q (t + 1) (n / 3)
+but is expected to have type
+  Q t (3 * (n / 3) + n % 3) = Q t (n % 3) + 3 * (4 ^ 3 ^ t) ^ (n % 3) * Q (t + 1) (n / 3)
+in the application
+  gst_canonical_information_regeneratesS Q t n childOffset childMul (4 ^ 3 ^ t) A Z hrec
+error: ErdosTernary2.lean:11859:2: Type mismatch: After simplification, term
+  hU
+ has type
+  childMul * gstOriginRemainingUS t n = childMul * 4 ^ (3 ^ t * (n % 3)) * gstOriginRemainingUS (t + 1) (n / 3)
+but is expected to have type
+  childMul * gstOriginRemainingUS t n = childMul * (4 ^ 3 ^ t) ^ (n % 3) * gstOriginRemainingUS (t + 1) (n / 3)
+error: ErdosTernary2.lean:11868:10: unexpected token 'in'; expected ','
+info: ErdosTernary2.lean:11976:2: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+error: ErdosTernary2.lean:11974:41: unsolved goals
+s u : ℕ
+⊢ GSTCanonicalBlockS s * gstCanonicalPrefixOffsetS (1 + s) +
+        GSTCanonicalBlockS s * gstNavigationConstant (2 + s) u * 4 ^ (3 ^ s * 3) +
+      (gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3 =
+    GSTCanonicalBlockS s * gstCanonicalPrefixOffsetS (1 + s) +
+        GSTCanonicalBlockS s * gstNavigationConstant (2 + s) u * GSTCanonicalBlockS (1 + s) +
+      (gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3
+warning: ErdosTernary2.lean:13026:5: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:13246:32: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:13399:34: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+info: ErdosTernary2.lean:13855:30: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+warning: ErdosTernary2.lean:13855:26: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:13891:21: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:14375:2: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  g ≥ 0
+  f ≥ 0
+  e ≥ 0
+  b ≥ 0
+  3*b - f + g ≤ -1
+  a ≥ 0
+  0 ≤ a + b - 3*e ≤ 2
+where
+ a := ↑C
+ b := ↑B * ↑d
+ e := ↑(C + B * d) / 3
+ f := ↑(1 + 3 * B) * ↑d
+ g := ↑d
+error: ErdosTernary2.lean:14405:2: No goals to be solved
+error: ErdosTernary2.lean:14431:5: unexpected token 'in'; expected ','
+warning: ErdosTernary2.lean:14434:8: declaration uses `sorry`
+warning: ErdosTernary2.lean:14438:30: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: ErdosTernary2.lean:14438:2: 'rw [show i + 1 + 1 = (i + 1) + 1 by omega, Finset.sum_range_succ]' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+error: ErdosTernary2.lean:14445:9: unsolved goals
+case zero
+⊢ sorry 0 = 1
+warning: ErdosTernary2.lean:14446:16: declaration uses `sorry`
+error: ErdosTernary2.lean:14456:2: Tactic `decide` failed for proposition
+  gstSixUniversePrefixS 1 = 7
+because its `Decidable` instance
+  instDecidableEqNat (gstSixUniversePrefixS 1) 7
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableEqNat` and `Nat.decEq`, reduction got stuck at the `Decidable` instance
+  match h : (gstSixUniversePrefixS 1).beq 7 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+error: ErdosTernary2.lean:14466:2: Tactic `decide` failed for proposition
+  13 = 6 + gstSixUniversePrefixS 1
+because its `Decidable` instance
+  instDecidableEqNat 13 (6 + gstSixUniversePrefixS 1)
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableEqNat` and `Nat.decEq`, reduction got stuck at the `Decidable` instance
+  match h : Nat.beq 13 (6 + gstSixUniversePrefixS 1) with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+error: ErdosTernary2.lean:14806:5: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:14816:9: unsolved goals
+case zero
+a d : ℕ → ℕ
+h0 : d 0 ≠ 0
+hpath : GSTBig1ClearBridgePathS a d 0
+⊢ sorry a d 0 = 0
+error: ErdosTernary2.lean:14828:18: Function expected at
+  ih hprefix
+but this term has type
+  gstBig1ProjectedPathCodeS a d K = 6 ^ K - 1
+
+Note: Expected a function because this term is being applied to the argument
+  h0
+warning: ErdosTernary2.lean:14816:18: declaration uses `sorry`
+error: ErdosTernary2.lean:14870:4: No goals to be solved
+error: ErdosTernary2.lean:14870:4: No goals to be solved
+error: ErdosTernary2.lean:14870:4: No goals to be solved
+error: ErdosTernary2.lean:14999:8: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  gstFirstMicroMassS (gstCarryS R p) (gstDigitS R p)
+in the target expression
+  (have C := gstCarryS R p;
+    have d := gstDigitS R p;
+    (gstFirstMicroMassS C d, gstSecondMicroMassS C d)) =
+    (5, 5)
+
+case refine_1
+R p : ℕ
+hd2 : gstDigitS R p = 2
+hI : GSTPhysicalTwoDigitBig1ClearS R p
+hC : gstCarryS R p < 4
+hd : gstDigitS R p < 3
+hd0 : gstDigitS R p ≠ 0
+hC3 : gstCarryS R p = 3
+_hd2 : gstDigitS R p = 2
+_hmid2 : gstFirstMicroOutputS (gstCarryS R p) (gstDigitS R p) = 2
+hout2 : gstSecondMicroOutputS (gstCarryS R p) (gstDigitS R p) = 2
+hM1 : gstFirstMicroMassS (gstCarryS R p) (gstDigitS R p) = 5
+hM2 : gstSecondMicroMassS (gstCarryS R p) (gstDigitS R p) = 5
+⊢ (have C := gstCarryS R p;
+    have d := gstDigitS R p;
+    (gstFirstMicroMassS C d, gstSecondMicroMassS C d)) =
+    (5, 5)
+error: ErdosTernary2.lean:15078:2: Expected type must not contain free variables
+  0 = 0 ∧
+    gstPhysicalMicroPairS R p = (4, 2) ∧
+      gstFirstMicroOutputS 0 2 = 1 ∧
+        gstBinaryBridgeEventS (gstMicroHighBitS 0) 2 = 5 ∧
+          gstBinaryBridgeEventS (gstMicroLowBitS 0) (gstFirstMicroOutputS 0 2) = 7 ∧ gstHandwrittenUJumpS 0 2 = -8
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+error: ErdosTernary2.lean:15149:2: Tactic `rfl` failed: The left-hand side
+  gstAffineMulCarryS 4 0 T p
+is not definitionally equal to the right-hand side
+  gstCarryS T p
+
+T p : ℕ
+⊢ gstAffineMulCarryS 4 0 T p = gstCarryS T p
+warning: ErdosTernary2.lean:15287:7: Variable name `T` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _T
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15287:9: Variable name `H` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _H
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15346:5: Variable name `hn` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hn
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15424:31: Variable name `c` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _c
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:15492:10: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)
+in the target expression
+  C < 4
+
+case inl
+Q : ℕ → ℕ → ℕ
+hQ : GSTCanonicalOriginEnergyS Q
+s n c z : ℕ
+hs : 1 ≤ s
+hA : 4 ^ 3 ^ s = 1 + 3 ^ (s + 1) * c
+hc : c = 1 + 3 * z
+q : ℕ
+hparent :
+  GSTSeededBadTraceS (gstAffineMulCarryS 4 1 (z + 4 ^ 3 ^ s * Q (s + 1) n) (q + 1))
+    (gstAffineMulCarryS (4 ^ 3 ^ s) z (Q (s + 1) n) (q + 1) + 4 ^ 3 ^ s * (Q (s + 1) n / 3 ^ (q + 1)))
+hchild : GSTSeededBadTraceS (gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)) (Q (s + 1) n / 3 ^ (q + 1))
+hEq :
+  gstAffineMulCarryS 4 1 (z + 4 ^ 3 ^ s * Q (s + 1) n) (q + 1) +
+      4 * gstAffineMulCarryS (4 ^ 3 ^ s) z (Q (s + 1) n) (q + 1) =
+    gstAffineMulCarryS (4 ^ 3 ^ s) (1 + 4 * z) (4 * Q (s + 1) n) (q + 1) +
+      4 ^ 3 ^ s * gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)
+hW : gstAffineMulCarryS (4 ^ 3 ^ s) (1 + 4 * z) (4 * Q (s + 1) n) (q + 1) < 4 ^ 3 ^ s
+N : ℕ := 3 ^ s
+A : ℕ := 4 ^ N
+T : ℕ := Q (s + 1) n
+D : ℕ := gstAffineMulCarryS 4 1 (z + A * T) (q + 1)
+Z : ℕ := gstAffineMulCarryS A z T (q + 1)
+W : ℕ := gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1)
+C : ℕ := gstAffineMulCarryS 4 0 T (q + 1)
+Y : ℕ := T / 3 ^ (q + 1)
+S : ℕ := D + 4 * Z
+hNA : A = 4 ^ N
+hN3 : 3 ≤ N
+hE0 : 4 ^ (3 ^ (s + 1) * n) = 1 + 3 * 3 ^ (s + 1) * T
+hwide0 :
+  gstWideCarryS (4 ^ (N + 1)) (4 ^ (3 ^ (s + 1) * n)) (s + 2 + (q + 1)) =
+    gstAffineMulCarryS 4 1 (z + 4 ^ N * T) (q + 1) + 4 * gstAffineMulCarryS (4 ^ N) z T (q + 1)
+hwide : S = gstWideCarryS (4 ^ (N + 1)) (4 ^ (3 ^ (s + 1) * n)) (s + 2 + (q + 1))
+h2 : gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1) = 2
+⊢ C < 4
+error: ErdosTernary2.lean:15493:10: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)
+in the target expression
+  C < 4
+
+case inr
+Q : ℕ → ℕ → ℕ
+hQ : GSTCanonicalOriginEnergyS Q
+s n c z : ℕ
+hs : 1 ≤ s
+hA : 4 ^ 3 ^ s = 1 + 3 ^ (s + 1) * c
+hc : c = 1 + 3 * z
+q : ℕ
+hparent :
+  GSTSeededBadTraceS (gstAffineMulCarryS 4 1 (z + 4 ^ 3 ^ s * Q (s + 1) n) (q + 1))
+    (gstAffineMulCarryS (4 ^ 3 ^ s) z (Q (s + 1) n) (q + 1) + 4 ^ 3 ^ s * (Q (s + 1) n / 3 ^ (q + 1)))
+hchild : GSTSeededBadTraceS (gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)) (Q (s + 1) n / 3 ^ (q + 1))
+hEq :
+  gstAffineMulCarryS 4 1 (z + 4 ^ 3 ^ s * Q (s + 1) n) (q + 1) +
+      4 * gstAffineMulCarryS (4 ^ 3 ^ s) z (Q (s + 1) n) (q + 1) =
+    gstAffineMulCarryS (4 ^ 3 ^ s) (1 + 4 * z) (4 * Q (s + 1) n) (q + 1) +
+      4 ^ 3 ^ s * gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1)
+hW : gstAffineMulCarryS (4 ^ 3 ^ s) (1 + 4 * z) (4 * Q (s + 1) n) (q + 1) < 4 ^ 3 ^ s
+N : ℕ := 3 ^ s
+A : ℕ := 4 ^ N
+T : ℕ := Q (s + 1) n
+D : ℕ := gstAffineMulCarryS 4 1 (z + A * T) (q + 1)
+Z : ℕ := gstAffineMulCarryS A z T (q + 1)
+W : ℕ := gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1)
+C : ℕ := gstAffineMulCarryS 4 0 T (q + 1)
+Y : ℕ := T / 3 ^ (q + 1)
+S : ℕ := D + 4 * Z
+hNA : A = 4 ^ N
+hN3 : 3 ≤ N
+hE0 : 4 ^ (3 ^ (s + 1) * n) = 1 + 3 * 3 ^ (s + 1) * T
+hwide0 :
+  gstWideCarryS (4 ^ (N + 1)) (4 ^ (3 ^ (s + 1) * n)) (s + 2 + (q + 1)) =
+    gstAffineMulCarryS 4 1 (z + 4 ^ N * T) (q + 1) + 4 * gstAffineMulCarryS (4 ^ N) z T (q + 1)
+hwide : S = gstWideCarryS (4 ^ (N + 1)) (4 ^ (3 ^ (s + 1) * n)) (s + 2 + (q + 1))
+h3 : gstAffineMulCarryS 4 0 (Q (s + 1) n) (q + 1) = 3
+⊢ C < 4
+error: ErdosTernary2.lean:15884:2: No goals to be solved
+error: ErdosTernary2.lean:16437:8: unexpected token 'in'; expected ','
+error: ErdosTernary2.lean:16570:4: Type mismatch
+  Eq.symm (Nat.mod_add_div D 2)
+has type
+  D = D % 2 + 2 * (D / 2)
+but is expected to have type
+  D = 2 * (D / 2) + D % 2
+error: ErdosTernary2.lean:16573:4: Type mismatch
+  Eq.symm (Nat.mod_add_div C 2)
+has type
+  C = C % 2 + 2 * (C / 2)
+but is expected to have type
+  C = 2 * (C / 2) + C % 2
+error: ErdosTernary2.lean:16590:4: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  o ≥ 0
+  m ≥ 0
+  2*l + m - 2*n ≥ 0
+  0 ≤ k ≤ 1
+  0 ≤ j ≤ 1
+  i ≥ 0
+  4*i + 2*j - 2*l - m + 2*n + o - 2*p ≤ -1
+  h ≥ 0
+  0 ≤ h - 4*i - 2*j + 2*l + m - 2*n ≤ 1
+  0 ≤ h - 4*i + 2*l + m - 2*n ≤ 3
+  0 ≤ h + o - 2*p ≤ 1
+  0 ≤ h + m - 2*n ≤ 1
+  0 ≤ g ≤ 3
+  0 ≤ g - 2*k ≤ 1
+  f ≥ 1
+  f - h ≥ 1
+where
+ f := ↑A
+ g := ↑C
+ h := ↑W
+ i := ↑Z
+ j := ↑D / 2
+ k := ↑C / 2
+ l := ↑(2 * a + b + 4 * Z) / 2
+ m := ↑A * ↑(2 * c + e)
+ n := ↑(W + A * (2 * c + e)) / 2
+ o := ↑A * ↑(C % 2)
+ p := ↑(W + A * (C % 2)) / 2
+error: ErdosTernary2.lean:16598:4: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  n ≥ 0
+  m ≥ 0
+  l ≥ 0
+  0 ≤ k ≤ 1
+  j ≥ 0
+  0 ≤ i ≤ 1
+  i + 2*j - m - n ≤ -1
+  2*i + 4*j + l - 2*m ≥ 0
+  h ≥ 0
+  0 ≤ h + l - 2*m ≤ 1
+  0 ≤ h + 2*i + l - 2*m ≤ 3
+  0 ≤ g ≤ 3
+  0 ≤ g - 2*k ≤ 1
+  f ≥ 1
+  f - h ≥ 1
+where
+ f := ↑A
+ g := ↑C
+ h := ↑W
+ i := ↑D / 2
+ j := ↑Z
+ k := ↑C / 2
+ l := ↑A * ↑e
+ m := ↑(W + A * e) / 2
+ n := ↑A * ↑c
+error: ErdosTernary2.lean:16628:37: Unknown identifier `hC2`
+warning: ErdosTernary2.lean:16656:17: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:16746:2: aesop: error in norm simp: `simp` failed: maximum number of steps exceeded
 error: Lean exited with code 1
 Some required targets logged failures:
 - ErdosTernary2
