@@ -29,6 +29,8 @@
 -- Erdős Ternary-2 Conjecture: PROVEN
 
 import GSTTactic
+import Mathlib
+import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 /-
@@ -98,7 +100,7 @@ import Mathlib.Tactic.Ring
 set_option maxRecDepth 10000000
 set_option maxHeartbeats 100000000
 
--- open scoped Classical  -- removed: causes decide to fail on inlined modules
+-- open scoped Classical removed (causes decide failures on inlined modules)
 
 set_option maxRecDepth 10000000
 set_option maxHeartbeats 100000000
@@ -6950,9 +6952,9 @@ theorem gst_omega_gate_polynomial_zero_iff (w : GSTOmegaState) :
     exact ⟨hd, hC⟩
   · rintro ⟨hd, hC0 | hC3⟩
     · rw [GSTOmegaGatePolynomial, hd, hC0]
-      decide
+      norm_num
     · rw [GSTOmegaGatePolynomial, hd, hC3]
-      decide
+      norm_num
 
 /-- A zero of the Ω∞ collision polynomial is precisely the missing residual
     Navigation witness; no oscillation adapter or legacy `h_creation` is used. -/
@@ -9388,7 +9390,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;>
-    omega
+    decide
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -9422,7 +9424,7 @@ theorem gst_handwritten_u_jump_negative_iff_happyS
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;>
-    omega
+    decide
 
 /-- Exact next ternary-prefix decomposition used by the telescoping potential. -/
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
@@ -9820,7 +9822,7 @@ theorem four_pow_succ_lt_three_pow_doubleS
             Nat.mul_lt_mul_of_pos_right (by decide : 4 < 9) h3pos
           _ = 3^(2*(N+1)) := by
             rw [show 2*(N+1) = 2*N + 2 by omega, Nat.pow_add]
-            decide
+            norm_num
             ac_rfl
       · have hN2 : N = 2 := by omega
         subst N
@@ -10109,7 +10111,7 @@ theorem gst_hard_tail_parent_navigationS
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 n ht
   norm_num at hrec
   rw [hrec, hunit t ht]
-  unfold GSTHardPrefixOneTailS GSTCanonicalBlockS
+  simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]
   ring
 
 /-- Origin trit one: exact 3-affine copy of the same hard object one level
@@ -10471,7 +10473,7 @@ theorem gst_canonical_block_mod81_oneS
     rw [show (81:Nat) = 3^4 by decide]
     exact Nat.pow_dvd_pow 3 (by omega)
   rw [hp]
-  decide
+  norm_num
 
 /-- Stable low residue of the actual parent Navigation constant Q_s(4). -/
 theorem gst_navigation_constant_four_mod243_stableS
@@ -10505,7 +10507,7 @@ theorem gst_navigation_constant_four_mod243_stableS
         3 * (16 + 81 * ((4^(3^s) * c (s+1)) / 81)) =
           48 + 243 * ((4^(3^s) * c (s+1)) / 81) := by ring
     rw [hshape2, Nat.add_mod, Nat.mul_mod]
-    decide
+    norm_num
 
   rw [hrec, Nat.add_mod, hc243, hterm]
   decide
@@ -10690,7 +10692,7 @@ theorem gst_canonical_block_unit_mod9S
     rw [show (9:Nat) = 3^2 by decide]
     exact Nat.pow_dvd_pow 3 (by omega)
   rw [hdiv]
-  decide
+  norm_num
 
 /-- The residue-one block multiplier is one modulo 3. -/
 theorem gst_canonical_block_unit_mod3S
@@ -10703,9 +10705,9 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact dvd_mul_right 3 (3^t)
+    exact Nat.pow_dvd_pow 3 (by omega)
   rw [hdiv]
-  decide
+  norm_num
 
 /-- The nested origin 4=1+3*1 has residue one modulo 9. -/
 theorem gst_canonical_Q4_mod9S
@@ -10846,7 +10848,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
       (gstNavigationConstant_mod3 (s+2) u (by omega) hu (by omega))
   have hA3 : 4^(3^s * 4) % 3 = 1 := by
     rw [Nat.pow_mod]
-    decide
+    norm_num
   have hprod3 :
       (4^(3^s * 4) * gstNavigationConstant (s+2) u) % 3 = 1 := by
     rw [Nat.mul_mod, hA3, hQu3]
@@ -10870,7 +10872,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
           9 + 27 * ((4^(3^s * 4) *
             gstNavigationConstant (s+2) u) / 3) := by ring
     rw [hshape2, Nat.add_mod, Nat.mul_mod]
-    decide
+    norm_num
 
   rw [hrec, Nat.add_mod, hQ4, hterm]
   decide
@@ -10993,7 +10995,7 @@ theorem gst_canonical_origin_cut_multiplier_mod3S
     (s a : Nat) :
     4^(3^s*a) % 3 = 1 := by
   rw [Nat.pow_mod]
-  decide
+  norm_num
 
 /-- The canonical Navigation value retains the origin's least ternary trit at
 every positive level, including the divisible-by-three and zero cases. -/
@@ -12356,7 +12358,7 @@ digit one level higher.
 /-- Powers of four are one modulo three. -/
 theorem gst_pow4_mod3_oneS (m : Nat) : 4^m % 3 = 1 := by
   rw [Nat.pow_mod]
-  decide
+  norm_num
 
 /-- Adding one exponent trit `3^p` shifts the newly exposed ternary power digit
 by exactly one. -/
@@ -13702,7 +13704,7 @@ theorem gst_shared_information_left_endpointS
   have hcpos : 1 ≤ c := by omega
   have hzdiv : c / 3 = z := by
     rw [hc, Nat.add_mul_div_left 1 z (by decide : 0 < 3)]
-    decide
+    norm_num
   have hoff := gst_gst_offsets_lt_multiplierS D c hD hcpos
   have hz1 : 1 + 4*z < 4^N := by
     rw [← hzdiv, hA]
@@ -14454,18 +14456,16 @@ theorem gst_six_universe_prefix_closedS (i : Nat) :
 /-- The first nontrivial cumulative bridge universe has seven states. -/
 theorem gst_six_universe_prefix_oneS :
     gstSixUniversePrefixS 1 = 7 := by
-  unfold gstSixUniversePrefixS
   decide
 
 /-- The first aligned two-layer modulus factors as (6-1)(6+1). -/
 theorem gst_six_square_boundary_factorS :
     6^2 - 1 = 5 * 7 := by
-  norm_num
+  decide
 
 /-- The exact EQ2 event factor 13 is 6 plus the first cumulative universe 7. -/
 theorem gst_event_factor_thirteen_from_six_sevenS :
     13 = 6 + gstSixUniversePrefixS 1 := by
-  unfold gstSixUniversePrefixS
   decide
 
 /-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
@@ -16570,10 +16570,10 @@ theorem gst_shared_x4_binary_factorS
   have h2 : 0 < (2:Nat) := by decide
   have hDb : D = 2*a + b := by
     dsimp [a, b]
-    exact (Nat.mod_add_div D 2).symm
+    by omega
   have hCe : C = 2*c + e := by
     dsimp [c, e]
-    exact (Nat.mod_add_div C 2).symm
+    by omega
   have ha : a < 2 := by
     dsimp [a]
     omega
