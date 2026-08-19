@@ -8555,409 +8555,6 @@ theorem gst_prefix_one_omega_bad_of_no_parent_navigation_inline
     exact gstNavigationWitness_of_digit_carry_three _ (1+j) hd' hc'
 
 -- BEGIN ATTACHED SOL BIG-N CLOSURE STACK
--- BEGIN ATTACHED AtomicPrefixOneReductionScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Prefix-one Omega badness rules out every parent Navigation witness.
-    Position zero is excluded by the exact prefix-one residue modulo three;
-    every positive parent gate projects to an Omega gate-polynomial zero. -/
-theorem gst_prefix_one_no_parent_navigation_of_omega_bad_atomic
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
-    ¬ GSTNavigationWitness (gstNavigationConstant s (1+3*n)) := by
-  intro hnav
-  obtain ⟨p, hp⟩ := hnav
-  have hQmod : gstNavigationConstant s (1+3*n) % 3 = 1 := by
-    calc
-      gstNavigationConstant s (1+3*n) % 3 = (1+3*n) % 3 :=
-        gstNavigationConstant_mod3 s (1+3*n) hs (by omega) (by omega)
-      _ = 1 := by omega
-  have hp0 : p ≠ 0 := by
-    intro hpz
-    subst p
-    have hd0 : gstDigit (gstNavigationConstant s (1+3*n)) 0 = 1 := by
-      change gstNavigationConstant s (1+3*n) / 1 % 3 = 1
-      simpa using hQmod
-    rw [hd0] at hp
-    omega
-  have hp1 : 1 ≤ p := by omega
-  let j := p - 1
-  have hpj : p = 1 + j := by
-    dsimp [j]
-    omega
-  have hparentDigit :
-      gstDigit (gstNavigationConstant s (1+3*n)) (1+j) = 2 := by
-    rw [← hpj]
-    exact hp.1
-  have hcarryMod : gstCarry (gstNavigationConstant s (1+3*n)) p % 3 = 0 :=
-    gstGoodSpace_carry_mod3_zero _ p hp.2
-  have hcarryLt : gstCarry (gstNavigationConstant s (1+3*n)) p < 4 :=
-    gstCarry_lt_four _ p hp1
-  have hparentCarryP :
-      gstCarry (gstNavigationConstant s (1+3*n)) p = 0 ∨
-      gstCarry (gstNavigationConstant s (1+3*n)) p = 3 := by
-    omega
-  have hparentCarry :
-      gstCarry (gstNavigationConstant s (1+3*n)) (1+j) = 0 ∨
-      gstCarry (gstNavigationConstant s (1+3*n)) (1+j) = 3 := by
-    rw [← hpj]
-    exact hparentCarryP
-  have hprojection := gst_omega_parent_projection s 1 n j hs
-  have hOmegaDigit : (gstOmega s 1 n j).parentDigit = 2 := by
-    rw [← hprojection.1]
-    simpa [Nat.pow_one] using hparentDigit
-  have hOmegaCarry :
-      (gstOmega s 1 n j).parentCarry = 0 ∨
-      (gstOmega s 1 n j).parentCarry = 3 := by
-    rcases hparentCarry with h0 | h3
-    · left
-      rw [← hprojection.2]
-      simpa [Nat.pow_one] using h0
-    · right
-      rw [← hprojection.2]
-      simpa [Nat.pow_one] using h3
-  have hzero : GSTOmegaGatePolynomial (gstOmega s 1 n j) = 0 :=
-    (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2
-      ⟨hOmegaDigit, hOmegaCarry⟩
-  have hnonzero := hBad j
-  change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0 at hnonzero
-  exact hnonzero hzero
-
-/-- A Navigation witness of `3*R` cannot occur at position zero and shifts
-    exactly back to a Navigation witness of `R`. -/
-theorem gstNavigationWitness_of_mul_three_atomic
-    (R : Nat) (h : GSTNavigationWitness (3*R)) :
-    GSTNavigationWitness R := by
-  obtain ⟨p, hd, hspace⟩ := h
-  cases p with
-  | zero =>
-      have hz : gstDigit (3*R) 0 = 0 := by
-        simp [gstDigit]
-      rw [hz] at hd
-      omega
-  | succ j =>
-      have hd' : gstDigit (3*R) (j+1) = 2 := by
-        simpa [Nat.succ_eq_add_one] using hd
-      have hspace' :
-          gstSpaceAt (3*R) (j+1) = .gstPlus ∨
-          gstSpaceAt (3*R) (j+1) = .null := by
-        simpa [Nat.succ_eq_add_one] using hspace
-      refine ⟨j, ?_, ?_⟩
-      · rw [← gstDigit_mul_three_shift R j]
-        exact hd'
-      · rw [← gstSpace_mul_three_shift R j]
-        exact hspace'
-
-/-- Iterated inverse shift through a forced ternary zero prefix. -/
-theorem gstNavigationWitness_of_mul_three_pow_atomic
-    (r R : Nat) (h : GSTNavigationWitness (3^r * R)) :
-    GSTNavigationWitness R := by
-  induction r generalizing R with
-  | zero =>
-      simpa using h
-  | succ r ih =>
-      have hscaled : GSTNavigationWitness (3^r * (3*R)) := by
-        simpa [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
-          using h
-      have hthree : GSTNavigationWitness (3*R) := ih (R := 3*R) hscaled
-      exact gstNavigationWitness_of_mul_three_atomic R hthree
-
-/-- Exact iterated canonical zero-origin scaling. -/
-theorem gst_navigation_constant_mul3_pow_atomic
-    (s r m : Nat) (hs : 1 ≤ s) :
-    gstNavigationConstant s (3^r * m) =
-      3^r * gstNavigationConstant (s+r) m := by
-  induction r generalizing s with
-  | zero => simp
-  | succ r ih =>
-      have harg : 3^(r+1) * m = 3 * (3^r * m) := by
-        rw [Nat.pow_succ]
-        ac_rfl
-      rw [harg, gst_navigation_constant_mul3 s (3^r*m) hs]
-      rw [ih (s := s+1) (by omega)]
-      have hidx : (s+1)+r = s+(r+1) := by omega
-      rw [hidx, Nat.pow_succ]
-      ac_rfl
--- END ATTACHED AtomicPrefixOneReductionScratch.lean
-
--- BEGIN ATTACHED OriginTransducerScratch.lean
-/-!
-Temporary kernel scratch for the canonical natural-origin information step.
-No Erdős theorem and no extra axiom: all canonical decomposition data enters
-as explicit theorem hypotheses.
--/
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Cancellation algebra used by the Navigation Constant recurrence. -/
-theorem origin_navigation_algebraS
-    (D A c0 Q Qnext K : Nat) (hD : 0 < D)
-    (hA : A = 1 + D*c0)
-    (hQ : 1 + D*Q = A * (1 + D*K*Qnext)) :
-    Q = c0 + K*A*Qnext := by
-  have hfactor : A * (1 + D*K*Qnext) =
-      1 + D * (c0 + K*A*Qnext) := by
-    rw [hA]
-    simp only [Nat.mul_add, Nat.add_mul, Nat.one_mul, Nat.mul_one]
-    ac_rfl
-  rw [hfactor] at hQ
-  have hadd := Nat.add_left_cancel hQ
-  exact Nat.mul_left_cancel hD hadd
-
-/-- If Q has the exact perfect-power decomposition at t and t+1, splitting an
-    origin parameter as 3*u+d gives the exact digit recurrence
-      Q_t(3u+d) = Q_t(d) + 3*A_t^d*Q_{t+1}(u). -/
-theorem origin_digit_recurrenceS
-    (Q : Nat → Nat → Nat) (t u d A D : Nat)
-    (hD : 0 < D)
-    (hAd : A^d = 1 + D * Q t d)
-    (hcur : 1 + D * Q t (3*u+d) =
-      A^d * (1 + D * 3 * Q (t+1) u)) :
-    Q t (3*u+d) = Q t d + 3 * A^d * Q (t+1) u := by
-  exact origin_navigation_algebraS D (A^d) (Q t d)
-    (Q t (3*u+d)) (Q (t+1) u) 3 hD hAd hcur
-
-/-- Exact affine information step.  The emitted ternary digit is E mod 3;
-    everything not emitted is retained in the updated offset and multiplier. -/
-theorem affine_origin_stepS
-    (Q : Nat → Nat → Nat) (t u d z m A : Nat)
-    (hrec : Q t (3*u+d) = Q t d + 3 * A^d * Q (t+1) u) :
-    let E := z + m * Q t d
-    let r := E % 3
-    let z' := E / 3
-    let m' := m * A^d
-    z + m * Q t (3*u+d) =
-      r + 3 * (z' + m' * Q (t+1) u) := by
-  dsimp only
-  rw [hrec]
-  have hE : z + m * Q t d =
-      (z + m * Q t d) % 3 + 3 * ((z + m * Q t d) / 3) := by
-    have h := Nat.mod_add_div (z + m * Q t d) 3
-    omega
-  rw [Nat.mul_add]
-  rw [show m * (3 * A^d * Q (t+1) u) =
-      3 * (m * A^d * Q (t+1) u) by ac_rfl]
-  omega
-
-/-- Natural-origin specialization: consume exactly the least ternary trit and
-    replace the origin by n/3.  This is the formal regeneration/descent step. -/
-theorem affine_natural_origin_stepS
-    (Q : Nat → Nat → Nat) (t n z m A : Nat)
-    (hrec : Q t (3*(n/3) + n%3) =
-      Q t (n%3) + 3 * A^(n%3) * Q (t+1) (n/3)) :
-    let E := z + m * Q t (n%3)
-    let r := E % 3
-    let z' := E / 3
-    let m' := m * A^(n%3)
-    z + m * Q t n =
-      r + 3 * (z' + m' * Q (t+1) (n/3)) := by
-  dsimp only
-  have hn : n = 3*(n/3) + n%3 := by
-    have h := Nat.mod_add_div n 3
-    omega
-  have hstep := affine_origin_stepS Q t (n/3) (n%3) z m A hrec
-  dsimp only at hstep
-  calc
-    z + m * Q t n = z + m * Q t (3*(n/3) + n%3) := by rw [← hn]
-    _ = (z + m * Q t (n%3)) % 3 +
-        3 * ((z + m * Q t (n%3)) / 3 +
-          m * A^(n%3) * Q (t+1) (n/3)) := hstep
-
-/-- Positive origins strictly descend when one ternary trit is consumed. -/
-theorem natural_origin_div3_strictS (n : Nat) (hn : 0 < n) :
-    n / 3 < n := by
-  exact Nat.div_lt_self hn (by decide : 1 < 3)
-
-/-!
-Canonical three-phase GST orbit algebra.
-
-These lemmas deliberately do not assert a gate theorem.  They only prove that
-phase zero, phase one, and phase two are exact cross-sections of one power
-orbit when A = 1 + D*c and c = 1 + 3*z.
--/
-
-/-- From the phase-zero identity A^(3n)=1+3DT, one multiplication by A gives
-    the exact phase-one identity with tail X=z+A*T. -/
-theorem gst_phase_one_exactS
-    (A D c z T n : Nat)
-    (hA : A = 1 + D*c)
-    (hc : c = 1 + 3*z)
-    (h0 : A^(3*n) = 1 + 3*D*T) :
-    A^(3*n + 1) = 1 + D + 3*D*(z + A*T) := by
-  rw [Nat.pow_succ, h0, hA, hc]
-  ring
-
-/-- If D=3N, the next multiplication gives the exact phase-two tail
-    z + N*c + A*H1. -/
-theorem gst_phase_two_exactS
-    (A D N c z H1 n : Nat)
-    (hDN : D = 3*N)
-    (hA : A = 1 + D*c)
-    (hc : c = 1 + 3*z)
-    (h1 : A^(3*n + 1) = 1 + D + 3*D*H1) :
-    A^(3*n + 2) = 1 + 2*D + 3*D*(z + N*c + A*H1) := by
-  have hexp : 3*n + 2 = (3*n + 1) + 1 := by omega
-  rw [hexp, Nat.pow_succ, h1, hA, hc, hDN]
-  ring
-
-/-- The phase-two cross-section wraps to phase zero after one more A-step.
-    `W` is the exact next zero-phase offset, characterized by c+2A=3W. -/
-theorem gst_phase_wrap_exactS
-    (A D c H2 W n : Nat)
-    (hA : A = 1 + D*c)
-    (hW : c + 2*A = 3*W)
-    (h2 : A^(3*n + 2) = 1 + 2*D + 3*D*H2) :
-    A^(3*(n+1)) = 1 + 3*D*(W + A*H2) := by
-  have hexp : 3*(n+1) = (3*n + 2) + 1 := by omega
-  have hW' : c + 2*(1 + D*c) = 3*W := by
-    simpa [hA] using hW
-  rw [hexp, Nat.pow_succ, h2, hA]
-  have hshape :
-      (1 + 2*D + 3*D*H2) * (1 + D*c) =
-        1 + D*(c + 2*(1 + D*c)) +
-          3*D*((1 + D*c)*H2) := by
-    ring
-  rw [hshape, hW']
-  ring
-
-/-- The three canonical low prefixes occupy disjoint carry bands when D≥9.
-    These inequalities are the arithmetic content of the phase seeds 0,1,2. -/
-theorem gst_phase_low_prefix_bandsS
-    (D : Nat) (hD : 9 ≤ D) :
-    4 < 3*D ∧
-    (3*D ≤ 4*(1+D) ∧ 4*(1+D) < 6*D) ∧
-    (6*D ≤ 4*(1+2*D) ∧ 4*(1+2*D) < 9*D) := by
-  omega
--- END ATTACHED OriginTransducerScratch.lean
-
--- BEGIN ATTACHED PurePowerCarrierScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Abstract certificate that Q is the canonical perfect-power Navigation map. -/
-def GSTCanonicalOriginEnergyS (Q : Nat → Nat → Nat) : Prop :=
-  ∀ t n, 1 ≤ t →
-    4^(3^t*n) = 1 + 3^(t+1) * Q t n
-
-/-- The perfect-power origin splits exactly into its current ternary trit and
-    the deeper origin.  This is the energy-side regeneration law. -/
-theorem gst_pure_power_origin_splitS (t n : Nat) :
-    4^(3^t*n) =
-      4^(3^t*(n%3)) * 4^(3^(t+1)*(n/3)) := by
-  have hn : n = n % 3 + 3 * (n / 3) := by
-    have h := Nat.mod_add_div n 3
-    omega
-  have hexp : 3^t*n = 3^t*(n%3) + 3^(t+1)*(n/3) := by
-    calc
-      3^t*n = 3^t*(n % 3 + 3*(n/3)) :=
-        congrArg (fun x : Nat => 3^t * x) hn
-      _ = 3^t*(n%3) + 3^(t+1)*(n/3) := by
-        rw [Nat.pow_succ]
-        ring
-  rw [hexp, Nat.pow_add]
-
-/-- For a canonical Navigation map, the exact origin energy survives one
-    natural-origin descent as a pure power-of-four factor times the deeper
-    canonical energy. -/
-theorem gst_canonical_origin_energy_regeneratesS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n : Nat) (ht : 1 ≤ t) :
-    1 + 3^(t+1) * Q t n =
-      4^(3^t*(n%3)) *
-        (1 + 3^(t+2) * Q (t+1) (n/3)) := by
-  have htop := hQ t n ht
-  have hdeep := hQ (t+1) (n/3) (by omega)
-  rw [← htop, gst_pure_power_origin_splitS t n, hdeep]
-
-/-- At a zero remaining origin the canonical energy is exactly one. -/
-theorem gst_canonical_origin_energy_zeroS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t : Nat) (ht : 1 ≤ t) :
-    1 + 3^(t+1) * Q t 0 = 1 := by
-  have h := hQ t 0 ht
-  simpa using h.symm
-
-/-- Every nonzero natural origin strictly descends under the same n -> n/3
-    regeneration axis. -/
-theorem gst_canonical_origin_strict_descentS
-    (n : Nat) (hn : 0 < n) : n/3 < n := by
-  exact Nat.div_lt_self hn (by decide)
--- END ATTACHED PurePowerCarrierScratch.lean
-
--- BEGIN ATTACHED CanonicalPrefixScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Arbitrary finite ternary-origin prefix recurrence for a canonical
-    Navigation map.  This is the exact many-trit version of
-    `origin_digit_recurrenceS`. -/
-theorem gst_canonical_prefix_recurrenceS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t a q m : Nat) (ht : 1 ≤ t) :
-    Q t (a + 3^q*m) =
-      Q t a + 3^q * 4^(3^t*a) * Q (t+q) m := by
-  have hbase := hQ t a ht
-  have hdeep := hQ (t+q) m (by omega)
-  have hwhole := hQ t (a + 3^q*m) ht
-  have hexp :
-      3^t * (a + 3^q*m) = 3^t*a + 3^(t+q)*m := by
-    rw [Nat.mul_add, Nat.pow_add]
-    ring
-  have hpow :
-      4^(3^t * (a + 3^q*m)) =
-        4^(3^t*a) * 4^(3^(t+q)*m) := by
-    rw [hexp, Nat.pow_add]
-  have hden : 3^(t+q+1) = 3^(t+1) * 3^q := by
-    rw [show t+q+1 = (t+1)+q by omega, Nat.pow_add]
-  have hcur :
-      1 + 3^(t+1) * Q t (a + 3^q*m) =
-        4^(3^t*a) *
-          (1 + 3^(t+1) * 3^q * Q (t+q) m) := by
-    calc
-      1 + 3^(t+1) * Q t (a + 3^q*m) =
-          4^(3^t * (a + 3^q*m)) := hwhole.symm
-      _ = 4^(3^t*a) * 4^(3^(t+q)*m) := hpow
-      _ = 4^(3^t*a) * (1 + 3^(t+q+1) * Q (t+q) m) := by rw [hdeep]
-      _ = 4^(3^t*a) *
-          (1 + 3^(t+1) * 3^q * Q (t+q) m) := by rw [hden]
-  exact origin_navigation_algebraS
-    (3^(t+1)) (4^(3^t*a)) (Q t a)
-    (Q t (a + 3^q*m)) (Q (t+q) m) (3^q)
-    (Nat.pow_pos (by decide)) hbase hcur
-
-/-- Prefix/tail specialization at the actual finite prefix of a natural origin. -/
-theorem gst_canonical_prefix_mod_divS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n q : Nat) (ht : 1 ≤ t) :
-    Q t n = Q t (n % 3^q) +
-      3^q * 4^(3^t * (n % 3^q)) * Q (t+q) (n / 3^q) := by
-  have hn : n = n % 3^q + 3^q * (n / 3^q) := by
-    have h := Nat.mod_add_div n (3^q)
-    omega
-  calc
-    Q t n = Q t (n % 3^q + 3^q * (n / 3^q)) :=
-      congrArg (fun x : Nat => Q t x) hn
-    _ = Q t (n % 3^q) +
-        3^q * 4^(3^t * (n % 3^q)) * Q (t+q) (n / 3^q) :=
-      gst_canonical_prefix_recurrenceS Q hQ t (n % 3^q) q (n / 3^q) ht
-
-/-- Exact origin causality: the first q ternary digits of the canonical
-    Navigation value depend only on the first q ternary trits of the origin. -/
-theorem gst_canonical_prefix_residueS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n q : Nat) (ht : 1 ≤ t) :
-    Q t n % 3^q = Q t (n % 3^q) % 3^q := by
-  rw [gst_canonical_prefix_mod_divS Q hQ t n q ht]
-  simp [Nat.add_mod, Nat.mul_mod]
--- END ATTACHED CanonicalPrefixScratch.lean
-
 -- BEGIN ATTACHED InformationDescentScratch.lean
 /-!
 Temporary RED/GREEN scratch for the corrected GST information-descent surgery.
@@ -8994,14 +8591,14 @@ theorem gst_null_two_regeneratesS
     (R p : Nat) (hC : gstCarryS R p = 0) (hd : gstDigitS R p = 2) :
     gstCarryS R (p+1) = 2 := by
   rw [gstCarryS_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- GST+ digit two propagates its carry-three phase. -/
 theorem gst_plus_two_propagatesS
     (R p : Nat) (hC : gstCarryS R p = 3) (hd : gstDigitS R p = 2) :
     gstCarryS R (p+1) = 3 := by
   rw [gstCarryS_forward_exact_all, hC, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Seeded affine carries compose exactly under a ternary cut. -/
 theorem gst_seeded_affine_carry_semigroupS
@@ -9213,81 +8810,159 @@ theorem gst_two_two_forces_happy_gateS
   omega
 -- END ATTACHED InformationDescentScratch.lean
 
--- BEGIN ATTACHED CanonicalCausalityScratch.lean
+-- BEGIN ATTACHED InformationGeometryScratch.lean
+/-!
+Pure arithmetic geometry of the shared GST information integer.
+No Erdős theorem and no global wave assumption is used here.
+-/
+
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
-/-- A ternary digit is exactly the corresponding one-trit quotient of the
-    prefix residue through that digit. -/
-theorem gstDigitS_eq_prefix_residue_divS (R j : Nat) :
-    gstDigitS R j = (R % 3^(j+1)) / 3^j := by
-  unfold gstDigitS
-  rw [Nat.pow_succ]
-  rw [Nat.mod_mul]
-  have hp : 0 < 3^j := Nat.pow_pos (by decide)
-  rw [Nat.add_mul_div_left _ _ hp]
-  have hr : R % 3^j < 3^j := Nat.mod_lt _ hp
-  rw [Nat.div_eq_of_lt hr]
-  simp
-
-/-- Equality through ternary depth j+1 preserves the complete GST vertex at j:
-    both the input digit and the incoming multiply-by-four carry. -/
-theorem gst_state_eq_of_prefix_residueS
-    (R S j : Nat)
-    (hres : R % 3^(j+1) = S % 3^(j+1)) :
-    gstDigitS R j = gstDigitS S j ∧
-      gstCarryS R j = gstCarryS S j := by
+/-- Read the low base-4 coordinate of an exact decomposition S = p + 4 Z. -/
+theorem gst_information_low_coordinatesS
+    (S p Z : Nat) (hp : p < 4) (hS : S = p + 4*Z) :
+    S % 4 = p ∧ S / 4 = Z := by
+  subst S
   constructor
-  · rw [gstDigitS_eq_prefix_residue_divS,
-        gstDigitS_eq_prefix_residue_divS, hres]
-  · have hdvd : 3^j ∣ 3^(j+1) :=
-      Nat.pow_dvd_pow 3 (by omega)
-    have hlow : R % 3^j = S % 3^j := by
-      calc
-        R % 3^j = (R % 3^(j+1)) % 3^j := by
-          rw [Nat.mod_mod_of_dvd R hdvd]
-        _ = (S % 3^(j+1)) % 3^j := by rw [hres]
-        _ = S % 3^j := Nat.mod_mod_of_dvd S hdvd
-    unfold gstCarryS
-    rw [hlow]
+  · rw [Nat.add_mod]
+    simp [Nat.mod_eq_of_lt hp]
+  · have h4 : 0 < (4:Nat) := by decide
+    rw [Nat.add_mul_div_left p Z h4]
+    have hpdiv : p / 4 = 0 := Nat.div_eq_of_lt hp
+    simp [hpdiv]
 
-/-- Canonical origin causality at one exact GST vertex: the state at position j
-    depends only on n modulo 3^(j+1). -/
-theorem gst_canonical_state_from_origin_prefixS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n j : Nat) (ht : 1 ≤ t) :
-    let a := n % 3^(j+1)
-    gstDigitS (Q t n) j = gstDigitS (Q t a) j ∧
-      gstCarryS (Q t n) j = gstCarryS (Q t a) j := by
-  dsimp only
-  apply gst_state_eq_of_prefix_residueS
-  exact gst_canonical_prefix_residueS Q hQ t n (j+1) ht
-
-/-- A canonical child Happy Gate is already present in the finite origin prefix
-    that ends exactly at the gate's causal depth. -/
-theorem gst_canonical_gate_from_origin_prefixS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n j : Nat) (ht : 1 ≤ t)
-    (hgate : gstDigitS (Q t n) j = 2 ∧
-      (gstCarryS (Q t n) j = 0 ∨ gstCarryS (Q t n) j = 3)) :
-    let a := n % 3^(j+1)
-    gstDigitS (Q t a) j = 2 ∧
-      (gstCarryS (Q t a) j = 0 ∨ gstCarryS (Q t a) j = 3) := by
-  dsimp only
-  have hs := gst_canonical_state_from_origin_prefixS Q hQ t n j ht
+/-- Read the high A-coordinate of an exact decomposition S = W + A C. -/
+theorem gst_information_high_coordinatesS
+    (S W A C : Nat) (hA : 0 < A) (hW : W < A)
+    (hS : S = W + A*C) :
+    S % A = W ∧ S / A = C := by
+  subst S
   constructor
-  · rw [← hs.1]
-    exact hgate.1
-  · rcases hgate.2 with h0 | h3
-    · left
-      rw [← hs.2]
-      exact h0
-    · right
-      rw [← hs.2]
-      exact h3
--- END ATTACHED CanonicalCausalityScratch.lean
+  · rw [Nat.add_mod]
+    simp [Nat.mod_eq_of_lt hW]
+  · rw [Nat.add_mul_div_left W C hA]
+    have hWdiv : W / A = 0 := Nat.div_eq_of_lt hW
+    simp [hWdiv]
+
+/-- Quaternary coordinate at depth i inside one shared information word. -/
+def gstInformationCarryAtS (S i : Nat) : Nat :=
+  S / 4^i % 4
+
+/-- When A=4^N, the two GST decompositions are literally the bottom and top
+    base-4 coordinates of one finite information word. -/
+theorem gst_information_bottom_top_coordinatesS
+    (S p Z W A C N : Nat)
+    (hA : A = 4^N)
+    (hp : p < 4) (hC : C < 4)
+    (hW : W < A)
+    (hLow : S = p + 4*Z)
+    (hHigh : S = W + A*C) :
+    gstInformationCarryAtS S 0 = p ∧
+      gstInformationCarryAtS S N = C := by
+  have hlow := gst_information_low_coordinatesS S p Z hp hLow
+  have hApos : 0 < A := by
+    rw [hA]
+    exact Nat.pow_pos (by decide)
+  have hhigh := gst_information_high_coordinatesS S W A C hApos hW hHigh
+  constructor
+  · simpa [gstInformationCarryAtS] using hlow.1
+  · rw [gstInformationCarryAtS, ← hA]
+    rw [hhigh.2]
+    exact Nat.mod_eq_of_lt hC
+
+/-- The shared information word has exactly one more possible base-4 digit
+    than the multiplier A=4^N. -/
+theorem gst_information_word_boundS
+    (S W A C : Nat)
+    (hW : W < A) (hC : C < 4)
+    (hHigh : S = W + A*C) :
+    S < 4*A := by
+  rw [hHigh]
+  have h1 : W + A*C < A + A*C := Nat.add_lt_add_right hW (A*C)
+  have h2 : A + A*C = A*(C+1) := by
+    rw [Nat.mul_add, Nat.mul_one]
+    ac_rfl
+  have hC1 : C+1 ≤ 4 := by omega
+  have h3 : A*(C+1) ≤ A*4 := Nat.mul_le_mul_left A hC1
+  rw [h2] at h1
+  have h4 : A*4 = 4*A := by ac_rfl
+  rw [h4] at h3
+  exact lt_of_lt_of_le h1 h3
+
+/-- Endpoint form used at a child Happy Gate: NULL means the top quaternary
+    coordinate is 0; GST+ carry-three means it is 3. -/
+theorem gst_information_gate_endpointS
+    (S W A C N : Nat)
+    (hA : A = 4^N)
+    (hC : C = 0 ∨ C = 3)
+    (hW : W < A)
+    (hHigh : S = W + A*C) :
+    gstInformationCarryAtS S N = 0 ∨
+      gstInformationCarryAtS S N = 3 := by
+  have hApos : 0 < A := by
+    rw [hA]
+    exact Nat.pow_pos (by decide)
+  have hhigh := gst_information_high_coordinatesS S W A C hApos hW hHigh
+  rw [gstInformationCarryAtS, ← hA, hhigh.2]
+  rcases hC with h0 | h3
+  · left
+    simp [h0]
+  · right
+    simp [h3]
+
+/-- Exact 2-adic/3-adic scale inequality behind the GST bridge.  For N≥3,
+    an (N+1)-digit base-4 information word fits strictly below ternary depth
+    2N. -/
+theorem four_pow_succ_lt_three_pow_doubleS
+    (N : Nat) (hN : 3 ≤ N) :
+    4^(N+1) < 3^(2*N) := by
+  induction N with
+  | zero => omega
+  | succ N ih =>
+      by_cases hprev : 3 ≤ N
+      · have hprevBound := ih hprev
+        have h3pos : 0 < 3^(2*N) := Nat.pow_pos (by decide)
+        calc
+          4^((N+1)+1) = 4 * 4^(N+1) := by
+            rw [Nat.pow_succ]
+            ac_rfl
+          _ < 4 * 3^(2*N) :=
+            Nat.mul_lt_mul_of_pos_left hprevBound (by decide)
+          _ < 9 * 3^(2*N) :=
+            Nat.mul_lt_mul_of_pos_right (by decide : 4 < 9) h3pos
+          _ = 3^(2*(N+1)) := by
+            rw [show 2*(N+1) = 2*N + 2 by omega, Nat.pow_add]
+            norm_num
+            ac_rfl
+      · have hN2 : N = 2 := by omega
+        subst N
+        decide
+
+/-- The finite shared information word lies below the aligned ternary bridge. -/
+theorem gst_information_bridge_boundS
+    (S A N : Nat)
+    (hN : 3 ≤ N)
+    (hA : A = 4^N)
+    (hS : S < 4*A) :
+    S < 3^(2*N) := by
+  have h4 : 4*A = 4^(N+1) := by
+    rw [hA, Nat.pow_succ]
+    ac_rfl
+  rw [h4] at hS
+  exact lt_trans hS (four_pow_succ_lt_three_pow_doubleS N hN)
+
+/-- At the aligned bridge depth, the stored information word has zero quotient.
+    This is a finite NULL boundary of the information carrier; it is not a
+    claim that the global GST wave terminates. -/
+theorem gst_information_bridge_nullS
+    (S A N : Nat)
+    (hN : 3 ≤ N)
+    (hA : A = 4^N)
+    (hS : S < 4*A) :
+    S / 3^(2*N) = 0 := by
+  exact Nat.div_eq_of_lt (gst_information_bridge_boundS S A N hN hA hS)
+-- END ATTACHED InformationGeometryScratch.lean
 
 -- BEGIN ATTACHED InformationBadTraceScratch.lean
 set_option maxRecDepth 1000000
@@ -9339,6 +9014,1535 @@ theorem gst_word_12102_synchronizesS (C : Nat) (hC : C < 4) :
       exact Or.inl (Or.inr rfl)
 -- END ATTACHED InformationBadTraceScratch.lean
 
+-- BEGIN ATTACHED CarryWordScratch.lean
+/-!
+Generic radix theorem behind the GST phase strip.
+For a fixed ternary cut M, repeated multiplication by 4 produces one carry
+per horizontal step.  The quotient after many steps stores those carries as
+its base-4 digits, in reverse chronological order.
+-/
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+def gstStripQuotientS (r M j : Nat) : Nat :=
+  (4^j * r) / M
+
+def gstStripCarryS (r M j : Nat) : Nat :=
+  (4 * ((4^j * r) % M)) / M
+
+/-- One horizontal ×4 step appends exactly one base-4 carry digit. -/
+theorem gst_strip_quotient_succS
+    (r M j : Nat) (hM : 0 < M) :
+    gstStripQuotientS r M (j+1) =
+      4 * gstStripQuotientS r M j + gstStripCarryS r M j := by
+  simp only [gstStripQuotientS, gstStripCarryS]
+  have hsplit :
+      4^j * r = M * ((4^j * r) / M) + (4^j * r) % M := by
+    exact (Nat.div_add_mod (4^j * r) M).symm
+  have hnumPow : 4^(j+1) * r = 4 * (4^j * r) := by
+    rw [Nat.pow_succ]
+    ac_rfl
+  calc
+    (4^(j+1) * r) / M = (4 * (4^j * r)) / M :=
+      congrArg (fun x : Nat => x / M) hnumPow
+    _ = (4 * (M * ((4^j * r) / M) + (4^j * r) % M)) / M := by
+      rw [← hsplit]
+    _ = (4 * ((4^j * r) % M) + M * (4 * ((4^j * r) / M))) / M := by
+      congr 1
+      rw [Nat.mul_add]
+      ac_rfl
+    _ = (4 * ((4^j * r) % M)) / M + 4 * ((4^j * r) / M) := by
+      rw [Nat.add_mul_div_left _ _ hM]
+    _ = 4 * ((4^j * r) / M) + (4 * ((4^j * r) % M)) / M := by ac_rfl
+
+/-- Every horizontal carry is one legal quaternary digit. -/
+theorem gst_strip_carry_lt_fourS
+    (r M j : Nat) (hM : 0 < M) :
+    gstStripCarryS r M j < 4 := by
+  unfold gstStripCarryS
+  have hr : (4^j * r) % M < M := Nat.mod_lt _ hM
+  have hnum : 4 * ((4^j * r) % M) < M * 4 := by
+    have h := Nat.mul_lt_mul_of_pos_left hr (by decide : 0 < 4)
+    simpa [Nat.mul_comm] using h
+  exact Nat.div_lt_of_lt_mul hnum
+
+/-- The newest horizontal carry is the low base-4 digit of the new quotient. -/
+theorem gst_strip_quotient_succ_mod4S
+    (r M j : Nat) (hM : 0 < M) :
+    gstStripQuotientS r M (j+1) % 4 = gstStripCarryS r M j := by
+  rw [gst_strip_quotient_succS r M j hM]
+  have hc := gst_strip_carry_lt_fourS r M j hM
+  omega
+
+/-- Removing the newest base-4 digit recovers the preceding strip quotient. -/
+theorem gst_strip_quotient_succ_div4S
+    (r M j : Nat) (hM : 0 < M) :
+    gstStripQuotientS r M (j+1) / 4 = gstStripQuotientS r M j := by
+  rw [gst_strip_quotient_succS r M j hM]
+  have hc := gst_strip_carry_lt_fourS r M j hM
+  have h4 : 0 < (4:Nat) := by decide
+  have hshape :
+      4 * gstStripQuotientS r M j + gstStripCarryS r M j =
+        gstStripCarryS r M j + 4 * gstStripQuotientS r M j := by ac_rfl
+  rw [hshape, Nat.add_mul_div_left _ _ h4]
+  have hzero : gstStripCarryS r M j / 4 = 0 := Nat.div_eq_of_lt hc
+  simp [hzero]
+
+/-- Repeatedly removing k newest carry digits recovers the older quotient. -/
+theorem gst_strip_quotient_shift_divS
+    (r M i k : Nat) (hM : 0 < M) :
+    gstStripQuotientS r M (i+k) / 4^k = gstStripQuotientS r M i := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+      have hstep := gst_strip_quotient_succ_div4S r M (i+k) hM
+      have hidx : i + (k+1) = (i+k)+1 := by omega
+      rw [hidx]
+      have hpow : 4^(k+1) = 4 * 4^k := by
+        rw [Nat.pow_succ]
+        ac_rfl
+      rw [hpow, ← Nat.div_div_eq_div_mul]
+      rw [hstep]
+      exact ih
+
+/-- Every intermediate GST carry is therefore an exact base-4 coordinate of
+    the final shared carry word. -/
+theorem gst_strip_carry_is_information_digitS
+    (r M i k : Nat) (hM : 0 < M) :
+    gstStripQuotientS r M (i+k+1) / 4^k % 4 =
+      gstStripCarryS r M i := by
+  have hshift := gst_strip_quotient_shift_divS r M (i+1) k hM
+  have hidx : (i+1)+k = i+k+1 := by omega
+  rw [hidx] at hshift
+  rw [hshift]
+  exact gst_strip_quotient_succ_mod4S r M i hM
+-- END ATTACHED CarryWordScratch.lean
+
+-- BEGIN ATTACHED InformationCarryWordBridgeScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- The commuting-square shared-information integer is literally the horizontal
+    GST carry word across the corresponding power-of-four strip. -/
+theorem gst_shared_information_is_carry_wordS
+    (N D c z T q : Nat)
+    (hD : 3 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z) :
+    gstStripQuotientS
+        (1 + 3*D*(T % 3^q))
+        (3*D*3^q)
+        (N+1) =
+      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
+        4 * gstAffineMulCarryS (4^N) z T q := by
+  let M : Nat := 3^q
+  let K : Nat := 1 + 4*(z + 4^N*(T % M))
+  have hM : 0 < M := by
+    dsimp [M]
+    exact Nat.pow_pos (by decide)
+  have hDpos : 0 < D := by omega
+  have h3Dpos : 0 < 3*D := Nat.mul_pos (by decide) hDpos
+  have hDen : 0 < 3*D*M := Nat.mul_pos h3Dpos hM
+
+  have hnum :
+      4^(N+1) * (1 + 3*D*(T % M)) =
+        (D+4) + 3*D*K := by
+    dsimp [K]
+    rw [Nat.pow_succ, hA, hc]
+    ring
+
+  have hKsplit : K = M*(K/M) + K%M := by
+    have h := Nat.mod_add_div K M
+    omega
+
+  have hr : K % M < M := Nat.mod_lt _ hM
+  have hsmall : D + 4 < 3*D := by omega
+  have hrsucc : K % M + 1 ≤ M := Nat.succ_le_of_lt hr
+  have hmul : 3*D*(K % M + 1) ≤ 3*D*M :=
+    Nat.mul_le_mul_left (3*D) hrsucc
+  have hres : (D+4) + 3*D*(K%M) < 3*D*M := by
+    have hlt : (D+4) + 3*D*(K%M) < 3*D + 3*D*(K%M) := by
+      omega
+    have hshape : 3*D + 3*D*(K%M) = 3*D*(K%M + 1) := by ring
+    rw [hshape] at hlt
+    exact lt_of_lt_of_le hlt hmul
+
+  have hword :
+      gstStripQuotientS
+          (1 + 3*D*(T % M))
+          (3*D*M)
+          (N+1) = K/M := by
+    unfold gstStripQuotientS
+    rw [hnum]
+    have hshape0 :
+        (D+4) + 3*D*K =
+          (D+4) + 3*D*(M*(K/M) + K%M) :=
+      congrArg (fun x => (D+4) + 3*D*x) hKsplit
+    have hshape :
+        (D + 4) + 3 * D * K =
+          ((D+4) + 3*D*(K%M)) + (3*D*M)*(K/M) := by
+      calc
+        (D+4) + 3*D*K =
+            (D+4) + 3*D*(M*(K/M) + K%M) := hshape0
+        _ = ((D+4) + 3*D*(K%M)) + (3*D*M)*(K/M) := by ring
+    rw [hshape, Nat.add_mul_div_left _ _ hDen]
+    rw [Nat.div_eq_of_lt hres]
+    simp
+
+  have hmod :
+      (z + 4^N*(T % M)) % M = (z + 4^N*T) % M := by
+    simp [Nat.add_mod, Nat.mul_mod]
+
+  have hparent :
+      gstAffineMulCarryS 4 1 (z + 4^N*(T % M)) q =
+        gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
+    unfold gstAffineMulCarryS
+    dsimp [M] at hmod
+    rw [hmod]
+
+  have hdecomp :=
+    gst_affine_tail_div_decompositionS 1 4 (z + 4^N*(T % M)) q
+  have hshared :
+      K/M =
+        gstAffineMulCarryS 4 1 (z + 4^N*T) q +
+          4 * gstAffineMulCarryS (4^N) z T q := by
+    dsimp [K, M]
+    dsimp [M] at hparent hdecomp
+    rw [hdecomp, hparent]
+    rfl
+
+  dsimp [M] at hword
+  exact hword.trans hshared
+-- END ATTACHED InformationCarryWordBridgeScratch.lean
+
+-- BEGIN ATTACHED InformationStateScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- The bottom decomposition D + 4 Z is itself one seeded affine information
+    carry with multiplier 4*A. -/
+theorem gst_shared_information_state_exactS
+    (A z T q : Nat) :
+    gstAffineMulCarryS (4*A) (1 + 4*z) T q =
+      gstAffineMulCarryS 4 1 (z + A*T) q +
+        4 * gstAffineMulCarryS A z T q := by
+  let M := 3^q
+  have hM : 0 < M := by
+    dsimp [M]
+    exact Nat.pow_pos (by decide)
+  let Y := z + A*(T % M)
+  have hmodY : Y % M = (z + A*T) % M := by
+    dsimp [Y, M]
+    simp [Nat.add_mod, Nat.mul_mod]
+  have hdiv := gst_affine_tail_div_decompositionS 1 4 Y q
+  have hYdiv : Y / M = gstAffineMulCarryS A z T q := by
+    dsimp [Y, M, gstAffineMulCarryS]
+  have hparent :
+      gstAffineMulCarryS 4 1 Y q =
+        gstAffineMulCarryS 4 1 (z + A*T) q := by
+    unfold gstAffineMulCarryS
+    dsimp [M] at hmodY
+    rw [hmodY]
+  calc
+    gstAffineMulCarryS (4*A) (1 + 4*z) T q =
+        (1 + 4*Y) / 3^q := by
+          unfold gstAffineMulCarryS
+          dsimp [Y, M]
+          congr 1
+          ring
+    _ = gstAffineMulCarryS 4 1 Y q + 4 * (Y / 3^q) := hdiv
+    _ = gstAffineMulCarryS 4 1 (z + A*T) q +
+          4 * gstAffineMulCarryS A z T q := by
+          dsimp [M] at hYdiv
+          rw [hparent, hYdiv]
+
+/-- One shared information state obeys the exact ternary vertical recurrence. -/
+theorem gst_shared_information_state_forwardS
+    (A z T q : Nat) :
+    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+1) =
+      (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
+        (4*A) * gstDigitS T q) / 3 := by
+  simp only [gstAffineMulCarryS, gstDigitS, Nat.pow_succ]
+  have hp : 0 < 3^q := Nat.pow_pos (by decide)
+  have hsplit : T % (3^q * 3) =
+      T % 3^q + 3^q * (T / 3^q % 3) := by
+    rw [Nat.mod_mul]
+  rw [hsplit, Nat.mul_add]
+  rw [show (4*A) * (3^q * (T / 3^q % 3)) =
+      3^q * ((4*A) * (T / 3^q % 3)) by ac_rfl]
+  rw [show
+      1 + 4*z + ((4*A) * (T % 3^q) +
+        3^q * ((4*A) * (T / 3^q % 3))) =
+      (1 + 4*z + (4*A) * (T % 3^q)) +
+        3^q * ((4*A) * (T / 3^q % 3)) by ring]
+  rw [← Nat.div_div_eq_div_mul]
+  rw [Nat.add_mul_div_left _ _ hp]
+
+/-- The parent seeded carry and vertical affine carry are exactly the bottom
+    base-4 digit and quotient of the shared information state. -/
+theorem gst_shared_information_bottom_coordinatesS
+    (A z T q : Nat)
+    (hD : gstAffineMulCarryS 4 1 (z + A*T) q < 4) :
+    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
+    let D := gstAffineMulCarryS 4 1 (z + A*T) q
+    let Z := gstAffineMulCarryS A z T q
+    S % 4 = D ∧ S / 4 = Z := by
+  dsimp only
+  have hS := gst_shared_information_state_exactS A z T q
+  exact gst_information_low_coordinatesS
+    _ _ _ hD hS
+
+/-- The child carry is the top base-4 coordinate of the same information word. -/
+theorem gst_shared_information_top_coordinateS
+    (A z T q N : Nat)
+    (hA : A = 4^N)
+    (hApos : 0 < A)
+    (hz1 : 1 + 4*z < A) :
+    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
+    let C := gstCarryS T q
+    S / A = C := by
+  dsimp only
+  have hEq := gst_shared_information_carry_equationS A z T q
+  have hW : gstAffineMulCarryS A (1 + 4*z) (4*T) q < A :=
+    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) q hApos hz1
+  have hShared := gst_shared_information_state_exactS A z T q
+  rw [hShared]
+  rw [← hEq]
+  have hcoord := gst_information_high_coordinatesS
+    (gstAffineMulCarryS A (1 + 4*z) (4*T) q + A * gstCarryS T q)
+    (gstAffineMulCarryS A (1 + 4*z) (4*T) q)
+    A (gstCarryS T q) hApos hW rfl
+  exact hcoord.2
+
+/-- If A ≡ 1 (mod 3), the parent digit is read from the vertical information
+    quotient Z together with the current child digit. -/
+theorem gst_parent_digit_from_informationS
+    (A z T q : Nat) (hA3 : A % 3 = 1) :
+    gstDigitS (z + A*T) q =
+      (gstAffineMulCarryS A z T q + gstDigitS T q) % 3 := by
+  have htail := gst_affine_tail_div_decompositionS z A T q
+  unfold gstDigitS
+  rw [htail]
+  have hmul : (A * (T / 3^q)) % 3 = gstDigitS T q := by
+    unfold gstDigitS
+    calc
+      (A * (T / 3^q)) % 3 =
+          ((A % 3) * ((T / 3^q) % 3)) % 3 := Nat.mul_mod A (T / 3^q) 3
+      _ = (T / 3^q) % 3 := by simp [hA3]
+  rw [Nat.add_mod, hmul]
+  simpa [gstDigitS] using
+    (Nat.add_mod
+      (gstAffineMulCarryS A z T q)
+      (T / 3^q % 3) 3).symm
+-- END ATTACHED InformationStateScratch.lean
+
+-- BEGIN ATTACHED OriginTransducerScratch.lean
+/-!
+Temporary kernel scratch for the canonical natural-origin information step.
+No Erdős theorem and no extra axiom: all canonical decomposition data enters
+as explicit theorem hypotheses.
+-/
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Cancellation algebra used by the Navigation Constant recurrence. -/
+theorem origin_navigation_algebraS
+    (D A c0 Q Qnext K : Nat) (hD : 0 < D)
+    (hA : A = 1 + D*c0)
+    (hQ : 1 + D*Q = A * (1 + D*K*Qnext)) :
+    Q = c0 + K*A*Qnext := by
+  have hfactor : A * (1 + D*K*Qnext) =
+      1 + D * (c0 + K*A*Qnext) := by
+    rw [hA]
+    simp only [Nat.mul_add, Nat.add_mul, Nat.one_mul, Nat.mul_one]
+    ac_rfl
+  rw [hfactor] at hQ
+  have hadd := Nat.add_left_cancel hQ
+  exact Nat.mul_left_cancel hD hadd
+
+/-- If Q has the exact perfect-power decomposition at t and t+1, splitting an
+    origin parameter as 3*u+d gives the exact digit recurrence
+      Q_t(3u+d) = Q_t(d) + 3*A_t^d*Q_{t+1}(u). -/
+theorem origin_digit_recurrenceS
+    (Q : Nat → Nat → Nat) (t u d A D : Nat)
+    (hD : 0 < D)
+    (hAd : A^d = 1 + D * Q t d)
+    (hcur : 1 + D * Q t (3*u+d) =
+      A^d * (1 + D * 3 * Q (t+1) u)) :
+    Q t (3*u+d) = Q t d + 3 * A^d * Q (t+1) u := by
+  exact origin_navigation_algebraS D (A^d) (Q t d)
+    (Q t (3*u+d)) (Q (t+1) u) 3 hD hAd hcur
+
+/-- Exact affine information step.  The emitted ternary digit is E mod 3;
+    everything not emitted is retained in the updated offset and multiplier. -/
+theorem affine_origin_stepS
+    (Q : Nat → Nat → Nat) (t u d z m A : Nat)
+    (hrec : Q t (3*u+d) = Q t d + 3 * A^d * Q (t+1) u) :
+    let E := z + m * Q t d
+    let r := E % 3
+    let z' := E / 3
+    let m' := m * A^d
+    z + m * Q t (3*u+d) =
+      r + 3 * (z' + m' * Q (t+1) u) := by
+  dsimp only
+  rw [hrec]
+  have hE : z + m * Q t d =
+      (z + m * Q t d) % 3 + 3 * ((z + m * Q t d) / 3) := by
+    have h := Nat.mod_add_div (z + m * Q t d) 3
+    omega
+  rw [Nat.mul_add]
+  rw [show m * (3 * A^d * Q (t+1) u) =
+      3 * (m * A^d * Q (t+1) u) by ac_rfl]
+  omega
+
+/-- Natural-origin specialization: consume exactly the least ternary trit and
+    replace the origin by n/3.  This is the formal regeneration/descent step. -/
+theorem affine_natural_origin_stepS
+    (Q : Nat → Nat → Nat) (t n z m A : Nat)
+    (hrec : Q t (3*(n/3) + n%3) =
+      Q t (n%3) + 3 * A^(n%3) * Q (t+1) (n/3)) :
+    let E := z + m * Q t (n%3)
+    let r := E % 3
+    let z' := E / 3
+    let m' := m * A^(n%3)
+    z + m * Q t n =
+      r + 3 * (z' + m' * Q (t+1) (n/3)) := by
+  dsimp only
+  have hn : n = 3*(n/3) + n%3 := by
+    have h := Nat.mod_add_div n 3
+    omega
+  have hstep := affine_origin_stepS Q t (n/3) (n%3) z m A hrec
+  dsimp only at hstep
+  calc
+    z + m * Q t n = z + m * Q t (3*(n/3) + n%3) := by rw [← hn]
+    _ = (z + m * Q t (n%3)) % 3 +
+        3 * ((z + m * Q t (n%3)) / 3 +
+          m * A^(n%3) * Q (t+1) (n/3)) := hstep
+
+/-- Positive origins strictly descend when one ternary trit is consumed. -/
+theorem natural_origin_div3_strictS (n : Nat) (hn : 0 < n) :
+    n / 3 < n := by
+  exact Nat.div_lt_self hn (by decide : 1 < 3)
+
+/-!
+Canonical three-phase GST orbit algebra.
+
+These lemmas deliberately do not assert a gate theorem.  They only prove that
+phase zero, phase one, and phase two are exact cross-sections of one power
+orbit when A = 1 + D*c and c = 1 + 3*z.
+-/
+
+/-- From the phase-zero identity A^(3n)=1+3DT, one multiplication by A gives
+    the exact phase-one identity with tail X=z+A*T. -/
+theorem gst_phase_one_exactS
+    (A D c z T n : Nat)
+    (hA : A = 1 + D*c)
+    (hc : c = 1 + 3*z)
+    (h0 : A^(3*n) = 1 + 3*D*T) :
+    A^(3*n + 1) = 1 + D + 3*D*(z + A*T) := by
+  rw [Nat.pow_succ, h0, hA, hc]
+  ring
+
+/-- If D=3N, the next multiplication gives the exact phase-two tail
+    z + N*c + A*H1. -/
+theorem gst_phase_two_exactS
+    (A D N c z H1 n : Nat)
+    (hDN : D = 3*N)
+    (hA : A = 1 + D*c)
+    (hc : c = 1 + 3*z)
+    (h1 : A^(3*n + 1) = 1 + D + 3*D*H1) :
+    A^(3*n + 2) = 1 + 2*D + 3*D*(z + N*c + A*H1) := by
+  have hexp : 3*n + 2 = (3*n + 1) + 1 := by omega
+  rw [hexp, Nat.pow_succ, h1, hA, hc, hDN]
+  ring
+
+/-- The phase-two cross-section wraps to phase zero after one more A-step.
+    `W` is the exact next zero-phase offset, characterized by c+2A=3W. -/
+theorem gst_phase_wrap_exactS
+    (A D c H2 W n : Nat)
+    (hA : A = 1 + D*c)
+    (hW : c + 2*A = 3*W)
+    (h2 : A^(3*n + 2) = 1 + 2*D + 3*D*H2) :
+    A^(3*(n+1)) = 1 + 3*D*(W + A*H2) := by
+  have hexp : 3*(n+1) = (3*n + 2) + 1 := by omega
+  have hW' : c + 2*(1 + D*c) = 3*W := by
+    simpa [hA] using hW
+  rw [hexp, Nat.pow_succ, h2, hA]
+  have hshape :
+      (1 + 2*D + 3*D*H2) * (1 + D*c) =
+        1 + D*(c + 2*(1 + D*c)) +
+          3*D*((1 + D*c)*H2) := by
+    ring
+  rw [hshape, hW']
+  ring
+
+/-- The three canonical low prefixes occupy disjoint carry bands when D≥9.
+    These inequalities are the arithmetic content of the phase seeds 0,1,2. -/
+theorem gst_phase_low_prefix_bandsS
+    (D : Nat) (hD : 9 ≤ D) :
+    4 < 3*D ∧
+    (3*D ≤ 4*(1+D) ∧ 4*(1+D) < 6*D) ∧
+    (6*D ≤ 4*(1+2*D) ∧ 4*(1+2*D) < 9*D) := by
+  omega
+-- END ATTACHED OriginTransducerScratch.lean
+
+-- BEGIN ATTACHED InformationRegenerationScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Seed-retaining complete bad language for the scratch information state. -/
+def GSTSeededBadTraceS (seed R : Nat) : Prop :=
+  ∀ j, GSTBadPairS (gstAffineMulCarryS 4 seed R j) (gstDigitS R j)
+
+/-- Dividing a relative affine realization by one ternary position preserves
+    the same relative multiplier.  Only the finite offset is regenerated. -/
+theorem gst_relative_affine_tail_divS
+    (A Z Y : Nat) :
+    (Z + A*Y) / 3 =
+      (Z + A*(Y%3)) / 3 + A*(Y/3) := by
+  have h := gst_affine_tail_div_decompositionS Z A Y 1
+  simpa [gstAffineMulCarryS] using h
+
+/-- The emitted digit of a relative affine realization depends only on the
+    current child digit and the finite information offset. -/
+theorem gst_relative_affine_emitted_digitS
+    (A Z Y : Nat) :
+    (Z + A*Y) % 3 = (Z + A*(Y%3)) % 3 := by
+  simp [Nat.add_mod, Nat.mul_mod]
+
+/-- Exact simultaneous regeneration step.  One natural-origin trit is consumed
+    in the child affine state, while the parent remains the same relative
+    A-affine realization of the regenerated child.  No information is erased. -/
+theorem gst_canonical_information_regeneratesS
+    (Q : Nat → Nat → Nat)
+    (t n childOffset childMul originA A Z : Nat)
+    (hrec : Q t (3*(n/3) + n%3) =
+      Q t (n%3) + 3 * originA^(n%3) * Q (t+1) (n/3)) :
+    let E := childOffset + childMul * Q t (n%3)
+    let r := E % 3
+    let childOffset' := E / 3
+    let childMul' := childMul * originA^(n%3)
+    let Y' := childOffset' + childMul' * Q (t+1) (n/3)
+    let e := (Z + A*r) % 3
+    let Z' := (Z + A*r) / 3
+    childOffset + childMul * Q t n = r + 3*Y' ∧
+      Z + A*(childOffset + childMul * Q t n) =
+        e + 3*(Z' + A*Y') := by
+  dsimp only
+  have hchild :=
+    affine_natural_origin_stepS Q t n childOffset childMul originA hrec
+  dsimp only at hchild
+  constructor
+  · exact hchild
+  · let r := (childOffset + childMul * Q t (n % 3)) % 3
+    let Y' := (childOffset + childMul * Q t (n % 3)) / 3 +
+      childMul * originA ^ (n % 3) * Q (t + 1) (n / 3)
+    have hchild' : childOffset + childMul * Q t n = r + 3*Y' := by
+      simpa [r, Y'] using hchild
+    have hsplit : Z + A*r = (Z + A*r) % 3 + 3*((Z + A*r)/3) := by
+      have h := Nat.mod_add_div (Z + A*r) 3
+      omega
+    calc
+      Z + A*(childOffset + childMul * Q t n) =
+          Z + A*(r + 3*Y') := by rw [hchild']
+      _ = (Z + A*r) + 3*(A*Y') := by ring
+      _ = ((Z + A*r) % 3 + 3*((Z + A*r)/3)) + 3*(A*Y') := by rw [← hsplit]
+      _ = (Z + A*r) % 3 + 3*((Z + A*r)/3 + A*Y') := by ring
+      _ = (Z + A * ((childOffset + childMul * Q t (n % 3)) % 3)) % 3 +
+          3 * ((Z + A * ((childOffset + childMul * Q t (n % 3)) % 3)) / 3 +
+            A * ((childOffset + childMul * Q t (n % 3)) / 3 +
+              childMul * originA ^ (n % 3) * Q (t + 1) (n / 3))) := by
+        rfl
+
+/-- A complete seed-retaining parent bad trace remains bad after consuming its
+    first ternary row.  The new seed is exactly the regenerated carry. -/
+theorem gst_seeded_bad_trace_regenerates_tailS
+    (D X : Nat) (hbad : GSTSeededBadTraceS D X) :
+    GSTSeededBadTraceS
+      (gstAffineMulCarryS 4 D X 1) (X/3) := by
+  intro j
+  have h := hbad (1+j)
+  rw [gst_seeded_affine_carry_semigroupS D X 1 j,
+      gst_seeded_affine_digit_shiftS X 1 j] at h
+  simpa using h
+
+/-- The child seed regenerates by the same local GST equation when the first
+    emitted child digit is consumed. -/
+theorem gst_child_seed_after_regenerationS
+    (C Y : Nat) :
+    gstAffineMulCarryS 4 C Y 1 =
+      gstStepCarryS C (Y%3) := by
+  simp [gstAffineMulCarryS, gstStepCarryS]
+
+/-- Likewise for the parent seed. -/
+theorem gst_parent_seed_after_regenerationS
+    (D X : Nat) :
+    gstAffineMulCarryS 4 D X 1 =
+      gstStepCarryS D (X%3) := by
+  simp [gstAffineMulCarryS, gstStepCarryS]
+
+/-- NULL is therefore a regenerative carrier state, not an absorbing endpoint:
+    a child digit two at carry zero moves to carry two in the regenerated tail. -/
+theorem gst_null_gate_regenerates_seedS
+    (Y : Nat) (hd : Y % 3 = 2) :
+    gstAffineMulCarryS 4 0 Y 1 = 2 := by
+  rw [gst_child_seed_after_regenerationS, hd]
+  decide
+
+/-- A GST+ child digit two similarly regenerates with carry three. -/
+theorem gst_plus_gate_regenerates_seedS
+    (Y : Nat) (hd : Y % 3 = 2) :
+    gstAffineMulCarryS 4 3 Y 1 = 3 := by
+  rw [gst_child_seed_after_regenerationS, hd]
+  decide
+-- END ATTACHED InformationRegenerationScratch.lean
+
+-- BEGIN ATTACHED InformationLocalizationScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- A complete seeded bad trace can be cut at any ternary position without
+    losing its incoming carry. -/
+theorem gst_seeded_bad_trace_suffixS
+    (D X q : Nat) (hbad : GSTSeededBadTraceS D X) :
+    GSTSeededBadTraceS
+      (gstAffineMulCarryS 4 D X q) (X / 3^q) := by
+  intro j
+  have h := hbad (q+j)
+  rw [gst_seeded_affine_carry_semigroupS D X q j,
+      gst_seeded_affine_digit_shiftS X q j] at h
+  exact h
+
+/-- A seeded child Happy Gate at position q becomes a position-zero Happy Gate
+    after cutting at q; the accumulated child carry is retained as the seed. -/
+theorem gst_seeded_gate_localizesS
+    (C Y q : Nat)
+    (hgate : gstDigitS Y q = 2 ∧
+      (gstAffineMulCarryS 4 C Y q = 0 ∨
+       gstAffineMulCarryS 4 C Y q = 3)) :
+    gstDigitS (Y / 3^q) 0 = 2 ∧
+      (gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
+          (Y / 3^q) 0 = 0 ∨
+       gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
+          (Y / 3^q) 0 = 3) := by
+  have hseed0 :
+      gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
+          (Y / 3^q) 0 = gstAffineMulCarryS 4 C Y q := by
+    simp [gstAffineMulCarryS, Nat.mod_one]
+  constructor
+  · rw [← gst_seeded_affine_digit_shiftS Y q 0]
+    simpa [Nat.mod_one] using hgate.1
+  · rcases hgate.2 with h0 | h3
+    · left
+      rw [hseed0, h0]
+    · right
+      rw [hseed0, h3]
+
+/-- Cutting a relative affine realization keeps the same relative multiplier A;
+    all processed information is absorbed into the regenerated finite offset. -/
+theorem gst_relative_affine_suffixS
+    (A Z Y q : Nat) :
+    (Z + A*Y) / 3^q =
+      gstAffineMulCarryS A Z Y q + A*(Y / 3^q) := by
+  exact gst_affine_tail_div_decompositionS Z A Y q
+
+/-- Full localization package at an arbitrary child gate.  The parent bad
+    language, child gate, and shared relative affine form all survive the cut. -/
+theorem gst_shared_gate_localizationS
+    (A Z Y D C q : Nat)
+    (hgate : gstDigitS Y q = 2 ∧
+      (gstAffineMulCarryS 4 C Y q = 0 ∨
+       gstAffineMulCarryS 4 C Y q = 3))
+    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
+    let Yq := Y / 3^q
+    let Zq := gstAffineMulCarryS A Z Y q
+    let Dq := gstAffineMulCarryS 4 D (Z + A*Y) q
+    let Cq := gstAffineMulCarryS 4 C Y q
+    GSTSeededBadTraceS Dq (Zq + A*Yq) ∧
+      (gstDigitS Yq 0 = 2 ∧
+        (gstAffineMulCarryS 4 Cq Yq 0 = 0 ∨
+         gstAffineMulCarryS 4 Cq Yq 0 = 3)) := by
+  dsimp only
+  have hsuffix := gst_seeded_bad_trace_suffixS D (Z + A*Y) q hbad
+  have hshape := gst_relative_affine_suffixS A Z Y q
+  have hgate0 := gst_seeded_gate_localizesS C Y q hgate
+  constructor
+  · rw [hshape] at hsuffix
+    exact hsuffix
+  · exact hgate0
+-- END ATTACHED InformationLocalizationScratch.lean
+
+-- BEGIN ATTACHED InformationFluxScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Every horizontal GST carry across the canonical phase strip is literally
+    one base-4 coordinate of the same shared information state. -/
+theorem gst_shared_information_horizontal_coordinateS
+    (N D c z T q i : Nat)
+    (hi : i ≤ N)
+    (hD : 3 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z) :
+    let r := 1 + 3*D*(T % 3^q)
+    let M := 3*D*3^q
+    let S := gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q
+    gstInformationCarryAtS S (N-i) = gstStripCarryS r M i := by
+  dsimp only
+  have hDpos : 0 < D := by omega
+  have hM : 0 < 3*D*3^q := by
+    exact Nat.mul_pos (Nat.mul_pos (by decide) hDpos) (Nat.pow_pos (by decide))
+  have hbridge :=
+    gst_shared_information_is_carry_wordS N D c z T q hD hA hc
+  have hstate := gst_shared_information_state_exactS (4^N) z T q
+  have hfinal :
+      gstStripQuotientS
+          (1 + 3*D*(T % 3^q))
+          (3*D*3^q)
+          (N+1) =
+        gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q := by
+    exact hbridge.trans hstate.symm
+  have hcoord :=
+    gst_strip_carry_is_information_digitS
+      (1 + 3*D*(T % 3^q)) (3*D*3^q) i (N-i) hM
+  have hidx : i + (N-i) + 1 = N+1 := by omega
+  rw [hidx, hfinal] at hcoord
+  simpa [gstInformationCarryAtS] using hcoord
+
+/-- The left boundary carry of the horizontal strip is exactly the child GST
+    carry.  This is the top coordinate of the shared information word. -/
+theorem gst_shared_information_left_endpointS
+    (N D c z T q : Nat)
+    (hD : 9 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z) :
+    gstStripCarryS
+        (1 + 3*D*(T % 3^q))
+        (3*D*3^q) 0 = gstCarryS T q := by
+  have hD3 : 3 ≤ D := by omega
+  have hcoord :=
+    gst_shared_information_horizontal_coordinateS
+      N D c z T q 0 (by omega) hD3 hA hc
+  dsimp only at hcoord
+  have hcpos : 1 ≤ c := by omega
+  have hzdiv : c / 3 = z := by
+    rw [hc, Nat.add_mul_div_left 1 z (by decide : 0 < 3)]
+    norm_num
+  have hoff := gst_gst_offsets_lt_multiplierS D c hD hcpos
+  have hz1 : 1 + 4*z < 4^N := by
+    rw [← hzdiv, hA]
+    exact hoff.2
+  have hApos : 0 < 4^N := Nat.pow_pos (by decide)
+  have htop :=
+    gst_shared_information_top_coordinateS
+      (4^N) z T q N rfl hApos hz1
+  dsimp only at htop
+  have hC : gstCarryS T q < 4 := by
+    have h := gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide)
+    simpa [gstCarryS, gstAffineMulCarryS] using h
+  have hinfo :
+      gstInformationCarryAtS
+          (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) N =
+        gstCarryS T q := by
+    unfold gstInformationCarryAtS
+    rw [htop]
+    exact Nat.mod_eq_of_lt hC
+  exact hcoord.symm.trans hinfo
+
+/-- The right boundary carry of the horizontal strip is exactly the seed-one
+    parent GST carry.  This is the bottom coordinate of the same information
+    word. -/
+theorem gst_shared_information_right_endpointS
+    (N D c z T q : Nat)
+    (hD : 3 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z) :
+    gstStripCarryS
+        (1 + 3*D*(T % 3^q))
+        (3*D*3^q) N =
+      gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
+  have hcoord :=
+    gst_shared_information_horizontal_coordinateS
+      N D c z T q N (by omega) hD hA hc
+  dsimp only at hcoord
+  have hcoord0 :
+      gstStripCarryS
+          (1 + 3*D*(T % 3^q))
+          (3*D*3^q) N =
+        gstInformationCarryAtS
+          (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) 0 := by
+    simpa using hcoord.symm
+  have hp : gstAffineMulCarryS 4 1 (z + 4^N*T) q < 4 :=
+    gst_affine_carry_lt_multiplierS 4 1 (z + 4^N*T) q (by decide) (by decide)
+  have hbottom :=
+    gst_shared_information_bottom_coordinatesS (4^N) z T q hp
+  dsimp only at hbottom
+  calc
+    gstStripCarryS
+        (1 + 3*D*(T % 3^q))
+        (3*D*3^q) N =
+      gstInformationCarryAtS
+        (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) 0 := hcoord0
+    _ = gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
+      simpa [gstInformationCarryAtS] using hbottom.1
+-- END ATTACHED InformationFluxScratch.lean
+
+-- BEGIN ATTACHED InformationForcingScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Output digit paired with the scratch carry recurrence. -/
+def gstOutputDigitS (C d : Nat) : Nat :=
+  (C + 4*d) % 3
+
+/-- The low-end shared information word commutes exactly with one vertical
+    ternary regeneration step.  `D` is the parent carry, `Z` the vertical
+    information quotient, `A` the fixed horizontal multiplier, and `r` the
+    current child digit.  No information is discarded: the regenerated parent
+    carry and regenerated information quotient are exactly the quotient of the
+    old shared word after the child digit has been injected. -/
+theorem gst_shared_word_regenerates_exactS
+    (A D Z r : Nat) :
+    (D + 4*Z + 4*A*r) / 3 =
+      gstStepCarryS D ((Z + A*r) % 3) +
+        4 * ((Z + A*r) / 3) := by
+  let E := Z + A*r
+  have hE : E = E % 3 + 3*(E/3) := by
+    have h := Nat.mod_add_div E 3
+    omega
+  have hshape :
+      D + 4*Z + 4*A*r = D + 4*E := by
+    dsimp [E]
+    ring
+  rw [hshape, hE]
+  have hnum :
+      D + 4 * (E % 3 + 3 * (E / 3)) =
+        (D + 4*(E%3)) + 3*(4*(E/3)) := by
+    ring
+  rw [hnum]
+  have h3 : 0 < (3:Nat) := by decide
+  rw [Nat.add_mul_div_left _ _ h3]
+  rfl
+
+/-- The parent bad language regenerates in the same relative affine form.
+    Only the finite offset and incoming seed change; the multiplier `A` is
+    untouched. -/
+theorem gst_relative_parent_bad_regeneratesS
+    (A D Z Y : Nat)
+    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
+    let r := Y % 3
+    let e := (Z + A*r) % 3
+    let D' := gstStepCarryS D e
+    let Z' := (Z + A*r) / 3
+    GSTSeededBadTraceS D' (Z' + A*(Y/3)) := by
+  dsimp only
+  have hsuffix :=
+    gst_seeded_bad_trace_regenerates_tailS D (Z + A*Y) hbad
+  have htail := gst_relative_affine_tail_divS A Z Y
+  have hemit := gst_relative_affine_emitted_digitS A Z Y
+  have hseed :
+      gstAffineMulCarryS 4 D (Z + A*Y) 1 =
+        gstStepCarryS D ((Z + A*(Y%3)) % 3) := by
+    rw [gst_parent_seed_after_regenerationS]
+    rw [hemit]
+  rw [hseed, htail] at hsuffix
+  exact hsuffix
+
+/-- A localized child Happy Gate cannot simply disappear when the parent is
+    assumed completely bad.  After consuming the gate row, the parent bad
+    suffix is regenerated exactly, the child information survives as seed 2
+    (NULL realization) or seed 3 (GST+ realization), and the low shared word
+    obeys the exact commuting conservation equation. -/
+theorem gst_localized_gate_forcing_stepS
+    (A D Z C Y : Nat)
+    (hgate : Y % 3 = 2 ∧ (C = 0 ∨ C = 3))
+    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
+    let e := (Z + A*2) % 3
+    let D' := gstStepCarryS D e
+    let Z' := (Z + A*2) / 3
+    let C' := gstStepCarryS C 2
+    GSTSeededBadTraceS D' (Z' + A*(Y/3)) ∧
+      (C' = 2 ∨ C' = 3) ∧
+      (D + 4*Z + 8*A) / 3 = D' + 4*Z' := by
+  dsimp only
+  have hparent := gst_relative_parent_bad_regeneratesS A D Z Y hbad
+  dsimp only at hparent
+  rw [hgate.1] at hparent
+  have hlatent : gstStepCarryS C 2 = 2 ∨ gstStepCarryS C 2 = 3 := by
+    rcases hgate.2 with h0 | h3
+    · left
+      rw [h0]
+      decide
+    · right
+      rw [h3]
+      decide
+  have hshared := gst_shared_word_regenerates_exactS A D Z 2
+  refine ⟨hparent, hlatent, ?_⟩
+  convert hshared using 1 <;> ring
+-- END ATTACHED InformationForcingScratch.lean
+
+-- BEGIN ATTACHED InformationIterationScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- The high endpoint of the shared information word obeys the same exact
+    ternary regeneration law.  `r` is the child input digit, `u` its realised
+    output digit under carry `C`, and `C'` the regenerated child carry. -/
+theorem gst_shared_high_regenerates_exactS
+    (A W C r : Nat) :
+    (W + A*C + 4*A*r) / 3 =
+      (W + A*gstOutputDigitS C r) / 3 +
+        A * gstStepCarryS C r := by
+  let U := C + 4*r
+  have hU : U = U % 3 + 3*(U/3) := by
+    have h := Nat.mod_add_div U 3
+    omega
+  have hshape0 : W + A*C + 4*A*r = W + A*U := by
+    dsimp [U]
+    ring
+  rw [hshape0, hU]
+  have hshape1 :
+      W + A*(U % 3 + 3*(U/3)) =
+        (W + A*(U%3)) + 3*(A*(U/3)) := by
+    ring
+  rw [hshape1]
+  have h3 : 0 < (3:Nat) := by decide
+  rw [Nat.add_mul_div_left _ _ h3]
+  simp [gstOutputDigitS, gstStepCarryS, U]
+
+/-- The regenerated high remainder remains strictly below the horizontal
+    multiplier.  Thus the child carry continues to be the top base-4
+    coordinate of the same finite information word after every row. -/
+theorem gst_shared_high_remainder_ltS
+    (A W C r : Nat) (hA : 0 < A) (hW : W < A) :
+    (W + A*gstOutputDigitS C r) / 3 < A := by
+  have hu : gstOutputDigitS C r < 3 := by
+    unfold gstOutputDigitS
+    exact Nat.mod_lt _ (by decide)
+  have hu1 : gstOutputDigitS C r + 1 ≤ 3 := Nat.succ_le_of_lt hu
+  have hnum : W + A*gstOutputDigitS C r < 3*A := by
+    calc
+      W + A*gstOutputDigitS C r <
+          A + A*gstOutputDigitS C r := Nat.add_lt_add_right hW _
+      _ = A * (gstOutputDigitS C r + 1) := by
+        rw [Nat.mul_add, Nat.mul_one]
+        ac_rfl
+      _ ≤ A*3 := Nat.mul_le_mul_left A hu1
+      _ = 3*A := by ac_rfl
+  exact Nat.div_lt_of_lt_mul hnum
+
+/-- One vertical row preserves both endpoint decompositions of the same shared
+    information word.  The low endpoint is the parent seeded carry; the high
+    endpoint is the child carry.  CREATE/DESTROY/SURVIVE are therefore
+    different realisations of one conserved state rather than different
+    information objects. -/
+theorem gst_shared_two_endpoint_regeneratesS
+    (A D Z W C r : Nat)
+    (hEq : D + 4*Z = W + A*C) :
+    let e := (Z + A*r) % 3
+    let D' := gstStepCarryS D e
+    let Z' := (Z + A*r) / 3
+    let u := gstOutputDigitS C r
+    let C' := gstStepCarryS C r
+    let W' := (W + A*u) / 3
+    D' + 4*Z' = W' + A*C' := by
+  dsimp only
+  have hlow := gst_shared_word_regenerates_exactS A D Z r
+  have hhigh := gst_shared_high_regenerates_exactS A W C r
+  calc
+    gstStepCarryS D ((Z + A*r) % 3) + 4*((Z + A*r)/3) =
+        (D + 4*Z + 4*A*r) / 3 := hlow.symm
+    _ = (W + A*C + 4*A*r) / 3 := by rw [hEq]
+    _ = (W + A*gstOutputDigitS C r) / 3 +
+          A*gstStepCarryS C r := hhigh
+
+/-- The complete iterative package.  A seed-retaining parent bad trace and the
+    two endpoint decompositions regenerate together after consuming one child
+    ternary digit.  No NULL absorption or finite wave cutoff is used. -/
+theorem gst_coupled_bad_information_regeneratesS
+    (A D Z W C Y : Nat)
+    (hA : 0 < A) (hW : W < A)
+    (hEq : D + 4*Z = W + A*C)
+    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
+    let r := Y % 3
+    let e := (Z + A*r) % 3
+    let D' := gstStepCarryS D e
+    let Z' := (Z + A*r) / 3
+    let u := gstOutputDigitS C r
+    let C' := gstStepCarryS C r
+    let W' := (W + A*u) / 3
+    GSTSeededBadTraceS D' (Z' + A*(Y/3)) ∧
+      D' + 4*Z' = W' + A*C' ∧
+      W' < A := by
+  dsimp only
+  have hbad' := gst_relative_parent_bad_regeneratesS A D Z Y hbad
+  dsimp only at hbad'
+  have hEq' := gst_shared_two_endpoint_regeneratesS A D Z W C (Y%3) hEq
+  dsimp only at hEq'
+  have hW' := gst_shared_high_remainder_ltS A W C (Y%3) hA hW
+  exact ⟨hbad', hEq', hW'⟩
+
+/-- At a child Happy Gate the high endpoint realises digit two on both sides:
+    NULL (carry 0) regenerates to latent carry 2 and GST+ (carry 3) remains
+    carry 3, while in either case the high remainder is driven by the same
+    realised digit two. -/
+theorem gst_child_gate_high_realisationS
+    (C : Nat) (hC : C = 0 ∨ C = 3) :
+    gstOutputDigitS C 2 = 2 ∧
+      (gstStepCarryS C 2 = 2 ∨ gstStepCarryS C 2 = 3) := by
+  rcases hC with h0 | h3
+  · subst C
+    decide
+  · subst C
+    decide
+-- END ATTACHED InformationIterationScratch.lean
+
+-- BEGIN ATTACHED InformationQuotientScratch.lean
+/-!
+Exact consequences of the kernel-green shared-information equation.
+No universal Erdős claim is made here.
+-/
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- The child GST carry is literally the base-A quotient of the shared
+    information state `p + 4*a0`. -/
+theorem gst_shared_information_childCarry_is_quotientS
+    (A z T q : Nat) (hA : 0 < A) (hz1 : 1 + 4*z < A) :
+    gstCarryS T q =
+      (gstAffineMulCarryS 4 1 (z + A*T) q +
+        4 * gstAffineMulCarryS A z T q) / A := by
+  have hEq := gst_shared_information_carry_equationS A z T q
+  have ha1 : gstAffineMulCarryS A (1 + 4*z) (4*T) q < A :=
+    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) q hA hz1
+  have hdecomp :
+      gstAffineMulCarryS 4 1 (z + A*T) q +
+          4 * gstAffineMulCarryS A z T q =
+        A * gstCarryS T q +
+          gstAffineMulCarryS A (1 + 4*z) (4*T) q := by
+    omega
+  rw [hdecomp]
+  exact (Nat.mul_add_div A (gstCarryS T q)
+    (gstAffineMulCarryS A (1 + 4*z) (4*T) q)).trans (by
+      rw [Nat.div_eq_of_lt ha1]
+      simp [hA])
+
+/-- The complementary affine carry is literally the base-A remainder of the
+    same shared information state. -/
+theorem gst_shared_information_affineCarry_is_remainderS
+    (A z T q : Nat) (hA : 0 < A) (hz1 : 1 + 4*z < A) :
+    gstAffineMulCarryS A (1 + 4*z) (4*T) q =
+      (gstAffineMulCarryS 4 1 (z + A*T) q +
+        4 * gstAffineMulCarryS A z T q) % A := by
+  have hEq := gst_shared_information_carry_equationS A z T q
+  have ha1 : gstAffineMulCarryS A (1 + 4*z) (4*T) q < A :=
+    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) q hA hz1
+  have hdecomp :
+      gstAffineMulCarryS 4 1 (z + A*T) q +
+          4 * gstAffineMulCarryS A z T q =
+        A * gstCarryS T q +
+          gstAffineMulCarryS A (1 + 4*z) (4*T) q := by
+    omega
+  rw [hdecomp, Nat.add_mod]
+  simp [Nat.mod_eq_of_lt ha1, hA]
+
+/-- The perfect-power energy of the child and the prefix multiplier combine
+    exactly to the prefix-one parent perfect power. -/
+theorem gst_prefix_one_perfect_power_energy_factorS (s n : Nat) :
+    4^(3^s) * 4^(3^(s+1) * n) = 4^(3^s * (1 + 3*n)) := by
+  rw [← Nat.pow_add]
+  congr 1
+  rw [Nat.pow_succ]
+  ring
+-- END ATTACHED InformationQuotientScratch.lean
+
+-- BEGIN ATTACHED StripConservationScratch.lean
+/-!
+Generalized GST strip conservation.
+For an arbitrary multiplier B, the entire horizontal block R -> B*R has one
+exact ternary carry law.  No canonical-power or Erdős assumption is used.
+-/
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+def gstWideCarryS (B R p : Nat) : Nat :=
+  (B * (R % 3^p)) / 3^p
+
+def gstWideDigitS (R p : Nat) : Nat :=
+  R / 3^p % 3
+
+/-- Arbitrary-multiplier carry recurrence. -/
+theorem gst_wide_carry_forward_exactS
+    (B R p : Nat) :
+    gstWideCarryS B R (p+1) =
+      (gstWideCarryS B R p + B * gstWideDigitS R p) / 3 := by
+  simp only [gstWideCarryS, gstWideDigitS, Nat.pow_succ]
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hsplit : R % (3^p * 3) =
+      R % 3^p + 3^p * (R / 3^p % 3) := by
+    rw [Nat.mod_mul]
+  rw [hsplit, Nat.mul_add]
+  rw [show B * (3^p * (R / 3^p % 3)) =
+      3^p * (B * (R / 3^p % 3)) by ac_rfl]
+  rw [← Nat.div_div_eq_div_mul]
+  rw [Nat.add_mul_div_left _ _ hp]
+
+/-- Exact quotient decomposition after multiplying R by B. -/
+theorem gst_wide_quotient_decompositionS
+    (B R p : Nat) :
+    (B*R) / 3^p =
+      gstWideCarryS B R p + B * (R / 3^p) := by
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hdiv : R = 3^p * (R / 3^p) + R % 3^p :=
+    (Nat.div_add_mod R (3^p)).symm
+  calc
+    (B*R) / 3^p =
+        (B * (3^p * (R / 3^p) + R % 3^p)) / 3^p := by rw [← hdiv]
+    _ = (B * (R % 3^p) + 3^p * (B * (R / 3^p))) / 3^p := by
+      congr 1
+      rw [Nat.mul_add]
+      ac_rfl
+    _ = (B * (R % 3^p)) / 3^p + B * (R / 3^p) := by
+      rw [Nat.add_mul_div_left _ _ hp]
+    _ = gstWideCarryS B R p + B * (R / 3^p) := by rfl
+
+/-- The output ternary digit of B*R depends only on the incoming wide carry
+    and the current input digit. -/
+theorem gst_wide_output_digit_exactS
+    (B R p : Nat) :
+    gstWideDigitS (B*R) p =
+      (gstWideCarryS B R p + B * gstWideDigitS R p) % 3 := by
+  unfold gstWideDigitS
+  rw [gst_wide_quotient_decompositionS]
+  have hmul :
+      (B * (R / 3^p)) % 3 =
+        (B * ((R / 3^p) % 3)) % 3 := by
+    calc
+      (B * (R / 3^p)) % 3 =
+          ((B % 3) * ((R / 3^p) % 3)) % 3 :=
+            Nat.mul_mod B (R / 3^p) 3
+      _ = (B * ((R / 3^p) % 3)) % 3 := by
+        simpa only [Nat.mod_mod] using
+          (Nat.mul_mod B ((R / 3^p) % 3) 3).symm
+  have haddL := Nat.add_mod
+      (gstWideCarryS B R p) (B * (R / 3^p)) 3
+  have haddR := Nat.add_mod
+      (gstWideCarryS B R p) (B * ((R / 3^p) % 3)) 3
+  rw [haddL, haddR, hmul]
+
+/-- Exact finite strip conservation at one ternary row. -/
+theorem gst_strip_conservation_exactS
+    (B R p : Nat) :
+    B * gstWideDigitS R p + gstWideCarryS B R p =
+      gstWideDigitS (B*R) p +
+        3 * gstWideCarryS B R (p+1) := by
+  have hcarry := gst_wide_carry_forward_exactS B R p
+  have hdigit := gst_wide_output_digit_exactS B R p
+  let X := gstWideCarryS B R p + B * gstWideDigitS R p
+  have hdivmod : X = X % 3 + 3 * (X / 3) := by
+    have h := Nat.mod_add_div X 3
+    omega
+  dsimp [X] at hdivmod
+  rw [← hcarry, ← hdigit] at hdivmod
+  omega
+
+/-- Specialization to a horizontal strip of N+1 ordinary ×4 steps. -/
+theorem gst_power_four_strip_conservationS
+    (N R p : Nat) :
+    4^(N+1) * gstWideDigitS R p +
+        gstWideCarryS (4^(N+1)) R p =
+      gstWideDigitS (4^(N+1) * R) p +
+        3 * gstWideCarryS (4^(N+1)) R (p+1) := by
+  exact gst_strip_conservation_exactS (4^(N+1)) R p
+
+/-- At a fixed ternary cut, the generalized carry of 4^(N+1) is exactly the
+    quotient storing the N+1 ordinary horizontal GST carries. -/
+theorem gst_wide_carry_is_carry_wordS
+    (N R p : Nat) :
+    gstWideCarryS (4^(N+1)) R p =
+      (4^(N+1) * (R % 3^p)) / 3^p := by
+  rfl
+-- END ATTACHED StripConservationScratch.lean
+
+-- BEGIN ATTACHED PurePowerCarrierScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Abstract certificate that Q is the canonical perfect-power Navigation map. -/
+def GSTCanonicalOriginEnergyS (Q : Nat → Nat → Nat) : Prop :=
+  ∀ t n, 1 ≤ t →
+    4^(3^t*n) = 1 + 3^(t+1) * Q t n
+
+/-- The perfect-power origin splits exactly into its current ternary trit and
+    the deeper origin.  This is the energy-side regeneration law. -/
+theorem gst_pure_power_origin_splitS (t n : Nat) :
+    4^(3^t*n) =
+      4^(3^t*(n%3)) * 4^(3^(t+1)*(n/3)) := by
+  have hn : n = n % 3 + 3 * (n / 3) := by
+    have h := Nat.mod_add_div n 3
+    omega
+  have hexp : 3^t*n = 3^t*(n%3) + 3^(t+1)*(n/3) := by
+    calc
+      3^t*n = 3^t*(n % 3 + 3*(n/3)) :=
+        congrArg (fun x : Nat => 3^t * x) hn
+      _ = 3^t*(n%3) + 3^(t+1)*(n/3) := by
+        rw [Nat.pow_succ]
+        ring
+  rw [hexp, Nat.pow_add]
+
+/-- For a canonical Navigation map, the exact origin energy survives one
+    natural-origin descent as a pure power-of-four factor times the deeper
+    canonical energy. -/
+theorem gst_canonical_origin_energy_regeneratesS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n : Nat) (ht : 1 ≤ t) :
+    1 + 3^(t+1) * Q t n =
+      4^(3^t*(n%3)) *
+        (1 + 3^(t+2) * Q (t+1) (n/3)) := by
+  have htop := hQ t n ht
+  have hdeep := hQ (t+1) (n/3) (by omega)
+  rw [← htop, gst_pure_power_origin_splitS t n, hdeep]
+
+/-- At a zero remaining origin the canonical energy is exactly one. -/
+theorem gst_canonical_origin_energy_zeroS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t : Nat) (ht : 1 ≤ t) :
+    1 + 3^(t+1) * Q t 0 = 1 := by
+  have h := hQ t 0 ht
+  simpa using h.symm
+
+/-- Every nonzero natural origin strictly descends under the same n -> n/3
+    regeneration axis. -/
+theorem gst_canonical_origin_strict_descentS
+    (n : Nat) (hn : 0 < n) : n/3 < n := by
+  exact Nat.div_lt_self hn (by decide)
+-- END ATTACHED PurePowerCarrierScratch.lean
+
+-- BEGIN ATTACHED CanonicalPrefixScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Arbitrary finite ternary-origin prefix recurrence for a canonical
+    Navigation map.  This is the exact many-trit version of
+    `origin_digit_recurrenceS`. -/
+theorem gst_canonical_prefix_recurrenceS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t a q m : Nat) (ht : 1 ≤ t) :
+    Q t (a + 3^q*m) =
+      Q t a + 3^q * 4^(3^t*a) * Q (t+q) m := by
+  have hbase := hQ t a ht
+  have hdeep := hQ (t+q) m (by omega)
+  have hwhole := hQ t (a + 3^q*m) ht
+  have hexp :
+      3^t * (a + 3^q*m) = 3^t*a + 3^(t+q)*m := by
+    rw [Nat.mul_add, Nat.pow_add]
+    ring
+  have hpow :
+      4^(3^t * (a + 3^q*m)) =
+        4^(3^t*a) * 4^(3^(t+q)*m) := by
+    rw [hexp, Nat.pow_add]
+  have hden : 3^(t+q+1) = 3^(t+1) * 3^q := by
+    rw [show t+q+1 = (t+1)+q by omega, Nat.pow_add]
+  have hcur :
+      1 + 3^(t+1) * Q t (a + 3^q*m) =
+        4^(3^t*a) *
+          (1 + 3^(t+1) * 3^q * Q (t+q) m) := by
+    calc
+      1 + 3^(t+1) * Q t (a + 3^q*m) =
+          4^(3^t * (a + 3^q*m)) := hwhole.symm
+      _ = 4^(3^t*a) * 4^(3^(t+q)*m) := hpow
+      _ = 4^(3^t*a) * (1 + 3^(t+q+1) * Q (t+q) m) := by rw [hdeep]
+      _ = 4^(3^t*a) *
+          (1 + 3^(t+1) * 3^q * Q (t+q) m) := by rw [hden]
+  exact origin_navigation_algebraS
+    (3^(t+1)) (4^(3^t*a)) (Q t a)
+    (Q t (a + 3^q*m)) (Q (t+q) m) (3^q)
+    (Nat.pow_pos (by decide)) hbase hcur
+
+/-- Prefix/tail specialization at the actual finite prefix of a natural origin. -/
+theorem gst_canonical_prefix_mod_divS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n q : Nat) (ht : 1 ≤ t) :
+    Q t n = Q t (n % 3^q) +
+      3^q * 4^(3^t * (n % 3^q)) * Q (t+q) (n / 3^q) := by
+  have hn : n = n % 3^q + 3^q * (n / 3^q) := by
+    have h := Nat.mod_add_div n (3^q)
+    omega
+  calc
+    Q t n = Q t (n % 3^q + 3^q * (n / 3^q)) :=
+      congrArg (fun x : Nat => Q t x) hn
+    _ = Q t (n % 3^q) +
+        3^q * 4^(3^t * (n % 3^q)) * Q (t+q) (n / 3^q) :=
+      gst_canonical_prefix_recurrenceS Q hQ t (n % 3^q) q (n / 3^q) ht
+
+/-- Exact origin causality: the first q ternary digits of the canonical
+    Navigation value depend only on the first q ternary trits of the origin. -/
+theorem gst_canonical_prefix_residueS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n q : Nat) (ht : 1 ≤ t) :
+    Q t n % 3^q = Q t (n % 3^q) % 3^q := by
+  rw [gst_canonical_prefix_mod_divS Q hQ t n q ht]
+  simp [Nat.add_mod, Nat.mul_mod]
+-- END ATTACHED CanonicalPrefixScratch.lean
+
+-- BEGIN ATTACHED NavigationResidueCutScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+A direct canonical Navigation cut missing from the old origin classifier.
+The argument is abstract in the canonical map Q and uses only exact origin
+energy plus three low residues of Q(t,1).
+-/
+
+/-- At level at least two, the canonical block multiplier is one modulo 9. -/
+theorem gst_canonical_block_unit_mod9S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t : Nat) (ht : 2 ≤ t) :
+    4^(3^t) % 9 = 1 := by
+  have h := hQ t 1 (by omega)
+  simp only [Nat.mul_one] at h
+  rw [h, Nat.add_mod, Nat.mul_mod]
+  have hdiv : 3^(t+1) % 9 = 0 := by
+    apply Nat.mod_eq_zero_of_dvd
+    rw [show (9:Nat) = 3^2 by decide]
+    exact Nat.pow_dvd_pow 3 (by omega)
+  rw [hdiv]
+  norm_num
+
+/-- The residue-one block multiplier is one modulo 3. -/
+theorem gst_canonical_block_unit_mod3S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t : Nat) (ht : 1 ≤ t) :
+    4^(3^t) % 3 = 1 := by
+  have h := hQ t 1 ht
+  simp only [Nat.mul_one] at h
+  rw [h, Nat.add_mod, Nat.mul_mod]
+  have hdiv : 3^(t+1) % 3 = 0 := by
+    apply Nat.mod_eq_zero_of_dvd
+    exact pow_dvd_pow 3 (by omega)
+  rw [hdiv]
+  norm_num
+
+/-- The nested origin 4=1+3*1 has residue one modulo 9. -/
+theorem gst_canonical_Q4_mod9S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t : Nat) (ht : 2 ≤ t)
+    (hQ1_9 : Q t 1 % 9 = 7)
+    (hQnext1_3 : Q (t+1) 1 % 3 = 1) :
+    Q t 4 % 9 = 1 := by
+  have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 1 (by omega)
+  norm_num at hrec ⊢
+  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_9]
+  have hA3 : 4^(3^t) % 3 = 1 :=
+    gst_canonical_block_unit_mod3S Q hQ t (by omega)
+  have hthree :
+      (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
+    have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
+      rw [Nat.mul_mod, hA3, hQnext1_3]
+      decide
+    have hfactor :
+        (3 * 4^(3^t) * Q (t+1) 1) % 9 =
+          3 * ((4^(3^t) * Q (t+1) 1) % 3) := by
+      omega
+    rw [hfactor, hAq3]
+  rw [hthree]
+  decide
+
+/-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
+theorem gst_canonical_Q13_mod27S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (s : Nat) (hs : 2 ≤ s)
+    (hQ1_27 : Q s 1 % 27 = 16)
+    (hQnext1_9 : Q (s+1) 1 % 9 = 7)
+    (hQnext2_3 : Q (s+2) 1 % 3 = 1) :
+    Q s 13 % 27 = 19 := by
+  have hQ4 : Q (s+1) 4 % 9 = 1 :=
+    gst_canonical_Q4_mod9S Q hQ (s+1) (by omega)
+      hQnext1_9 hQnext2_3
+  have hrec := gst_canonical_prefix_recurrenceS Q hQ s 1 1 4 (by omega)
+  norm_num at hrec ⊢
+  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_27]
+  have hA9 : 4^(3^s) % 9 = 1 :=
+    gst_canonical_block_unit_mod9S Q hQ s hs
+  have hterm :
+      (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
+    have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
+      rw [Nat.mul_mod, hA9, hQ4]
+      decide
+    have hfactor :
+        (3 * 4^(3^s) * Q (s+1) 4) % 27 =
+          3 * ((4^(3^s) * Q (s+1) 4) % 9) := by
+      omega
+    rw [hfactor, hAq9]
+  rw [hterm]
+  decide
+
+/-- Canonical origin causality extends the residue-13 calculation to the full
+class b == 13 (mod 27). -/
+theorem gst_canonical_mod27_13_residueS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (s b : Nat) (hs : 2 ≤ s)
+    (hb13 : b % 27 = 13)
+    (hQ1_27 : Q s 1 % 27 = 16)
+    (hQnext1_9 : Q (s+1) 1 % 9 = 7)
+    (hQnext2_3 : Q (s+2) 1 % 3 = 1) :
+    Q s b % 27 = 19 := by
+  have hprefix := gst_canonical_prefix_residueS Q hQ s b 3 (by omega)
+  norm_num at hprefix
+  rw [hb13] at hprefix
+  exact hprefix.trans
+    (gst_canonical_Q13_mod27S Q hQ s hs hQ1_27 hQnext1_9 hQnext2_3)
+
+/-- Residue 19 modulo 27 is a fixed NULL Happy Gate at ternary position two. -/
+theorem gst_residue19_is_null_gate2S
+    (R : Nat) (hR : R % 27 = 19) :
+    gstDigitS R 2 = 2 ∧ gstCarryS R 2 = 0 := by
+  constructor
+  · unfold gstDigitS
+    have hdiv : R / 9 % 3 = (R % 27) / 9 := by
+      omega
+    rw [hdiv, hR]
+    decide
+  · unfold gstCarryS
+    have hmod9 : R % 9 = 1 := by
+      have h := Nat.mod_mod_of_dvd R (by decide : 9 ∣ 27)
+      rw [hR] at h
+      norm_num at h ⊢
+      exact h.symm
+    rw [hmod9]
+    decide
+-- END ATTACHED NavigationResidueCutScratch.lean
+
+-- BEGIN ATTACHED CanonicalOriginModulusScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Universal finite-origin quotient of a canonical Navigation map
+
+For every positive canonical level, addition in origin space becomes an affine
+addition law in physical Q-space.  Consequently every finite origin modulus
+`m` is represented exactly by the physical modulus `Q t m`.
+-/
+
+/-- The zero origin has zero Navigation value. -/
+theorem gst_canonical_origin_zeroS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t : Nat) (ht : 1 ≤ t) :
+    Q t 0 = 0 := by
+  have h := hQ t 0 ht
+  norm_num at h
+  have hp : 0 < 3^(t+1) := Nat.pow_pos (by decide)
+  omega
+
+/-- Exact additive origin law. -/
+theorem gst_canonical_origin_addS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t a b : Nat) (ht : 1 ≤ t) :
+    Q t (a+b) = Q t a + 4^(3^t*a) * Q t b := by
+  let D := 3^(t+1)
+  let A := 4^(3^t*a)
+  have hA0 := hQ t a ht
+  have hb := hQ t b ht
+  have hab := hQ t (a+b) ht
+  have hexp : 3^t*(a+b) = 3^t*a + 3^t*b := by ring
+  have hpow : 4^(3^t*(a+b)) = A * 4^(3^t*b) := by
+    dsimp [A]
+    rw [hexp, Nat.pow_add]
+  have hA : A = 1 + D * Q t a := by
+    simpa [A, D] using hA0
+  have hcur :
+      1 + D * Q t (a+b) =
+        A * (1 + D * 1 * Q t b) := by
+    calc
+      1 + D * Q t (a+b) = 4^(3^t*(a+b)) := by
+        simpa [D] using hab.symm
+      _ = A * 4^(3^t*b) := hpow
+      _ = A * (1 + D * Q t b) := by rw [hb]
+      _ = A * (1 + D * 1 * Q t b) := by ring
+  exact origin_navigation_algebraS
+    D A (Q t a) (Q t (a+b)) (Q t b) 1
+    (Nat.pow_pos (by decide)) hA hcur
+
+/-- Every integral multiple of an origin modulus maps to a physical value
+that is divisible by `Q t m`. -/
+theorem gst_canonical_origin_multiple_dvdS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t m q : Nat) (ht : 1 ≤ t) :
+    Q t m ∣ Q t (q*m) := by
+  induction q with
+  | zero =>
+      have h0 := gst_canonical_origin_zeroS Q hQ t ht
+      simp [h0]
+  | succ q ih =>
+      have hadd := gst_canonical_origin_addS Q hQ t (q*m) m ht
+      have hshape : (q+1)*m = q*m + m := by ring
+      rw [hshape, hadd]
+      exact Nat.dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)
+
+/-- Universal origin-modulus embedding.
+
+`Q t b` reduced modulo the physical modulus `Q t m` is exactly the canonical
+image of the finite origin residue `b mod m` reduced by the same modulus.
+-/
+theorem gst_canonical_origin_modulusS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t b m : Nat) (ht : 1 ≤ t) :
+    Q t b % Q t m = Q t (b % m) % Q t m := by
+  let r := b % m
+  let q := b / m
+  have hb : b = r + q*m := by
+    dsimp [r, q]
+    have h := Nat.mod_add_div b m
+    omega
+  have hadd := gst_canonical_origin_addS Q hQ t r (q*m) ht
+  have hdvdQ : Q t m ∣ Q t (q*m) :=
+    gst_canonical_origin_multiple_dvdS Q hQ t m q ht
+  have hdvdTerm : Q t m ∣ 4^(3^t*r) * Q t (q*m) :=
+    dvd_mul_of_dvd_right hdvdQ _
+  rw [hb, hadd, Nat.add_mod, Nat.mod_eq_zero_of_dvd hdvdTerm,
+    Nat.add_zero, Nat.mod_mod]
+
+/-- The first binary origin modulus is exactly 455. -/
+theorem gst_canonical_Q_one_two_eq_455S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 2 = 455 := by
+  have h := hQ 1 2 (by decide)
+  norm_num at h
+  omega
+
+/-- Origin parity is therefore represented exactly in Q-space modulo 455 at
+level one. -/
+theorem gst_canonical_origin_parity_mod455S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (b : Nat) :
+    Q 1 b % 455 = Q 1 (b % 2) % 455 := by
+  have hmod := gst_canonical_origin_modulusS Q hQ 1 b 2 (by decide)
+  rw [gst_canonical_Q_one_two_eq_455S Q hQ] at hmod
+  exact hmod
+-- END ATTACHED CanonicalOriginModulusScratch.lean
+
 -- BEGIN ATTACHED HandwrittenUniversalParadoxPotentialScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -9372,7 +10576,7 @@ theorem gst_handwritten_u_charge_tableS :
     gstHandwrittenUChargeS 1 = 15 ∧
     gstHandwrittenUChargeS 2 = 15 ∧
     gstHandwrittenUChargeS 3 = 21 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Local U-potential characterization of the bad GST language.
 
@@ -9393,7 +10597,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -9414,7 +10618,7 @@ theorem gst_handwritten_u_jump_tableS :
     gstHandwrittenUJumpS 3 0 = 24 ∧
     gstHandwrittenUJumpS 3 1 = 0 ∧
     gstHandwrittenUJumpS 3 2 = -6 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Negative U-potential jump is exactly a physical Happy/SURVIVE cell. -/
 theorem gst_handwritten_u_jump_negative_iff_happyS
@@ -9426,7 +10630,7 @@ theorem gst_handwritten_u_jump_negative_iff_happyS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
 
 /-- Exact next ternary-prefix decomposition used by the telescoping potential. -/
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
@@ -9585,507 +10789,6 @@ theorem gst_prefix_one_omega_bad_u_terminal_boundS
     (gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad)
     hempty
 -- END ATTACHED OmegaUPotentialBridgeScratch.lean
-
--- BEGIN ATTACHED CanonicalOriginModulusScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Universal finite-origin quotient of a canonical Navigation map
-
-For every positive canonical level, addition in origin space becomes an affine
-addition law in physical Q-space.  Consequently every finite origin modulus
-`m` is represented exactly by the physical modulus `Q t m`.
--/
-
-/-- The zero origin has zero Navigation value. -/
-theorem gst_canonical_origin_zeroS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t : Nat) (ht : 1 ≤ t) :
-    Q t 0 = 0 := by
-  have h := hQ t 0 ht
-  norm_num at h
-  have hp : 0 < 3^(t+1) := Nat.pow_pos (by decide)
-  omega
-
-/-- Exact additive origin law. -/
-theorem gst_canonical_origin_addS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t a b : Nat) (ht : 1 ≤ t) :
-    Q t (a+b) = Q t a + 4^(3^t*a) * Q t b := by
-  let D := 3^(t+1)
-  let A := 4^(3^t*a)
-  have hA0 := hQ t a ht
-  have hb := hQ t b ht
-  have hab := hQ t (a+b) ht
-  have hexp : 3^t*(a+b) = 3^t*a + 3^t*b := by ring
-  have hpow : 4^(3^t*(a+b)) = A * 4^(3^t*b) := by
-    dsimp [A]
-    rw [hexp, Nat.pow_add]
-  have hA : A = 1 + D * Q t a := by
-    simpa [A, D] using hA0
-  have hcur :
-      1 + D * Q t (a+b) =
-        A * (1 + D * 1 * Q t b) := by
-    calc
-      1 + D * Q t (a+b) = 4^(3^t*(a+b)) := by
-        simpa [D] using hab.symm
-      _ = A * 4^(3^t*b) := hpow
-      _ = A * (1 + D * Q t b) := by rw [hb]
-      _ = A * (1 + D * 1 * Q t b) := by ring
-  exact origin_navigation_algebraS
-    D A (Q t a) (Q t (a+b)) (Q t b) 1
-    (Nat.pow_pos (by decide)) hA hcur
-
-/-- Every integral multiple of an origin modulus maps to a physical value
-that is divisible by `Q t m`. -/
-theorem gst_canonical_origin_multiple_dvdS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t m q : Nat) (ht : 1 ≤ t) :
-    Q t m ∣ Q t (q*m) := by
-  induction q with
-  | zero =>
-      have h0 := gst_canonical_origin_zeroS Q hQ t ht
-      simp [h0]
-  | succ q ih =>
-      have hadd := gst_canonical_origin_addS Q hQ t (q*m) m ht
-      have hshape : (q+1)*m = q*m + m := by ring
-      rw [hshape, hadd]
-      exact Nat.dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)
-
-/-- Universal origin-modulus embedding.
-
-`Q t b` reduced modulo the physical modulus `Q t m` is exactly the canonical
-image of the finite origin residue `b mod m` reduced by the same modulus.
--/
-theorem gst_canonical_origin_modulusS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t b m : Nat) (ht : 1 ≤ t) :
-    Q t b % Q t m = Q t (b % m) % Q t m := by
-  let r := b % m
-  let q := b / m
-  have hb : b = r + q*m := by
-    dsimp [r, q]
-    have h := Nat.mod_add_div b m
-    omega
-  have hadd := gst_canonical_origin_addS Q hQ t r (q*m) ht
-  have hdvdQ : Q t m ∣ Q t (q*m) :=
-    gst_canonical_origin_multiple_dvdS Q hQ t m q ht
-  have hdvdTerm : Q t m ∣ 4^(3^t*r) * Q t (q*m) :=
-    dvd_mul_of_dvd_right hdvdQ _
-  rw [hb, hadd, Nat.add_mod, Nat.mod_eq_zero_of_dvd hdvdTerm,
-    Nat.add_zero, Nat.mod_mod]
-
-/-- The first binary origin modulus is exactly 455. -/
-theorem gst_canonical_Q_one_two_eq_455S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q) :
-    Q 1 2 = 455 := by
-  have h := hQ 1 2 (by decide)
-  norm_num at h
-  omega
-
-/-- Origin parity is therefore represented exactly in Q-space modulo 455 at
-level one. -/
-theorem gst_canonical_origin_parity_mod455S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (b : Nat) :
-    Q 1 b % 455 = Q 1 (b % 2) % 455 := by
-  have hmod := gst_canonical_origin_modulusS Q hQ 1 b 2 (by decide)
-  rw [gst_canonical_Q_one_two_eq_455S Q hQ] at hmod
-  exact hmod
--- END ATTACHED CanonicalOriginModulusScratch.lean
-
--- BEGIN ATTACHED InformationGeometryScratch.lean
-/-!
-Pure arithmetic geometry of the shared GST information integer.
-No Erdős theorem and no global wave assumption is used here.
--/
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Read the low base-4 coordinate of an exact decomposition S = p + 4 Z. -/
-theorem gst_information_low_coordinatesS
-    (S p Z : Nat) (hp : p < 4) (hS : S = p + 4*Z) :
-    S % 4 = p ∧ S / 4 = Z := by
-  subst S
-  constructor
-  · rw [Nat.add_mod]
-    simp [Nat.mod_eq_of_lt hp]
-  · have h4 : 0 < (4:Nat) := by decide
-    rw [Nat.add_mul_div_left p Z h4]
-    have hpdiv : p / 4 = 0 := Nat.div_eq_of_lt hp
-    simp [hpdiv]
-
-/-- Read the high A-coordinate of an exact decomposition S = W + A C. -/
-theorem gst_information_high_coordinatesS
-    (S W A C : Nat) (hA : 0 < A) (hW : W < A)
-    (hS : S = W + A*C) :
-    S % A = W ∧ S / A = C := by
-  subst S
-  constructor
-  · rw [Nat.add_mod]
-    simp [Nat.mod_eq_of_lt hW]
-  · rw [Nat.add_mul_div_left W C hA]
-    have hWdiv : W / A = 0 := Nat.div_eq_of_lt hW
-    simp [hWdiv]
-
-/-- Quaternary coordinate at depth i inside one shared information word. -/
-def gstInformationCarryAtS (S i : Nat) : Nat :=
-  S / 4^i % 4
-
-/-- When A=4^N, the two GST decompositions are literally the bottom and top
-    base-4 coordinates of one finite information word. -/
-theorem gst_information_bottom_top_coordinatesS
-    (S p Z W A C N : Nat)
-    (hA : A = 4^N)
-    (hp : p < 4) (hC : C < 4)
-    (hW : W < A)
-    (hLow : S = p + 4*Z)
-    (hHigh : S = W + A*C) :
-    gstInformationCarryAtS S 0 = p ∧
-      gstInformationCarryAtS S N = C := by
-  have hlow := gst_information_low_coordinatesS S p Z hp hLow
-  have hApos : 0 < A := by
-    rw [hA]
-    exact Nat.pow_pos (by decide)
-  have hhigh := gst_information_high_coordinatesS S W A C hApos hW hHigh
-  constructor
-  · simpa [gstInformationCarryAtS] using hlow.1
-  · rw [gstInformationCarryAtS, ← hA]
-    rw [hhigh.2]
-    exact Nat.mod_eq_of_lt hC
-
-/-- The shared information word has exactly one more possible base-4 digit
-    than the multiplier A=4^N. -/
-theorem gst_information_word_boundS
-    (S W A C : Nat)
-    (hW : W < A) (hC : C < 4)
-    (hHigh : S = W + A*C) :
-    S < 4*A := by
-  rw [hHigh]
-  have h1 : W + A*C < A + A*C := Nat.add_lt_add_right hW (A*C)
-  have h2 : A + A*C = A*(C+1) := by
-    rw [Nat.mul_add, Nat.mul_one]
-    ac_rfl
-  have hC1 : C+1 ≤ 4 := by omega
-  have h3 : A*(C+1) ≤ A*4 := Nat.mul_le_mul_left A hC1
-  rw [h2] at h1
-  have h4 : A*4 = 4*A := by ac_rfl
-  rw [h4] at h3
-  exact lt_of_lt_of_le h1 h3
-
-/-- Endpoint form used at a child Happy Gate: NULL means the top quaternary
-    coordinate is 0; GST+ carry-three means it is 3. -/
-theorem gst_information_gate_endpointS
-    (S W A C N : Nat)
-    (hA : A = 4^N)
-    (hC : C = 0 ∨ C = 3)
-    (hW : W < A)
-    (hHigh : S = W + A*C) :
-    gstInformationCarryAtS S N = 0 ∨
-      gstInformationCarryAtS S N = 3 := by
-  have hApos : 0 < A := by
-    rw [hA]
-    exact Nat.pow_pos (by decide)
-  have hhigh := gst_information_high_coordinatesS S W A C hApos hW hHigh
-  rw [gstInformationCarryAtS, ← hA, hhigh.2]
-  rcases hC with h0 | h3
-  · left
-    simp [h0]
-  · right
-    simp [h3]
-
-/-- Exact 2-adic/3-adic scale inequality behind the GST bridge.  For N≥3,
-    an (N+1)-digit base-4 information word fits strictly below ternary depth
-    2N. -/
-theorem four_pow_succ_lt_three_pow_doubleS
-    (N : Nat) (hN : 3 ≤ N) :
-    4^(N+1) < 3^(2*N) := by
-  induction N with
-  | zero => omega
-  | succ N ih =>
-      by_cases hprev : 3 ≤ N
-      · have hprevBound := ih hprev
-        have h3pos : 0 < 3^(2*N) := Nat.pow_pos (by decide)
-        calc
-          4^((N+1)+1) = 4 * 4^(N+1) := by
-            rw [Nat.pow_succ]
-            ac_rfl
-          _ < 4 * 3^(2*N) :=
-            Nat.mul_lt_mul_of_pos_left hprevBound (by decide)
-          _ < 9 * 3^(2*N) :=
-            Nat.mul_lt_mul_of_pos_right (by decide : 4 < 9) h3pos
-          _ = 3^(2*(N+1)) := by
-            rw [show 2*(N+1) = 2*N + 2 by omega, Nat.pow_add]
-            norm_num
-            ac_rfl
-      · have hN2 : N = 2 := by omega
-        subst N
-        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- The finite shared information word lies below the aligned ternary bridge. -/
-theorem gst_information_bridge_boundS
-    (S A N : Nat)
-    (hN : 3 ≤ N)
-    (hA : A = 4^N)
-    (hS : S < 4*A) :
-    S < 3^(2*N) := by
-  have h4 : 4*A = 4^(N+1) := by
-    rw [hA, Nat.pow_succ]
-    ac_rfl
-  rw [h4] at hS
-  exact lt_trans hS (four_pow_succ_lt_three_pow_doubleS N hN)
-
-/-- At the aligned bridge depth, the stored information word has zero quotient.
-    This is a finite NULL boundary of the information carrier; it is not a
-    claim that the global GST wave terminates. -/
-theorem gst_information_bridge_nullS
-    (S A N : Nat)
-    (hN : 3 ≤ N)
-    (hA : A = 4^N)
-    (hS : S < 4*A) :
-    S / 3^(2*N) = 0 := by
-  exact Nat.div_eq_of_lt (gst_information_bridge_boundS S A N hN hA hS)
--- END ATTACHED InformationGeometryScratch.lean
-
--- BEGIN ATTACHED InformationStateScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- The bottom decomposition D + 4 Z is itself one seeded affine information
-    carry with multiplier 4*A. -/
-theorem gst_shared_information_state_exactS
-    (A z T q : Nat) :
-    gstAffineMulCarryS (4*A) (1 + 4*z) T q =
-      gstAffineMulCarryS 4 1 (z + A*T) q +
-        4 * gstAffineMulCarryS A z T q := by
-  let M := 3^q
-  have hM : 0 < M := by
-    dsimp [M]
-    exact Nat.pow_pos (by decide)
-  let Y := z + A*(T % M)
-  have hmodY : Y % M = (z + A*T) % M := by
-    dsimp [Y, M]
-    simp [Nat.add_mod, Nat.mul_mod]
-  have hdiv := gst_affine_tail_div_decompositionS 1 4 Y q
-  have hYdiv : Y / M = gstAffineMulCarryS A z T q := by
-    dsimp [Y, M, gstAffineMulCarryS]
-  have hparent :
-      gstAffineMulCarryS 4 1 Y q =
-        gstAffineMulCarryS 4 1 (z + A*T) q := by
-    unfold gstAffineMulCarryS
-    dsimp [M] at hmodY
-    rw [hmodY]
-  calc
-    gstAffineMulCarryS (4*A) (1 + 4*z) T q =
-        (1 + 4*Y) / 3^q := by
-          unfold gstAffineMulCarryS
-          dsimp [Y, M]
-          congr 1
-          ring
-    _ = gstAffineMulCarryS 4 1 Y q + 4 * (Y / 3^q) := hdiv
-    _ = gstAffineMulCarryS 4 1 (z + A*T) q +
-          4 * gstAffineMulCarryS A z T q := by
-          dsimp [M] at hYdiv
-          rw [hparent, hYdiv]
-
-/-- One shared information state obeys the exact ternary vertical recurrence. -/
-theorem gst_shared_information_state_forwardS
-    (A z T q : Nat) :
-    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+1) =
-      (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
-        (4*A) * gstDigitS T q) / 3 := by
-  simp only [gstAffineMulCarryS, gstDigitS, Nat.pow_succ]
-  have hp : 0 < 3^q := Nat.pow_pos (by decide)
-  have hsplit : T % (3^q * 3) =
-      T % 3^q + 3^q * (T / 3^q % 3) := by
-    rw [Nat.mod_mul]
-  rw [hsplit, Nat.mul_add]
-  rw [show (4*A) * (3^q * (T / 3^q % 3)) =
-      3^q * ((4*A) * (T / 3^q % 3)) by ac_rfl]
-  rw [show
-      1 + 4*z + ((4*A) * (T % 3^q) +
-        3^q * ((4*A) * (T / 3^q % 3))) =
-      (1 + 4*z + (4*A) * (T % 3^q)) +
-        3^q * ((4*A) * (T / 3^q % 3)) by ring]
-  rw [← Nat.div_div_eq_div_mul]
-  rw [Nat.add_mul_div_left _ _ hp]
-
-/-- The parent seeded carry and vertical affine carry are exactly the bottom
-    base-4 digit and quotient of the shared information state. -/
-theorem gst_shared_information_bottom_coordinatesS
-    (A z T q : Nat)
-    (hD : gstAffineMulCarryS 4 1 (z + A*T) q < 4) :
-    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
-    let D := gstAffineMulCarryS 4 1 (z + A*T) q
-    let Z := gstAffineMulCarryS A z T q
-    S % 4 = D ∧ S / 4 = Z := by
-  dsimp only
-  have hS := gst_shared_information_state_exactS A z T q
-  exact gst_information_low_coordinatesS
-    _ _ _ hD hS
-
-/-- The child carry is the top base-4 coordinate of the same information word. -/
-theorem gst_shared_information_top_coordinateS
-    (A z T q N : Nat)
-    (hA : A = 4^N)
-    (hApos : 0 < A)
-    (hz1 : 1 + 4*z < A) :
-    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
-    let C := gstCarryS T q
-    S / A = C := by
-  dsimp only
-  have hEq := gst_shared_information_carry_equationS A z T q
-  have hW : gstAffineMulCarryS A (1 + 4*z) (4*T) q < A :=
-    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) q hApos hz1
-  have hShared := gst_shared_information_state_exactS A z T q
-  rw [hShared]
-  rw [← hEq]
-  have hcoord := gst_information_high_coordinatesS
-    (gstAffineMulCarryS A (1 + 4*z) (4*T) q + A * gstCarryS T q)
-    (gstAffineMulCarryS A (1 + 4*z) (4*T) q)
-    A (gstCarryS T q) hApos hW rfl
-  exact hcoord.2
-
-/-- If A ≡ 1 (mod 3), the parent digit is read from the vertical information
-    quotient Z together with the current child digit. -/
-theorem gst_parent_digit_from_informationS
-    (A z T q : Nat) (hA3 : A % 3 = 1) :
-    gstDigitS (z + A*T) q =
-      (gstAffineMulCarryS A z T q + gstDigitS T q) % 3 := by
-  have htail := gst_affine_tail_div_decompositionS z A T q
-  unfold gstDigitS
-  rw [htail]
-  have hmul : (A * (T / 3^q)) % 3 = gstDigitS T q := by
-    unfold gstDigitS
-    calc
-      (A * (T / 3^q)) % 3 =
-          ((A % 3) * ((T / 3^q) % 3)) % 3 := Nat.mul_mod A (T / 3^q) 3
-      _ = (T / 3^q) % 3 := by simp [hA3]
-  rw [Nat.add_mod, hmul]
-  simpa [gstDigitS] using
-    (Nat.add_mod
-      (gstAffineMulCarryS A z T q)
-      (T / 3^q % 3) 3).symm
--- END ATTACHED InformationStateScratch.lean
-
--- BEGIN ATTACHED InformationRegenerationScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Seed-retaining complete bad language for the scratch information state. -/
-def GSTSeededBadTraceS (seed R : Nat) : Prop :=
-  ∀ j, GSTBadPairS (gstAffineMulCarryS 4 seed R j) (gstDigitS R j)
-
-/-- Dividing a relative affine realization by one ternary position preserves
-    the same relative multiplier.  Only the finite offset is regenerated. -/
-theorem gst_relative_affine_tail_divS
-    (A Z Y : Nat) :
-    (Z + A*Y) / 3 =
-      (Z + A*(Y%3)) / 3 + A*(Y/3) := by
-  have h := gst_affine_tail_div_decompositionS Z A Y 1
-  simpa [gstAffineMulCarryS] using h
-
-/-- The emitted digit of a relative affine realization depends only on the
-    current child digit and the finite information offset. -/
-theorem gst_relative_affine_emitted_digitS
-    (A Z Y : Nat) :
-    (Z + A*Y) % 3 = (Z + A*(Y%3)) % 3 := by
-  simp [Nat.add_mod, Nat.mul_mod]
-
-/-- Exact simultaneous regeneration step.  One natural-origin trit is consumed
-    in the child affine state, while the parent remains the same relative
-    A-affine realization of the regenerated child.  No information is erased. -/
-theorem gst_canonical_information_regeneratesS
-    (Q : Nat → Nat → Nat)
-    (t n childOffset childMul originA A Z : Nat)
-    (hrec : Q t (3*(n/3) + n%3) =
-      Q t (n%3) + 3 * originA^(n%3) * Q (t+1) (n/3)) :
-    let E := childOffset + childMul * Q t (n%3)
-    let r := E % 3
-    let childOffset' := E / 3
-    let childMul' := childMul * originA^(n%3)
-    let Y' := childOffset' + childMul' * Q (t+1) (n/3)
-    let e := (Z + A*r) % 3
-    let Z' := (Z + A*r) / 3
-    childOffset + childMul * Q t n = r + 3*Y' ∧
-      Z + A*(childOffset + childMul * Q t n) =
-        e + 3*(Z' + A*Y') := by
-  dsimp only
-  have hchild :=
-    affine_natural_origin_stepS Q t n childOffset childMul originA hrec
-  dsimp only at hchild
-  constructor
-  · exact hchild
-  · let r := (childOffset + childMul * Q t (n % 3)) % 3
-    let Y' := (childOffset + childMul * Q t (n % 3)) / 3 +
-      childMul * originA ^ (n % 3) * Q (t + 1) (n / 3)
-    have hchild' : childOffset + childMul * Q t n = r + 3*Y' := by
-      simpa [r, Y'] using hchild
-    have hsplit : Z + A*r = (Z + A*r) % 3 + 3*((Z + A*r)/3) := by
-      have h := Nat.mod_add_div (Z + A*r) 3
-      omega
-    calc
-      Z + A*(childOffset + childMul * Q t n) =
-          Z + A*(r + 3*Y') := by rw [hchild']
-      _ = (Z + A*r) + 3*(A*Y') := by ring
-      _ = ((Z + A*r) % 3 + 3*((Z + A*r)/3)) + 3*(A*Y') := by rw [← hsplit]
-      _ = (Z + A*r) % 3 + 3*((Z + A*r)/3 + A*Y') := by ring
-      _ = (Z + A * ((childOffset + childMul * Q t (n % 3)) % 3)) % 3 +
-          3 * ((Z + A * ((childOffset + childMul * Q t (n % 3)) % 3)) / 3 +
-            A * ((childOffset + childMul * Q t (n % 3)) / 3 +
-              childMul * originA ^ (n % 3) * Q (t + 1) (n / 3))) := by
-        rfl
-
-/-- A complete seed-retaining parent bad trace remains bad after consuming its
-    first ternary row.  The new seed is exactly the regenerated carry. -/
-theorem gst_seeded_bad_trace_regenerates_tailS
-    (D X : Nat) (hbad : GSTSeededBadTraceS D X) :
-    GSTSeededBadTraceS
-      (gstAffineMulCarryS 4 D X 1) (X/3) := by
-  intro j
-  have h := hbad (1+j)
-  rw [gst_seeded_affine_carry_semigroupS D X 1 j,
-      gst_seeded_affine_digit_shiftS X 1 j] at h
-  simpa using h
-
-/-- The child seed regenerates by the same local GST equation when the first
-    emitted child digit is consumed. -/
-theorem gst_child_seed_after_regenerationS
-    (C Y : Nat) :
-    gstAffineMulCarryS 4 C Y 1 =
-      gstStepCarryS C (Y%3) := by
-  simp [gstAffineMulCarryS, gstStepCarryS]
-
-/-- Likewise for the parent seed. -/
-theorem gst_parent_seed_after_regenerationS
-    (D X : Nat) :
-    gstAffineMulCarryS 4 D X 1 =
-      gstStepCarryS D (X%3) := by
-  simp [gstAffineMulCarryS, gstStepCarryS]
-
-/-- NULL is therefore a regenerative carrier state, not an absorbing endpoint:
-    a child digit two at carry zero moves to carry two in the regenerated tail. -/
-theorem gst_null_gate_regenerates_seedS
-    (Y : Nat) (hd : Y % 3 = 2) :
-    gstAffineMulCarryS 4 0 Y 1 = 2 := by
-  rw [gst_child_seed_after_regenerationS, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- A GST+ child digit two similarly regenerates with carry three. -/
-theorem gst_plus_gate_regenerates_seedS
-    (Y : Nat) (hd : Y % 3 = 2) :
-    gstAffineMulCarryS 4 3 Y 1 = 3 := by
-  rw [gst_child_seed_after_regenerationS, hd]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED InformationRegenerationScratch.lean
 
 -- BEGIN ATTACHED PrefixOneOriginPhaseRecursionScratch.lean
 set_option maxRecDepth 1000000
@@ -10260,7 +10963,7 @@ theorem gst_bad_hard_tail_origin_one_regeneratesS
   have hseed :
       gstAffineMulCarryS 4 1 (GSTHardPrefixOneTailS Q z t (3*u+1)) 1 = 0 := by
     rw [gst_parent_seed_after_regenerationS, hd0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   rw [hseed, gst_hard_tail_origin_one_div3S Q hQ z hunit t u ht] at hsuffix
   exact hsuffix
 
@@ -10284,7 +10987,7 @@ theorem gst_bad_hard_tail_origin_two_regeneratesS
   have hseed :
       gstAffineMulCarryS 4 1 (GSTHardPrefixOneTailS Q z t (3*u+2)) 1 = 1 := by
     rw [gst_parent_seed_after_regenerationS, hd1]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   rw [hseed, gst_hard_tail_origin_two_div3S Q hQ z hunit t u ht] at hsuffix
   exact hsuffix
 
@@ -10492,7 +11195,7 @@ theorem gst_navigation_constant_four_mod243_stableS
     c_mod81_stable (s+1) (by omega)
   have hprod81 : (4^(3^s) * c (s+1)) % 81 = 16 := by
     rw [Nat.mul_mod, hA81, hcNext81]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   have hprodDecomp :
       4^(3^s) * c (s+1) =
         16 + 81 * ((4^(3^s) * c (s+1)) / 81) := by
@@ -10512,7 +11215,7 @@ theorem gst_navigation_constant_four_mod243_stableS
     norm_num
 
   rw [hrec, Nat.add_mod, hc243, hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Exact regenerated terminal word after the forced prefix and NULL row. -/
 def gstResidualNullTerminalS (s : Nat) : Nat :=
@@ -10565,7 +11268,7 @@ theorem gst_residual_null_terminal_happyS
   · right
     unfold gstAffineMulCarryS
     rw [show (3:Nat)^2 = 9 by decide, h9]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
 
 /-- Explicit low-level NULL terminal gates.  These are finite kernel checks,
 not bounded searches used as a universal theorem. -/
@@ -10573,19 +11276,19 @@ theorem gst_residual_null_terminal_happy_s1S :
     gstDigitS (gstResidualNullTerminalS 1) 6 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 1) 6 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 1) 6 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 theorem gst_residual_null_terminal_happy_s2S :
     gstDigitS (gstResidualNullTerminalS 2) 7 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 2) 7 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 2) 7 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 theorem gst_residual_null_terminal_happy_s3S :
     gstDigitS (gstResidualNullTerminalS 3) 5 = 2 ∧
       (gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 3) 5 = 0 ∨
        gstAffineMulCarryS 4 0 (gstResidualNullTerminalS 3) 5 = 3) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Every positive canonical level has an explicit terminal NULL gate. -/
 theorem gst_residual_null_terminal_happy_allS
@@ -10670,140 +11373,6 @@ theorem gst_residual_null_bad_forces_deeper_originS
   exact False.elim (gst_residual_null_origin_one_bad_impossible_allS s hs hBad)
 -- END ATTACHED ResidualNullTerminalScratch.lean
 
--- BEGIN ATTACHED NavigationResidueCutScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-A direct canonical Navigation cut missing from the old origin classifier.
-The argument is abstract in the canonical map Q and uses only exact origin
-energy plus three low residues of Q(t,1).
--/
-
-/-- At level at least two, the canonical block multiplier is one modulo 9. -/
-theorem gst_canonical_block_unit_mod9S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t : Nat) (ht : 2 ≤ t) :
-    4^(3^t) % 9 = 1 := by
-  have h := hQ t 1 (by omega)
-  simp only [Nat.mul_one] at h
-  rw [h, Nat.add_mod, Nat.mul_mod]
-  have hdiv : 3^(t+1) % 9 = 0 := by
-    apply Nat.mod_eq_zero_of_dvd
-    rw [show (9:Nat) = 3^2 by decide]
-    exact Nat.pow_dvd_pow 3 (by omega)
-  rw [hdiv]
-  norm_num
-
-/-- The residue-one block multiplier is one modulo 3. -/
-theorem gst_canonical_block_unit_mod3S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t : Nat) (ht : 1 ≤ t) :
-    4^(3^t) % 3 = 1 := by
-  have h := hQ t 1 ht
-  simp only [Nat.mul_one] at h
-  rw [h, Nat.add_mod, Nat.mul_mod]
-  have hdiv : 3^(t+1) % 3 = 0 := by
-    apply Nat.mod_eq_zero_of_dvd
-    exact pow_dvd_pow 3 (by omega)
-  rw [hdiv]
-  norm_num
-
-/-- The nested origin 4=1+3*1 has residue one modulo 9. -/
-theorem gst_canonical_Q4_mod9S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t : Nat) (ht : 2 ≤ t)
-    (hQ1_9 : Q t 1 % 9 = 7)
-    (hQnext1_3 : Q (t+1) 1 % 3 = 1) :
-    Q t 4 % 9 = 1 := by
-  have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 1 (by omega)
-  norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_9]
-  have hA3 : 4^(3^t) % 3 = 1 :=
-    gst_canonical_block_unit_mod3S Q hQ t (by omega)
-  have hthree :
-      (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
-    have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
-      rw [Nat.mul_mod, hA3, hQnext1_3]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-    have hfactor :
-        (3 * 4^(3^t) * Q (t+1) 1) % 9 =
-          3 * ((4^(3^t) * Q (t+1) 1) % 3) := by
-      omega
-    rw [hfactor, hAq3]
-  rw [hthree]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
-theorem gst_canonical_Q13_mod27S
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (s : Nat) (hs : 2 ≤ s)
-    (hQ1_27 : Q s 1 % 27 = 16)
-    (hQnext1_9 : Q (s+1) 1 % 9 = 7)
-    (hQnext2_3 : Q (s+2) 1 % 3 = 1) :
-    Q s 13 % 27 = 19 := by
-  have hQ4 : Q (s+1) 4 % 9 = 1 :=
-    gst_canonical_Q4_mod9S Q hQ (s+1) (by omega)
-      hQnext1_9 hQnext2_3
-  have hrec := gst_canonical_prefix_recurrenceS Q hQ s 1 1 4 (by omega)
-  norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_27]
-  have hA9 : 4^(3^s) % 9 = 1 :=
-    gst_canonical_block_unit_mod9S Q hQ s hs
-  have hterm :
-      (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
-    have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
-      rw [Nat.mul_mod, hA9, hQ4]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-    have hfactor :
-        (3 * 4^(3^s) * Q (s+1) 4) % 27 =
-          3 * ((4^(3^s) * Q (s+1) 4) % 9) := by
-      omega
-    rw [hfactor, hAq9]
-  rw [hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- Canonical origin causality extends the residue-13 calculation to the full
-class b == 13 (mod 27). -/
-theorem gst_canonical_mod27_13_residueS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (s b : Nat) (hs : 2 ≤ s)
-    (hb13 : b % 27 = 13)
-    (hQ1_27 : Q s 1 % 27 = 16)
-    (hQnext1_9 : Q (s+1) 1 % 9 = 7)
-    (hQnext2_3 : Q (s+2) 1 % 3 = 1) :
-    Q s b % 27 = 19 := by
-  have hprefix := gst_canonical_prefix_residueS Q hQ s b 3 (by omega)
-  norm_num at hprefix
-  rw [hb13] at hprefix
-  exact hprefix.trans
-    (gst_canonical_Q13_mod27S Q hQ s hs hQ1_27 hQnext1_9 hQnext2_3)
-
-/-- Residue 19 modulo 27 is a fixed NULL Happy Gate at ternary position two. -/
-theorem gst_residue19_is_null_gate2S
-    (R : Nat) (hR : R % 27 = 19) :
-    gstDigitS R 2 = 2 ∧ gstCarryS R 2 = 0 := by
-  constructor
-  · unfold gstDigitS
-    have hdiv : R / 9 % 3 = (R % 27) / 9 := by
-      omega
-    rw [hdiv, hR]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-  · unfold gstCarryS
-    have hmod9 : R % 9 = 1 := by
-      have h := Nat.mod_mod_of_dvd R (by decide : 9 ∣ 27)
-      rw [hR] at h
-      norm_num at h ⊢
-      exact h.symm
-    rw [hmod9]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED NavigationResidueCutScratch.lean
-
 -- BEGIN ATTACHED ResidualNullPrefixFourCutScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -10823,10 +11392,10 @@ theorem gst_navigation_constant_four_mod27S
     gstNavigationConstant s 4 % 27 = 10 := by
   by_cases hs2 : s = 2
   · subst s
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   by_cases hs3 : s = 3
   · subst s
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   · have h243 := gst_navigation_constant_four_mod243_stableS s (by omega)
     have h := Nat.mod_mod_of_dvd (gstNavigationConstant s 4)
       (by decide : 27 ∣ 243)
@@ -10854,7 +11423,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
   have hprod3 :
       (4^(3^s * 4) * gstNavigationConstant (s+2) u) % 3 = 1 := by
     rw [Nat.mul_mod, hA3, hQu3]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   have hprodDecomp :
       4^(3^s * 4) * gstNavigationConstant (s+2) u =
         1 + 3 * ((4^(3^s * 4) * gstNavigationConstant (s+2) u) / 3) := by
@@ -10877,7 +11446,7 @@ theorem gst_navigation_prefix_four_next_one_mod27S
     norm_num
 
   rw [hrec, Nat.add_mod, hQ4, hterm]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- In the true NULL residual n=3u+1, a second origin trit one contradicts the
 complete parent Omega bad trace. -/
@@ -11009,7 +11578,7 @@ theorem gst_navigation_constant_mod3_allS
     have hQ0 := gst_canonical_origin_zeroS
       gstNavigationConstant gst_navigation_constant_origin_energyS s hs
     rw [hQ0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   by_cases hm3 : m % 3 = 0
   · have hmshape : m = 3 * (m / 3) := by
       have h := Nat.mod_add_div m 3
@@ -11093,6 +11662,1142 @@ theorem gst_canonical_bad_forbids_cut_shiftS
   exact hno (gst_canonical_origin_cut_witnessS
     s a k m hs hcarry hd)
 -- END ATTACHED CanonicalOriginCutIntersectionScratch.lean
+
+-- BEGIN ATTACHED FiniteSupportScratch.lean
+/-!
+Finite-support side of the corrected GST separation proof.
+This file proves only arithmetic facts about natural ternary origins.
+It deliberately does NOT assume or assert the missing GST forcing theorem.
+-/
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- The k-th least-significant ternary origin digit. -/
+def ternaryOriginDigitS (n k : Nat) : Nat :=
+  n / 3^k % 3
+
+/-- A genuinely infinite ternary-support origin has a nonzero trit beyond every
+    finite cutoff.  Ordinary naturals will be proved not to satisfy this. -/
+def InfiniteTernarySupportS (n : Nat) : Prop :=
+  ∀ K, ∃ k, K ≤ k ∧ ternaryOriginDigitS n k ≠ 0
+
+/-- Elementary growth bound used to give every natural an explicit ternary
+    cutoff without logarithms. -/
+theorem three_pow_succ_gt_selfS (n : Nat) :
+    n < 3^(n+1) := by
+  induction n with
+  | zero => decide
+  | succ n ih =>
+      have hp : 0 < 3^(n+1) := Nat.pow_pos (by decide)
+      have hle : n+1 ≤ 3^(n+1) := by omega
+      rw [show (n+1)+1 = (n+1)+1 by rfl, Nat.pow_succ]
+      omega
+
+/-- Every ternary origin digit at or above the explicit cutoff n+1 is zero. -/
+theorem ternary_origin_eventually_zeroS
+    (n k : Nat) (hk : n+1 ≤ k) :
+    ternaryOriginDigitS n k = 0 := by
+  have hbase : n < 3^(n+1) := three_pow_succ_gt_selfS n
+  have hpow : 3^(n+1) ≤ 3^k :=
+    Nat.pow_le_pow_of_le (by decide : 1 < 3) hk
+  have hlt : n < 3^k := lt_of_lt_of_le hbase hpow
+  have hdiv : n / 3^k = 0 := Nat.div_eq_of_lt hlt
+  simp [ternaryOriginDigitS, hdiv]
+
+/-- No natural number has genuinely infinite ternary support. -/
+theorem natural_not_infinite_ternary_supportS (n : Nat) :
+    ¬ InfiniteTernarySupportS n := by
+  intro hinf
+  obtain ⟨k, hk, hnz⟩ := hinf (n+1)
+  exact hnz (ternary_origin_eventually_zeroS n k hk)
+
+/-- Consumer form for the final GST separation: any theorem forcing a nonzero
+    origin trit beyond every cutoff is immediately contradictory for Nat. -/
+theorem finite_origin_contradictionS
+    (n : Nat)
+    (hforce : ∀ K, ∃ k, K ≤ k ∧ ternaryOriginDigitS n k ≠ 0) :
+    False := by
+  exact natural_not_infinite_ternary_supportS n hforce
+-- END ATTACHED FiniteSupportScratch.lean
+
+-- BEGIN ATTACHED LastGateTrapScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- A Happy Gate in a seed-retaining child wave. -/
+def GSTSeededHappyS (D X j : Nat) : Prop :=
+  gstDigitS X j = 2 ∧
+    (gstAffineMulCarryS 4 D X j = 0 ∨
+     gstAffineMulCarryS 4 D X j = 3)
+
+/-- Any nonempty finite interval of seeded gates has a last gate. -/
+theorem gst_exists_last_seeded_gate_belowS
+    (D X N : Nat)
+    (hex : ∃ j, j < N ∧ GSTSeededHappyS D X j) :
+    ∃ q, q < N ∧ GSTSeededHappyS D X q ∧
+      ∀ r, q < r → r < N → ¬ GSTSeededHappyS D X r := by
+  induction N with
+  | zero =>
+      obtain ⟨j, hj, _⟩ := hex
+      omega
+  | succ N ih =>
+      by_cases hN : GSTSeededHappyS D X N
+      · refine ⟨N, Nat.lt_succ_self N, hN, ?_⟩
+        intro r hNr hr
+        omega
+      · have hexN : ∃ j, j < N ∧ GSTSeededHappyS D X j := by
+          obtain ⟨j, hj, hjgate⟩ := hex
+          by_cases heq : j = N
+          · subst j
+            exact False.elim (hN hjgate)
+          · have hjN : j < N := by omega
+            exact ⟨j, hjN, hjgate⟩
+        obtain ⟨q, hqN, hqgate, hlast⟩ := ih hexN
+        refine ⟨q, by omega, hqgate, ?_⟩
+        intro r hqr hr
+        by_cases heq : r = N
+        · subst r
+          exact hN
+        · have hrN : r < N := by omega
+          exact hlast r hqr hrN
+
+/-- Above the explicit natural ceiling every ternary digit is zero. -/
+theorem gst_digit_zero_above_self_ceilingS
+    (X j : Nat) (hj : X + 1 ≤ j) :
+    gstDigitS X j = 0 := by
+  have hbase : X < 3^(X+1) := three_pow_succ_gt_selfS X
+  have hpow : 3^(X+1) ≤ 3^j :=
+    Nat.pow_le_pow_of_le (by decide : 1 < 3) hj
+  have hlt : X < 3^j := lt_of_lt_of_le hbase hpow
+  unfold gstDigitS
+  rw [Nat.div_eq_of_lt hlt]
+
+/-- Seeded gates are therefore confined below the same finite natural ceiling;
+    this bounds only the location of a gate, not the GST wave itself. -/
+theorem gst_no_seeded_gate_above_self_ceilingS
+    (D X j : Nat) (hj : X + 1 ≤ j) :
+    ¬ GSTSeededHappyS D X j := by
+  intro hgate
+  have hd0 : gstDigitS X j = 0 :=
+    gst_digit_zero_above_self_ceilingS X j hj
+  have hd2 : gstDigitS X j = 2 := hgate.1
+  omega
+
+/-- Every seeded witness in a natural child has a globally last Happy Gate. -/
+theorem gst_exists_global_last_seeded_gateS
+    (D X : Nat)
+    (hex : ∃ j, GSTSeededHappyS D X j) :
+    ∃ q, GSTSeededHappyS D X q ∧
+      ∀ r, q < r → ¬ GSTSeededHappyS D X r := by
+  obtain ⟨j, hjgate⟩ := hex
+  have hjlt : j < X + 1 := by
+    by_contra hnot
+    have hj : X + 1 ≤ j := by omega
+    exact gst_no_seeded_gate_above_self_ceilingS D X j hj hjgate
+  obtain ⟨q, hq, hqgate, hlast⟩ :=
+    gst_exists_last_seeded_gate_belowS D X (X+1) ⟨j, hjlt, hjgate⟩
+  refine ⟨q, hqgate, ?_⟩
+  intro r hqr
+  by_cases hr : r < X + 1
+  · exact hlast r hqr hr
+  · have hceil : X + 1 ≤ r := by omega
+    exact gst_no_seeded_gate_above_self_ceilingS D X r hceil
+
+/-- Once we cut immediately after the globally last child gate, the remaining
+    child wave is a complete seeded bad trace.  The gate is not declared
+    terminal: its carry is retained exactly as the incoming suffix seed. -/
+theorem gst_suffix_after_last_gate_is_badS
+    (D X q : Nat)
+    (hq : GSTSeededHappyS D X q)
+    (hlast : ∀ r, q < r → ¬ GSTSeededHappyS D X r) :
+    let Dq := gstAffineMulCarryS 4 D X q
+    let Dnext := gstStepCarryS Dq 2
+    let Xnext := X / 3^(q+1)
+    GSTSeededBadTraceS Dnext Xnext := by
+  dsimp only
+  have hstep := gstAffineS_forward_exact_all D X q
+  have hDnext :
+      gstAffineMulCarryS 4 D X (q+1) =
+        gstStepCarryS (gstAffineMulCarryS 4 D X q) 2 := by
+    rw [hstep, hq.1]
+  intro j
+  have hno := hlast (q+1+j) (by omega)
+  intro hgate
+  apply hno
+  constructor
+  · rw [gst_seeded_affine_digit_shiftS X (q+1) j]
+    exact hgate.1
+  · rw [gst_seeded_affine_carry_semigroupS D X (q+1) j,
+        hDnext]
+    exact hgate.2
+-- END ATTACHED LastGateTrapScratch.lean
+
+-- BEGIN ATTACHED CanonicalTrapScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- After the globally last child Happy Gate, a hypothetical completely bad
+    prefix-one parent traps the regenerated information between two complete
+    seeded bad boundaries.  This is a packaging theorem only: it asserts no
+    final separation principle.
+
+    D = regenerated parent carry seed
+    Z = regenerated low affine quotient
+    W = regenerated high latent remainder
+    C = regenerated child carry seed (2 or 3)
+    Y = remaining child ternary suffix
+
+    The exact shared-information equation D + 4 Z = W + A C is retained. -/
+theorem gst_canonical_two_boundary_trapS
+    (A z T : Nat)
+    (hA : 0 < A)
+    (hz1 : 1 + 4*z < A)
+    (hparent : GSTSeededBadTraceS 1 (z + A*T))
+    (hchild : ∃ j, GSTSeededHappyS 0 T j) :
+    ∃ q,
+      let D := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
+      let Z := gstAffineMulCarryS A z T (q+1)
+      let W := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
+      let C := gstAffineMulCarryS 4 0 T (q+1)
+      let Y := T / 3^(q+1)
+      GSTSeededBadTraceS D (Z + A*Y) ∧
+      GSTSeededBadTraceS C Y ∧
+      (C = 2 ∨ C = 3) ∧
+      D + 4*Z = W + A*C ∧
+      W < A := by
+  obtain ⟨q, hq, hlast⟩ :=
+    gst_exists_global_last_seeded_gateS 0 T hchild
+  refine ⟨q, ?_⟩
+  dsimp only
+
+  have hparentSuffix :=
+    gst_seeded_bad_trace_suffixS 1 (z + A*T) (q+1) hparent
+  have hparentShape := gst_relative_affine_suffixS A z T (q+1)
+  rw [hparentShape] at hparentSuffix
+
+  have hchildSuffix :=
+    gst_suffix_after_last_gate_is_badS 0 T q hq hlast
+  dsimp only at hchildSuffix
+  have hchildStep := gstAffineS_forward_exact_all 0 T q
+  have hCeq :
+      gstAffineMulCarryS 4 0 T (q+1) =
+        gstStepCarryS (gstAffineMulCarryS 4 0 T q) 2 := by
+    rw [hchildStep, hq.1]
+  rw [← hCeq] at hchildSuffix
+
+  have hlatent0 := gst_child_gate_high_realisationS
+    (gstAffineMulCarryS 4 0 T q) hq.2
+  have hlatent :
+      gstAffineMulCarryS 4 0 T (q+1) = 2 ∨
+      gstAffineMulCarryS 4 0 T (q+1) = 3 := by
+    rw [hCeq]
+    exact hlatent0.2
+
+  have hEq := gst_shared_information_carry_equationS A z T (q+1)
+  have hcarryEq :
+      gstCarryS T (q+1) = gstAffineMulCarryS 4 0 T (q+1) := by
+    simp [gstCarryS, gstAffineMulCarryS]
+  rw [hcarryEq] at hEq
+  have hshared :
+      gstAffineMulCarryS 4 1 (z + A*T) (q+1) +
+          4 * gstAffineMulCarryS A z T (q+1) =
+        gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1) +
+          A * gstAffineMulCarryS 4 0 T (q+1) := hEq.symm
+
+  have hW : gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1) < A :=
+    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) (q+1) hA hz1
+
+  exact ⟨hparentSuffix, hchildSuffix, hlatent, hshared, hW⟩
+-- END ATTACHED CanonicalTrapScratch.lean
+
+-- BEGIN ATTACHED GSTExponentLiftScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+Pure-power exponent-residue graph.
+
+This is the canonical component absent from arbitrary affine T. If one
+3-adic exponent trit is changed at level p, the exact LTE block
+4^(3^p)=1+3^(p+1)c with c == 1 (mod 3) determines the newly exposed power
+digit one level higher.
+-/
+
+/-- Powers of four are one modulo three. -/
+theorem gst_pow4_mod3_oneS (m : Nat) : 4^m % 3 = 1 := by
+  rw [Nat.pow_mod]
+  norm_num
+
+/-- Adding one exponent trit `3^p` shifts the newly exposed ternary power digit
+by exactly one. -/
+theorem gst_pow4_exponent_lift_one_digitS
+    (p m c : Nat)
+    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
+    (hc : c % 3 = 1) :
+    gstDigitS (4^(m + 3^p)) (p+1) =
+      (gstDigitS (4^m) (p+1) + 1) % 3 := by
+  let L := 3^(p+1)
+  have hL : 0 < L := by
+    dsimp [L]
+    exact Nat.pow_pos (by decide)
+  have hpow : 4^(m + 3^p) = 4^m * (1 + L*c) := by
+    rw [Nat.pow_add, hA]
+  have hshape :
+      4^m * (1 + L*c) = 4^m + L * (4^m*c) := by ring
+  unfold gstDigitS
+  rw [show 3^(p+1) = L by rfl, hpow, hshape]
+  rw [Nat.add_mul_div_left _ _ hL]
+  rw [Nat.add_mod, Nat.mul_mod, gst_pow4_mod3_oneS, hc]
+
+/-- Adding exponent trit `2*3^p` shifts the newly exposed ternary power digit
+by exactly two.  This is obtained by applying the exact one-trit lift twice,
+so no separate nonlinear modular normalization is needed. -/
+theorem gst_pow4_exponent_lift_two_digitS
+    (p m c : Nat)
+    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
+    (hc : c % 3 = 1) :
+    gstDigitS (4^(m + 2*3^p)) (p+1) =
+      (gstDigitS (4^m) (p+1) + 2) % 3 := by
+  have h1 := gst_pow4_exponent_lift_one_digitS p m c hA hc
+  have h2 := gst_pow4_exponent_lift_one_digitS p (m + 3^p) c hA hc
+  have hexp : m + 2*3^p = (m + 3^p) + 3^p := by omega
+  rw [hexp]
+  rw [h2, h1]
+  have hd : gstDigitS (4^m) (p+1) < 3 := by
+    unfold gstDigitS
+    exact Nat.mod_lt _ (by decide)
+  omega
+
+/-- Unified exponent-trit lift for a in {0,1,2}. -/
+theorem gst_pow4_exponent_trit_lift_digitS
+    (p m c a : Nat)
+    (ha : a < 3)
+    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
+    (hc : c % 3 = 1) :
+    gstDigitS (4^(m + a*3^p)) (p+1) =
+      (gstDigitS (4^m) (p+1) + a) % 3 := by
+  have haCases : a = 0 ∨ a = 1 ∨ a = 2 := by omega
+  rcases haCases with h0 | h1 | h2
+  · subst a
+    simp only [Nat.zero_mul, Nat.add_zero]
+    have hd : gstDigitS (4^m) (p+1) < 3 := by
+      unfold gstDigitS
+      exact Nat.mod_lt _ (by decide)
+    omega
+  · subst a
+    simpa using gst_pow4_exponent_lift_one_digitS p m c hA hc
+  · subst a
+    simpa using gst_pow4_exponent_lift_two_digitS p m c hA hc
+-- END ATTACHED GSTExponentLiftScratch.lean
+
+-- BEGIN ATTACHED GSTGraphV2Scratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# GST Graph V2 scratch
+
+V2 does NOT replace the original GST ontology.  It keeps the exact seven
+non-dimensional axes
+
+  (x, x', y, y', z, z', n -> n')
+
+and the same three spaces NULL / ALT- / GST+.  The upgrade is that every vertex
+may additionally be read through the shared-information, phase-cycle, and
+canonical-energy overlays proved in the information modules.
+
+Semantic correction: NULL is a genuine space/realisation, but no absorbing or
+terminal axiom is attached to it.  In particular digit-two information in NULL
+regenerates to carry two under the exact GST edge law.
+-/
+
+inductive GSTSpaceV2S
+  | null
+  | altMinus
+  | gstPlus
+  deriving Repr, DecidableEq
+
+def gstSpaceV2S (C : Nat) : GSTSpaceV2S :=
+  if C = 0 then .null else if C = 3 then .gstPlus else .altMinus
+
+/-- The original seven axes, represented without collapsing any coordinate. -/
+structure GSTSevenAxisVertexV2S where
+  x : Nat
+  xNext : Nat
+  carry : Nat
+  space : GSTSpaceV2S
+  digit : Nat
+  boundary : Nat
+  descent : Nat
+  nextDescent : Nat
+  deriving Repr
+
+/-- Canonical construction of one V2 vertex.  The additional V2 invariants are
+projections/overlays on this vertex; they are not replacement dimensions. -/
+def gstSevenAxisVertexV2S (R N p : Nat) : GSTSevenAxisVertexV2S where
+  x := p
+  xNext := p + 1
+  carry := gstCarryS R p
+  space := gstSpaceV2S (gstCarryS R p)
+  digit := gstDigitS R p
+  boundary := N - p
+  descent := R / 3^p
+  nextDescent := R / 3^(p+1)
+
+/-- The V2 overlay retains the new conserved coordinates discovered during the
+surgery while the underlying seven-axis vertex remains intact. -/
+structure GSTGraphV2OverlayS where
+  sharedCarrier : Nat
+  affineQuotient : Nat
+  highRemainder : Nat
+  phase : Nat
+  paradoxEnergy : Nat
+  deriving Repr
+
+/-- The two residue classes of the shared carrier which realise a parent Happy
+Gate for the current child digit r. -/
+def GSTParentHappyResidue12S (S r : Nat) : Prop :=
+  match r with
+  | 0 => S % 12 = 8 ∨ S % 12 = 11
+  | 1 => S % 12 = 4 ∨ S % 12 = 7
+  | 2 => S % 12 = 0 ∨ S % 12 = 3
+  | _ => False
+
+/-- Exact mod-12 compression of the parent gate condition. -/
+theorem gst_parent_happy_iff_shared_residue12S
+    (S D Z r : Nat)
+    (hD : D < 4)
+    (hr : r < 3)
+    (hS : S = D + 4*Z) :
+    (((Z + r) % 3 = 2) ∧ (D = 0 ∨ D = 3)) ↔
+      GSTParentHappyResidue12S S r := by
+  have hrCases : r = 0 ∨ r = 1 ∨ r = 2 := by omega
+  rcases hrCases with h0 | h1 | h2
+  · subst r
+    simp [GSTParentHappyResidue12S]
+    omega
+  · subst r
+    simp [GSTParentHappyResidue12S]
+    omega
+  · subst r
+    simp [GSTParentHappyResidue12S]
+    omega
+
+/-- Parent badness is exactly avoidance of the rotating residue pair. -/
+theorem gst_parent_bad_iff_avoids_shared_residue12S
+    (S D Z r : Nat)
+    (hD : D < 4)
+    (hr : r < 3)
+    (hS : S = D + 4*Z) :
+    GSTBadPairS D ((Z+r) % 3) ↔
+      ¬ GSTParentHappyResidue12S S r := by
+  unfold GSTBadPairS
+  rw [gst_parent_happy_iff_shared_residue12S S D Z r hD hr hS]
+
+/-- At a child digit-two row a bad parent avoids residues 0 and 3 mod 12. -/
+theorem gst_parent_bad_at_child_two_residue12S
+    (S D Z : Nat)
+    (hD : D < 4)
+    (hS : S = D + 4*Z)
+    (hbad : GSTBadPairS D ((Z+2) % 3)) :
+    S % 12 ≠ 0 ∧ S % 12 ≠ 3 := by
+  have havoid :=
+    (gst_parent_bad_iff_avoids_shared_residue12S S D Z 2 hD (by decide) hS).mp hbad
+  simpa [GSTParentHappyResidue12S] using havoid
+
+/-!
+The second V2 compression is horizontal. Encode one microscopic multiply-by-4
+output word at macro phase p by `Yp = p + 4*Hp`. The canonical macro phase
+advance by A becomes an affine recurrence on the Y words themselves.
+-/
+
+/-- Phase 0 -> phase 1 on the microscopic output word. -/
+theorem gst_phase_micro_output01S
+    (A z H0 H1 : Nat)
+    (hH1 : H1 = z + A*H0) :
+    1 + 4*H1 = (1 + 4*z) + A*(4*H0) := by
+  rw [hH1]
+  ring
+
+/-- Phase 1 -> phase 2 on the microscopic output word. -/
+theorem gst_phase_micro_output12S
+    (A N c z H1 H2 : Nat)
+    (hA : A = 1 + 3*N*c)
+    (hc : c = 1 + 3*z)
+    (hH2 : H2 = z + N*c + A*H1) :
+    2 + 4*H2 = (1 + 4*z + N*c) + A*(1 + 4*H1) := by
+  rw [hH2, hA, hc]
+  ring
+
+/-- Phase 2 -> next phase 0 on the microscopic output word. -/
+theorem gst_phase_micro_output20S
+    (A N c z H2 H0next : Nat)
+    (hA : A = 1 + 3*N*c)
+    (hc : c = 1 + 3*z)
+    (hH0 : H0next = z + 1 + 2*N*c + A*H2) :
+    4*H0next = (2 + 4*z + 2*N*c) + A*(2 + 4*H2) := by
+  rw [hH0, hA, hc]
+  ring
+
+/-- Generic bridge from phase energy to its microscopic output tail. -/
+theorem gst_phase_micro_output_energyS
+    (E D p H : Nat)
+    (hE : E = 1 + p*D + 3*D*H) :
+    4*E = 4 + p*D + 3*D*(p + 4*H) := by
+  rw [hE]
+  ring
+
+/-- Exact microscopic output digit for a seed-retaining wave. -/
+theorem gst_seeded_output_digit_exactS
+    (seed H q : Nat) :
+    gstDigitS (seed + 4*H) q =
+      (gstAffineMulCarryS 4 seed H q + gstDigitS H q) % 3 := by
+  exact gst_parent_digit_from_informationS 4 seed H q (by decide)
+
+/-- A seeded Happy Gate is exactly a common ternary digit two between the input
+word H and its microscopic output word seed+4H. -/
+theorem gst_seeded_happy_iff_common_twoS
+    (seed H q : Nat)
+    (hseed : seed < 4) :
+    (gstDigitS H q = 2 ∧
+      (gstAffineMulCarryS 4 seed H q = 0 ∨
+       gstAffineMulCarryS 4 seed H q = 3)) ↔
+    (gstDigitS H q = 2 ∧ gstDigitS (seed + 4*H) q = 2) := by
+  have hC : gstAffineMulCarryS 4 seed H q < 4 :=
+    gst_affine_carry_lt_multiplierS 4 seed H q (by decide) hseed
+  have hout := gst_seeded_output_digit_exactS seed H q
+  constructor
+  · rintro ⟨hd, h0 | h3⟩
+    · refine ⟨hd, ?_⟩
+      rw [hout, hd, h0]
+    · refine ⟨hd, ?_⟩
+      rw [hout, hd, h3]
+  · rintro ⟨hd, hout2⟩
+    refine ⟨hd, ?_⟩
+    rw [hout, hd] at hout2
+    omega
+
+/-- A complete seeded bad trace is exactly absence of a common digit two
+between H and seed+4H at every ternary height. -/
+theorem gst_seeded_bad_iff_no_common_twoS
+    (seed H : Nat)
+    (hseed : seed < 4) :
+    GSTSeededBadTraceS seed H ↔
+      ∀ q, ¬ (gstDigitS H q = 2 ∧ gstDigitS (seed + 4*H) q = 2) := by
+  constructor
+  · intro hbad q hcommon
+    have hhappy :=
+      (gst_seeded_happy_iff_common_twoS seed H q hseed).mpr hcommon
+    exact (hbad q) hhappy
+  · intro hno q hhappy
+    have hcommon :=
+      (gst_seeded_happy_iff_common_twoS seed H q hseed).mp hhappy
+    exact hno q hcommon
+
+/-! Local five-rotation realization law. This is a re-coordinate map of one
+legal GST cell, not a global GST+/ALT- mirror. -/
+def gstLocalRotateS (x : Nat × Nat) : Nat × Nat :=
+  ((x.1 + 4*x.2) / 3, (x.1 + 4*x.2) % 3)
+
+/-- Every legal local carry/digit cell returns after five re-coordinatizations.
+The two fixed states are `(0,0)` and `(3,2)`; the remaining ten states form two
+five-cycles. -/
+theorem gst_local_rotate_fiveS
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    gstLocalRotateS
+      (gstLocalRotateS
+        (gstLocalRotateS
+          (gstLocalRotateS
+            (gstLocalRotateS (C,d))))) = (C,d) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;> decide
+-- END ATTACHED GSTGraphV2Scratch.lean
+
+-- BEGIN ATTACHED GSTGraphV2FluxScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+GST Graph V2 local information flux.
+Every legal multiply-by-four cell is compressed to the mass C + 4*d in
+{0,...,11}.  The four event types occupy exact disjoint mass sectors.
+-/
+
+def gstCellMassV2S (C d : Nat) : Nat := C + 4*d
+
+def gstCellOutputV2S (C d : Nat) : Nat := (C + 4*d) % 3
+
+def gstCellNextCarryV2S (C d : Nat) : Nat := (C + 4*d) / 3
+
+/-- Exact local conservation of one GST cell. -/
+theorem gst_cell_mass_conservationV2S (C d : Nat) :
+    gstCellMassV2S C d =
+      gstCellOutputV2S C d + 3 * gstCellNextCarryV2S C d := by
+  unfold gstCellMassV2S gstCellOutputV2S gstCellNextCarryV2S
+  have h := Nat.mod_add_div (C + 4*d) 3
+  omega
+
+/-- SURVIVE occupies exactly masses 8 and 11. -/
+theorem gst_cell_survive_iff_massV2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    (d = 2 ∧ gstCellOutputV2S C d = 2) ↔
+      (gstCellMassV2S C d = 8 ∨ gstCellMassV2S C d = 11) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;> decide
+
+/-- CREATE occupies exactly masses 2 and 5. -/
+theorem gst_cell_create_iff_massV2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    (d ≠ 2 ∧ gstCellOutputV2S C d = 2) ↔
+      (gstCellMassV2S C d = 2 ∨ gstCellMassV2S C d = 5) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;> decide
+
+/-- DESTROY occupies exactly masses 9 and 10. -/
+theorem gst_cell_destroy_iff_massV2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    (d = 2 ∧ gstCellOutputV2S C d ≠ 2) ↔
+      (gstCellMassV2S C d = 9 ∨ gstCellMassV2S C d = 10) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;> decide
+
+/-- The parent cell mass is one residue of the shared carrier.  This unifies
+all three rotating residue-12 cases into a single equation. -/
+theorem gst_parent_cell_mass_from_sharedV2S
+    (S D Z r : Nat)
+    (hD : D < 4)
+    (hr : r < 3)
+    (hS : S = D + 4*Z) :
+    gstCellMassV2S D ((Z+r)%3) = (S + 4*r) % 12 := by
+  have hP : (Z+r)%3 < 3 := Nat.mod_lt _ (by decide)
+  have hmass : D + 4*((Z+r)%3) < 12 := by omega
+  have hmod : (D + 4*(Z+r)) % 12 = D + 4*((Z+r)%3) := by
+    have hz : Z+r = 3*((Z+r)/3) + (Z+r)%3 :=
+      (Nat.div_add_mod (Z+r) 3).symm
+    rw [hz]
+    have hshape :
+        D + 4 * (3 * ((Z+r)/3) + (Z+r)%3) =
+          (D + 4*((Z+r)%3)) + 12*((Z+r)/3) := by ring
+    rw [hshape, Nat.add_mod, Nat.mul_mod]
+    simp [Nat.mod_eq_of_lt hmass]
+  unfold gstCellMassV2S
+  rw [hS]
+  have hshape : D + 4*Z + 4*r = D + 4*(Z+r) := by ring
+  rw [hshape, hmod]
+
+/-- Unified parent SURVIVE classifier in the shared carrier coordinates. -/
+theorem gst_parent_survive_iff_shared_mass_sectorV2S
+    (S D Z r : Nat)
+    (hD : D < 4)
+    (hr : r < 3)
+    (hS : S = D + 4*Z) :
+    (((Z+r)%3 = 2) ∧
+      (gstCellOutputV2S D ((Z+r)%3) = 2)) ↔
+      ((S + 4*r) % 12 = 8 ∨ (S + 4*r) % 12 = 11) := by
+  have hp : (Z+r)%3 < 3 := Nat.mod_lt _ (by decide)
+  rw [gst_cell_survive_iff_massV2S D ((Z+r)%3) hD hp]
+  rw [gst_parent_cell_mass_from_sharedV2S S D Z r hD hr hS]
+
+/-!
+The local re-coordinate map acts on the mass by multiplication by four modulo
+11.  Because 4 has order five modulo 11, the ten non-fixed legal masses split
+into two exact five-cycles.  This is a local coordinate invariant only; no
+global mirror principle is assumed.
+-/
+
+/-- One local GST re-coordinate rotates the mass by x |-> 4x modulo 11. -/
+theorem gst_local_rotate_mass_mod11V2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    let y := gstLocalRotateS (C,d)
+    gstCellMassV2S y.1 y.2 % 11 =
+      (4 * gstCellMassV2S C d) % 11 := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;> decide
+
+/-- The nonzero BIG2 species is the second five-cycle together with the fixed
+SURVIVE mass 11. -/
+def GSTBig2MassSpeciesV2S (M : Nat) : Prop :=
+  M = 2 ∨ M = 6 ∨ M = 7 ∨ M = 8 ∨ M = 10 ∨ M = 11
+
+/-- A legal child Happy Gate always begins in the BIG2 mass species. -/
+theorem gst_child_happy_has_big2_mass_speciesV2S
+    (C : Nat) (hC : C = 0 ∨ C = 3) :
+    GSTBig2MassSpeciesV2S (gstCellMassV2S C 2) := by
+  rcases hC with h0 | h3 <;> subst C <;>
+    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S]
+
+/-- The BIG2 five-cycle is closed under one local re-coordinate. -/
+theorem gst_big2_species_rotate_closedV2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hbig : GSTBig2MassSpeciesV2S (gstCellMassV2S C d)) :
+    let y := gstLocalRotateS (C,d)
+    GSTBig2MassSpeciesV2S (gstCellMassV2S y.1 y.2) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S, gstLocalRotateS] at hbig ⊢
+
+/-- Every legal BIG2-species cell reaches a SURVIVE mass (8 or 11) within at
+most four local coordinate rotations. -/
+theorem gst_big2_species_hits_survive_within_fourV2S
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hbig : GSTBig2MassSpeciesV2S (gstCellMassV2S C d)) :
+    let x0 := (C,d)
+    let x1 := gstLocalRotateS x0
+    let x2 := gstLocalRotateS x1
+    let x3 := gstLocalRotateS x2
+    let x4 := gstLocalRotateS x3
+    (gstCellMassV2S x0.1 x0.2 = 8 ∨ gstCellMassV2S x0.1 x0.2 = 11) ∨
+    (gstCellMassV2S x1.1 x1.2 = 8 ∨ gstCellMassV2S x1.1 x1.2 = 11) ∨
+    (gstCellMassV2S x2.1 x2.2 = 8 ∨ gstCellMassV2S x2.1 x2.2 = 11) ∨
+    (gstCellMassV2S x3.1 x3.2 = 8 ∨ gstCellMassV2S x3.1 x3.2 = 11) ∨
+    (gstCellMassV2S x4.1 x4.2 = 8 ∨ gstCellMassV2S x4.1 x4.2 = 11) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S, gstLocalRotateS] at hbig ⊢
+-- END ATTACHED GSTGraphV2FluxScratch.lean
+
+-- BEGIN ATTACHED GSTGraphV2BlockScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+Block-scale GST Graph V2 laws.
+The vertical Omega graph is sampled every k ternary rows without introducing a
+terminal cutoff.  The whole k-trit child block is retained as one exact radix
+coordinate.
+-/
+
+/-- Generic affine carry sampled across a block of `k` ternary rows. -/
+theorem gst_affine_block_step_exactV2S
+    (B z T q k : Nat) :
+    gstAffineMulCarryS B z T (q+k) =
+      (gstAffineMulCarryS B z T q +
+        B * ((T / 3^q) % 3^k)) / 3^k := by
+  simp only [gstAffineMulCarryS]
+  rw [Nat.pow_add, Nat.mod_mul]
+  have hqpos : 0 < 3^q := Nat.pow_pos (by decide)
+  have hshape :
+      z + B * (T % 3^q + 3^q * (T / 3^q % 3^k)) =
+        (z + B * (T % 3^q)) +
+          3^q * (B * (T / 3^q % 3^k)) := by
+    rw [Nat.mul_add]
+    ac_rfl
+  rw [hshape, ← Nat.div_div_eq_div_mul,
+      Nat.add_mul_div_left _ _ hqpos]
+
+/-- Exact block echo of the shared information carrier.
+
+With block width `k`, `D = 3^k`, and GST multiplier `A = 1 + D*c`, write
+
+  S_q = affineCarry(4A,1+4z,T,q)
+  U_q = (T/3^q) mod D.
+
+Then one whole block advance is
+
+  S_(q+k) = 4*c*U_q + floor((S_q + 4*U_q)/D).
+
+The term `4*c*U_q` is the explicit shifted information echo; the second term
+is the retained residual carrier. -/
+theorem gst_shared_information_block_echoV2S
+    (A c D z T q k : Nat)
+    (hD : D = 3^k)
+    (hA : A = 1 + D*c) :
+    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
+    let U := (T / 3^q) % D
+    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+k) =
+      4*c*U + (S + 4*U) / D := by
+  dsimp only
+  have hstep :=
+    gst_affine_block_step_exactV2S (4*A) (1 + 4*z) T q k
+  have hDpos : 0 < D := by
+    rw [hD]
+    exact Nat.pow_pos (by decide)
+  rw [← hD] at hstep
+  calc
+    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+k) =
+        (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
+          (4*A) * ((T / 3^q) % D)) / D := hstep
+    _ = ((gstAffineMulCarryS (4*A) (1 + 4*z) T q +
+          4 * ((T / 3^q) % D)) +
+          D * (4*c*((T / 3^q) % D))) / D := by
+          rw [hA]
+          congr 1
+          ring
+    _ = (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
+          4 * ((T / 3^q) % D)) / D +
+          4*c*((T / 3^q) % D) := by
+          rw [Nat.add_mul_div_left _ _ hDpos]
+    _ = 4*c*((T / 3^q) % D) +
+          (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
+            4 * ((T / 3^q) % D)) / D := by ac_rfl
+-- END ATTACHED GSTGraphV2BlockScratch.lean
+
+-- BEGIN ATTACHED GSTResidueSpacetimeScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Generic prefixed residue spacetime
+
+A chart `E = P + B*H`, with `P < B`, identifies the ternary digits of `H`
+with the successive jumps of the full-energy residue tower modulo `B*3^q`.
+-/
+
+def gstPrefixedModulusS (B q : Nat) : Nat := B * 3^q
+
+/-- Exact residue of a prefixed ternary tail. -/
+theorem gst_prefixed_residue_exactS
+    (P B H E q : Nat)
+    (hB : 1 ≤ B) (hP : P < B)
+    (hE : E = P + B*H) :
+    E % gstPrefixedModulusS B q = P + B*(H % 3^q) := by
+  unfold gstPrefixedModulusS
+  have hq : 0 < 3^q := Nat.pow_pos (by decide)
+  have hM : 0 < B*3^q := Nat.mul_pos (by omega) hq
+  have hr : H % 3^q < 3^q := Nat.mod_lt _ hq
+  have hsmall : P + B*(H % 3^q) < B*3^q := by
+    calc
+      P + B*(H % 3^q) < B + B*(H % 3^q) :=
+        Nat.add_lt_add_right hP _
+      _ = B*((H % 3^q)+1) := by ring
+      _ ≤ B*3^q := Nat.mul_le_mul_left B (Nat.succ_le_of_lt hr)
+  have hH : H = 3^q*(H/3^q) + H%3^q :=
+    (Nat.div_add_mod H (3^q)).symm
+  have hdecomp :
+      E = (P + B*(H%3^q)) + (B*3^q)*(H/3^q) := by
+    rw [hE]
+    conv_lhs => rw [hH]
+    ring
+  have hzero : ((B*3^q)*(H/3^q)) % (B*3^q) = 0 :=
+    Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
+  rw [hdecomp, Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
+  exact Nat.mod_eq_of_lt hsmall
+
+/-- Successive prefixed residues differ by exactly one tail ternary digit. -/
+theorem gst_prefixed_residue_stepS
+    (P B H q : Nat) :
+    P + B*(H % 3^(q+1)) =
+      (P + B*(H % 3^q)) +
+        gstPrefixedModulusS B q * gstDigitS H q := by
+  unfold gstPrefixedModulusS gstDigitS
+  rw [Nat.pow_succ, Nat.mod_mul]
+  ring
+
+/-- A tail digit two is exactly a `+2` jump in the full-energy residue tower. -/
+theorem gst_prefixed_digit_two_iff_residue_jumpS
+    (P B H E q : Nat)
+    (hB : 1 ≤ B) (hP : P < B)
+    (hE : E = P + B*H) :
+    gstDigitS H q = 2 ↔
+      E % gstPrefixedModulusS B (q+1) =
+        E % gstPrefixedModulusS B q +
+          2 * gstPrefixedModulusS B q := by
+  have hq := gst_prefixed_residue_exactS P B H E q hB hP hE
+  have hq1 := gst_prefixed_residue_exactS P B H E (q+1) hB hP hE
+  have hstep := gst_prefixed_residue_stepS P B H q
+  constructor
+  · intro hd
+    rw [hq1, hq, hstep, hd]
+    ring
+  · intro hjump
+    rw [hq1, hq] at hjump
+    rw [hstep] at hjump
+    have hadd :
+        gstPrefixedModulusS B q * gstDigitS H q =
+          2 * gstPrefixedModulusS B q :=
+      Nat.add_left_cancel hjump
+    have hM : 0 < gstPrefixedModulusS B q := by
+      unfold gstPrefixedModulusS
+      exact Nat.mul_pos (by omega) (Nat.pow_pos (by decide))
+    have hmul :
+        gstPrefixedModulusS B q * gstDigitS H q =
+          gstPrefixedModulusS B q * 2 := by
+      simpa [Nat.mul_comm] using hadd
+    exact Nat.mul_left_cancel hM hmul
+
+/-- A common digit two between two prefixed tails is exactly a simultaneous
+`+2` jump of their two full-energy residue towers. -/
+theorem gst_prefixed_common_two_iff_double_residue_jumpS
+    (P0 P1 B H0 H1 E0 E1 q : Nat)
+    (hB : 1 ≤ B) (hP0 : P0 < B) (hP1 : P1 < B)
+    (hE0 : E0 = P0 + B*H0)
+    (hE1 : E1 = P1 + B*H1) :
+    (gstDigitS H0 q = 2 ∧ gstDigitS H1 q = 2) ↔
+      (E0 % gstPrefixedModulusS B (q+1) =
+          E0 % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q ∧
+       E1 % gstPrefixedModulusS B (q+1) =
+          E1 % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q) := by
+  rw [gst_prefixed_digit_two_iff_residue_jumpS P0 B H0 E0 q hB hP0 hE0,
+      gst_prefixed_digit_two_iff_residue_jumpS P1 B H1 E1 q hB hP1 hE1]
+
+/-- One graph event: adjacent energies `E` and `4E` both make a digit-two
+residue jump at the same ternary row. -/
+def GSTDoubleJumpS (B E q : Nat) : Prop :=
+  E % gstPrefixedModulusS B (q+1) =
+      E % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q ∧
+  (4*E) % gstPrefixedModulusS B (q+1) =
+      (4*E) % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q
+
+/-- Phase-zero SURVIVE/common-two is exactly a double jump of the exact energy
+`E = 1 + 3D*T`. -/
+theorem gst_phase0_common_two_iff_double_jumpS
+    (D T E q : Nat) (hD : 3 ≤ D)
+    (hE : E = 1 + 3*D*T) :
+    (gstDigitS T q = 2 ∧ gstDigitS (4*T) q = 2) ↔
+      GSTDoubleJumpS (3*D) E q := by
+  have hE4 : 4*E = 4 + (3*D)*(4*T) := by
+    rw [hE]
+    ring
+  simpa [GSTDoubleJumpS] using
+    (gst_prefixed_common_two_iff_double_residue_jumpS
+      1 4 (3*D) T (4*T) E (4*E) q
+      (by omega) (by omega) (by omega) hE hE4)
+
+/-- Phase-one SURVIVE/common-two is exactly a double jump of the exact energy
+`E = 1 + D + 3D*H`.  The microscopic output tail is `1+4H`. -/
+theorem gst_phase1_common_two_iff_double_jumpS
+    (D H E q : Nat) (hD : 3 ≤ D)
+    (hE : E = 1 + D + 3*D*H) :
+    (gstDigitS H q = 2 ∧ gstDigitS (1+4*H) q = 2) ↔
+      GSTDoubleJumpS (3*D) E q := by
+  have hE4 : 4*E = (4+D) + (3*D)*(1+4*H) := by
+    rw [hE]
+    ring
+  simpa [GSTDoubleJumpS] using
+    (gst_prefixed_common_two_iff_double_residue_jumpS
+      (1+D) (4+D) (3*D) H (1+4*H) E (4*E) q
+      (by omega) (by omega) (by omega) hE hE4)
+-- END ATTACHED GSTResidueSpacetimeScratch.lean
+
+-- BEGIN ATTACHED AtomicPrefixOneReductionScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- Prefix-one Omega badness rules out every parent Navigation witness.
+    Position zero is excluded by the exact prefix-one residue modulo three;
+    every positive parent gate projects to an Omega gate-polynomial zero. -/
+theorem gst_prefix_one_no_parent_navigation_of_omega_bad_atomic
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ¬ GSTNavigationWitness (gstNavigationConstant s (1+3*n)) := by
+  intro hnav
+  obtain ⟨p, hp⟩ := hnav
+  have hQmod : gstNavigationConstant s (1+3*n) % 3 = 1 := by
+    calc
+      gstNavigationConstant s (1+3*n) % 3 = (1+3*n) % 3 :=
+        gstNavigationConstant_mod3 s (1+3*n) hs (by omega) (by omega)
+      _ = 1 := by omega
+  have hp0 : p ≠ 0 := by
+    intro hpz
+    subst p
+    have hd0 : gstDigit (gstNavigationConstant s (1+3*n)) 0 = 1 := by
+      change gstNavigationConstant s (1+3*n) / 1 % 3 = 1
+      simpa using hQmod
+    rw [hd0] at hp
+    omega
+  have hp1 : 1 ≤ p := by omega
+  let j := p - 1
+  have hpj : p = 1 + j := by
+    dsimp [j]
+    omega
+  have hparentDigit :
+      gstDigit (gstNavigationConstant s (1+3*n)) (1+j) = 2 := by
+    rw [← hpj]
+    exact hp.1
+  have hcarryMod : gstCarry (gstNavigationConstant s (1+3*n)) p % 3 = 0 :=
+    gstGoodSpace_carry_mod3_zero _ p hp.2
+  have hcarryLt : gstCarry (gstNavigationConstant s (1+3*n)) p < 4 :=
+    gstCarry_lt_four _ p hp1
+  have hparentCarryP :
+      gstCarry (gstNavigationConstant s (1+3*n)) p = 0 ∨
+      gstCarry (gstNavigationConstant s (1+3*n)) p = 3 := by
+    omega
+  have hparentCarry :
+      gstCarry (gstNavigationConstant s (1+3*n)) (1+j) = 0 ∨
+      gstCarry (gstNavigationConstant s (1+3*n)) (1+j) = 3 := by
+    rw [← hpj]
+    exact hparentCarryP
+  have hprojection := gst_omega_parent_projection s 1 n j hs
+  have hOmegaDigit : (gstOmega s 1 n j).parentDigit = 2 := by
+    rw [← hprojection.1]
+    simpa [Nat.pow_one] using hparentDigit
+  have hOmegaCarry :
+      (gstOmega s 1 n j).parentCarry = 0 ∨
+      (gstOmega s 1 n j).parentCarry = 3 := by
+    rcases hparentCarry with h0 | h3
+    · left
+      rw [← hprojection.2]
+      simpa [Nat.pow_one] using h0
+    · right
+      rw [← hprojection.2]
+      simpa [Nat.pow_one] using h3
+  have hzero : GSTOmegaGatePolynomial (gstOmega s 1 n j) = 0 :=
+    (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2
+      ⟨hOmegaDigit, hOmegaCarry⟩
+  have hnonzero := hBad j
+  change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0 at hnonzero
+  exact hnonzero hzero
+
+/-- A Navigation witness of `3*R` cannot occur at position zero and shifts
+    exactly back to a Navigation witness of `R`. -/
+theorem gstNavigationWitness_of_mul_three_atomic
+    (R : Nat) (h : GSTNavigationWitness (3*R)) :
+    GSTNavigationWitness R := by
+  obtain ⟨p, hd, hspace⟩ := h
+  cases p with
+  | zero =>
+      have hz : gstDigit (3*R) 0 = 0 := by
+        simp [gstDigit]
+      rw [hz] at hd
+      omega
+  | succ j =>
+      have hd' : gstDigit (3*R) (j+1) = 2 := by
+        simpa [Nat.succ_eq_add_one] using hd
+      have hspace' :
+          gstSpaceAt (3*R) (j+1) = .gstPlus ∨
+          gstSpaceAt (3*R) (j+1) = .null := by
+        simpa [Nat.succ_eq_add_one] using hspace
+      refine ⟨j, ?_, ?_⟩
+      · rw [← gstDigit_mul_three_shift R j]
+        exact hd'
+      · rw [← gstSpace_mul_three_shift R j]
+        exact hspace'
+
+/-- Iterated inverse shift through a forced ternary zero prefix. -/
+theorem gstNavigationWitness_of_mul_three_pow_atomic
+    (r R : Nat) (h : GSTNavigationWitness (3^r * R)) :
+    GSTNavigationWitness R := by
+  induction r generalizing R with
+  | zero =>
+      simpa using h
+  | succ r ih =>
+      have hscaled : GSTNavigationWitness (3^r * (3*R)) := by
+        simpa [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+          using h
+      have hthree : GSTNavigationWitness (3*R) := ih (R := 3*R) hscaled
+      exact gstNavigationWitness_of_mul_three_atomic R hthree
+
+/-- Exact iterated canonical zero-origin scaling. -/
+theorem gst_navigation_constant_mul3_pow_atomic
+    (s r m : Nat) (hs : 1 ≤ s) :
+    gstNavigationConstant s (3^r * m) =
+      3^r * gstNavigationConstant (s+r) m := by
+  induction r generalizing s with
+  | zero => simp
+  | succ r ih =>
+      have harg : 3^(r+1) * m = 3 * (3^r * m) := by
+        rw [Nat.pow_succ]
+        ac_rfl
+      rw [harg, gst_navigation_constant_mul3 s (3^r*m) hs]
+      rw [ih (s := s+1) (by omega)]
+      have hidx : (s+1)+r = s+(r+1) := by omega
+      rw [hidx, Nat.pow_succ]
+      ac_rfl
+-- END ATTACHED AtomicPrefixOneReductionScratch.lean
+
+-- BEGIN ATTACHED GSTPhaseCrossingScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Physical phase-crossing reduction
+
+This file does not assume the missing prefix-one crossing theorem.  It removes
+all remaining event/Omega vocabulary from that seam and identifies both sides
+with literal simultaneous +2 jumps in the exact power residue tower.
+-/
+
+/-- A seed-zero child Happy Gate is exactly a physical phase-zero double jump. -/
+theorem gst_phase0_seeded_happy_iff_double_jumpS
+    (D T E q : Nat) (hD : 3 ≤ D)
+    (hE : E = 1 + 3*D*T) :
+    (gstDigitS T q = 2 ∧
+      (gstAffineMulCarryS 4 0 T q = 0 ∨
+       gstAffineMulCarryS 4 0 T q = 3)) ↔
+      GSTDoubleJumpS (3*D) E q := by
+  rw [gst_seeded_happy_iff_common_twoS 0 T q (by decide)]
+  simpa using gst_phase0_common_two_iff_double_jumpS D T E q hD hE
+
+/-- A seed-one parent Happy Gate is exactly a physical phase-one double jump. -/
+theorem gst_phase1_seeded_happy_iff_double_jumpS
+    (D H E q : Nat) (hD : 3 ≤ D)
+    (hE : E = 1 + D + 3*D*H) :
+    (gstDigitS H q = 2 ∧
+      (gstAffineMulCarryS 4 1 H q = 0 ∨
+       gstAffineMulCarryS 4 1 H q = 3)) ↔
+      GSTDoubleJumpS (3*D) E q := by
+  rw [gst_seeded_happy_iff_common_twoS 1 H q (by decide)]
+  simpa using gst_phase1_common_two_iff_double_jumpS D H E q hD hE
+
+/-- Complete seed-one parent badness is precisely absence of every physical
+phase-one double jump. -/
+theorem gst_phase1_seeded_bad_iff_no_double_jumpS
+    (D H E : Nat) (hD : 3 ≤ D)
+    (hE : E = 1 + D + 3*D*H) :
+    GSTSeededBadTraceS 1 H ↔
+      ∀ q, ¬ GSTDoubleJumpS (3*D) E q := by
+  constructor
+  · intro hbad q hjump
+    have hnoCommon :=
+      (gst_seeded_bad_iff_no_common_twoS 1 H (by decide)).1 hbad q
+    apply hnoCommon
+    exact (gst_phase1_common_two_iff_double_jumpS D H E q hD hE).2 hjump
+  · intro hno
+    apply (gst_seeded_bad_iff_no_common_twoS 1 H (by decide)).2
+    intro q hcommon
+    apply hno q
+    exact (gst_phase1_common_two_iff_double_jumpS D H E q hD hE).1 hcommon
+
+/-- The exact remaining mathematical seam after the first forty green commits:
+a phase-zero double jump must cross the phase-one wall.  This is deliberately a
+property, not an axiom or theorem claim. -/
+def GSTPhysicalPhaseCrossingS (D T H E0 E1 : Nat) : Prop :=
+  (∃ q, GSTDoubleJumpS (3*D) E0 q) →
+    ∃ q, GSTDoubleJumpS (3*D) E1 q
+
+/-- Once the physical crossing property is supplied, a certified child gate
+contradicts a completely bad phase-one parent immediately.  Thus future work
+has exactly one target: prove `GSTPhysicalPhaseCrossingS` from the canonical
+pure-power rectangle, rather than proving an artificial pointwise reflection. -/
+theorem gst_physical_crossing_contradicts_parent_badS
+    (D T H E0 E1 q0 : Nat)
+    (hD : 3 ≤ D)
+    (hE0 : E0 = 1 + 3*D*T)
+    (hE1 : E1 = 1 + D + 3*D*H)
+    (hcross : GSTPhysicalPhaseCrossingS D T H E0 E1)
+    (hchild : gstDigitS T q0 = 2 ∧
+      (gstAffineMulCarryS 4 0 T q0 = 0 ∨
+       gstAffineMulCarryS 4 0 T q0 = 3))
+    (hparentBad : GSTSeededBadTraceS 1 H) : False := by
+  have h0 : GSTDoubleJumpS (3*D) E0 q0 :=
+    (gst_phase0_seeded_happy_iff_double_jumpS D T E0 q0 hD hE0).1 hchild
+  obtain ⟨q1, h1⟩ := hcross ⟨q0, h0⟩
+  have hno :=
+    (gst_phase1_seeded_bad_iff_no_double_jumpS D H E1 hD hE1).1 hparentBad
+  exact hno q1 h1
+-- END ATTACHED GSTPhaseCrossingScratch.lean
 
 -- BEGIN ATTACHED PurePowerBadAxisScratch.lean
 set_option maxRecDepth 1000000
@@ -11284,6 +12989,812 @@ theorem gst_parent_energy_stateS
     rw [hseed] at h
     exact h
 -- END ATTACHED PurePowerBadAxisScratch.lean
+
+-- BEGIN ATTACHED BadLanguageMagnitudeScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# GST bad-language magnitude axis
+
+A complete seeded bad GST trace cannot contain the consecutive ternary word
+`22`.  This file converts that symbolic exclusion into an exact Archimedean
+bound on every finite prefix.  It is deliberately independent of any Erdős
+claim or canonical-power forcing theorem.
+-/
+
+/-- Ternary words with no consecutive pair `22`. -/
+def GSTNo22S (X : Nat) : Prop :=
+  ∀ j, ¬ (gstDigitS X j = 2 ∧ gstDigitS X (j+1) = 2)
+
+/-- Complete seeded badness implies the purely symbolic no-`22` language. -/
+theorem gst_no22_of_seeded_badS
+    (D X : Nat) (hD : D < 4)
+    (hbad : ∀ j,
+      GSTBadPairS (gstAffineMulCarryS 4 D X j) (gstDigitS X j)) :
+    GSTNo22S X := by
+  intro j
+  exact gst_bad_trace_forbids_22S D X hD hbad j
+
+/-- The no-`22` language is stable under every ternary suffix cut. -/
+theorem gst_no22_div_three_powS
+    (X q : Nat) (hno : GSTNo22S X) :
+    GSTNo22S (X / 3^q) := by
+  intro j h22
+  apply hno (q+j)
+  constructor
+  · rw [gst_seeded_affine_digit_shiftS X q j]
+    exact h22.1
+  · rw [show (q+j)+1 = q+(j+1) by omega,
+        gst_seeded_affine_digit_shiftS X q (j+1)]
+    exact h22.2
+
+/-- A no-`22` word has low two-trit block at most `21₃ = 7`. -/
+theorem gst_no22_low_pair_le_sevenS
+    (X : Nat) (hno : GSTNo22S X) :
+    X % 9 ≤ 7 := by
+  have h0lt : gstDigitS X 0 < 3 := by
+    unfold gstDigitS
+    exact Nat.mod_lt _ (by decide)
+  have h1lt : gstDigitS X 1 < 3 := by
+    unfold gstDigitS
+    exact Nat.mod_lt _ (by decide)
+  have hd0 : gstDigitS X 0 = 0 ∨
+      gstDigitS X 0 = 1 ∨ gstDigitS X 0 = 2 := by
+    omega
+  have hd1 : gstDigitS X 1 = 0 ∨
+      gstDigitS X 1 = 1 ∨ gstDigitS X 1 = 2 := by
+    omega
+  have hpair :
+      ¬ (gstDigitS X 0 = 2 ∧ gstDigitS X 1 = 2) := by
+    simpa using hno 0
+  have hmod : X % 9 = gstDigitS X 0 + 3 * gstDigitS X 1 := by
+    calc
+      X % 9 = X % (3^1 * 3) := by norm_num
+      _ = X % 3^1 + 3^1 * (X / 3^1 % 3) := by
+        rw [Nat.mod_mul]
+      _ = gstDigitS X 0 + 3 * gstDigitS X 1 := by
+        simp [gstDigitS]
+  rw [hmod]
+  rcases hd0 with h00 | h01 | h02 <;>
+    rcases hd1 with h10 | h11 | h12
+  all_goals omega
+
+/-- Exact finite magnitude bound for an even number of ternary positions.
+
+If `X < 9^m` and its ternary word contains no consecutive `22`, then
+
+`8 X ≤ 7 (9^m - 1)`.
+
+The extremal word is `21 21 ... 21` (most-significant pair first), whose
+normalized limiting value is exactly `7/8` of the ambient ternary interval.
+-/
+theorem gst_no22_nine_power_boundS
+    (X m : Nat)
+    (hX : X < 9^m)
+    (hno : GSTNo22S X) :
+    8 * X ≤ 7 * (9^m - 1) := by
+  induction m generalizing X with
+  | zero =>
+      norm_num at hX ⊢
+      omega
+  | succ m ih =>
+      let Y := X / 9
+      have hpow : 9^(m+1) = 9 * 9^m := by
+        rw [Nat.pow_succ]
+        ac_rfl
+      have hYlt : Y < 9^m := by
+        have hx' : X < 9 * 9^m := by
+          simpa [hpow] using hX
+        exact Nat.div_lt_of_lt_mul hx'
+      have hYno : GSTNo22S Y := by
+        have h := gst_no22_div_three_powS X 2 hno
+        simpa [Y] using h
+      have hYbound := ih Y hYlt hYno
+      have hlow : X % 9 ≤ 7 := gst_no22_low_pair_le_sevenS X hno
+      have hdecomp : X = X % 9 + 9 * Y := by
+        dsimp [Y]
+        exact (Nat.mod_add_div X 9).symm
+      have hP : 0 < 9^m := Nat.pow_pos (by decide)
+      rw [hpow]
+      omega
+
+/-- Direct GST consequence: every finite seed-retaining bad word is trapped
+strictly below the top eighth of any containing base-nine block. -/
+theorem gst_seeded_bad_nine_power_boundS
+    (D X m : Nat)
+    (hD : D < 4)
+    (hbad : ∀ j,
+      GSTBadPairS (gstAffineMulCarryS 4 D X j) (gstDigitS X j))
+    (hX : X < 9^m) :
+    8 * X ≤ 7 * (9^m - 1) := by
+  exact gst_no22_nine_power_boundS X m hX
+    (gst_no22_of_seeded_badS D X hD hbad)
+-- END ATTACHED BadLanguageMagnitudeScratch.lean
+
+-- BEGIN ATTACHED PurePowerTailReductionScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+Arithmetic reduction of the prefix-one information-descent seam.
+No new forcing principle is assumed here.  The purpose of this file is to
+remove Omega/event language and expose the exact remaining pure-power tail
+implication.
+-/
+
+def GSTHighBadTraceS (R cut : Nat) : Prop :=
+  ∀ q, GSTBadPairS (gstCarryS R (cut+q)) (gstDigitS R (cut+q))
+
+/-- The seed-zero child bad trace is exactly badness of the high tail of its
+    canonical energy representation `1 + 3^(s+2) T`. -/
+theorem gst_child_bad_iff_energy_high_badS
+    (s T : Nat) (hs : 1 ≤ s) :
+    GSTSeededBadTraceS 0 T ↔
+      GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2) := by
+  constructor
+  · intro hbad q
+    have hstate := gst_child_energy_stateS s T q hs
+    dsimp only at hstate
+    rw [hstate.1, hstate.2]
+    simpa [gstAffineMulCarryS, gstCarryS] using hbad q
+  · intro hbad q
+    have hstate := gst_child_energy_stateS s T q hs
+    dsimp only at hstate
+    have hq := hbad q
+    rw [hstate.1, hstate.2] at hq
+    simpa [gstAffineMulCarryS, gstCarryS] using hq
+
+/-- The seed-one parent bad trace is exactly badness of the high tail after
+    stripping the forced prefix `1 + 3^(s+1)`. -/
+theorem gst_parent_bad_iff_energy_high_badS
+    (s X : Nat) (hs : 1 ≤ s) :
+    GSTSeededBadTraceS 1 X ↔
+      GSTHighBadTraceS
+        ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) := by
+  constructor
+  · intro hbad q
+    have hstate := gst_parent_energy_stateS s X q hs
+    dsimp only at hstate
+    rw [hstate.1, hstate.2]
+    exact hbad q
+  · intro hbad q
+    have hstate := gst_parent_energy_stateS s X q hs
+    dsimp only at hstate
+    have hq := hbad q
+    rw [hstate.1, hstate.2] at hq
+    exact hq
+
+/-- Exact logical reduction: the original seed-one -> seed-zero information
+    descent is neither more nor less than high-tail badness transfer between
+    the two forced-prefix energies. -/
+theorem gst_information_descent_iff_high_tail_transferS
+    (s T X : Nat) (hs : 1 ≤ s) :
+    (GSTSeededBadTraceS 1 X → GSTSeededBadTraceS 0 T) ↔
+      (GSTHighBadTraceS
+          ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) →
+       GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2)) := by
+  constructor
+  · intro h hparent
+    have hp : GSTSeededBadTraceS 1 X :=
+      (gst_parent_bad_iff_energy_high_badS s X hs).2 hparent
+    have hc : GSTSeededBadTraceS 0 T := h hp
+    exact (gst_child_bad_iff_energy_high_badS s T hs).1 hc
+  · intro h hparent
+    have hp : GSTHighBadTraceS
+        ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) :=
+      (gst_parent_bad_iff_energy_high_badS s X hs).1 hparent
+    have hc : GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2) := h hp
+    exact (gst_child_bad_iff_energy_high_badS s T hs).2 hc
+
+/-- At every vertical cut the horizontal strip input is not an arbitrary
+    residue: for a canonical energy `E = 4^K = 1 + 3*D*T` it is literally the
+    residue of that exact power of four modulo the aligned ternary modulus. -/
+theorem gst_pure_power_strip_input_residueS
+    (D T E K q : Nat)
+    (hD : 1 ≤ D)
+    (hE : E = 1 + 3*D*T)
+    (hPow : E = 4^K) :
+    4^K % (3*D*3^q) = 1 + 3*D*(T % 3^q) := by
+  have hqpos : 0 < 3^q := Nat.pow_pos (by decide)
+  have hMpos : 0 < 3*D*3^q := by positivity
+  have hrlt : 1 + 3*D*(T % 3^q) < 3*D*3^q := by
+    have hr : T % 3^q < 3^q := Nat.mod_lt _ hqpos
+    have h3D : 1 < 3*D := by omega
+    have hmul : 3*D*(T % 3^q + 1) ≤ 3*D*3^q :=
+      Nat.mul_le_mul_left (3*D) (Nat.succ_le_of_lt hr)
+    have hstep : 1 + 3*D*(T % 3^q) < 3*D*(T % 3^q + 1) := by
+      rw [Nat.mul_add, Nat.mul_one]
+      omega
+    exact lt_of_lt_of_le hstep hmul
+  have hT : T = 3^q * (T / 3^q) + T % 3^q :=
+    (Nat.div_add_mod T (3^q)).symm
+  have hdecomp :
+      E = (1 + 3*D*(T % 3^q)) + (3*D*3^q) * (T / 3^q) := by
+    rw [hE]
+    conv_lhs => rw [hT]
+    ring
+  have hmulmod :
+      ((3*D*3^q) * (T / 3^q)) % (3*D*3^q) = 0 :=
+    Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
+  rw [← hPow, hdecomp, Nat.add_mod, hmulmod, Nat.add_zero, Nat.mod_mod]
+  exact Nat.mod_eq_of_lt hrlt
+-- END ATTACHED PurePowerTailReductionScratch.lean
+
+-- BEGIN ATTACHED PurePowerResidueGraphScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Pure-power residue tower view of GST Graph V2
+
+The canonical child is represented only through residues of the exact power of
+four. No finite cutoff or terminal NULL interpretation appears here.
+-/
+
+def gstResidueTowerModulusS (D q : Nat) : Nat := 3*D*3^q
+
+/-- The aligned residue tower grows by exactly one child ternary digit. -/
+theorem gst_residue_tower_stepS
+    (D T q : Nat) :
+    1 + 3*D*(T % 3^(q+1)) =
+      (1 + 3*D*(T % 3^q)) +
+        gstResidueTowerModulusS D q * gstDigitS T q := by
+  unfold gstResidueTowerModulusS gstDigitS
+  rw [Nat.pow_succ, Nat.mod_mul]
+  ring
+
+/-- For an exact pure-power energy the q-th aligned residue is precisely the
+canonical child prefix residue. -/
+theorem gst_pure_power_residue_tower_exactS
+    (D T E K q : Nat)
+    (hD : 1 ≤ D)
+    (hE : E = 1 + 3*D*T)
+    (hPow : E = 4^K) :
+    4^K % gstResidueTowerModulusS D q =
+      1 + 3*D*(T % 3^q) := by
+  unfold gstResidueTowerModulusS
+  exact gst_pure_power_strip_input_residueS D T E K q hD hE hPow
+
+/-- For the canonical prefix-one scale D=3^(s+1), the q-th residue-tower
+modulus is exactly the absolute ternary row s+2+q. -/
+theorem gst_residue_tower_modulus_canonicalS
+    (s q : Nat) :
+    gstResidueTowerModulusS (3^(s+1)) q = 3^(s+2+q) := by
+  unfold gstResidueTowerModulusS
+  calc
+    3 * 3^(s+1) * 3^q = 3^1 * 3^(s+1) * 3^q := by norm_num
+    _ = 3^(1+(s+1)) * 3^q := by rw [← Nat.pow_add]
+    _ = 3^((1+(s+1))+q) := by rw [← Nat.pow_add]
+    _ = 3^(s+2+q) := by congr 1 <;> omega
+
+/-- V2 power-grid bridge. Once the strip input is the exact residue of 4^K,
+every horizontal carry coordinate is literally the ordinary GST carry of the
+actual consecutive power column 4^(K+i) at the aligned ternary row. -/
+theorem gst_residue_strip_carry_is_exact_power_carryS
+    (s K q i : Nat) :
+    gstStripCarryS
+        (4^K % gstResidueTowerModulusS (3^(s+1)) q)
+        (gstResidueTowerModulusS (3^(s+1)) q) i =
+      gstCarryS (4^(K+i)) (s+2+q) := by
+  have hM := gst_residue_tower_modulus_canonicalS s q
+  unfold gstStripCarryS gstCarryS
+  rw [hM]
+  have hres :
+      (4^i * (4^K % 3^(s+2+q))) % 3^(s+2+q) =
+        (4^i * 4^K) % 3^(s+2+q) := by
+    simp [Nat.mul_mod]
+  rw [hres]
+  have hpow : 4^i * 4^K = 4^(K+i) := by
+    calc
+      4^i * 4^K = 4^(i+K) := (Nat.pow_add 4 i K).symm
+      _ = 4^(K+i) := by rw [Nat.add_comm]
+  rw [hpow]
+
+/-- The final strip quotient is the wide carry across the same exact rectangle
+of consecutive power columns. -/
+theorem gst_residue_strip_quotient_is_exact_power_wide_carryS
+    (s K q width : Nat) :
+    gstStripQuotientS
+        (4^K % gstResidueTowerModulusS (3^(s+1)) q)
+        (gstResidueTowerModulusS (3^(s+1)) q) width =
+      (4^width * (4^K % 3^(s+2+q))) / 3^(s+2+q) := by
+  unfold gstStripQuotientS
+  rw [gst_residue_tower_modulus_canonicalS]
+
+/-- The whole shared GST information carrier is the horizontal carry quotient
+of the exact pure-power residue tower. -/
+theorem gst_shared_state_is_pure_power_residue_stripS
+    (N D c z T E K q : Nat)
+    (hD3 : 3 ≤ D)
+    (hD1 : 1 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z)
+    (hE : E = 1 + 3*D*T)
+    (hPow : E = 4^K) :
+    gstStripQuotientS
+        (4^K % gstResidueTowerModulusS D q)
+        (gstResidueTowerModulusS D q)
+        (N+1) =
+      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
+        4 * gstAffineMulCarryS (4^N) z T q := by
+  have hr := gst_pure_power_residue_tower_exactS D T E K q hD1 hE hPow
+  unfold gstResidueTowerModulusS at hr ⊢
+  rw [hr]
+  exact gst_shared_information_is_carry_wordS N D c z T q hD3 hA hc
+
+/-- Canonical rectangle identification. The shared information word is exactly
+the wide carry generated by the actual power rectangle 4^K -> 4^(K+N+1). -/
+theorem gst_shared_state_is_exact_power_rectangleS
+    (s N c z T E K q : Nat)
+    (hs : 1 ≤ s)
+    (hA : 4^N = 1 + 3^(s+1)*c)
+    (hc : c = 1 + 3*z)
+    (hE : E = 1 + 3*3^(s+1)*T)
+    (hPow : E = 4^K) :
+    gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
+      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
+        4 * gstAffineMulCarryS (4^N) z T q := by
+  have hD3 : 3 ≤ 3^(s+1) := by
+    have h9 : 9 ≤ 3^(s+1) := by
+      rw [show (9:Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hDpos : 0 < 3^(s+1) := Nat.pow_pos (by decide)
+  have hD1 : 1 ≤ 3^(s+1) := by omega
+  have hstrip := gst_shared_state_is_pure_power_residue_stripS
+    N (3^(s+1)) c z T E K q hD3 hD1 hA hc hE hPow
+  have hrect := gst_residue_strip_quotient_is_exact_power_wide_carryS
+    s K q (N+1)
+  have hwide :
+      gstStripQuotientS
+          (4^K % gstResidueTowerModulusS (3^(s+1)) q)
+          (gstResidueTowerModulusS (3^(s+1)) q) (N+1) =
+        gstWideCarryS (4^(N+1)) (4^K) (s+2+q) := by
+    rw [hrect]
+    rfl
+  exact hwide.symm.trans hstrip
+
+/-- The physical wide carry and the affine shared carrier are the same integer. -/
+theorem gst_exact_power_rectangle_is_shared_carrierS
+    (s N c z T E K q : Nat)
+    (hs : 1 ≤ s)
+    (hA : 4^N = 1 + 3^(s+1)*c)
+    (hc : c = 1 + 3*z)
+    (hE : E = 1 + 3*3^(s+1)*T)
+    (hPow : E = 4^K) :
+    gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
+      gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q := by
+  have hwide := gst_shared_state_is_exact_power_rectangleS
+    s N c z T E K q hs hA hc hE hPow
+  have hstate := gst_shared_information_state_exactS (4^N) z T q
+  exact hwide.trans hstate.symm
+
+/-- Exact channel equation in physical power-grid coordinates. Sampling the
+seven-axis GST rectangle every k=s+1 ternary rows gives the nonlinear block
+echo without an abstract endpoint replacement. -/
+theorem gst_exact_power_block_channel_echoS
+    (s N c z T E K q : Nat)
+    (hs : 1 ≤ s)
+    (hA : 4^N = 1 + 3^(s+1)*c)
+    (hc : c = 1 + 3*z)
+    (hE : E = 1 + 3*3^(s+1)*T)
+    (hPow : E = 4^K) :
+    let U := (T / 3^q) % 3^(s+1)
+    gstWideCarryS (4^(N+1)) (4^K) (s+2+(q+(s+1))) =
+      4*c*U +
+        (gstWideCarryS (4^(N+1)) (4^K) (s+2+q) + 4*U) / 3^(s+1) := by
+  dsimp only
+  have hq := gst_exact_power_rectangle_is_shared_carrierS
+    s N c z T E K q hs hA hc hE hPow
+  have hqk := gst_exact_power_rectangle_is_shared_carrierS
+    s N c z T E K (q+(s+1)) hs hA hc hE hPow
+  have hblock := gst_shared_information_block_echoV2S
+    (4^N) c (3^(s+1)) z T q (s+1) rfl hA
+  dsimp only at hblock
+  have hmul : 4 * 4^N = 4^(N+1) := by
+    rw [Nat.pow_succ]
+    ac_rfl
+  have hq' :
+      gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
+        gstAffineMulCarryS (4^(N+1)) (1 + 4*z) T q := by
+    simpa [hmul] using hq
+  have hqk' :
+      gstWideCarryS (4^(N+1)) (4^K) (s+2+(q+(s+1))) =
+        gstAffineMulCarryS (4^(N+1)) (1 + 4*z) T (q+(s+1)) := by
+    simpa [hmul] using hqk
+  rw [hmul] at hblock
+  rw [← hq', ← hqk'] at hblock
+  exact hblock
+
+/-- Exact conservation across one physical GST power rectangle. -/
+theorem gst_exact_power_rectangle_conservationS
+    (s N K q : Nat) :
+    4^(N+1) * gstDigitS (4^K) (s+2+q) +
+        gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
+      gstDigitS (4^(K+N+1)) (s+2+q) +
+        3 * gstWideCarryS (4^(N+1)) (4^K) ((s+2+q)+1) := by
+  have h := gst_strip_conservation_exactS
+    (4^(N+1)) (4^K) (s+2+q)
+  have hpow : 4^(N+1) * 4^K = 4^(K+N+1) := by
+    calc
+      4^(N+1) * 4^K = 4^((N+1)+K) := (Nat.pow_add 4 (N+1) K).symm
+      _ = 4^(K+N+1) := by congr 1 <;> omega
+  simpa [gstWideDigitS, gstDigitS, hpow] using h
+
+/-- Parent badness is a forbidden-sector statement about one quotient of an
+exact power-of-four residue. -/
+theorem gst_pure_power_parent_bad_forbids_residue_sectorS
+    (N D c z T E K q : Nat)
+    (hD3 : 3 ≤ D)
+    (hD1 : 1 ≤ D)
+    (hA : 4^N = 1 + D*c)
+    (hc : c = 1 + 3*z)
+    (hE : E = 1 + 3*D*T)
+    (hPow : E = 4^K)
+    (hbad : GSTBadPairS
+      (gstAffineMulCarryS 4 1 (z + 4^N*T) q)
+      ((gstAffineMulCarryS (4^N) z T q + gstDigitS T q) % 3)) :
+    let S := gstStripQuotientS
+      (4^K % gstResidueTowerModulusS D q)
+      (gstResidueTowerModulusS D q) (N+1)
+    ¬ GSTParentHappyResidue12S S (gstDigitS T q) := by
+  dsimp only
+  have hS := gst_shared_state_is_pure_power_residue_stripS
+    N D c z T E K q hD3 hD1 hA hc hE hPow
+  let P := gstAffineMulCarryS 4 1 (z + 4^N*T) q
+  let Z := gstAffineMulCarryS (4^N) z T q
+  let r := gstDigitS T q
+  have hP : P < 4 := by
+    dsimp [P]
+    exact gst_affine_carry_lt_multiplierS 4 1 (z + 4^N*T) q (by decide) (by decide)
+  have hr : r < 3 := by
+    dsimp [r, gstDigitS]
+    exact Nat.mod_lt _ (by decide)
+  have hshape :
+      gstStripQuotientS
+          (4^K % gstResidueTowerModulusS D q)
+          (gstResidueTowerModulusS D q) (N+1) = P + 4*Z := by
+    simpa [P, Z] using hS
+  have hiff := gst_parent_bad_iff_avoids_shared_residue12S
+    (gstStripQuotientS
+      (4^K % gstResidueTowerModulusS D q)
+      (gstResidueTowerModulusS D q) (N+1)) P Z r hP hr hshape
+  apply hiff.mp
+  simpa [P, Z, r] using hbad
+-- END ATTACHED PurePowerResidueGraphScratch.lean
+
+-- BEGIN ATTACHED PhaseCycleInformationScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+Cyclic shared-information algebra for the corrected infinite-wave GST picture.
+
+The phase transitions are not terminal reductions.  They are three exact
+realisations of one conserved affine information law, with incoming GST seeds
+cycling 0 -> 1 -> 2 -> 0.
+-/
+
+/-- Generic seeded commuting-square law.
+
+If the two full integer realisations agree
+
+    B + A*(C + 4*T) = C' + 4*(z + A*T),
+
+then after every ternary cut q the same information splits into the high
+A-coordinate (the child seeded carry) and the low base-4 coordinate (the
+parent seeded carry):
+
+    beta_q + A*h_q = p'_q + 4*a_q.
+
+No finite cutoff, terminal state, or origin exhaustion is used. -/
+theorem gst_seeded_shared_information_equationS
+    (A B C C' z T q : Nat)
+    (hcommute : B + A*(C + 4*T) = C' + 4*(z + A*T)) :
+    gstAffineMulCarryS A B (C + 4*T) q +
+        A * gstAffineMulCarryS 4 C T q =
+      gstAffineMulCarryS 4 C' (z + A*T) q +
+        4 * gstAffineMulCarryS A z T q := by
+  have hleft := gst_affine_tail_div_decompositionS B A (C + 4*T) q
+  have hchild := gst_affine_tail_div_decompositionS C 4 T q
+  have hright := gst_affine_tail_div_decompositionS C' 4 (z + A*T) q
+  have htail := gst_affine_tail_div_decompositionS z A T q
+  have hfull :
+      (B + A*(C + 4*T)) / 3^q =
+        (C' + 4*(z + A*T)) / 3^q := by
+    rw [hcommute]
+  rw [hleft, hright, hchild, htail] at hfull
+  nlinarith
+
+/-- Phase 0 -> phase 1: seed zero becomes seed one. -/
+theorem gst_phase01_shared_informationS
+    (A z T q : Nat) :
+    gstAffineMulCarryS A (1 + 4*z) (4*T) q +
+        A * gstAffineMulCarryS 4 0 T q =
+      gstAffineMulCarryS 4 1 (z + A*T) q +
+        4 * gstAffineMulCarryS A z T q := by
+  have hcommute :
+      (1 + 4*z) + A*(0 + 4*T) =
+        1 + 4*(z + A*T) := by ring
+  simpa using
+    (gst_seeded_shared_information_equationS
+      A (1 + 4*z) 0 1 z T q hcommute)
+
+/-- Phase 1 -> phase 2.  Write D=3*N and A=1+D*c.  With c=1+3*z,
+    the exact phase-one tail offset is z + N*c.  The information seed advances
+    from one to two, while the companion high coordinate remains explicit. -/
+theorem gst_phase12_shared_informationS
+    (N c z T q : Nat)
+    (hc : c = 1 + 3*z) :
+    let A := 1 + 3*N*c
+    let z12 := z + N*c
+    let B12 := 1 + 4*z + N*c
+    gstAffineMulCarryS A B12 (1 + 4*T) q +
+        A * gstAffineMulCarryS 4 1 T q =
+      gstAffineMulCarryS 4 2 (z12 + A*T) q +
+        4 * gstAffineMulCarryS A z12 T q := by
+  dsimp only
+  have hcommute :
+      (1 + 4*z + N*c) + (1 + 3*N*c)*(1 + 4*T) =
+        2 + 4*((z + N*c) + (1 + 3*N*c)*T) := by
+    rw [hc]
+    ring
+  exact gst_seeded_shared_information_equationS
+    (1 + 3*N*c) (1 + 4*z + N*c) 1 2 (z + N*c) T q hcommute
+
+/-- Phase 2 -> the next phase 0.  The seed does not die: the phase prefix wraps
+    it back from two to zero while the affine information is retained in the
+    new tail offset z + 1 + 2*N*c. -/
+theorem gst_phase20_shared_informationS
+    (N c z T q : Nat)
+    (hc : c = 1 + 3*z) :
+    let A := 1 + 3*N*c
+    let z20 := z + 1 + 2*N*c
+    let B20 := 2 + 4*z + 2*N*c
+    gstAffineMulCarryS A B20 (2 + 4*T) q +
+        A * gstAffineMulCarryS 4 2 T q =
+      gstAffineMulCarryS 4 0 (z20 + A*T) q +
+        4 * gstAffineMulCarryS A z20 T q := by
+  dsimp only
+  have hcommute :
+      (2 + 4*z + 2*N*c) + (1 + 3*N*c)*(2 + 4*T) =
+        0 + 4*((z + 1 + 2*N*c) + (1 + 3*N*c)*T) := by
+    rw [hc]
+    ring
+  exact gst_seeded_shared_information_equationS
+    (1 + 3*N*c) (2 + 4*z + 2*N*c) 2 0 (z + 1 + 2*N*c) T q hcommute
+
+/-- The three companion offsets all remain inside the same horizontal
+    multiplier interval.  This keeps every phase in one shared information
+    carrier rather than creating or deleting a separate object. -/
+theorem gst_phase_cycle_offsets_insideS
+    (N c z : Nat)
+    (hN : 3 ≤ N)
+    (hc : c = 1 + 3*z) :
+    let A := 1 + 3*N*c
+    z < A ∧
+      z + N*c < A ∧
+      z + 1 + 2*N*c < A ∧
+      1 + 4*z < A ∧
+      1 + 4*z + N*c < A ∧
+      2 + 4*z + 2*N*c < A := by
+  dsimp only
+  rw [hc]
+  constructor
+  · nlinarith
+  constructor
+  · nlinarith
+  constructor
+  · nlinarith
+  constructor
+  · nlinarith
+  constructor
+  · nlinarith
+  · nlinarith
+-- END ATTACHED PhaseCycleInformationScratch.lean
+
+-- BEGIN ATTACHED HandwrittenSixUniverseScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Finite arithmetic of the handwritten 6^k / 7 / 13 layer
+
+No GST forcing theorem is asserted here.  These lemmas simply make the finite
+state-count arithmetic exact before it is coupled to the V2 graph.
+-/
+
+/-- Number of bridge states through natural depth i, including depth zero. -/
+def gstSixUniversePrefixS (i : Nat) : Nat :=
+  Finset.sum (Finset.range ((i+1))) (fun k => 6^k)
+
+/-- Exact six-ary geometric recurrence. -/
+theorem gst_six_universe_prefix_succS (i : Nat) :
+    gstSixUniversePrefixS (i+1) =
+      gstSixUniversePrefixS i + 6^(i+1) := by
+  unfold gstSixUniversePrefixS
+  rw [show i+1+1 = (i+1)+1 by omega, Finset.sum_range_succ]
+
+/-- Closed integer form of the finite 6^k universe.
+The denominator 5=6-1 is represented without division. -/
+theorem gst_six_universe_prefix_closedS (i : Nat) :
+    5 * gstSixUniversePrefixS i = 6^(i+1) - 1 := by
+  induction i with
+  | zero =>
+      norm_num [gstSixUniversePrefixS]
+  | succ i ih =>
+      rw [gst_six_universe_prefix_succS, Nat.mul_add, ih]
+      have hp : 0 < 6^(i+1) := Nat.pow_pos (by decide)
+      rw [show 6^((i+1)+1) = 6^(i+1) * 6 by rw [Nat.pow_succ]]
+      omega
+
+/-- The first nontrivial cumulative bridge universe has seven states. -/
+theorem gst_six_universe_prefix_oneS :
+    gstSixUniversePrefixS 1 = 7 := by
+  simp only [gstSixUniversePrefixS]
+  norm_num
+
+/-- The first aligned two-layer modulus factors as (6-1)(6+1). -/
+theorem gst_six_square_boundary_factorS :
+    6^2 - 1 = 5 * 7 := by
+  norm_num
+
+/-- The exact EQ2 event factor 13 is 6 plus the first cumulative universe 7. -/
+theorem gst_event_factor_thirteen_from_six_sevenS :
+    13 = 6 + gstSixUniversePrefixS 1 := by
+  simp only [gstSixUniversePrefixS]
+  norm_num
+
+/-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
+factor x=13.  Kept as integer division because 13-6 divides 7 exactly. -/
+theorem gst_handwritten_kernel_normalizes_at_thirteenS :
+    7 / (13 - 6) = 1 := by
+  norm_num
+
+/-- The first known nested canonical binary quotient factorization. -/
+theorem gst_first_binary_quotient_factorizationS :
+    455 = 5 * 7 * 13 := by
+  decide
+-- END ATTACHED HandwrittenSixUniverseScratch.lean
+
+-- BEGIN ATTACHED HandwrittenKernelV2Scratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Handwritten kernel on the fundamental six-state bridge
+
+A single multiply-by-two/base-three bridge cell has mass
+
+    m = a + 2*d,   a in {0,1}, d in {0,1,2},
+
+hence `m < 6`.  Its alternate coordinate reading is
+
+    R6(m) = floor(m/3) + 2*(m mod 3).
+
+Boss's kernel magnitude `|7/(m-6)|` has denominator `6-m` on the physical
+spectrum.  We keep the exact integer denominator here; all ratio statements
+are expressed by cross multiplication, so no analytic structure is assumed.
+-/
+
+def gstMicroRotate6S (m : Nat) : Nat := m / 3 + 2*(m % 3)
+
+def gstHandwrittenKernelDenomS (m : Nat) : Nat := 6 - m
+
+/-- Exact six-state re-coordinate table. -/
+theorem gst_micro_rotate6_tableS :
+    gstMicroRotate6S 0 = 0 ∧
+    gstMicroRotate6S 1 = 2 ∧
+    gstMicroRotate6S 2 = 4 ∧
+    gstMicroRotate6S 4 = 3 ∧
+    gstMicroRotate6S 3 = 1 ∧
+    gstMicroRotate6S 5 = 5 := by
+  decide
+
+/-- The only fixed bridge masses are the all-zero state and BIG2 SURVIVE. -/
+theorem gst_micro_rotate6_fixed_iffS
+    (m : Nat) (hm : m < 6) :
+    gstMicroRotate6S m = m ↔ m = 0 ∨ m = 5 := by
+  have hcases : m = 0 ∨ m = 1 ∨ m = 2 ∨ m = 3 ∨ m = 4 ∨ m = 5 := by omega
+  rcases hcases with h0 | h1 | h2 | h3 | h4 | h5 <;>
+    subst m <;> decide
+
+/-- Thus the unique nonzero fixed state is mass five. -/
+theorem gst_micro_rotate6_nonzero_fixedS
+    (m : Nat) (hm : m < 6) (hm0 : m ≠ 0)
+    (hfix : gstMicroRotate6S m = m) :
+    m = 5 := by
+  rcases (gst_micro_rotate6_fixed_iffS m hm).1 hfix with h0 | h5
+  · exact False.elim (hm0 h0)
+  · exact h5
+
+/-- The proper alternate orbit has exact period four. -/
+theorem gst_micro_rotate6_four_cycleS :
+    gstMicroRotate6S (gstMicroRotate6S
+      (gstMicroRotate6S (gstMicroRotate6S 1))) = 1 := by
+  decide
+
+/-- Kernel denominators on the active BIG2 masses. -/
+theorem gst_handwritten_kernel_active_denomsS :
+    gstHandwrittenKernelDenomS 2 = 4 ∧
+    gstHandwrittenKernelDenomS 4 = 2 ∧
+    gstHandwrittenKernelDenomS 5 = 1 := by
+  decide
+
+/-- CREATE -> DESTROY doubles the magnitude of 7/(6-m): denominator halves. -/
+theorem gst_handwritten_kernel_create_destroy_doubleS :
+    gstHandwrittenKernelDenomS 2 =
+      2 * gstHandwrittenKernelDenomS 4 := by
+  decide
+
+/-- The reversed DESTROY -> CREATE orientation halves the kernel magnitude. -/
+theorem gst_handwritten_kernel_destroy_create_halfS :
+    2 * gstHandwrittenKernelDenomS 4 =
+      gstHandwrittenKernelDenomS 2 := by
+  decide
+
+/-- SURVIVE is the nonzero fixed kernel state. -/
+theorem gst_handwritten_kernel_survive_fixedS :
+    gstMicroRotate6S 5 = 5 ∧ gstHandwrittenKernelDenomS 5 = 1 := by
+  decide
+
+/-- Integer cross-product form of telescoping around the complete nonfixed
+four-cycle.  It is the denominator counterpart of
+
+  K(2)/K(1) * K(4)/K(2) * K(3)/K(4) * K(1)/K(3) = 1.
+-/
+theorem gst_handwritten_kernel_cycle_telescopesS :
+    gstHandwrittenKernelDenomS 1 *
+      gstHandwrittenKernelDenomS 2 *
+      gstHandwrittenKernelDenomS 4 *
+      gstHandwrittenKernelDenomS 3 =
+    gstHandwrittenKernelDenomS 2 *
+      gstHandwrittenKernelDenomS 4 *
+      gstHandwrittenKernelDenomS 3 *
+      gstHandwrittenKernelDenomS 1 := by
+  ring
+
+/-- Decompose a legal x4 GST carry into its two binary bridge carries. -/
+def gstMicroHighBitS (C : Nat) : Nat := C / 2
+def gstMicroLowBitS (C : Nat) : Nat := C % 2
+
+/-- First x2 bridge mass inside one x4 GST cell. -/
+def gstFirstMicroMassS (C d : Nat) : Nat := gstMicroHighBitS C + 2*d
+
+/-- Intermediate ternary digit emitted by the first x2 bridge. -/
+def gstFirstMicroOutputS (C d : Nat) : Nat := gstFirstMicroMassS C d % 3
+
+/-- Second x2 bridge mass inside one x4 GST cell. -/
+def gstSecondMicroMassS (C d : Nat) : Nat :=
+  gstMicroLowBitS C + 2*gstFirstMicroOutputS C d
+
+/-- Exact microscopic patterns of the three canonical BIG2 orientations. -/
+theorem gst_micro_big2_orientation_tableS :
+    (gstFirstMicroMassS 0 1, gstSecondMicroMassS 0 1) = (2,4) ∧
+    (gstFirstMicroMassS 0 2, gstSecondMicroMassS 0 2) = (4,2) ∧
+    (gstFirstMicroMassS 3 2, gstSecondMicroMassS 3 2) = (5,5) := by
+  decide
+
+/-- The kernel orientation associated to phase-one hidden BIG2 is exactly a
+binary factor two in cross-multiplied denominator form. -/
+theorem gst_phase_one_micro_kernel_factor_twoS :
+    gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 1) =
+      2 * gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 1) := by
+  decide
+
+/-- Phase two reverses the same factor. -/
+theorem gst_phase_two_micro_kernel_factor_halfS :
+    2 * gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 2) =
+      gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 2) := by
+  decide
+
+/-- GST+ SURVIVE is fixed in both microscopic layers. -/
+theorem gst_plus_survive_micro_kernel_fixedS :
+    gstFirstMicroMassS 3 2 = 5 ∧
+      gstSecondMicroMassS 3 2 = 5 := by
+  decide
+-- END ATTACHED HandwrittenKernelV2Scratch.lean
 
 -- BEGIN ATTACHED OmegaSpacetimeScratch.lean
 set_option maxRecDepth 1000000
@@ -11480,6 +13991,503 @@ theorem gst_omega_pressure_no_unbounded_twoS
     exact gst_omega_pressure_transfer_le_energyS t T j
   omega
 -- END ATTACHED OmegaSpacetimeScratch.lean
+
+-- BEGIN ATTACHED HandwrittenBigNOmegaScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Handwritten BIG-N / Omega exact algebra scratch
+
+This file contains only exact finite algebra extracted from the handwritten
+operator experiment.  It does NOT assert the missing residual termination
+law, a global mirror, or terminal NULL.
+-/
+
+/-- Output ternary digit of one fundamental multiply-by-two/base-three bridge. -/
+def gstBinaryBridgeOutputS (a d : Nat) : Nat :=
+  (a + 2*d) % 3
+
+/-- Next binary carry of one fundamental multiply-by-two/base-three bridge. -/
+def gstBinaryBridgeNextCarryS (a d : Nat) : Nat :=
+  (a + 2*d) / 3
+
+/-- Six-state microscopic mass.  Under `a<2`, `d<3`, this lies in `{0,...,5}`. -/
+def gstBinaryBridgeMassS (a d : Nat) : Nat :=
+  a + 2*d
+
+/-- Input/output event symbol.  It is the two-trit base-three word `d + 3e`. -/
+def gstBinaryBridgeEventS (a d : Nat) : Nat :=
+  d + 3 * gstBinaryBridgeOutputS a d
+
+/-- Exact fundamental 2-world / 3-world bridge equation. -/
+theorem gst_binary_bridge_exactS (a d : Nat) :
+    gstBinaryBridgeMassS a d =
+      gstBinaryBridgeOutputS a d +
+        3 * gstBinaryBridgeNextCarryS a d := by
+  unfold gstBinaryBridgeMassS gstBinaryBridgeOutputS
+    gstBinaryBridgeNextCarryS
+  have h := Nat.mod_add_div (a + 2*d) 3
+  omega
+
+/-- Exact local origin of the handwritten numerator seven.
+
+`J + 9 a' = 7 d + 3 a`.
+
+After base-three weighting and summation over a complete finite word, the
+binary-carry boundary telescopes and gives the global event word `7R`. -/
+theorem gst_binary_bridge_event_seven_balanceS (a d : Nat) :
+    gstBinaryBridgeEventS a d +
+        9 * gstBinaryBridgeNextCarryS a d =
+      7*d + 3*a := by
+  unfold gstBinaryBridgeEventS gstBinaryBridgeOutputS
+    gstBinaryBridgeNextCarryS
+  have h := Nat.mod_add_div (a + 2*d) 3
+  omega
+
+/-- The physical x2 bridge has exactly six possible event symbols.
+The missing event symbol `6` is therefore outside the physical microscopic
+image. -/
+theorem gst_binary_bridge_event_six_valuesS
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    gstBinaryBridgeEventS a d = 0 ∨
+    gstBinaryBridgeEventS a d = 1 ∨
+    gstBinaryBridgeEventS a d = 3 ∨
+    gstBinaryBridgeEventS a d = 5 ∨
+    gstBinaryBridgeEventS a d = 7 ∨
+    gstBinaryBridgeEventS a d = 8 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;>
+    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- The handwritten pole coordinate `6` is absent from every physical x2
+bridge state. -/
+theorem gst_binary_bridge_event_ne_sixS
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    gstBinaryBridgeEventS a d ≠ 6 := by
+  rcases gst_binary_bridge_event_six_valuesS a d ha hd with
+      h0 | h1 | h3 | h5 | h7 | h8 <;> omega
+
+/-- In the microscopic x2 bridge, CREATE is exactly event symbol seven. -/
+theorem gst_binary_bridge_create_iff_event7S
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    (d ≠ 2 ∧ gstBinaryBridgeOutputS a d = 2) ↔
+      gstBinaryBridgeEventS a d = 7 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;>
+    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- In the microscopic x2 bridge, DESTROY is exactly event symbol five. -/
+theorem gst_binary_bridge_destroy_iff_event5S
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    (d = 2 ∧ gstBinaryBridgeOutputS a d ≠ 2) ↔
+      gstBinaryBridgeEventS a d = 5 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;>
+    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- In the microscopic x2 bridge, SURVIVE is exactly event symbol eight. -/
+theorem gst_binary_bridge_survive_iff_event8S
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    (d = 2 ∧ gstBinaryBridgeOutputS a d = 2) ↔
+      gstBinaryBridgeEventS a d = 8 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;>
+    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- Hard phase-one low cell: hidden BIG2 is CREATE then DESTROY. -/
+theorem gst_binary_bridge_phase1_hidden_pairS :
+    gstBinaryBridgeEventS 0 1 = 7 ∧
+      gstBinaryBridgeEventS 0 2 = 5 := by
+  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- NULL Happy cell: the same microscopic orientation is reversed. -/
+theorem gst_binary_bridge_null_survive_pairS :
+    gstBinaryBridgeEventS 0 2 = 5 ∧
+      gstBinaryBridgeEventS 0 1 = 7 := by
+  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-- GST+ Happy cell: both microscopic layers are SURVIVE. -/
+theorem gst_binary_bridge_plus_survive_pairS :
+    gstBinaryBridgeEventS 1 2 = 8 ∧
+      gstBinaryBridgeEventS 1 2 = 8 := by
+  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
+
+/-! General binary block. -/
+
+def gstBinaryBlockOutputS (B C d : Nat) : Nat :=
+  (C + B*d) % 3
+
+def gstBinaryBlockNextCarryS (B C d : Nat) : Nat :=
+  (C + B*d) / 3
+
+def gstBinaryBlockEventS (B C d : Nat) : Nat :=
+  d + 3 * gstBinaryBlockOutputS B C d
+
+/-- General exact event balance.  For `B=2` its event factor is `7`; for
+`B=4` it is `13`. -/
+theorem gst_binary_block_event_balanceS (B C d : Nat) :
+    gstBinaryBlockEventS B C d +
+        9 * gstBinaryBlockNextCarryS B C d =
+      (1 + 3*B)*d + 3*C := by
+  unfold gstBinaryBlockEventS gstBinaryBlockOutputS
+    gstBinaryBlockNextCarryS
+  have h := Nat.mod_add_div (C + B*d) 3
+  omega
+
+/-! Navigation finite horizon.  This is ordinary support arithmetic, not a
+terminal-space axiom. -/
+
+theorem gst_self_lt_three_powS : ∀ N : Nat, 1 ≤ N → N < 3^N
+  | 0, hN => by omega
+  | N+1, hN => by
+      by_cases h0 : N = 0
+      · subst N
+        decide
+      · have ih : N < 3^N := gst_self_lt_three_powS N (by omega)
+        have hp : 0 < 3^N := Nat.pow_pos (by decide)
+        rw [Nat.pow_succ]
+        omega
+
+/-- At its own natural Navigation index, the ordinary natural descent is
+already zero. -/
+theorem gst_navigation_self_horizon_zeroS
+    (N : Nat) (hN : 1 ≤ N) :
+    N / 3^N = 0 := by
+  exact Nat.div_eq_of_lt (gst_self_lt_three_powS N hN)
+
+/-- Consequently the ternary information digit of `N` at its own Navigation
+index is zero. -/
+theorem gst_navigation_self_digit_zeroS
+    (N : Nat) (hN : 1 ≤ N) :
+    gstDigitS N N = 0 := by
+  unfold gstDigitS
+  rw [gst_navigation_self_horizon_zeroS N hN]
+  simp
+
+/-- The Omega pressure packet has no new transfer at the finite Navigation
+horizon itself.  Information already transferred to the past coordinate is not
+erased by this statement. -/
+theorem gst_omega_transfer_at_navigation_horizon_zeroS
+    (t N : Nat) (hN : 1 ≤ N) :
+    gstOmegaPressureTransferS t N N = 0 := by
+  unfold gstOmegaPressureTransferS
+  rw [gst_navigation_self_digit_zeroS N hN]
+  simp
+-- END ATTACHED HandwrittenBigNOmegaScratch.lean
+
+-- BEGIN ATTACHED HandwrittenKernelCanonicalLevelOneScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Canonical meaning of the handwritten 7/(x-6) kernel at GST level one
+
+The constants 7 and 6 are not introduced here: they are shown to be the exact
+first canonical GST bridge coefficient and its forced-prefix displacement.
+-/
+
+/-- The canonical level-one block is 4^3 = 64. -/
+theorem gst_level_one_block_eq_64S : (4:Nat)^(3^1) = 64 := by
+  decide
+
+/-- The canonical Navigation unit at level one is seven. -/
+theorem gst_level_one_Q1_eq_7S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 1 = 7 := by
+  have h := hQ 1 1 (by decide)
+  norm_num at h
+  omega
+
+/-- The forced prefix-one tail coordinate is therefore z_1=2. -/
+theorem gst_level_one_z_eq_2S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (z1 : Nat) (hz : Q 1 1 = 1 + 3*z1) :
+    z1 = 2 := by
+  rw [gst_level_one_Q1_eq_7S Q hQ] at hz
+  omega
+
+/-- Boss's denominator pole 6 is exactly c_1-1 = 3*z_1. -/
+theorem gst_handwritten_six_is_level_one_prefix_displacementS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 1 - 1 = 6 := by
+  rw [gst_level_one_Q1_eq_7S Q hQ]
+
+/-- The exact level-one binary Navigation quotient. -/
+theorem gst_level_one_Q2_eq_455S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 2 = 455 := by
+  have h := hQ 1 2 (by decide)
+  norm_num at h
+  omega
+
+/-- All three factors from the full handwritten/V2 experiment are canonical
+level-one expressions in c_1=7. -/
+theorem gst_level_one_455_canonical_factorS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 2 =
+      Q 1 1 * (Q 1 1 - 2) * (2*Q 1 1 - 1) := by
+  rw [gst_level_one_Q2_eq_455S Q hQ,
+    gst_level_one_Q1_eq_7S Q hQ]
+  decide
+
+/-- Equivalent six-world factorization. -/
+theorem gst_level_one_455_six_world_factorS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 2 = (6^2 - 1) * (2*6 + 1) := by
+  rw [gst_level_one_Q2_eq_455S Q hQ]
+  decide
+
+/-- 455 has the exact alternating ternary word 121212 (MSD first).  The Nat
+identity below is the LSB-first digit expansion 2,1,2,1,2,1. -/
+theorem gst_level_one_Q2_ternary_121212S
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    Q 1 2 =
+      2*3^0 + 1*3^1 + 2*3^2 + 1*3^3 + 2*3^4 + 1*3^5 := by
+  rw [gst_level_one_Q2_eq_455S Q hQ]
+  decide
+
+/-- The event factor 13 is exactly two times the six-state boundary plus one,
+and equally 2*c_1-1. -/
+theorem gst_level_one_event_factor_thirteenS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q) :
+    13 = 2*6 + 1 ∧ 13 = 2*Q 1 1 - 1 := by
+  rw [gst_level_one_Q1_eq_7S Q hQ]
+  decide
+-- END ATTACHED HandwrittenKernelCanonicalLevelOneScratch.lean
+
+-- BEGIN ATTACHED HandwrittenSignedKernelFluxScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Signed handwritten 7/(x-6) kernel on the microscopic x2 event coordinate
+
+This file uses the exact x2/base3 bridge
+
+  a + 2*d = e + 3*a'
+
+with a,a' binary and d,e ternary.  Its event symbol is J=d+3e.  The physical
+six-state event image is {0,1,3,5,7,8}; J=6 is the missing central value.
+
+On the active BIG2 events Boss's kernel 7/(J-6) has the exact signed values
+
+  CREATE  J=7 : +7
+  DESTROY J=5 : -7
+  SURVIVE J=8 : +7/2.
+
+To keep the arithmetic integral we encode twice this kernel.  The resulting
+quantity is a discrete horizontal flux plus a SURVIVE residual, so its sum
+telescopes on every finite physical row.
+-/
+
+def gstMicroTwoIndicatorS (d : Nat) : Int := if d = 2 then 1 else 0
+
+def gstMicroEventOutputS (a d : Nat) : Nat := (a + 2*d) % 3
+
+def gstMicroEventCarryS (a d : Nat) : Nat := (a + 2*d) / 3
+
+def gstMicroEventSymbolS (a d : Nat) : Nat :=
+  d + 3*gstMicroEventOutputS a d
+
+/-- Active means BIG2 is present on at least one side of the microscopic cell. -/
+def gstMicroBig2ActiveS (a d : Nat) : Prop :=
+  d = 2 ∨ gstMicroEventOutputS a d = 2
+
+/-- Signed CREATE/DESTROY flux. -/
+def gstMicroBig2FluxS (a d : Nat) : Int :=
+  7 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
+       gstMicroTwoIndicatorS d)
+
+/-- Twice Boss's signed kernel on the active sector, written without division.
+The first term is the boundary flux; the second is the SURVIVE residual. -/
+def gstMicroKernelTwiceS (a d : Nat) : Int :=
+  14 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
+        gstMicroTwoIndicatorS d) +
+  7 * gstMicroTwoIndicatorS d *
+      gstMicroTwoIndicatorS (gstMicroEventOutputS a d)
+
+/-- Exact six-state event-symbol table. -/
+theorem gst_micro_event_symbol_tableS :
+    gstMicroEventSymbolS 0 0 = 0 ∧
+    gstMicroEventSymbolS 0 1 = 7 ∧
+    gstMicroEventSymbolS 0 2 = 5 ∧
+    gstMicroEventSymbolS 1 0 = 3 ∧
+    gstMicroEventSymbolS 1 1 = 1 ∧
+    gstMicroEventSymbolS 1 2 = 8 := by
+  decide
+
+/-- Six is not a physical microscopic event symbol. -/
+theorem gst_micro_event_symbol_ne_sixS
+    (a d : Nat) (ha : a < 2) (hd : d < 3) :
+    gstMicroEventSymbolS a d ≠ 6 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;> decide
+
+/-- CREATE/DESTROY/SURVIVE receive the signed kernel values 14,-14,7. -/
+theorem gst_micro_kernel_twice_active_tableS :
+    gstMicroKernelTwiceS 0 1 = 14 ∧
+    gstMicroKernelTwiceS 0 2 = -14 ∧
+    gstMicroKernelTwiceS 1 2 = 7 := by
+  decide
+
+/-- Cross-multiplied exact form of 2*7/(J-6) on every active BIG2 cell.
+
+  (J-6) * K2 = 14.
+-/
+theorem gst_micro_kernel_resolvent_exactS
+    (a d : Nat) (ha : a < 2) (hd : d < 3)
+    (hactive : gstMicroBig2ActiveS a d) :
+    ((gstMicroEventSymbolS a d : Int) - 6) *
+      gstMicroKernelTwiceS a d = 14 := by
+  have hac : a = 0 ∨ a = 1 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hac with h0 | h1 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst a <;> subst d <;>
+    simp [gstMicroBig2ActiveS, gstMicroEventOutputS] at hactive <;>
+    norm_num [gstMicroEventSymbolS, gstMicroEventOutputS,
+      gstMicroKernelTwiceS, gstMicroTwoIndicatorS]
+
+/-- The signed CREATE/DESTROY part is exactly a difference of BIG2 boundary
+indicators.  This is the one-cell divergence law. -/
+theorem gst_micro_big2_flux_exactS (a d : Nat) :
+    gstMicroBig2FluxS a d =
+      7 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
+           gstMicroTwoIndicatorS d) := by
+  rfl
+
+/-- Abstract finite-row telescope.  This theorem is deliberately stated for
+an arbitrary sequence of ternary digits; when instantiated with consecutive
+physical x2 columns, `b (r+1)` is the output BIG2 indicator of column r.
+-/
+theorem gst_micro_big2_flux_telescopesS
+    (b : Nat → Int) (L : Nat) :
+    (Finset.sum (Finset.range (L)) (fun r => 7 * (b (r+1)) - b r)) =
+      7 * (b L - b 0) := by
+  induction L with
+  | zero => simp
+  | succ L ih =>
+      rw [Finset.sum_range_succ, ih]
+      ring
+
+/-- Kernel decomposition: signed boundary flux plus the SURVIVE residual. -/
+theorem gst_micro_kernel_twice_decomposeS (a d : Nat) :
+    gstMicroKernelTwiceS a d =
+      2 * gstMicroBig2FluxS a d +
+      7 * gstMicroTwoIndicatorS d *
+          gstMicroTwoIndicatorS (gstMicroEventOutputS a d) := by
+  unfold gstMicroKernelTwiceS gstMicroBig2FluxS
+  ring
+-- END ATTACHED HandwrittenSignedKernelFluxScratch.lean
+
+-- BEGIN ATTACHED HandwrittenX6UPotentialChordScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Exact x-6 / orientation / U-potential chord
+
+For one physical x4 GST cell, split the carry into its two binary bridge bits
+and form the two microscopic x2 masses m1,m2.  Boss's handwritten singular
+coordinate x-6 is taken here literally as x=(m1+m2).
+
+Across the twelve legal cells the singular fibre x=6 consists of exactly two
+points:
+
+  (m1,m2)=(2,4)  hidden CREATE->DESTROY
+  (m1,m2)=(4,2)  exposed DESTROY->CREATE
+
+The antisymmetric orientation z=m2-m1 separates them.  The independently
+derived U-potential jump epsilon is affine in z on this fibre:
+
+  epsilon = 4 + 6*z.
+
+Thus the two sides of the handwritten pole are exactly BAD (+16) and NULL
+SURVIVE (-8).  This is a local finite theorem only; no global transport across
+the pole is asserted here.
+-/
+
+def gstHandwrittenXCoordS (C d : Nat) : Nat :=
+  gstFirstMicroMassS C d + gstSecondMicroMassS C d
+
+def gstHandwrittenZOrientS (C d : Nat) : Int :=
+  (gstSecondMicroMassS C d : Int) - (gstFirstMicroMassS C d : Int)
+
+/-- The singular x=6 fibre contains precisely the hidden/exposed BIG2 pair. -/
+theorem gst_handwritten_x_eq_six_iff_big2_orientationS
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    gstHandwrittenXCoordS C d = 6 ↔
+      (C = 0 ∧ d = 1) ∨ (C = 0 ∧ d = 2) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    decide
+
+/-- Exact two coordinates on the singular fibre. -/
+theorem gst_handwritten_x6_orientation_tableS :
+    gstHandwrittenXCoordS 0 1 = 6 ∧
+    gstHandwrittenZOrientS 0 1 = 2 ∧
+    gstHandwrittenXCoordS 0 2 = 6 ∧
+    gstHandwrittenZOrientS 0 2 = -2 := by
+  decide
+
+/-- On x=6 the U-potential jump is exactly 4+6z. -/
+theorem gst_handwritten_x6_u_jump_orientationS
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hx : gstHandwrittenXCoordS C d = 6) :
+    gstHandwrittenUJumpS C d = 4 + 6 * gstHandwrittenZOrientS C d := by
+  have hor := (gst_handwritten_x_eq_six_iff_big2_orientationS C d hC hd).1 hx
+  rcases hor with ⟨hC0,hd1⟩ | ⟨hC0,hd2⟩ <;>
+    subst C <;> subst d <;> decide
+
+/-- Positive orientation is the hidden BAD point of the singular fibre. -/
+theorem gst_handwritten_x6_hidden_u_jumpS :
+    gstHandwrittenUJumpS 0 1 = 16 ∧
+      gstHandwrittenZOrientS 0 1 = 2 := by
+  decide
+
+/-- Negative orientation is the exposed NULL SURVIVE point. -/
+theorem gst_handwritten_x6_exposed_u_jumpS :
+    gstHandwrittenUJumpS 0 2 = -8 ∧
+      gstHandwrittenZOrientS 0 2 = -2 := by
+  decide
+
+/-- Therefore on the singular fibre negative U curvature is equivalent to the
+exposed orientation. -/
+theorem gst_handwritten_x6_negative_iff_exposedS
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hx : gstHandwrittenXCoordS C d = 6) :
+    gstHandwrittenUJumpS C d < 0 ↔ (C = 0 ∧ d = 2) := by
+  have hor := (gst_handwritten_x_eq_six_iff_big2_orientationS C d hC hd).1 hx
+  rcases hor with ⟨hC0,hd1⟩ | ⟨hC0,hd2⟩ <;>
+    subst C <;> subst d <;> decide
+-- END ATTACHED HandwrittenX6UPotentialChordScratch.lean
 
 -- BEGIN ATTACHED HandwrittenOmegaOperatorScratch.lean
 set_option maxRecDepth 1000000
@@ -11878,2749 +14886,185 @@ theorem gst_handwritten_two_axis_same_energyS
     gst_handwritten_navigation_omega_budgetS Q hQ t n ht]
 -- END ATTACHED HandwrittenOmegaOriginCommutingSquareScratch.lean
 
--- BEGIN ATTACHED RetainedOffsetUStateScratch.lean
+-- BEGIN ATTACHED HandwrittenBigNBinaryFactorScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
-# Retained-offset canonical U-state
+# Binary factorisation of the GST shared carrier
 
-This is the generic natural-origin step needed after the first residual NULL
-regeneration.  The finite offset and multiplier are never discarded.
+Exact algebra only.  No residual termination or global transport theorem is
+asserted here.
 -/
 
-/-- One exact retained-offset natural-origin step. -/
-theorem gst_retained_offset_u_state_stepS
-    (Q : Nat → Nat → Nat)
-    (hQ : GSTCanonicalOriginEnergyS Q)
-    (t n offset mul seed : Nat) (ht : 1 ≤ t)
-    (hbad : GSTSeededBadTraceS seed (offset + mul * Q t n)) :
-    let originA := 4^(3^t)
-    let E := offset + mul * Q t (n % 3)
-    let r := E % 3
-    let offset' := E / 3
-    let mul' := mul * originA^(n % 3)
-    let X' := offset' + mul' * Q (t+1) (n/3)
-    let seed' := gstStepCarryS seed r
-    offset + mul * Q t n = r + 3*X' ∧
-      GSTSeededBadTraceS seed' X' ∧
-      mul * gstOriginRemainingUS t n =
-        mul' * gstOriginRemainingUS (t+1) (n/3) := by
+/-- Numerical value of the redundant ternary event word attached to an exact
+binary bridge `R -> Y`.  If its local digits are `d + 3e`, its base-three
+value is literally `R + 3Y`. -/
+def gstBinaryEventWordValueS (R Y : Nat) : Nat := R + 3*Y
+
+/-- A seeded multiply-by-two bridge has global event value `7R + 3a`. -/
+theorem gst_binary_seeded_event_valueS (a R : Nat) :
+    gstBinaryEventWordValueS R (a + 2*R) = 7*R + 3*a := by
+  unfold gstBinaryEventWordValueS
+  ring
+
+/-- Two binary bridge layers are exactly one seeded multiply-by-four wave.
+The full interior event word cancels from the combination below, leaving only
+the two bits of the incoming GST carry. -/
+theorem gst_binary_two_layer_event_chargeS
+    (a b R : Nat) :
+    let Y := a + 2*R
+    let Z := b + 2*Y
+    gstBinaryEventWordValueS Y Z =
+      2 * gstBinaryEventWordValueS R Y + (a + 3*b) := by
   dsimp only
-  let originA := 4^(3^t)
-  let E := offset + mul * Q t (n % 3)
-  let r := E % 3
-  let offset' := E / 3
-  let mul' := mul * originA^(n % 3)
-  let X' := offset' + mul' * Q (t+1) (n/3)
-
-  have hrec0 := gst_canonical_natural_origin_recurrenceS Q hQ t n ht
-  have hn : n = 3*(n/3) + n%3 := by
-    have h := Nat.mod_add_div n 3
-    omega
-  have hrec :
-      Q t (3*(n/3) + n%3) =
-        Q t (n%3) +
-          3 * (4^(3^t))^(n%3) * Q (t+1) (n/3) := by
-    rw [← hn]
-    exact hrec0
-
-  have hsplit0 := affine_natural_origin_stepS
-    Q t n offset mul (4^(3^t)) hrec
-  dsimp only at hsplit0
-  have hsplit : offset + mul * Q t n = r + 3*X' := by
-    simpa [originA, E, r, offset', mul', X'] using hsplit0
-
-  have hrlt : r < 3 := by
-    dsimp [r, E]
-    exact Nat.mod_lt _ (by decide)
-  have hxdiv : (offset + mul * Q t n) / 3 = X' := by
-    rw [hsplit]
-    rw [Nat.add_mul_div_left r X' (by decide : 0 < 3)]
-    rw [Nat.div_eq_of_lt hrlt]
-    simp
-  have hxmod : (offset + mul * Q t n) % 3 = r := by
-    rw [hsplit, Nat.add_mod, Nat.mul_mod]
-    simp [Nat.mod_eq_of_lt hrlt]
-
-  have hbadTail := gst_seeded_bad_trace_regenerates_tailS
-    seed (offset + mul * Q t n) hbad
-  have hseed :
-      gstAffineMulCarryS 4 seed (offset + mul * Q t n) 1 =
-        gstStepCarryS seed r := by
-    rw [gst_parent_seed_after_regenerationS, hxmod]
-  rw [hseed, hxdiv] at hbadTail
-
-  have hU := gst_origin_simultaneous_mul_divS mul t n
-  have hU' :
-      mul * gstOriginRemainingUS t n =
-        mul' * gstOriginRemainingUS (t+1) (n/3) := by
-    simpa [mul', originA, gstOriginMultiplierStepS,
-      gstOriginConsumedPhaseS, Nat.pow_mul] using hU
-
-  exact ⟨hsplit, hbadTail, hU'⟩
-
-/-- Positive retained origins remain a well-founded natural descent. -/
-theorem gst_retained_offset_origin_strictS
-    (n : Nat) (hn : 1 ≤ n) : n/3 < n := by
-  exact Nat.div_lt_self (by omega) (by decide : 1 < 3)
-
-/-- The first residual NULL state expands into the retained-offset normal form
-for all subsequent origin steps. -/
-theorem gst_residual_null_retained_state_shapeS
-    (s u : Nat) :
-    (gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3 +
-        GSTCanonicalBlockS s *
-          GSTHardPrefixOneTailS
-            gstNavigationConstant gstCanonicalPrefixOffsetS (s+1) u =
-      ((gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3 +
-        GSTCanonicalBlockS s * gstCanonicalPrefixOffsetS (s+1)) +
-      (GSTCanonicalBlockS s * GSTCanonicalBlockS (s+1)) *
-        gstNavigationConstant (s+2) u := by
-  unfold GSTHardPrefixOneTailS
-  ring
--- END ATTACHED RetainedOffsetUStateScratch.lean
-
--- BEGIN ATTACHED GSTGraphV2Scratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# GST Graph V2 scratch
-
-V2 does NOT replace the original GST ontology.  It keeps the exact seven
-non-dimensional axes
-
-  (x, x', y, y', z, z', n -> n')
-
-and the same three spaces NULL / ALT- / GST+.  The upgrade is that every vertex
-may additionally be read through the shared-information, phase-cycle, and
-canonical-energy overlays proved in the information modules.
-
-Semantic correction: NULL is a genuine space/realisation, but no absorbing or
-terminal axiom is attached to it.  In particular digit-two information in NULL
-regenerates to carry two under the exact GST edge law.
--/
-
-inductive GSTSpaceV2S
-  | null
-  | altMinus
-  | gstPlus
-  deriving Repr, DecidableEq
-
-def gstSpaceV2S (C : Nat) : GSTSpaceV2S :=
-  if C = 0 then .null else if C = 3 then .gstPlus else .altMinus
-
-/-- The original seven axes, represented without collapsing any coordinate. -/
-structure GSTSevenAxisVertexV2S where
-  x : Nat
-  xNext : Nat
-  carry : Nat
-  space : GSTSpaceV2S
-  digit : Nat
-  boundary : Nat
-  descent : Nat
-  nextDescent : Nat
-  deriving Repr
-
-/-- Canonical construction of one V2 vertex.  The additional V2 invariants are
-projections/overlays on this vertex; they are not replacement dimensions. -/
-def gstSevenAxisVertexV2S (R N p : Nat) : GSTSevenAxisVertexV2S where
-  x := p
-  xNext := p + 1
-  carry := gstCarryS R p
-  space := gstSpaceV2S (gstCarryS R p)
-  digit := gstDigitS R p
-  boundary := N - p
-  descent := R / 3^p
-  nextDescent := R / 3^(p+1)
-
-/-- The V2 overlay retains the new conserved coordinates discovered during the
-surgery while the underlying seven-axis vertex remains intact. -/
-structure GSTGraphV2OverlayS where
-  sharedCarrier : Nat
-  affineQuotient : Nat
-  highRemainder : Nat
-  phase : Nat
-  paradoxEnergy : Nat
-  deriving Repr
-
-/-- The two residue classes of the shared carrier which realise a parent Happy
-Gate for the current child digit r. -/
-def GSTParentHappyResidue12S (S r : Nat) : Prop :=
-  match r with
-  | 0 => S % 12 = 8 ∨ S % 12 = 11
-  | 1 => S % 12 = 4 ∨ S % 12 = 7
-  | 2 => S % 12 = 0 ∨ S % 12 = 3
-  | _ => False
-
-/-- Exact mod-12 compression of the parent gate condition. -/
-theorem gst_parent_happy_iff_shared_residue12S
-    (S D Z r : Nat)
-    (hD : D < 4)
-    (hr : r < 3)
-    (hS : S = D + 4*Z) :
-    (((Z + r) % 3 = 2) ∧ (D = 0 ∨ D = 3)) ↔
-      GSTParentHappyResidue12S S r := by
-  have hrCases : r = 0 ∨ r = 1 ∨ r = 2 := by omega
-  rcases hrCases with h0 | h1 | h2
-  · subst r
-    simp [GSTParentHappyResidue12S]
-    omega
-  · subst r
-    simp [GSTParentHappyResidue12S]
-    omega
-  · subst r
-    simp [GSTParentHappyResidue12S]
-    omega
-
-/-- Parent badness is exactly avoidance of the rotating residue pair. -/
-theorem gst_parent_bad_iff_avoids_shared_residue12S
-    (S D Z r : Nat)
-    (hD : D < 4)
-    (hr : r < 3)
-    (hS : S = D + 4*Z) :
-    GSTBadPairS D ((Z+r) % 3) ↔
-      ¬ GSTParentHappyResidue12S S r := by
-  unfold GSTBadPairS
-  rw [gst_parent_happy_iff_shared_residue12S S D Z r hD hr hS]
-
-/-- At a child digit-two row a bad parent avoids residues 0 and 3 mod 12. -/
-theorem gst_parent_bad_at_child_two_residue12S
-    (S D Z : Nat)
-    (hD : D < 4)
-    (hS : S = D + 4*Z)
-    (hbad : GSTBadPairS D ((Z+2) % 3)) :
-    S % 12 ≠ 0 ∧ S % 12 ≠ 3 := by
-  have havoid :=
-    (gst_parent_bad_iff_avoids_shared_residue12S S D Z 2 hD (by decide) hS).mp hbad
-  simpa [GSTParentHappyResidue12S] using havoid
-
-/-!
-The second V2 compression is horizontal. Encode one microscopic multiply-by-4
-output word at macro phase p by `Yp = p + 4*Hp`. The canonical macro phase
-advance by A becomes an affine recurrence on the Y words themselves.
--/
-
-/-- Phase 0 -> phase 1 on the microscopic output word. -/
-theorem gst_phase_micro_output01S
-    (A z H0 H1 : Nat)
-    (hH1 : H1 = z + A*H0) :
-    1 + 4*H1 = (1 + 4*z) + A*(4*H0) := by
-  rw [hH1]
+  unfold gstBinaryEventWordValueS
   ring
 
-/-- Phase 1 -> phase 2 on the microscopic output word. -/
-theorem gst_phase_micro_output12S
-    (A N c z H1 H2 : Nat)
-    (hA : A = 1 + 3*N*c)
-    (hc : c = 1 + 3*z)
-    (hH2 : H2 = z + N*c + A*H1) :
-    2 + 4*H2 = (1 + 4*z + N*c) + A*(1 + 4*H1) := by
-  rw [hH2, hA, hc]
-  ring
+/-- For a physical GST seed `D<4`, binary bit reversal gives the exact global
+space charge of the two microscopic event words. -/
+def gstBinarySpaceChargeS (D : Nat) : Nat :=
+  D / 2 + 3 * (D % 2)
 
-/-- Phase 2 -> next phase 0 on the microscopic output word. -/
-theorem gst_phase_micro_output20S
-    (A N c z H2 H0next : Nat)
-    (hA : A = 1 + 3*N*c)
-    (hc : c = 1 + 3*z)
-    (hH0 : H0next = z + 1 + 2*N*c + A*H2) :
-    4*H0next = (2 + 4*z + 2*N*c) + A*(2 + 4*H2) := by
-  rw [hH0, hA, hc]
-  ring
+theorem gst_binary_space_charge_four_valuesS
+    (D : Nat) (hD : D < 4) :
+    (D = 0 ∧ gstBinarySpaceChargeS D = 0) ∨
+    (D = 1 ∧ gstBinarySpaceChargeS D = 3) ∨
+    (D = 2 ∧ gstBinarySpaceChargeS D = 1) ∨
+    (D = 3 ∧ gstBinarySpaceChargeS D = 4) := by
+  have hcases : D = 0 ∨ D = 1 ∨ D = 2 ∨ D = 3 := by omega
+  rcases hcases with h0 | h1 | h2 | h3 <;>
+    subst D <;> norm_num [gstBinarySpaceChargeS]
 
-/-- Generic bridge from phase energy to its microscopic output tail. -/
-theorem gst_phase_micro_output_energyS
-    (E D p H : Nat)
-    (hE : E = 1 + p*D + 3*D*H) :
-    4*E = 4 + p*D + 3*D*(p + 4*H) := by
-  rw [hE]
-  ring
+/-- The central charge `2` never occurs for a legal GST carry. -/
+theorem gst_binary_space_charge_ne_twoS
+    (D : Nat) (hD : D < 4) :
+    gstBinarySpaceChargeS D ≠ 2 := by
+  rcases gst_binary_space_charge_four_valuesS D hD with
+      h0 | h1 | h2 | h3 <;> omega
 
-/-- Exact microscopic output digit for a seed-retaining wave. -/
-theorem gst_seeded_output_digit_exactS
-    (seed H q : Nat) :
-    gstDigitS (seed + 4*H) q =
-      (gstAffineMulCarryS 4 seed H q + gstDigitS H q) % 3 := by
-  exact gst_parent_digit_from_informationS 4 seed H q (by decide)
+/-- NULL/GST+ are exactly the two endpoints of the binary event charge; ALT-
+occupies the two interior noncentral values. -/
+theorem gst_binary_good_space_charge_endpointsS
+    (D : Nat) (hD : D < 4) :
+    (D = 0 ∨ D = 3) ↔
+      (gstBinarySpaceChargeS D = 0 ∨ gstBinarySpaceChargeS D = 4) := by
+  rcases gst_binary_space_charge_four_valuesS D hD with
+      h0 | h1 | h2 | h3 <;> omega
 
-/-- A seeded Happy Gate is exactly a common ternary digit two between the input
-word H and its microscopic output word seed+4H. -/
-theorem gst_seeded_happy_iff_common_twoS
-    (seed H q : Nat)
-    (hseed : seed < 4) :
-    (gstDigitS H q = 2 ∧
-      (gstAffineMulCarryS 4 seed H q = 0 ∨
-       gstAffineMulCarryS 4 seed H q = 3)) ↔
-    (gstDigitS H q = 2 ∧ gstDigitS (seed + 4*H) q = 2) := by
-  have hC : gstAffineMulCarryS 4 seed H q < 4 :=
-    gst_affine_carry_lt_multiplierS 4 seed H q (by decide) hseed
-  have hout := gst_seeded_output_digit_exactS seed H q
-  constructor
-  · rintro ⟨hd, h0 | h3⟩
-    · refine ⟨hd, ?_⟩
-      rw [hout, hd, h0]
-    · refine ⟨hd, ?_⟩
-      rw [hout, hd, h3]
-  · rintro ⟨hd, hout2⟩
-    refine ⟨hd, ?_⟩
-    rw [hout, hd] at hout2
-    omega
+/-- Exact event-charge identity for a seeded x4 wave.  The first binary layer
+has seed bit `D/2`, the second has seed bit `D%2`; the whole wave collapses to
+`gstBinarySpaceChargeS D`. -/
+theorem gst_seeded_x4_event_chargeS
+    (D R : Nat) :
+    let a := D / 2
+    let b := D % 2
+    let Y := a + 2*R
+    let Z := b + 2*Y
+    gstBinaryEventWordValueS Y Z =
+      2 * gstBinaryEventWordValueS R Y + gstBinarySpaceChargeS D := by
+  dsimp only
+  exact gst_binary_two_layer_event_chargeS (D/2) (D%2) R
 
-/-- A complete seeded bad trace is exactly absence of a common digit two
-between H and seed+4H at every ternary height. -/
-theorem gst_seeded_bad_iff_no_common_twoS
-    (seed H : Nat)
-    (hseed : seed < 4) :
-    GSTSeededBadTraceS seed H ↔
-      ∀ q, ¬ (gstDigitS H q = 2 ∧ gstDigitS (seed + 4*H) q = 2) := by
-  constructor
-  · intro hbad q hcommon
-    have hhappy :=
-      (gst_seeded_happy_iff_common_twoS seed H q hseed).mpr hcommon
-    exact (hbad q) hhappy
-  · intro hno q hhappy
-    have hcommon :=
-      (gst_seeded_happy_iff_common_twoS seed H q hseed).mp hhappy
-    exact hno q hcommon
-
-/-! Local five-rotation realization law. This is a re-coordinate map of one
-legal GST cell, not a global GST+/ALT- mirror. -/
-def gstLocalRotateS (x : Nat × Nat) : Nat × Nat :=
-  ((x.1 + 4*x.2) / 3, (x.1 + 4*x.2) % 3)
-
-/-- Every legal local carry/digit cell returns after five re-coordinatizations.
-The two fixed states are `(0,0)` and `(3,2)`; the remaining ten states form two
-five-cycles. -/
-theorem gst_local_rotate_fiveS
-    (C d : Nat) (hC : C < 4) (hd : d < 3) :
-    gstLocalRotateS
-      (gstLocalRotateS
-        (gstLocalRotateS
-          (gstLocalRotateS
-            (gstLocalRotateS (C,d))))) = (C,d) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
--- END ATTACHED GSTGraphV2Scratch.lean
-
--- BEGIN ATTACHED GSTResidueSpacetimeScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Generic prefixed residue spacetime
-
-A chart `E = P + B*H`, with `P < B`, identifies the ternary digits of `H`
-with the successive jumps of the full-energy residue tower modulo `B*3^q`.
--/
-
-def gstPrefixedModulusS (B q : Nat) : Nat := B * 3^q
-
-/-- Exact residue of a prefixed ternary tail. -/
-theorem gst_prefixed_residue_exactS
-    (P B H E q : Nat)
-    (hB : 1 ≤ B) (hP : P < B)
-    (hE : E = P + B*H) :
-    E % gstPrefixedModulusS B q = P + B*(H % 3^q) := by
-  unfold gstPrefixedModulusS
-  have hq : 0 < 3^q := Nat.pow_pos (by decide)
-  have hM : 0 < B*3^q := Nat.mul_pos (by omega) hq
-  have hr : H % 3^q < 3^q := Nat.mod_lt _ hq
-  have hsmall : P + B*(H % 3^q) < B*3^q := by
-    calc
-      P + B*(H % 3^q) < B + B*(H % 3^q) :=
-        Nat.add_lt_add_right hP _
-      _ = B*((H % 3^q)+1) := by ring
-      _ ≤ B*3^q := Nat.mul_le_mul_left B (Nat.succ_le_of_lt hr)
-  have hH : H = 3^q*(H/3^q) + H%3^q :=
-    (Nat.div_add_mod H (3^q)).symm
-  have hdecomp :
-      E = (P + B*(H%3^q)) + (B*3^q)*(H/3^q) := by
-    rw [hE]
-    conv_lhs => rw [hH]
-    ring
-  have hzero : ((B*3^q)*(H/3^q)) % (B*3^q) = 0 :=
-    Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
-  rw [hdecomp, Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
-  exact Nat.mod_eq_of_lt hsmall
-
-/-- Successive prefixed residues differ by exactly one tail ternary digit. -/
-theorem gst_prefixed_residue_stepS
-    (P B H q : Nat) :
-    P + B*(H % 3^(q+1)) =
-      (P + B*(H % 3^q)) +
-        gstPrefixedModulusS B q * gstDigitS H q := by
-  unfold gstPrefixedModulusS gstDigitS
-  rw [Nat.pow_succ, Nat.mod_mul]
-  ring
-
-/-- A tail digit two is exactly a `+2` jump in the full-energy residue tower. -/
-theorem gst_prefixed_digit_two_iff_residue_jumpS
-    (P B H E q : Nat)
-    (hB : 1 ≤ B) (hP : P < B)
-    (hE : E = P + B*H) :
-    gstDigitS H q = 2 ↔
-      E % gstPrefixedModulusS B (q+1) =
-        E % gstPrefixedModulusS B q +
-          2 * gstPrefixedModulusS B q := by
-  have hq := gst_prefixed_residue_exactS P B H E q hB hP hE
-  have hq1 := gst_prefixed_residue_exactS P B H E (q+1) hB hP hE
-  have hstep := gst_prefixed_residue_stepS P B H q
-  constructor
-  · intro hd
-    rw [hq1, hq, hstep, hd]
-    ring
-  · intro hjump
-    rw [hq1, hq] at hjump
-    rw [hstep] at hjump
-    have hadd :
-        gstPrefixedModulusS B q * gstDigitS H q =
-          2 * gstPrefixedModulusS B q :=
-      Nat.add_left_cancel hjump
-    have hM : 0 < gstPrefixedModulusS B q := by
-      unfold gstPrefixedModulusS
-      exact Nat.mul_pos (by omega) (Nat.pow_pos (by decide))
-    have hmul :
-        gstPrefixedModulusS B q * gstDigitS H q =
-          gstPrefixedModulusS B q * 2 := by
-      simpa [Nat.mul_comm] using hadd
-    exact Nat.mul_left_cancel hM hmul
-
-/-- A common digit two between two prefixed tails is exactly a simultaneous
-`+2` jump of their two full-energy residue towers. -/
-theorem gst_prefixed_common_two_iff_double_residue_jumpS
-    (P0 P1 B H0 H1 E0 E1 q : Nat)
-    (hB : 1 ≤ B) (hP0 : P0 < B) (hP1 : P1 < B)
-    (hE0 : E0 = P0 + B*H0)
-    (hE1 : E1 = P1 + B*H1) :
-    (gstDigitS H0 q = 2 ∧ gstDigitS H1 q = 2) ↔
-      (E0 % gstPrefixedModulusS B (q+1) =
-          E0 % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q ∧
-       E1 % gstPrefixedModulusS B (q+1) =
-          E1 % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q) := by
-  rw [gst_prefixed_digit_two_iff_residue_jumpS P0 B H0 E0 q hB hP0 hE0,
-      gst_prefixed_digit_two_iff_residue_jumpS P1 B H1 E1 q hB hP1 hE1]
-
-/-- One graph event: adjacent energies `E` and `4E` both make a digit-two
-residue jump at the same ternary row. -/
-def GSTDoubleJumpS (B E q : Nat) : Prop :=
-  E % gstPrefixedModulusS B (q+1) =
-      E % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q ∧
-  (4*E) % gstPrefixedModulusS B (q+1) =
-      (4*E) % gstPrefixedModulusS B q + 2*gstPrefixedModulusS B q
-
-/-- Phase-zero SURVIVE/common-two is exactly a double jump of the exact energy
-`E = 1 + 3D*T`. -/
-theorem gst_phase0_common_two_iff_double_jumpS
-    (D T E q : Nat) (hD : 3 ≤ D)
-    (hE : E = 1 + 3*D*T) :
-    (gstDigitS T q = 2 ∧ gstDigitS (4*T) q = 2) ↔
-      GSTDoubleJumpS (3*D) E q := by
-  have hE4 : 4*E = 4 + (3*D)*(4*T) := by
-    rw [hE]
-    ring
-  simpa [GSTDoubleJumpS] using
-    (gst_prefixed_common_two_iff_double_residue_jumpS
-      1 4 (3*D) T (4*T) E (4*E) q
-      (by omega) (by omega) (by omega) hE hE4)
-
-/-- Phase-one SURVIVE/common-two is exactly a double jump of the exact energy
-`E = 1 + D + 3D*H`.  The microscopic output tail is `1+4H`. -/
-theorem gst_phase1_common_two_iff_double_jumpS
-    (D H E q : Nat) (hD : 3 ≤ D)
-    (hE : E = 1 + D + 3*D*H) :
-    (gstDigitS H q = 2 ∧ gstDigitS (1+4*H) q = 2) ↔
-      GSTDoubleJumpS (3*D) E q := by
-  have hE4 : 4*E = (4+D) + (3*D)*(1+4*H) := by
-    rw [hE]
-    ring
-  simpa [GSTDoubleJumpS] using
-    (gst_prefixed_common_two_iff_double_residue_jumpS
-      (1+D) (4+D) (3*D) H (1+4*H) E (4*E) q
-      (by omega) (by omega) (by omega) hE hE4)
--- END ATTACHED GSTResidueSpacetimeScratch.lean
-
--- BEGIN ATTACHED GSTExponentLiftScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-Pure-power exponent-residue graph.
-
-This is the canonical component absent from arbitrary affine T. If one
-3-adic exponent trit is changed at level p, the exact LTE block
-4^(3^p)=1+3^(p+1)c with c == 1 (mod 3) determines the newly exposed power
-digit one level higher.
--/
-
-/-- Powers of four are one modulo three. -/
-theorem gst_pow4_mod3_oneS (m : Nat) : 4^m % 3 = 1 := by
-  rw [Nat.pow_mod]
-  norm_num
-
-/-- Adding one exponent trit `3^p` shifts the newly exposed ternary power digit
-by exactly one. -/
-theorem gst_pow4_exponent_lift_one_digitS
-    (p m c : Nat)
-    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
-    (hc : c % 3 = 1) :
-    gstDigitS (4^(m + 3^p)) (p+1) =
-      (gstDigitS (4^m) (p+1) + 1) % 3 := by
-  let L := 3^(p+1)
-  have hL : 0 < L := by
-    dsimp [L]
-    exact Nat.pow_pos (by decide)
-  have hpow : 4^(m + 3^p) = 4^m * (1 + L*c) := by
-    rw [Nat.pow_add, hA]
-  have hshape :
-      4^m * (1 + L*c) = 4^m + L * (4^m*c) := by ring
-  unfold gstDigitS
-  rw [show 3^(p+1) = L by rfl, hpow, hshape]
-  rw [Nat.add_mul_div_left _ _ hL]
-  rw [Nat.add_mod, Nat.mul_mod, gst_pow4_mod3_oneS, hc]
-
-/-- Adding exponent trit `2*3^p` shifts the newly exposed ternary power digit
-by exactly two.  This is obtained by applying the exact one-trit lift twice,
-so no separate nonlinear modular normalization is needed. -/
-theorem gst_pow4_exponent_lift_two_digitS
-    (p m c : Nat)
-    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
-    (hc : c % 3 = 1) :
-    gstDigitS (4^(m + 2*3^p)) (p+1) =
-      (gstDigitS (4^m) (p+1) + 2) % 3 := by
-  have h1 := gst_pow4_exponent_lift_one_digitS p m c hA hc
-  have h2 := gst_pow4_exponent_lift_one_digitS p (m + 3^p) c hA hc
-  have hexp : m + 2*3^p = (m + 3^p) + 3^p := by omega
-  rw [hexp]
-  rw [h2, h1]
-  have hd : gstDigitS (4^m) (p+1) < 3 := by
-    unfold gstDigitS
-    exact Nat.mod_lt _ (by decide)
+/-- The final integer after the two binary layers is exactly `D + 4R`. -/
+theorem gst_seeded_x4_binary_layers_exactS
+    (D R : Nat) :
+    D % 2 + 2 * (D / 2 + 2*R) = D + 4*R := by
+  have hD := Nat.mod_add_div D 2
   omega
 
-/-- Unified exponent-trit lift for a in {0,1,2}. -/
-theorem gst_pow4_exponent_trit_lift_digitS
-    (p m c a : Nat)
-    (ha : a < 3)
-    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
-    (hc : c % 3 = 1) :
-    gstDigitS (4^(m + a*3^p)) (p+1) =
-      (gstDigitS (4^m) (p+1) + a) % 3 := by
-  have haCases : a = 0 ∨ a = 1 ∨ a = 2 := by omega
-  rcases haCases with h0 | h1 | h2
-  · subst a
-    simp only [Nat.zero_mul, Nat.add_zero]
-    have hd : gstDigitS (4^m) (p+1) < 3 := by
-      unfold gstDigitS
-      exact Nat.mod_lt _ (by decide)
-    omega
-  · subst a
-    simpa using gst_pow4_exponent_lift_one_digitS p m c hA hc
-  · subst a
-    simpa using gst_pow4_exponent_lift_two_digitS p m c hA hc
--- END ATTACHED GSTExponentLiftScratch.lean
-
--- BEGIN ATTACHED CarryWordScratch.lean
-/-!
-Generic radix theorem behind the GST phase strip.
-For a fixed ternary cut M, repeated multiplication by 4 produces one carry
-per horizontal step.  The quotient after many steps stores those carries as
-its base-4 digits, in reverse chronological order.
--/
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-def gstStripQuotientS (r M j : Nat) : Nat :=
-  (4^j * r) / M
-
-def gstStripCarryS (r M j : Nat) : Nat :=
-  (4 * ((4^j * r) % M)) / M
-
-/-- One horizontal ×4 step appends exactly one base-4 carry digit. -/
-theorem gst_strip_quotient_succS
-    (r M j : Nat) (hM : 0 < M) :
-    gstStripQuotientS r M (j+1) =
-      4 * gstStripQuotientS r M j + gstStripCarryS r M j := by
-  simp only [gstStripQuotientS, gstStripCarryS]
-  have hsplit :
-      4^j * r = M * ((4^j * r) / M) + (4^j * r) % M := by
-    exact (Nat.div_add_mod (4^j * r) M).symm
-  have hnumPow : 4^(j+1) * r = 4 * (4^j * r) := by
-    rw [Nat.pow_succ]
-    ac_rfl
-  calc
-    (4^(j+1) * r) / M = (4 * (4^j * r)) / M :=
-      congrArg (fun x : Nat => x / M) hnumPow
-    _ = (4 * (M * ((4^j * r) / M) + (4^j * r) % M)) / M := by
-      rw [← hsplit]
-    _ = (4 * ((4^j * r) % M) + M * (4 * ((4^j * r) / M))) / M := by
-      congr 1
-      rw [Nat.mul_add]
-      ac_rfl
-    _ = (4 * ((4^j * r) % M)) / M + 4 * ((4^j * r) / M) := by
-      rw [Nat.add_mul_div_left _ _ hM]
-    _ = 4 * ((4^j * r) / M) + (4 * ((4^j * r) % M)) / M := by ac_rfl
-
-/-- Every horizontal carry is one legal quaternary digit. -/
-theorem gst_strip_carry_lt_fourS
-    (r M j : Nat) (hM : 0 < M) :
-    gstStripCarryS r M j < 4 := by
-  unfold gstStripCarryS
-  have hr : (4^j * r) % M < M := Nat.mod_lt _ hM
-  have hnum : 4 * ((4^j * r) % M) < M * 4 := by
-    have h := Nat.mul_lt_mul_of_pos_left hr (by decide : 0 < 4)
-    simpa [Nat.mul_comm] using h
-  exact Nat.div_lt_of_lt_mul hnum
-
-/-- The newest horizontal carry is the low base-4 digit of the new quotient. -/
-theorem gst_strip_quotient_succ_mod4S
-    (r M j : Nat) (hM : 0 < M) :
-    gstStripQuotientS r M (j+1) % 4 = gstStripCarryS r M j := by
-  rw [gst_strip_quotient_succS r M j hM]
-  have hc := gst_strip_carry_lt_fourS r M j hM
-  omega
-
-/-- Removing the newest base-4 digit recovers the preceding strip quotient. -/
-theorem gst_strip_quotient_succ_div4S
-    (r M j : Nat) (hM : 0 < M) :
-    gstStripQuotientS r M (j+1) / 4 = gstStripQuotientS r M j := by
-  rw [gst_strip_quotient_succS r M j hM]
-  have hc := gst_strip_carry_lt_fourS r M j hM
-  have h4 : 0 < (4:Nat) := by decide
-  have hshape :
-      4 * gstStripQuotientS r M j + gstStripCarryS r M j =
-        gstStripCarryS r M j + 4 * gstStripQuotientS r M j := by ac_rfl
-  rw [hshape, Nat.add_mul_div_left _ _ h4]
-  have hzero : gstStripCarryS r M j / 4 = 0 := Nat.div_eq_of_lt hc
-  simp [hzero]
-
-/-- Repeatedly removing k newest carry digits recovers the older quotient. -/
-theorem gst_strip_quotient_shift_divS
-    (r M i k : Nat) (hM : 0 < M) :
-    gstStripQuotientS r M (i+k) / 4^k = gstStripQuotientS r M i := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-      have hstep := gst_strip_quotient_succ_div4S r M (i+k) hM
-      have hidx : i + (k+1) = (i+k)+1 := by omega
-      rw [hidx]
-      have hpow : 4^(k+1) = 4 * 4^k := by
-        rw [Nat.pow_succ]
-        ac_rfl
-      rw [hpow, ← Nat.div_div_eq_div_mul]
-      rw [hstep]
-      exact ih
-
-/-- Every intermediate GST carry is therefore an exact base-4 coordinate of
-    the final shared carry word. -/
-theorem gst_strip_carry_is_information_digitS
-    (r M i k : Nat) (hM : 0 < M) :
-    gstStripQuotientS r M (i+k+1) / 4^k % 4 =
-      gstStripCarryS r M i := by
-  have hshift := gst_strip_quotient_shift_divS r M (i+1) k hM
-  have hidx : (i+1)+k = i+k+1 := by omega
-  rw [hidx] at hshift
-  rw [hshift]
-  exact gst_strip_quotient_succ_mod4S r M i hM
--- END ATTACHED CarryWordScratch.lean
-
--- BEGIN ATTACHED InformationCarryWordBridgeScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- The commuting-square shared-information integer is literally the horizontal
-    GST carry word across the corresponding power-of-four strip. -/
-theorem gst_shared_information_is_carry_wordS
-    (N D c z T q : Nat)
-    (hD : 3 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z) :
-    gstStripQuotientS
-        (1 + 3*D*(T % 3^q))
-        (3*D*3^q)
-        (N+1) =
-      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
-        4 * gstAffineMulCarryS (4^N) z T q := by
-  let M : Nat := 3^q
-  let K : Nat := 1 + 4*(z + 4^N*(T % M))
-  have hM : 0 < M := by
-    dsimp [M]
-    exact Nat.pow_pos (by decide)
-  have hDpos : 0 < D := by omega
-  have h3Dpos : 0 < 3*D := Nat.mul_pos (by decide) hDpos
-  have hDen : 0 < 3*D*M := Nat.mul_pos h3Dpos hM
-
-  have hnum :
-      4^(N+1) * (1 + 3*D*(T % M)) =
-        (D+4) + 3*D*K := by
-    dsimp [K]
-    rw [Nat.pow_succ, hA, hc]
-    ring
-
-  have hKsplit : K = M*(K/M) + K%M := by
-    have h := Nat.mod_add_div K M
-    omega
-
-  have hr : K % M < M := Nat.mod_lt _ hM
-  have hsmall : D + 4 < 3*D := by omega
-  have hrsucc : K % M + 1 ≤ M := Nat.succ_le_of_lt hr
-  have hmul : 3*D*(K % M + 1) ≤ 3*D*M :=
-    Nat.mul_le_mul_left (3*D) hrsucc
-  have hres : (D+4) + 3*D*(K%M) < 3*D*M := by
-    have hlt : (D+4) + 3*D*(K%M) < 3*D + 3*D*(K%M) := by
-      omega
-    have hshape : 3*D + 3*D*(K%M) = 3*D*(K%M + 1) := by ring
-    rw [hshape] at hlt
-    exact lt_of_lt_of_le hlt hmul
-
-  have hword :
-      gstStripQuotientS
-          (1 + 3*D*(T % M))
-          (3*D*M)
-          (N+1) = K/M := by
-    unfold gstStripQuotientS
-    rw [hnum]
-    have hshape0 :
-        (D+4) + 3*D*K =
-          (D+4) + 3*D*(M*(K/M) + K%M) :=
-      congrArg (fun x => (D+4) + 3*D*x) hKsplit
-    have hshape :
-        (D + 4) + 3 * D * K =
-          ((D+4) + 3*D*(K%M)) + (3*D*M)*(K/M) := by
-      calc
-        (D+4) + 3*D*K =
-            (D+4) + 3*D*(M*(K/M) + K%M) := hshape0
-        _ = ((D+4) + 3*D*(K%M)) + (3*D*M)*(K/M) := by ring
-    rw [hshape, Nat.add_mul_div_left _ _ hDen]
-    rw [Nat.div_eq_of_lt hres]
-    simp
-
-  have hmod :
-      (z + 4^N*(T % M)) % M = (z + 4^N*T) % M := by
-    simp [Nat.add_mod, Nat.mul_mod]
-
-  have hparent :
-      gstAffineMulCarryS 4 1 (z + 4^N*(T % M)) q =
-        gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
-    unfold gstAffineMulCarryS
-    dsimp [M] at hmod
-    rw [hmod]
-
-  have hdecomp :=
-    gst_affine_tail_div_decompositionS 1 4 (z + 4^N*(T % M)) q
-  have hshared :
-      K/M =
-        gstAffineMulCarryS 4 1 (z + 4^N*T) q +
-          4 * gstAffineMulCarryS (4^N) z T q := by
-    dsimp [K, M]
-    dsimp [M] at hparent hdecomp
-    rw [hdecomp, hparent]
-    rfl
-
-  dsimp [M] at hword
-  exact hword.trans hshared
--- END ATTACHED InformationCarryWordBridgeScratch.lean
-
--- BEGIN ATTACHED BadLanguageMagnitudeScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# GST bad-language magnitude axis
-
-A complete seeded bad GST trace cannot contain the consecutive ternary word
-`22`.  This file converts that symbolic exclusion into an exact Archimedean
-bound on every finite prefix.  It is deliberately independent of any Erdős
-claim or canonical-power forcing theorem.
--/
-
-/-- Ternary words with no consecutive pair `22`. -/
-def GSTNo22S (X : Nat) : Prop :=
-  ∀ j, ¬ (gstDigitS X j = 2 ∧ gstDigitS X (j+1) = 2)
-
-/-- Complete seeded badness implies the purely symbolic no-`22` language. -/
-theorem gst_no22_of_seeded_badS
-    (D X : Nat) (hD : D < 4)
-    (hbad : ∀ j,
-      GSTBadPairS (gstAffineMulCarryS 4 D X j) (gstDigitS X j)) :
-    GSTNo22S X := by
-  intro j
-  exact gst_bad_trace_forbids_22S D X hD hbad j
-
-/-- The no-`22` language is stable under every ternary suffix cut. -/
-theorem gst_no22_div_three_powS
-    (X q : Nat) (hno : GSTNo22S X) :
-    GSTNo22S (X / 3^q) := by
-  intro j h22
-  apply hno (q+j)
-  constructor
-  · rw [gst_seeded_affine_digit_shiftS X q j]
-    exact h22.1
-  · rw [show (q+j)+1 = q+(j+1) by omega,
-        gst_seeded_affine_digit_shiftS X q (j+1)]
-    exact h22.2
-
-/-- A no-`22` word has low two-trit block at most `21₃ = 7`. -/
-theorem gst_no22_low_pair_le_sevenS
-    (X : Nat) (hno : GSTNo22S X) :
-    X % 9 ≤ 7 := by
-  have h0lt : gstDigitS X 0 < 3 := by
-    unfold gstDigitS
-    exact Nat.mod_lt _ (by decide)
-  have h1lt : gstDigitS X 1 < 3 := by
-    unfold gstDigitS
-    exact Nat.mod_lt _ (by decide)
-  have hd0 : gstDigitS X 0 = 0 ∨
-      gstDigitS X 0 = 1 ∨ gstDigitS X 0 = 2 := by
-    omega
-  have hd1 : gstDigitS X 1 = 0 ∨
-      gstDigitS X 1 = 1 ∨ gstDigitS X 1 = 2 := by
-    omega
-  have hpair :
-      ¬ (gstDigitS X 0 = 2 ∧ gstDigitS X 1 = 2) := by
-    simpa using hno 0
-  have hmod : X % 9 = gstDigitS X 0 + 3 * gstDigitS X 1 := by
-    calc
-      X % 9 = X % (3^1 * 3) := by norm_num
-      _ = X % 3^1 + 3^1 * (X / 3^1 % 3) := by
-        rw [Nat.mod_mul]
-      _ = gstDigitS X 0 + 3 * gstDigitS X 1 := by
-        simp [gstDigitS]
-  rw [hmod]
-  rcases hd0 with h00 | h01 | h02 <;>
-    rcases hd1 with h10 | h11 | h12
-  all_goals omega
-
-/-- Exact finite magnitude bound for an even number of ternary positions.
-
-If `X < 9^m` and its ternary word contains no consecutive `22`, then
-
-`8 X ≤ 7 (9^m - 1)`.
-
-The extremal word is `21 21 ... 21` (most-significant pair first), whose
-normalized limiting value is exactly `7/8` of the ambient ternary interval.
--/
-theorem gst_no22_nine_power_boundS
-    (X m : Nat)
-    (hX : X < 9^m)
-    (hno : GSTNo22S X) :
-    8 * X ≤ 7 * (9^m - 1) := by
-  induction m generalizing X with
-  | zero =>
-      norm_num at hX ⊢
-      omega
-  | succ m ih =>
-      let Y := X / 9
-      have hpow : 9^(m+1) = 9 * 9^m := by
-        rw [Nat.pow_succ]
-        ac_rfl
-      have hYlt : Y < 9^m := by
-        have hx' : X < 9 * 9^m := by
-          simpa [hpow] using hX
-        exact Nat.div_lt_of_lt_mul hx'
-      have hYno : GSTNo22S Y := by
-        have h := gst_no22_div_three_powS X 2 hno
-        simpa [Y] using h
-      have hYbound := ih Y hYlt hYno
-      have hlow : X % 9 ≤ 7 := gst_no22_low_pair_le_sevenS X hno
-      have hdecomp : X = X % 9 + 9 * Y := by
-        dsimp [Y]
-        exact (Nat.mod_add_div X 9).symm
-      have hP : 0 < 9^m := Nat.pow_pos (by decide)
-      rw [hpow]
-      omega
-
-/-- Direct GST consequence: every finite seed-retaining bad word is trapped
-strictly below the top eighth of any containing base-nine block. -/
-theorem gst_seeded_bad_nine_power_boundS
-    (D X m : Nat)
-    (hD : D < 4)
-    (hbad : ∀ j,
-      GSTBadPairS (gstAffineMulCarryS 4 D X j) (gstDigitS X j))
-    (hX : X < 9^m) :
-    8 * X ≤ 7 * (9^m - 1) := by
-  exact gst_no22_nine_power_boundS X m hX
-    (gst_no22_of_seeded_badS D X hD hbad)
--- END ATTACHED BadLanguageMagnitudeScratch.lean
-
--- BEGIN ATTACHED PurePowerTailReductionScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-Arithmetic reduction of the prefix-one information-descent seam.
-No new forcing principle is assumed here.  The purpose of this file is to
-remove Omega/event language and expose the exact remaining pure-power tail
-implication.
--/
-
-def GSTHighBadTraceS (R cut : Nat) : Prop :=
-  ∀ q, GSTBadPairS (gstCarryS R (cut+q)) (gstDigitS R (cut+q))
-
-/-- The seed-zero child bad trace is exactly badness of the high tail of its
-    canonical energy representation `1 + 3^(s+2) T`. -/
-theorem gst_child_bad_iff_energy_high_badS
-    (s T : Nat) (hs : 1 ≤ s) :
-    GSTSeededBadTraceS 0 T ↔
-      GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2) := by
-  constructor
-  · intro hbad q
-    have hstate := gst_child_energy_stateS s T q hs
-    dsimp only at hstate
-    rw [hstate.1, hstate.2]
-    simpa [gstAffineMulCarryS, gstCarryS] using hbad q
-  · intro hbad q
-    have hstate := gst_child_energy_stateS s T q hs
-    dsimp only at hstate
-    have hq := hbad q
-    rw [hstate.1, hstate.2] at hq
-    simpa [gstAffineMulCarryS, gstCarryS] using hq
-
-/-- The seed-one parent bad trace is exactly badness of the high tail after
-    stripping the forced prefix `1 + 3^(s+1)`. -/
-theorem gst_parent_bad_iff_energy_high_badS
-    (s X : Nat) (hs : 1 ≤ s) :
-    GSTSeededBadTraceS 1 X ↔
-      GSTHighBadTraceS
-        ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) := by
-  constructor
-  · intro hbad q
-    have hstate := gst_parent_energy_stateS s X q hs
-    dsimp only at hstate
-    rw [hstate.1, hstate.2]
-    exact hbad q
-  · intro hbad q
-    have hstate := gst_parent_energy_stateS s X q hs
-    dsimp only at hstate
-    have hq := hbad q
-    rw [hstate.1, hstate.2] at hq
-    exact hq
-
-/-- Exact logical reduction: the original seed-one -> seed-zero information
-    descent is neither more nor less than high-tail badness transfer between
-    the two forced-prefix energies. -/
-theorem gst_information_descent_iff_high_tail_transferS
-    (s T X : Nat) (hs : 1 ≤ s) :
-    (GSTSeededBadTraceS 1 X → GSTSeededBadTraceS 0 T) ↔
-      (GSTHighBadTraceS
-          ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) →
-       GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2)) := by
-  constructor
-  · intro h hparent
-    have hp : GSTSeededBadTraceS 1 X :=
-      (gst_parent_bad_iff_energy_high_badS s X hs).2 hparent
-    have hc : GSTSeededBadTraceS 0 T := h hp
-    exact (gst_child_bad_iff_energy_high_badS s T hs).1 hc
-  · intro h hparent
-    have hp : GSTHighBadTraceS
-        ((1 + 3^(s+1)) + 3^(s+2) * X) (s+2) :=
-      (gst_parent_bad_iff_energy_high_badS s X hs).1 hparent
-    have hc : GSTHighBadTraceS (1 + 3^(s+2) * T) (s+2) := h hp
-    exact (gst_child_bad_iff_energy_high_badS s T hs).2 hc
-
-/-- At every vertical cut the horizontal strip input is not an arbitrary
-    residue: for a canonical energy `E = 4^K = 1 + 3*D*T` it is literally the
-    residue of that exact power of four modulo the aligned ternary modulus. -/
-theorem gst_pure_power_strip_input_residueS
-    (D T E K q : Nat)
-    (hD : 1 ≤ D)
-    (hE : E = 1 + 3*D*T)
-    (hPow : E = 4^K) :
-    4^K % (3*D*3^q) = 1 + 3*D*(T % 3^q) := by
-  have hqpos : 0 < 3^q := Nat.pow_pos (by decide)
-  have hMpos : 0 < 3*D*3^q := by positivity
-  have hrlt : 1 + 3*D*(T % 3^q) < 3*D*3^q := by
-    have hr : T % 3^q < 3^q := Nat.mod_lt _ hqpos
-    have h3D : 1 < 3*D := by omega
-    have hmul : 3*D*(T % 3^q + 1) ≤ 3*D*3^q :=
-      Nat.mul_le_mul_left (3*D) (Nat.succ_le_of_lt hr)
-    have hstep : 1 + 3*D*(T % 3^q) < 3*D*(T % 3^q + 1) := by
-      rw [Nat.mul_add, Nat.mul_one]
-      omega
-    exact lt_of_lt_of_le hstep hmul
-  have hT : T = 3^q * (T / 3^q) + T % 3^q :=
-    (Nat.div_add_mod T (3^q)).symm
-  have hdecomp :
-      E = (1 + 3*D*(T % 3^q)) + (3*D*3^q) * (T / 3^q) := by
-    rw [hE]
-    conv_lhs => rw [hT]
-    ring
-  have hmulmod :
-      ((3*D*3^q) * (T / 3^q)) % (3*D*3^q) = 0 :=
-    Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
-  rw [← hPow, hdecomp, Nat.add_mod, hmulmod, Nat.add_zero, Nat.mod_mod]
-  exact Nat.mod_eq_of_lt hrlt
--- END ATTACHED PurePowerTailReductionScratch.lean
-
--- BEGIN ATTACHED StripConservationScratch.lean
-/-!
-Generalized GST strip conservation.
-For an arbitrary multiplier B, the entire horizontal block R -> B*R has one
-exact ternary carry law.  No canonical-power or Erdős assumption is used.
--/
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-def gstWideCarryS (B R p : Nat) : Nat :=
-  (B * (R % 3^p)) / 3^p
-
-def gstWideDigitS (R p : Nat) : Nat :=
-  R / 3^p % 3
-
-/-- Arbitrary-multiplier carry recurrence. -/
-theorem gst_wide_carry_forward_exactS
-    (B R p : Nat) :
-    gstWideCarryS B R (p+1) =
-      (gstWideCarryS B R p + B * gstWideDigitS R p) / 3 := by
-  simp only [gstWideCarryS, gstWideDigitS, Nat.pow_succ]
-  have hp : 0 < 3^p := Nat.pow_pos (by decide)
-  have hsplit : R % (3^p * 3) =
-      R % 3^p + 3^p * (R / 3^p % 3) := by
-    rw [Nat.mod_mul]
-  rw [hsplit, Nat.mul_add]
-  rw [show B * (3^p * (R / 3^p % 3)) =
-      3^p * (B * (R / 3^p % 3)) by ac_rfl]
-  rw [← Nat.div_div_eq_div_mul]
-  rw [Nat.add_mul_div_left _ _ hp]
-
-/-- Exact quotient decomposition after multiplying R by B. -/
-theorem gst_wide_quotient_decompositionS
-    (B R p : Nat) :
-    (B*R) / 3^p =
-      gstWideCarryS B R p + B * (R / 3^p) := by
-  have hp : 0 < 3^p := Nat.pow_pos (by decide)
-  have hdiv : R = 3^p * (R / 3^p) + R % 3^p :=
-    (Nat.div_add_mod R (3^p)).symm
-  calc
-    (B*R) / 3^p =
-        (B * (3^p * (R / 3^p) + R % 3^p)) / 3^p := by rw [← hdiv]
-    _ = (B * (R % 3^p) + 3^p * (B * (R / 3^p))) / 3^p := by
-      congr 1
-      rw [Nat.mul_add]
-      ac_rfl
-    _ = (B * (R % 3^p)) / 3^p + B * (R / 3^p) := by
-      rw [Nat.add_mul_div_left _ _ hp]
-    _ = gstWideCarryS B R p + B * (R / 3^p) := by rfl
-
-/-- The output ternary digit of B*R depends only on the incoming wide carry
-    and the current input digit. -/
-theorem gst_wide_output_digit_exactS
-    (B R p : Nat) :
-    gstWideDigitS (B*R) p =
-      (gstWideCarryS B R p + B * gstWideDigitS R p) % 3 := by
-  unfold gstWideDigitS
-  rw [gst_wide_quotient_decompositionS]
-  have hmul :
-      (B * (R / 3^p)) % 3 =
-        (B * ((R / 3^p) % 3)) % 3 := by
-    calc
-      (B * (R / 3^p)) % 3 =
-          ((B % 3) * ((R / 3^p) % 3)) % 3 :=
-            Nat.mul_mod B (R / 3^p) 3
-      _ = (B * ((R / 3^p) % 3)) % 3 := by
-        simpa only [Nat.mod_mod] using
-          (Nat.mul_mod B ((R / 3^p) % 3) 3).symm
-  have haddL := Nat.add_mod
-      (gstWideCarryS B R p) (B * (R / 3^p)) 3
-  have haddR := Nat.add_mod
-      (gstWideCarryS B R p) (B * ((R / 3^p) % 3)) 3
-  rw [haddL, haddR, hmul]
-
-/-- Exact finite strip conservation at one ternary row. -/
-theorem gst_strip_conservation_exactS
-    (B R p : Nat) :
-    B * gstWideDigitS R p + gstWideCarryS B R p =
-      gstWideDigitS (B*R) p +
-        3 * gstWideCarryS B R (p+1) := by
-  have hcarry := gst_wide_carry_forward_exactS B R p
-  have hdigit := gst_wide_output_digit_exactS B R p
-  let X := gstWideCarryS B R p + B * gstWideDigitS R p
-  have hdivmod : X = X % 3 + 3 * (X / 3) := by
-    have h := Nat.mod_add_div X 3
-    omega
-  dsimp [X] at hdivmod
-  rw [← hcarry, ← hdigit] at hdivmod
-  omega
-
-/-- Specialization to a horizontal strip of N+1 ordinary ×4 steps. -/
-theorem gst_power_four_strip_conservationS
-    (N R p : Nat) :
-    4^(N+1) * gstWideDigitS R p +
-        gstWideCarryS (4^(N+1)) R p =
-      gstWideDigitS (4^(N+1) * R) p +
-        3 * gstWideCarryS (4^(N+1)) R (p+1) := by
-  exact gst_strip_conservation_exactS (4^(N+1)) R p
-
-/-- At a fixed ternary cut, the generalized carry of 4^(N+1) is exactly the
-    quotient storing the N+1 ordinary horizontal GST carries. -/
-theorem gst_wide_carry_is_carry_wordS
-    (N R p : Nat) :
-    gstWideCarryS (4^(N+1)) R p =
-      (4^(N+1) * (R % 3^p)) / 3^p := by
-  rfl
--- END ATTACHED StripConservationScratch.lean
-
--- BEGIN ATTACHED GSTGraphV2FluxScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-GST Graph V2 local information flux.
-Every legal multiply-by-four cell is compressed to the mass C + 4*d in
-{0,...,11}.  The four event types occupy exact disjoint mass sectors.
--/
-
-def gstCellMassV2S (C d : Nat) : Nat := C + 4*d
-
-def gstCellOutputV2S (C d : Nat) : Nat := (C + 4*d) % 3
-
-def gstCellNextCarryV2S (C d : Nat) : Nat := (C + 4*d) / 3
-
-/-- Exact local conservation of one GST cell. -/
-theorem gst_cell_mass_conservationV2S (C d : Nat) :
-    gstCellMassV2S C d =
-      gstCellOutputV2S C d + 3 * gstCellNextCarryV2S C d := by
-  unfold gstCellMassV2S gstCellOutputV2S gstCellNextCarryV2S
-  have h := Nat.mod_add_div (C + 4*d) 3
-  omega
-
-/-- SURVIVE occupies exactly masses 8 and 11. -/
-theorem gst_cell_survive_iff_massV2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3) :
-    (d = 2 ∧ gstCellOutputV2S C d = 2) ↔
-      (gstCellMassV2S C d = 8 ∨ gstCellMassV2S C d = 11) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
-
-/-- CREATE occupies exactly masses 2 and 5. -/
-theorem gst_cell_create_iff_massV2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3) :
-    (d ≠ 2 ∧ gstCellOutputV2S C d = 2) ↔
-      (gstCellMassV2S C d = 2 ∨ gstCellMassV2S C d = 5) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
-
-/-- DESTROY occupies exactly masses 9 and 10. -/
-theorem gst_cell_destroy_iff_massV2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3) :
-    (d = 2 ∧ gstCellOutputV2S C d ≠ 2) ↔
-      (gstCellMassV2S C d = 9 ∨ gstCellMassV2S C d = 10) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
-
-/-- The parent cell mass is one residue of the shared carrier.  This unifies
-all three rotating residue-12 cases into a single equation. -/
-theorem gst_parent_cell_mass_from_sharedV2S
-    (S D Z r : Nat)
-    (hD : D < 4)
-    (hr : r < 3)
-    (hS : S = D + 4*Z) :
-    gstCellMassV2S D ((Z+r)%3) = (S + 4*r) % 12 := by
-  have hP : (Z+r)%3 < 3 := Nat.mod_lt _ (by decide)
-  have hmass : D + 4*((Z+r)%3) < 12 := by omega
-  have hmod : (D + 4*(Z+r)) % 12 = D + 4*((Z+r)%3) := by
-    have hz : Z+r = 3*((Z+r)/3) + (Z+r)%3 :=
-      (Nat.div_add_mod (Z+r) 3).symm
-    rw [hz]
-    have hshape :
-        D + 4 * (3 * ((Z+r)/3) + (Z+r)%3) =
-          (D + 4*((Z+r)%3)) + 12*((Z+r)/3) := by ring
-    rw [hshape, Nat.add_mod, Nat.mul_mod]
-    simp [Nat.mod_eq_of_lt hmass]
-  unfold gstCellMassV2S
-  rw [hS]
-  have hshape : D + 4*Z + 4*r = D + 4*(Z+r) := by ring
-  rw [hshape, hmod]
-
-/-- Unified parent SURVIVE classifier in the shared carrier coordinates. -/
-theorem gst_parent_survive_iff_shared_mass_sectorV2S
-    (S D Z r : Nat)
-    (hD : D < 4)
-    (hr : r < 3)
-    (hS : S = D + 4*Z) :
-    (((Z+r)%3 = 2) ∧
-      (gstCellOutputV2S D ((Z+r)%3) = 2)) ↔
-      ((S + 4*r) % 12 = 8 ∨ (S + 4*r) % 12 = 11) := by
-  have hp : (Z+r)%3 < 3 := Nat.mod_lt _ (by decide)
-  rw [gst_cell_survive_iff_massV2S D ((Z+r)%3) hD hp]
-  rw [gst_parent_cell_mass_from_sharedV2S S D Z r hD hr hS]
-
-/-!
-The local re-coordinate map acts on the mass by multiplication by four modulo
-11.  Because 4 has order five modulo 11, the ten non-fixed legal masses split
-into two exact five-cycles.  This is a local coordinate invariant only; no
-global mirror principle is assumed.
--/
-
-/-- One local GST re-coordinate rotates the mass by x |-> 4x modulo 11. -/
-theorem gst_local_rotate_mass_mod11V2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3) :
-    let y := gstLocalRotateS (C,d)
-    gstCellMassV2S y.1 y.2 % 11 =
-      (4 * gstCellMassV2S C d) % 11 := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
-
-/-- The nonzero BIG2 species is the second five-cycle together with the fixed
-SURVIVE mass 11. -/
-def GSTBig2MassSpeciesV2S (M : Nat) : Prop :=
-  M = 2 ∨ M = 6 ∨ M = 7 ∨ M = 8 ∨ M = 10 ∨ M = 11
-
-/-- A legal child Happy Gate always begins in the BIG2 mass species. -/
-theorem gst_child_happy_has_big2_mass_speciesV2S
-    (C : Nat) (hC : C = 0 ∨ C = 3) :
-    GSTBig2MassSpeciesV2S (gstCellMassV2S C 2) := by
-  rcases hC with h0 | h3 <;> subst C <;>
-    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S]
-
-/-- The BIG2 five-cycle is closed under one local re-coordinate. -/
-theorem gst_big2_species_rotate_closedV2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3)
-    (hbig : GSTBig2MassSpeciesV2S (gstCellMassV2S C d)) :
-    let y := gstLocalRotateS (C,d)
-    GSTBig2MassSpeciesV2S (gstCellMassV2S y.1 y.2) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;>
-    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S, gstLocalRotateS] at hbig ⊢
-
-/-- Every legal BIG2-species cell reaches a SURVIVE mass (8 or 11) within at
-most four local coordinate rotations. -/
-theorem gst_big2_species_hits_survive_within_fourV2S
-    (C d : Nat) (hC : C < 4) (hd : d < 3)
-    (hbig : GSTBig2MassSpeciesV2S (gstCellMassV2S C d)) :
-    let x0 := (C,d)
-    let x1 := gstLocalRotateS x0
-    let x2 := gstLocalRotateS x1
-    let x3 := gstLocalRotateS x2
-    let x4 := gstLocalRotateS x3
-    (gstCellMassV2S x0.1 x0.2 = 8 ∨ gstCellMassV2S x0.1 x0.2 = 11) ∨
-    (gstCellMassV2S x1.1 x1.2 = 8 ∨ gstCellMassV2S x1.1 x1.2 = 11) ∨
-    (gstCellMassV2S x2.1 x2.2 = 8 ∨ gstCellMassV2S x2.1 x2.2 = 11) ∨
-    (gstCellMassV2S x3.1 x3.2 = 8 ∨ gstCellMassV2S x3.1 x3.2 = 11) ∨
-    (gstCellMassV2S x4.1 x4.2 = 8 ∨ gstCellMassV2S x4.1 x4.2 = 11) := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;>
-    simp [GSTBig2MassSpeciesV2S, gstCellMassV2S, gstLocalRotateS] at hbig ⊢
--- END ATTACHED GSTGraphV2FluxScratch.lean
-
--- BEGIN ATTACHED GSTGraphV2BlockScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-Block-scale GST Graph V2 laws.
-The vertical Omega graph is sampled every k ternary rows without introducing a
-terminal cutoff.  The whole k-trit child block is retained as one exact radix
-coordinate.
--/
-
-/-- Generic affine carry sampled across a block of `k` ternary rows. -/
-theorem gst_affine_block_step_exactV2S
-    (B z T q k : Nat) :
-    gstAffineMulCarryS B z T (q+k) =
-      (gstAffineMulCarryS B z T q +
-        B * ((T / 3^q) % 3^k)) / 3^k := by
-  simp only [gstAffineMulCarryS]
-  rw [Nat.pow_add, Nat.mod_mul]
-  have hqpos : 0 < 3^q := Nat.pow_pos (by decide)
-  have hshape :
-      z + B * (T % 3^q + 3^q * (T / 3^q % 3^k)) =
-        (z + B * (T % 3^q)) +
-          3^q * (B * (T / 3^q % 3^k)) := by
-    rw [Nat.mul_add]
-    ac_rfl
-  rw [hshape, ← Nat.div_div_eq_div_mul,
-      Nat.add_mul_div_left _ _ hqpos]
-
-/-- Exact block echo of the shared information carrier.
-
-With block width `k`, `D = 3^k`, and GST multiplier `A = 1 + D*c`, write
-
-  S_q = affineCarry(4A,1+4z,T,q)
-  U_q = (T/3^q) mod D.
-
-Then one whole block advance is
-
-  S_(q+k) = 4*c*U_q + floor((S_q + 4*U_q)/D).
-
-The term `4*c*U_q` is the explicit shifted information echo; the second term
-is the retained residual carrier. -/
-theorem gst_shared_information_block_echoV2S
-    (A c D z T q k : Nat)
-    (hD : D = 3^k)
-    (hA : A = 1 + D*c) :
-    let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
-    let U := (T / 3^q) % D
-    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+k) =
-      4*c*U + (S + 4*U) / D := by
-  dsimp only
-  have hstep :=
-    gst_affine_block_step_exactV2S (4*A) (1 + 4*z) T q k
-  have hDpos : 0 < D := by
-    rw [hD]
-    exact Nat.pow_pos (by decide)
-  rw [← hD] at hstep
-  calc
-    gstAffineMulCarryS (4*A) (1 + 4*z) T (q+k) =
-        (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
-          (4*A) * ((T / 3^q) % D)) / D := hstep
-    _ = ((gstAffineMulCarryS (4*A) (1 + 4*z) T q +
-          4 * ((T / 3^q) % D)) +
-          D * (4*c*((T / 3^q) % D))) / D := by
-          rw [hA]
-          congr 1
-          ring
-    _ = (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
-          4 * ((T / 3^q) % D)) / D +
-          4*c*((T / 3^q) % D) := by
-          rw [Nat.add_mul_div_left _ _ hDpos]
-    _ = 4*c*((T / 3^q) % D) +
-          (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
-            4 * ((T / 3^q) % D)) / D := by ac_rfl
--- END ATTACHED GSTGraphV2BlockScratch.lean
-
--- BEGIN ATTACHED PurePowerResidueGraphScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Pure-power residue tower view of GST Graph V2
-
-The canonical child is represented only through residues of the exact power of
-four. No finite cutoff or terminal NULL interpretation appears here.
--/
-
-def gstResidueTowerModulusS (D q : Nat) : Nat := 3*D*3^q
-
-/-- The aligned residue tower grows by exactly one child ternary digit. -/
-theorem gst_residue_tower_stepS
-    (D T q : Nat) :
-    1 + 3*D*(T % 3^(q+1)) =
-      (1 + 3*D*(T % 3^q)) +
-        gstResidueTowerModulusS D q * gstDigitS T q := by
-  unfold gstResidueTowerModulusS gstDigitS
-  rw [Nat.pow_succ, Nat.mod_mul]
-  ring
-
-/-- For an exact pure-power energy the q-th aligned residue is precisely the
-canonical child prefix residue. -/
-theorem gst_pure_power_residue_tower_exactS
-    (D T E K q : Nat)
-    (hD : 1 ≤ D)
-    (hE : E = 1 + 3*D*T)
-    (hPow : E = 4^K) :
-    4^K % gstResidueTowerModulusS D q =
-      1 + 3*D*(T % 3^q) := by
-  unfold gstResidueTowerModulusS
-  exact gst_pure_power_strip_input_residueS D T E K q hD hE hPow
-
-/-- For the canonical prefix-one scale D=3^(s+1), the q-th residue-tower
-modulus is exactly the absolute ternary row s+2+q. -/
-theorem gst_residue_tower_modulus_canonicalS
-    (s q : Nat) :
-    gstResidueTowerModulusS (3^(s+1)) q = 3^(s+2+q) := by
-  unfold gstResidueTowerModulusS
-  calc
-    3 * 3^(s+1) * 3^q = 3^1 * 3^(s+1) * 3^q := by norm_num
-    _ = 3^(1+(s+1)) * 3^q := by rw [← Nat.pow_add]
-    _ = 3^((1+(s+1))+q) := by rw [← Nat.pow_add]
-    _ = 3^(s+2+q) := by congr 1 <;> omega
-
-/-- V2 power-grid bridge. Once the strip input is the exact residue of 4^K,
-every horizontal carry coordinate is literally the ordinary GST carry of the
-actual consecutive power column 4^(K+i) at the aligned ternary row. -/
-theorem gst_residue_strip_carry_is_exact_power_carryS
-    (s K q i : Nat) :
-    gstStripCarryS
-        (4^K % gstResidueTowerModulusS (3^(s+1)) q)
-        (gstResidueTowerModulusS (3^(s+1)) q) i =
-      gstCarryS (4^(K+i)) (s+2+q) := by
-  have hM := gst_residue_tower_modulus_canonicalS s q
-  unfold gstStripCarryS gstCarryS
-  rw [hM]
-  have hres :
-      (4^i * (4^K % 3^(s+2+q))) % 3^(s+2+q) =
-        (4^i * 4^K) % 3^(s+2+q) := by
-    simp [Nat.mul_mod]
-  rw [hres]
-  have hpow : 4^i * 4^K = 4^(K+i) := by
-    calc
-      4^i * 4^K = 4^(i+K) := (Nat.pow_add 4 i K).symm
-      _ = 4^(K+i) := by rw [Nat.add_comm]
-  rw [hpow]
-
-/-- The final strip quotient is the wide carry across the same exact rectangle
-of consecutive power columns. -/
-theorem gst_residue_strip_quotient_is_exact_power_wide_carryS
-    (s K q width : Nat) :
-    gstStripQuotientS
-        (4^K % gstResidueTowerModulusS (3^(s+1)) q)
-        (gstResidueTowerModulusS (3^(s+1)) q) width =
-      (4^width * (4^K % 3^(s+2+q))) / 3^(s+2+q) := by
-  unfold gstStripQuotientS
-  rw [gst_residue_tower_modulus_canonicalS]
-
-/-- The whole shared GST information carrier is the horizontal carry quotient
-of the exact pure-power residue tower. -/
-theorem gst_shared_state_is_pure_power_residue_stripS
-    (N D c z T E K q : Nat)
-    (hD3 : 3 ≤ D)
-    (hD1 : 1 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z)
-    (hE : E = 1 + 3*D*T)
-    (hPow : E = 4^K) :
-    gstStripQuotientS
-        (4^K % gstResidueTowerModulusS D q)
-        (gstResidueTowerModulusS D q)
-        (N+1) =
-      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
-        4 * gstAffineMulCarryS (4^N) z T q := by
-  have hr := gst_pure_power_residue_tower_exactS D T E K q hD1 hE hPow
-  unfold gstResidueTowerModulusS at hr ⊢
-  rw [hr]
-  exact gst_shared_information_is_carry_wordS N D c z T q hD3 hA hc
-
-/-- Canonical rectangle identification. The shared information word is exactly
-the wide carry generated by the actual power rectangle 4^K -> 4^(K+N+1). -/
-theorem gst_shared_state_is_exact_power_rectangleS
-    (s N c z T E K q : Nat)
-    (hs : 1 ≤ s)
-    (hA : 4^N = 1 + 3^(s+1)*c)
-    (hc : c = 1 + 3*z)
-    (hE : E = 1 + 3*3^(s+1)*T)
-    (hPow : E = 4^K) :
-    gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
-      gstAffineMulCarryS 4 1 (z + 4^N*T) q +
-        4 * gstAffineMulCarryS (4^N) z T q := by
-  have hD3 : 3 ≤ 3^(s+1) := by
-    have h9 : 9 ≤ 3^(s+1) := by
-      rw [show (9:Nat) = 3^2 by decide]
-      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    omega
-  have hDpos : 0 < 3^(s+1) := Nat.pow_pos (by decide)
-  have hD1 : 1 ≤ 3^(s+1) := by omega
-  have hstrip := gst_shared_state_is_pure_power_residue_stripS
-    N (3^(s+1)) c z T E K q hD3 hD1 hA hc hE hPow
-  have hrect := gst_residue_strip_quotient_is_exact_power_wide_carryS
-    s K q (N+1)
-  have hwide :
-      gstStripQuotientS
-          (4^K % gstResidueTowerModulusS (3^(s+1)) q)
-          (gstResidueTowerModulusS (3^(s+1)) q) (N+1) =
-        gstWideCarryS (4^(N+1)) (4^K) (s+2+q) := by
-    rw [hrect]
-    rfl
-  exact hwide.symm.trans hstrip
-
-/-- The physical wide carry and the affine shared carrier are the same integer. -/
-theorem gst_exact_power_rectangle_is_shared_carrierS
-    (s N c z T E K q : Nat)
-    (hs : 1 ≤ s)
-    (hA : 4^N = 1 + 3^(s+1)*c)
-    (hc : c = 1 + 3*z)
-    (hE : E = 1 + 3*3^(s+1)*T)
-    (hPow : E = 4^K) :
-    gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
-      gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q := by
-  have hwide := gst_shared_state_is_exact_power_rectangleS
-    s N c z T E K q hs hA hc hE hPow
-  have hstate := gst_shared_information_state_exactS (4^N) z T q
-  exact hwide.trans hstate.symm
-
-/-- Exact channel equation in physical power-grid coordinates. Sampling the
-seven-axis GST rectangle every k=s+1 ternary rows gives the nonlinear block
-echo without an abstract endpoint replacement. -/
-theorem gst_exact_power_block_channel_echoS
-    (s N c z T E K q : Nat)
-    (hs : 1 ≤ s)
-    (hA : 4^N = 1 + 3^(s+1)*c)
-    (hc : c = 1 + 3*z)
-    (hE : E = 1 + 3*3^(s+1)*T)
-    (hPow : E = 4^K) :
-    let U := (T / 3^q) % 3^(s+1)
-    gstWideCarryS (4^(N+1)) (4^K) (s+2+(q+(s+1))) =
-      4*c*U +
-        (gstWideCarryS (4^(N+1)) (4^K) (s+2+q) + 4*U) / 3^(s+1) := by
-  dsimp only
-  have hq := gst_exact_power_rectangle_is_shared_carrierS
-    s N c z T E K q hs hA hc hE hPow
-  have hqk := gst_exact_power_rectangle_is_shared_carrierS
-    s N c z T E K (q+(s+1)) hs hA hc hE hPow
-  have hblock := gst_shared_information_block_echoV2S
-    (4^N) c (3^(s+1)) z T q (s+1) rfl hA
-  dsimp only at hblock
-  have hmul : 4 * 4^N = 4^(N+1) := by
-    rw [Nat.pow_succ]
-    ac_rfl
-  have hq' :
-      gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
-        gstAffineMulCarryS (4^(N+1)) (1 + 4*z) T q := by
-    simpa [hmul] using hq
-  have hqk' :
-      gstWideCarryS (4^(N+1)) (4^K) (s+2+(q+(s+1))) =
-        gstAffineMulCarryS (4^(N+1)) (1 + 4*z) T (q+(s+1)) := by
-    simpa [hmul] using hqk
-  rw [hmul] at hblock
-  rw [← hq', ← hqk'] at hblock
-  exact hblock
-
-/-- Exact conservation across one physical GST power rectangle. -/
-theorem gst_exact_power_rectangle_conservationS
-    (s N K q : Nat) :
-    4^(N+1) * gstDigitS (4^K) (s+2+q) +
-        gstWideCarryS (4^(N+1)) (4^K) (s+2+q) =
-      gstDigitS (4^(K+N+1)) (s+2+q) +
-        3 * gstWideCarryS (4^(N+1)) (4^K) ((s+2+q)+1) := by
-  have h := gst_strip_conservation_exactS
-    (4^(N+1)) (4^K) (s+2+q)
-  have hpow : 4^(N+1) * 4^K = 4^(K+N+1) := by
-    calc
-      4^(N+1) * 4^K = 4^((N+1)+K) := (Nat.pow_add 4 (N+1) K).symm
-      _ = 4^(K+N+1) := by congr 1 <;> omega
-  simpa [gstWideDigitS, gstDigitS, hpow] using h
-
-/-- Parent badness is a forbidden-sector statement about one quotient of an
-exact power-of-four residue. -/
-theorem gst_pure_power_parent_bad_forbids_residue_sectorS
-    (N D c z T E K q : Nat)
-    (hD3 : 3 ≤ D)
-    (hD1 : 1 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z)
-    (hE : E = 1 + 3*D*T)
-    (hPow : E = 4^K)
-    (hbad : GSTBadPairS
-      (gstAffineMulCarryS 4 1 (z + 4^N*T) q)
-      ((gstAffineMulCarryS (4^N) z T q + gstDigitS T q) % 3)) :
-    let S := gstStripQuotientS
-      (4^K % gstResidueTowerModulusS D q)
-      (gstResidueTowerModulusS D q) (N+1)
-    ¬ GSTParentHappyResidue12S S (gstDigitS T q) := by
-  dsimp only
-  have hS := gst_shared_state_is_pure_power_residue_stripS
-    N D c z T E K q hD3 hD1 hA hc hE hPow
-  let P := gstAffineMulCarryS 4 1 (z + 4^N*T) q
-  let Z := gstAffineMulCarryS (4^N) z T q
-  let r := gstDigitS T q
-  have hP : P < 4 := by
-    dsimp [P]
-    exact gst_affine_carry_lt_multiplierS 4 1 (z + 4^N*T) q (by decide) (by decide)
-  have hr : r < 3 := by
-    dsimp [r, gstDigitS]
-    exact Nat.mod_lt _ (by decide)
-  have hshape :
-      gstStripQuotientS
-          (4^K % gstResidueTowerModulusS D q)
-          (gstResidueTowerModulusS D q) (N+1) = P + 4*Z := by
-    simpa [P, Z] using hS
-  have hiff := gst_parent_bad_iff_avoids_shared_residue12S
-    (gstStripQuotientS
-      (4^K % gstResidueTowerModulusS D q)
-      (gstResidueTowerModulusS D q) (N+1)) P Z r hP hr hshape
-  apply hiff.mp
-  simpa [P, Z, r] using hbad
--- END ATTACHED PurePowerResidueGraphScratch.lean
-
--- BEGIN ATTACHED PhaseCycleInformationScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-Cyclic shared-information algebra for the corrected infinite-wave GST picture.
-
-The phase transitions are not terminal reductions.  They are three exact
-realisations of one conserved affine information law, with incoming GST seeds
-cycling 0 -> 1 -> 2 -> 0.
--/
-
-/-- Generic seeded commuting-square law.
-
-If the two full integer realisations agree
-
-    B + A*(C + 4*T) = C' + 4*(z + A*T),
-
-then after every ternary cut q the same information splits into the high
-A-coordinate (the child seeded carry) and the low base-4 coordinate (the
-parent seeded carry):
-
-    beta_q + A*h_q = p'_q + 4*a_q.
-
-No finite cutoff, terminal state, or origin exhaustion is used. -/
-theorem gst_seeded_shared_information_equationS
-    (A B C C' z T q : Nat)
-    (hcommute : B + A*(C + 4*T) = C' + 4*(z + A*T)) :
-    gstAffineMulCarryS A B (C + 4*T) q +
-        A * gstAffineMulCarryS 4 C T q =
-      gstAffineMulCarryS 4 C' (z + A*T) q +
-        4 * gstAffineMulCarryS A z T q := by
-  have hleft := gst_affine_tail_div_decompositionS B A (C + 4*T) q
-  have hchild := gst_affine_tail_div_decompositionS C 4 T q
-  have hright := gst_affine_tail_div_decompositionS C' 4 (z + A*T) q
-  have htail := gst_affine_tail_div_decompositionS z A T q
-  have hfull :
-      (B + A*(C + 4*T)) / 3^q =
-        (C' + 4*(z + A*T)) / 3^q := by
-    rw [hcommute]
-  rw [hleft, hright, hchild, htail] at hfull
-  nlinarith
-
-/-- Phase 0 -> phase 1: seed zero becomes seed one. -/
-theorem gst_phase01_shared_informationS
-    (A z T q : Nat) :
-    gstAffineMulCarryS A (1 + 4*z) (4*T) q +
-        A * gstAffineMulCarryS 4 0 T q =
-      gstAffineMulCarryS 4 1 (z + A*T) q +
-        4 * gstAffineMulCarryS A z T q := by
-  have hcommute :
-      (1 + 4*z) + A*(0 + 4*T) =
-        1 + 4*(z + A*T) := by ring
-  simpa using
-    (gst_seeded_shared_information_equationS
-      A (1 + 4*z) 0 1 z T q hcommute)
-
-/-- Phase 1 -> phase 2.  Write D=3*N and A=1+D*c.  With c=1+3*z,
-    the exact phase-one tail offset is z + N*c.  The information seed advances
-    from one to two, while the companion high coordinate remains explicit. -/
-theorem gst_phase12_shared_informationS
-    (N c z T q : Nat)
-    (hc : c = 1 + 3*z) :
-    let A := 1 + 3*N*c
-    let z12 := z + N*c
-    let B12 := 1 + 4*z + N*c
-    gstAffineMulCarryS A B12 (1 + 4*T) q +
-        A * gstAffineMulCarryS 4 1 T q =
-      gstAffineMulCarryS 4 2 (z12 + A*T) q +
-        4 * gstAffineMulCarryS A z12 T q := by
-  dsimp only
-  have hcommute :
-      (1 + 4*z + N*c) + (1 + 3*N*c)*(1 + 4*T) =
-        2 + 4*((z + N*c) + (1 + 3*N*c)*T) := by
-    rw [hc]
-    ring
-  exact gst_seeded_shared_information_equationS
-    (1 + 3*N*c) (1 + 4*z + N*c) 1 2 (z + N*c) T q hcommute
-
-/-- Phase 2 -> the next phase 0.  The seed does not die: the phase prefix wraps
-    it back from two to zero while the affine information is retained in the
-    new tail offset z + 1 + 2*N*c. -/
-theorem gst_phase20_shared_informationS
-    (N c z T q : Nat)
-    (hc : c = 1 + 3*z) :
-    let A := 1 + 3*N*c
-    let z20 := z + 1 + 2*N*c
-    let B20 := 2 + 4*z + 2*N*c
-    gstAffineMulCarryS A B20 (2 + 4*T) q +
-        A * gstAffineMulCarryS 4 2 T q =
-      gstAffineMulCarryS 4 0 (z20 + A*T) q +
-        4 * gstAffineMulCarryS A z20 T q := by
-  dsimp only
-  have hcommute :
-      (2 + 4*z + 2*N*c) + (1 + 3*N*c)*(2 + 4*T) =
-        0 + 4*((z + 1 + 2*N*c) + (1 + 3*N*c)*T) := by
-    rw [hc]
-    ring
-  exact gst_seeded_shared_information_equationS
-    (1 + 3*N*c) (2 + 4*z + 2*N*c) 2 0 (z + 1 + 2*N*c) T q hcommute
-
-/-- The three companion offsets all remain inside the same horizontal
-    multiplier interval.  This keeps every phase in one shared information
-    carrier rather than creating or deleting a separate object. -/
-theorem gst_phase_cycle_offsets_insideS
-    (N c z : Nat)
-    (hN : 3 ≤ N)
-    (hc : c = 1 + 3*z) :
-    let A := 1 + 3*N*c
-    z < A ∧
-      z + N*c < A ∧
-      z + 1 + 2*N*c < A ∧
-      1 + 4*z < A ∧
-      1 + 4*z + N*c < A ∧
-      2 + 4*z + 2*N*c < A := by
-  dsimp only
-  rw [hc]
-  constructor
-  · nlinarith
-  constructor
-  · nlinarith
-  constructor
-  · nlinarith
-  constructor
-  · nlinarith
-  constructor
-  · nlinarith
-  · nlinarith
--- END ATTACHED PhaseCycleInformationScratch.lean
-
--- BEGIN ATTACHED InformationLocalizationScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- A complete seeded bad trace can be cut at any ternary position without
-    losing its incoming carry. -/
-theorem gst_seeded_bad_trace_suffixS
-    (D X q : Nat) (hbad : GSTSeededBadTraceS D X) :
-    GSTSeededBadTraceS
-      (gstAffineMulCarryS 4 D X q) (X / 3^q) := by
-  intro j
-  have h := hbad (q+j)
-  rw [gst_seeded_affine_carry_semigroupS D X q j,
-      gst_seeded_affine_digit_shiftS X q j] at h
-  exact h
-
-/-- A seeded child Happy Gate at position q becomes a position-zero Happy Gate
-    after cutting at q; the accumulated child carry is retained as the seed. -/
-theorem gst_seeded_gate_localizesS
-    (C Y q : Nat)
-    (hgate : gstDigitS Y q = 2 ∧
-      (gstAffineMulCarryS 4 C Y q = 0 ∨
-       gstAffineMulCarryS 4 C Y q = 3)) :
-    gstDigitS (Y / 3^q) 0 = 2 ∧
-      (gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
-          (Y / 3^q) 0 = 0 ∨
-       gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
-          (Y / 3^q) 0 = 3) := by
-  have hseed0 :
-      gstAffineMulCarryS 4 (gstAffineMulCarryS 4 C Y q)
-          (Y / 3^q) 0 = gstAffineMulCarryS 4 C Y q := by
-    simp [gstAffineMulCarryS, Nat.mod_one]
-  constructor
-  · rw [← gst_seeded_affine_digit_shiftS Y q 0]
-    simpa [Nat.mod_one] using hgate.1
-  · rcases hgate.2 with h0 | h3
-    · left
-      rw [hseed0, h0]
-    · right
-      rw [hseed0, h3]
-
-/-- Cutting a relative affine realization keeps the same relative multiplier A;
-    all processed information is absorbed into the regenerated finite offset. -/
-theorem gst_relative_affine_suffixS
-    (A Z Y q : Nat) :
-    (Z + A*Y) / 3^q =
-      gstAffineMulCarryS A Z Y q + A*(Y / 3^q) := by
-  exact gst_affine_tail_div_decompositionS Z A Y q
-
-/-- Full localization package at an arbitrary child gate.  The parent bad
-    language, child gate, and shared relative affine form all survive the cut. -/
-theorem gst_shared_gate_localizationS
-    (A Z Y D C q : Nat)
-    (hgate : gstDigitS Y q = 2 ∧
-      (gstAffineMulCarryS 4 C Y q = 0 ∨
-       gstAffineMulCarryS 4 C Y q = 3))
-    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
-    let Yq := Y / 3^q
-    let Zq := gstAffineMulCarryS A Z Y q
-    let Dq := gstAffineMulCarryS 4 D (Z + A*Y) q
-    let Cq := gstAffineMulCarryS 4 C Y q
-    GSTSeededBadTraceS Dq (Zq + A*Yq) ∧
-      (gstDigitS Yq 0 = 2 ∧
-        (gstAffineMulCarryS 4 Cq Yq 0 = 0 ∨
-         gstAffineMulCarryS 4 Cq Yq 0 = 3)) := by
-  dsimp only
-  have hsuffix := gst_seeded_bad_trace_suffixS D (Z + A*Y) q hbad
-  have hshape := gst_relative_affine_suffixS A Z Y q
-  have hgate0 := gst_seeded_gate_localizesS C Y q hgate
-  constructor
-  · rw [hshape] at hsuffix
-    exact hsuffix
-  · exact hgate0
--- END ATTACHED InformationLocalizationScratch.lean
-
--- BEGIN ATTACHED InformationFluxScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Every horizontal GST carry across the canonical phase strip is literally
-    one base-4 coordinate of the same shared information state. -/
-theorem gst_shared_information_horizontal_coordinateS
-    (N D c z T q i : Nat)
-    (hi : i ≤ N)
-    (hD : 3 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z) :
-    let r := 1 + 3*D*(T % 3^q)
-    let M := 3*D*3^q
-    let S := gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q
-    gstInformationCarryAtS S (N-i) = gstStripCarryS r M i := by
-  dsimp only
-  have hDpos : 0 < D := by omega
-  have hM : 0 < 3*D*3^q := by
-    exact Nat.mul_pos (Nat.mul_pos (by decide) hDpos) (Nat.pow_pos (by decide))
-  have hbridge :=
-    gst_shared_information_is_carry_wordS N D c z T q hD hA hc
-  have hstate := gst_shared_information_state_exactS (4^N) z T q
-  have hfinal :
-      gstStripQuotientS
-          (1 + 3*D*(T % 3^q))
-          (3*D*3^q)
-          (N+1) =
-        gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q := by
-    exact hbridge.trans hstate.symm
-  have hcoord :=
-    gst_strip_carry_is_information_digitS
-      (1 + 3*D*(T % 3^q)) (3*D*3^q) i (N-i) hM
-  have hidx : i + (N-i) + 1 = N+1 := by omega
-  rw [hidx, hfinal] at hcoord
-  simpa [gstInformationCarryAtS] using hcoord
-
-/-- The left boundary carry of the horizontal strip is exactly the child GST
-    carry.  This is the top coordinate of the shared information word. -/
-theorem gst_shared_information_left_endpointS
-    (N D c z T q : Nat)
-    (hD : 9 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z) :
-    gstStripCarryS
-        (1 + 3*D*(T % 3^q))
-        (3*D*3^q) 0 = gstCarryS T q := by
-  have hD3 : 3 ≤ D := by omega
-  have hcoord :=
-    gst_shared_information_horizontal_coordinateS
-      N D c z T q 0 (by omega) hD3 hA hc
-  dsimp only at hcoord
-  have hcpos : 1 ≤ c := by omega
-  have hzdiv : c / 3 = z := by
-    rw [hc, Nat.add_mul_div_left 1 z (by decide : 0 < 3)]
-    norm_num
-  have hoff := gst_gst_offsets_lt_multiplierS D c hD hcpos
-  have hz1 : 1 + 4*z < 4^N := by
-    rw [← hzdiv, hA]
-    exact hoff.2
-  have hApos : 0 < 4^N := Nat.pow_pos (by decide)
-  have htop :=
-    gst_shared_information_top_coordinateS
-      (4^N) z T q N rfl hApos hz1
-  dsimp only at htop
-  have hC : gstCarryS T q < 4 := by
-    have h := gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide)
-    simpa [gstCarryS, gstAffineMulCarryS] using h
-  have hinfo :
-      gstInformationCarryAtS
-          (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) N =
-        gstCarryS T q := by
-    unfold gstInformationCarryAtS
-    rw [htop]
-    exact Nat.mod_eq_of_lt hC
-  exact hcoord.symm.trans hinfo
-
-/-- The right boundary carry of the horizontal strip is exactly the seed-one
-    parent GST carry.  This is the bottom coordinate of the same information
-    word. -/
-theorem gst_shared_information_right_endpointS
-    (N D c z T q : Nat)
-    (hD : 3 ≤ D)
-    (hA : 4^N = 1 + D*c)
-    (hc : c = 1 + 3*z) :
-    gstStripCarryS
-        (1 + 3*D*(T % 3^q))
-        (3*D*3^q) N =
-      gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
-  have hcoord :=
-    gst_shared_information_horizontal_coordinateS
-      N D c z T q N (by omega) hD hA hc
-  dsimp only at hcoord
-  have hcoord0 :
-      gstStripCarryS
-          (1 + 3*D*(T % 3^q))
-          (3*D*3^q) N =
-        gstInformationCarryAtS
-          (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) 0 := by
-    simpa using hcoord.symm
-  have hp : gstAffineMulCarryS 4 1 (z + 4^N*T) q < 4 :=
-    gst_affine_carry_lt_multiplierS 4 1 (z + 4^N*T) q (by decide) (by decide)
-  have hbottom :=
-    gst_shared_information_bottom_coordinatesS (4^N) z T q hp
-  dsimp only at hbottom
-  calc
-    gstStripCarryS
-        (1 + 3*D*(T % 3^q))
-        (3*D*3^q) N =
-      gstInformationCarryAtS
-        (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) 0 := hcoord0
-    _ = gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
-      simpa [gstInformationCarryAtS] using hbottom.1
--- END ATTACHED InformationFluxScratch.lean
-
--- BEGIN ATTACHED InformationForcingScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- Output digit paired with the scratch carry recurrence. -/
-def gstOutputDigitS (C d : Nat) : Nat :=
-  (C + 4*d) % 3
-
-/-- The low-end shared information word commutes exactly with one vertical
-    ternary regeneration step.  `D` is the parent carry, `Z` the vertical
-    information quotient, `A` the fixed horizontal multiplier, and `r` the
-    current child digit.  No information is discarded: the regenerated parent
-    carry and regenerated information quotient are exactly the quotient of the
-    old shared word after the child digit has been injected. -/
-theorem gst_shared_word_regenerates_exactS
-    (A D Z r : Nat) :
-    (D + 4*Z + 4*A*r) / 3 =
-      gstStepCarryS D ((Z + A*r) % 3) +
-        4 * ((Z + A*r) / 3) := by
-  let E := Z + A*r
-  have hE : E = E % 3 + 3*(E/3) := by
-    have h := Nat.mod_add_div E 3
-    omega
-  have hshape :
-      D + 4*Z + 4*A*r = D + 4*E := by
-    dsimp [E]
-    ring
-  rw [hshape, hE]
-  have hnum :
-      D + 4 * (E % 3 + 3 * (E / 3)) =
-        (D + 4*(E%3)) + 3*(4*(E/3)) := by
-    ring
-  rw [hnum]
-  have h3 : 0 < (3:Nat) := by decide
-  rw [Nat.add_mul_div_left _ _ h3]
-  rfl
-
-/-- The parent bad language regenerates in the same relative affine form.
-    Only the finite offset and incoming seed change; the multiplier `A` is
-    untouched. -/
-theorem gst_relative_parent_bad_regeneratesS
-    (A D Z Y : Nat)
-    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
-    let r := Y % 3
-    let e := (Z + A*r) % 3
-    let D' := gstStepCarryS D e
-    let Z' := (Z + A*r) / 3
-    GSTSeededBadTraceS D' (Z' + A*(Y/3)) := by
-  dsimp only
-  have hsuffix :=
-    gst_seeded_bad_trace_regenerates_tailS D (Z + A*Y) hbad
-  have htail := gst_relative_affine_tail_divS A Z Y
-  have hemit := gst_relative_affine_emitted_digitS A Z Y
-  have hseed :
-      gstAffineMulCarryS 4 D (Z + A*Y) 1 =
-        gstStepCarryS D ((Z + A*(Y%3)) % 3) := by
-    rw [gst_parent_seed_after_regenerationS]
-    rw [hemit]
-  rw [hseed, htail] at hsuffix
-  exact hsuffix
-
-/-- A localized child Happy Gate cannot simply disappear when the parent is
-    assumed completely bad.  After consuming the gate row, the parent bad
-    suffix is regenerated exactly, the child information survives as seed 2
-    (NULL realization) or seed 3 (GST+ realization), and the low shared word
-    obeys the exact commuting conservation equation. -/
-theorem gst_localized_gate_forcing_stepS
-    (A D Z C Y : Nat)
-    (hgate : Y % 3 = 2 ∧ (C = 0 ∨ C = 3))
-    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
-    let e := (Z + A*2) % 3
-    let D' := gstStepCarryS D e
-    let Z' := (Z + A*2) / 3
-    let C' := gstStepCarryS C 2
-    GSTSeededBadTraceS D' (Z' + A*(Y/3)) ∧
-      (C' = 2 ∨ C' = 3) ∧
-      (D + 4*Z + 8*A) / 3 = D' + 4*Z' := by
-  dsimp only
-  have hparent := gst_relative_parent_bad_regeneratesS A D Z Y hbad
-  dsimp only at hparent
-  rw [hgate.1] at hparent
-  have hlatent : gstStepCarryS C 2 = 2 ∨ gstStepCarryS C 2 = 3 := by
-    rcases hgate.2 with h0 | h3
-    · left
-      rw [h0]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-    · right
-      rw [h3]
-      simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-  have hshared := gst_shared_word_regenerates_exactS A D Z 2
-  refine ⟨hparent, hlatent, ?_⟩
-  convert hshared using 1 <;> ring
--- END ATTACHED InformationForcingScratch.lean
-
--- BEGIN ATTACHED InformationIterationScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- The high endpoint of the shared information word obeys the same exact
-    ternary regeneration law.  `r` is the child input digit, `u` its realised
-    output digit under carry `C`, and `C'` the regenerated child carry. -/
-theorem gst_shared_high_regenerates_exactS
-    (A W C r : Nat) :
-    (W + A*C + 4*A*r) / 3 =
-      (W + A*gstOutputDigitS C r) / 3 +
-        A * gstStepCarryS C r := by
-  let U := C + 4*r
-  have hU : U = U % 3 + 3*(U/3) := by
-    have h := Nat.mod_add_div U 3
-    omega
-  have hshape0 : W + A*C + 4*A*r = W + A*U := by
-    dsimp [U]
-    ring
-  rw [hshape0, hU]
-  have hshape1 :
-      W + A*(U % 3 + 3*(U/3)) =
-        (W + A*(U%3)) + 3*(A*(U/3)) := by
-    ring
-  rw [hshape1]
-  have h3 : 0 < (3:Nat) := by decide
-  rw [Nat.add_mul_div_left _ _ h3]
-  simp [gstOutputDigitS, gstStepCarryS, U]
-
-/-- The regenerated high remainder remains strictly below the horizontal
-    multiplier.  Thus the child carry continues to be the top base-4
-    coordinate of the same finite information word after every row. -/
-theorem gst_shared_high_remainder_ltS
-    (A W C r : Nat) (hA : 0 < A) (hW : W < A) :
-    (W + A*gstOutputDigitS C r) / 3 < A := by
-  have hu : gstOutputDigitS C r < 3 := by
-    unfold gstOutputDigitS
-    exact Nat.mod_lt _ (by decide)
-  have hu1 : gstOutputDigitS C r + 1 ≤ 3 := Nat.succ_le_of_lt hu
-  have hnum : W + A*gstOutputDigitS C r < 3*A := by
-    calc
-      W + A*gstOutputDigitS C r <
-          A + A*gstOutputDigitS C r := Nat.add_lt_add_right hW _
-      _ = A * (gstOutputDigitS C r + 1) := by
-        rw [Nat.mul_add, Nat.mul_one]
-        ac_rfl
-      _ ≤ A*3 := Nat.mul_le_mul_left A hu1
-      _ = 3*A := by ac_rfl
-  exact Nat.div_lt_of_lt_mul hnum
-
-/-- One vertical row preserves both endpoint decompositions of the same shared
-    information word.  The low endpoint is the parent seeded carry; the high
-    endpoint is the child carry.  CREATE/DESTROY/SURVIVE are therefore
-    different realisations of one conserved state rather than different
-    information objects. -/
-theorem gst_shared_two_endpoint_regeneratesS
-    (A D Z W C r : Nat)
-    (hEq : D + 4*Z = W + A*C) :
-    let e := (Z + A*r) % 3
-    let D' := gstStepCarryS D e
-    let Z' := (Z + A*r) / 3
-    let u := gstOutputDigitS C r
-    let C' := gstStepCarryS C r
-    let W' := (W + A*u) / 3
-    D' + 4*Z' = W' + A*C' := by
-  dsimp only
-  have hlow := gst_shared_word_regenerates_exactS A D Z r
-  have hhigh := gst_shared_high_regenerates_exactS A W C r
-  calc
-    gstStepCarryS D ((Z + A*r) % 3) + 4*((Z + A*r)/3) =
-        (D + 4*Z + 4*A*r) / 3 := hlow.symm
-    _ = (W + A*C + 4*A*r) / 3 := by rw [hEq]
-    _ = (W + A*gstOutputDigitS C r) / 3 +
-          A*gstStepCarryS C r := hhigh
-
-/-- The complete iterative package.  A seed-retaining parent bad trace and the
-    two endpoint decompositions regenerate together after consuming one child
-    ternary digit.  No NULL absorption or finite wave cutoff is used. -/
-theorem gst_coupled_bad_information_regeneratesS
-    (A D Z W C Y : Nat)
-    (hA : 0 < A) (hW : W < A)
-    (hEq : D + 4*Z = W + A*C)
-    (hbad : GSTSeededBadTraceS D (Z + A*Y)) :
-    let r := Y % 3
-    let e := (Z + A*r) % 3
-    let D' := gstStepCarryS D e
-    let Z' := (Z + A*r) / 3
-    let u := gstOutputDigitS C r
-    let C' := gstStepCarryS C r
-    let W' := (W + A*u) / 3
-    GSTSeededBadTraceS D' (Z' + A*(Y/3)) ∧
-      D' + 4*Z' = W' + A*C' ∧
-      W' < A := by
-  dsimp only
-  have hbad' := gst_relative_parent_bad_regeneratesS A D Z Y hbad
-  dsimp only at hbad'
-  have hEq' := gst_shared_two_endpoint_regeneratesS A D Z W C (Y%3) hEq
-  dsimp only at hEq'
-  have hW' := gst_shared_high_remainder_ltS A W C (Y%3) hA hW
-  exact ⟨hbad', hEq', hW'⟩
-
-/-- At a child Happy Gate the high endpoint realises digit two on both sides:
-    NULL (carry 0) regenerates to latent carry 2 and GST+ (carry 3) remains
-    carry 3, while in either case the high remainder is driven by the same
-    realised digit two. -/
-theorem gst_child_gate_high_realisationS
-    (C : Nat) (hC : C = 0 ∨ C = 3) :
-    gstOutputDigitS C 2 = 2 ∧
-      (gstStepCarryS C 2 = 2 ∨ gstStepCarryS C 2 = 3) := by
-  rcases hC with h0 | h3
-  · subst C
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-  · subst C
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED InformationIterationScratch.lean
-
--- BEGIN ATTACHED FiniteSupportScratch.lean
-/-!
-Finite-support side of the corrected GST separation proof.
-This file proves only arithmetic facts about natural ternary origins.
-It deliberately does NOT assume or assert the missing GST forcing theorem.
--/
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- The k-th least-significant ternary origin digit. -/
-def ternaryOriginDigitS (n k : Nat) : Nat :=
-  n / 3^k % 3
-
-/-- A genuinely infinite ternary-support origin has a nonzero trit beyond every
-    finite cutoff.  Ordinary naturals will be proved not to satisfy this. -/
-def InfiniteTernarySupportS (n : Nat) : Prop :=
-  ∀ K, ∃ k, K ≤ k ∧ ternaryOriginDigitS n k ≠ 0
-
-/-- Elementary growth bound used to give every natural an explicit ternary
-    cutoff without logarithms. -/
-theorem three_pow_succ_gt_selfS (n : Nat) :
-    n < 3^(n+1) := by
-  induction n with
-  | zero => decide
-  | succ n ih =>
-      have hp : 0 < 3^(n+1) := Nat.pow_pos (by decide)
-      have hle : n+1 ≤ 3^(n+1) := by omega
-      rw [show (n+1)+1 = (n+1)+1 by rfl, Nat.pow_succ]
-      omega
-
-/-- Every ternary origin digit at or above the explicit cutoff n+1 is zero. -/
-theorem ternary_origin_eventually_zeroS
-    (n k : Nat) (hk : n+1 ≤ k) :
-    ternaryOriginDigitS n k = 0 := by
-  have hbase : n < 3^(n+1) := three_pow_succ_gt_selfS n
-  have hpow : 3^(n+1) ≤ 3^k :=
-    Nat.pow_le_pow_of_le (by decide : 1 < 3) hk
-  have hlt : n < 3^k := lt_of_lt_of_le hbase hpow
-  have hdiv : n / 3^k = 0 := Nat.div_eq_of_lt hlt
-  simp [ternaryOriginDigitS, hdiv]
-
-/-- No natural number has genuinely infinite ternary support. -/
-theorem natural_not_infinite_ternary_supportS (n : Nat) :
-    ¬ InfiniteTernarySupportS n := by
-  intro hinf
-  obtain ⟨k, hk, hnz⟩ := hinf (n+1)
-  exact hnz (ternary_origin_eventually_zeroS n k hk)
-
-/-- Consumer form for the final GST separation: any theorem forcing a nonzero
-    origin trit beyond every cutoff is immediately contradictory for Nat. -/
-theorem finite_origin_contradictionS
-    (n : Nat)
-    (hforce : ∀ K, ∃ k, K ≤ k ∧ ternaryOriginDigitS n k ≠ 0) :
-    False := by
-  exact natural_not_infinite_ternary_supportS n hforce
--- END ATTACHED FiniteSupportScratch.lean
-
--- BEGIN ATTACHED LastGateTrapScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- A Happy Gate in a seed-retaining child wave. -/
-def GSTSeededHappyS (D X j : Nat) : Prop :=
-  gstDigitS X j = 2 ∧
-    (gstAffineMulCarryS 4 D X j = 0 ∨
-     gstAffineMulCarryS 4 D X j = 3)
-
-/-- Any nonempty finite interval of seeded gates has a last gate. -/
-theorem gst_exists_last_seeded_gate_belowS
-    (D X N : Nat)
-    (hex : ∃ j, j < N ∧ GSTSeededHappyS D X j) :
-    ∃ q, q < N ∧ GSTSeededHappyS D X q ∧
-      ∀ r, q < r → r < N → ¬ GSTSeededHappyS D X r := by
-  induction N with
-  | zero =>
-      obtain ⟨j, hj, _⟩ := hex
-      omega
-  | succ N ih =>
-      by_cases hN : GSTSeededHappyS D X N
-      · refine ⟨N, Nat.lt_succ_self N, hN, ?_⟩
-        intro r hNr hr
-        omega
-      · have hexN : ∃ j, j < N ∧ GSTSeededHappyS D X j := by
-          obtain ⟨j, hj, hjgate⟩ := hex
-          by_cases heq : j = N
-          · subst j
-            exact False.elim (hN hjgate)
-          · have hjN : j < N := by omega
-            exact ⟨j, hjN, hjgate⟩
-        obtain ⟨q, hqN, hqgate, hlast⟩ := ih hexN
-        refine ⟨q, by omega, hqgate, ?_⟩
-        intro r hqr hr
-        by_cases heq : r = N
-        · subst r
-          exact hN
-        · have hrN : r < N := by omega
-          exact hlast r hqr hrN
-
-/-- Above the explicit natural ceiling every ternary digit is zero. -/
-theorem gst_digit_zero_above_self_ceilingS
-    (X j : Nat) (hj : X + 1 ≤ j) :
-    gstDigitS X j = 0 := by
-  have hbase : X < 3^(X+1) := three_pow_succ_gt_selfS X
-  have hpow : 3^(X+1) ≤ 3^j :=
-    Nat.pow_le_pow_of_le (by decide : 1 < 3) hj
-  have hlt : X < 3^j := lt_of_lt_of_le hbase hpow
-  unfold gstDigitS
-  rw [Nat.div_eq_of_lt hlt]
-
-/-- Seeded gates are therefore confined below the same finite natural ceiling;
-    this bounds only the location of a gate, not the GST wave itself. -/
-theorem gst_no_seeded_gate_above_self_ceilingS
-    (D X j : Nat) (hj : X + 1 ≤ j) :
-    ¬ GSTSeededHappyS D X j := by
-  intro hgate
-  have hd0 : gstDigitS X j = 0 :=
-    gst_digit_zero_above_self_ceilingS X j hj
-  have hd2 : gstDigitS X j = 2 := hgate.1
-  omega
-
-/-- Every seeded witness in a natural child has a globally last Happy Gate. -/
-theorem gst_exists_global_last_seeded_gateS
-    (D X : Nat)
-    (hex : ∃ j, GSTSeededHappyS D X j) :
-    ∃ q, GSTSeededHappyS D X q ∧
-      ∀ r, q < r → ¬ GSTSeededHappyS D X r := by
-  obtain ⟨j, hjgate⟩ := hex
-  have hjlt : j < X + 1 := by
-    by_contra hnot
-    have hj : X + 1 ≤ j := by omega
-    exact gst_no_seeded_gate_above_self_ceilingS D X j hj hjgate
-  obtain ⟨q, hq, hqgate, hlast⟩ :=
-    gst_exists_last_seeded_gate_belowS D X (X+1) ⟨j, hjlt, hjgate⟩
-  refine ⟨q, hqgate, ?_⟩
-  intro r hqr
-  by_cases hr : r < X + 1
-  · exact hlast r hqr hr
-  · have hceil : X + 1 ≤ r := by omega
-    exact gst_no_seeded_gate_above_self_ceilingS D X r hceil
-
-/-- Once we cut immediately after the globally last child gate, the remaining
-    child wave is a complete seeded bad trace.  The gate is not declared
-    terminal: its carry is retained exactly as the incoming suffix seed. -/
-theorem gst_suffix_after_last_gate_is_badS
-    (D X q : Nat)
-    (hq : GSTSeededHappyS D X q)
-    (hlast : ∀ r, q < r → ¬ GSTSeededHappyS D X r) :
-    let Dq := gstAffineMulCarryS 4 D X q
-    let Dnext := gstStepCarryS Dq 2
-    let Xnext := X / 3^(q+1)
-    GSTSeededBadTraceS Dnext Xnext := by
-  dsimp only
-  have hstep := gstAffineS_forward_exact_all D X q
-  have hDnext :
-      gstAffineMulCarryS 4 D X (q+1) =
-        gstStepCarryS (gstAffineMulCarryS 4 D X q) 2 := by
-    rw [hstep, hq.1]
-  intro j
-  have hno := hlast (q+1+j) (by omega)
-  intro hgate
-  apply hno
-  constructor
-  · rw [gst_seeded_affine_digit_shiftS X (q+1) j]
-    exact hgate.1
-  · rw [gst_seeded_affine_carry_semigroupS D X (q+1) j,
-        hDnext]
-    exact hgate.2
--- END ATTACHED LastGateTrapScratch.lean
-
--- BEGIN ATTACHED CanonicalTrapScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-- After the globally last child Happy Gate, a hypothetical completely bad
-    prefix-one parent traps the regenerated information between two complete
-    seeded bad boundaries.  This is a packaging theorem only: it asserts no
-    final separation principle.
-
-    D = regenerated parent carry seed
-    Z = regenerated low affine quotient
-    W = regenerated high latent remainder
-    C = regenerated child carry seed (2 or 3)
-    Y = remaining child ternary suffix
-
-    The exact shared-information equation D + 4 Z = W + A C is retained. -/
-theorem gst_canonical_two_boundary_trapS
-    (A z T : Nat)
+/-- Every legal x4 shared-information equation factors through a unique-style
+intermediate binary remainder.  `Wmid` is the information state after the
+first x2 bridge layer.
+
+The theorem is stated existentially to avoid building subtraction into the
+state definition. -/
+theorem gst_shared_x4_binary_factorS
+    (A D Z W C : Nat)
     (hA : 0 < A)
-    (hz1 : 1 + 4*z < A)
-    (hparent : GSTSeededBadTraceS 1 (z + A*T))
-    (hchild : ∃ j, GSTSeededHappyS 0 T j) :
-    ∃ q,
-      let D := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
-      let Z := gstAffineMulCarryS A z T (q+1)
-      let W := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
-      let C := gstAffineMulCarryS 4 0 T (q+1)
-      let Y := T / 3^(q+1)
-      GSTSeededBadTraceS D (Z + A*Y) ∧
-      GSTSeededBadTraceS C Y ∧
-      (C = 2 ∨ C = 3) ∧
-      D + 4*Z = W + A*C ∧
-      W < A := by
-  obtain ⟨q, hq, hlast⟩ :=
-    gst_exists_global_last_seeded_gateS 0 T hchild
-  refine ⟨q, ?_⟩
-  dsimp only
-
-  have hparentSuffix :=
-    gst_seeded_bad_trace_suffixS 1 (z + A*T) (q+1) hparent
-  have hparentShape := gst_relative_affine_suffixS A z T (q+1)
-  rw [hparentShape] at hparentSuffix
-
-  have hchildSuffix :=
-    gst_suffix_after_last_gate_is_badS 0 T q hq hlast
-  dsimp only at hchildSuffix
-  have hchildStep := gstAffineS_forward_exact_all 0 T q
-  have hCeq :
-      gstAffineMulCarryS 4 0 T (q+1) =
-        gstStepCarryS (gstAffineMulCarryS 4 0 T q) 2 := by
-    rw [hchildStep, hq.1]
-  rw [← hCeq] at hchildSuffix
-
-  have hlatent0 := gst_child_gate_high_realisationS
-    (gstAffineMulCarryS 4 0 T q) hq.2
-  have hlatent :
-      gstAffineMulCarryS 4 0 T (q+1) = 2 ∨
-      gstAffineMulCarryS 4 0 T (q+1) = 3 := by
-    rw [hCeq]
-    exact hlatent0.2
-
-  have hEq := gst_shared_information_carry_equationS A z T (q+1)
-  have hcarryEq :
-      gstCarryS T (q+1) = gstAffineMulCarryS 4 0 T (q+1) := by
-    simp [gstCarryS, gstAffineMulCarryS]
-  rw [hcarryEq] at hEq
-  have hshared :
-      gstAffineMulCarryS 4 1 (z + A*T) (q+1) +
-          4 * gstAffineMulCarryS A z T (q+1) =
-        gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1) +
-          A * gstAffineMulCarryS 4 0 T (q+1) := hEq.symm
-
-  have hW : gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1) < A :=
-    gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) (q+1) hA hz1
-
-  exact ⟨hparentSuffix, hchildSuffix, hlatent, hshared, hW⟩
--- END ATTACHED CanonicalTrapScratch.lean
-
--- BEGIN ATTACHED HandwrittenBigNOmegaScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Handwritten BIG-N / Omega exact algebra scratch
-
-This file contains only exact finite algebra extracted from the handwritten
-operator experiment.  It does NOT assert the missing residual termination
-law, a global mirror, or terminal NULL.
--/
-
-/-- Output ternary digit of one fundamental multiply-by-two/base-three bridge. -/
-def gstBinaryBridgeOutputS (a d : Nat) : Nat :=
-  (a + 2*d) % 3
-
-/-- Next binary carry of one fundamental multiply-by-two/base-three bridge. -/
-def gstBinaryBridgeNextCarryS (a d : Nat) : Nat :=
-  (a + 2*d) / 3
-
-/-- Six-state microscopic mass.  Under `a<2`, `d<3`, this lies in `{0,...,5}`. -/
-def gstBinaryBridgeMassS (a d : Nat) : Nat :=
-  a + 2*d
-
-/-- Input/output event symbol.  It is the two-trit base-three word `d + 3e`. -/
-def gstBinaryBridgeEventS (a d : Nat) : Nat :=
-  d + 3 * gstBinaryBridgeOutputS a d
-
-/-- Exact fundamental 2-world / 3-world bridge equation. -/
-theorem gst_binary_bridge_exactS (a d : Nat) :
-    gstBinaryBridgeMassS a d =
-      gstBinaryBridgeOutputS a d +
-        3 * gstBinaryBridgeNextCarryS a d := by
-  unfold gstBinaryBridgeMassS gstBinaryBridgeOutputS
-    gstBinaryBridgeNextCarryS
-  have h := Nat.mod_add_div (a + 2*d) 3
-  omega
-
-/-- Exact local origin of the handwritten numerator seven.
-
-`J + 9 a' = 7 d + 3 a`.
-
-After base-three weighting and summation over a complete finite word, the
-binary-carry boundary telescopes and gives the global event word `7R`. -/
-theorem gst_binary_bridge_event_seven_balanceS (a d : Nat) :
-    gstBinaryBridgeEventS a d +
-        9 * gstBinaryBridgeNextCarryS a d =
-      7*d + 3*a := by
-  unfold gstBinaryBridgeEventS gstBinaryBridgeOutputS
-    gstBinaryBridgeNextCarryS
-  have h := Nat.mod_add_div (a + 2*d) 3
-  omega
-
-/-- The physical x2 bridge has exactly six possible event symbols.
-The missing event symbol `6` is therefore outside the physical microscopic
-image. -/
-theorem gst_binary_bridge_event_six_valuesS
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    gstBinaryBridgeEventS a d = 0 ∨
-    gstBinaryBridgeEventS a d = 1 ∨
-    gstBinaryBridgeEventS a d = 3 ∨
-    gstBinaryBridgeEventS a d = 5 ∨
-    gstBinaryBridgeEventS a d = 7 ∨
-    gstBinaryBridgeEventS a d = 8 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;>
-    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- The handwritten pole coordinate `6` is absent from every physical x2
-bridge state. -/
-theorem gst_binary_bridge_event_ne_sixS
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    gstBinaryBridgeEventS a d ≠ 6 := by
-  rcases gst_binary_bridge_event_six_valuesS a d ha hd with
-      h0 | h1 | h3 | h5 | h7 | h8 <;> omega
-
-/-- In the microscopic x2 bridge, CREATE is exactly event symbol seven. -/
-theorem gst_binary_bridge_create_iff_event7S
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    (d ≠ 2 ∧ gstBinaryBridgeOutputS a d = 2) ↔
-      gstBinaryBridgeEventS a d = 7 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;>
-    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- In the microscopic x2 bridge, DESTROY is exactly event symbol five. -/
-theorem gst_binary_bridge_destroy_iff_event5S
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    (d = 2 ∧ gstBinaryBridgeOutputS a d ≠ 2) ↔
-      gstBinaryBridgeEventS a d = 5 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;>
-    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- In the microscopic x2 bridge, SURVIVE is exactly event symbol eight. -/
-theorem gst_binary_bridge_survive_iff_event8S
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    (d = 2 ∧ gstBinaryBridgeOutputS a d = 2) ↔
-      gstBinaryBridgeEventS a d = 8 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;>
-    norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- Hard phase-one low cell: hidden BIG2 is CREATE then DESTROY. -/
-theorem gst_binary_bridge_phase1_hidden_pairS :
-    gstBinaryBridgeEventS 0 1 = 7 ∧
-      gstBinaryBridgeEventS 0 2 = 5 := by
-  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- NULL Happy cell: the same microscopic orientation is reversed. -/
-theorem gst_binary_bridge_null_survive_pairS :
-    gstBinaryBridgeEventS 0 2 = 5 ∧
-      gstBinaryBridgeEventS 0 1 = 7 := by
-  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-- GST+ Happy cell: both microscopic layers are SURVIVE. -/
-theorem gst_binary_bridge_plus_survive_pairS :
-    gstBinaryBridgeEventS 1 2 = 8 ∧
-      gstBinaryBridgeEventS 1 2 = 8 := by
-  norm_num [gstBinaryBridgeEventS, gstBinaryBridgeOutputS]
-
-/-! General binary block. -/
-
-def gstBinaryBlockOutputS (B C d : Nat) : Nat :=
-  (C + B*d) % 3
-
-def gstBinaryBlockNextCarryS (B C d : Nat) : Nat :=
-  (C + B*d) / 3
-
-def gstBinaryBlockEventS (B C d : Nat) : Nat :=
-  d + 3 * gstBinaryBlockOutputS B C d
-
-/-- General exact event balance.  For `B=2` its event factor is `7`; for
-`B=4` it is `13`. -/
-theorem gst_binary_block_event_balanceS (B C d : Nat) :
-    gstBinaryBlockEventS B C d +
-        9 * gstBinaryBlockNextCarryS B C d =
-      (1 + 3*B)*d + 3*C := by
-  unfold gstBinaryBlockEventS gstBinaryBlockOutputS
-    gstBinaryBlockNextCarryS
-  have h := Nat.mod_add_div (C + B*d) 3
-  omega
-
-/-! Navigation finite horizon.  This is ordinary support arithmetic, not a
-terminal-space axiom. -/
-
-theorem gst_self_lt_three_powS : ∀ N : Nat, 1 ≤ N → N < 3^N
-  | 0, hN => by omega
-  | N+1, hN => by
-      by_cases h0 : N = 0
-      · subst N
-        simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-      · have ih : N < 3^N := gst_self_lt_three_powS N (by omega)
-        have hp : 0 < 3^N := Nat.pow_pos (by decide)
-        rw [Nat.pow_succ]
-        omega
-
-/-- At its own natural Navigation index, the ordinary natural descent is
-already zero. -/
-theorem gst_navigation_self_horizon_zeroS
-    (N : Nat) (hN : 1 ≤ N) :
-    N / 3^N = 0 := by
-  exact Nat.div_eq_of_lt (gst_self_lt_three_powS N hN)
-
-/-- Consequently the ternary information digit of `N` at its own Navigation
-index is zero. -/
-theorem gst_navigation_self_digit_zeroS
-    (N : Nat) (hN : 1 ≤ N) :
-    gstDigitS N N = 0 := by
-  unfold gstDigitS
-  rw [gst_navigation_self_horizon_zeroS N hN]
-  simp
-
-/-- The Omega pressure packet has no new transfer at the finite Navigation
-horizon itself.  Information already transferred to the past coordinate is not
-erased by this statement. -/
-theorem gst_omega_transfer_at_navigation_horizon_zeroS
-    (t N : Nat) (hN : 1 ≤ N) :
-    gstOmegaPressureTransferS t N N = 0 := by
-  unfold gstOmegaPressureTransferS
-  rw [gst_navigation_self_digit_zeroS N hN]
-  simp
--- END ATTACHED HandwrittenBigNOmegaScratch.lean
-
--- BEGIN ATTACHED HandwrittenSixUniverseScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Finite arithmetic of the handwritten 6^k / 7 / 13 layer
-
-No GST forcing theorem is asserted here.  These lemmas simply make the finite
-state-count arithmetic exact before it is coupled to the V2 graph.
--/
-
-/-- Number of bridge states through natural depth i, including depth zero. -/
-def gstSixUniversePrefixS (i : Nat) : Nat :=
-  Finset.sum (Finset.range ((i+1))) (fun k => 6^k)
-
-/-- Exact six-ary geometric recurrence. -/
-theorem gst_six_universe_prefix_succS (i : Nat) :
-    gstSixUniversePrefixS (i+1) =
-      gstSixUniversePrefixS i + 6^(i+1) := by
-  unfold gstSixUniversePrefixS
-  rw [show i+1+1 = (i+1)+1 by omega, Finset.sum_range_succ]
-
-/-- Closed integer form of the finite 6^k universe.
-The denominator 5=6-1 is represented without division. -/
-theorem gst_six_universe_prefix_closedS (i : Nat) :
-    5 * gstSixUniversePrefixS i = 6^(i+1) - 1 := by
-  induction i with
-  | zero =>
-      norm_num [gstSixUniversePrefixS]
-  | succ i ih =>
-      rw [gst_six_universe_prefix_succS, Nat.mul_add, ih]
-      have hp : 0 < 6^(i+1) := Nat.pow_pos (by decide)
-      rw [show 6^((i+1)+1) = 6^(i+1) * 6 by rw [Nat.pow_succ]]
+    (hD : D < 4)
+    (hC : C < 4)
+    (hW : W < A)
+    (hshared : D + 4*Z = W + A*C) :
+    ∃ a b c e Wmid,
+      D = 2*a + b ∧
+      C = 2*c + e ∧
+      a < 2 ∧ b < 2 ∧ c < 2 ∧ e < 2 ∧
+      Wmid < A ∧
+      a + 2*Z = Wmid + A*c ∧
+      b + 2*Wmid = W + A*e := by
+  let a := D / 2
+  let b := D % 2
+  let c := C / 2
+  let e := C % 2
+  let Wmid := (W + A*e) / 2
+  have h2 : 0 < (2:Nat) := by decide
+  have hDb : D = 2*a + b := by
+    dsimp [a, b]
+    omega
+  have hCe : C = 2*c + e := by
+    dsimp [c, e]
+    omega
+  have ha : a < 2 := by
+    dsimp [a]
+    omega
+  have hb : b < 2 := by
+    dsimp [b]
+    exact Nat.mod_lt _ h2
+  have hc : c < 2 := by
+    dsimp [c]
+    omega
+  have he : e < 2 := by
+    dsimp [e]
+    exact Nat.mod_lt _ h2
+  have hpar : (W + A*e) % 2 = b := by
+    have hmod := congrArg (fun x : Nat => x % 2) hshared
+    rw [hDb, hCe] at hmod
+    dsimp [b, e]
+    omega
+  have hWsplit : b + 2*Wmid = W + A*e := by
+    dsimp [Wmid]
+    have h := Nat.mod_add_div (W + A*e) 2
+    rw [hpar] at h
+    omega
+  have hmid : a + 2*Z = Wmid + A*c := by
+    rw [hDb, hCe] at hshared
+    omega
+  have hWmid : Wmid < A := by
+    by_cases he0 : e = 0
+    · rw [he0, Nat.mul_zero, Nat.add_zero] at hWsplit
       omega
+    · have he1 : e = 1 := by omega
+      rw [he1, Nat.mul_one] at hWsplit
+      omega
+  exact ⟨a, b, c, e, Wmid, hDb, hCe, ha, hb, hc, he,
+    hWmid, hmid, hWsplit⟩
 
-/-- The first nontrivial cumulative bridge universe has seven states. -/
-theorem gst_six_universe_prefix_oneS :
-    gstSixUniversePrefixS 1 = 7 := by
-  simp only [gstSixUniversePrefixS]
-  norm_num
-
-/-- The first aligned two-layer modulus factors as (6-1)(6+1). -/
-theorem gst_six_square_boundary_factorS :
-    6^2 - 1 = 5 * 7 := by
-  norm_num
-
-/-- The exact EQ2 event factor 13 is 6 plus the first cumulative universe 7. -/
-theorem gst_event_factor_thirteen_from_six_sevenS :
-    13 = 6 + gstSixUniversePrefixS 1 := by
-  simp only [gstSixUniversePrefixS]
-  norm_num
-
-/-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
-factor x=13.  Kept as integer division because 13-6 divides 7 exactly. -/
-theorem gst_handwritten_kernel_normalizes_at_thirteenS :
-    7 / (13 - 6) = 1 := by
-  norm_num
-
-/-- The first known nested canonical binary quotient factorization. -/
-theorem gst_first_binary_quotient_factorizationS :
-    455 = 5 * 7 * 13 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED HandwrittenSixUniverseScratch.lean
-
--- BEGIN ATTACHED HandwrittenKernelV2Scratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Handwritten kernel on the fundamental six-state bridge
-
-A single multiply-by-two/base-three bridge cell has mass
-
-    m = a + 2*d,   a in {0,1}, d in {0,1,2},
-
-hence `m < 6`.  Its alternate coordinate reading is
-
-    R6(m) = floor(m/3) + 2*(m mod 3).
-
-Boss's kernel magnitude `|7/(m-6)|` has denominator `6-m` on the physical
-spectrum.  We keep the exact integer denominator here; all ratio statements
-are expressed by cross multiplication, so no analytic structure is assumed.
--/
-
-def gstMicroRotate6S (m : Nat) : Nat := m / 3 + 2*(m % 3)
-
-def gstHandwrittenKernelDenomS (m : Nat) : Nat := 6 - m
-
-/-- Exact six-state re-coordinate table. -/
-theorem gst_micro_rotate6_tableS :
-    gstMicroRotate6S 0 = 0 ∧
-    gstMicroRotate6S 1 = 2 ∧
-    gstMicroRotate6S 2 = 4 ∧
-    gstMicroRotate6S 4 = 3 ∧
-    gstMicroRotate6S 3 = 1 ∧
-    gstMicroRotate6S 5 = 5 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- The only fixed bridge masses are the all-zero state and BIG2 SURVIVE. -/
-theorem gst_micro_rotate6_fixed_iffS
-    (m : Nat) (hm : m < 6) :
-    gstMicroRotate6S m = m ↔ m = 0 ∨ m = 5 := by
-  have hcases : m = 0 ∨ m = 1 ∨ m = 2 ∨ m = 3 ∨ m = 4 ∨ m = 5 := by omega
-  rcases hcases with h0 | h1 | h2 | h3 | h4 | h5 <;>
-    subst m <;> decide
-
-/-- Thus the unique nonzero fixed state is mass five. -/
-theorem gst_micro_rotate6_nonzero_fixedS
-    (m : Nat) (hm : m < 6) (hm0 : m ≠ 0)
-    (hfix : gstMicroRotate6S m = m) :
-    m = 5 := by
-  rcases (gst_micro_rotate6_fixed_iffS m hm).1 hfix with h0 | h5
-  · exact False.elim (hm0 h0)
-  · exact h5
-
-/-- The proper alternate orbit has exact period four. -/
-theorem gst_micro_rotate6_four_cycleS :
-    gstMicroRotate6S (gstMicroRotate6S
-      (gstMicroRotate6S (gstMicroRotate6S 1))) = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- Kernel denominators on the active BIG2 masses. -/
-theorem gst_handwritten_kernel_active_denomsS :
-    gstHandwrittenKernelDenomS 2 = 4 ∧
-    gstHandwrittenKernelDenomS 4 = 2 ∧
-    gstHandwrittenKernelDenomS 5 = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- CREATE -> DESTROY doubles the magnitude of 7/(6-m): denominator halves. -/
-theorem gst_handwritten_kernel_create_destroy_doubleS :
-    gstHandwrittenKernelDenomS 2 =
-      2 * gstHandwrittenKernelDenomS 4 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- The reversed DESTROY -> CREATE orientation halves the kernel magnitude. -/
-theorem gst_handwritten_kernel_destroy_create_halfS :
-    2 * gstHandwrittenKernelDenomS 4 =
-      gstHandwrittenKernelDenomS 2 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- SURVIVE is the nonzero fixed kernel state. -/
-theorem gst_handwritten_kernel_survive_fixedS :
-    gstMicroRotate6S 5 = 5 ∧ gstHandwrittenKernelDenomS 5 = 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- Integer cross-product form of telescoping around the complete nonfixed
-four-cycle.  It is the denominator counterpart of
-
-  K(2)/K(1) * K(4)/K(2) * K(3)/K(4) * K(1)/K(3) = 1.
--/
-theorem gst_handwritten_kernel_cycle_telescopesS :
-    gstHandwrittenKernelDenomS 1 *
-      gstHandwrittenKernelDenomS 2 *
-      gstHandwrittenKernelDenomS 4 *
-      gstHandwrittenKernelDenomS 3 =
-    gstHandwrittenKernelDenomS 2 *
-      gstHandwrittenKernelDenomS 4 *
-      gstHandwrittenKernelDenomS 3 *
-      gstHandwrittenKernelDenomS 1 := by
-  ring
-
-/-- Decompose a legal x4 GST carry into its two binary bridge carries. -/
-def gstMicroHighBitS (C : Nat) : Nat := C / 2
-def gstMicroLowBitS (C : Nat) : Nat := C % 2
-
-/-- First x2 bridge mass inside one x4 GST cell. -/
-def gstFirstMicroMassS (C d : Nat) : Nat := gstMicroHighBitS C + 2*d
-
-/-- Intermediate ternary digit emitted by the first x2 bridge. -/
-def gstFirstMicroOutputS (C d : Nat) : Nat := gstFirstMicroMassS C d % 3
-
-/-- Second x2 bridge mass inside one x4 GST cell. -/
-def gstSecondMicroMassS (C d : Nat) : Nat :=
-  gstMicroLowBitS C + 2*gstFirstMicroOutputS C d
-
-/-- Exact microscopic patterns of the three canonical BIG2 orientations. -/
-theorem gst_micro_big2_orientation_tableS :
-    (gstFirstMicroMassS 0 1, gstSecondMicroMassS 0 1) = (2,4) ∧
-    (gstFirstMicroMassS 0 2, gstSecondMicroMassS 0 2) = (4,2) ∧
-    (gstFirstMicroMassS 3 2, gstSecondMicroMassS 3 2) = (5,5) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- The kernel orientation associated to phase-one hidden BIG2 is exactly a
-binary factor two in cross-multiplied denominator form. -/
-theorem gst_phase_one_micro_kernel_factor_twoS :
-    gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 1) =
-      2 * gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 1) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- Phase two reverses the same factor. -/
-theorem gst_phase_two_micro_kernel_factor_halfS :
-    2 * gstHandwrittenKernelDenomS (gstFirstMicroMassS 0 2) =
-      gstHandwrittenKernelDenomS (gstSecondMicroMassS 0 2) := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
-
-/-- GST+ SURVIVE is fixed in both microscopic layers. -/
-theorem gst_plus_survive_micro_kernel_fixedS :
-    gstFirstMicroMassS 3 2 = 5 ∧
-      gstSecondMicroMassS 3 2 = 5 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED HandwrittenKernelV2Scratch.lean
+/-- After a last child Happy Gate the regenerated child carry `C` is 2 or 3,
+so the high binary child bit in the factored shared carrier is forced to one. -/
+theorem gst_shared_x4_binary_factor_last_gate_high_bitS
+    (A D Z W C : Nat)
+    (hA : 0 < A)
+    (hD : D < 4)
+    (hC : C = 2 ∨ C = 3)
+    (hW : W < A)
+    (hshared : D + 4*Z = W + A*C) :
+    ∃ a b e Wmid,
+      D = 2*a + b ∧
+      C = 2 + e ∧
+      a < 2 ∧ b < 2 ∧ e < 2 ∧ Wmid < A ∧
+      a + 2*Z = Wmid + A ∧
+      b + 2*Wmid = W + A*e := by
+  have hClt : C < 4 := by rcases hC with rfl | rfl <;> decide
+  obtain ⟨a,b,c,e,Wmid,hDb,hCe,ha,hb,hc,he,hmid,h1,h2⟩ :=
+    gst_shared_x4_binary_factorS A D Z W C hA hD hClt hW hshared
+  have hc1 : c = 1 := by
+    rcases hC with rfl | rfl <;> omega
+  subst c
+  refine ⟨a,b,e,Wmid,hDb,?_,ha,hb,he,hmid,?_,h2⟩
+  · omega
+  · simpa using h1
+-- END ATTACHED HandwrittenBigNBinaryFactorScratch.lean
 
 -- BEGIN ATTACHED PhysicalSixBridgeGateScratch.lean
 set_option maxRecDepth 1000000
@@ -14854,7 +15298,7 @@ theorem gst_two_layer_big2_information_path_tableS :
     gstFirstMicroOutputS 0 1 = 2 ∧ gstSecondMicroOutputS 0 1 = 1 ∧
     gstFirstMicroOutputS 0 2 = 1 ∧ gstSecondMicroOutputS 0 2 = 2 ∧
     gstFirstMicroOutputS 3 2 = 2 ∧ gstSecondMicroOutputS 3 2 = 2 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Pathwise `I ≠ BIG1`, together with nonzero aligned input, completely
 solves the physical two-layer sector: the only legal x4 cell is GST+ with
@@ -14909,7 +15353,7 @@ theorem gst_big1_projector_two_layer_chord_35S
 (C,w)=(3,8), i.e. carry GST+ and ternary block 22. -/
 theorem gst_aligned_36_max_mass_is_same_chord_35S :
     3 + 4*8 = 35 ∧ 8 = 2 + 3*2 ∧ 35 = 6^2 - 1 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- The world-projection coefficient at cardinality 6^K is the same integer
 selected by the unique nonzero pathwise-BIG1-clear base-six word. -/
@@ -14924,6 +15368,169 @@ theorem gst_big1_projected_path_equals_world_projection_coefficientS
   rw [gst_big1_projected_path_code_eq_six_pow_sub_oneS a d K hpath h0]
   rfl
 -- END ATTACHED HandwrittenBig1PathProjectorScratch.lean
+
+-- BEGIN ATTACHED HandwrittenUSpaceChargeScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Exact V2 space charge for Boss's simultaneous U multiply/divide operator
+
+Every nonfixed local GST V2 re-coordinate orbit has length five.  Directly
+from the legal 12-cell table, each such orbit contains one GST+ carry and four
+non-GST+ carries (one NULL and three ALT-).  Therefore the integer charge
+
+    GST+  -> +4
+    NULL/ALT- -> -1
+
+has zero total on every nonfixed five-cycle.
+
+This determines the exponents of the handwritten simultaneous U operator up to
+an overall common scaling.  No physical horizontal-transport claim is made:
+this is a theorem about the five alternate readings of one local information
+cell.
+-/
+
+def gstV2SpaceChargeS (C : Nat) : Int :=
+  if C = 3 then 4 else -1
+
+/-- Charge depends exactly on the three-space classification: GST+ gets +4;
+NULL and both ALT- carries get -1. -/
+theorem gst_v2_space_charge_tableS :
+    gstV2SpaceChargeS 0 = -1 ∧
+    gstV2SpaceChargeS 1 = -1 ∧
+    gstV2SpaceChargeS 2 = -1 ∧
+    gstV2SpaceChargeS 3 = 4 := by
+  decide
+
+/-- Sum of the space charges seen over five successive local re-coordinates. -/
+def gstFiveOrbitChargeS (C d : Nat) : Int :=
+  let x0 := (C,d)
+  let x1 := gstLocalRotateS x0
+  let x2 := gstLocalRotateS x1
+  let x3 := gstLocalRotateS x2
+  let x4 := gstLocalRotateS x3
+  gstV2SpaceChargeS x0.1 + gstV2SpaceChargeS x1.1 +
+    gstV2SpaceChargeS x2.1 + gstV2SpaceChargeS x3.1 +
+    gstV2SpaceChargeS x4.1
+
+/-- Every legal nonfixed five-cycle is U-neutral. -/
+theorem gst_nonfixed_five_orbit_charge_zeroS
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hnot0 : (C,d) ≠ (0,0))
+    (hnotPlus : (C,d) ≠ (3,2)) :
+    gstFiveOrbitChargeS C d = 0 := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    simp [gstFiveOrbitChargeS, gstV2SpaceChargeS, gstLocalRotateS] at hnot0 hnotPlus ⊢
+
+/-- The NULL child Happy gate belongs to a nonfixed BIG2 orbit, so its complete
+five-subspace U charge is neutral rather than terminal. -/
+theorem gst_null_big2_five_orbit_charge_zeroS :
+    gstFiveOrbitChargeS 0 2 = 0 := by
+  decide
+
+/-- The fixed GST+ SURVIVE cell has positive charge at every reading. -/
+theorem gst_plus_survive_five_orbit_chargeS :
+    gstFiveOrbitChargeS 3 2 = 20 := by
+  decide
+
+/-- The fixed all-zero NULL cell has negative charge at every reading. -/
+theorem gst_null_zero_five_orbit_chargeS :
+    gstFiveOrbitChargeS 0 0 = -5 := by
+  decide
+
+/-- One explicit nonfixed orbit: 0,2 -> 2,2 -> 3,1 -> 2,1 -> 2,0 -> 0,2.
+Its GST+ reading appears exactly once. -/
+theorem gst_null_big2_orbit_explicitS :
+    let x0 : Nat × Nat := (0,2)
+    let x1 := gstLocalRotateS x0
+    let x2 := gstLocalRotateS x1
+    let x3 := gstLocalRotateS x2
+    let x4 := gstLocalRotateS x3
+    x1 = (2,2) ∧ x2 = (3,1) ∧ x3 = (2,1) ∧ x4 = (2,0) ∧
+      gstLocalRotateS x4 = x0 := by
+  decide
+-- END ATTACHED HandwrittenUSpaceChargeScratch.lean
+
+-- BEGIN ATTACHED CanonicalCausalityScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-- A ternary digit is exactly the corresponding one-trit quotient of the
+    prefix residue through that digit. -/
+theorem gstDigitS_eq_prefix_residue_divS (R j : Nat) :
+    gstDigitS R j = (R % 3^(j+1)) / 3^j := by
+  unfold gstDigitS
+  rw [Nat.pow_succ]
+  rw [Nat.mod_mul]
+  have hp : 0 < 3^j := Nat.pow_pos (by decide)
+  rw [Nat.add_mul_div_left _ _ hp]
+  have hr : R % 3^j < 3^j := Nat.mod_lt _ hp
+  rw [Nat.div_eq_of_lt hr]
+  simp
+
+/-- Equality through ternary depth j+1 preserves the complete GST vertex at j:
+    both the input digit and the incoming multiply-by-four carry. -/
+theorem gst_state_eq_of_prefix_residueS
+    (R S j : Nat)
+    (hres : R % 3^(j+1) = S % 3^(j+1)) :
+    gstDigitS R j = gstDigitS S j ∧
+      gstCarryS R j = gstCarryS S j := by
+  constructor
+  · rw [gstDigitS_eq_prefix_residue_divS,
+        gstDigitS_eq_prefix_residue_divS, hres]
+  · have hdvd : 3^j ∣ 3^(j+1) :=
+      Nat.pow_dvd_pow 3 (by omega)
+    have hlow : R % 3^j = S % 3^j := by
+      calc
+        R % 3^j = (R % 3^(j+1)) % 3^j := by
+          rw [Nat.mod_mod_of_dvd R hdvd]
+        _ = (S % 3^(j+1)) % 3^j := by rw [hres]
+        _ = S % 3^j := Nat.mod_mod_of_dvd S hdvd
+    unfold gstCarryS
+    rw [hlow]
+
+/-- Canonical origin causality at one exact GST vertex: the state at position j
+    depends only on n modulo 3^(j+1). -/
+theorem gst_canonical_state_from_origin_prefixS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n j : Nat) (ht : 1 ≤ t) :
+    let a := n % 3^(j+1)
+    gstDigitS (Q t n) j = gstDigitS (Q t a) j ∧
+      gstCarryS (Q t n) j = gstCarryS (Q t a) j := by
+  dsimp only
+  apply gst_state_eq_of_prefix_residueS
+  exact gst_canonical_prefix_residueS Q hQ t n (j+1) ht
+
+/-- A canonical child Happy Gate is already present in the finite origin prefix
+    that ends exactly at the gate's causal depth. -/
+theorem gst_canonical_gate_from_origin_prefixS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n j : Nat) (ht : 1 ≤ t)
+    (hgate : gstDigitS (Q t n) j = 2 ∧
+      (gstCarryS (Q t n) j = 0 ∨ gstCarryS (Q t n) j = 3)) :
+    let a := n % 3^(j+1)
+    gstDigitS (Q t a) j = 2 ∧
+      (gstCarryS (Q t a) j = 0 ∨ gstCarryS (Q t a) j = 3) := by
+  dsimp only
+  have hs := gst_canonical_state_from_origin_prefixS Q hQ t n j ht
+  constructor
+  · rw [← hs.1]
+    exact hgate.1
+  · rcases hgate.2 with h0 | h3
+    · left
+      rw [← hs.2]
+      exact h0
+    · right
+      rw [← hs.2]
+      exact h3
+-- END ATTACHED CanonicalCausalityScratch.lean
 
 -- BEGIN ATTACHED PrefixOneTwoDigitChordScratch.lean
 set_option maxRecDepth 1000000
@@ -15023,7 +15630,7 @@ theorem gst_physical_two_digit_chord_event_88S
         (gstFirstMicroOutputS (gstCarryS R p) (gstDigitS R p)) = 8 := by
   have h := gst_physical_two_digit_chord_forces_gst_plusS R p hd2 hI
   rw [h.1, hd2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- The numerical chord shared by the two-digit projector, the six-state
 bridge universe, and the 36-state V2 boundary. -/
@@ -15035,7 +15642,7 @@ theorem gst_physical_two_digit_chord_35S
         6 * gstSecondMicroMassS (gstCarryS R p) (gstDigitS R p) =
       6^2 - 1 := by
   rw [(gst_physical_two_digit_chord_forces_gst_plusS R p hd2 hI).2.2.2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-! ## Exhaustive local classification at an actual Happy BIG2 cell -/
 
@@ -15052,9 +15659,9 @@ theorem gst_happy_big2_two_digit_clear_iff_plusS
   unfold GSTPhysicalTwoDigitBig1ClearS
   rcases hhappy with h0 | h3
   · rw [h0, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   · rw [h3, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
 
 /-- The complementary local branch is exactly NULL.  No information is lost:
 when `I ≠ 1` fails at an already-Happy BIG2 cell, the physical word is 42_6,
@@ -15082,7 +15689,7 @@ theorem gst_happy_big2_two_digit_not_clear_is_nullS
       apply hnot
       exact hiff.mpr hthree
   rw [h0, hd2]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Complete right-chord dichotomy.  There is no third physical Happy BIG2
 orientation.  The clear branch is GST+ 55_6 / (8,8) / code 35 / U=-6; the
@@ -15121,7 +15728,7 @@ theorem gst_happy_big2_right_chord_dichotomyS
     refine ⟨hI, hplus.1, hplus.2.1, hevents.1, hevents.2,
       hplus.2.2.2, ?_⟩
     rw [hplus.1, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   · right
     have hnull := gst_happy_big2_two_digit_not_clear_is_nullS
       R p hd2 hhappy hI
@@ -15731,223 +16338,6 @@ theorem gst_terminal_seed_one_gate_of_prefixed_oneS
   exact (gst_prefixed_one_happy_iff_seed_oneS z j).1 hgate
 -- END ATTACHED PrefixOneTerminalZScratch.lean
 
--- BEGIN ATTACHED CanonicalOriginTritForcingScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Canonical origin-trit forcing at a physical prefix-one cut
-
-This file turns complete physical phase-one badness into a literal restriction
-on the ordinary ternary origin `n`.
-
-At parent origin `b = 1 + 3*n`, row `q` of the forced-one tail is row `q+1`
-of `Q_s(b)`.  The canonical origin-cut theorem decomposes that physical vertex
-into
-
-  * the finite origin prefix `a = b mod 3^(q+1)`, and
-  * the next ordinary origin trit `digit_3(n,q)`.
-
-Therefore, if the finite-prefix carry is in a good GST space, complete parent
-badness forbids exactly the origin trit that would shift the exposed physical
-digit to BIG2.  In particular, a good BIG2 finite-prefix state forces the
-actual q-th origin trit to be nonzero.
-
-No old duality, residual-Omega termination, global mirror, terminal NULL, or
-global BIG1 projector is used.
--/
-
-/-- The residual origin trit after the forced leading one is literally the
-q-th ternary trit of `n`. -/
-theorem gst_prefix_one_residual_origin_trit_exactS
-    (n q : Nat) :
-    ((1 + 3*n) / 3^(q+1)) % 3 = gstDigitS n q := by
-  have hshift := gst_prefixed_one_digit_shiftS n q
-  simpa [gstDigitS] using hshift
-
-/-- Complete badness of the genuine canonical prefix-one parent forbids the
-next ordinary-origin trit from completing a good finite prefix to physical
-BIG2 at cut q+1. -/
-theorem gst_prefix_one_bad_forbids_origin_trit_shift_at_cutS
-    (s n q : Nat) (hs : 1 ≤ s)
-    (hbad : GSTSeededBadTraceS 1
-      (GSTHardPrefixOneTailS
-        gstNavigationConstant gstCanonicalPrefixOffsetS s n))
-    (hcarry :
-      gstCarryS
-          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 0 ∨
-      gstCarryS
-          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 3) :
-    (gstDigitS
-        (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) +
-      gstDigitS n q) % 3 ≠ 2 := by
-  intro hshiftedTwo
-
-  let b : Nat := 1 + 3*n
-  let k : Nat := q + 1
-  let a : Nat := b % 3^k
-  let m : Nat := b / 3^k
-  let H : Nat :=
-    GSTHardPrefixOneTailS
-      gstNavigationConstant gstCanonicalPrefixOffsetS s n
-
-  have hdecomp : a + 3^k*m = b := by
-    dsimp [a, m]
-    exact Nat.mod_add_div b (3^k)
-
-  have hmtrit : m % 3 = gstDigitS n q := by
-    dsimp [m, b, k]
-    exact gst_prefix_one_residual_origin_trit_exactS n q
-
-  have hcutDigit :=
-    gst_canonical_origin_cut_digitS s a k m hs
-  have hfullDigitFormula :
-      gstDigitS (gstNavigationConstant s b) k =
-        (gstDigitS (gstNavigationConstant s a) k + m % 3) % 3 := by
-    rw [← hdecomp]
-    exact hcutDigit
-
-  have hfullCarryFormula :=
-    gst_canonical_origin_cut_carryS s a k m hs
-  have hfullCarryEq :
-      gstCarryS (gstNavigationConstant s b) k =
-        gstCarryS (gstNavigationConstant s a) k := by
-    rw [← hdecomp]
-    exact hfullCarryFormula
-
-  have hcarryA :
-      gstCarryS (gstNavigationConstant s a) k = 0 ∨
-        gstCarryS (gstNavigationConstant s a) k = 3 := by
-    simpa [a, b, k] using hcarry
-
-  have hfullDigit :
-      gstDigitS (gstNavigationConstant s b) k = 2 := by
-    rw [hfullDigitFormula, hmtrit]
-    simpa [a, b, k] using hshiftedTwo
-
-  have hfullCarry :
-      gstCarryS (gstNavigationConstant s b) k = 0 ∨
-        gstCarryS (gstNavigationConstant s b) k = 3 := by
-    rw [hfullCarryEq]
-    exact hcarryA
-
-  have hparent :
-      gstNavigationConstant s b = 1 + 3*H := by
-    dsimp [b, H]
-    exact gst_hard_tail_parent_navigationS
-      gstNavigationConstant gst_navigation_constant_origin_energyS
-      gstCanonicalPrefixOffsetS gst_navigation_constant_unit_prefixS
-      s n hs
-
-  have hDigitShift :
-      gstDigitS (gstNavigationConstant s b) k = gstDigitS H q := by
-    dsimp [k]
-    rw [hparent]
-    exact gst_prefixed_one_digit_shiftS H q
-
-  have hCarryShift :
-      gstCarryS (gstNavigationConstant s b) k =
-        gstAffineMulCarryS 4 1 H q := by
-    dsimp [k]
-    rw [hparent]
-    exact gst_prefixed_one_carry_shiftS H q
-
-  have htailDigit : gstDigitS H q = 2 :=
-    hDigitShift.symm.trans hfullDigit
-
-  have htailCarry :
-      gstAffineMulCarryS 4 1 H q = 0 ∨
-        gstAffineMulCarryS 4 1 H q = 3 := by
-    rcases hfullCarry with h0 | h3
-    · exact Or.inl (hCarryShift.symm.trans h0)
-    · exact Or.inr (hCarryShift.symm.trans h3)
-
-  have hbadAt := hbad q
-  exact hbadAt ⟨htailDigit, htailCarry⟩
-
-/-- Genuine forcing consequence.  If the finite canonical origin prefix is
-already a good BIG2 physical state at cut q+1, then a completely bad parent
-forces the actual q-th ternary origin trit of n to be nonzero. -/
-theorem gst_prefix_one_bad_good_big2_prefix_forces_origin_nonzeroS
-    (s n q : Nat) (hs : 1 ≤ s)
-    (hbad : GSTSeededBadTraceS 1
-      (GSTHardPrefixOneTailS
-        gstNavigationConstant gstCanonicalPrefixOffsetS s n))
-    (hcarry :
-      gstCarryS
-          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 0 ∨
-      gstCarryS
-          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 3)
-    (hprefixBig2 :
-      gstDigitS
-        (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 2) :
-    gstDigitS n q ≠ 0 := by
-  intro hnzero
-  have hforbid :=
-    gst_prefix_one_bad_forbids_origin_trit_shift_at_cutS
-      s n q hs hbad hcarry
-  apply hforbid
-  rw [hprefixBig2, hnzero]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
--- END ATTACHED CanonicalOriginTritForcingScratch.lean
-
--- BEGIN ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 10000000
-
-/-!
-# Locked residual-only final bridge interface
-
-This module contains no new forcing axiom.  It packages the exact one theorem
-still required by the prefix-one residual seam and proves its consumer.
-
-The residual origin is already maximally 3-free, so only n % 3 != 0 enters
-this interface.  All origin-closed and non-residual branches remain owned by
-the monolith's existing strong-induction machinery.
--/
-
-/-- Exact remaining forcing statement.  Under a certified child Navigation
-witness and a complete phase-one Omega bad trace, the ordinary natural origin
-would have to carry nonzero ternary information beyond every finite cutoff. -/
-def GSTCanonicalResidualInfiniteSupportBridgeS : Prop :=
-  ∀ s n,
-    1 ≤ s →
-    1 ≤ n →
-    n % 3 ≠ 0 →
-    GSTNavigationWitness (gstNavigationConstant (s+1) n) →
-    GSTOmegaInfiniteBadTrace s 1 n →
-    InfiniteTernarySupportS n
-
-/-- Once the residual forcing statement is supplied, a complete prefix-one
-Omega bad trace is impossible for an ordinary natural origin. -/
-theorem gst_residual_prefix_one_no_bad_of_infinite_support_bridgeS
-    (hbridge : GSTCanonicalResidualInfiniteSupportBridgeS)
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) (hn3 : n % 3 ≠ 0)
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n)) :
-    ¬ GSTOmegaInfiniteBadTrace s 1 n := by
-  intro hBad
-  have hinf : InfiniteTernarySupportS n :=
-    hbridge s n hs hn hn3 hchild hBad
-  exact finite_origin_contradictionS n hinf
-
-/-- The same consumer with the handwritten U-potential attached explicitly.
-This theorem records that any hypothetical residual bad trace simultaneously
-obeys every finite U-potential bound before finite support destroys it. -/
-theorem gst_residual_prefix_one_u_bad_contradiction_of_bridgeS
-    (hbridge : GSTCanonicalResidualInfiniteSupportBridgeS)
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) (hn3 : n % 3 ≠ 0)
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  have _hU : ∀ K,
-      24 * (gstPrefixOneUPotentialTailS s n % 3^K) + 15 ≤
-        3^K * gstHandwrittenUChargeS
-          (gstAffineMulCarryS 4 1 (gstPrefixOneUPotentialTailS s n) K) :=
-    fun K => gst_prefix_one_omega_bad_u_potential_boundS s n K hs hBad
-  have hinf : InfiniteTernarySupportS n :=
-    hbridge s n hs hn hn3 hchild hBad
-  exact finite_origin_contradictionS n hinf
--- END ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
-
 -- BEGIN ATTACHED RightChordCanonicalGateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -16000,7 +16390,7 @@ theorem gst_scoped_two_digit_happy_gate_right_chordS
     C d hC hd hd0 hclear.1 hclear.2.1 hclear.2.2
   have hU : gstHandwrittenUJumpS C d = -6 := by
     rw [hC3, hd2]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   exact ⟨hC3, hd2, hmid2, hout2, hM1, hM2, h35, hU⟩
 
 /-- The mixed-radix state selected by the same chord is the maximal legal
@@ -16016,7 +16406,7 @@ theorem gst_scoped_right_chord_is_36_state_35S
   have h := gst_scoped_two_digit_happy_gate_right_chordS
     C d hC hd hhappy hclear
   rw [h.1]
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  decide
 
 /-- Apply the scoped projector at an actual seed-zero child Happy Gate.
 The current carry is forced from the old NULL/GST+ ambiguity to GST+ carry 3,
@@ -16041,7 +16431,7 @@ theorem gst_scoped_child_gate_forces_plus_and_postseed_threeS
   have hstep := gstAffineS_forward_exact_all 0 T q
   have hpost : gstAffineMulCarryS 4 0 T (q+1) = 3 := by
     rw [hstep, hgate.1, hright.1]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   exact ⟨hright.1, hpost, hright.2.2.2.2.2.2.1⟩
 
 /-- The same last-gate chord lands the conserved shared-information carrier in
@@ -16130,6 +16520,121 @@ theorem gst_scoped_last_gate_two_boundary_plus_trapS
 
   exact ⟨hparentSuffix, hchildSuffix, hC3, hshared, hW⟩
 -- END ATTACHED RightChordCanonicalGateScratch.lean
+
+-- BEGIN ATTACHED ScopedTwoDigitPhysicalBlockScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+/-!
+# Scoped physical two-information-digit block
+
+Boss's correction is enforced literally here.
+
+`I != 1` is NOT quantified over a trace.  It is introduced only for a single
+chosen pair of consecutive information digits `p,p+1`.  When the formula also
+selects the nonzero sector for those two entries, finite ternary legality makes
+the pair exactly `22`.
+
+If the incoming physical GST carry at that pair is 3, the aligned two-row mass
+is then
+
+  3 + 4*(22_3) = 3 + 4*8 = 35 = 6^2-1,
+
+and both rows are literal GST+ Happy Gates.  Consequently a complete bad suffix
+with seed 3 cannot contain such a selected two-digit component.
+-/
+
+/-- Boss's local two-digit information condition at exactly positions p,p+1.
+No statement is made about any other information position. -/
+def GSTScopedTwoInformationDigitsS (X p : Nat) : Prop :=
+  gstDigitS X p ≠ 0 ∧
+  gstDigitS X p ≠ 1 ∧
+  gstDigitS X (p+1) ≠ 0 ∧
+  gstDigitS X (p+1) ≠ 1
+
+/-- In a legal ternary word, the locally selected nonzero / not-BIG1 pair is
+exactly the physical two-trit word 22. -/
+theorem gst_scoped_two_information_digits_force_22S
+    (X p : Nat)
+    (hscope : GSTScopedTwoInformationDigitsS X p) :
+    gstDigitS X p = 2 ∧ gstDigitS X (p+1) = 2 := by
+  have h0lt : gstDigitS X p < 3 := gst_digitS_lt_three_allS X p
+  have h1lt : gstDigitS X (p+1) < 3 := gst_digitS_lt_three_allS X (p+1)
+  constructor <;> omega
+
+/-- Exact aligned base-nine word and 36-state mass of the scoped two-digit
+component when its incoming carry is GST+ carry three. -/
+theorem gst_scoped_two_digit_seed_three_is_physical_35S
+    (D X p : Nat)
+    (hD3 : gstAffineMulCarryS 4 D X p = 3)
+    (hscope : GSTScopedTwoInformationDigitsS X p) :
+    let w := gstDigitS X p + 3*gstDigitS X (p+1)
+    w = 8 ∧
+      gstAffineMulCarryS 4 D X p + 4*w = 35 ∧
+      35 = 6^2 - 1 ∧
+      gstAffineMulCarryS 4 D X (p+1) = 3 := by
+  dsimp only
+  obtain ⟨hd0, hd1⟩ :=
+    gst_scoped_two_information_digits_force_22S X p hscope
+  have hstep := gstAffineS_forward_exact_all D X p
+  rw [hd0, hD3] at hstep
+  norm_num [gstStepCarryS] at hstep
+  rw [hd0, hd1, hD3, hstep]
+  decide
+
+/-- The 35 cell is physically Happy at BOTH rows, not merely an aligned
+re-coordinate. -/
+theorem gst_scoped_two_digit_seed_three_two_happy_rowsS
+    (D X p : Nat)
+    (hD3 : gstAffineMulCarryS 4 D X p = 3)
+    (hscope : GSTScopedTwoInformationDigitsS X p) :
+    GSTSeededHappyS D X p ∧ GSTSeededHappyS D X (p+1) := by
+  obtain ⟨hd0, hd1⟩ :=
+    gst_scoped_two_information_digits_force_22S X p hscope
+  have hstep := gstAffineS_forward_exact_all D X p
+  rw [hd0, hD3] at hstep
+  norm_num [gstStepCarryS] at hstep
+  constructor
+  · exact ⟨hd0, Or.inr hD3⟩
+  · exact ⟨hd1, Or.inr hstep⟩
+
+/-- A complete bad trace can never contain one locally selected two-digit
+nonzero/not-BIG1 component at a position whose incoming carry is 3. -/
+theorem gst_bad_trace_forbids_scoped_two_digit_at_seed_threeS
+    (D X p : Nat)
+    (hbad : GSTSeededBadTraceS D X)
+    (hD3 : gstAffineMulCarryS 4 D X p = 3) :
+    ¬ GSTScopedTwoInformationDigitsS X p := by
+  intro hscope
+  have hhappy :=
+    gst_scoped_two_digit_seed_three_two_happy_rowsS D X p hD3 hscope
+  exact (hbad p) hhappy.1
+
+/-- Position-zero specialization used by the strengthened canonical trap.
+A seeded bad suffix with exact incoming seed 3 cannot begin with Boss's scoped
+two-digit nonzero/not-BIG1 component. -/
+theorem gst_seed_three_bad_suffix_forbids_scoped_two_digit_headS
+    (Y : Nat)
+    (hbad : GSTSeededBadTraceS 3 Y) :
+    ¬ GSTScopedTwoInformationDigitsS Y 0 := by
+  have hC0 : gstAffineMulCarryS 4 3 Y 0 = 3 := by
+    simp [gstAffineMulCarryS]
+  exact gst_bad_trace_forbids_scoped_two_digit_at_seed_threeS
+    3 Y 0 hbad hC0
+
+/-- Pack the physical right chord at the head of a seed-three suffix.  This is
+exactly the two-digit case that would contradict trapped complete badness. -/
+theorem gst_seed_three_scoped_two_digit_head_chord_35S
+    (Y : Nat)
+    (hscope : GSTScopedTwoInformationDigitsS Y 0) :
+    let w := gstDigitS Y 0 + 3*gstDigitS Y 1
+    w = 8 ∧ 3 + 4*w = 35 ∧ 35 = 6^2 - 1 := by
+  dsimp only
+  obtain ⟨hd0, hd1⟩ :=
+    gst_scoped_two_information_digits_force_22S Y 0 hscope
+  rw [hd0, hd1]
+  decide
+-- END ATTACHED ScopedTwoDigitPhysicalBlockScratch.lean
 
 -- BEGIN ATTACHED CanonicalRightChordTrapScratch.lean
 set_option maxRecDepth 1000000
@@ -16331,313 +16836,325 @@ theorem gst_canonical_right_chord_seed_classificationS
   · exact Or.inl ⟨h3, hclass3.mp h3⟩
 -- END ATTACHED CanonicalRightChordTrapScratch.lean
 
--- BEGIN ATTACHED HandwrittenSignedKernelFluxScratch.lean
+-- BEGIN ATTACHED CanonicalOriginTritForcingScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
-# Signed handwritten 7/(x-6) kernel on the microscopic x2 event coordinate
+# Canonical origin-trit forcing at a physical prefix-one cut
 
-This file uses the exact x2/base3 bridge
+This file turns complete physical phase-one badness into a literal restriction
+on the ordinary ternary origin `n`.
 
-  a + 2*d = e + 3*a'
+At parent origin `b = 1 + 3*n`, row `q` of the forced-one tail is row `q+1`
+of `Q_s(b)`.  The canonical origin-cut theorem decomposes that physical vertex
+into
 
-with a,a' binary and d,e ternary.  Its event symbol is J=d+3e.  The physical
-six-state event image is {0,1,3,5,7,8}; J=6 is the missing central value.
+  * the finite origin prefix `a = b mod 3^(q+1)`, and
+  * the next ordinary origin trit `digit_3(n,q)`.
 
-On the active BIG2 events Boss's kernel 7/(J-6) has the exact signed values
+Therefore, if the finite-prefix carry is in a good GST space, complete parent
+badness forbids exactly the origin trit that would shift the exposed physical
+digit to BIG2.  In particular, a good BIG2 finite-prefix state forces the
+actual q-th origin trit to be nonzero.
 
-  CREATE  J=7 : +7
-  DESTROY J=5 : -7
-  SURVIVE J=8 : +7/2.
-
-To keep the arithmetic integral we encode twice this kernel.  The resulting
-quantity is a discrete horizontal flux plus a SURVIVE residual, so its sum
-telescopes on every finite physical row.
+No old duality, residual-Omega termination, global mirror, terminal NULL, or
+global BIG1 projector is used.
 -/
 
-def gstMicroTwoIndicatorS (d : Nat) : Int := if d = 2 then 1 else 0
+/-- The residual origin trit after the forced leading one is literally the
+q-th ternary trit of `n`. -/
+theorem gst_prefix_one_residual_origin_trit_exactS
+    (n q : Nat) :
+    ((1 + 3*n) / 3^(q+1)) % 3 = gstDigitS n q := by
+  have hshift := gst_prefixed_one_digit_shiftS n q
+  simpa [gstDigitS] using hshift
 
-def gstMicroEventOutputS (a d : Nat) : Nat := (a + 2*d) % 3
+/-- Complete badness of the genuine canonical prefix-one parent forbids the
+next ordinary-origin trit from completing a good finite prefix to physical
+BIG2 at cut q+1. -/
+theorem gst_prefix_one_bad_forbids_origin_trit_shift_at_cutS
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hbad : GSTSeededBadTraceS 1
+      (GSTHardPrefixOneTailS
+        gstNavigationConstant gstCanonicalPrefixOffsetS s n))
+    (hcarry :
+      gstCarryS
+          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 0 ∨
+      gstCarryS
+          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 3) :
+    (gstDigitS
+        (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) +
+      gstDigitS n q) % 3 ≠ 2 := by
+  intro hshiftedTwo
 
-def gstMicroEventCarryS (a d : Nat) : Nat := (a + 2*d) / 3
+  let b : Nat := 1 + 3*n
+  let k : Nat := q + 1
+  let a : Nat := b % 3^k
+  let m : Nat := b / 3^k
+  let H : Nat :=
+    GSTHardPrefixOneTailS
+      gstNavigationConstant gstCanonicalPrefixOffsetS s n
 
-def gstMicroEventSymbolS (a d : Nat) : Nat :=
-  d + 3*gstMicroEventOutputS a d
+  have hdecomp : a + 3^k*m = b := by
+    dsimp [a, m]
+    exact Nat.mod_add_div b (3^k)
 
-/-- Active means BIG2 is present on at least one side of the microscopic cell. -/
-def gstMicroBig2ActiveS (a d : Nat) : Prop :=
-  d = 2 ∨ gstMicroEventOutputS a d = 2
+  have hmtrit : m % 3 = gstDigitS n q := by
+    dsimp [m, b, k]
+    exact gst_prefix_one_residual_origin_trit_exactS n q
 
-/-- Signed CREATE/DESTROY flux. -/
-def gstMicroBig2FluxS (a d : Nat) : Int :=
-  7 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
-       gstMicroTwoIndicatorS d)
+  have hcutDigit :=
+    gst_canonical_origin_cut_digitS s a k m hs
+  have hfullDigitFormula :
+      gstDigitS (gstNavigationConstant s b) k =
+        (gstDigitS (gstNavigationConstant s a) k + m % 3) % 3 := by
+    rw [← hdecomp]
+    exact hcutDigit
 
-/-- Twice Boss's signed kernel on the active sector, written without division.
-The first term is the boundary flux; the second is the SURVIVE residual. -/
-def gstMicroKernelTwiceS (a d : Nat) : Int :=
-  14 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
-        gstMicroTwoIndicatorS d) +
-  7 * gstMicroTwoIndicatorS d *
-      gstMicroTwoIndicatorS (gstMicroEventOutputS a d)
+  have hfullCarryFormula :=
+    gst_canonical_origin_cut_carryS s a k m hs
+  have hfullCarryEq :
+      gstCarryS (gstNavigationConstant s b) k =
+        gstCarryS (gstNavigationConstant s a) k := by
+    rw [← hdecomp]
+    exact hfullCarryFormula
 
-/-- Exact six-state event-symbol table. -/
-theorem gst_micro_event_symbol_tableS :
-    gstMicroEventSymbolS 0 0 = 0 ∧
-    gstMicroEventSymbolS 0 1 = 7 ∧
-    gstMicroEventSymbolS 0 2 = 5 ∧
-    gstMicroEventSymbolS 1 0 = 3 ∧
-    gstMicroEventSymbolS 1 1 = 1 ∧
-    gstMicroEventSymbolS 1 2 = 8 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  have hcarryA :
+      gstCarryS (gstNavigationConstant s a) k = 0 ∨
+        gstCarryS (gstNavigationConstant s a) k = 3 := by
+    simpa [a, b, k] using hcarry
 
-/-- Six is not a physical microscopic event symbol. -/
-theorem gst_micro_event_symbol_ne_sixS
-    (a d : Nat) (ha : a < 2) (hd : d < 3) :
-    gstMicroEventSymbolS a d ≠ 6 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;> decide
+  have hfullDigit :
+      gstDigitS (gstNavigationConstant s b) k = 2 := by
+    rw [hfullDigitFormula, hmtrit]
+    simpa [a, b, k] using hshiftedTwo
 
-/-- CREATE/DESTROY/SURVIVE receive the signed kernel values 14,-14,7. -/
-theorem gst_micro_kernel_twice_active_tableS :
-    gstMicroKernelTwiceS 0 1 = 14 ∧
-    gstMicroKernelTwiceS 0 2 = -14 ∧
-    gstMicroKernelTwiceS 1 2 = 7 := by
-  simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+  have hfullCarry :
+      gstCarryS (gstNavigationConstant s b) k = 0 ∨
+        gstCarryS (gstNavigationConstant s b) k = 3 := by
+    rw [hfullCarryEq]
+    exact hcarryA
 
-/-- Cross-multiplied exact form of 2*7/(J-6) on every active BIG2 cell.
+  have hparent :
+      gstNavigationConstant s b = 1 + 3*H := by
+    dsimp [b, H]
+    exact gst_hard_tail_parent_navigationS
+      gstNavigationConstant gst_navigation_constant_origin_energyS
+      gstCanonicalPrefixOffsetS gst_navigation_constant_unit_prefixS
+      s n hs
 
-  (J-6) * K2 = 14.
--/
-theorem gst_micro_kernel_resolvent_exactS
-    (a d : Nat) (ha : a < 2) (hd : d < 3)
-    (hactive : gstMicroBig2ActiveS a d) :
-    ((gstMicroEventSymbolS a d : Int) - 6) *
-      gstMicroKernelTwiceS a d = 14 := by
-  have hac : a = 0 ∨ a = 1 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hac with h0 | h1 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst a <;> subst d <;>
-    simp [gstMicroBig2ActiveS, gstMicroEventOutputS] at hactive <;>
-    norm_num [gstMicroEventSymbolS, gstMicroEventOutputS,
-      gstMicroKernelTwiceS, gstMicroTwoIndicatorS]
+  have hDigitShift :
+      gstDigitS (gstNavigationConstant s b) k = gstDigitS H q := by
+    dsimp [k]
+    rw [hparent]
+    exact gst_prefixed_one_digit_shiftS H q
 
-/-- The signed CREATE/DESTROY part is exactly a difference of BIG2 boundary
-indicators.  This is the one-cell divergence law. -/
-theorem gst_micro_big2_flux_exactS (a d : Nat) :
-    gstMicroBig2FluxS a d =
-      7 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
-           gstMicroTwoIndicatorS d) := by
-  rfl
+  have hCarryShift :
+      gstCarryS (gstNavigationConstant s b) k =
+        gstAffineMulCarryS 4 1 H q := by
+    dsimp [k]
+    rw [hparent]
+    exact gst_prefixed_one_carry_shiftS H q
 
-/-- Abstract finite-row telescope.  This theorem is deliberately stated for
-an arbitrary sequence of ternary digits; when instantiated with consecutive
-physical x2 columns, `b (r+1)` is the output BIG2 indicator of column r.
--/
-theorem gst_micro_big2_flux_telescopesS
-    (b : Nat → Int) (L : Nat) :
-    (Finset.sum (Finset.range (L)) (fun r => 7 * (b (r+1)) - b r)) =
-      7 * (b L - b 0) := by
-  induction L with
-  | zero => simp
-  | succ L ih =>
-      rw [Finset.sum_range_succ, ih]
-      ring
+  have htailDigit : gstDigitS H q = 2 :=
+    hDigitShift.symm.trans hfullDigit
 
-/-- Kernel decomposition: signed boundary flux plus the SURVIVE residual. -/
-theorem gst_micro_kernel_twice_decomposeS (a d : Nat) :
-    gstMicroKernelTwiceS a d =
-      2 * gstMicroBig2FluxS a d +
-      7 * gstMicroTwoIndicatorS d *
-          gstMicroTwoIndicatorS (gstMicroEventOutputS a d) := by
-  unfold gstMicroKernelTwiceS gstMicroBig2FluxS
-  ring
--- END ATTACHED HandwrittenSignedKernelFluxScratch.lean
+  have htailCarry :
+      gstAffineMulCarryS 4 1 H q = 0 ∨
+        gstAffineMulCarryS 4 1 H q = 3 := by
+    rcases hfullCarry with h0 | h3
+    · exact Or.inl (hCarryShift.symm.trans h0)
+    · exact Or.inr (hCarryShift.symm.trans h3)
 
--- BEGIN ATTACHED HandwrittenBigNBinaryFactorScratch.lean
+  have hbadAt := hbad q
+  exact hbadAt ⟨htailDigit, htailCarry⟩
+
+/-- Genuine forcing consequence.  If the finite canonical origin prefix is
+already a good BIG2 physical state at cut q+1, then a completely bad parent
+forces the actual q-th ternary origin trit of n to be nonzero. -/
+theorem gst_prefix_one_bad_good_big2_prefix_forces_origin_nonzeroS
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hbad : GSTSeededBadTraceS 1
+      (GSTHardPrefixOneTailS
+        gstNavigationConstant gstCanonicalPrefixOffsetS s n))
+    (hcarry :
+      gstCarryS
+          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 0 ∨
+      gstCarryS
+          (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 3)
+    (hprefixBig2 :
+      gstDigitS
+        (gstNavigationConstant s ((1 + 3*n) % 3^(q+1))) (q+1) = 2) :
+    gstDigitS n q ≠ 0 := by
+  intro hnzero
+  have hforbid :=
+    gst_prefix_one_bad_forbids_origin_trit_shift_at_cutS
+      s n q hs hbad hcarry
+  apply hforbid
+  rw [hprefixBig2, hnzero]
+  decide
+-- END ATTACHED CanonicalOriginTritForcingScratch.lean
+
+-- BEGIN ATTACHED RetainedOffsetUStateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
-# Binary factorisation of the GST shared carrier
+# Retained-offset canonical U-state
 
-Exact algebra only.  No residual termination or global transport theorem is
-asserted here.
+This is the generic natural-origin step needed after the first residual NULL
+regeneration.  The finite offset and multiplier are never discarded.
 -/
 
-/-- Numerical value of the redundant ternary event word attached to an exact
-binary bridge `R -> Y`.  If its local digits are `d + 3e`, its base-three
-value is literally `R + 3Y`. -/
-def gstBinaryEventWordValueS (R Y : Nat) : Nat := R + 3*Y
-
-/-- A seeded multiply-by-two bridge has global event value `7R + 3a`. -/
-theorem gst_binary_seeded_event_valueS (a R : Nat) :
-    gstBinaryEventWordValueS R (a + 2*R) = 7*R + 3*a := by
-  unfold gstBinaryEventWordValueS
-  ring
-
-/-- Two binary bridge layers are exactly one seeded multiply-by-four wave.
-The full interior event word cancels from the combination below, leaving only
-the two bits of the incoming GST carry. -/
-theorem gst_binary_two_layer_event_chargeS
-    (a b R : Nat) :
-    let Y := a + 2*R
-    let Z := b + 2*Y
-    gstBinaryEventWordValueS Y Z =
-      2 * gstBinaryEventWordValueS R Y + (a + 3*b) := by
+/-- One exact retained-offset natural-origin step. -/
+theorem gst_retained_offset_u_state_stepS
+    (Q : Nat → Nat → Nat)
+    (hQ : GSTCanonicalOriginEnergyS Q)
+    (t n offset mul seed : Nat) (ht : 1 ≤ t)
+    (hbad : GSTSeededBadTraceS seed (offset + mul * Q t n)) :
+    let originA := 4^(3^t)
+    let E := offset + mul * Q t (n % 3)
+    let r := E % 3
+    let offset' := E / 3
+    let mul' := mul * originA^(n % 3)
+    let X' := offset' + mul' * Q (t+1) (n/3)
+    let seed' := gstStepCarryS seed r
+    offset + mul * Q t n = r + 3*X' ∧
+      GSTSeededBadTraceS seed' X' ∧
+      mul * gstOriginRemainingUS t n =
+        mul' * gstOriginRemainingUS (t+1) (n/3) := by
   dsimp only
-  unfold gstBinaryEventWordValueS
+  let originA := 4^(3^t)
+  let E := offset + mul * Q t (n % 3)
+  let r := E % 3
+  let offset' := E / 3
+  let mul' := mul * originA^(n % 3)
+  let X' := offset' + mul' * Q (t+1) (n/3)
+
+  have hrec0 := gst_canonical_natural_origin_recurrenceS Q hQ t n ht
+  have hn : n = 3*(n/3) + n%3 := by
+    have h := Nat.mod_add_div n 3
+    omega
+  have hrec :
+      Q t (3*(n/3) + n%3) =
+        Q t (n%3) +
+          3 * (4^(3^t))^(n%3) * Q (t+1) (n/3) := by
+    rw [← hn]
+    exact hrec0
+
+  have hsplit0 := affine_natural_origin_stepS
+    Q t n offset mul (4^(3^t)) hrec
+  dsimp only at hsplit0
+  have hsplit : offset + mul * Q t n = r + 3*X' := by
+    simpa [originA, E, r, offset', mul', X'] using hsplit0
+
+  have hrlt : r < 3 := by
+    dsimp [r, E]
+    exact Nat.mod_lt _ (by decide)
+  have hxdiv : (offset + mul * Q t n) / 3 = X' := by
+    rw [hsplit]
+    rw [Nat.add_mul_div_left r X' (by decide : 0 < 3)]
+    rw [Nat.div_eq_of_lt hrlt]
+    simp
+  have hxmod : (offset + mul * Q t n) % 3 = r := by
+    rw [hsplit, Nat.add_mod, Nat.mul_mod]
+    simp [Nat.mod_eq_of_lt hrlt]
+
+  have hbadTail := gst_seeded_bad_trace_regenerates_tailS
+    seed (offset + mul * Q t n) hbad
+  have hseed :
+      gstAffineMulCarryS 4 seed (offset + mul * Q t n) 1 =
+        gstStepCarryS seed r := by
+    rw [gst_parent_seed_after_regenerationS, hxmod]
+  rw [hseed, hxdiv] at hbadTail
+
+  have hU := gst_origin_simultaneous_mul_divS mul t n
+  have hU' :
+      mul * gstOriginRemainingUS t n =
+        mul' * gstOriginRemainingUS (t+1) (n/3) := by
+    simpa [mul', originA, gstOriginMultiplierStepS,
+      gstOriginConsumedPhaseS, Nat.pow_mul] using hU
+
+  exact ⟨hsplit, hbadTail, hU'⟩
+
+/-- Positive retained origins remain a well-founded natural descent. -/
+theorem gst_retained_offset_origin_strictS
+    (n : Nat) (hn : 1 ≤ n) : n/3 < n := by
+  exact Nat.div_lt_self (by omega) (by decide : 1 < 3)
+
+/-- The first residual NULL state expands into the retained-offset normal form
+for all subsequent origin steps. -/
+theorem gst_residual_null_retained_state_shapeS
+    (s u : Nat) :
+    (gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3 +
+        GSTCanonicalBlockS s *
+          GSTHardPrefixOneTailS
+            gstNavigationConstant gstCanonicalPrefixOffsetS (s+1) u =
+      ((gstCanonicalPrefixOffsetS s + GSTCanonicalBlockS s) / 3 +
+        GSTCanonicalBlockS s * gstCanonicalPrefixOffsetS (s+1)) +
+      (GSTCanonicalBlockS s * GSTCanonicalBlockS (s+1)) *
+        gstNavigationConstant (s+2) u := by
+  unfold GSTHardPrefixOneTailS
   ring
+-- END ATTACHED RetainedOffsetUStateScratch.lean
 
-/-- For a physical GST seed `D<4`, binary bit reversal gives the exact global
-space charge of the two microscopic event words. -/
-def gstBinarySpaceChargeS (D : Nat) : Nat :=
-  D / 2 + 3 * (D % 2)
+-- BEGIN ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
 
-theorem gst_binary_space_charge_four_valuesS
-    (D : Nat) (hD : D < 4) :
-    (D = 0 ∧ gstBinarySpaceChargeS D = 0) ∨
-    (D = 1 ∧ gstBinarySpaceChargeS D = 3) ∨
-    (D = 2 ∧ gstBinarySpaceChargeS D = 1) ∨
-    (D = 3 ∧ gstBinarySpaceChargeS D = 4) := by
-  have hcases : D = 0 ∨ D = 1 ∨ D = 2 ∨ D = 3 := by omega
-  rcases hcases with h0 | h1 | h2 | h3 <;>
-    subst D <;> norm_num [gstBinarySpaceChargeS]
+/-!
+# Locked residual-only final bridge interface
 
-/-- The central charge `2` never occurs for a legal GST carry. -/
-theorem gst_binary_space_charge_ne_twoS
-    (D : Nat) (hD : D < 4) :
-    gstBinarySpaceChargeS D ≠ 2 := by
-  rcases gst_binary_space_charge_four_valuesS D hD with
-      h0 | h1 | h2 | h3 <;> omega
+This module contains no new forcing axiom.  It packages the exact one theorem
+still required by the prefix-one residual seam and proves its consumer.
 
-/-- NULL/GST+ are exactly the two endpoints of the binary event charge; ALT-
-occupies the two interior noncentral values. -/
-theorem gst_binary_good_space_charge_endpointsS
-    (D : Nat) (hD : D < 4) :
-    (D = 0 ∨ D = 3) ↔
-      (gstBinarySpaceChargeS D = 0 ∨ gstBinarySpaceChargeS D = 4) := by
-  rcases gst_binary_space_charge_four_valuesS D hD with
-      h0 | h1 | h2 | h3 <;> omega
+The residual origin is already maximally 3-free, so only n % 3 != 0 enters
+this interface.  All origin-closed and non-residual branches remain owned by
+the monolith's existing strong-induction machinery.
+-/
 
-/-- Exact event-charge identity for a seeded x4 wave.  The first binary layer
-has seed bit `D/2`, the second has seed bit `D%2`; the whole wave collapses to
-`gstBinarySpaceChargeS D`. -/
-theorem gst_seeded_x4_event_chargeS
-    (D R : Nat) :
-    let a := D / 2
-    let b := D % 2
-    let Y := a + 2*R
-    let Z := b + 2*Y
-    gstBinaryEventWordValueS Y Z =
-      2 * gstBinaryEventWordValueS R Y + gstBinarySpaceChargeS D := by
-  dsimp only
-  exact gst_binary_two_layer_event_chargeS (D/2) (D%2) R
+/-- Exact remaining forcing statement.  Under a certified child Navigation
+witness and a complete phase-one Omega bad trace, the ordinary natural origin
+would have to carry nonzero ternary information beyond every finite cutoff. -/
+def GSTCanonicalResidualInfiniteSupportBridgeS : Prop :=
+  ∀ s n,
+    1 ≤ s →
+    1 ≤ n →
+    n % 3 ≠ 0 →
+    GSTNavigationWitness (gstNavigationConstant (s+1) n) →
+    GSTOmegaInfiniteBadTrace s 1 n →
+    InfiniteTernarySupportS n
 
-/-- The final integer after the two binary layers is exactly `D + 4R`. -/
-theorem gst_seeded_x4_binary_layers_exactS
-    (D R : Nat) :
-    D % 2 + 2 * (D / 2 + 2*R) = D + 4*R := by
-  have hD := Nat.mod_add_div D 2
-  omega
+/-- Once the residual forcing statement is supplied, a complete prefix-one
+Omega bad trace is impossible for an ordinary natural origin. -/
+theorem gst_residual_prefix_one_no_bad_of_infinite_support_bridgeS
+    (hbridge : GSTCanonicalResidualInfiniteSupportBridgeS)
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) (hn3 : n % 3 ≠ 0)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n)) :
+    ¬ GSTOmegaInfiniteBadTrace s 1 n := by
+  intro hBad
+  have hinf : InfiniteTernarySupportS n :=
+    hbridge s n hs hn hn3 hchild hBad
+  exact finite_origin_contradictionS n hinf
 
-/-- Every legal x4 shared-information equation factors through a unique-style
-intermediate binary remainder.  `Wmid` is the information state after the
-first x2 bridge layer.
-
-The theorem is stated existentially to avoid building subtraction into the
-state definition. -/
-theorem gst_shared_x4_binary_factorS
-    (A D Z W C : Nat)
-    (hA : 0 < A)
-    (hD : D < 4)
-    (hC : C < 4)
-    (hW : W < A)
-    (hshared : D + 4*Z = W + A*C) :
-    ∃ a b c e Wmid,
-      D = 2*a + b ∧
-      C = 2*c + e ∧
-      a < 2 ∧ b < 2 ∧ c < 2 ∧ e < 2 ∧
-      Wmid < A ∧
-      a + 2*Z = Wmid + A*c ∧
-      b + 2*Wmid = W + A*e := by
-  let a := D / 2
-  let b := D % 2
-  let c := C / 2
-  let e := C % 2
-  let Wmid := (W + A*e) / 2
-  have h2 : 0 < (2:Nat) := by decide
-  have hDb : D = 2*a + b := by
-    dsimp [a, b]
-    omega
-  have hCe : C = 2*c + e := by
-    dsimp [c, e]
-    omega
-  have ha : a < 2 := by
-    dsimp [a]
-    omega
-  have hb : b < 2 := by
-    dsimp [b]
-    exact Nat.mod_lt _ h2
-  have hc : c < 2 := by
-    dsimp [c]
-    omega
-  have he : e < 2 := by
-    dsimp [e]
-    exact Nat.mod_lt _ h2
-  have hpar : (W + A*e) % 2 = b := by
-    have hmod := congrArg (fun x : Nat => x % 2) hshared
-    rw [hDb, hCe] at hmod
-    dsimp [b, e]
-    omega
-  have hWsplit : b + 2*Wmid = W + A*e := by
-    dsimp [Wmid]
-    have h := Nat.mod_add_div (W + A*e) 2
-    rw [hpar] at h
-    omega
-  have hmid : a + 2*Z = Wmid + A*c := by
-    rw [hDb, hCe] at hshared
-    omega
-  have hWmid : Wmid < A := by
-    by_cases he0 : e = 0
-    · rw [he0, Nat.mul_zero, Nat.add_zero] at hWsplit
-      omega
-    · have he1 : e = 1 := by omega
-      rw [he1, Nat.mul_one] at hWsplit
-      omega
-  exact ⟨a, b, c, e, Wmid, hDb, hCe, ha, hb, hc, he,
-    hWmid, hmid, hWsplit⟩
-
-/-- After a last child Happy Gate the regenerated child carry `C` is 2 or 3,
-so the high binary child bit in the factored shared carrier is forced to one. -/
-theorem gst_shared_x4_binary_factor_last_gate_high_bitS
-    (A D Z W C : Nat)
-    (hA : 0 < A)
-    (hD : D < 4)
-    (hC : C = 2 ∨ C = 3)
-    (hW : W < A)
-    (hshared : D + 4*Z = W + A*C) :
-    ∃ a b e Wmid,
-      D = 2*a + b ∧
-      C = 2 + e ∧
-      a < 2 ∧ b < 2 ∧ e < 2 ∧ Wmid < A ∧
-      a + 2*Z = Wmid + A ∧
-      b + 2*Wmid = W + A*e := by
-  have hClt : C < 4 := by rcases hC with rfl | rfl <;> decide
-  obtain ⟨a,b,c,e,Wmid,hDb,hCe,ha,hb,hc,he,hmid,h1,h2⟩ :=
-    gst_shared_x4_binary_factorS A D Z W C hA hD hClt hW hshared
-  have hc1 : c = 1 := by
-    rcases hC with rfl | rfl <;> omega
-  subst c
-  refine ⟨a,b,e,Wmid,hDb,?_,ha,hb,he,hmid,?_,h2⟩
-  · omega
-  · simpa using h1
--- END ATTACHED HandwrittenBigNBinaryFactorScratch.lean
+/-- The same consumer with the handwritten U-potential attached explicitly.
+This theorem records that any hypothetical residual bad trace simultaneously
+obeys every finite U-potential bound before finite support destroys it. -/
+theorem gst_residual_prefix_one_u_bad_contradiction_of_bridgeS
+    (hbridge : GSTCanonicalResidualInfiniteSupportBridgeS)
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) (hn3 : n % 3 ≠ 0)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  have _hU : ∀ K,
+      24 * (gstPrefixOneUPotentialTailS s n % 3^K) + 15 ≤
+        3^K * gstHandwrittenUChargeS
+          (gstAffineMulCarryS 4 1 (gstPrefixOneUPotentialTailS s n) K) :=
+    fun K => gst_prefix_one_omega_bad_u_potential_boundS s n K hs hBad
+  have hinf : InfiniteTernarySupportS n :=
+    hbridge s n hs hn hn3 hchild hBad
+  exact finite_origin_contradictionS n hinf
+-- END ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
 
 -- END ATTACHED SOL BIG-N CLOSURE STACK
 
@@ -16666,7 +17183,7 @@ theorem gst_prefix_one_bigN_future_zero_inline
   dsimp only
   by_cases hN0 : gstNavigationConstant (s+1) n = 0
   · rw [hN0]
-    simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega
+    decide
   · exact gst_navigation_self_horizon_zeroS
       (gstNavigationConstant (s+1) n) (by omega)
 

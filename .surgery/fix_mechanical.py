@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""fix_mechanical.py — Fix ALL mechanical errors in the patched ErdosTernary2.lean
-Run AFTER apply.py. Fixes: Summation notation, dvd_add, dvd_pow_self, hC2,
-unfold, mod_add_div, gstSixUniversePrefixS decide, standalone decide.
+"""fix_mechanical.py — Fix mechanical errors in the patched ErdosTernary2.lean
+Run AFTER apply.py. With reordered modules, GSTBadPairS + its Decidable instance
+are defined BEFORE any decide call. So decide should work as-is.
+
+Only fixes: Summation notation, dvd_add, dvd_pow_self, hC2, unfold,
+mod_add_div, gstSixUniversePrefixS decide.
 """
 import re
 from pathlib import Path
@@ -10,17 +13,11 @@ p = Path('ErdosTernary2.lean')
 text = p.read_text(encoding='utf-8')
 
 # 1. Replace ALL unicode summation with Finset.sum
-# Pattern: VAR in Finset.range EXPR, BODY
-# Use a simple approach: find all occurrences of the unicode char and replace
-SUM_CHAR = '\u2211'  # the actual unicode character
-
-# Split by lines and process
+SUM_CHAR = '\u2211'
 lines = text.split('\n')
 new_lines = []
 for line in lines:
     if SUM_CHAR in line:
-        # Replace the summation pattern
-        # Pattern: SUM VAR in Finset.range EXPR, BODY
         pattern = r'\u2211 (\w+) in Finset\.range ([^,\n]+), ([^\n)]+)'
         def replacer(m):
             var = m.group(1)
@@ -71,27 +68,8 @@ text = text.replace(
     '7 / (13 - 6) = 1 := by\n  norm_num'
 )
 
-# 8. Replace standalone decide ONLY in the inlined modules (after BEGIN ATTACHED)
-# The original file's decide calls (before BEGIN ATTACHED) work fine — they
-# prove simple Nat equalities with native Decidable instances.
-# The inlined modules' decide calls need replacement because they reference
-# custom defs (GSTBadPairS, etc.) that don't have Decidable without open scoped Classical.
-attached_marker = '-- BEGIN ATTACHED'
-if attached_marker in text:
-    parts = text.split(attached_marker, 1)
-    before = parts[0]  # original file (keep decide as-is)
-    after = attached_marker + parts[1]  # inlined modules (replace decide)
-    
-    lines = after.split('\n')
-    new_lines = []
-    for line in lines:
-        stripped = line.strip()
-        if stripped == 'decide':
-            indent = len(line) - len(line.lstrip())
-            new_lines.append(' ' * indent + 'simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS, gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS, gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS, gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS, gstSixUniversePrefixS, gstLocalRotateS, gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS, gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS, gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS, gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS, gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS, gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS, ternaryOriginDigitS, InfiniteTernarySupportS, GSTOmegaGatePolynomial, gstOmega, GSTCanonicalBlockS, gstCanonicalPrefixOffsetS, GSTHardPrefixOneTailS, gstPrefixOneUPotentialTailS] <;> omega')
-        else:
-            new_lines.append(line)
-    text = before + '\n'.join(new_lines)
+# NOTE: Do NOT replace decide — with reordered modules, the Decidable instance
+# for GSTBadPairS is defined BEFORE any decide call. decide should work as-is.
 
 p.write_text(text, encoding='utf-8')
-print("fix_mechanical.py: ALL mechanical fixes applied")
+print("fix_mechanical.py: mechanical fixes applied (NO decide replacement, NO Decidable instance)")
