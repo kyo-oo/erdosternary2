@@ -16633,6 +16633,18 @@ theorem gst_shared_x4_binary_factorS
   exact ⟨a, b, c, e, Wmid, hDb, hCe, ha, hb, hc, he,
     hWmid, hmid, hWsplit⟩
 
+/-- A final carry of two or three has high binary bit one.  Keeping this
+micro-lemma outside the shared-information proof prevents unrelated nonlinear
+products from entering the Presburger context. -/
+private theorem gst_last_gate_high_binary_bitS
+    (C c e : Nat)
+    (hC : C = 2 ∨ C = 3)
+    (hCe : C = 2*c + e)
+    (hc : c < 2)
+    (he : e < 2) :
+    c = 1 := by
+  rcases hC with rfl | rfl <;> omega
+
 /-- After a last child Happy Gate the regenerated child carry `C` is 2 or 3,
 so the high binary child bit in the factored shared carrier is forced to one. -/
 theorem gst_shared_x4_binary_factor_last_gate_high_bitS
@@ -16651,11 +16663,11 @@ theorem gst_shared_x4_binary_factor_last_gate_high_bitS
   have hClt : C < 4 := by rcases hC with rfl | rfl <;> decide
   obtain ⟨a,b,c,e,Wmid,hDb,hCe,ha,hb,hc,he,hmid,h1,h2⟩ :=
     gst_shared_x4_binary_factorS A D Z W C hA hD hClt hW hshared
-  have hc1 : c = 1 := by
-    rcases hC with rfl | rfl <;> omega
+  have hc1 : c = 1 :=
+    gst_last_gate_high_binary_bitS C c e hC hCe hc he
   subst c
   refine ⟨a,b,e,Wmid,hDb,?_,ha,hb,he,hmid,?_,h2⟩
-  · omega
+  · simpa using hCe
   · simpa using h1
 -- END ATTACHED HandwrittenBigNBinaryFactorScratch.lean
 
