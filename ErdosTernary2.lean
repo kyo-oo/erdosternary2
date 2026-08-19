@@ -10470,7 +10470,7 @@ theorem gst_canonical_block_mod81_oneS
   have hp : 3^(s+1) % 81 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (81:Nat) = 3^4 by decide]
-    exact pow_dvd_pow (by decide : 1 ≤ 3) (by omega)
+    exact pow_dvd_pow 3 (by omega)
   rw [hp]
   norm_num
 
@@ -10689,7 +10689,7 @@ theorem gst_canonical_block_unit_mod9S
   have hdiv : 3^(t+1) % 9 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
     rw [show (9:Nat) = 3^2 by decide]
-    exact pow_dvd_pow (by decide : 1 ≤ 3) (by omega)
+    exact pow_dvd_pow 3 (by omega)
   rw [hdiv]
   norm_num
 
@@ -10704,7 +10704,7 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact pow_dvd_pow (by decide : 1 ≤ 3) (by omega)
+    exact pow_dvd_pow 3 (by omega)
   rw [hdiv]
   norm_num
 
