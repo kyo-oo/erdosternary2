@@ -16,6 +16,15 @@ if end is not None:
             lines[i] = '--' + lines[i][2:]
     text = ''.join(lines)
 
+
+# Remove 'open scoped Classical' — it creates Classical.propDecidable which shadows
+# native Decidable instances, causing 'decide' to fail on custom defs (GSTBadPairS, etc.)
+# in the inlined scratch modules.
+text = text.replace(
+    'open scoped Classical\n',
+    '-- open scoped Classical removed (causes decide failures on inlined modules)\n'
+)
+
 # The old residual Omega termination chain is proof archaeology only.
 qstart_tag = '/- QUARANTINED LEGACY RESIDUAL OMEGA START\n'
 qend_tag = '\nQUARANTINED LEGACY RESIDUAL OMEGA END -/'
