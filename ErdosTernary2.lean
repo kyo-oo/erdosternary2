@@ -8972,7 +8972,7 @@ set_option maxHeartbeats 10000000
 def GSTBadPairS (C d : Nat) : Prop :=
   ¬ (d = 2 ∧ (C = 0 ∨ C = 3))
 instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
-  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse h else isTrue h
+  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse (fun hp => hp h) else isTrue h
 
 
 /-- A seed-retaining affine bad trace cannot contain the universal 22 synchronizer. -/

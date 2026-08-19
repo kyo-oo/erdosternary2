@@ -103,7 +103,7 @@ old_instance_omega = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (
   | _, _ => isTrue (by simp [GSTBadPairS]; omega)'''
 
 new_instance = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
-  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse h else isTrue h'''
+  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse (fun hp => hp h) else isTrue h'''
 
 if old_instance in text:
     text = text.replace(old_instance, new_instance)
