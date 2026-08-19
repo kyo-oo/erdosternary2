@@ -16591,9 +16591,23 @@ theorem gst_shared_x4_binary_factorS
     rw [hpar] at h
     omega
   have hmid : a + 2*Z = Wmid + A*c := by
-    rw [hDb, hCe] at hshared
-    ring_nf at hshared hWsplit ⊢
-    omega
+    have hshared' :
+        2*(a + 2*Z) + b = (W + A*e) + 2*(A*c) := by
+      calc
+        2*(a + 2*Z) + b = (2*a + b) + 4*Z := by ring
+        _ = D + 4*Z := by rw [hDb]
+        _ = W + A*C := hshared
+        _ = W + A*(2*c + e) := by rw [hCe]
+        _ = (W + A*e) + 2*(A*c) := by ring
+    have htwiceWithBit :
+        2*(a + 2*Z) + b = 2*(Wmid + A*c) + b := by
+      calc
+        2*(a + 2*Z) + b = (W + A*e) + 2*(A*c) := hshared'
+        _ = (b + 2*Wmid) + 2*(A*c) := by rw [hWsplit]
+        _ = 2*(Wmid + A*c) + b := by ring
+    have htwice : 2*(a + 2*Z) = 2*(Wmid + A*c) :=
+      Nat.add_right_cancel htwiceWithBit
+    exact Nat.mul_left_cancel h2 htwice
   have hWmid : Wmid < A := by
     by_cases he0 : e = 0
     · rw [he0, Nat.mul_zero, Nat.add_zero] at hWsplit
