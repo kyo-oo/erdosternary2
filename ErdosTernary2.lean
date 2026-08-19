@@ -16536,6 +16536,23 @@ theorem gst_seeded_x4_binary_layers_exactS
   have hD := Nat.mod_add_div D 2
   omega
 
+/-- A binary midpoint stays below the modulus.  Splitting the low child bit
+keeps this proof in pure linear arithmetic, isolated from the surrounding
+shared-information products. -/
+private theorem gst_binary_midpoint_ltS
+    (A b e Wmid W : Nat)
+    (hb : b < 2)
+    (he : e < 2)
+    (hW : W < A)
+    (hWsplit : b + 2*Wmid = W + A*e) :
+    Wmid < A := by
+  have he_cases : e = 0 ∨ e = 1 := by omega
+  rcases he_cases with rfl | rfl
+  · simp only [Nat.mul_zero, Nat.add_zero] at hWsplit
+    omega
+  · simp only [Nat.mul_one] at hWsplit
+    omega
+
 /-- Every legal x4 shared-information equation factors through a unique-style
 intermediate binary remainder.  `Wmid` is the information state after the
 first x2 bridge layer.
@@ -16608,13 +16625,8 @@ theorem gst_shared_x4_binary_factorS
     have htwice : 2*(a + 2*Z) = 2*(Wmid + A*c) :=
       Nat.add_right_cancel htwiceWithBit
     exact Nat.mul_left_cancel h2 htwice
-  have hWmid : Wmid < A := by
-    by_cases he0 : e = 0
-    · rw [he0, Nat.mul_zero, Nat.add_zero] at hWsplit
-      omega
-    · have he1 : e = 1 := by omega
-      rw [he1, Nat.mul_one] at hWsplit
-      omega
+  have hWmid : Wmid < A :=
+    gst_binary_midpoint_ltS A b e Wmid W hb he hW hWsplit
   exact ⟨a, b, c, e, Wmid, hDb, hCe, ha, hb, hc, he,
     hWmid, hmid, hWsplit⟩
 
