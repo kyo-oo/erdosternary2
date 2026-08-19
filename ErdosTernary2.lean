@@ -16622,7 +16622,7 @@ theorem gst_shared_x4_binary_factor_last_gate_high_bitS
   obtain ⟨a,b,c,e,Wmid,hDb,hCe,ha,hb,hc,he,hmid,h1,h2⟩ :=
     gst_shared_x4_binary_factorS A D Z W C hA hD hClt hW hshared
   have hc1 : c = 1 := by
-    rcases hC with hC2 | hC3 <;> rw [hC2] at hCe <;> try rw [hC3] at hCe <;> omega
+    rcases hC with rfl | rfl <;> omega
   subst c
   refine ⟨a,b,e,Wmid,hDb,?_,ha,hb,he,hmid,?_,h2⟩
   · omega
