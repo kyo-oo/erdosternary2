@@ -98,7 +98,7 @@ import Mathlib.Tactic.Ring
 set_option maxRecDepth 10000000
 set_option maxHeartbeats 100000000
 
--- open scoped Classical removed
+open scoped Classical
 
 set_option maxRecDepth 10000000
 set_option maxHeartbeats 100000000
