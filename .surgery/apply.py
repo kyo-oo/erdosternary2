@@ -25,6 +25,46 @@ text = text.replace(
     '-- open scoped Classical removed (causes decide failures on inlined modules)\n'
 )
 
+
+# Replace standalone 'decide' with 'simp only [...] <;> omega' — decide fails
+# because GSTBadPairS, gstHandwrittenUChargeS, etc. don't have Decidable instances
+# without 'open scoped Classical'. simp + omega handles these cases directly.
+import re
+def replace_decide(text):
+    # Replace standalone 'decide' (whole line, possibly indented) with
+    # simp only [all relevant defs] <;> omega
+    # This works for ALL decide calls in the inlined scratch modules.
+    
+    # Pattern: a line that is ONLY whitespace + 'decide'
+    # Replace with: simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS,
+    #   gstHandwrittenUJumpS, gstBinaryBridgeOutputS, gstBinaryBridgeMassS,
+    #   gstBinaryBridgeEventS, gstFirstMicroMassS, gstSecondMicroMassS,
+    #   gstFirstMicroOutputS, gstSecondMicroOutputS, gstMicroHighBitS, gstMicroLowBitS,
+    #   gstPhysicalMicroPairS, gstSixUniversePrefixS, gstLocalRotateS,
+    #   gstMicroRotate6S, gstV2SpaceChargeS, gstBinarySpaceChargeS,
+    #   gstMicroEventSymbolS, gstMicroTwoIndicatorS, gstMicroKernelTwiceS,
+    #   gstMicroBig2FluxS, gstHandwrittenXCoordS, gstHandwrittenZOrientS,
+    #   gstOutputDigitS, gstMicroBig2ActiveS, gstResidualNullTerminalS,
+    #   gstNavigationConstant, gstDigit, gstCarry, gstDigitS, gstCarryS,
+    #   gstAffineMulCarryS, gstStepCarryS, GSTSeededHappyS, GSTSeededBadTraceS,
+    #   ternaryOriginDigitS, InfiniteTernarySupportS] <;> omega
+    
+    # Actually, simpler: just replace 'decide' with 'first | decide | simp <;> omega'
+    # This tries decide first (works if Decidable exists), then falls back to simp+omega
+    
+    lines = text.split('\n')
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped == 'decide':
+            indent = len(line) - len(line.lstrip())
+            # Use 'simp <;> omega' — simp unfolds the defs, omega handles the arithmetic
+            new_lines.append(' ' * indent + 'simp <;> omega')
+        else:
+            new_lines.append(line)
+    return '\n'.join(new_lines)
+
+
 # The old residual Omega termination chain is proof archaeology only.
 qstart_tag = '/- QUARANTINED LEGACY RESIDUAL OMEGA START\n'
 qend_tag = '\nQUARANTINED LEGACY RESIDUAL OMEGA END -/'
@@ -220,5 +260,7 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
+
+text = replace_decide(text)
 
 p.write_text(text, encoding='utf-8')
