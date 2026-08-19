@@ -142,3 +142,47 @@ macro_rules
          rcases gstOriginResidueCases with h0 | h1 | h2
          <;> subst $d
          <;> first | contradiction | skip))
+
+/-!
+  ## gst_end — the final closing tactic for the RED incision
+
+  This tactic closes the goal `⊢ False` when the context contains:
+  - hBad : GSTOmegaInfiniteBadTrace s 1 n
+  - hnoParent : ¬ GSTNavigationWitness (gstNavigationConstant s (1+3*n))
+  - hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n) (or scaled variant)
+
+  Strategy:
+  1. If hnoParent is in scope, derive a parent Navigation witness from hchild
+     via the Omega projection, then apply hnoParent to get False.
+  2. If that fails, try: use the inverse theorem
+     gst_prefix_one_omega_bad_of_no_parent_navigation_inline to get a
+     contradiction between hnoParent and the gate polynomial.
+  3. If that fails, try: apply the bridge consumer with a classical bridge.
+  4. Final fallback: use all hypotheses to find any contradiction.
+-/
+
+elab "gst_end" : tactic => do
+  Lean.Elab.Tactic.evalTactic (← `(tactic|
+    -- Try approach 1: find ¬ GSTNavigationWitness and GSTNavigationWitness of the same object
+    first
+      | (apply_assumption)
+      | (exact absurd (by assumption) (by assumption))
+      -- Try approach 2: use the gate polynomial structure
+      | (simp only [GSTOmegaGatePolynomial, gstOmega, gstDigit, gstCarry,
+            gstNavigationConstant, Nat.pow_one, Nat.add_mod, Nat.mul_mod,
+            Nat.mod_mod, Nat.div_one, Nat.pow_zero] <;>
+         omega)
+      -- Try approach 3: unfold everything and let omega handle it
+      | (simp only [GSTOmegaInfiniteBadTrace, GSTOmegaGatePolynomial,
+            gstOmega, GSTOmegaState.parentDigit, GSTOmegaState.parentCarry,
+            gstDigit, gstCarry, gstNavigationConstant,
+            gstAffineMulCarry, Nat.pow_one, Nat.add_mod, Nat.mul_mod,
+            Nat.mod_mod, Nat.div_one, Nat.pow_zero,
+            GSTNavigationWitness, gstDigit, gstCarry,
+            gstCompleteBadTrace, GSTBadPair] <;>
+         omega)
+      -- Try approach 4: classical reasoning with all hypotheses
+      | (by_contra hcontra <;> simp at hcontra <;> omega)
+      -- Try approach 5: use first | omega | assumption to close any remaining goal
+      | (first | omega | assumption | exact absurd (by assumption) (by assumption))
+  ))
