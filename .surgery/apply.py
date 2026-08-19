@@ -219,15 +219,15 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
 text = text[:info_start] + new_info + text[info_end:]
 
 
-# Insert Decidable instance for GSTBadPairS AFTER its definition
+# Insert Decidable instance for GSTBadPairS AFTER its definition body
 gstbadpair_def = "def GSTBadPairS (C d : Nat) : Prop :="
 if gstbadpair_def in text:
-    # Find the end of the def (the line after ":=")
     idx = text.index(gstbadpair_def)
-    # Find the next newline after the := line
-    line_end = text.index('\n', idx)
-    # Insert the instance right after the def
-    instance_code = '\ninstance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=\n  match C, d with\n  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])'
-    text = text[:line_end] + '\n' + instance_code + text[line_end:]
+    # Find the SECOND newline (end of body line, after := and the body)
+    first_nl = text.index('\n', idx)
+    second_nl = text.index('\n', first_nl + 1)
+    # Insert AFTER the body line
+    instance_code = '\ninstance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=\n  match C, d with\n  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])\n'
+    text = text[:second_nl] + instance_code + text[second_nl:]
 
 p.write_text(text, encoding='utf-8')
