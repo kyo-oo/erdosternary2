@@ -7330,7 +7330,6 @@ theorem gst_omega_seededAffine_block_echo
   weaker and sufficient.  This block remains as proof archaeology only.
 -/
 
-/- QUARANTINED LEGACY RESIDUAL OMEGA START
 /-- First-level residual Ω∞ termination.  The proof consumes the exact seeded
     orbit, a finite child gate, the terminal natural cone, and the complete
     residual boundary classification. -/
@@ -7424,8 +7423,6 @@ theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
 theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
-QUARANTINED LEGACY RESIDUAL OMEGA END -/
-
 
 /-
 /-- Numerical ceiling used to bound every power-of-four graph witness. -/
@@ -16679,71 +16676,50 @@ theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
     GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
-  apply gst_complete_bad_of_no_navigation
-  intro hchild
-
-  have hnoParent :
-      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
-    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic s n hs hn hBad
-
-  let r := v3 n
-  let m := n / 3^r
-  have hnpos : 0 < n := by omega
-  have hdvd : 3^r ∣ n := by
-    dsimp [r]
-    exact pow_v3_dvd n hnpos
-  have hmod : n % 3^r = 0 := Nat.mod_eq_zero_of_dvd hdvd
-  have hnfac : n = 3^r * m := by
-    dsimp [m]
-    have h := Nat.div_add_mod n (3^r)
-    rw [hmod, Nat.add_zero] at h
-    exact h.symm
-  have hmne : m ≠ 0 := by
-    intro hmz
-    have hnzero : n = 0 := by simpa [hmz] using hnfac
-    omega
-  have hm : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hmne
-  have hm3 : m % 3 ≠ 0 := by
-    dsimp [m, r]
-    exact v3_maximal n hnpos
-
-  have hscale :
-      gstNavigationConstant (s+1) n =
-        3^r * gstNavigationConstant (s+1+r) m := by
-    rw [hnfac]
-    exact gst_navigation_constant_mul3_pow_atomic (s+1) r m (by omega)
-  rw [hscale] at hchild
-  have hchildCore :
-      GSTNavigationWitness (gstNavigationConstant (s+1+r) m) :=
-    gstNavigationWitness_of_mul_three_pow_atomic r
-      (gstNavigationConstant (s+1+r) m) hchild
-
-  let k := r + 1
-  have hk : 1 ≤ k := by dsimp [k]; omega
-  have hparentArg : 1 + 3*n = 1 + 3^k*m := by
-    dsimp [k]
-    rw [hnfac, Nat.pow_succ]
-    ring
-
-  by_cases hclosed : GSTOriginClosed s k (m % 3)
-  · have hparentCore :
-        GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) :=
-      gst_navigation_constant_origin_closed_witness
-        s k m (m % 3) hs hm hm3 rfl hclosed
-    apply hnoParent
-    rw [hparentArg]
-    exact hparentCore
-
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary : GSTResidualBoundary s k (m % 3) :=
-    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
-
-  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
-  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
-  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  gst_omega
+  have hb : 1 ≤ 1 + 3*n := by omega
+  have hb3 : (1 + 3*n) % 3 ≠ 0 := by omega
+  have hdomain : 2 ≤ s ∨ 1 < 1 + 3*n := Or.inr (by omega)
+  have hParent : GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_navigation_witness_all_of_residual
+      (gst_residual_navigation_lift_of_omega_termination
+        gst_residual_omega_termination)
+      s (1 + 3*n) hs hb hb3 hdomain
+  rcases hParent with ⟨j, hd, hspace⟩
+  cases j with
+  | zero =>
+      have hmod := gstNavigationConstant_mod3 s (1 + 3*n) hs hb hb3
+      have hbmod : (1 + 3*n) % 3 = 1 := by omega
+      simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
+      rw [hmod, hbmod] at hd
+      omega
+  | succ j =>
+      have hprojection := gst_omega_parent_projection s 1 n j hs
+      have hCmod : gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) % 3 = 0 := by
+        exact gstGoodSpace_carry_mod3_zero _ (j+1) hspace
+      have hClt : gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) < 4 :=
+        gstCarry_lt_four _ (j+1) (by omega)
+      have hC : gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 0 ∨
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 3 := by
+        omega
+      have hd' : gstDigit (gstNavigationConstant s (1 + 3*n)) (1+j) = 2 := by
+        simpa [Nat.add_comm] using hd
+      have hC' : gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 0 ∨
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 3 := by
+        simpa [Nat.add_comm] using hC
+      have hgate :
+          (gstOmega s 1 n j).parentDigit = 2 ∧
+          ((gstOmega s 1 n j).parentCarry = 0 ∨
+           (gstOmega s 1 n j).parentCarry = 3) := by
+        constructor
+        · rw [← hprojection.1]
+          simpa [Nat.pow_one] using hd'
+        · rw [← hprojection.2]
+          simpa [Nat.pow_one] using hC'
+      have hzero : GSTOmegaGatePolynomial (gstOmega s 1 n j) = 0 :=
+        (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2 hgate
+      have hne := hBad j
+      change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0 at hne
+      exact False.elim (hne hzero)
 
 /-- Corrected information-wave closure: once parent badness descends to the
     shared child information, the certified child Happy Gate is an immediate
