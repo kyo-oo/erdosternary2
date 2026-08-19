@@ -8,5 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Test
-        run: echo "hello"
+        with:
+          fetch-depth: 0
+      - name: Apply surgery
+        run: python3 .surgery/apply.py
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        continue-on-error: true
+        with:
+          build: false
+      - name: Build
+        run: |
+          set +e
+          lake update 2>&1 | tail -5
+          lake exe cache get 2>&1 | tail -5
+          lake build ErdosTernary2 2>&1 | tail -30
+          echo "EXIT: $?"
+      - name: Comparator
+        run: bash scripts/comparator.sh 2>&1 | tail -15
