@@ -181,19 +181,32 @@ theorem ternaryDigitAt_mul_two
   have hsplit :
       (2*R) / 3^p =
         (2 * (R % 3^p)) / 3^p + 2 * (R / 3^p) := by
-    have hdiv : R = 3^p * (R / 3^p) + R % 3^p :=
-      (Nat.div_add_mod R (3^p)).symm
-    rw [hdiv, Nat.mul_add]
-    rw [show 2 * (3^p * (R / 3^p)) =
-      3^p * (2 * (R / 3^p)) by ac_rfl]
-    rw [show 3^p * (2 * (R / 3^p)) + 2 * (R % 3^p) =
-      2 * (R % 3^p) + 3^p * (2 * (R / 3^p)) by ac_rfl]
-    rw [Nat.add_mul_div_left _ _ hp]
-  rw [hsplit, Nat.add_mod]
-  have hmulmod : (2 * (R / 3^p)) % 3 =
-      (2 * (R / 3^p % 3)) % 3 := by
-    rw [Nat.mul_mod]
-  rw [hmulmod]
+    calc
+      (2*R) / 3^p =
+          (2 * (R % 3^p + 3^p * (R / 3^p))) / 3^p := by
+            rw [Nat.mod_add_div]
+      _ = (2 * (R % 3^p) + 3^p * (2 * (R / 3^p))) / 3^p := by
+            congr 1
+            ring
+      _ = (2 * (R % 3^p)) / 3^p + 2 * (R / 3^p) := by
+            rw [Nat.add_mul_div_left _ _ hp]
+  rw [hsplit]
+  have hqmod :
+      (2 * (R / 3^p)) % 3 =
+        (2 * (R / 3^p % 3)) % 3 := by
+    simpa only [Nat.mod_mod] using
+      (Nat.mul_mod 2 (R / 3^p) 3)
+  calc
+    ((2 * (R % 3^p)) / 3^p + 2 * (R / 3^p)) % 3 =
+        (((2 * (R % 3^p)) / 3^p) % 3 +
+          (2 * (R / 3^p)) % 3) % 3 :=
+      Nat.add_mod _ _ 3
+    _ = ((((2 * (R % 3^p)) / 3^p) % 3) +
+          (2 * (R / 3^p % 3)) % 3) % 3 := by rw [hqmod]
+    _ = ((2 * (R % 3^p)) / 3^p +
+          2 * (R / 3^p % 3)) % 3 := by
+      symm
+      exact Nat.add_mod _ _ 3
 
 /-- The actual powers-of-two orbit at one ternary row is a legal microscopic
 bridge path, with no abstract transition assumption. -/
