@@ -1,15 +1,32 @@
 name: Lean Action CI
+
 on:
   push:
     branches: ['**']
   pull_request:
     branches: ['**']
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Setup Lean (lake update + cache)
+        shell: bash
+        run: |
+          set +e
+          # Install elan + lean + lake via the leanprover setup
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          source $HOME/.cargo/env
+          # Use the toolchain from lean-toolchain
+          TOOLCHAIN=$(cat lean-toolchain)
+          echo "Using toolchain: $TOOLCHAIN"
+          elan default $TOOLCHAIN
+          # Generate manifest
+          lake update
+          # Get Mathlib cache
+          lake exe cache get || true
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: .
