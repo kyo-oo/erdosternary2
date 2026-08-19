@@ -16,18 +16,7 @@ if end is not None:
             lines[i] = '--' + lines[i][2:]
     text = ''.join(lines)
 
-# The old residual Omega termination chain is proof archaeology only.
-qstart_tag = '/- QUARANTINED LEGACY RESIDUAL OMEGA START\n'
-qend_tag = '\nQUARANTINED LEGACY RESIDUAL OMEGA END -/'
-legacy_start = '/-- First-level residual Ω∞ termination.'
-legacy_end = '''theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
-  gst_residual_navigation_lift_of_omega_termination
-    gst_residual_omega_termination'''
-if qstart_tag not in text:
-    if legacy_start not in text or legacy_end not in text:
-        raise RuntimeError('legacy residual Omega anchors missing')
-    text = text.replace(legacy_start, qstart_tag + legacy_start, 1)
-    text = text.replace(legacy_end, legacy_end + qend_tag, 1)
+# LEGACY BLOCK KEPT — do NOT quarantine
 
 # ---------------------------------------------------------------------------
 # Attach the theorem-grade BIG-N/origin/right-chord stack before the production
@@ -134,82 +123,6 @@ if 'theorem gst_bigN_seed3_endpoint_forces_non_one_inline' not in text:
         raise RuntimeError('BIG-N insertion anchor missing')
     text = text.replace(anchor, bign_code + anchor, 1)
 
-# Factor the child origin n = 3^r*m. Every already-closed origin class now
-# contradicts parent Omega badness immediately. The only remaining point is the
-# genuine 3-free young residual where the attached BIG-N/right-chord stack acts.
-info_start_marker = 'theorem gst_prefix_one_information_bad_descends_inline'
-info_end_marker = '\n\n/-- Corrected information-wave closure:'
-info_start = text.index(info_start_marker)
-info_end = text.index(info_end_marker, info_start)
-new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
-    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
-  apply gst_complete_bad_of_no_navigation
-  intro hchild
-
-  have hnoParent :
-      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
-    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic s n hs hn hBad
-
-  let r := v3 n
-  let m := n / 3^r
-  have hnpos : 0 < n := by omega
-  have hdvd : 3^r ∣ n := by
-    dsimp [r]
-    exact pow_v3_dvd n hnpos
-  have hmod : n % 3^r = 0 := Nat.mod_eq_zero_of_dvd hdvd
-  have hnfac : n = 3^r * m := by
-    dsimp [m]
-    have h := Nat.div_add_mod n (3^r)
-    rw [hmod, Nat.add_zero] at h
-    exact h.symm
-  have hmne : m ≠ 0 := by
-    intro hmz
-    have hnzero : n = 0 := by simpa [hmz] using hnfac
-    omega
-  have hm : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hmne
-  have hm3 : m % 3 ≠ 0 := by
-    dsimp [m, r]
-    exact v3_maximal n hnpos
-
-  have hscale :
-      gstNavigationConstant (s+1) n =
-        3^r * gstNavigationConstant (s+1+r) m := by
-    rw [hnfac]
-    exact gst_navigation_constant_mul3_pow_atomic (s+1) r m (by omega)
-  rw [hscale] at hchild
-  have hchildCore :
-      GSTNavigationWitness (gstNavigationConstant (s+1+r) m) :=
-    gstNavigationWitness_of_mul_three_pow_atomic r
-      (gstNavigationConstant (s+1+r) m) hchild
-
-  let k := r + 1
-  have hk : 1 ≤ k := by dsimp [k]; omega
-  have hparentArg : 1 + 3*n = 1 + 3^k*m := by
-    dsimp [k]
-    rw [hnfac, Nat.pow_succ]
-    ring
-
-  by_cases hclosed : GSTOriginClosed s k (m % 3)
-  · have hparentCore :
-        GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) :=
-      gst_navigation_constant_origin_closed_witness
-        s k m (m % 3) hs hm hm3 rfl hclosed
-    apply hnoParent
-    rw [hparentArg]
-    exact hparentCore
-
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary : GSTResidualBoundary s k (m % 3) :=
-    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
-
-  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
-  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
-  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  gst_omega'''
-text = text[:info_start] + new_info + text[info_end:]
+# CALL SITE KEPT — do NOT replace
 
 p.write_text(text, encoding='utf-8')

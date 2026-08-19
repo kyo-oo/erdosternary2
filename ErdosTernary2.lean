@@ -16743,7 +16743,7 @@ theorem gst_prefix_one_information_bad_descends_inline
   -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
   -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
   -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  sorry
+  gst_omega
 
 /-- Corrected information-wave closure: once parent badness descends to the
     shared child information, the certified child Happy Gate is an immediate
