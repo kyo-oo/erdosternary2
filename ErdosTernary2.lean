@@ -8975,7 +8975,7 @@ instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
   match C, d with
   | 0, 2 => isFalse (by simp [GSTBadPairS])
   | 3, 2 => isFalse (by simp [GSTBadPairS])
-  | _, _ => isTrue (by simp [GSTBadPairS])
+  | _, _ => isTrue (by simp [GSTBadPairS]; omega)
 
 
 /-- A seed-retaining affine bad trace cannot contain the universal 22 synchronizer. -/

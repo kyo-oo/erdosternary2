@@ -73,3 +73,12 @@ text = text.replace(
 
 p.write_text(text, encoding='utf-8')
 print("fix_mechanical.py: mechanical fixes applied (NO decide replacement, NO Decidable instance)")
+
+# 9. Fix the GSTBadPairS.decidable instance body — simp [GSTBadPairS] fails
+# to close the isTrue case. Use simp [GSTBadPairS]; omega instead.
+text = text.replace(
+    '  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])',
+    '  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS]; omega)'
+)
+p.write_text(text, encoding='utf-8')
+print("fix_mechanical.py: instance body fixed (simp [GSTBadPairS] → simp [GSTBadPairS]; omega)")
