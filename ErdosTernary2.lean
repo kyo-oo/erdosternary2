@@ -11529,8 +11529,7 @@ theorem gst_handwritten_navigation_omega_budgetS
     (hQ : GSTCanonicalOriginEnergyS Q)
     (t n : Nat) (ht : 1 ≤ t) :
     1 +
-        (∑ i in Finset.range (Q t n + 1),
-          gstOmegaNaturalTransferS t (Q t n) i) =
+        (Finset.sum (Finset.range (Q t n + 1)) (fun i => gstOmegaNaturalTransferS t (Q t n)) i) =
       4^(3^t * n) := by
   rw [gst_omega_natural_transfer_totalS]
   exact (hQ t n ht).symm
@@ -11660,16 +11659,14 @@ theorem gst_origin_phase_prefixS
 
 theorem gst_origin_phase_totalS
     (s n : Nat) :
-    (∑ t in Finset.range (n+1),
-      3^(s+t) * gstOriginNaturalTritS n t) = 3^s * n := by
+    (Finset.sum (Finset.range (n+1)) (fun t => 3^(s+t)) * gstOriginNaturalTritS n t) = 3^s * n := by
   rw [gst_origin_phase_prefixS]
   have hlt : n < 3^(n+1) := gst_three_pow_succ_gt_pressureS n
   rw [Nat.mod_eq_of_lt hlt]
 
 theorem gst_origin_phase_reconstructs_energyS
     (s n : Nat) :
-    4^(∑ t in Finset.range (n+1),
-      3^(s+t) * gstOriginNaturalTritS n t) = 4^(3^s * n) := by
+    4^(Finset.sum (Finset.range (n+1)) (fun t => 3^(s+t)) * gstOriginNaturalTritS n t) = 4^(3^s * n) := by
   rw [gst_origin_phase_totalS]
 
 /-!
@@ -11867,10 +11864,8 @@ theorem gst_handwritten_two_axis_same_energyS
     (Q : Nat → Nat → Nat)
     (hQ : GSTCanonicalOriginEnergyS Q)
     (t n : Nat) (ht : 1 ≤ t) :
-    4^(∑ r in Finset.range (n+1),
-      3^(t+r) * gstOriginNaturalTritS n r) =
-    1 + (∑ i in Finset.range (Q t n + 1),
-      gstOmegaNaturalTransferS t (Q t n) i) := by
+    4^(Finset.sum (Finset.range (n+1)) (fun r => 3^(t+r)) * gstOriginNaturalTritS n r) =
+    1 + (Finset.sum (Finset.range (Q t n + 1)) (fun i => gstOmegaNaturalTransferS t (Q t n)) i) := by
   rw [gst_origin_phase_reconstructs_energyS,
     gst_handwritten_navigation_omega_budgetS Q hQ t n ht]
 -- END ATTACHED HandwrittenOmegaOriginCommutingSquareScratch.lean
