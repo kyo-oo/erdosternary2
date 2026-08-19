@@ -19,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: orchestrator-final-bridge
           fetch-depth: 0
 
       - name: Apply exact source surgery
