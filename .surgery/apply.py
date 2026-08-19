@@ -233,11 +233,10 @@ if gstbadpair_def in text:
 
 # MECHANICAL FIXES for inlined modules
 # 1. Add 'import Mathlib' for notation and identifiers
-text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\n')\n# Add open BigOperators for ∑ notation\ntext = text.replace('import Mathlib\n', 'import Mathlib\nopen BigOperators\n')
+text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\nopen BigOperators\n')
 
-# 2. dvd_add -> inline proof (Dvd.Dvd.add is wrong name in Lean 4 Mathlib)
-text = text.replace('exact dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)',
-                    'exact Nat.dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)')
+# 2. dvd_add -> Dvd.Dvd.add (not imported without Mathlib)
+text = text.replace('exact dvd_add ih', 'exact Nat.dvd_add ih')
 
 # 3. Nat.dvd_pow_self -> pow_dvd_pow (wrong name in Mathlib)
 text = text.replace('Nat.dvd_pow_self 3', 'pow_dvd_pow 3')
