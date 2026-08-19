@@ -28,13 +28,11 @@ if qstart_tag not in text:
         raise RuntimeError('legacy residual Omega anchors missing')
     text = text.replace(legacy_start, qstart_tag + legacy_start, 1)
     text = text.replace(legacy_end, legacy_end + qend_tag, 1)
-    # Fix: ALL /- and -/ inside the quarantine block close the quarantine
-    # comment prematurely. Convert them all to -- (regular comments).
-    # Find the block between qstart_tag and qend_tag, replace inner /- and -/
+    # Fix: ALL inner /- and -/ in the quarantine block close the quarantine
+    # comment prematurely. Convert them to -- (regular comments).
     start_idx = text.index(qstart_tag) + len(qstart_tag)
     end_idx = text.index(qend_tag)
     inner = text[start_idx:end_idx]
-    # Replace /- with -- and -/ with -- (making them regular line comments)
     inner = inner.replace('/-', '--')
     inner = inner.replace('-/', '--')
     text = text[:start_idx] + inner + text[end_idx:]
@@ -47,6 +45,10 @@ if qstart_tag not in text:
 attach_marker = '-- BEGIN ATTACHED SOL BIG-N CLOSURE STACK\n'
 attach_end = '-- END ATTACHED SOL BIG-N CLOSURE STACK\n\n'
 anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
+decidable_code = "-- Concrete Decidable instances for custom defs\n" \
+    "instance : Decidable (GSTBadPairS (C : Nat) (d : Nat)) :=" \
+    "  if h : d = 2 \\\<and> (C = 0 \\\<or> C = 3) then isFalse h else isTrue h\n\n"
+
 if attach_marker not in text:
     snap = Path('ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic')
     roots = [
@@ -105,7 +107,7 @@ if attach_marker not in text:
     attached = attach_marker + ''.join(chunks) + attach_end
     if anchor not in text:
         raise RuntimeError('inline integration anchor missing for BIG-N attachment')
-    text = text.replace(anchor, attached + anchor, 1)
+    text = text.replace(anchor, decidable_code + attached + anchor, 1)
 
 # BIG-N finite endpoint. This is the literal finite i=N case: a carry-three
 # start cannot reach carry one through an all-BIG1 information interval.
