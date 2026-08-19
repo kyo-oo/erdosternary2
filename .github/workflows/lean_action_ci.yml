@@ -18,16 +18,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Lean
-        uses: leanprover/lean-action@v1
-        continue-on-error: true
-        with:
-          build: false
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          source $HOME/.cargo/env
+          elan default $(cat lean-toolchain)
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Resolve dependencies and compile
-        if: always()
         shell: bash
         run: |
+          source $HOME/.cargo/env
           mkdir -p .surgery
           set +e
           lake update > .surgery/update.txt 2>&1
@@ -46,12 +47,12 @@ jobs:
 
       - name: Run sorry check
         if: always()
-        shell: bash
         run: |
+          source $HOME/.cargo/env
           bash scripts/sorry_check.sh || true
 
       - name: Run comparator
         if: always()
-        shell: bash
         run: |
+          source $HOME/.cargo/env
           bash scripts/comparator.sh || true
