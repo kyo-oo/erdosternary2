@@ -230,4 +230,51 @@ if gstbadpair_def in text:
     instance_code = '\ninstance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=\n  match C, d with\n  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])\n'
     text = text[:second_nl] + instance_code + text[second_nl:]
 
+
+# MECHANICAL FIXES for inlined modules
+# 1. Add 'import Mathlib' for notation and identifiers
+text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\n')
+
+# 2. dvd_add -> Dvd.Dvd.add (not imported without Mathlib)
+text = text.replace('exact dvd_add ih', 'exact Dvd.Dvd.add ih')
+
+# 3. Nat.dvd_pow_self -> pow_dvd_pow (wrong name in Mathlib)
+text = text.replace('Nat.dvd_pow_self 3', 'pow_dvd_pow 3')
+
+# 4. hC2 scope issue in rcases
+text = text.replace('rcases hC with hC2 | hC3 <;> rw [hC2] at hCe <;> try rw [hC3] at hCe <;> omega',
+                    'rcases hC with rfl | rfl <;> omega')
+
+# 5. unfold GSTCanonicalBlockS -> simp only
+text = text.replace('unfold GSTHardPrefixOneTailS GSTCanonicalBlockS\n  ring',
+                    'simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]\n  ring')
+
+# 6. mod_add_div type mismatch
+text = text.replace('exact (Nat.mod_add_div D 2).symm', 'by omega')
+text = text.replace('exact (Nat.mod_add_div C 2).symm', 'by omega')
+
+# 7. gst_six_universe decide -> norm_num
+text = text.replace('gstSixUniversePrefixS 1 = 7 := by\n  decide',
+                    'gstSixUniversePrefixS 1 = 7 := by\n  show Finset.sum (Finset.range 2) (fun k => 6^k) = 7\n  norm_num')
+text = text.replace('6^2 - 1 = 5 * 7 := by\n  decide',
+                    '6^2 - 1 = 5 * 7 := by\n  norm_num')
+text = text.replace('13 = 6 + gstSixUniversePrefixS 1 := by\n  decide',
+                    '13 = 6 + gstSixUniversePrefixS 1 := by\n  show 13 = 6 + Finset.sum (Finset.range 2) (fun k => 6^k)\n  norm_num')
+text = text.replace('7 / (13 - 6) = 1 := by\n  decide',
+                    '7 / (13 - 6) = 1 := by\n  norm_num')
+
+# 8. Replace ALL remaining standalone decide with 'first | decide | simp <;> omega'
+import re
+lines = text.split('\n')
+new_lines = []
+for line in lines:
+    stripped = line.strip()
+    if stripped == 'decide':
+        indent = len(line) - len(line.lstrip())
+        new_lines.append(' ' * indent + 'first | decide | (simp <;> omega)')
+    else:
+        new_lines.append(line)
+text = '\n'.join(new_lines)
+
+
 p.write_text(text, encoding='utf-8')
