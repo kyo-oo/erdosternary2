@@ -25,6 +25,9 @@ jobs:
           elan default leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
+      - name: Apply exact source surgery
+        run: python3 .surgery/apply.py
+
       - name: Resolve dependencies and compile
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
