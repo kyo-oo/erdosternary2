@@ -20,9 +20,8 @@ jobs:
 
       - name: Install elan
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           source $HOME/.cargo/env
-          elan default $(cat lean-toolchain)
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Resolve dependencies and compile
