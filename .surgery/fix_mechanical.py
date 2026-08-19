@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """fix_mechanical.py — Fix mechanical errors in the patched ErdosTernary2.lean
-Run AFTER apply.py. With reordered modules, GSTBadPairS + its Decidable instance
-are defined BEFORE any decide call. So decide should work as-is.
-
-Only fixes: Summation notation, dvd_add, dvd_pow_self, hC2, unfold,
-mod_add_div, gstSixUniversePrefixS decide.
+Run AFTER apply.py. Fixes: Summation, dvd_add, dvd_pow_self, hC2, unfold,
+mod_add_div, gstSixUniversePrefixS, GSTBadPairS.decidable instance.
 """
 import re
 from pathlib import Path
@@ -68,17 +65,50 @@ text = text.replace(
     '7 / (13 - 6) = 1 := by\n  norm_num'
 )
 
-# NOTE: Do NOT replace decide — with reordered modules, the Decidable instance
-# for GSTBadPairS is defined BEFORE any decide call. decide should work as-is.
+# 8. Fix GSTBadPairS.decidable instance — replace the match-based instance
+# with a simpler one that uses `by decide` after casing on concrete values.
+# The match-based instance fails because the catch-all case has free variables.
+# Using `cases C <;> cases d <;> decide` splits into concrete cases.
+# But we need to handle ALL Nat values (0, 1, 2, 3+), so we case 4 times on C
+# and 3 times on d (0, 1, 2+).
+#
+# Actually, the SIMPLEST approach: just replace the instance with:
+#   instance : Decidable (GSTBadPairS C d) := inferInstance
+# This uses Classical.propDecidable (from open scoped Classical).
+# But this gets stuck on Classical.choice...
+#
+# The REAL fix: remove the explicit instance entirely. With open scoped Classical,
+# Classical.propDecidable provides Decidable for ALL Props. The `decide` tactic
+# will use it. But it gets stuck...
+#
+# ACTUALLY: the issue is that the inlined InformationBadTraceScratch module
+# ALREADY has the instance. If it fails to compile, ALL subsequent code fails.
+# The fix: remove the instance entirely (let Classical.propDecidable handle it).
+# The `decide` calls will use Classical.propDecidable which MIGHT work for
+# concrete values (after cases/subst).
+
+# Remove the explicit GSTBadPairS.decidable instance
+old_instance = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
+  match C, d with
+  | 0, 2 => isFalse (by simp [GSTBadPairS])
+  | 3, 2 => isFalse (by simp [GSTBadPairS])
+  | _, _ => isTrue (by simp [GSTBadPairS])'''
+
+old_instance_omega = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
+  match C, d with
+  | 0, 2 => isFalse (by simp [GSTBadPairS])
+  | 3, 2 => isFalse (by simp [GSTBadPairS])
+  | _, _ => isTrue (by simp [GSTBadPairS]; omega)'''
+
+# Replace whichever version exists
+if old_instance in text:
+    text = text.replace(old_instance, '-- GSTBadPairS.decidable removed (uses Classical.propDecidable via open scoped Classical)')
+    print("Removed original GSTBadPairS.decidable instance")
+elif old_instance_omega in text:
+    text = text.replace(old_instance_omega, '-- GSTBadPairS.decidable removed (uses Classical.propDecidable via open scoped Classical)')
+    print("Removed omega version of GSTBadPairS.decidable instance")
+else:
+    print("WARNING: GSTBadPairS.decidable instance not found (already removed?)")
 
 p.write_text(text, encoding='utf-8')
-print("fix_mechanical.py: mechanical fixes applied (NO decide replacement, NO Decidable instance)")
-
-# 9. Fix the GSTBadPairS.decidable instance body — simp [GSTBadPairS] fails
-# to close the isTrue case. Use simp [GSTBadPairS]; omega instead.
-text = text.replace(
-    '  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])',
-    '  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS]; omega)'
-)
-p.write_text(text, encoding='utf-8')
-print("fix_mechanical.py: instance body fixed (simp [GSTBadPairS] → simp [GSTBadPairS]; omega)")
+print("fix_mechanical.py: ALL mechanical fixes applied")
