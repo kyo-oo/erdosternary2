@@ -30,7 +30,6 @@
 
 import GSTTactic
 import Mathlib
-import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 /-
