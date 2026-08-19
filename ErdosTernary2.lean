@@ -7325,11 +7325,9 @@ theorem gst_omega_seededAffine_block_echo
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
 /- QUARANTINED LEGACY RESIDUAL OMEGA START
-/-
   Legacy residual overproof.  The final digit theorem does not require a pure
   Navigation witness at every exponent; the two-wave theorem below is strictly
   weaker and sufficient.  This block remains as proof archaeology only.
--/
 
 /-- First-level residual Ω∞ termination.  The proof consumes the exact seeded
     orbit, a finite child gate, the terminal natural cone, and the complete
