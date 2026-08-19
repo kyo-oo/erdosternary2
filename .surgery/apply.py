@@ -28,12 +28,6 @@ if qstart_tag not in text:
         raise RuntimeError('legacy residual Omega anchors missing')
     text = text.replace(legacy_start, qstart_tag + legacy_start, 1)
     text = text.replace(legacy_end, legacy_end + qend_tag, 1)
-    start_idx = text.index(qstart_tag) + len(qstart_tag)
-    end_idx = text.index(qend_tag)
-    inner = text[start_idx:end_idx]
-    inner = inner.replace('/-', '--')
-    inner = inner.replace('-/', '--')
-    text = text[:start_idx] + inner + text[end_idx:]
 
 # ---------------------------------------------------------------------------
 # Attach the theorem-grade BIG-N/origin/right-chord stack before the production
@@ -46,70 +40,26 @@ anchor = '''/-\n  INLINE INTEGRATION TARGET.\n'''
 if attach_marker not in text:
     snap = Path('ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic')
     roots = [
-        'InformationDescentScratch',
-        'InformationGeometryScratch',
-        'InformationBadTraceScratch',
-        'CarryWordScratch',
-        'InformationCarryWordBridgeScratch',
-        'InformationStateScratch',
-        'InformationRegenerationScratch',
-        'InformationLocalizationScratch',
-        'InformationForcingScratch',
-        'InformationFluxScratch',
-        'InformationIterationScratch',
-        'InformationQuotientScratch',
-        'StripConservationScratch',
-        'OriginTransducerScratch',
-        'PurePowerCarrierScratch',
-        'CanonicalPrefixScratch',
-        'NavigationResidueCutScratch',
-        'CanonicalOriginModulusScratch',
-        'CanonicalOriginCutIntersectionScratch',
-        'CanonicalTrapScratch',
-        'LastGateTrapScratch',
-        'FiniteSupportScratch',
-        'GSTExponentLiftScratch',
-        'GSTGraphV2Scratch',
-        'GSTGraphV2BlockScratch',
-        'GSTGraphV2FluxScratch',
-        'GSTPhaseCrossingScratch',
-        'GSTResidueSpacetimeScratch',
-        'PurePowerResidueGraphScratch',
-        'PurePowerTailReductionScratch',
-        'PurePowerBadAxisScratch',
-        'PurePowerCarrierScratch',
-        'PhaseCycleInformationScratch',
-        'HandwrittenSixUniverseScratch',
-        'HandwrittenKernelV2Scratch',
-        'HandwrittenBigNOmegaScratch',
-        'HandwrittenKernelCanonicalLevelOneScratch',
-        'HandwrittenUniversalParadoxPotentialScratch',
-        'HandwrittenSignedKernelFluxScratch',
-        'HandwrittenX6UPotentialChordScratch',
-        'HandwrittenOmegaOperatorScratch',
-        'HandwrittenOmegaOriginCommutingSquareScratch',
-        'HandwrittenBigNBinaryFactorScratch',
-        'HandwrittenBig1PathProjectorScratch',
-        'HandwrittenUSpaceChargeScratch',
-        'OmegaSpacetimeScratch',
-        'OmegaUPotentialBridgeScratch',
+        'AtomicPrefixOneReductionScratch',
         'CanonicalCausalityScratch',
-        'CanonicalPhaseCrossingSurgeryScratch',
-        'PrefixOneTerminalZScratch',
-        'PrefixOneOriginPhaseRecursionScratch',
-        'PrefixOneTwoDigitChordScratch',
-        'PrefixOneRightChordLastGateScratch',
-        'PhysicalSixBridgeGateScratch',
-        'ScopedTwoDigitPhysicalBlockScratch',
-        'RightChordCanonicalGateScratch',
-        'CanonicalRightChordTrapScratch',
-        'CanonicalOriginTritForcingScratch',
+        'CanonicalOriginCutIntersectionScratch',
         'ResidualNullBranchReductionScratch',
         'ResidualNullTerminalScratch',
         'ResidualNullPrefixFourCutScratch',
         'RetainedOffsetUStateScratch',
+        'CanonicalOriginTritForcingScratch',
         'CanonicalResidualInfiniteSupportBridgeScratch',
-        'AtomicPrefixOneReductionScratch',
+        'PrefixOneTwoDigitChordScratch',
+        'RightChordCanonicalGateScratch',
+        'CanonicalRightChordTrapScratch',
+        'CanonicalPhaseCrossingSurgeryScratch',
+        'InformationFluxScratch',
+        'StripConservationScratch',
+        'HandwrittenSignedKernelFluxScratch',
+        'HandwrittenBigNOmegaScratch',
+        'HandwrittenBigNBinaryFactorScratch',
+        'HandwrittenBig1PathProjectorScratch',
+        'HandwrittenOmegaOriginCommutingSquareScratch',
     ]
     seen = set()
     chunks = []
@@ -261,17 +211,5 @@ new_info = r'''theorem gst_prefix_one_information_bad_descends_inline
   -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
   gst_omega'''
 text = text[:info_start] + new_info + text[info_end:]
-
-
-# Insert Decidable instance for GSTBadPairS AFTER its definition body
-gstbadpair_def = "def GSTBadPairS (C d : Nat) : Prop :="
-if gstbadpair_def in text:
-    idx = text.index(gstbadpair_def)
-    # Find the SECOND newline (end of body line, after := and the body)
-    first_nl = text.index('\n', idx)
-    second_nl = text.index('\n', first_nl + 1)
-    # Insert AFTER the body line
-    instance_code = '\ninstance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=\n  match C, d with\n  | 0, 2 => isFalse (by simp [GSTBadPairS])\n  | 3, 2 => isFalse (by simp [GSTBadPairS])\n  | _, _ => isTrue (by simp [GSTBadPairS])\n'
-    text = text[:second_nl] + instance_code + text[second_nl:]
 
 p.write_text(text, encoding='utf-8')
