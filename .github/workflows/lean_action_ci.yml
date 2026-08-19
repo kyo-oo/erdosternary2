@@ -18,19 +18,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install elan and setup Lean
+      - name: Install elan
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           source $HOME/.cargo/env
           elan default leanprover/lean4:v4.33.0-rc2
-          which lake
-          which lean
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Resolve dependencies and compile
         run: |
           source $HOME/.cargo/env
-          which lake
           mkdir -p .surgery
           set +e
           lake update > .surgery/update.txt 2>&1
