@@ -27,6 +27,10 @@ jobs:
 
       - name: Apply exact source surgery
         run: python3 .surgery/apply.py
+        shell: bash
+      - name: Fix mechanical errors
+        run: python3 .surgery/fix_mechanical.py
+        shell: bash
 
       - name: Resolve dependencies and compile
         run: |
