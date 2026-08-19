@@ -16595,6 +16595,7 @@ theorem gst_shared_x4_binary_factorS
     omega
   have hmid : a + 2*Z = Wmid + A*c := by
     rw [hDb, hCe] at hshared
+    ring_nf at hshared hWsplit ⊢
     omega
   have hWmid : Wmid < A := by
     by_cases he0 : e = 0
