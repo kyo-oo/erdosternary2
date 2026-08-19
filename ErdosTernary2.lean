@@ -11539,8 +11539,8 @@ theorem gst_handwritten_prefix_one_omega_budgetS
     (hQ : GSTCanonicalOriginEnergyS Q)
     (s n : Nat) (hs : 1 ≤ s) :
     1 +
-        (∑ i in Finset.range (Q (s+1) n + 1),
-          gstOmegaNaturalTransferS (s+1) (Q (s+1) n) i) =
+        Finset.sum (Finset.range (Q (s+1) n + 1))
+          (fun i => gstOmegaNaturalTransferS (s+1) (Q (s+1) n) i) =
       4^(3^(s+1) * n) := by
   exact gst_handwritten_navigation_omega_budgetS Q hQ (s+1) n (by omega)
 
