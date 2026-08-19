@@ -232,61 +232,11 @@ if gstbadpair_def in text:
 
 
 # MECHANICAL FIXES for inlined modules
-# 1. Add 'import Mathlib' for notation and identifiers
-text = text.replace('import GSTTactic\n', 'import GSTTactic\nimport Mathlib\n')\n# Add open BigOperators for ∑ notation\ntext = text.replace('import Mathlib\n', 'import Mathlib\nopen BigOperators\n')
-
-# 2. dvd_add -> inline proof (Dvd.Dvd.add is wrong name in Lean 4 Mathlib)
-text = text.replace('exact dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)',
-                    'exact Nat.dvd_add ih (dvd_mul_of_dvd_right (dvd_refl (Q t m)) _)')
-
-# 3. Nat.dvd_pow_self -> pow_dvd_pow (wrong name in Mathlib)
-text = text.replace('Nat.dvd_pow_self 3', 'pow_dvd_pow 3')
-
-# 4. hC2 scope issue in rcases
-text = text.replace('rcases hC with hC2 | hC3 <;> rw [hC2] at hCe <;> try rw [hC3] at hCe <;> omega',
-                    'rcases hC with rfl | rfl <;> omega')
-
-# 5. unfold GSTCanonicalBlockS -> simp only
-text = text.replace('unfold GSTHardPrefixOneTailS GSTCanonicalBlockS\n  ring',
-                    'simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]\n  ring')
-
-# 6. mod_add_div type mismatch
-text = text.replace('exact (Nat.mod_add_div D 2).symm', 'omega')
-text = text.replace('exact (Nat.mod_add_div C 2).symm', 'omega')
-
-# 7. gst_six_universe decide -> norm_num
-text = text.replace('gstSixUniversePrefixS 1 = 7 := by\n  decide',
-                    'gstSixUniversePrefixS 1 = 7 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
-text = text.replace('6^2 - 1 = 5 * 7 := by\n  decide',
-                    '6^2 - 1 = 5 * 7 := by\n  norm_num')
-text = text.replace('13 = 6 + gstSixUniversePrefixS 1 := by\n  decide',
-                    '13 = 6 + gstSixUniversePrefixS 1 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
-text = text.replace('7 / (13 - 6) = 1 := by\n  decide',
-                    '7 / (13 - 6) = 1 := by\n  norm_num')
-
-# 8. Replace ALL remaining standalone decide with 'first | decide | simp <;> omega'
 import re
-lines = text.split('\n')
-new_lines = []
-for line in lines:
-    stripped = line.strip()
-    if stripped == 'decide':
-        indent = len(line) - len(line.lstrip())
-        new_lines.append(' ' * indent + 'first | decide | (simp <;> omega)')
-    else:
-        new_lines.append(line)
-text = '\n'.join(new_lines)
 
-
-
-# MECHANICAL FIXES for inlined modules
 # 1. Replace ALL Summation notation with explicit Finset.sum
-import re
 def replace_sum(text):
-    # Pattern: Sum VAR in Finset.range EXPR, BODY
-    # Replace with: Finset.sum (Finset.range EXPR) (fun VAR => BODY)
-    # Handle multi-line and nested cases
-    pattern = r'Sum (\w+) in Finset\.range ([^,\n]+), ([^\n)]+)'
+    pattern = r'∑ (\w+) in Finset\.range ([^,\n]+), ([^\n)]+)'
     def replacer(m):
         var = m.group(1)
         rng = m.group(2).strip()
@@ -307,25 +257,38 @@ text = text.replace('rcases hC with hC2 | hC3 <;> rw [hC2] at hCe <;> try rw [hC
                     'rcases hC with rfl | rfl <;> omega')
 
 # 5. unfold -> simp only
-text = text.replace('unfold GSTHardPrefixOneTailS GSTCanonicalBlockS\n  ring',
-                    'simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]\n  ring')
+text = text.replace('unfold GSTHardPrefixOneTailS GSTCanonicalBlockS
+  ring',
+                    'simp only [GSTHardPrefixOneTailS, GSTCanonicalBlockS]
+  ring')
 
 # 6. mod_add_div
 text = text.replace('exact (Nat.mod_add_div D 2).symm', 'omega')
 text = text.replace('exact (Nat.mod_add_div C 2).symm', 'omega')
 
 # 7. gstSixUniversePrefixS decide -> simp only + norm_num
-text = text.replace('gstSixUniversePrefixS 1 = 7 := by\n  decide',
-                    'gstSixUniversePrefixS 1 = 7 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
-text = text.replace('6^2 - 1 = 5 * 7 := by\n  decide',
-                    '6^2 - 1 = 5 * 7 := by\n  norm_num')
-text = text.replace('13 = 6 + gstSixUniversePrefixS 1 := by\n  decide',
-                    '13 = 6 + gstSixUniversePrefixS 1 := by\n  simp only [gstSixUniversePrefixS]\n  norm_num')
-text = text.replace('7 / (13 - 6) = 1 := by\n  decide',
-                    '7 / (13 - 6) = 1 := by\n  norm_num')
+text = text.replace('gstSixUniversePrefixS 1 = 7 := by
+  decide',
+                    'gstSixUniversePrefixS 1 = 7 := by
+  simp only [gstSixUniversePrefixS]
+  norm_num')
+text = text.replace('6^2 - 1 = 5 * 7 := by
+  decide',
+                    '6^2 - 1 = 5 * 7 := by
+  norm_num')
+text = text.replace('13 = 6 + gstSixUniversePrefixS 1 := by
+  decide',
+                    '13 = 6 + gstSixUniversePrefixS 1 := by
+  simp only [gstSixUniversePrefixS]
+  norm_num')
+text = text.replace('7 / (13 - 6) = 1 := by
+  decide',
+                    '7 / (13 - 6) = 1 := by
+  norm_num')
 
 # 8. Replace ALL remaining standalone decide with simp only [...] <;> omega
-lines = text.split('\n')
+lines = text.split('
+')
 new_lines = []
 for line in lines:
     stripped = line.strip()
@@ -334,7 +297,8 @@ for line in lines:
         new_lines.append(' ' * indent + 'simp only [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS] <;> omega')
     else:
         new_lines.append(line)
-text = '\n'.join(new_lines)
+text = '
+'.join(new_lines)
 
 
 p.write_text(text, encoding='utf-8')
