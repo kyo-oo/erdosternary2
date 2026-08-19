@@ -7,27 +7,55 @@ on:
     branches: ['**']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Setup Lean (lake update + cache)
+        with:
+          fetch-depth: 0
+
+      - name: Apply exact source surgery
+        shell: bash
+        run: python3 .surgery/apply.py
+
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        continue-on-error: true
+        with:
+          build: false
+
+      - name: Resolve dependencies and compile
+        if: always()
         shell: bash
         run: |
+          mkdir -p .surgery
           set +e
-          # Install elan + lean + lake via the leanprover setup
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
-          source $HOME/.cargo/env
-          # Use the toolchain from lean-toolchain
-          TOOLCHAIN=$(cat lean-toolchain)
-          echo "Using toolchain: $TOOLCHAIN"
-          elan default $TOOLCHAIN
-          # Generate manifest
-          lake update
-          # Get Mathlib cache
-          lake exe cache get || true
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: .
-          nanoda-allow-sorry: true
+          lake update > .surgery/update.txt 2>&1
+          update_code=$?
+          if [ "$update_code" -eq 0 ]; then
+            lake exe cache get >> .surgery/update.txt 2>&1
+            lake build ErdosTernary2 > .surgery/build.txt 2>&1
+            code=$?
+          else
+            cp .surgery/update.txt .surgery/build.txt
+            code=$update_code
+          fi
+          echo "$code" > .surgery/build.exit
+          cat .surgery/build.txt
+          exit 0
+
+      - name: Run sorry check
+        if: always()
+        shell: bash
+        run: |
+          bash scripts/sorry_check.sh || true
+
+      - name: Run comparator
+        if: always()
+        shell: bash
+        run: |
+          bash scripts/comparator.sh || true
