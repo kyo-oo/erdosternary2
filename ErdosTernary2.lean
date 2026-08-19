@@ -8971,7 +8971,8 @@ set_option maxHeartbeats 10000000
 /-- Scratch copy of the real bad-pair predicate. -/
 def GSTBadPairS (C d : Nat) : Prop :=
   ¬ (d = 2 ∧ (C = 0 ∨ C = 3))
--- GSTBadPairS.decidable removed (uses Classical.propDecidable via open scoped Classical)
+instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
+  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse h else isTrue h
 
 
 /-- A seed-retaining affine bad trace cannot contain the universal 22 synchronizer. -/

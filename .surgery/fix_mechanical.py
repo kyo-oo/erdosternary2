@@ -87,7 +87,9 @@ text = text.replace(
 # The `decide` calls will use Classical.propDecidable which MIGHT work for
 # concrete values (after cases/subst).
 
-# Remove the explicit GSTBadPairS.decidable instance
+# Fix GSTBadPairS.decidable instance — use if-then-else (no simp/omega needed)
+# The match-based instance failed because the catch-all case had free variables.
+# The if-then-else approach uses Nat.decEq directly, no simp needed.
 old_instance = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
   match C, d with
   | 0, 2 => isFalse (by simp [GSTBadPairS])
@@ -100,15 +102,17 @@ old_instance_omega = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (
   | 3, 2 => isFalse (by simp [GSTBadPairS])
   | _, _ => isTrue (by simp [GSTBadPairS]; omega)'''
 
-# Replace whichever version exists
+new_instance = '''instance GSTBadPairS.decidable (C d : Nat) : Decidable (GSTBadPairS C d) :=
+  if h : d = 2 ∧ (C = 0 ∨ C = 3) then isFalse h else isTrue h'''
+
 if old_instance in text:
-    text = text.replace(old_instance, '-- GSTBadPairS.decidable removed (uses Classical.propDecidable via open scoped Classical)')
-    print("Removed original GSTBadPairS.decidable instance")
+    text = text.replace(old_instance, new_instance)
+    print("Replaced original GSTBadPairS.decidable with if-then-else version")
 elif old_instance_omega in text:
-    text = text.replace(old_instance_omega, '-- GSTBadPairS.decidable removed (uses Classical.propDecidable via open scoped Classical)')
-    print("Removed omega version of GSTBadPairS.decidable instance")
+    text = text.replace(old_instance_omega, new_instance)
+    print("Replaced omega version of GSTBadPairS.decidable with if-then-else version")
 else:
-    print("WARNING: GSTBadPairS.decidable instance not found (already removed?)")
+    print("WARNING: GSTBadPairS.decidable instance not found")
 
 p.write_text(text, encoding='utf-8')
 print("fix_mechanical.py: ALL mechanical fixes applied")
