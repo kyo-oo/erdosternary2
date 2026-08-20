@@ -123,13 +123,13 @@ theorem gst_cardinal_master_exactS
         (K-1) * gstCardinalCarryEvalS R K (R+1) := by
   have h := gst_cardinal_master_with_boundaryS R K (R+1)
   rw [gst_carry_zero_at_natural_ceilingS, Nat.mul_zero, Nat.add_zero] at h
+  let C := gstCardinalCarryEvalS R K (R+1)
   have hKshape : K = 1 + (K-1) := by omega
-  have hmul :
-      K * gstCardinalCarryEvalS R K (R+1) =
-        gstCardinalCarryEvalS R K (R+1) +
-          (K-1) * gstCardinalCarryEvalS R K (R+1) := by
-    rw [hKshape]
-    ring
+  have hmul : K * C = C + (K-1) * C := by
+    calc
+      K * C = (1 + (K-1)) * C := by rw [hKshape]
+      _ = C + (K-1) * C := by ring
+  dsimp only [C] at hmul
   rw [hmul] at h
   omega
 
