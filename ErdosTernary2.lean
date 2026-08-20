@@ -29,6 +29,7 @@
 -- Erdős Ternary-2 Conjecture: PROVEN
 
 import GSTTactic
+import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 /-
@@ -11824,7 +11825,6 @@ theorem gst_omega_past_origin_power_fingerprintS
   rw [hE]
   change (1 + 3^(t+1) * Q t a) % 3^(t+1+K) = _
   rw [hres, gst_omega_past_is_origin_prefixS Q hQ t n K ht]
-  rfl
 
 /-- One origin trit may be consumed at the same time that the canonical affine
 information state regenerates.  The affine multiplier absorbs exactly the
@@ -11848,12 +11848,20 @@ theorem gst_canonical_information_U_commuting_stepS
         childMul' * gstOriginRemainingUS (t+1) (n/3) := by
   dsimp only
   have hrec := gst_canonical_natural_origin_recurrenceS Q hQ t n ht
+  have hnSplit : 3*(n/3) + n%3 = n := by
+    have h := Nat.mod_add_div n 3
+    omega
+  have hrec' : Q t (3*(n/3) + n%3) =
+      Q t (n%3) + 3 * (4^(3^t))^(n%3) * Q (t+1) (n/3) := by
+    rw [hnSplit]
+    exact hrec
   have hinfo := gst_canonical_information_regeneratesS
-    Q t n childOffset childMul (4^(3^t)) A Z hrec
+    Q t n childOffset childMul (4^(3^t)) A Z hrec'
   dsimp only at hinfo
   refine ⟨hinfo.1, hinfo.2, ?_⟩
   have hU := gst_origin_simultaneous_mul_divS childMul t n
-  simpa [gstOriginMultiplierStepS, gstOriginConsumedPhaseS] using hU
+  simpa [gstOriginMultiplierStepS, gstOriginConsumedPhaseS,
+    Nat.pow_mul] using hU
 
 /-- Therefore the two handwritten directions reconstruct the same canonical
 energy at their finite natural ceilings: origin-phase Pi on the exponent side,
@@ -11970,6 +11978,8 @@ theorem gst_residual_null_retained_state_shapeS
       (GSTCanonicalBlockS s * GSTCanonicalBlockS (s+1)) *
         gstNavigationConstant (s+2) u := by
   unfold GSTHardPrefixOneTailS
+  rw [show GSTCanonicalBlockS (s+1) = 4^(3^s * 3) by
+    simp [GSTCanonicalBlockS, Nat.pow_succ]]
   ring
 -- END ATTACHED RetainedOffsetUStateScratch.lean
 
@@ -14369,7 +14379,11 @@ theorem gst_binary_block_event_balanceS (B C d : Nat) :
   unfold gstBinaryBlockEventS gstBinaryBlockOutputS
     gstBinaryBlockNextCarryS
   have h := Nat.mod_add_div (C + B*d) 3
-  omega
+  calc
+    d + 3 * ((C + B*d) % 3) + 9 * ((C + B*d) / 3) =
+        d + 3 * ((C + B*d) % 3 + 3 * ((C + B*d) / 3)) := by ring
+    _ = d + 3 * (C + B*d) := by rw [h]
+    _ = (1 + 3*B)*d + 3*C := by ring
 
 /-! Navigation finite horizon.  This is ordinary support arithmetic, not a
 terminal-space axiom. -/
