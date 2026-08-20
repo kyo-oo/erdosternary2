@@ -284,7 +284,8 @@ theorem gst_omega_natural_transfer_prefixS
     Finset.sum (Finset.range K) (fun i => gstOmegaNaturalTransferS t T i) =
       3^(t+1) * (T % 3^K) := by
   induction K with
-  | zero => simp [gstOmegaNaturalTransferS]
+  | zero =>
+      simpa [gstOmegaNaturalTransferS] using Nat.mod_one T
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hstep : T % 3^(K+1) =
@@ -306,7 +307,7 @@ theorem gst_self_lt_three_pow_succS : ∀ N : Nat, N < 3^(N+1)
       calc
         N + 1 < 3^(N+1) + 1 := by omega
         _ ≤ 3^(N+1) * 3 := by omega
-        _ = 3^((N+1)+1) := by rw [Nat.pow_succ]
+        _ = 3^((N+1)+1) := (Nat.pow_succ 3 (N+1)).symm
 
 /-- An exact infinite natural sum is encoded by stabilization of all deep
 prefix observations; the underlying function remains Nat-indexed. -/
