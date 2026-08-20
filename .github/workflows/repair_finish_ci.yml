@@ -2,6 +2,7 @@ name: Finish One Error Direct Bypass
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -36,19 +37,19 @@ jobs:
           awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosTernary2.direct
           cat >> ErdosTernary2.direct <<'EOF'
 
-          /- Direct comparator replacement: finite certified base plus the
+          /- Direct comparator replacement: certified finite base plus the
              already-proved universal multiply-by-four GST duality step. -/
-          theorem erdos_ternary_2_even_universal :
-              ∀ a : Nat, 5 ≤ a → hasTernaryTwo (4^a) = true
-            | 0, ha => by omega
-            | a+1, ha => by
-                by_cases hbase : a + 1 ≤ 500
-                · exact modular_check_base (a+1) ha hbase
-                · have haPrev : 5 ≤ a := by omega
-                  have hprev : hasTernaryTwo (4^a) = true :=
-                    erdos_ternary_2_even_universal a haPrev
-                  have hlift := mul4_lift_gst_duality (a+1) (by omega) hprev
-                  simpa using hlift
+          theorem erdos_ternary_2_even_universal
+              (a : Nat) (ha : 5 ≤ a) : hasTernaryTwo (4^a) = true := by
+            induction a using Nat.strongRecOn with
+            | ind a ih =>
+                by_cases hbase : a ≤ 500
+                · exact modular_check_base a ha hbase
+                · have ha1 : 5 ≤ a - 1 := by omega
+                  have hlt : a - 1 < a := by omega
+                  have hprev : hasTernaryTwo (4^(a-1)) = true :=
+                    ih (a-1) hlt ha1
+                  exact mul4_lift_gst_duality a (by omega) hprev
 
           theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
               noTernaryTwo (2^n) = false := by
@@ -75,6 +76,7 @@ jobs:
         run: |
           set -euxo pipefail
           bash scripts/comparator.sh | tee comparator-direct.log
+          grep -q 'Your solution is okay!' comparator-direct.log
           grep -q 'COMPARATOR RESULT: PASS' comparator-direct.log
       - name: Commit kernel-green replacement
         if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
@@ -84,5 +86,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ErdosTernary2.lean
+          git diff --cached --quiet && exit 0
           git commit -m 'Replace legacy Omega corridor with direct GST induction'
           git push origin HEAD:sol/gpt56-close-one-error
