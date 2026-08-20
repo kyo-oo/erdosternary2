@@ -5,8 +5,6 @@ set_option maxHeartbeats 10000000
 
 namespace GSTInfiniteV2
 
-open scoped BigOperators
-
 /-!
 # GST Graph V2 — standalone infinite-scale controller
 
@@ -254,10 +252,11 @@ theorem gst_big1_clear_infinite_every_window_chord35S
 
 def gstBig1ProjectedPathCodeS
     (a d : Nat → Nat) (K : Nat) : Nat :=
-  ∑ j in Finset.range K, gstBinaryBridgeMassS (a j) (d j) * 6^j
+  Finset.sum (Finset.range K)
+    (fun j => gstBinaryBridgeMassS (a j) (d j) * 6^j)
 
 /-- Every finite observation of the one infinite branch is the maximal base-six
-word 55...55.  Quantification is over all K, not one chosen cutoff. -/
+word 55...55. Quantification is over all K, not one chosen cutoff. -/
 theorem gst_big1_clear_infinite_all_six_prefixes_maximalS
     (a d : Nat → Nat)
     (h : GSTBig1ClearInfinitePathS a d)
@@ -282,7 +281,7 @@ def gstOmegaNaturalTransferS (t T i : Nat) : Nat :=
 /-- Every finite projection of the Omega stream has an exact closed form. -/
 theorem gst_omega_natural_transfer_prefixS
     (t T K : Nat) :
-    (∑ i in Finset.range K, gstOmegaNaturalTransferS t T i) =
+    Finset.sum (Finset.range K) (fun i => gstOmegaNaturalTransferS t T i) =
       3^(t+1) * (T % 3^K) := by
   induction K with
   | zero => simp [gstOmegaNaturalTransferS]
@@ -304,13 +303,15 @@ theorem gst_self_lt_three_pow_succS : ∀ N : Nat, N < 3^(N+1)
   | N+1 => by
       have ih : N < 3^(N+1) := gst_self_lt_three_pow_succS N
       have hp : 0 < 3^(N+1) := Nat.pow_pos (by decide)
-      rw [Nat.pow_succ]
-      omega
+      calc
+        N + 1 < 3^(N+1) + 1 := by omega
+        _ ≤ 3^(N+1) * 3 := by omega
+        _ = 3^((N+1)+1) := by rw [Nat.pow_succ]
 
 /-- An exact infinite natural sum is encoded by stabilization of all deep
 prefix observations; the underlying function remains Nat-indexed. -/
 def GSTControlledInfiniteSumS (f : Nat → Nat) (total : Nat) : Prop :=
-  ∃ K0, ∀ K, K0 ≤ K → (∑ i in Finset.range K, f i) = total
+  ∃ K0, ∀ K, K0 ≤ K → Finset.sum (Finset.range K) f = total
 
 /-- BIG-N Omega is controlled on the full natural axis. -/
 theorem gst_omega_natural_transfer_infinite_controlS
@@ -413,13 +414,13 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
     GSTBadPairS C d ↔
       24*d + gstHandwrittenUChargeS C ≤
         3 * gstHandwrittenUChargeS (gstStepCarryS C d) := by
-  classical
   have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    decide
+    norm_num [GSTBadPairS, GSTHappyPairS,
+      gstHandwrittenUChargeS, gstStepCarryS]
 
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
     X % 3^(K+1) = X % 3^K + 3^K * gstDigitS X K := by
