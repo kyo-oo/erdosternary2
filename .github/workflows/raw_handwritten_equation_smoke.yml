@@ -1,0 +1,39 @@
+name: Raw Handwritten GST Equation Smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  raw-equation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve dependencies and cache
+        timeout-minutes: 20
+        run: |
+          lake update
+          lake exe cache get
+      - name: Build infinite prerequisites
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+      - name: Kernel-test full raw handwritten equation
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2RawHandwrittenEquationScratch.lean" | tee raw-equation.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' raw-equation.log
