@@ -19,5 +19,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Lean
         uses: leanprover/lean-action@v1
-      - name: Compile infinite-control RED smoke
+      - name: Compile production infinite core
+        run: lake env lean GSTV2InfiniteCore.lean
+      - name: Compile all-depth coupled transport
+        run: lake env lean GSTInfiniteCollision.lean
+      - name: Print transport axioms
+        run: |
+          cat > /tmp/TransportAxioms.lean <<'EOF'
+          import GSTInfiniteCollision
+          #print axioms GSTV2.coupledOrbit_invariant_all
+          #print axioms GSTV2.coupledOrbit_childCarry_exact
+          #print axioms GSTV2.infinite_coupled_control
+          EOF
+          lake env lean /tmp/TransportAxioms.lean
+      - name: Compile infinite-control RED seam
         run: lake env lean GSTInfiniteControlProductionSmoke.lean
