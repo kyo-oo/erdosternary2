@@ -25,7 +25,6 @@ theorem gst_natural_digit_stream_eventually_zeroS
   have hlt : X < 3^j := lt_of_lt_of_le hbase hpow
   unfold gstDigitS
   rw [Nat.div_eq_of_lt hlt]
-  simp
 
 /-- The infinite `I != BIG1` branch cannot be the ternary information stream
 of any ordinary natural.  Infinite rigidity forces BIG2 at every coordinate;
