@@ -51,13 +51,13 @@ jobs:
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
-      - name: Typecheck infinite BIG-N dichotomy
+      - name: Typecheck exact BIG-N Navigation horizon
         timeout-minutes: 20
         shell: bash
         run: |
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
       - name: Typecheck nested infinite world tower
         timeout-minutes: 20
         shell: bash
