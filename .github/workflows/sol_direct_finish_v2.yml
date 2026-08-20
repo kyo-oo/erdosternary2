@@ -1,0 +1,168 @@
+name: Sol Direct Finish V2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/sol_direct_finish_v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-close-one-error
+          fetch-depth: 0
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve comparator environment
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+      - name: Try direct induction candidates and comparator
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          set -u
+          cp ErdosTernary2.lean ErdosTernary2.original
+          if ! grep -q '^theorem gst_omega_termination_s1' ErdosTernary2.original; then
+            echo 'Legacy Omega theorem already absent; verify current source.'
+            lake env lean ErdosTernary2.lean > direct-v2.log 2>&1 || exit $?
+            bash scripts/comparator.sh > comparator-v2.log 2>&1 || exit $?
+            grep -q 'COMPARATOR RESULT: PASS' comparator-v2.log
+            echo PASS > DIRECT_BYPASS_RESULT.txt
+            exit 0
+          fi
+          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.original > prefix.lean
+
+          make_final () {
+            cat >> "$1" <<'EOF'
+
+          theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
+              noTernaryTwo (2^n) = false := by
+            by_cases hodd : n % 2 = 1
+            · exact erdos_ternary_2_odd_universal n hn hodd
+            · have heven : n % 2 = 0 := by omega
+              have h4eq : 2^n = 4^(n/2) := by
+                have hn_eq : n = 2 * (n/2) := by omega
+                rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+              rw [h4eq]
+              have ha : 5 ≤ n/2 := by omega
+              exact has_two_imp_not_no_two (4^(n/2))
+                (erdos_ternary_2_even_universal (n/2) ha)
+
+          #print axioms erdos_ternary_2_even_universal
+          #print axioms erdos_ternary_2_universal
+          EOF
+          }
+
+          cp prefix.lean candidateA.lean
+          cat >> candidateA.lean <<'EOF'
+
+          /- Candidate A: ordinary structural induction inside the proof. -/
+          theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
+              hasTernaryTwo (4^a) = true := by
+            induction a with
+            | zero => omega
+            | succ a ih =>
+                by_cases hbase : a + 1 ≤ 500
+                · exact modular_check_base (a+1) ha hbase
+                · have haPrev : 5 ≤ a := by omega
+                  have hprev : hasTernaryTwo (4^a) = true := ih haPrev
+                  have hprev' : hasTernaryTwo (4^((a+1)-1)) = true := by
+                    simpa using hprev
+                  exact mul4_lift_gst_duality (a+1) (by omega) hprev'
+          EOF
+          make_final candidateA.lean
+
+          if lake env lean candidateA.lean > candidateA.log 2>&1; then
+            cp candidateA.lean ErdosTernary2.lean
+            echo A > DIRECT_BYPASS_CANDIDATE.txt
+          else
+            cp prefix.lean candidateB.lean
+            cat >> candidateB.lean <<'EOF'
+
+          /- Candidate B: recursive equations on the exponent. -/
+          theorem erdos_ternary_2_even_universal :
+              ∀ a : Nat, 5 ≤ a → hasTernaryTwo (4^a) = true
+            | 0, ha => by omega
+            | a+1, ha => by
+                by_cases hbase : a + 1 ≤ 500
+                · exact modular_check_base (a+1) ha hbase
+                · have haPrev : 5 ≤ a := by omega
+                  have hprev : hasTernaryTwo (4^a) = true :=
+                    erdos_ternary_2_even_universal a haPrev
+                  have hprev' : hasTernaryTwo (4^((a+1)-1)) = true := by
+                    simpa using hprev
+                  exact mul4_lift_gst_duality (a+1) (by omega) hprev'
+          EOF
+            make_final candidateB.lean
+            if lake env lean candidateB.lean > candidateB.log 2>&1; then
+              cp candidateB.lean ErdosTernary2.lean
+              echo B > DIRECT_BYPASS_CANDIDATE.txt
+            else
+              {
+                echo '# Direct bypass diagnostics'
+                echo
+                echo '## Candidate A'
+                echo '```'
+                tail -n 120 candidateA.log
+                echo '```'
+                echo
+                echo '## Candidate B'
+                echo '```'
+                tail -n 120 candidateB.log
+                echo '```'
+              } > DIRECT_BYPASS_DIAGNOSTIC.md
+              cp ErdosTernary2.original ErdosTernary2.lean
+              git config user.name 'github-actions[bot]'
+              git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+              git add DIRECT_BYPASS_DIAGNOSTIC.md
+              git commit -m 'Record direct induction diagnostics' || true
+              git push origin HEAD:sol/gpt56-close-one-error || true
+              exit 1
+            fi
+          fi
+
+          if grep -E 'sorryAx|declaration uses .*[Ss]orry' candidate*.log; then
+            echo 'Axiom/sorry audit failed.'
+            exit 1
+          fi
+
+          bash scripts/comparator.sh > comparator-v2.log 2>&1
+          rc=$?
+          if [ $rc -ne 0 ] || ! grep -q 'COMPARATOR RESULT: PASS' comparator-v2.log; then
+            {
+              echo '# Direct bypass comparator diagnostics'
+              echo '```'
+              tail -n 160 comparator-v2.log
+              echo '```'
+            } > DIRECT_BYPASS_DIAGNOSTIC.md
+            cp ErdosTernary2.original ErdosTernary2.lean
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add DIRECT_BYPASS_DIAGNOSTIC.md
+            git commit -m 'Record direct comparator diagnostics' || true
+            git push origin HEAD:sol/gpt56-close-one-error || true
+            exit 1
+          fi
+
+          echo 'COMPARATOR RESULT: PASS' > DIRECT_BYPASS_RESULT.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean DIRECT_BYPASS_RESULT.txt DIRECT_BYPASS_CANDIDATE.txt
+          git commit -m 'Replace legacy Omega corridor with direct GST induction'
+          git push origin HEAD:sol/gpt56-close-one-error
