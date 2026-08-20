@@ -9446,8 +9446,7 @@ theorem gst_bad_prefix_u_potential_boundS
       3^K * gstHandwrittenUChargeS (gstAffineMulCarryS 4 D X K) := by
   induction K with
   | zero =>
-      simpa [gstAffineMulCarryS] using
-        (Nat.le_refl (gstHandwrittenUChargeS D))
+      norm_num [gstAffineMulCarryS]
   | succ K ih =>
       have hprev :
           24*(X % 3^K) + gstHandwrittenUChargeS D ≤
@@ -9555,8 +9554,8 @@ theorem gst_prefix_one_omega_bad_to_u_seeded_badS
   apply hNe
   apply (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2
   have hc3 : c s % 3 = 1 := c_mod3 s hs
-  simpa only [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS,
-    gstAffineMulCarryS, Nat.pow_one, hc3] using hGate
+  simpa only [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS, gstDigit,
+    gstAffineMulCarryS, gstAffineMulCarry, Nat.pow_one, hc3] using hGate
 
 /-- The monolith Ω∞ bad hypothesis therefore inherits the exact finite
 U-potential telescope at every information depth K. -/
@@ -9677,6 +9676,7 @@ theorem gst_canonical_origin_modulusS
     dvd_mul_of_dvd_right hdvdQ _
   rw [hb, hadd, Nat.add_mod, Nat.mod_eq_zero_of_dvd hdvdTerm,
     Nat.add_zero, Nat.mod_mod]
+  simp [r, Nat.add_mod]
 
 /-- The first binary origin modulus is exactly 455. -/
 theorem gst_canonical_Q_one_two_eq_455S
@@ -10728,7 +10728,7 @@ theorem gst_canonical_Q4_mod9S
       have h := Nat.mod_add_div (4^(3^t) * Q (t+1) 1) 3
       rw [hAq3] at h
       omega
-    rw [hdecomp]
+    rw [Nat.mul_assoc, hdecomp]
     simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
   norm_num [hthree]
 
@@ -10759,7 +10759,7 @@ theorem gst_canonical_Q13_mod27S
       have h := Nat.mod_add_div (4^(3^s) * Q (s+1) 4) 9
       rw [hAq9] at h
       omega
-    rw [hdecomp]
+    rw [Nat.mul_assoc, hdecomp]
     simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
   norm_num [hterm]
 
@@ -10790,7 +10790,6 @@ theorem gst_residue19_is_null_gate2S
     have hdiv : R / 9 % 3 = (R % 27) / 9 := by
       omega
     rw [hdiv, hR]
-    decide
   · unfold gstCarryS
     change 4 * (R % 9) / 9 = 0
     have hmod9 : R % 9 = 1 := by
@@ -11489,7 +11488,7 @@ def gstOmegaNaturalTransferS (t T i : Nat) : Nat :=
 
 theorem gst_omega_natural_transfer_prefixS
     (t T K : Nat) :
-    (∑ i in Finset.range K, gstOmegaNaturalTransferS t T i) =
+    (Finset.range K).sum (fun i => gstOmegaNaturalTransferS t T i) =
       3^(t+1) * (T % 3^K) := by
   induction K with
   | zero => simp [gstOmegaNaturalTransferS]
@@ -11506,7 +11505,7 @@ theorem gst_omega_natural_transfer_prefixS
 
 theorem gst_omega_natural_transfer_totalS
     (t T : Nat) :
-    (∑ i in Finset.range (T+1), gstOmegaNaturalTransferS t T i) =
+    (Finset.range (T+1)).sum (fun i => gstOmegaNaturalTransferS t T i) =
       3^(t+1) * T := by
   rw [gst_omega_natural_transfer_prefixS]
   have hlt : T < 3^(T+1) := gst_three_pow_succ_gt_pressureS T
@@ -11514,7 +11513,7 @@ theorem gst_omega_natural_transfer_totalS
 
 theorem gst_omega_natural_transfer_is_energyS
     (t T : Nat) :
-    1 + (∑ i in Finset.range (T+1), gstOmegaNaturalTransferS t T i) =
+    1 + (Finset.range (T+1)).sum (fun i => gstOmegaNaturalTransferS t T i) =
       gstOmegaPressureEnergyS t T := by
   rw [gst_omega_natural_transfer_totalS]
   rfl
@@ -11524,8 +11523,8 @@ theorem gst_handwritten_navigation_omega_budgetS
     (hQ : GSTCanonicalOriginEnergyS Q)
     (t n : Nat) (ht : 1 ≤ t) :
     1 +
-        (∑ i in Finset.range (Q t n + 1),
-          gstOmegaNaturalTransferS t (Q t n) i) =
+        (Finset.range (Q t n + 1)).sum
+          (fun i => gstOmegaNaturalTransferS t (Q t n) i) =
       4^(3^t * n) := by
   rw [gst_omega_natural_transfer_totalS]
   exact (hQ t n ht).symm
@@ -11535,8 +11534,8 @@ theorem gst_handwritten_prefix_one_omega_budgetS
     (hQ : GSTCanonicalOriginEnergyS Q)
     (s n : Nat) (hs : 1 ≤ s) :
     1 +
-        (∑ i in Finset.range (Q (s+1) n + 1),
-          gstOmegaNaturalTransferS (s+1) (Q (s+1) n) i) =
+        (Finset.range (Q (s+1) n + 1)).sum
+          (fun i => gstOmegaNaturalTransferS (s+1) (Q (s+1) n) i) =
       4^(3^(s+1) * n) := by
   exact gst_handwritten_navigation_omega_budgetS Q hQ (s+1) n (by omega)
 
@@ -11638,7 +11637,8 @@ def gstOriginNaturalTritS (n t : Nat) : Nat := n / 3^t % 3
 
 theorem gst_origin_phase_prefixS
     (s n K : Nat) :
-    (∑ t in Finset.range K, 3^(s+t) * gstOriginNaturalTritS n t) =
+    (Finset.range K).sum
+        (fun t => 3^(s+t) * gstOriginNaturalTritS n t) =
       3^s * (n % 3^K) := by
   induction K with
   | zero => simp [gstOriginNaturalTritS]
@@ -11655,16 +11655,16 @@ theorem gst_origin_phase_prefixS
 
 theorem gst_origin_phase_totalS
     (s n : Nat) :
-    (∑ t in Finset.range (n+1),
-      3^(s+t) * gstOriginNaturalTritS n t) = 3^s * n := by
+    (Finset.range (n+1)).sum
+      (fun t => 3^(s+t) * gstOriginNaturalTritS n t) = 3^s * n := by
   rw [gst_origin_phase_prefixS]
   have hlt : n < 3^(n+1) := gst_three_pow_succ_gt_pressureS n
   rw [Nat.mod_eq_of_lt hlt]
 
 theorem gst_origin_phase_reconstructs_energyS
     (s n : Nat) :
-    4^(∑ t in Finset.range (n+1),
-      3^(s+t) * gstOriginNaturalTritS n t) = 4^(3^s * n) := by
+    4^((Finset.range (n+1)).sum
+      (fun t => 3^(s+t) * gstOriginNaturalTritS n t)) = 4^(3^s * n) := by
   rw [gst_origin_phase_totalS]
 
 /-!
@@ -11821,6 +11821,7 @@ theorem gst_omega_past_origin_power_fingerprintS
           (3^(t+1)*3^K) = 0 :=
       Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
     rw [hzero, Nat.zero_add]
+    rw [Nat.mod_mod]
     exact Nat.mod_eq_of_lt hsmall
   rw [hE]
   change (1 + 3^(t+1) * Q t a) % 3^(t+1+K) = _
@@ -11870,10 +11871,10 @@ theorem gst_handwritten_two_axis_same_energyS
     (Q : Nat → Nat → Nat)
     (hQ : GSTCanonicalOriginEnergyS Q)
     (t n : Nat) (ht : 1 ≤ t) :
-    4^(∑ r in Finset.range (n+1),
-      3^(t+r) * gstOriginNaturalTritS n r) =
-    1 + (∑ i in Finset.range (Q t n + 1),
-      gstOmegaNaturalTransferS t (Q t n) i) := by
+    4^((Finset.range (n+1)).sum
+      (fun r => 3^(t+r) * gstOriginNaturalTritS n r)) =
+    1 + (Finset.range (Q t n + 1)).sum
+      (fun i => gstOmegaNaturalTransferS t (Q t n) i) := by
   rw [gst_origin_phase_reconstructs_energyS,
     gst_handwritten_navigation_omega_budgetS Q hQ t n ht]
 -- END ATTACHED HandwrittenOmegaOriginCommutingSquareScratch.lean
