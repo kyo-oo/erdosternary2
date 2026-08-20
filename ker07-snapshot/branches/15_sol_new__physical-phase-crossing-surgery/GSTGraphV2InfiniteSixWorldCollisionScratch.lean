@@ -35,7 +35,6 @@ theorem gst_base_six_digit_zero_above_supportS
   have hlt : X < 6^p := lt_of_lt_of_le hbase hpow
   unfold gstBaseSixDigitS
   rw [Nat.div_eq_of_lt hlt]
-  simp
 
 /-- No ordinary natural has the all-five base-six stream at every depth. -/
 theorem gst_no_natural_all_five_base_sixS
