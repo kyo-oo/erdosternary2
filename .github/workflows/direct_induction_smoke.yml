@@ -2,6 +2,7 @@ name: Direct Induction Bypass Smoke
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -35,7 +36,7 @@ jobs:
           theorem gpt56_direct_even_universal (a : Nat) :
               5 ≤ a → hasTernaryTwo (4^a) = true := by
             induction a using Nat.strongRecOn with
-            | h a ih =>
+            | ind a ih =>
                 intro ha
                 by_cases hbase : a ≤ 500
                 · exact modular_check_base a ha hbase
