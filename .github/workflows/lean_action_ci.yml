@@ -29,12 +29,12 @@ jobs:
         run: |
           set -euxo pipefail
           lake exe cache get
-      - name: Typecheck GSTTactic without serialization
+      - name: Build GSTTactic import artifact
         timeout-minutes: 10
         shell: bash
         run: |
           set -euxo pipefail
-          lake env lean GSTTactic.lean
+          lake build GSTTactic
       - name: Typecheck proof monolith without serialization
         timeout-minutes: 30
         shell: bash
