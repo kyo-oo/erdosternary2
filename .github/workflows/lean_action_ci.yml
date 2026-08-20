@@ -35,13 +35,15 @@ jobs:
         run: |
           set -euxo pipefail
           lake build GSTTactic
-      - name: Typecheck infinite GST V2 control layer
+      - name: Build infinite GST V2 control artifact
         timeout-minutes: 20
         shell: bash
         run: |
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean \
+            -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" \
+            "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
       - name: Typecheck infinite natural-support contradiction blade
         timeout-minutes: 20
         shell: bash
