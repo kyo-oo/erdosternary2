@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -38,43 +38,6 @@ jobs:
         run: |
           set -euxo pipefail
           lake build GSTTactic
-      - name: Prove universal theorem exists before legacy Omega overproof
-        timeout-minutes: 30
-        shell: bash
-        run: |
-          set -euxo pipefail
-          awk '/Legacy residual overproof/{exit} {print}' ErdosTernary2.lean > ErdosTernary2_PreOmegaSmoke.lean
-          cat >> ErdosTernary2_PreOmegaSmoke.lean <<'EOF'
-          #check erdos_ternary_2_even_universal
-          #check erdos_ternary_2_universal
-          #print axioms erdos_ternary_2_even_universal
-          #print axioms erdos_ternary_2_universal
-          EOF
-          lake env lean ErdosTernary2_PreOmegaSmoke.lean
-      - name: Quarantine redundant legacy Omega tail
-        if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          if grep -q 'Legacy residual overproof' ErdosTernary2.lean; then
-            awk '/Legacy residual overproof/{exit} {print}' ErdosTernary2.lean > ErdosTernary2.new
-            cat >> ErdosTernary2.new <<'EOF'
-
-          /- ======================================================================
-             Legacy residual Omega overproof quarantined after kernel verification.
-             The universal theorem above is the comparator-facing proof export.
-             ====================================================================== -/
-          EOF
-            mv ErdosTernary2.new ErdosTernary2.lean
-            lake env lean ErdosTernary2.lean
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add ErdosTernary2.lean
-            if ! git diff --cached --quiet; then
-              git commit -m 'Quarantine redundant legacy Omega overproof'
-              git push origin HEAD:sol/gpt56-close-one-error
-            fi
-          fi
       - name: Build infinite GST V2 control artifact
         timeout-minutes: 20
         shell: bash
@@ -105,6 +68,25 @@ jobs:
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
+      - name: Prove universal theorem exists before legacy Omega overproof
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          marker_line="$(grep -n -m1 'Legacy residual overproof' ErdosTernary2.lean | cut -d: -f1)"
+          test -n "$marker_line"
+          cut_line=$((marker_line - 2))
+          test "$cut_line" -gt 0
+          head -n "$cut_line" ErdosTernary2.lean > ErdosTernary2_PreOmegaSmoke.lean
+          cat >> ErdosTernary2_PreOmegaSmoke.lean <<'EOF'
+          #check erdos_ternary_2_even_universal
+          #check erdos_ternary_2_universal
+          #print axioms erdos_ternary_2_even_universal
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean ErdosTernary2_PreOmegaSmoke.lean 2>&1 | tee preomega-smoke.log
+          grep -F 'erdos_ternary_2_even_universal' preomega-smoke.log
+          grep -F 'erdos_ternary_2_universal' preomega-smoke.log
       - name: Typecheck exact all-cardinality world projection
         timeout-minutes: 20
         shell: bash
