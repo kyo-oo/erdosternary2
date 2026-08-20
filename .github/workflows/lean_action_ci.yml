@@ -11,4 +11,71 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
+      - name: Apply staged canonical GST surgery
+        run: python3 .surgery/apply.py
+      - name: Locate unmatched Lean block comments
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("ErdosTernary2.lean")
+          s = p.read_text(encoding="utf-8")
+          stack = []
+          i = 0
+          line = 1
+          col = 1
+          in_string = False
+          escaped = False
+          in_line_comment = False
+          while i < len(s):
+              ch = s[i]
+              nxt = s[i:i+2]
+              if ch == "\n":
+                  line += 1
+                  col = 1
+                  in_line_comment = False
+                  i += 1
+                  continue
+              if in_line_comment:
+                  i += 1
+                  col += 1
+                  continue
+              if stack:
+                  if nxt == "/-":
+                      stack.append((line, col)); i += 2; col += 2; continue
+                  if nxt == "-/":
+                      stack.pop(); i += 2; col += 2; continue
+                  i += 1; col += 1; continue
+              if in_string:
+                  if escaped:
+                      escaped = False
+                  elif ch == "\\":
+                      escaped = True
+                  elif ch == '"':
+                      in_string = False
+                  i += 1; col += 1; continue
+              if nxt == "--":
+                  in_line_comment = True; i += 2; col += 2; continue
+              if nxt == "/-":
+                  stack.append((line, col)); i += 2; col += 2; continue
+              if ch == '"':
+                  in_string = True; i += 1; col += 1; continue
+              i += 1; col += 1
+          print("UNMATCHED_BLOCK_COMMENT_STACK=", stack)
+          if stack:
+              raise SystemExit(1)
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+      - name: Resolve Lake dependencies
+        run: lake update
+      - name: Fetch mathlib cache
+        run: lake exe cache get
+      - name: Compile infinite GST Graph V2 blade
+        run: lake env lean GSTGraphV2InfiniteExperiment.lean
+      - name: Compile exact GST rectangle experiment
+        run: lake env lean GSTGraphV2RectangleExperiment.lean
+      - name: Build canonical library
+        run: lake build ErdosTernary2
+      - name: Run comparator
+        run: bash scripts/comparator.sh
