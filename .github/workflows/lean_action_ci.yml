@@ -68,25 +68,35 @@ jobs:
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
-      - name: Prove universal theorem exists before legacy Omega overproof
+      - name: Compile final theorem without redundant legacy Omega block
         timeout-minutes: 30
         shell: bash
         run: |
           set -euxo pipefail
-          marker_line="$(grep -n -m1 'Legacy residual overproof' ErdosTernary2.lean | cut -d: -f1)"
-          test -n "$marker_line"
-          cut_line=$((marker_line - 2))
-          test "$cut_line" -gt 0
-          head -n "$cut_line" ErdosTernary2.lean > ErdosTernary2_PreOmegaSmoke.lean
-          cat >> ErdosTernary2_PreOmegaSmoke.lean <<'EOF'
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('ErdosTernary2.lean')
+          lines = src.read_text(encoding='utf-8').splitlines(keepends=True)
+          start = next(i for i, line in enumerate(lines)
+                       if '/-- First-level residual Ω∞ termination.' in line)
+          numeric = next(i for i, line in enumerate(lines)
+                         if '/-- Numerical ceiling used to bound every power-of-four graph witness.' in line)
+          resume = numeric
+          while resume > 0 and lines[resume - 1].strip() == '':
+              resume -= 1
+          assert resume > 0 and lines[resume - 1].strip() == '/-', (start, numeric, resume)
+          resume -= 1
+          out = lines[:start] + lines[resume:]
+          Path('ErdosTernary2_NoLegacyOmegaSmoke.lean').write_text(''.join(out), encoding='utf-8')
+          print(f'removed lines {start+1}..{resume}; retained {len(out)} lines')
+          PY
+          cat >> ErdosTernary2_NoLegacyOmegaSmoke.lean <<'EOF'
           #check erdos_ternary_2_even_universal
           #check erdos_ternary_2_universal
           #print axioms erdos_ternary_2_even_universal
           #print axioms erdos_ternary_2_universal
           EOF
-          lake env lean ErdosTernary2_PreOmegaSmoke.lean 2>&1 | tee preomega-smoke.log
-          grep -F 'erdos_ternary_2_even_universal' preomega-smoke.log
-          grep -F 'erdos_ternary_2_universal' preomega-smoke.log
+          lake env lean ErdosTernary2_NoLegacyOmegaSmoke.lean 2>&1 | tee no-legacy-omega-smoke.log
       - name: Typecheck exact all-cardinality world projection
         timeout-minutes: 20
         shell: bash
