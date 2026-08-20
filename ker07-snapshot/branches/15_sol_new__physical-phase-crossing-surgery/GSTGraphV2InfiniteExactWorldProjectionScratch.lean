@@ -47,12 +47,13 @@ theorem gst_cardinality_mod_world_coefficientS
     (K : Nat) (hK : 3 ≤ K) :
     K % (K-1) = 1 := by
   have hshape : K = (K-1) + 1 := by omega
+  have hone_lt : 1 < K - 1 := by omega
   calc
     K % (K-1) = ((K-1) + 1) % (K-1) :=
       congrArg (fun x : Nat => x % (K-1)) hshape
     _ = 1 := by
       rw [Nat.add_mod, Nat.mod_self, Nat.zero_add]
-      exact Nat.mod_eq_of_lt (by omega)
+      exact Nat.mod_eq_of_lt hone_lt
 
 /-- Integer-cleared x=3/K evaluation has exactly the same K-1 shadow as the
 ordinary ternary prefix. -/
@@ -80,6 +81,8 @@ theorem gst_cleared_world_eval_prefix_shadowS
             Nat.mul_mod, hkmod]
         simp
       rw [hold, hterm, ih]
+      simp only [Nat.mod_mod]
+      rw [← Nat.add_mod]
 
 /-- Same theorem directly in terms of the actual integer residue R mod 3^L. -/
 theorem gst_cleared_world_eval_prefix_fingerprintS
