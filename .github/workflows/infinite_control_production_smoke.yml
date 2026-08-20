@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - sol/gpt56-infinite-control-production
+  pull_request:
+    branches:
+      - sol/gpt56-close-one-error
   workflow_dispatch:
 
 permissions:
