@@ -46,14 +46,15 @@ theorem gst_sleep_three_world_join_all_scalesS :
 formula is exactly the maximal base-six prefix 55...55_6. -/
 theorem gst_sleep_weighted_six_sumS (q : Nat) :
     5 * Finset.sum (Finset.range q) (fun j => 6^j) = 6^q - 1 := by
-  exact gst_infinite_six_world_prefix_closedS q
+  simpa [gstInfiniteSixWorldPrefixS] using
+    (gst_infinite_six_world_prefix_closedS q)
 
 /-- Kernel-seven upgrade of the same term.  This is the infinite coefficient
 already used by the eleven-equation master. -/
 theorem gst_sleep_kernel_weighted_six_sumS (q : Nat) :
     35 * Finset.sum (Finset.range q) (fun j => 6^j) =
       7 * (6^q - 1) := by
-  have h := gst_infinite_six_world_prefix_closedS q
+  have h := gst_sleep_weighted_six_sumS q
   omega
 
 /-- Same geometric term written directly through the binary/ternary joined
@@ -79,7 +80,7 @@ geometric sum rather than an opaque 6^q-1 scalar. -/
 theorem gst_sleep_join_sum_cardinal_chordS
     (R : Nat) (a d : Nat -> Nat)
     (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 != 0) :
+    (h0 : d 0 ≠ 0) :
     forall q,
       4 * gstCardinalInputEvalS R (6^q) (R+1) =
         gstCardinalOutputEvalS R (6^q) (R+1) +
@@ -97,7 +98,7 @@ theorem gst_sleep_join_sum_cardinal_chordS
 theorem gst_sleep_kernel_join_sum_cardinal_chordS
     (R : Nat) (a d : Nat -> Nat)
     (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 != 0) :
+    (h0 : d 0 ≠ 0) :
     forall q,
       28 * gstCardinalInputEvalS R (6^q) (R+1) =
         7 * gstCardinalOutputEvalS R (6^q) (R+1) +
@@ -169,7 +170,7 @@ structure GSTSleepEquationInfiniteFusionS
 theorem gst_sleep_equation_infinite_fusionS
     (R N : Nat) (a d : Nat -> Nat)
     (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 != 0) :
+    (h0 : d 0 ≠ 0) :
     GSTSleepEquationInfiniteFusionS R N a d := by
   refine {
     graphWorld := gst_sleep_equation_seven_axis_three_world_masterS R N
