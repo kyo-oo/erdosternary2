@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - sol/gpt56-infinite-control-production
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -54,7 +55,6 @@ jobs:
 
           creation_name = 'theorem h_creation_for_4pow'
           start = text.index(creation_name)
-          # Extract exactly one top-level declaration from the quarantined text.
           tail = text[start:]
           nxt = re.search(r'\n(?=(?:theorem|lemma|def|structure|inductive|abbrev)\s+[A-Za-z0-9_])', tail[len(creation_name):])
           if not nxt:
@@ -62,9 +62,7 @@ jobs:
           end = start + len(creation_name) + nxt.start() + 1
           creation = text[start:end].rstrip() + '\n'
 
-          # The declaration must not carry a proof placeholder into production.
-          bad_tokens = ('sorry', 'admit', 'sorryAx')
-          for tok in bad_tokens:
+          for tok in ('sorry', 'admit', 'sorryAx'):
               if re.search(rf'(?<![A-Za-z0-9_]){re.escape(tok)}(?![A-Za-z0-9_])', creation):
                   raise SystemExit(f'creation declaration contains forbidden token: {tok}')
 
@@ -118,7 +116,6 @@ theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
 '''
 
           candidate = pre.rstrip() + '\n\n' + creation + direct
-          # Ensure the broken declarations are really gone from active candidate.
           for dead in (
               'theorem gst_omega_termination_s1',
               'theorem gst_omega_termination_s3',
