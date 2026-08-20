@@ -23,7 +23,9 @@ jobs:
           lake update 2>&1 | tail -5
           lake exe cache get 2>&1 | tail -5
           lake build ErdosTernary2 2>&1 | tee lean-build.log
-          echo "LEAN_EXIT: ${PIPESTATUS[0]}"
+          lean_exit=${PIPESTATUS[0]}
+          echo "LEAN_EXIT: ${lean_exit}"
+          exit "${lean_exit}"
       - name: Comparator
         run: |
           set -o pipefail
