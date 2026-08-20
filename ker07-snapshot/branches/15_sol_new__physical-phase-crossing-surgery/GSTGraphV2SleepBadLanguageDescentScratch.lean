@@ -87,9 +87,13 @@ theorem gst_sleep_seed_zero_noBig1_bad_is_zeroS :
       by_cases hX0 : X = 0
       · exact hX0
       have hd2 : X % 3 ≠ 2 := by
-        have h := hbad 0
-        simpa [GSTSleepSeededBadTraceS, GSTBadPairS, GSTHappyPairS,
-          gstAffineCarryS, gstDigitS] using h
+        intro hx
+        have hbad0 := hbad 0
+        apply hbad0
+        constructor
+        · simpa [gstDigitS] using hx
+        · left
+          simp [gstAffineCarryS]
       have hd1 : X % 3 ≠ 1 := by
         have h := hno 0
         simpa [GSTSleepNoBig1S, gstDigitS] using h
@@ -154,9 +158,13 @@ theorem gst_sleep_seed_one_three_noBig1_bad_formsS :
         · subst X
           exact ⟨0, by decide⟩
         have hd2 : X % 3 ≠ 2 := by
-          have h := hbad 0
-          simpa [GSTSleepSeededBadTraceS, GSTBadPairS, GSTHappyPairS,
-            gstAffineCarryS, gstDigitS] using h
+          intro hx
+          have hbad0 := hbad 0
+          apply hbad0
+          constructor
+          · simpa [gstDigitS] using hx
+          · right
+            simp [gstAffineCarryS]
         have hd1 : X % 3 ≠ 1 := by
           have h := hno 0
           simpa [GSTSleepNoBig1S, gstDigitS] using h
@@ -225,11 +233,13 @@ theorem gst_sleep_big1_free_last_gate_peel_formsS
   · obtain ⟨r, hr⟩ := gst_sleep_seed_two_noBig1_bad_formS Y hbad hno
     left
     refine ⟨r, rfl, ?_⟩
+    have hp : 0 < 9^r := Nat.pow_pos (by decide)
     omega
   · obtain ⟨r, hr⟩ :=
       (gst_sleep_seed_one_three_noBig1_bad_formsS Y).2 hbad hno
     right
     refine ⟨r, rfl, ?_⟩
+    have hp : 0 < 9^r := Nat.pow_pos (by decide)
     omega
 
 /-- Same result in pure ternary-power form. -/
@@ -244,17 +254,18 @@ theorem gst_sleep_big1_free_last_gate_peel_is_ternary_boundaryS
   · obtain ⟨r, _hC2, hX⟩ := h2
     left
     refine ⟨r, ?_⟩
-    rw [show 9^r = 3^(2*r) by
-      rw [show (9:Nat) = 3^2 by decide, ← Nat.pow_mul]] at hX
+    have hpow : 9^r = 3^(2*r) := by
+      rw [show (9:Nat) = 3^2 by decide, ← Nat.pow_mul]
+    rw [hpow] at hX
     exact hX
   · obtain ⟨r, _hC3, hX⟩ := h3
     right
     refine ⟨r, ?_⟩
-    rw [show 3 * 9^r = 3^(2*r+1) by
+    have hpow : 3 * 9^r = 3^(2*r+1) := by
       rw [show (9:Nat) = 3^2 by decide, ← Nat.pow_mul,
         show 2*r+1 = 1 + 2*r by omega, Nat.pow_add]
-      norm_num] at hX
-    exact hX
+      norm_num
+    exact hX.trans hpow
 
 #check gst_sleep_seed_zero_noBig1_bad_is_zeroS
 #check gst_sleep_seed_one_three_noBig1_bad_formsS
