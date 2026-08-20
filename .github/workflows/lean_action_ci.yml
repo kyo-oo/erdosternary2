@@ -44,6 +44,11 @@ jobs:
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+      - name: Typecheck sleep-equation seven-axis three-world fusion
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
       - name: Typecheck exact Omega Past-Future ledger synthesis
         timeout-minutes: 20
         run: |
