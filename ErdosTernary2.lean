@@ -32,6 +32,8 @@ import GSTTactic
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
+
+open scoped BigOperators
 /-
   CardinalWorlds_Final.lean
   ====================================================================
@@ -9389,7 +9391,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    decide
+    norm_num [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS]
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -9444,7 +9446,8 @@ theorem gst_bad_prefix_u_potential_boundS
       3^K * gstHandwrittenUChargeS (gstAffineMulCarryS 4 D X K) := by
   induction K with
   | zero =>
-      simp [gstAffineMulCarryS]
+      simpa [gstAffineMulCarryS] using
+        (Nat.le_refl (gstHandwrittenUChargeS D))
   | succ K ih =>
       have hprev :
           24*(X % 3^K) + gstHandwrittenUChargeS D ≤
@@ -9552,7 +9555,7 @@ theorem gst_prefix_one_omega_bad_to_u_seeded_badS
   apply hNe
   apply (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2
   have hc3 : c s % 3 = 1 := c_mod3 s hs
-  simpa [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS,
+  simpa only [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS,
     gstAffineMulCarryS, Nat.pow_one, hc3] using hGate
 
 /-- The monolith Ω∞ bad hypothesis therefore inherits the exact finite
@@ -9631,9 +9634,10 @@ theorem gst_canonical_origin_addS
       _ = A * 4^(3^t*b) := hpow
       _ = A * (1 + D * Q t b) := by rw [hb]
       _ = A * (1 + D * 1 * Q t b) := by ring
-  exact origin_navigation_algebraS
-    D A (Q t a) (Q t (a+b)) (Q t b) 1
-    (Nat.pow_pos (by decide)) hA hcur
+  simpa only [Nat.one_mul] using
+    origin_navigation_algebraS
+      D A (Q t a) (Q t (a+b)) (Q t b) 1
+      (Nat.pow_pos (by decide)) hA hcur
 
 /-- Every integral multiple of an origin modulus maps to a physical value
 that is divisible by `Q t m`. -/
@@ -9665,9 +9669,7 @@ theorem gst_canonical_origin_modulusS
   let r := b % m
   let q := b / m
   have hb : b = r + q*m := by
-    dsimp [r, q]
-    have h := Nat.mod_add_div b m
-    omega
+    simpa only [r, q, Nat.mul_comm] using (Nat.mod_add_div b m).symm
   have hadd := gst_canonical_origin_addS Q hQ t r (q*m) ht
   have hdvdQ : Q t m ∣ Q t (q*m) :=
     gst_canonical_origin_multiple_dvdS Q hQ t m q ht
@@ -10109,7 +10111,7 @@ theorem gst_hard_tail_parent_navigationS
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 n ht
   norm_num at hrec
   rw [hrec, hunit t ht]
-  unfold GSTHardPrefixOneTailS GSTCanonicalBlockS
+  unfold GSTHardPrefixOneTailS
   ring
 
 /-- Origin trit one: exact 3-affine copy of the same hard object one level
@@ -10487,8 +10489,7 @@ theorem gst_navigation_constant_four_mod243_stableS
   have hcNext81 : c (s+1) % 81 = 16 :=
     c_mod81_stable (s+1) (by omega)
   have hprod81 : (4^(3^s) * c (s+1)) % 81 = 16 := by
-    rw [Nat.mul_mod, hA81, hcNext81]
-    decide
+    norm_num [Nat.mul_mod, hA81, hcNext81]
   have hprodDecomp :
       4^(3^s) * c (s+1) =
         16 + 81 * ((4^(3^s) * c (s+1)) / 81) := by
@@ -10504,11 +10505,9 @@ theorem gst_navigation_constant_four_mod243_stableS
     have hshape2 :
         3 * (16 + 81 * ((4^(3^s) * c (s+1)) / 81)) =
           48 + 243 * ((4^(3^s) * c (s+1)) / 81) := by ring
-    rw [hshape2, Nat.add_mod, Nat.mul_mod]
-    norm_num
+    simp [hshape2, Nat.add_mod, Nat.mul_mod]
 
-  rw [hrec, Nat.add_mod, hc243, hterm]
-  decide
+  norm_num [hrec, Nat.add_mod, hc243, hterm]
 
 /-- Exact regenerated terminal word after the forced prefix and NULL row. -/
 def gstResidualNullTerminalS (s : Nat) : Nat :=
@@ -10559,9 +10558,7 @@ theorem gst_residual_null_terminal_happyS
     norm_num at hsplit
     omega
   · right
-    unfold gstAffineMulCarryS
-    rw [show (3:Nat)^2 = 9 by decide, h9]
-    decide
+    norm_num [gstAffineMulCarryS, h9]
 
 /-- Explicit low-level NULL terminal gates.  These are finite kernel checks,
 not bounded searches used as a universal theorem. -/
@@ -10703,7 +10700,8 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact Nat.dvd_pow_self 3 (by omega)
+    rw [show (3 : Nat) = 3^1 by decide]
+    exact Nat.pow_dvd_pow 3 (by omega)
   rw [hdiv]
   norm_num
 
@@ -10717,21 +10715,22 @@ theorem gst_canonical_Q4_mod9S
     Q t 4 % 9 = 1 := by
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 1 (by omega)
   norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_9]
+  rw [hrec, Nat.add_mod, hQ1_9]
   have hA3 : 4^(3^t) % 3 = 1 :=
     gst_canonical_block_unit_mod3S Q hQ t (by omega)
   have hthree :
       (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
     have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
-      rw [Nat.mul_mod, hA3, hQnext1_3]
-      decide
-    have hfactor :
-        (3 * 4^(3^t) * Q (t+1) 1) % 9 =
-          3 * ((4^(3^t) * Q (t+1) 1) % 3) := by
+      norm_num [Nat.mul_mod, hA3, hQnext1_3]
+    have hdecomp :
+        4^(3^t) * Q (t+1) 1 =
+          1 + 3 * ((4^(3^t) * Q (t+1) 1) / 3) := by
+      have h := Nat.mod_add_div (4^(3^t) * Q (t+1) 1) 3
+      rw [hAq3] at h
       omega
-    rw [hfactor, hAq3]
-  rw [hthree]
-  decide
+    rw [hdecomp]
+    simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
+  norm_num [hthree]
 
 /-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
 theorem gst_canonical_Q13_mod27S
@@ -10747,21 +10746,22 @@ theorem gst_canonical_Q13_mod27S
       hQnext1_9 hQnext2_3
   have hrec := gst_canonical_prefix_recurrenceS Q hQ s 1 1 4 (by omega)
   norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_27]
+  rw [hrec, Nat.add_mod, hQ1_27]
   have hA9 : 4^(3^s) % 9 = 1 :=
     gst_canonical_block_unit_mod9S Q hQ s hs
   have hterm :
       (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
     have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
-      rw [Nat.mul_mod, hA9, hQ4]
-      decide
-    have hfactor :
-        (3 * 4^(3^s) * Q (s+1) 4) % 27 =
-          3 * ((4^(3^s) * Q (s+1) 4) % 9) := by
+      norm_num [Nat.mul_mod, hA9, hQ4]
+    have hdecomp :
+        4^(3^s) * Q (s+1) 4 =
+          1 + 9 * ((4^(3^s) * Q (s+1) 4) / 9) := by
+      have h := Nat.mod_add_div (4^(3^s) * Q (s+1) 4) 9
+      rw [hAq9] at h
       omega
-    rw [hfactor, hAq9]
-  rw [hterm]
-  decide
+    rw [hdecomp]
+    simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
+  norm_num [hterm]
 
 /-- Canonical origin causality extends the residue-13 calculation to the full
 class b == 13 (mod 27). -/
@@ -10786,18 +10786,19 @@ theorem gst_residue19_is_null_gate2S
     gstDigitS R 2 = 2 ∧ gstCarryS R 2 = 0 := by
   constructor
   · unfold gstDigitS
+    change R / 9 % 3 = 2
     have hdiv : R / 9 % 3 = (R % 27) / 9 := by
       omega
     rw [hdiv, hR]
     decide
   · unfold gstCarryS
+    change 4 * (R % 9) / 9 = 0
     have hmod9 : R % 9 = 1 := by
       have h := Nat.mod_mod_of_dvd R (by decide : 9 ∣ 27)
       rw [hR] at h
       norm_num at h ⊢
       exact h.symm
-    rw [hmod9]
-    decide
+    norm_num [hmod9]
 -- END ATTACHED NavigationResidueCutScratch.lean
 
 -- BEGIN ATTACHED ResidualNullPrefixFourCutScratch.lean
@@ -10845,12 +10846,10 @@ theorem gst_navigation_prefix_four_next_one_mod27S
     simpa [hu1] using
       (gstNavigationConstant_mod3 (s+2) u (by omega) hu (by omega))
   have hA3 : 4^(3^s * 4) % 3 = 1 := by
-    rw [Nat.pow_mod]
-    norm_num
+    norm_num [Nat.pow_mod]
   have hprod3 :
       (4^(3^s * 4) * gstNavigationConstant (s+2) u) % 3 = 1 := by
-    rw [Nat.mul_mod, hA3, hQu3]
-    decide
+    norm_num [Nat.mul_mod, hA3, hQu3]
   have hprodDecomp :
       4^(3^s * 4) * gstNavigationConstant (s+2) u =
         1 + 3 * ((4^(3^s * 4) * gstNavigationConstant (s+2) u) / 3) := by
@@ -10869,11 +10868,9 @@ theorem gst_navigation_prefix_four_next_one_mod27S
           gstNavigationConstant (s+2) u) / 3)) =
           9 + 27 * ((4^(3^s * 4) *
             gstNavigationConstant (s+2) u) / 3) := by ring
-    rw [hshape2, Nat.add_mod, Nat.mul_mod]
-    norm_num
+    simp [hshape2, Nat.add_mod, Nat.mul_mod]
 
-  rw [hrec, Nat.add_mod, hQ4, hterm]
-  decide
+  norm_num [hrec, Nat.add_mod, hQ4, hterm]
 
 /-- In the true NULL residual n=3u+1, a second origin trit one contradicts the
 complete parent Omega bad trace. -/
@@ -11004,8 +11001,7 @@ theorem gst_navigation_constant_mod3_allS
   · subst m
     have hQ0 := gst_canonical_origin_zeroS
       gstNavigationConstant gst_navigation_constant_origin_energyS s hs
-    rw [hQ0]
-    decide
+    simp [hQ0]
   by_cases hm3 : m % 3 = 0
   · have hmshape : m = 3 * (m / 3) := by
       have h := Nat.mod_add_div m 3
@@ -11716,10 +11712,12 @@ theorem gst_origin_prefix_remaining_U_conservationS
       3^t * n =
         3^t * (n % 3^K) + 3^(t+K) * (n / 3^K) := by
     calc
-      3^t*n = 3^t * (n % 3^K + 3^K*(n/3^K)) := by rw [hn]
+      3^t*n = 3^t * (n % 3^K + 3^K*(n/3^K)) :=
+        congrArg (fun x => 3^t * x) hn
       _ = 3^t*(n%3^K) + 3^t*3^K*(n/3^K) := by ring
       _ = 3^t*(n%3^K) + 3^(t+K)*(n/3^K) := by rw [← Nat.pow_add]
-  rw [hexp, Nat.pow_add]
+  rw [hexp]
+  exact (Nat.pow_add 4 _ _).symm
 
 /-- At the explicit natural ceiling the remaining U factor is one, so the
 consumed phase product has absorbed the entire original perfect-power energy. -/
@@ -11796,8 +11794,7 @@ theorem gst_omega_past_origin_power_fingerprintS
       1 + 3^(t+1) * (Q t a % 3^K) < 3^(t+1+K) := by
     rw [hM]
     have hbase : 1 < 3^(t+1) := by
-      have ht1 : 1 ≤ t+1 := by omega
-      exact Nat.one_lt_pow (by decide) (by omega)
+      simpa using pow_mono 0 (t+1) (by omega)
     have hle : Q t a % 3^K + 1 ≤ 3^K := Nat.succ_le_of_lt hq
     have hmul :
         3^(t+1) * (Q t a % 3^K + 1) ≤
@@ -11823,8 +11820,8 @@ theorem gst_omega_past_origin_power_fingerprintS
         ((3^(t+1)*3^K) * (Q t a / 3^K)) %
           (3^(t+1)*3^K) = 0 :=
       Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
-    rw [hzero, Nat.zero_add, Nat.mod_eq_of_lt]
-    exact hsmall
+    rw [hzero, Nat.zero_add]
+    exact Nat.mod_eq_of_lt hsmall
   rw [hE]
   change (1 + 3^(t+1) * Q t a) % 3^(t+1+K) = _
   rw [hres, gst_omega_past_is_origin_prefixS Q hQ t n K ht]
@@ -14839,7 +14836,7 @@ theorem gst_big1_projected_path_code_eq_six_pow_sub_oneS
           exact hpath.2.2.1 j (by omega)
         · intro j hj
           exact hpath.2.2.2 j (by omega)
-      have ih' := ih
+      have ih' := ih hprefix
       have hedge := gst_big1_clear_path_edges_are_surviveS
         a d (K+1) hpath h0 K (by omega)
       unfold gstBig1ProjectedPathCodeS at ih' ⊢
