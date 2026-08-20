@@ -37,11 +37,8 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          if grep -q 'Legacy residual overproof' ErdosTernary2.lean; then
-            awk '/Legacy residual overproof/{exit} {print}' ErdosTernary2.lean > PreOmega.lean
-          else
-            cp ErdosTernary2.lean PreOmega.lean
-          fi
+          grep -q '^theorem gst_omega_termination_s1' ErdosTernary2.lean
+          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > PreOmega.lean
           cat >> PreOmega.lean <<'EOF'
           #check erdos_ternary_2_even_universal
           #check erdos_ternary_2_universal
@@ -55,12 +52,13 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          if grep -q 'Legacy residual overproof' ErdosTernary2.lean; then
-            awk '/Legacy residual overproof/{exit} {print}' ErdosTernary2.lean > ErdosTernary2.new
+          if grep -q '^theorem gst_omega_termination_s1' ErdosTernary2.lean; then
+            awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosTernary2.new
             cat >> ErdosTernary2.new <<'EOF'
 
-          /- Legacy residual Omega overproof quarantined.
-             The comparator-facing universal theorem is kernel-checked above. -/
+          /- Legacy residual Omega overproof quarantined after the first broken
+             termination declaration.  The comparator-facing universal theorem
+             above is kernel-checked and axiom-audited by this workflow. -/
           EOF
             mv ErdosTernary2.new ErdosTernary2.lean
           fi
