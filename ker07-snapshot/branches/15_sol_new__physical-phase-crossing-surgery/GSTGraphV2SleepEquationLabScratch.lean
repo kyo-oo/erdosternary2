@@ -102,7 +102,8 @@ theorem gst_sleep_S_sigma_rotation_lawS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    simp [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS]
+    simp [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS] <;>
+    ring
 
 /-- Full 2/3/6 readout of the handwritten S/e channels. -/
 structure GSTSleepThreeWorldFingerprintS where
