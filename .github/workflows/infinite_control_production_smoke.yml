@@ -25,6 +25,8 @@ jobs:
         run: lake env lean GSTInfiniteCollision.lean
       - name: Compile all-depth bad transport
         run: lake env lean GSTInfiniteBadTransport.lean
+      - name: Compile coupled Past/Future ledger
+        run: lake env lean GSTInfiniteCoupledLedger.lean
       - name: Compile Happy-gate latent transport
         run: lake env lean GSTInfiniteGateTransport.lean
       - name: Compile prefix-one infinite adapter
@@ -33,16 +35,22 @@ jobs:
         run: lake env lean GSTPrefixOneGateAdapterSmoke.lean
       - name: Compile prefix-one latent-gate transport
         run: lake env lean GSTPrefixOneLatentGateSmoke.lean
+      - name: Compile prefix-one Past/Future ledger
+        run: lake env lean GSTPrefixOneLedgerSmoke.lean
       - name: Print transport axioms
         run: |
           cat > /tmp/TransportAxioms.lean <<'EOF'
           import GSTInfiniteGateTransport
+          import GSTInfiniteCoupledLedger
           #print axioms GSTV2.coupledOrbit_invariant_all
           #print axioms GSTV2.coupledOrbit_childCarry_exact
           #print axioms GSTV2.coupledOrbit_parentSeed_exact
           #print axioms GSTV2.coupledOrbit_parent_bad_suffix
           #print axioms GSTV2.infinite_bad_coupled_control
           #print axioms GSTV2.coupled_happy_transports_information
+          #print axioms GSTV2.seeded_mass_past_future
+          #print axioms GSTV2.coupledOrbit_past_synchronization
+          #print axioms GSTV2.infinite_coupled_ledger
           EOF
           lake env lean /tmp/TransportAxioms.lean
       - name: Compile infinite-control RED seam
