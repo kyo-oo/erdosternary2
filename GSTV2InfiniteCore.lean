@@ -71,15 +71,17 @@ theorem digit_prefix_value (N K : Nat) :
 theorem omega_past_closed (t N K : Nat) :
     omegaPast t N K = 3^(t+1) * (N % 3^K) := by
   unfold omegaPast omegaTransfer
-  rw [← Finset.mul_sum]
-  have hpow : ∀ k : Nat, 3^(t+1+k) = 3^(t+1) * 3^k := by
-    intro k
-    rw [Nat.pow_add]
-  apply Finset.sum_congr rfl
-  intro k hk
-  rw [hpow]
-  ring_nf
-  rw [digit_prefix_value]
+  calc
+    (∑ k in Finset.range K, 3^(t+1+k) * digit N k) =
+        ∑ k in Finset.range K, 3^(t+1) * (3^k * digit N k) := by
+          apply Finset.sum_congr rfl
+          intro k hk
+          rw [Nat.pow_add]
+          ring
+    _ = 3^(t+1) * (∑ k in Finset.range K, 3^k * digit N k) := by
+          rw [Finset.mul_sum]
+    _ = 3^(t+1) * (N % 3^K) := by
+          rw [digit_prefix_value]
 
 /-- Exact all-depth information conservation.
 
@@ -108,19 +110,21 @@ theorem omega_past_step (t N K : Nat) :
   unfold omegaPast
   rw [Finset.sum_range_succ]
 
+/-- Elementary explicit support ceiling, avoiding logarithms. -/
+theorem self_lt_three_pow_succ : ∀ N : Nat, N < 3^(N+1)
+  | 0 => by decide
+  | N+1 => by
+      have ih : N < 3^(N+1) := self_lt_three_pow_succ N
+      have hp : 0 < 3^(N+1) := Nat.pow_pos (by decide)
+      have hle : N+1 ≤ 3^(N+1) := by omega
+      rw [show (N+1)+1 = (N+1)+1 by rfl, Nat.pow_succ]
+      omega
+
 /-- Every natural origin has an explicit all-Nat zero-support horizon. -/
 theorem digit_eventually_zero (N k : Nat) (hk : N + 1 ≤ k) : digit N k = 0 := by
-  have hbase : N < 3^(N+1) := by
-    induction N with
-    | zero => decide
-    | succ N ih =>
-        have hp : 0 < 3^(N+1) := Nat.pow_pos (by decide)
-        have hle : N+1 ≤ 3^(N+1) := by omega
-        rw [show (N+1)+1 = (N+1)+1 by rfl, Nat.pow_succ]
-        omega
   have hpow : 3^(N+1) ≤ 3^k :=
     Nat.pow_le_pow_of_le (by decide : 1 < 3) hk
-  have hlt : N < 3^k := lt_of_lt_of_le hbase hpow
+  have hlt : N < 3^k := lt_of_lt_of_le (self_lt_three_pow_succ N) hpow
   have hdiv : N / 3^k = 0 := Nat.div_eq_of_lt hlt
   simp [digit, hdiv]
 
@@ -146,21 +150,10 @@ structure SupportHorizonControl (t N : Nat) : Prop where
 theorem support_horizon_control (t N : Nat) : SupportHorizonControl t N := by
   constructor
   · intro k hk
-    have hz := digit_eventually_zero N k hk
-    unfold digit at hz
-    have hlt : N < 3^k := by
-      have hbase : N < 3^(N+1) := by
-        induction N with
-        | zero => decide
-        | succ N ih =>
-            have hp : 0 < 3^(N+1) := Nat.pow_pos (by decide)
-            have hle : N+1 ≤ 3^(N+1) := by omega
-            rw [show (N+1)+1 = (N+1)+1 by rfl, Nat.pow_succ]
-            omega
-      have hpow : 3^(N+1) ≤ 3^k :=
-        Nat.pow_le_pow_of_le (by decide : 1 < 3) hk
-      exact lt_of_lt_of_le hbase hpow
-    exact Nat.div_eq_of_lt hlt
+    have hpow : 3^(N+1) ≤ 3^k :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) hk
+    exact Nat.div_eq_of_lt
+      (lt_of_lt_of_le (self_lt_three_pow_succ N) hpow)
   · exact omega_past_future_conservation t N
 
 end GSTV2
