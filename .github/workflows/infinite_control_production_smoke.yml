@@ -1,0 +1,20 @@
+name: Infinite Control Production Smoke
+
+on:
+  push:
+    branches:
+      - sol/gpt56-infinite-control-production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+      - name: Compile infinite-control RED smoke
+        run: lake env lean GSTInfiniteControlProductionSmoke.lean
