@@ -38,6 +38,8 @@ jobs:
           lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.olean" "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.olean" "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.olean" "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.olean" "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
