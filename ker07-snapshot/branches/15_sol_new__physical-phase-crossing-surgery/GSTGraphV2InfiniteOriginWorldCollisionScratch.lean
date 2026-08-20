@@ -96,37 +96,23 @@ theorem gst_no_finite_origin_cofinally_synchronizes_big1_clear_worldS
   have hpowpos : 0 < 6^K := Nat.pow_pos (by decide)
   omega
 
-/-- Negated cofinal form: every finite origin admits a cutoff beyond which no
-selected maximal six-world code can keep agreeing with its canonical residue
-at all later scales. -/
+/-- Strong negated cofinal form: every finite origin has an explicit cutoff
+`n+1` beyond which the maximal infinite code is different from its canonical
+finite-origin residue at **every** later world. -/
 theorem gst_finite_origin_has_six_world_desynchronization_cutoffS
     (n : Nat) (a d : Nat → Nat)
     (hpath : GSTBig1ClearInfinitePathS a d)
     (h0 : d 0 ≠ 0) :
-    ∃ M, ∀ K, M ≤ K →
+    ∀ K, n + 1 ≤ K →
       gstBig1ProjectedPathCodeS a d K ≠ n % 6^K := by
-  refine ⟨n+1, ?_⟩
   intro K hKlarge hEq
-  apply gst_no_finite_origin_cofinally_synchronizes_big1_clear_worldS
-    n a d hpath h0
-  intro M
-  let L := max M K
-  refine ⟨L, le_max_left _ _, ?_⟩
-  by_cases hLK : L = K
-  · subst L
-    exact hEq
-  · have hKL : K < L := by
-      have hKleL : K ≤ L := le_max_right _ _
-      omega
-    have hcodeL := gst_big1_clear_infinite_all_six_prefixes_maximalS
-      a d hpath h0 L
-    have hLpow : L < 6^L := Nat.lt_pow_self (by decide : 1 < 6)
-    have hnL : n < 6^L := by
-      have hnK : n < K := by omega
-      omega
-    have hmodL : n % 6^L = n := Nat.mod_eq_of_lt hnL
-    rw [hcodeL, hmodL]
-    have hpos : 0 < 6^L := Nat.pow_pos (by decide)
-    omega
+  have hcode := gst_big1_clear_infinite_all_six_prefixes_maximalS
+    a d hpath h0 K
+  have hKlt : K < 6^K := Nat.lt_pow_self (by decide : 1 < 6)
+  have hnlt : n < 6^K := by omega
+  have hmod : n % 6^K = n := Nat.mod_eq_of_lt hnlt
+  rw [hcode, hmod] at hEq
+  have hpos : 0 < 6^K := Nat.pow_pos (by decide)
+  omega
 
 end GSTInfiniteV2
