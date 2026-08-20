@@ -103,7 +103,6 @@ theorem gst_sleep_S_sigma_rotation_lawS
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS]
-    <;> ring
 
 /-- Full 2/3/6 readout of the handwritten S/e channels. -/
 structure GSTSleepThreeWorldFingerprintS where
@@ -137,14 +136,14 @@ theorem gst_sleep_three_world_fingerprint_injectiveS
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   have hCc' : C' = 0 ∨ C' = 1 ∨ C' = 2 ∨ C' = 3 := by omega
   have hdc' : d' = 0 ∨ d' = 1 ∨ d' = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    rcases hCc' with h0' | h1' | h2' | h3' <;>
-    rcases hdc' with d0' | d1' | d2' <;>
-    subst C <;> subst d <;> subst C' <;> subst d' <;>
-    norm_num [gstSleepThreeWorldFingerprintS, gstSleepSMomentS,
-      gstSleepEMomentS, gstSleepRotateS, gstSleepSChargeS,
-      gstSleepEnergyS] at hfp ⊢
+  rcases hCc with h0 | h1 | h2 | h3
+  all_goals rcases hdc with d0 | d1 | d2
+  all_goals rcases hCc' with h0' | h1' | h2' | h3'
+  all_goals rcases hdc' with d0' | d1' | d2'
+  all_goals subst_vars
+  all_goals norm_num [gstSleepThreeWorldFingerprintS, gstSleepSMomentS,
+    gstSleepEMomentS, gstSleepRotateS, gstSleepSChargeS,
+    gstSleepEnergyS] at hfp ⊢
 
 /-- The two Happy-Gate cells have two distinguished whole-equation
 fingerprints; injectivity makes this an algebraic gate detector. -/
