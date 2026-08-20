@@ -37,7 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > CTowerInfiniteUpgradeSmoke.lean
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          head -n "$CUT" ErdosTernary2.lean > CTowerInfiniteUpgradeSmoke.lean
           cat >> CTowerInfiniteUpgradeSmoke.lean <<'EOF'
 
           /-- Old finite stable coefficients form one compatible all-scale ternary system. -/
@@ -121,7 +123,9 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > DirectInductionSmoke.lean
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          head -n "$CUT" ErdosTernary2.lean > DirectInductionSmoke.lean
           cat >> DirectInductionSmoke.lean <<'EOF'
 
           theorem gpt56_direct_even_universal (a : Nat) :
