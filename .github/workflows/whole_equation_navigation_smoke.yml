@@ -38,7 +38,10 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosPreOmega.lean
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
+          tail -n 8 ErdosPreOmega.lean
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
       - name: Prove whole equation and Omega fingerprint adapter
         timeout-minutes: 20
@@ -51,8 +54,6 @@ jobs:
           import GSTGraphV2SleepEquationLabScratch
 
           open GSTInfiniteV2
-
-          #check gst_navigation_decomposition
 
           theorem gpt56_whole_equation_canonical_navigation
               (t n : Nat) (ht : 1 ≤ t) :
