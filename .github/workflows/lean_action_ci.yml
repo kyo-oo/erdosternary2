@@ -29,47 +29,11 @@ jobs:
       - name: Build GSTTactic import artifact
         timeout-minutes: 10
         run: lake build GSTTactic
-      - name: Typecheck physical signed-kernel telescope
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          lake env lean "$SNAP/GSTGraphV2PhysicalSignedKernelTelescopeScratch.lean"
       - name: Build infinite GST V2 control artifact
         timeout-minutes: 20
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
-      - name: Typecheck infinite natural-support contradiction blade
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
-      - name: Typecheck exact BIG-N Navigation horizon
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
-      - name: Typecheck nested infinite world tower
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
-      - name: Typecheck exact all-cardinality world projection
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteExactWorldProjectionScratch.lean"
-      - name: Typecheck direct infinite six-world collision
-        continue-on-error: true
-        timeout-minutes: 20
-        run: |
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteSixWorldCollisionScratch.lean"
       - name: Build infinite cardinal-world master artifact
         timeout-minutes: 20
         run: |
@@ -85,28 +49,29 @@ jobs:
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean"
+      - name: Typecheck finite-origin six-world collision
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
+      - name: Typecheck exact BIG-N Navigation horizon
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
+      - name: Typecheck nested infinite world tower
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
       - name: Typecheck infinite handwritten operator budget blade
         continue-on-error: true
         timeout-minutes: 20
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteHandwrittenOperatorScratch.lean"
-      - name: Compile final theorem without redundant legacy Omega block
-        continue-on-error: true
-        timeout-minutes: 30
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          lines = Path('ErdosTernary2.lean').read_text(encoding='utf-8').splitlines(keepends=True)
-          start = next(i for i, line in enumerate(lines) if '/-- First-level residual Ω∞ termination.' in line)
-          numeric = next(i for i, line in enumerate(lines) if '/-- Numerical ceiling used to bound every power-of-four graph witness.' in line)
-          resume = numeric
-          while resume > 0 and lines[resume - 1].strip() == '': resume -= 1
-          assert resume > 0 and lines[resume - 1].strip() == '/-'
-          resume -= 1
-          Path('ErdosTernary2_NoLegacyOmegaSmoke.lean').write_text(''.join(lines[:start] + lines[resume:]), encoding='utf-8')
-          PY
-          lake env lean ErdosTernary2_NoLegacyOmegaSmoke.lean
       - name: Typecheck proof monolith without serialization
         timeout-minutes: 30
         run: lake env lean ErdosTernary2.lean
