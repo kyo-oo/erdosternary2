@@ -29,8 +29,10 @@ def gstWorldModulusS (n : Nat) : Nat := gstWorldCardinalityS n - 1
 /-- Every world modulus is positive. -/
 theorem gst_world_modulus_posS (n : Nat) : 0 < gstWorldModulusS n := by
   unfold gstWorldModulusS gstWorldCardinalityS gstWorldDepthS
-  have he : 0 < 2^n := Nat.pow_pos (by decide)
-  have hp : 1 < 6^(2^n) := Nat.one_lt_pow (by decide) he
+  have he : 1 ≤ 2^n := by positivity
+  have hp : 6^1 ≤ 6^(2^n) :=
+    Nat.pow_le_pow_of_le (by decide : 1 < 6) he
+  norm_num at hp
   omega
 
 /-- Consecutive world depths double. -/
@@ -53,16 +55,22 @@ theorem gst_world_modulus_dvd_succS (n : Nat) :
     gstWorldModulusS n ∣ gstWorldModulusS (n+1) := by
   let X := gstWorldCardinalityS n
   have hX : 1 ≤ X := by
-    dsimp [X, gstWorldCardinalityS, gstWorldDepthS]
-    positivity
+    have hxpos : 0 < X := by
+      dsimp [X, gstWorldCardinalityS, gstWorldDepthS]
+      positivity
+    omega
   have hnext : gstWorldCardinalityS (n+1) = X^2 := by
     simpa [X] using gst_world_cardinality_succ_squareS n
+  have hXeq : X = (X-1) + 1 := by omega
+  have hadd : (X-1) * (X+1) + 1 = X^2 := by
+    rw [hXeq]
+    ring
+  have hfactor : X^2 - 1 = (X-1) * (X+1) := by omega
   refine ⟨X + 1, ?_⟩
   unfold gstWorldModulusS
   rw [hnext]
-  have hfactor : X^2 - 1 = (X - 1) * (X + 1) := by
-    nlinarith
-  exact hfactor.symm
+  change X^2 - 1 = (X-1) * (X+1)
+  exact hfactor
 
 /-- Divisibility through any later world. -/
 theorem gst_world_modulus_dvd_of_leS
@@ -92,7 +100,7 @@ theorem gst_world_fingerprint_compatibleS
   unfold gstWorldFingerprintS
   exact Nat.mod_mod_of_dvd R (gst_world_modulus_dvd_succS n)
 
-/-- Elementary growth: n+1 never exceeds 2^n at positive n. -/
+/-- Elementary growth: n+1 never exceeds 2^n. -/
 theorem gst_index_le_two_powS : ∀ n : Nat, n + 1 ≤ 2^n
   | 0 => by decide
   | n+1 => by
@@ -115,7 +123,8 @@ theorem gst_lt_recovery_world_modulusS (R : Nat) :
     R < gstWorldModulusS (R+1) := by
   unfold gstWorldModulusS gstWorldCardinalityS gstWorldDepthS
   have hlin : R + 2 ≤ 6^(R+1) := gst_self_plus_two_le_six_pow_succS R
-  have hexp : R + 1 ≤ 2^(R+1) := gst_index_le_two_powS (R+1)
+  have hexpStrong : R + 2 ≤ 2^(R+1) := gst_index_le_two_powS (R+1)
+  have hexp : R + 1 ≤ 2^(R+1) := by omega
   have hpow : 6^(R+1) ≤ 6^(2^(R+1)) :=
     Nat.pow_le_pow_of_le (by decide : 1 < 6) hexp
   omega
