@@ -1,0 +1,69 @@
+name: Whole Equation Navigation Smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve dependencies
+        timeout-minutes: 20
+        run: |
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+      - name: Build infinite handwritten equation modules
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
+      - name: Build pre-Omega monolith module
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosPreOmega.lean
+          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+      - name: Prove whole equation on canonical Navigation constant
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          cat > WholeEquationNavigationSmoke.lean <<'EOF'
+          import ErdosPreOmega
+          import GSTGraphV2SleepEquationLabScratch
+
+          open GSTInfiniteV2
+
+          #check gst_navigation_decomposition
+
+          theorem gpt56_whole_equation_canonical_navigation
+              (t n : Nat) (ht : 1 ≤ t) :
+              GSTSleepFullOperatorS t n (gstNavigationConstant t n) := by
+            apply gst_sleep_full_operatorS
+            unfold GSTSleepNavigationEnergyCouplingS
+            unfold gstOmegaPressureEnergyS gstOriginRemainingUS
+            exact (gst_navigation_decomposition t n ht).symm
+
+          #check gpt56_whole_equation_canonical_navigation
+          #print axioms gpt56_whole_equation_canonical_navigation
+          EOF
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean WholeEquationNavigationSmoke.lean | tee whole-equation.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' whole-equation.log
