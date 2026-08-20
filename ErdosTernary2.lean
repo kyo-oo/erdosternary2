@@ -15489,8 +15489,8 @@ theorem gst_canonical_trap_is_physical_surgeryS
 
   have hClt : C < 4 := by
     rcases hC with h2 | h3
-    · rw [h2]; decide
-    · rw [h3]; decide
+    · simpa [C, T, h2]
+    · simpa [C, T, h3]
   have hHigh : S = W + A*C := by
     dsimp [S, D, Z, W, A, N, T, C]
     simpa [N, A, T] using hEq
@@ -15881,7 +15881,6 @@ theorem gst_prefix_one_bad_good_big2_prefix_forces_origin_nonzeroS
       s n q hs hbad hcarry
   apply hforbid
   rw [hprefixBig2, hnzero]
-  decide
 -- END ATTACHED CanonicalOriginTritForcingScratch.lean
 
 -- BEGIN ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
@@ -16432,6 +16431,8 @@ theorem gst_micro_big2_flux_exactS (a d : Nat) :
 an arbitrary sequence of ternary digits; when instantiated with consecutive
 physical x2 columns, `b (r+1)` is the output BIG2 indicator of column r.
 -/
+open scoped BigOperators
+
 theorem gst_micro_big2_flux_telescopesS
     (b : Nat → Int) (L : Nat) :
     (∑ r in Finset.range L, 7 * (b (r+1) - b r)) =
@@ -16584,10 +16585,10 @@ theorem gst_shared_x4_binary_factorS
   have h2 : 0 < (2:Nat) := by decide
   have hDb : D = 2*a + b := by
     dsimp [a, b]
-    exact (Nat.mod_add_div D 2).symm
+    simpa [Nat.add_comm] using (Nat.mod_add_div D 2).symm
   have hCe : C = 2*c + e := by
     dsimp [c, e]
-    exact (Nat.mod_add_div C 2).symm
+    simpa [Nat.add_comm] using (Nat.mod_add_div C 2).symm
   have ha : a < 2 := by
     dsimp [a]
     omega
@@ -16601,15 +16602,21 @@ theorem gst_shared_x4_binary_factorS
     dsimp [e]
     exact Nat.mod_lt _ h2
   have hpar : (W + A*e) % 2 = b := by
-    have hmod := congrArg (fun x : Nat => x % 2) hshared
-    rw [hDb, hCe] at hmod
-    dsimp [b, e]
-    omega
+    have hsharedParity :
+        b + 2*(a + 2*Z) = (W + A*e) + 2*(A*c) := by
+      calc
+        b + 2*(a + 2*Z) = (2*a + b) + 4*Z := by ring
+        _ = D + 4*Z := by rw [hDb]
+        _ = W + A*C := hshared
+        _ = W + A*(2*c + e) := by rw [hCe]
+        _ = (W + A*e) + 2*(A*c) := by ring
+    have hmod := congrArg (fun x : Nat => x % 2) hsharedParity
+    simpa [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hb] using hmod.symm
   have hWsplit : b + 2*Wmid = W + A*e := by
     dsimp [Wmid]
     have h := Nat.mod_add_div (W + A*e) 2
     rw [hpar] at h
-    omega
+    exact h
   have hmid : a + 2*Z = Wmid + A*c := by
     have hshared' :
         2*(a + 2*Z) + b = (W + A*e) + 2*(A*c) := by
