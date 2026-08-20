@@ -93,7 +93,7 @@ theorem gst_sleep_seed_zero_noBig1_bad_is_zeroS :
         constructor
         · simpa [gstDigitS] using hx
         · left
-          simp [gstAffineCarryS]
+          simp [gstAffineCarryS, Nat.mod_one]
       have hd1 : X % 3 ≠ 1 := by
         have h := hno 0
         simpa [GSTSleepNoBig1S, gstDigitS] using h
@@ -164,7 +164,7 @@ theorem gst_sleep_seed_one_three_noBig1_bad_formsS :
           constructor
           · simpa [gstDigitS] using hx
           · right
-            simp [gstAffineCarryS]
+            simp [gstAffineCarryS, Nat.mod_one]
         have hd1 : X % 3 ≠ 1 := by
           have h := hno 0
           simpa [GSTSleepNoBig1S, gstDigitS] using h
@@ -264,7 +264,6 @@ theorem gst_sleep_big1_free_last_gate_peel_is_ternary_boundaryS
     have hpow : 3 * 9^r = 3^(2*r+1) := by
       rw [show (9:Nat) = 3^2 by decide, ← Nat.pow_mul,
         show 2*r+1 = 1 + 2*r by omega, Nat.pow_add]
-      norm_num
     exact hX.trans hpow
 
 #check gst_sleep_seed_zero_noBig1_bad_is_zeroS
