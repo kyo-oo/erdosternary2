@@ -75,11 +75,16 @@ jobs:
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
-      - name: Typecheck infinite eleven-equation synthesis master
+      - name: Build infinite eleven-equation synthesis master artifact
         timeout-minutes: 20
         run: |
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+      - name: Typecheck exact Omega Past-Future ledger synthesis
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean"
       - name: Typecheck infinite handwritten operator budget blade
         continue-on-error: true
         timeout-minutes: 20
