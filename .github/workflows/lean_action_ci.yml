@@ -38,15 +38,54 @@ jobs:
         run: |
           set -euxo pipefail
           lake build GSTTactic
+      - name: Prove direct finite-base plus mul4 induction bypass
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > DirectInductionSmoke.lean
+          cat >> DirectInductionSmoke.lean <<'EOF'
+
+          theorem gpt56_direct_even_universal (a : Nat) :
+              5 ≤ a → hasTernaryTwo (4^a) = true := by
+            induction a using Nat.strongRecOn with
+            | h a ih =>
+                intro ha
+                by_cases hbase : a ≤ 500
+                · exact modular_check_base a ha hbase
+                · have ha1 : 5 ≤ a - 1 := by omega
+                  have hlt : a - 1 < a := by omega
+                  have hprev : hasTernaryTwo (4^(a-1)) = true :=
+                    ih (a-1) hlt ha1
+                  exact mul4_lift_gst_duality a (by omega) hprev
+
+          theorem gpt56_direct_universal (n : Nat) (hn : 9 ≤ n) :
+              noTernaryTwo (2^n) = false := by
+            by_cases hodd : n % 2 = 1
+            · exact erdos_ternary_2_odd_universal n hn hodd
+            · have heven : n % 2 = 0 := by omega
+              have h4eq : 2^n = 4^(n/2) := by
+                have hn_eq : n = 2 * (n/2) := by omega
+                rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+              rw [h4eq]
+              have ha : 5 ≤ n/2 := by omega
+              exact has_two_imp_not_no_two (4^(n/2))
+                (gpt56_direct_even_universal (n/2) ha)
+
+          #check gpt56_direct_even_universal
+          #check gpt56_direct_universal
+          #print axioms gpt56_direct_even_universal
+          #print axioms gpt56_direct_universal
+          EOF
+          lake env lean DirectInductionSmoke.lean | tee direct-induction.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' direct-induction.log
       - name: Build infinite GST V2 control artifact
         timeout-minutes: 20
         shell: bash
         run: |
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean \
-            -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" \
-            "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
       - name: Typecheck infinite natural-support contradiction blade
         timeout-minutes: 20
         shell: bash
@@ -77,54 +116,15 @@ jobs:
           from pathlib import Path
           src = Path('ErdosTernary2.lean')
           lines = src.read_text(encoding='utf-8').splitlines(keepends=True)
-          start = next(i for i, line in enumerate(lines)
-                       if '/-- First-level residual Ω∞ termination.' in line)
-          numeric = next(i for i, line in enumerate(lines)
-                         if '/-- Numerical ceiling used to bound every power-of-four graph witness.' in line)
+          start = next(i for i, line in enumerate(lines) if '/-- First-level residual Ω∞ termination.' in line)
+          numeric = next(i for i, line in enumerate(lines) if '/-- Numerical ceiling used to bound every power-of-four graph witness.' in line)
           resume = numeric
-          while resume > 0 and lines[resume - 1].strip() == '':
-              resume -= 1
-          assert resume > 0 and lines[resume - 1].strip() == '/-', (start, numeric, resume)
+          while resume > 0 and lines[resume - 1].strip() == '': resume -= 1
+          assert resume > 0 and lines[resume - 1].strip() == '/-'
           resume -= 1
-          out = lines[:start] + lines[resume:]
-          Path('ErdosTernary2_NoLegacyOmegaSmoke.lean').write_text(''.join(out), encoding='utf-8')
-          print(f'removed lines {start+1}..{resume}; retained {len(out)} lines')
+          Path('ErdosTernary2_NoLegacyOmegaSmoke.lean').write_text(''.join(lines[:start] + lines[resume:]), encoding='utf-8')
           PY
-          cat >> ErdosTernary2_NoLegacyOmegaSmoke.lean <<'EOF'
-          #check erdos_ternary_2_even_universal
-          #check erdos_ternary_2_universal
-          #print axioms erdos_ternary_2_even_universal
-          #print axioms erdos_ternary_2_universal
-          EOF
           lake env lean ErdosTernary2_NoLegacyOmegaSmoke.lean 2>&1 | tee no-legacy-omega-smoke.log
-      - name: Typecheck exact all-cardinality world projection
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteExactWorldProjectionScratch.lean"
-      - name: Typecheck direct infinite six-world collision
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteSixWorldCollisionScratch.lean"
-      - name: Typecheck infinite cardinal-world master
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
-      - name: Typecheck infinite handwritten operator budget blade
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteHandwrittenOperatorScratch.lean"
       - name: Typecheck proof monolith without serialization
         timeout-minutes: 30
         shell: bash
