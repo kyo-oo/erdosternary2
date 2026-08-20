@@ -37,6 +37,8 @@ jobs:
         run: lake env lean GSTPrefixOneLatentGateSmoke.lean
       - name: Compile prefix-one Past/Future ledger
         run: lake env lean GSTPrefixOneLedgerSmoke.lean
+      - name: Kernel-check false last-gate route counterexample
+        run: lake env lean GSTPhysicalTrapCounterexample.lean
       - name: Print transport axioms
         run: |
           cat > /tmp/TransportAxioms.lean <<'EOF'
@@ -53,5 +55,5 @@ jobs:
           #print axioms GSTV2.infinite_coupled_ledger
           EOF
           lake env lean /tmp/TransportAxioms.lean
-      - name: Compile infinite-control RED seam
+      - name: Compile infinite-control production consumer
         run: lake env lean GSTInfiniteControlProductionSmoke.lean
