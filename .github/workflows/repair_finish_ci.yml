@@ -1,83 +1,20 @@
-name: Finish One Error
+name: Finish One Error (Manual Archive Check)
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   finish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Install pinned Lean
+      - name: Explain archived workflow
         shell: bash
         run: |
           set -euxo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
-      - name: Resolve dependencies
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          set -euxo pipefail
-          lake update
-          lake exe cache get
-      - name: Build GSTTactic
-        shell: bash
-        run: |
-          set -euxo pipefail
-          lake build GSTTactic
-      - name: Kernel-check proof before legacy Omega
-        timeout-minutes: 30
-        shell: bash
-        run: |
-          set -euxo pipefail
-          grep -q '^theorem gst_omega_termination_s1' ErdosTernary2.lean
-          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > PreOmega.lean
-          cat >> PreOmega.lean <<'EOF'
-          #check erdos_ternary_2_even_universal
-          #check erdos_ternary_2_universal
-          #print axioms erdos_ternary_2_even_universal
-          #print axioms erdos_ternary_2_universal
-          EOF
-          lake env lean PreOmega.lean | tee preomega.log
-          ! grep -E 'declaration uses .*(sorryAx|propext.*sorry|Classical.choice.*sorry)' preomega.log
-      - name: Quarantine verified redundant Omega tail
-        if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          if grep -q '^theorem gst_omega_termination_s1' ErdosTernary2.lean; then
-            awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosTernary2.new
-            cat >> ErdosTernary2.new <<'EOF'
-
-          /- Legacy residual Omega overproof quarantined after the first broken
-             termination declaration.  The comparator-facing universal theorem
-             above is kernel-checked and axiom-audited by this workflow. -/
-          EOF
-            mv ErdosTernary2.new ErdosTernary2.lean
-          fi
-          lake env lean ErdosTernary2.lean
-      - name: Typecheck Main
-        timeout-minutes: 30
-        shell: bash
-        run: |
-          set -euxo pipefail
-          lake env lean Main.lean
-      - name: Commit surgical replacement
-        if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean
-          if ! git diff --cached --quiet; then
-            git commit -m 'Quarantine redundant legacy Omega overproof'
-            git push origin HEAD:sol/gpt56-close-one-error
-          fi
+          echo 'Automatic legacy-Omega truncation is disabled.'
+          echo 'The active comparator-facing two-wave theorem lives after the old residual Omega block.'
+          echo 'Use Lean Comparator Surgery CI for the surgical no-legacy-Omega smoke test.'
