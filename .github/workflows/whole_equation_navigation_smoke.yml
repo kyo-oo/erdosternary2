@@ -40,7 +40,7 @@ jobs:
           set -euxo pipefail
           awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > ErdosPreOmega.lean
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
-      - name: Prove whole equation on canonical Navigation constant
+      - name: Prove whole equation and Omega fingerprint adapter
         timeout-minutes: 20
         shell: bash
         run: |
@@ -62,8 +62,61 @@ jobs:
             unfold gstOmegaPressureEnergyS gstOriginRemainingUS
             exact (gst_navigation_decomposition t n ht).symm
 
+          theorem gpt56_omega_gate_iff_whole_fingerprint
+              (s k m j : Nat) (hs : 1 ≤ s) (hk : 1 ≤ k) :
+              GSTOmegaGatePolynomial (gstOmega s k m j) = 0 ↔
+                GSTSleepHappyFingerprintS
+                  (gstSleepThreeWorldFingerprintS
+                    (gstOmega s k m j).parentCarry
+                    (gstOmega s k m j).parentDigit) := by
+            have hp := gst_omega_parent_projection s k m j hs
+            have hpos : 1 ≤ k + j := by omega
+            have hCroot :
+                gstCarry (gstNavigationConstant s (1 + 3^k*m)) (k+j) < 4 :=
+              carry_bound (gstNavigationConstant s (1 + 3^k*m)) (k+j) hpos
+            have hC : (gstOmega s k m j).parentCarry < 4 := by
+              rw [← hp.2]
+              exact hCroot
+            have hd : (gstOmega s k m j).parentDigit < 3 := by
+              rw [← hp.1]
+              unfold gstDigit
+              exact Nat.mod_lt _ (by decide)
+            constructor
+            · intro hz
+              have hg :=
+                (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).1 hz
+              apply (gst_sleep_happy_iff_three_world_fingerprintS
+                (gstOmega s k m j).parentCarry
+                (gstOmega s k m j).parentDigit hC hd).1
+              exact hg
+            · intro hf
+              apply (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).2
+              have hg :=
+                (gst_sleep_happy_iff_three_world_fingerprintS
+                  (gstOmega s k m j).parentCarry
+                  (gstOmega s k m j).parentDigit hC hd).2 hf
+              exact hg
+
+          theorem gpt56_omega_bad_trace_avoids_whole_fingerprint
+              (s k m : Nat) (hs : 1 ≤ s) (hk : 1 ≤ k)
+              (hbad : GSTOmegaInfiniteBadTrace s k m) :
+              ∀ j,
+                ¬ GSTSleepHappyFingerprintS
+                  (gstSleepThreeWorldFingerprintS
+                    (gstOmega s k m j).parentCarry
+                    (gstOmega s k m j).parentDigit) := by
+            intro j hfp
+            have hz :=
+              (gpt56_omega_gate_iff_whole_fingerprint s k m j hs hk).2 hfp
+            have hne := hbad j
+            change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0 at hne
+            exact hne hz
+
           #check gpt56_whole_equation_canonical_navigation
+          #check gpt56_omega_gate_iff_whole_fingerprint
+          #check gpt56_omega_bad_trace_avoids_whole_fingerprint
           #print axioms gpt56_whole_equation_canonical_navigation
+          #print axioms gpt56_omega_gate_iff_whole_fingerprint
           EOF
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean WholeEquationNavigationSmoke.lean | tee whole-equation.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' whole-equation.log
