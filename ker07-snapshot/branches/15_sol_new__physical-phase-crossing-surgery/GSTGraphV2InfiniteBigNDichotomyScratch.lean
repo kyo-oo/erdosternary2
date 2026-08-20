@@ -14,19 +14,14 @@ first coordinate at which the infinite information path itself hits BIG1.
 The complementary branch is pathwise `I != BIG1` at every natural coordinate.
 -/
 
-/-- Legal infinite microscopic bridge path before choosing either information
-regime. -/
 structure GSTInfiniteBridgePathS (a d : Nat → Nat) : Prop where
   bit_lt_two : ∀ j, a j < 2
   digit_lt_three : ∀ j, d j < 3
   bridge_step : ∀ j, gstBinaryBridgeOutputS (a j) (d j) = d (j+1)
 
-/-- BIG-N means N is the first information coordinate carrying BIG1. -/
 def GSTFirstBig1AtS (d : Nat → Nat) (N : Nat) : Prop :=
   d N = 1 ∧ ∀ j, j < N → d j ≠ 1
 
-/-- If an infinite path never hits BIG1, it is exactly the already-kernelized
-pathwise `I != BIG1` object. -/
 theorem gst_infinite_bridge_to_big1_clearS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -35,7 +30,6 @@ theorem gst_infinite_bridge_to_big1_clearS
   exact ⟨hpath.bit_lt_two, hpath.digit_lt_three,
     hno1, hpath.bridge_step⟩
 
-/-- Exhaustive information split on one genuinely infinite path. -/
 theorem gst_infinite_bigN_or_notBig1S
     (d : Nat → Nat) :
     (∃ N, d N = 1) ∨ (∀ j, d j ≠ 1) := by
@@ -45,8 +39,6 @@ theorem gst_infinite_bigN_or_notBig1S
     intro j hj
     exact h ⟨j, hj⟩
 
-/-- If BIG1 occurs anywhere, the well-order on Nat extracts an actual first
-BIG-N coordinate from the infinite path. -/
 theorem gst_exists_first_big1S
     (d : Nat → Nat)
     (hex : ∃ N, d N = 1) :
@@ -60,8 +52,6 @@ theorem gst_exists_first_big1S
     change j < Nat.find hex at hj
     omega
 
-/-- Before a positive first BIG-N hit, every information coordinate is forced
-to BIG2. -/
 theorem gst_before_first_big1_all_big2S
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -89,8 +79,6 @@ theorem gst_before_first_big1_all_big2S
       rw [← hpath.bridge_step j]
       exact hs.2.2.1
 
-/-- Every edge strictly before the BIG-N boundary is the all-SURVIVE mass-5
-state. -/
 theorem gst_before_first_big1_edges_surviveS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -114,8 +102,6 @@ theorem gst_before_first_big1_edges_surviveS
     (a j) (d j) ha hdlt (by omega) hd1 hout1
   exact ⟨hs.1, hs.2.1, hs.2.2.2.1, hs.2.2.2.2⟩
 
-/-- The edge that enters the first BIG1 coordinate is uniquely DESTROY:
-bit zero, BIG2 input, microscopic mass four, event five. -/
 theorem gst_first_big1_boundary_is_destroyS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -145,7 +131,6 @@ theorem gst_first_big1_boundary_is_destroyS
   norm_num [gstBinaryBridgeMassS, gstBinaryBridgeEventS,
     gstBinaryBridgeOutputS]
 
-/-- All-SURVIVE prefix code before the final DESTROY boundary. -/
 theorem gst_first_big1_survive_prefix_codeS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -173,9 +158,6 @@ theorem gst_first_big1_survive_prefix_codeS
         omega
   exact hprefix (N-1) (by omega)
 
-/-- Exact BIG-N finite code extracted from the infinite path.  For N>0 the
-first N microscopic cells are `55...54` in base six, hence value
-`5*6^(N-1)-1`. -/
 theorem gst_first_big1_exact_bigN_codeS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -188,20 +170,18 @@ theorem gst_first_big1_exact_bigN_codeS
     a d hpath h0 N hN hfirst
   have hbound := gst_first_big1_boundary_is_destroyS
     a d hpath h0 N hN hfirst
-  calc
-    gstBig1ProjectedPathCodeS a d N =
+  dsimp only at hbound
+  have hsum :
+      gstBig1ProjectedPathCodeS a d N =
         gstBig1ProjectedPathCodeS a d (N-1) +
           gstBinaryBridgeMassS (a (N-1)) (d (N-1)) * 6^(N-1) := by
-      unfold gstBig1ProjectedPathCodeS
-      rw [hshape, Finset.sum_range_succ]
-    _ = (6^(N-1) - 1) + 4 * 6^(N-1) := by
-      rw [hpre, hbound.2.2.1]
-    _ = 5 * 6^(N-1) - 1 := by
-      have hp : 0 < 6^(N-1) := Nat.pow_pos (by decide)
-      omega
+    unfold gstBig1ProjectedPathCodeS
+    conv_lhs => rw [hshape]
+    rw [Finset.sum_range_succ]
+  rw [hsum, hpre, hbound.2.2.1]
+  have hp : 0 < 6^(N-1) := Nat.pow_pos (by decide)
+  omega
 
-/-- Full infinite dichotomy with controlled output.  Either the infinite path
-has a first BIG-N coordinate, or the whole path is the rigid no-BIG1 branch. -/
 theorem gst_infinite_two_case_controlS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
@@ -212,8 +192,6 @@ theorem gst_infinite_two_case_controlS
   · exact Or.inl (gst_exists_first_big1S d hbig)
   · exact Or.inr (gst_infinite_bridge_to_big1_clearS a d hpath hno)
 
-/-- Quantitative version: a positive first BIG-N coordinate has exact finite
-code, while the no-BIG1 branch has maximal `6^K-1` code at every scale. -/
 theorem gst_infinite_two_case_quantitativeS
     (a d : Nat → Nat)
     (hpath : GSTInfiniteBridgePathS a d)
