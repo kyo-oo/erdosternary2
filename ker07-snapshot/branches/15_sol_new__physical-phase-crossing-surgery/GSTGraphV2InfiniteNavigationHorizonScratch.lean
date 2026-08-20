@@ -39,7 +39,6 @@ theorem gst_bigN_navigation_digit_zeroS
     gstDigitS N N = 0 := by
   unfold gstDigitS
   rw [gst_bigN_navigation_descent_zeroS N hN]
-  simp
 
 /-- The Omega transfer packet at the Navigation horizon is exactly zero. -/
 theorem gst_bigN_omega_transfer_zeroS
