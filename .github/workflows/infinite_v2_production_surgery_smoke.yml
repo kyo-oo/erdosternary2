@@ -1,0 +1,78 @@
+name: Infinite V2 Production Surgery Smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  red-green:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+
+      - name: Resolve dependencies
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+
+      - name: Compile independent infinite V2 stack
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          export LEAN_PATH="$SNAP:${LEAN_PATH:-}"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.olean" "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.olean" "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.olean" "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.olean" "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
+
+      - name: Compile pre-Omega production context
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
+          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+
+      - name: RED - production collision theorem must not exist yet
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          cat > InfiniteV2ProductionRed.lean <<'EOF'
+          import ErdosPreOmega
+          import GSTGraphV2InfiniteOmegaLedgerMasterScratch
+          import GSTGraphV2InfiniteOriginWorldCollisionScratch
+
+          open GSTInfiniteV2
+
+          #check gst_v2_infinite_prefix_one_collision
+          EOF
+          set +e
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean InfiniteV2ProductionRed.lean > red.log 2>&1
+          STATUS=$?
+          set -e
+          cat red.log
+          test "$STATUS" -ne 0
+          grep -q "Unknown identifier.*gst_v2_infinite_prefix_one_collision" red.log
+          echo "RED CONFIRMED: production infinite V2 collision seam is genuinely missing"
