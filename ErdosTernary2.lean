@@ -14402,7 +14402,6 @@ theorem gst_navigation_self_digit_zeroS
     gstDigitS N N = 0 := by
   unfold gstDigitS
   rw [gst_navigation_self_horizon_zeroS N hN]
-  simp
 
 /-- The Omega pressure packet has no new transfer at the finite Navigation
 horizon itself.  Information already transferred to the past coordinate is not
@@ -14428,7 +14427,7 @@ state-count arithmetic exact before it is coupled to the V2 graph.
 
 /-- Number of bridge states through natural depth i, including depth zero. -/
 def gstSixUniversePrefixS (i : Nat) : Nat :=
-  ∑ k in Finset.range (i+1), 6^k
+  Finset.sum (Finset.range (i+1)) (fun k => 6^k)
 
 /-- Exact six-ary geometric recurrence. -/
 theorem gst_six_universe_prefix_succS (i : Nat) :
@@ -14453,7 +14452,7 @@ theorem gst_six_universe_prefix_closedS (i : Nat) :
 /-- The first nontrivial cumulative bridge universe has seven states. -/
 theorem gst_six_universe_prefix_oneS :
     gstSixUniversePrefixS 1 = 7 := by
-  decide
+  norm_num [gstSixUniversePrefixS, Finset.sum_range_succ]
 
 /-- The first aligned two-layer modulus factors as (6-1)(6+1). -/
 theorem gst_six_square_boundary_factorS :
@@ -14463,7 +14462,7 @@ theorem gst_six_square_boundary_factorS :
 /-- The exact EQ2 event factor 13 is 6 plus the first cumulative universe 7. -/
 theorem gst_event_factor_thirteen_from_six_sevenS :
     13 = 6 + gstSixUniversePrefixS 1 := by
-  decide
+  norm_num [gstSixUniversePrefixS, Finset.sum_range_succ]
 
 /-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
 factor x=13.  Kept as integer division because 13-6 divides 7 exactly. -/
@@ -14803,7 +14802,8 @@ theorem gst_big1_clear_path_edges_are_surviveS
 /-- Base-six code of the K microscopic bridge states. -/
 def gstBig1ProjectedPathCodeS
     (a d : Nat → Nat) (K : Nat) : Nat :=
-  ∑ j in Finset.range K, gstBinaryBridgeMassS (a j) (d j) * 6^j
+  Finset.sum (Finset.range K)
+    (fun j => gstBinaryBridgeMassS (a j) (d j) * 6^j)
 
 /-- A nonzero pathwise-BIG1-clear component is exactly 55...55 in base six,
 therefore its code is 6^K-1. -/
@@ -14825,7 +14825,7 @@ theorem gst_big1_projected_path_code_eq_six_pow_sub_oneS
           exact hpath.2.2.1 j (by omega)
         · intro j hj
           exact hpath.2.2.2 j (by omega)
-      have ih' := ih hprefix h0
+      have ih' := ih
       have hedge := gst_big1_clear_path_edges_are_surviveS
         a d (K+1) hpath h0 K (by omega)
       unfold gstBig1ProjectedPathCodeS at ih' ⊢
@@ -14869,7 +14869,7 @@ theorem gst_big1_projector_two_layer_forces_plus_surviveS
     subst C <;>
     norm_num [gstFirstMicroOutputS, gstFirstMicroMassS,
       gstSecondMicroOutputS, gstSecondMicroMassS,
-      gstMicroHighBitS, gstMicroLowBitS] at hmid1 hout1 ⊢
+      gstMicroHighBitS, gstMicroLowBitS] at *
 
 /-- Therefore the nonzero BIG1-projected two-digit sector is not merely
 associated with a Happy Gate: it is exactly the physical GST+ Happy gate. -/
@@ -14995,8 +14995,7 @@ theorem gst_physical_two_digit_chord_forces_gst_plusS
     gst_big1_projector_two_layer_forces_plus_surviveS
       (gstCarryS R p) (gstDigitS R p) hC hd hd0 hI.1 hI.2.1 hI.2.2
   refine ⟨hC3, ?_, ?_, ?_⟩
-  · unfold gstPhysicalMicroPairS
-    rw [hM1, hM2]
+  · simp [gstPhysicalMicroPairS, hM1, hM2]
   · rw [← gst_second_micro_output_eq_x4_outputS
       (gstCarryS R p) (gstDigitS R p) hC hd]
     exact hout2
@@ -15074,8 +15073,11 @@ theorem gst_happy_big2_two_digit_not_clear_is_nullS
     · exfalso
       apply hnot
       exact hiff.mpr hthree
-  rw [h0, hd2]
-  decide
+  norm_num [h0, hd2, gstPhysicalMicroPairS,
+    gstFirstMicroOutputS, gstFirstMicroMassS,
+    gstSecondMicroMassS, gstMicroHighBitS, gstMicroLowBitS,
+    gstBinaryBridgeEventS, gstBinaryBridgeOutputS,
+    gstHandwrittenUJumpS, gstHandwrittenUChargeS, gstStepCarryS]
 
 /-- Complete right-chord dichotomy.  There is no third physical Happy BIG2
 orientation.  The clear branch is GST+ 55_6 / (8,8) / code 35 / U=-6; the
@@ -15146,7 +15148,7 @@ six-state chord and Old Sol's information-regeneration descent.
 theorem gst_seed_zero_affine_carry_eq_physicalS
     (T p : Nat) :
     gstAffineMulCarryS 4 0 T p = gstCarryS T p := by
-  rfl
+  simp [gstAffineMulCarryS, gstCarryS]
 
 /-- An actual seed-zero Happy Gate is an ordinary physical Happy BIG2 cell. -/
 theorem gst_seed_zero_happy_is_physical_big2S
@@ -16431,11 +16433,9 @@ theorem gst_micro_big2_flux_exactS (a d : Nat) :
 an arbitrary sequence of ternary digits; when instantiated with consecutive
 physical x2 columns, `b (r+1)` is the output BIG2 indicator of column r.
 -/
-open scoped BigOperators
-
 theorem gst_micro_big2_flux_telescopesS
     (b : Nat → Int) (L : Nat) :
-    (∑ r in Finset.range L, 7 * (b (r+1) - b r)) =
+    Finset.sum (Finset.range L) (fun r => 7 * (b (r+1) - b r)) =
       7 * (b L - b 0) := by
   induction L with
   | zero => simp
