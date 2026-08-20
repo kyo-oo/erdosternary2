@@ -127,8 +127,10 @@ theorem gst_cardinal_master_exactS
   have hKshape : K = 1 + (K-1) := by omega
   have hmul : K * C = C + (K-1) * C := by
     calc
-      K * C = (1 + (K-1)) * C := by rw [hKshape]
-      _ = C + (K-1) * C := by ring
+      K * C = (1 + (K-1)) * C :=
+        congrArg (fun x : Nat => x * C) hKshape
+      _ = C + (K-1) * C := by
+        rw [Nat.add_mul, Nat.one_mul]
   dsimp only [C] at hmul
   rw [hmul] at h
   omega
