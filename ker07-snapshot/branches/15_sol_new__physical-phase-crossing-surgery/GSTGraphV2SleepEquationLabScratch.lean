@@ -84,10 +84,10 @@ theorem gst_sleep_nonfixed_S_sigma_U_neutralS
     gstSleepSMomentS C d 1 = 0 := by
   have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;>
-    norm_num [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS] at hnot0 hnotPlus ⊢
+  rcases hCc with h0 | h1 | h2 | h3
+  all_goals rcases hdc with d0 | d1 | d2
+  all_goals subst_vars
+  all_goals norm_num [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS] at *
 
 /-- Exact phase law for the weighted S Sigma under one local U re-reading.
 For a legal five-cycle, rotating the starting cell multiplies the moment by n
@@ -143,7 +143,7 @@ theorem gst_sleep_three_world_fingerprint_injectiveS
   all_goals subst_vars
   all_goals norm_num [gstSleepThreeWorldFingerprintS, gstSleepSMomentS,
     gstSleepEMomentS, gstSleepRotateS, gstSleepSChargeS,
-    gstSleepEnergyS] at hfp ⊢
+    gstSleepEnergyS] at *
 
 /-- The two Happy-Gate cells have two distinguished whole-equation
 fingerprints; injectivity makes this an algebraic gate detector. -/
