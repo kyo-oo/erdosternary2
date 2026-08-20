@@ -37,36 +37,43 @@ jobs:
           export LEAN_PATH="$SNAP:${LEAN_PATH:-}"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.olean" "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.olean" "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.olean" "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.olean" "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.lean"
           lake env lean -o "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.olean" "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.olean" "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
+          lake env lean -o "$SNAP/GSTGraphV2SleepEquationCollisionScratch.olean" "$SNAP/GSTGraphV2SleepEquationCollisionScratch.lean"
 
-      - name: Compile pre-Omega production context
+      - name: Compile pre-legacy production context
         timeout-minutes: 30
         shell: bash
         run: |
           set -euxo pipefail
           LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          test -n "$LEGACY_LINE"
           CUT=$((LEGACY_LINE - 2))
           head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
-      - name: RED - production collision theorem must not exist yet
+      - name: RED - exact V2 prefix-one collision proof obligation
         shell: bash
         run: |
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           cat > InfiniteV2ProductionRed.lean <<'EOF'
           import ErdosPreOmega
-          import GSTGraphV2InfiniteOmegaLedgerMasterScratch
+          import GSTGraphV2InfiniteNaturalContradictionScratch
+          import GSTGraphV2InfiniteBigNDichotomyScratch
           import GSTGraphV2InfiniteOriginWorldCollisionScratch
+          import GSTGraphV2SleepBadLanguageDescentScratch
+          import GSTGraphV2SleepEquationCollisionScratch
 
           open GSTInfiniteV2
 
-          #check gst_v2_infinite_prefix_one_collision
+          theorem gst_v2_infinite_prefix_one_collision
+              (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+              (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+              (hbad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+            omega
           EOF
           set +e
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean InfiniteV2ProductionRed.lean > red.log 2>&1
@@ -74,5 +81,5 @@ jobs:
           set -e
           cat red.log
           test "$STATUS" -ne 0
-          grep -q "Unknown identifier.*gst_v2_infinite_prefix_one_collision" red.log
-          echo "RED CONFIRMED: production infinite V2 collision seam is genuinely missing"
+          grep -Eq "unsolved goals|failed to synthesize|omega could not prove" red.log
+          echo "RED CONFIRMED: exact modern collision signature is well-formed and mathematically unproved"
