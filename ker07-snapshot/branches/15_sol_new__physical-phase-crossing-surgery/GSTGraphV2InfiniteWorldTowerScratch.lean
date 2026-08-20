@@ -29,7 +29,8 @@ def gstWorldModulusS (n : Nat) : Nat := gstWorldCardinalityS n - 1
 /-- Every world modulus is positive. -/
 theorem gst_world_modulus_posS (n : Nat) : 0 < gstWorldModulusS n := by
   unfold gstWorldModulusS gstWorldCardinalityS gstWorldDepthS
-  have he : 1 ≤ 2^n := by positivity
+  have hepos : 0 < 2^n := Nat.pow_pos (by decide)
+  have he : 1 ≤ 2^n := by omega
   have hp : 6^1 ≤ 6^(2^n) :=
     Nat.pow_le_pow_of_le (by decide : 1 < 6) he
   norm_num at hp
@@ -57,14 +58,13 @@ theorem gst_world_modulus_dvd_succS (n : Nat) :
   have hX : 1 ≤ X := by
     have hxpos : 0 < X := by
       dsimp [X, gstWorldCardinalityS, gstWorldDepthS]
-      positivity
+      exact Nat.pow_pos (by decide)
     omega
   have hnext : gstWorldCardinalityS (n+1) = X^2 := by
     simpa [X] using gst_world_cardinality_succ_squareS n
   have hXeq : X = (X-1) + 1 := by omega
   have hadd : (X-1) * (X+1) + 1 = X^2 := by
-    rw [hXeq]
-    ring
+    nlinarith [hXeq]
   have hfactor : X^2 - 1 = (X-1) * (X+1) := by omega
   refine ⟨X + 1, ?_⟩
   unfold gstWorldModulusS
