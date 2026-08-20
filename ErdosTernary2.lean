@@ -10722,7 +10722,16 @@ theorem gst_canonical_Q4_mod9S
       (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
     have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
       norm_num [Nat.mul_mod, hA3, hQnext1_3]
-    omega
+    have hdecomp :
+        4^(3^t) * Q (t+1) 1 =
+          1 + 3 * ((4^(3^t) * Q (t+1) 1) / 3) := by
+      have h := Nat.mod_add_div (4^(3^t) * Q (t+1) 1) 3
+      rw [hAq3] at h
+      omega
+    rw [Nat.mul_assoc, hdecomp]
+    rw [show 3 * (1 + 3 * ((4^(3^t) * Q (t+1) 1) / 3)) =
+        3 + 9 * ((4^(3^t) * Q (t+1) 1) / 3) by ring]
+    norm_num [Nat.add_mod, Nat.mul_mod]
   norm_num [hthree]
 
 /-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
@@ -10746,7 +10755,16 @@ theorem gst_canonical_Q13_mod27S
       (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
     have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
       norm_num [Nat.mul_mod, hA9, hQ4]
-    omega
+    have hdecomp :
+        4^(3^s) * Q (s+1) 4 =
+          1 + 9 * ((4^(3^s) * Q (s+1) 4) / 9) := by
+      have h := Nat.mod_add_div (4^(3^s) * Q (s+1) 4) 9
+      rw [hAq9] at h
+      omega
+    rw [Nat.mul_assoc, hdecomp]
+    rw [show 3 * (1 + 9 * ((4^(3^s) * Q (s+1) 4) / 9)) =
+        3 + 27 * ((4^(3^s) * Q (s+1) 4) / 9) by ring]
+    norm_num [Nat.add_mod, Nat.mul_mod]
   norm_num [hterm]
 
 /-- Canonical origin causality extends the residue-13 calculation to the full
@@ -11637,7 +11655,6 @@ theorem gst_origin_phase_prefixS
       rw [hstep, Nat.mul_add]
       have hpow : 3^s * 3^K = 3^(s+K) := by rw [← Nat.pow_add]
       rw [← Nat.mul_assoc, hpow]
-      ring
 
 theorem gst_origin_phase_totalS
     (s n : Nat) :
