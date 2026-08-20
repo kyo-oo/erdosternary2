@@ -32,6 +32,90 @@ jobs:
           lake update
           lake exe cache get
           lake build GSTTactic
+      - name: Compile c-stable inverse-system and 12102 upgrade
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          awk '/^theorem gst_omega_termination_s1/{exit} {print}' ErdosTernary2.lean > CTowerInfiniteUpgradeSmoke.lean
+          cat >> CTowerInfiniteUpgradeSmoke.lean <<'EOF'
+
+          /-- Old finite stable coefficients form one compatible all-scale ternary system. -/
+          theorem gpt56_c_stable_projective (k : Nat) (hk : 1 ≤ k) :
+              c_stable (k+1) % 3^k = c_stable k := by
+            unfold c_stable
+            have hdvd : 3^k ∣ 3^(k+1) := Nat.pow_dvd_pow 3 (by omega)
+            rw [Nat.mod_mod_of_dvd _ hdvd]
+            have hrec := c_recursion (k+1) (by omega : 1 ≤ k+1)
+            rw [hrec]
+            have hAdiv : 3^k ∣ 3^(k+2) * (c (k+1))^2 :=
+              dvd_mul_of_dvd_left (Nat.pow_dvd_pow 3 (by omega : k ≤ k+2)) _
+            have hBdiv : 3^k ∣ 3^(2*(k+1)+1) * (c (k+1))^3 :=
+              dvd_mul_of_dvd_left
+                (Nat.pow_dvd_pow 3 (by omega : k ≤ 2*(k+1)+1)) _
+            exact add_mod_drop2 _ _ _ (3^k)
+              (Nat.mod_eq_zero_of_dvd hAdiv)
+              (Nat.mod_eq_zero_of_dvd hBdiv)
+
+          /-- From level four onward the canonical coefficient has the stable
+              five-trit low word 12102 (LSB first), i.e. residue 178 mod 243. -/
+          theorem gpt56_c_mod243_stable (s : Nat) (hs : 4 ≤ s) :
+              c s % 243 = 178 := by
+            induction s using Nat.le_induction with
+            | base => decide
+            | succ s hs4 ih =>
+                have hrec := c_recursion s (by omega : 1 ≤ s)
+                rw [hrec]
+                have hAdiv : 243 ∣ 3^(s+1) * (c s)^2 := by
+                  have hp : 3^5 ∣ 3^(s+1) :=
+                    Nat.pow_dvd_pow 3 (by omega : 5 ≤ s+1)
+                  norm_num at hp ⊢
+                  exact dvd_mul_of_dvd_left hp _
+                have hBdiv : 243 ∣ 3^(2*s+1) * (c s)^3 := by
+                  have hp : 3^5 ∣ 3^(2*s+1) :=
+                    Nat.pow_dvd_pow 3 (by omega : 5 ≤ 2*s+1)
+                  norm_num at hp ⊢
+                  exact dvd_mul_of_dvd_left hp _
+                rw [add_mod_drop2 _ _ _ 243
+                  (Nat.mod_eq_zero_of_dvd hAdiv)
+                  (Nat.mod_eq_zero_of_dvd hBdiv), ih]
+
+          theorem gpt56_c_low_word_12102 (s : Nat) (hs : 4 ≤ s) :
+              c s % 243 = 1 + 2*3 + 1*3^2 + 0*3^3 + 2*3^4 := by
+            rw [gpt56_c_mod243_stable s hs]
+            decide
+
+          theorem gpt56_c_position4_null_gate (s : Nat) (hs : 4 ≤ s) :
+              gstDigit (c s) 4 = 2 ∧ gstCarry (c s) 4 = 0 := by
+            have h243 := gpt56_c_mod243_stable s hs
+            have hd : gstDigit (c s) 4 = 2 := by
+              unfold gstDigit
+              rw [digit_identity]
+              norm_num at h243 ⊢
+              rw [h243]
+              decide
+            have h81 : c s % 81 = 16 := by
+              calc
+                c s % 81 = (c s % 243) % 81 := by
+                  symm
+                  exact Nat.mod_mod_of_dvd _ (by decide : 81 ∣ 243)
+                _ = 16 := by rw [h243]; decide
+            have hc : gstCarry (c s) 4 = 0 := by
+              unfold gstCarry
+              norm_num
+              rw [h81]
+              decide
+            exact ⟨hd, hc⟩
+
+          #check gpt56_c_stable_projective
+          #check gpt56_c_mod243_stable
+          #check gpt56_c_low_word_12102
+          #check gpt56_c_position4_null_gate
+          #print axioms gpt56_c_stable_projective
+          #print axioms gpt56_c_position4_null_gate
+          EOF
+          lake env lean CTowerInfiniteUpgradeSmoke.lean | tee cstable.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' cstable.log
       - name: Compile pre-Omega direct induction
         timeout-minutes: 30
         shell: bash
