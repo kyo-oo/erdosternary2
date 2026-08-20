@@ -6,191 +6,225 @@ set_option maxHeartbeats 10000000
 namespace GSTInfiniteV2
 
 /-!
-# Sleep-equation laboratory: seven-axis graph x three radix worlds
+# Full handwritten sleep-operator laboratory
 
-This file formalizes only the portions of the handwritten 2026-08-20 equation
-that can be read unambiguously enough to test mathematically:
+Correction to the first transcription: the glyph at the right is `S`, not the
+number five.  We therefore do NOT identify the handwritten Sigma term with the
+old `55...55_6` geometric word.
 
-  2^j , 3^j , 6^j
+The source meanings are kept:
 
-and the weighted six-world geometric term
+* Pi / t-axis: all-scale natural-origin constructor;
+* U: simultaneous multiply/divide conservation;
+* Omega-infinity: Nat-indexed information transfer with controlled total;
+* 2^j, 3^j, 6^j: the binary / ternary / mixed world scales;
+* S: the GST physical space coordinate.
 
-  5 * sum_{j<q} 6^j.
+For the seven-axis / three-space graph we encode S by the exact signed charge
+used by the old U-space calculation:
 
-The handwritten union signs are interpreted as a *join of radix scales*, not
-literal set union.  The rigorous join is the product of the coprime binary and
-ternary scales, which is exactly the mixed six-world scale.
+  GST+ -> +4,   NULL/ALT- -> -1.
 
-The product/limit/integral-looking block on the far left of the photograph is
-not assigned an analytic meaning here because its bounds/operators are not
-legible enough to justify one.  Its defensible all-scale content is represented
-by universal quantification over Nat, matching the existing infinite GST V2
-controller.
+The visible handwritten term `S n^x` is tested as the weighted space moment of
+the five exact local U-readings.  The corresponding microscopic energy/mass
+moment is retained as the `e^x` channel.  Evaluating both channels in the
+2-world, 3-world and 6-world gives a complete fingerprint of every legal GST
+cell.
 -/
 
-/-- Exact binary/ternary -> six-world scale join at every depth. -/
+/-- Exact local GST re-coordinate map. -/
+def gstSleepRotateS (x : Nat × Nat) : Nat × Nat :=
+  ((x.1 + 4*x.2) / 3, (x.1 + 4*x.2) % 3)
+
+/-- S is the signed three-space coordinate, not the numeral 5. -/
+def gstSleepSChargeS (C : Nat) : Int :=
+  if C = 3 then 4 else -1
+
+/-- Microscopic event-energy/mass coordinate of one GST cell. -/
+def gstSleepEnergyS (C d : Nat) : Int := (C + 4*d : Nat)
+
+/-- Five-reading weighted S-sum: the literal `sum S*n^x` interpretation. -/
+def gstSleepSMomentS (C d : Nat) (n : Int) : Int :=
+  let x0 : Nat × Nat := (C,d)
+  let x1 := gstSleepRotateS x0
+  let x2 := gstSleepRotateS x1
+  let x3 := gstSleepRotateS x2
+  let x4 := gstSleepRotateS x3
+  gstSleepSChargeS x0.1 * n^0 +
+  gstSleepSChargeS x1.1 * n^1 +
+  gstSleepSChargeS x2.1 * n^2 +
+  gstSleepSChargeS x3.1 * n^3 +
+  gstSleepSChargeS x4.1 * n^4
+
+/-- Matching five-reading microscopic energy/event moment. -/
+def gstSleepEMomentS (C d : Nat) (n : Int) : Int :=
+  let x0 : Nat × Nat := (C,d)
+  let x1 := gstSleepRotateS x0
+  let x2 := gstSleepRotateS x1
+  let x3 := gstSleepRotateS x2
+  let x4 := gstSleepRotateS x3
+  gstSleepEnergyS x0.1 x0.2 * n^0 +
+  gstSleepEnergyS x1.1 x1.2 * n^1 +
+  gstSleepEnergyS x2.1 x2.2 * n^2 +
+  gstSleepEnergyS x3.1 x3.2 * n^3 +
+  gstSleepEnergyS x4.1 x4.2 * n^4
+
+/-- The three handwritten radix worlds still join exactly at every depth. -/
 theorem gst_sleep_three_world_joinS (j : Nat) :
     2^j * 3^j = 6^j := by
   have h := Nat.mul_pow 2 3 j
   norm_num at h
   exact h.symm
 
-/-- The readable three-world fragment holds simultaneously at every natural
-observation scale. -/
-theorem gst_sleep_three_world_join_all_scalesS :
-    forall j : Nat, 2^j * 3^j = 6^j := by
-  intro j
-  exact gst_sleep_three_world_joinS j
+/-- U-neutrality is recovered by evaluating the S Sigma at n=1. -/
+theorem gst_sleep_nonfixed_S_sigma_U_neutralS
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hnot0 : (C,d) ≠ (0,0))
+    (hnotPlus : (C,d) ≠ (3,2)) :
+    gstSleepSMomentS C d 1 = 0 := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    norm_num [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS] at hnot0 hnotPlus ⊢
 
-/-- The weighted six-world term visible at the right of the handwritten
-formula is exactly the maximal base-six prefix 55...55_6. -/
-theorem gst_sleep_weighted_six_sumS (q : Nat) :
-    5 * Finset.sum (Finset.range q) (fun j => 6^j) = 6^q - 1 := by
-  simpa [gstInfiniteSixWorldPrefixS] using
-    (gst_infinite_six_world_prefix_closedS q)
+/-- Exact phase law for the weighted S Sigma under one local U re-reading.
+For a legal five-cycle, rotating the starting cell multiplies the moment by n
+up to the boundary term S_0*(n^5-1). -/
+theorem gst_sleep_S_sigma_rotation_lawS
+    (C d : Nat) (hC : C < 4) (hd : d < 3) (n : Int) :
+    let y := gstSleepRotateS (C,d)
+    n * gstSleepSMomentS y.1 y.2 n =
+      gstSleepSMomentS C d n + gstSleepSChargeS C * (n^5 - 1) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    simp [gstSleepSMomentS, gstSleepRotateS, gstSleepSChargeS]
+    <;> ring
 
-/-- Kernel-seven upgrade of the same term.  This is the infinite coefficient
-already used by the eleven-equation master. -/
-theorem gst_sleep_kernel_weighted_six_sumS (q : Nat) :
-    35 * Finset.sum (Finset.range q) (fun j => 6^j) =
-      7 * (6^q - 1) := by
-  have h := gst_sleep_weighted_six_sumS q
-  omega
+/-- Full 2/3/6 readout of the handwritten S/e channels. -/
+structure GSTSleepThreeWorldFingerprintS where
+  S2 : Int
+  S3 : Int
+  S6 : Int
+  E2 : Int
+  E3 : Int
+  E6 : Int
+  deriving Repr, DecidableEq
 
-/-- Same geometric term written directly through the binary/ternary joined
-scale.  This tests that the three-space reading and the six-world coefficient
-are one arithmetic object rather than two unrelated patterns. -/
-theorem gst_sleep_weighted_join_sumS (q : Nat) :
-    5 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j) =
-      6^q - 1 := by
-  have hjoin : forall j : Nat, 2^j * 3^j = 6^j :=
-    gst_sleep_three_world_join_all_scalesS
-  have hsum :
-      Finset.sum (Finset.range q) (fun j => 2^j * 3^j) =
-        Finset.sum (Finset.range q) (fun j => 6^j) := by
-    apply Finset.sum_congr rfl
-    intro j hj
-    exact hjoin j
-  rw [hsum]
-  exact gst_sleep_weighted_six_sumS q
+def gstSleepThreeWorldFingerprintS (C d : Nat) :
+    GSTSleepThreeWorldFingerprintS where
+  S2 := gstSleepSMomentS C d 2
+  S3 := gstSleepSMomentS C d 3
+  S6 := gstSleepSMomentS C d 6
+  E2 := gstSleepEMomentS C d 2
+  E3 := gstSleepEMomentS C d 3
+  E6 := gstSleepEMomentS C d 6
 
-/-- Direct substitution of the handwritten three-world join into the existing
-infinite cardinal chord.  The coefficient is now visibly the joined 2/3-world
-geometric sum rather than an opaque 6^q-1 scalar. -/
-theorem gst_sleep_join_sum_cardinal_chordS
-    (R : Nat) (a d : Nat -> Nat)
-    (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 ≠ 0) :
-    forall q,
-      4 * gstCardinalInputEvalS R (6^q) (R+1) =
-        gstCardinalOutputEvalS R (6^q) (R+1) +
-          (5 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
-            gstCardinalCarryEvalS R (6^q) (R+1) := by
-  intro q
-  have hcard := gst_infinite_path_cardinal_master_chordS R a d hpath h0 q
-  have hcode := gst_noBig1_path_code_is_cardinal_coefficientS a d hpath h0 q
-  have hsum := gst_sleep_weighted_join_sumS q
-  rw [hcode] at hcard
-  rw [hsum]
-  exact hcard
+/-- Main experimental result: the whole 2/3/6 + S*n^x + e^x readout is a
+complete local state coordinate.  No two legal carry/digit cells share it. -/
+theorem gst_sleep_three_world_fingerprint_injectiveS
+    (C d C' d' : Nat)
+    (hC : C < 4) (hd : d < 3)
+    (hC' : C' < 4) (hd' : d' < 3)
+    (hfp : gstSleepThreeWorldFingerprintS C d =
+      gstSleepThreeWorldFingerprintS C' d') :
+    C = C' ∧ d = d' := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  have hCc' : C' = 0 ∨ C' = 1 ∨ C' = 2 ∨ C' = 3 := by omega
+  have hdc' : d' = 0 ∨ d' = 1 ∨ d' = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    rcases hCc' with h0' | h1' | h2' | h3' <;>
+    rcases hdc' with d0' | d1' | d2' <;>
+    subst C <;> subst d <;> subst C' <;> subst d' <;>
+    norm_num [gstSleepThreeWorldFingerprintS, gstSleepSMomentS,
+      gstSleepEMomentS, gstSleepRotateS, gstSleepSChargeS,
+      gstSleepEnergyS] at hfp ⊢
 
-/-- Seven-kernel upgrade of the same handwritten/cardinal fusion. -/
-theorem gst_sleep_kernel_join_sum_cardinal_chordS
-    (R : Nat) (a d : Nat -> Nat)
-    (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 ≠ 0) :
-    forall q,
-      28 * gstCardinalInputEvalS R (6^q) (R+1) =
-        7 * gstCardinalOutputEvalS R (6^q) (R+1) +
-          (35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
-            gstCardinalCarryEvalS R (6^q) (R+1) := by
-  intro q
-  have hk := gst_infinite_kernel_cardinal_masterS R a d hpath h0 q
-  have hcoeff := gst_noBig1_kernel_world_coefficient_exactS a d hpath h0 q
-  have hsum := gst_sleep_weighted_join_sumS q
-  rw [hcoeff] at hk
-  have h35 :
-      35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j) =
-        7 * (6^q - 1) := by
-    omega
-  rw [h35]
-  exact hk
+/-- The two Happy-Gate cells have two distinguished whole-equation
+fingerprints; injectivity makes this an algebraic gate detector. -/
+def GSTSleepHappyFingerprintS (F : GSTSleepThreeWorldFingerprintS) : Prop :=
+  F = gstSleepThreeWorldFingerprintS 0 2 ∨
+  F = gstSleepThreeWorldFingerprintS 3 2
 
-/-- One all-scale package combining the existing seven-axis GST orbit with the
-three radix worlds and their weighted six-world coefficient. -/
-structure GSTSleepEquationSevenAxisThreeWorldMasterS
-    (R N : Nat) : Prop where
-  sevenAxisStep : forall p,
-    (gstGraphV2InfiniteOrbitS R N (p+1)).carry =
-      gstStepCarryS
-        (gstGraphV2InfiniteOrbitS R N p).carry
-        (gstGraphV2InfiniteOrbitS R N p).digit
-  threeWorldJoin : forall j, 2^j * 3^j = 6^j
-  weightedSixWorld : forall q,
-    5 * Finset.sum (Finset.range q) (fun j => 6^j) = 6^q - 1
-  kernelSevenWorld : forall q,
-    35 * Finset.sum (Finset.range q) (fun j => 6^j) =
-      7 * (6^q - 1)
+theorem gst_sleep_happy_iff_three_world_fingerprintS
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    GSTHappyPairS C d ↔
+      GSTSleepHappyFingerprintS (gstSleepThreeWorldFingerprintS C d) := by
+  constructor
+  · rintro ⟨rfl, rfl | rfl⟩
+    · exact Or.inl rfl
+    · exact Or.inr rfl
+  · intro h
+    rcases h with h0 | h3
+    · have hEq := gst_sleep_three_world_fingerprint_injectiveS
+        C d 0 2 hC hd (by decide) (by decide) h0
+      exact ⟨hEq.2, Or.inl hEq.1⟩
+    · have hEq := gst_sleep_three_world_fingerprint_injectiveS
+        C d 3 2 hC hd (by decide) (by decide) h3
+      exact ⟨hEq.2, Or.inr hEq.1⟩
 
-/-- The sleep-equation master is universal: no finite cutoff is required. -/
-theorem gst_sleep_equation_seven_axis_three_world_masterS
-    (R N : Nat) :
-    GSTSleepEquationSevenAxisThreeWorldMasterS R N := by
+/-- Coupling equation between the Pi-origin energy and the BIG-N Omega energy.
+For a canonical Navigation constant this is exactly the usual decomposition. -/
+def GSTSleepNavigationEnergyCouplingS (t n N : Nat) : Prop :=
+  gstOmegaPressureEnergyS t N = gstOriginRemainingUS t n
+
+/-- Full whole-expression package.  Pi is all-scale, U is all-scale, Omega is
+an actual Nat-indexed controlled infinite stream, and the S/e Sigma readout in
+the 2/3/6 worlds is a complete microscopic coordinate. -/
+structure GSTSleepFullOperatorS (t n N : Nat) : Prop where
+  energyCoupling : GSTSleepNavigationEnergyCouplingS t n N
+  omegaInfinite :
+    GSTControlledInfiniteSumS
+      (gstOmegaNaturalTransferS t N) (3^(t+1) * N)
+  piUInfinite : GSTOriginInfiniteMulDivControlS t n
+  omegaClosesToPi : gstOmegaPressureEnergyS t N = gstOriginRemainingUS t n
+  threeWorldJoin : ∀ j : Nat, 2^j * 3^j = 6^j
+  SphaseLaw : ∀ C d : Nat, C < 4 → d < 3 → ∀ b : Int,
+    let y := gstSleepRotateS (C,d)
+    b * gstSleepSMomentS y.1 y.2 b =
+      gstSleepSMomentS C d b + gstSleepSChargeS C * (b^5 - 1)
+  fingerprintComplete : ∀ C d C' d' : Nat,
+    C < 4 → d < 3 → C' < 4 → d' < 3 →
+    gstSleepThreeWorldFingerprintS C d =
+      gstSleepThreeWorldFingerprintS C' d' →
+    C = C' ∧ d = d'
+
+/-- The complete equation is internally consistent whenever the Navigation
+energy coupling holds.  Nothing here substitutes a finite cutoff for infinity. -/
+theorem gst_sleep_full_operatorS
+    (t n N : Nat)
+    (hlink : GSTSleepNavigationEnergyCouplingS t n N) :
+    GSTSleepFullOperatorS t n N := by
   refine {
-    sevenAxisStep := ?_
-    threeWorldJoin := gst_sleep_three_world_join_all_scalesS
-    weightedSixWorld := gst_sleep_weighted_six_sumS
-    kernelSevenWorld := gst_sleep_kernel_weighted_six_sumS }
-  intro p
-  exact gst_graph_v2_infinite_orbit_stepS R N p
+    energyCoupling := hlink
+    omegaInfinite := gst_omega_natural_transfer_infinite_controlS t N
+    piUInfinite := gst_origin_infinite_mul_div_controlS t n
+    omegaClosesToPi := hlink
+    threeWorldJoin := ?_
+    SphaseLaw := ?_
+    fingerprintComplete := ?_ }
+  · intro j
+    exact gst_sleep_three_world_joinS j
+  · intro C d hC hd b
+    exact gst_sleep_S_sigma_rotation_lawS C d hC hd b
+  · intro C d C' d' hC hd hC' hd' hfp
+    exact gst_sleep_three_world_fingerprint_injectiveS
+      C d C' d' hC hd hC' hd' hfp
 
-/-- Strong fusion with the already-kernelized nonzero I!=BIG1 infinite path.
-This deliberately upgrades old finite observations into one all-depth object:
-seven-axis GST dynamics + 2/3/6 radix join + eleven-equation path/cardinal
-master. -/
-structure GSTSleepEquationInfiniteFusionS
-    (R N : Nat) (a d : Nat -> Nat) : Prop where
-  graphWorld : GSTSleepEquationSevenAxisThreeWorldMasterS R N
-  eleven : GSTInfiniteElevenEquationMasterS R a d
-  pathCodeIsWeightedSixWorld : forall q,
-    gstBig1ProjectedPathCodeS a d q =
-      5 * Finset.sum (Finset.range q) (fun j => 6^j)
-  joinedCardinal : forall q,
-    4 * gstCardinalInputEvalS R (6^q) (R+1) =
-      gstCardinalOutputEvalS R (6^q) (R+1) +
-        (5 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
-          gstCardinalCarryEvalS R (6^q) (R+1)
-  joinedKernelCardinal : forall q,
-    28 * gstCardinalInputEvalS R (6^q) (R+1) =
-      7 * gstCardinalOutputEvalS R (6^q) (R+1) +
-        (35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
-          gstCardinalCarryEvalS R (6^q) (R+1)
+#check gst_sleep_three_world_joinS
+#check gst_sleep_nonfixed_S_sigma_U_neutralS
+#check gst_sleep_S_sigma_rotation_lawS
+#check gst_sleep_three_world_fingerprint_injectiveS
+#check gst_sleep_happy_iff_three_world_fingerprintS
+#check gst_sleep_full_operatorS
 
-/-- Universal fusion theorem. -/
-theorem gst_sleep_equation_infinite_fusionS
-    (R N : Nat) (a d : Nat -> Nat)
-    (hpath : GSTBig1ClearInfinitePathS a d)
-    (h0 : d 0 ≠ 0) :
-    GSTSleepEquationInfiniteFusionS R N a d := by
-  refine {
-    graphWorld := gst_sleep_equation_seven_axis_three_world_masterS R N
-    eleven := gst_infinite_eleven_equation_masterS R a d hpath h0
-    pathCodeIsWeightedSixWorld := ?_
-    joinedCardinal := gst_sleep_join_sum_cardinal_chordS R a d hpath h0
-    joinedKernelCardinal := gst_sleep_kernel_join_sum_cardinal_chordS R a d hpath h0 }
-  intro q
-  have hcode := gst_noBig1_path_code_is_cardinal_coefficientS
-    a d hpath h0 q
-  have hsum := gst_sleep_weighted_six_sumS q
-  omega
-
-#check gst_sleep_three_world_join_all_scalesS
-#check gst_sleep_weighted_join_sumS
-#check gst_sleep_join_sum_cardinal_chordS
-#check gst_sleep_kernel_join_sum_cardinal_chordS
-#check gst_sleep_equation_seven_axis_three_world_masterS
-#check gst_sleep_equation_infinite_fusionS
-
-#print axioms gst_sleep_equation_infinite_fusionS
+#print axioms gst_sleep_three_world_fingerprint_injectiveS
+#print axioms gst_sleep_full_operatorS
 
 end GSTInfiniteV2
