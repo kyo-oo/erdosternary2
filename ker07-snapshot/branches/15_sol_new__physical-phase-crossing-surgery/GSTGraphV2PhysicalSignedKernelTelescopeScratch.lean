@@ -39,7 +39,7 @@ theorem binaryColumnCarry_lt_two
   have hp : 0 < 3^p := Nat.pow_pos (by decide)
   have hr : (2^r * R) % 3^p < 3^p := Nat.mod_lt _ hp
   have hmul : 2 * ((2^r * R) % 3^p) < 3^p * 2 := by
-    exact Nat.mul_lt_mul_of_pos_left hr (by decide)
+    omega
   exact Nat.div_lt_of_lt_mul hmul
 
 /-- Every physical binary-column digit is ternary. -/
@@ -76,15 +76,8 @@ theorem microOutput_eq_next_binaryColumnDigit
   have hpow : 2^(r+1) * R = 2 * (2^r * R) := by
     rw [Nat.pow_succ]
     ac_rfl
-  rw [hpow]
-  rw [binary_mul_two_quotient_decomposition (2^r * R) p]
-  have hmul :
-      (2 * ((2^r * R) / 3^p)) % 3 =
-        (2 * (((2^r * R) / 3^p) % 3)) % 3 := by
-    simpa only [Nat.mod_mod] using
-      (Nat.mul_mod 2 ((2^r * R) / 3^p) 3)
-  rw [Nat.add_mod, hmul]
-  simp only [Nat.mod_mod]
+  rw [hpow, binary_mul_two_quotient_decomposition (2^r * R) p]
+  simp only [Nat.add_mod, Nat.mul_mod, Nat.mod_mod]
 
 /-- The exact signed-kernel identity on one physical binary column. -/
 theorem signedKernelTwice_physical_column
@@ -105,12 +98,13 @@ interior non-boundary contribution is the positive SURVIVE residual
 -/
 theorem signedKernelTwice_physical_telescope
     (R p L : Nat) :
-    (∑ r in Finset.range L,
-      signedKernelTwice (binaryColumnCarry R p r) (binaryColumnDigit R p r)) =
+    Finset.sum (Finset.range L)
+      (fun r => signedKernelTwice
+        (binaryColumnCarry R p r) (binaryColumnDigit R p r)) =
       14 * (twoIndicator (binaryColumnDigit R p L) -
             twoIndicator (binaryColumnDigit R p 0)) +
-      7 * (∑ r in Finset.range L,
-        twoIndicator (binaryColumnDigit R p r) *
+      7 * Finset.sum (Finset.range L)
+        (fun r => twoIndicator (binaryColumnDigit R p r) *
           twoIndicator (binaryColumnDigit R p (r+1))) := by
   induction L with
   | zero => simp
@@ -126,14 +120,15 @@ theorem signedKernelTwice_eq_boundary_of_no_survive
     (hno : ∀ r, r < L →
       ¬ (binaryColumnDigit R p r = 2 ∧
          binaryColumnDigit R p (r+1) = 2)) :
-    (∑ r in Finset.range L,
-      signedKernelTwice (binaryColumnCarry R p r) (binaryColumnDigit R p r)) =
+    Finset.sum (Finset.range L)
+      (fun r => signedKernelTwice
+        (binaryColumnCarry R p r) (binaryColumnDigit R p r)) =
       14 * (twoIndicator (binaryColumnDigit R p L) -
             twoIndicator (binaryColumnDigit R p 0)) := by
   rw [signedKernelTwice_physical_telescope]
   have hzero :
-      (∑ r in Finset.range L,
-        twoIndicator (binaryColumnDigit R p r) *
+      Finset.sum (Finset.range L)
+        (fun r => twoIndicator (binaryColumnDigit R p r) *
           twoIndicator (binaryColumnDigit R p (r+1))) = 0 := by
     apply Finset.sum_eq_zero
     intro r hr
