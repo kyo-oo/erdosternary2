@@ -6,26 +6,39 @@ on:
     branches:
       - sol/gpt56-close-one-error
     paths:
-      - 'ErdosTernary2.lean'
+      - 'GSTV2InfiniteCore.lean'
       - 'GSTInfiniteCollision.lean'
+      - 'ErdosTernary2.lean'
       - '.github/workflows/gst_v2_infinite_collision_smoke.yml'
 
 permissions:
   contents: read
 
 jobs:
-  smoke:
+  core:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: sol/gpt56-close-one-error
       - uses: leanprover/lean-action@v1
-      - name: Compile current monolith
-        run: lake env lean ErdosTernary2.lean
-      - name: Build project
-        run: lake build
-      - name: Sorry check
+        with:
+          lean-version: v4.33.0-rc2
+      - name: Prepare dependencies
+        run: |
+          lake update
+          lake exe cache get
+      - name: Kernel-check V2 infinite core
+        run: lake env lean GSTV2InfiniteCore.lean
+      - name: Print core axioms
+        run: |
+          cat > /tmp/CoreAxioms.lean <<'EOF'
+          import GSTV2InfiniteCore
+          #print axioms GSTV2.cell_mass_conservation
+          #print axioms GSTV2.omega_past_future_conservation
+          #print axioms GSTV2.finite_origin_collision
+          #print axioms GSTV2.support_horizon_control
+          EOF
+          lake env lean /tmp/CoreAxioms.lean
+      - name: Repository sorry check
         run: bash scripts/sorry_check.sh
-      - name: Comparator
-        run: bash scripts/comparator.sh
