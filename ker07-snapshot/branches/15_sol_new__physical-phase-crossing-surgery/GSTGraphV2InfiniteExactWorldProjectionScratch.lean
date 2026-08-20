@@ -28,7 +28,8 @@ theorem gst_ternary_prefix_value_exactS
     (R L : Nat) :
     gstTernaryPrefixValueS R L = R % 3^L := by
   induction L with
-  | zero => simp [gstTernaryPrefixValueS]
+  | zero =>
+      exact (Nat.mod_one R).symm
   | succ L ih =>
       rw [gstTernaryPrefixValueS, ih]
       exact (gst_prefix_residue_succ_exactS R L).symm
@@ -46,8 +47,12 @@ theorem gst_cardinality_mod_world_coefficientS
     (K : Nat) (hK : 3 ≤ K) :
     K % (K-1) = 1 := by
   have hshape : K = (K-1) + 1 := by omega
-  rw [hshape, Nat.add_mod, Nat.mod_self, Nat.zero_add]
-  exact Nat.mod_eq_of_lt (by omega)
+  calc
+    K % (K-1) = ((K-1) + 1) % (K-1) :=
+      congrArg (fun x : Nat => x % (K-1)) hshape
+    _ = 1 := by
+      rw [Nat.add_mod, Nat.mod_self, Nat.zero_add]
+      exact Nat.mod_eq_of_lt (by omega)
 
 /-- Integer-cleared x=3/K evaluation has exactly the same K-1 shadow as the
 ordinary ternary prefix. -/
@@ -61,11 +66,20 @@ theorem gst_cleared_world_eval_prefix_shadowS
   | zero => simp [gstClearedWorldEvalS, gstTernaryPrefixValueS]
   | succ L ih =>
       rw [gstClearedWorldEvalS, gstTernaryPrefixValueS,
-        Nat.add_mod, Nat.add_mod,
-        Nat.mul_mod, Nat.mul_mod, Nat.mul_mod,
-        Nat.mul_mod, Nat.mul_mod]
-      rw [hkmod, ih]
-      simp
+        Nat.add_mod, Nat.add_mod]
+      have hold :
+          (K * gstClearedWorldEvalS R K L) % (K-1) =
+            gstClearedWorldEvalS R K L % (K-1) := by
+        rw [Nat.mul_mod, hkmod]
+        simp
+      have hterm :
+          (K * 3^L * gstDigitS R L) % (K-1) =
+            (3^L * gstDigitS R L) % (K-1) := by
+        rw [show K * 3^L * gstDigitS R L =
+              K * (3^L * gstDigitS R L) by ring,
+            Nat.mul_mod, hkmod]
+        simp
+      rw [hold, hterm, ih]
 
 /-- Same theorem directly in terms of the actual integer residue R mod 3^L. -/
 theorem gst_cleared_world_eval_prefix_fingerprintS
