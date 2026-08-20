@@ -46,7 +46,6 @@ theorem gst_bigN_omega_transfer_zeroS
     gstOmegaNaturalTransferS t N N = 0 := by
   unfold gstOmegaNaturalTransferS
   rw [gst_bigN_navigation_digit_zeroS N hN]
-  simp
 
 /-- BIG-N kills every later information transfer as well.  The Omega object is
 still Nat-indexed; its support is proved to lie strictly below N. -/
