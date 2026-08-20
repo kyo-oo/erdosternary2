@@ -27,6 +27,8 @@ jobs:
         run: lake env lean GSTInfiniteBadTransport.lean
       - name: Compile prefix-one infinite adapter
         run: lake env lean GSTPrefixOneInfiniteAdapterSmoke.lean
+      - name: Compile synchronized child-gate adapter
+        run: lake env lean GSTPrefixOneGateAdapterSmoke.lean
       - name: Print transport axioms
         run: |
           cat > /tmp/TransportAxioms.lean <<'EOF'
