@@ -5,6 +5,8 @@ set_option maxHeartbeats 10000000
 
 namespace GSTInfiniteV2
 
+open scoped BigOperators
+
 /-!
 # GST Graph V2 — standalone infinite-scale controller
 
@@ -302,7 +304,7 @@ theorem gst_self_lt_three_pow_succS : ∀ N : Nat, N < 3^(N+1)
   | N+1 => by
       have ih : N < 3^(N+1) := gst_self_lt_three_pow_succS N
       have hp : 0 < 3^(N+1) := Nat.pow_pos (by decide)
-      rw [show (N+1)+1 = (N+1)+1 by rfl, Nat.pow_succ]
+      rw [Nat.pow_succ]
       omega
 
 /-- An exact infinite natural sum is encoded by stabilization of all deep
@@ -356,10 +358,15 @@ theorem gst_origin_prefix_remaining_U_conservationS
       3^t * n =
         3^t * (n % 3^K) + 3^(t+K) * (n / 3^K) := by
     calc
-      3^t*n = 3^t * (n % 3^K + 3^K*(n/3^K)) := by rw [hn]
+      3^t*n = 3^t * (n % 3^K + 3^K*(n/3^K)) :=
+        congrArg (fun q : Nat => 3^t * q) hn
       _ = 3^t*(n%3^K) + 3^t*3^K*(n/3^K) := by ring
       _ = 3^t*(n%3^K) + 3^(t+K)*(n/3^K) := by rw [← Nat.pow_add]
-  rw [hexp, Nat.pow_add]
+  calc
+    4^(3^t * (n % 3^K)) * 4^(3^(t+K) * (n / 3^K)) =
+        4^(3^t * (n % 3^K) + 3^(t+K) * (n / 3^K)) :=
+      (Nat.pow_add 4 _ _).symm
+    _ = 4^(3^t * n) := by rw [← hexp]
 
 def GSTOriginInfiniteMulDivControlS (t n : Nat) : Prop :=
   ∀ K,
@@ -406,11 +413,13 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
     GSTBadPairS C d ↔
       24*d + gstHandwrittenUChargeS C ≤
         3 * gstHandwrittenUChargeS (gstStepCarryS C d) := by
+  classical
   have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
+    subst C <;> subst d <;>
+    decide
 
 theorem gst_prefix_residue_succ_exactS (X K : Nat) :
     X % 3^(K+1) = X % 3^K + 3^K * gstDigitS X K := by
@@ -426,7 +435,9 @@ theorem gst_bad_prefix_u_potential_boundS
     24*(X % 3^K) + gstHandwrittenUChargeS D ≤
       3^K * gstHandwrittenUChargeS (gstAffineCarryS D X K) := by
   induction K with
-  | zero => simp [gstAffineCarryS]
+  | zero =>
+      have hx : X % 1 = 0 := Nat.mod_one X
+      simp [gstAffineCarryS, hx]
   | succ K ih =>
       have hprev := ih (fun j hj => hbad j (by omega))
       have hcarrylt : gstAffineCarryS D X K < 4 :=
@@ -534,7 +545,7 @@ def GSTInformationRegimeControlledS : GSTInformationRegimeS → Prop
       GSTControlledInfiniteSumS
           (gstOmegaNaturalTransferS t N) (3^(t+1) * N) ∧
         GSTOriginInfiniteMulDivControlS t N
-  | .notBig1 a d path nonzero =>
+  | .notBig1 a d _path _nonzero =>
       (∀ j,
         a j = 1 ∧ d j = 2 ∧
           gstBinaryBridgeMassS (a j) (d j) = 5 ∧
