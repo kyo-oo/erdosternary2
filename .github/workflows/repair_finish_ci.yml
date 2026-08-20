@@ -38,18 +38,17 @@ jobs:
 
           /- Direct comparator replacement: finite certified base plus the
              already-proved universal multiply-by-four GST duality step. -/
-          theorem erdos_ternary_2_even_universal (a : Nat) :
-              5 ≤ a → hasTernaryTwo (4^a) = true := by
-            induction a using Nat.strongRecOn with
-            | h a ih =>
-                intro ha
-                by_cases hbase : a ≤ 500
-                · exact modular_check_base a ha hbase
-                · have ha1 : 5 ≤ a - 1 := by omega
-                  have hlt : a - 1 < a := by omega
-                  have hprev : hasTernaryTwo (4^(a-1)) = true :=
-                    ih (a-1) hlt ha1
-                  exact mul4_lift_gst_duality a (by omega) hprev
+          theorem erdos_ternary_2_even_universal :
+              ∀ a : Nat, 5 ≤ a → hasTernaryTwo (4^a) = true
+            | 0, ha => by omega
+            | a+1, ha => by
+                by_cases hbase : a + 1 ≤ 500
+                · exact modular_check_base (a+1) ha hbase
+                · have haPrev : 5 ≤ a := by omega
+                  have hprev : hasTernaryTwo (4^a) = true :=
+                    erdos_ternary_2_even_universal a haPrev
+                  have hlift := mul4_lift_gst_duality (a+1) (by omega) hprev
+                  simpa using hlift
 
           theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
               noTernaryTwo (2^n) = false := by
