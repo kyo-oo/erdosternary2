@@ -73,6 +73,48 @@ theorem gst_sleep_weighted_join_sumS (q : Nat) :
   rw [hsum]
   exact gst_sleep_weighted_six_sumS q
 
+/-- Direct substitution of the handwritten three-world join into the existing
+infinite cardinal chord.  The coefficient is now visibly the joined 2/3-world
+geometric sum rather than an opaque 6^q-1 scalar. -/
+theorem gst_sleep_join_sum_cardinal_chordS
+    (R : Nat) (a d : Nat -> Nat)
+    (hpath : GSTBig1ClearInfinitePathS a d)
+    (h0 : d 0 != 0) :
+    forall q,
+      4 * gstCardinalInputEvalS R (6^q) (R+1) =
+        gstCardinalOutputEvalS R (6^q) (R+1) +
+          (5 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
+            gstCardinalCarryEvalS R (6^q) (R+1) := by
+  intro q
+  have hcard := gst_infinite_path_cardinal_master_chordS R a d hpath h0 q
+  have hcode := gst_noBig1_path_code_is_cardinal_coefficientS a d hpath h0 q
+  have hsum := gst_sleep_weighted_join_sumS q
+  rw [hcode] at hcard
+  rw [hsum]
+  exact hcard
+
+/-- Seven-kernel upgrade of the same handwritten/cardinal fusion. -/
+theorem gst_sleep_kernel_join_sum_cardinal_chordS
+    (R : Nat) (a d : Nat -> Nat)
+    (hpath : GSTBig1ClearInfinitePathS a d)
+    (h0 : d 0 != 0) :
+    forall q,
+      28 * gstCardinalInputEvalS R (6^q) (R+1) =
+        7 * gstCardinalOutputEvalS R (6^q) (R+1) +
+          (35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
+            gstCardinalCarryEvalS R (6^q) (R+1) := by
+  intro q
+  have hk := gst_infinite_kernel_cardinal_masterS R a d hpath h0 q
+  have hcoeff := gst_noBig1_kernel_world_coefficient_exactS a d hpath h0 q
+  have hsum := gst_sleep_weighted_join_sumS q
+  rw [hcoeff] at hk
+  have h35 :
+      35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j) =
+        7 * (6^q - 1) := by
+    omega
+  rw [h35]
+  exact hk
+
 /-- One all-scale package combining the existing seven-axis GST orbit with the
 three radix worlds and their weighted six-world coefficient. -/
 structure GSTSleepEquationSevenAxisThreeWorldMasterS
@@ -112,6 +154,16 @@ structure GSTSleepEquationInfiniteFusionS
   pathCodeIsWeightedSixWorld : forall q,
     gstBig1ProjectedPathCodeS a d q =
       5 * Finset.sum (Finset.range q) (fun j => 6^j)
+  joinedCardinal : forall q,
+    4 * gstCardinalInputEvalS R (6^q) (R+1) =
+      gstCardinalOutputEvalS R (6^q) (R+1) +
+        (5 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
+          gstCardinalCarryEvalS R (6^q) (R+1)
+  joinedKernelCardinal : forall q,
+    28 * gstCardinalInputEvalS R (6^q) (R+1) =
+      7 * gstCardinalOutputEvalS R (6^q) (R+1) +
+        (35 * Finset.sum (Finset.range q) (fun j => 2^j * 3^j)) *
+          gstCardinalCarryEvalS R (6^q) (R+1)
 
 /-- Universal fusion theorem. -/
 theorem gst_sleep_equation_infinite_fusionS
@@ -122,7 +174,9 @@ theorem gst_sleep_equation_infinite_fusionS
   refine {
     graphWorld := gst_sleep_equation_seven_axis_three_world_masterS R N
     eleven := gst_infinite_eleven_equation_masterS R a d hpath h0
-    pathCodeIsWeightedSixWorld := ?_ }
+    pathCodeIsWeightedSixWorld := ?_
+    joinedCardinal := gst_sleep_join_sum_cardinal_chordS R a d hpath h0
+    joinedKernelCardinal := gst_sleep_kernel_join_sum_cardinal_chordS R a d hpath h0 }
   intro q
   have hcode := gst_noBig1_path_code_is_cardinal_coefficientS
     a d hpath h0 q
@@ -131,6 +185,8 @@ theorem gst_sleep_equation_infinite_fusionS
 
 #check gst_sleep_three_world_join_all_scalesS
 #check gst_sleep_weighted_join_sumS
+#check gst_sleep_join_sum_cardinal_chordS
+#check gst_sleep_kernel_join_sum_cardinal_chordS
 #check gst_sleep_equation_seven_axis_three_world_masterS
 #check gst_sleep_equation_infinite_fusionS
 
