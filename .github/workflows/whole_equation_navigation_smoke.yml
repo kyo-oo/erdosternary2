@@ -1,0 +1,199 @@
+name: Whole Equation Navigation Smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve dependencies
+        timeout-minutes: 20
+        run: |
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+      - name: Build infinite handwritten equation modules
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.olean" "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
+      - name: Build pre-Omega monolith module
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
+          tail -n 8 ErdosPreOmega.lean
+          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+      - name: Prove whole equation and Omega fingerprint adapter
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          cat > WholeEquationNavigationSmoke.lean <<'EOF'
+          import ErdosPreOmega
+          import GSTGraphV2SleepBadLanguageDescentScratch
+
+          open GSTInfiniteV2
+
+          theorem gpt56_whole_equation_canonical_navigation
+              (t n : Nat) (ht : 1 ≤ t) :
+              GSTSleepFullOperatorS t n (gstNavigationConstant t n) := by
+            apply gst_sleep_full_operatorS
+            unfold GSTSleepNavigationEnergyCouplingS
+            unfold gstOmegaPressureEnergyS gstOriginRemainingUS
+            exact (gst_navigation_decomposition t n ht).symm
+
+          theorem gpt56_omega_gate_iff_whole_fingerprint
+              (s k m j : Nat) (hs : 1 ≤ s) (hk : 1 ≤ k) :
+              GSTOmegaGatePolynomial (gstOmega s k m j) = 0 ↔
+                GSTSleepHappyFingerprintS
+                  (gstSleepThreeWorldFingerprintS
+                    (gstOmega s k m j).parentCarry
+                    (gstOmega s k m j).parentDigit) := by
+            have hp := gst_omega_parent_projection s k m j hs
+            have hpos : 1 ≤ k + j := by omega
+            have hCroot :
+                gstCarry (gstNavigationConstant s (1 + 3^k*m)) (k+j) < 4 :=
+              carry_bound (gstNavigationConstant s (1 + 3^k*m)) (k+j) hpos
+            have hC : (gstOmega s k m j).parentCarry < 4 := by
+              rw [← hp.2]
+              exact hCroot
+            have hd : (gstOmega s k m j).parentDigit < 3 := by
+              rw [← hp.1]
+              unfold gstDigit
+              exact Nat.mod_lt _ (by decide)
+            constructor
+            · intro hz
+              have hg :=
+                (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).1 hz
+              apply (gst_sleep_happy_iff_three_world_fingerprintS
+                (gstOmega s k m j).parentCarry
+                (gstOmega s k m j).parentDigit hC hd).1
+              exact hg
+            · intro hf
+              apply (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).2
+              have hg :=
+                (gst_sleep_happy_iff_three_world_fingerprintS
+                  (gstOmega s k m j).parentCarry
+                  (gstOmega s k m j).parentDigit hC hd).2 hf
+              exact hg
+
+          theorem gpt56_omega_bad_trace_avoids_whole_fingerprint
+              (s k m : Nat) (hs : 1 ≤ s) (hk : 1 ≤ k)
+              (hbad : GSTOmegaInfiniteBadTrace s k m) :
+              ∀ j,
+                ¬ GSTSleepHappyFingerprintS
+                  (gstSleepThreeWorldFingerprintS
+                    (gstOmega s k m j).parentCarry
+                    (gstOmega s k m j).parentDigit) := by
+            intro j hfp
+            have hz :=
+              (gpt56_omega_gate_iff_whole_fingerprint s k m j hs hk).2 hfp
+            have hne := hbad j
+            change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0 at hne
+            exact hne hz
+
+          theorem gpt56_seeded_affine_bad_to_sleep
+              (D X : Nat) (hbad : GSTSeededAffineBadTrace D X) :
+              GSTSleepSeededBadTraceS D X := by
+            intro j
+            have hj := hbad j
+            simpa [GSTSeededAffineBadTrace, GSTBadPair, GSTSleepSeededBadTraceS,
+              GSTBadPairS, GSTHappyPairS, gstAffineMulCarry,
+              gstAffineCarryS, gstDigit, gstDigitS] using hj
+
+          /-- Complete Omega badness is no longer an unstructured infinity.
+              Either the affine parent contains BIG1 somewhere, or the entire
+              finite bad language is one of four explicit base-nine families. -/
+          theorem gpt56_omega_bad_parent_language_dichotomy
+              (s k m : Nat) (hs : 1 ≤ s) (hk : 1 ≤ k)
+              (hbad : GSTOmegaInfiniteBadTrace s k m) :
+              let D := (4 * (c s % 3^k)) / 3^k
+              let X := c s / 3^k + 4^(3^s) * gstNavigationConstant (s+k) m
+              (∃ j, gstDigitS X j = 1) ∨
+                (D = 0 ∧ X = 0) ∨
+                (D = 1 ∧ ∃ r, 4*X = 9^r - 1) ∨
+                (D = 2 ∧ ∃ r, 4*X = 9^r - 1) ∨
+                (D = 3 ∧ ∃ r, 4*X = 3 * (9^r - 1)) := by
+            dsimp only
+            let D := (4 * (c s % 3^k)) / 3^k
+            let X := c s / 3^k + 4^(3^s) * gstNavigationConstant (s+k) m
+            have hseedOld : GSTSeededAffineBadTrace D X := by
+              dsimp [D, X]
+              exact (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hbad
+            have hseed : GSTSleepSeededBadTraceS D X :=
+              gpt56_seeded_affine_bad_to_sleep D X hseedOld
+            by_cases hno : GSTSleepNoBig1S X
+            · right
+              have hden : 0 < 3^k := Nat.pow_pos (by decide)
+              have hr : c s % 3^k < 3^k := Nat.mod_lt _ hden
+              have hmul : 4 * (c s % 3^k) < 4 * 3^k :=
+                Nat.mul_lt_mul_left 4 hr
+              have hDlt : D < 4 := by
+                dsimp [D]
+                exact (Nat.div_lt_iff_lt_mul hden).2 (by
+                  simpa [Nat.mul_comm] using hmul)
+              have hDc : D = 0 ∨ D = 1 ∨ D = 2 ∨ D = 3 := by omega
+              rcases hDc with h0 | h1 | h2 | h3
+              · left
+                refine ⟨h0, ?_⟩
+                have hseed0 : GSTSleepSeededBadTraceS 0 X := by
+                  rw [← h0]
+                  exact hseed
+                exact gst_sleep_seed_zero_noBig1_bad_is_zeroS X hseed0 hno
+              · right; left
+                refine ⟨h1, ?_⟩
+                have hseed1 : GSTSleepSeededBadTraceS 1 X := by
+                  rw [← h1]
+                  exact hseed
+                exact (gst_sleep_seed_one_three_noBig1_bad_formsS X).1 hseed1 hno
+              · right; right; left
+                refine ⟨h2, ?_⟩
+                have hseed2 : GSTSleepSeededBadTraceS 2 X := by
+                  rw [← h2]
+                  exact hseed
+                exact gst_sleep_seed_two_noBig1_bad_formS X hseed2 hno
+              · right; right; right
+                refine ⟨h3, ?_⟩
+                have hseed3 : GSTSleepSeededBadTraceS 3 X := by
+                  rw [← h3]
+                  exact hseed
+                exact (gst_sleep_seed_one_three_noBig1_bad_formsS X).2 hseed3 hno
+            · left
+              by_contra hnone
+              apply hno
+              intro j hj
+              apply hnone
+              exact ⟨j, hj⟩
+
+          #check gpt56_whole_equation_canonical_navigation
+          #check gpt56_omega_gate_iff_whole_fingerprint
+          #check gpt56_omega_bad_trace_avoids_whole_fingerprint
+          #check gpt56_omega_bad_parent_language_dichotomy
+          #print axioms gpt56_whole_equation_canonical_navigation
+          #print axioms gpt56_omega_gate_iff_whole_fingerprint
+          #print axioms gpt56_omega_bad_parent_language_dichotomy
+          EOF
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean WholeEquationNavigationSmoke.lean | tee whole-equation.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' whole-equation.log

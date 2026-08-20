@@ -1,14 +1,96 @@
-name: Lean Action CI
+name: Lean Comparator Surgery CI
 
 on:
   push:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve exact comparator dependencies
+        timeout-minutes: 20
+        run: lake update
+      - name: Fetch Mathlib compiled cache
+        timeout-minutes: 20
+        run: lake exe cache get
+      - name: Build GSTTactic import artifact
+        timeout-minutes: 10
+        run: lake build GSTTactic
+      - name: Build infinite GST V2 control artifact
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
+      - name: Build infinite cardinal-world master artifact
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
+      - name: Build infinite eleven-equation synthesis master artifact
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
+      - name: Build full handwritten S-space operator artifact
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
+      - name: Typecheck BIG1-free bad-language trap descent
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
+      - name: Typecheck exact Omega Past-Future ledger synthesis
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean"
+      - name: Typecheck finite-origin six-world collision
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
+      - name: Typecheck exact BIG-N Navigation horizon
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteNavigationHorizonScratch.lean"
+      - name: Typecheck nested infinite world tower
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
+      - name: Typecheck infinite handwritten operator budget blade
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteHandwrittenOperatorScratch.lean"
+      - name: Typecheck proof monolith without serialization
+        timeout-minutes: 30
+        run: lake env lean ErdosTernary2.lean
+      - name: Zero-sorry verification gate
+        timeout-minutes: 5
+        run: bash scripts/sorry_check.sh
+      - name: Run real V5 comparator
+        timeout-minutes: 45
+        run: |
+          set -o pipefail
+          bash scripts/comparator.sh | tee comparator.log
+          grep -q 'COMPARATOR RESULT: PASS' comparator.log
