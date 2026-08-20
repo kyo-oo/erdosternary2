@@ -16,14 +16,10 @@ its reduction modulo K-1 is exactly the original ternary integer fingerprint.
 No approximation and no analytic convergence enters this statement.
 -/
 
-/-- Ordinary ternary prefix value, written recursively so it is an exact
-finite observation of the Nat-indexed digit stream. -/
 def gstTernaryPrefixValueS (R : Nat) : Nat → Nat
   | 0 => 0
   | L+1 => gstTernaryPrefixValueS R L + 3^L * gstDigitS R L
 
-/-- Every recursive prefix is literally R modulo the corresponding ternary
-scale. -/
 theorem gst_ternary_prefix_value_exactS
     (R L : Nat) :
     gstTernaryPrefixValueS R L = R % 3^L := by
@@ -34,15 +30,12 @@ theorem gst_ternary_prefix_value_exactS
       rw [gstTernaryPrefixValueS, ih]
       exact (gst_prefix_residue_succ_exactS R L).symm
 
-/-- Integer-cleared evaluation of the finite digit polynomial at x=3/K.
-At each new digit the old cleared value receives one factor K. -/
 def gstClearedWorldEvalS (R K : Nat) : Nat → Nat
   | 0 => 0
   | L+1 =>
       K * gstClearedWorldEvalS R K L +
         K * 3^L * gstDigitS R L
 
-/-- The world cardinality itself is one modulo its coefficient K-1. -/
 theorem gst_cardinality_mod_world_coefficientS
     (K : Nat) (hK : 3 ≤ K) :
     K % (K-1) = 1 := by
@@ -52,11 +45,9 @@ theorem gst_cardinality_mod_world_coefficientS
     K % (K-1) = ((K-1) + 1) % (K-1) :=
       congrArg (fun x : Nat => x % (K-1)) hshape
     _ = 1 := by
-      rw [Nat.add_mod, Nat.mod_self, Nat.zero_add]
-      exact Nat.mod_eq_of_lt hone_lt
+      rw [Nat.add_mod, Nat.mod_self, Nat.zero_add, Nat.mod_mod,
+        Nat.mod_eq_of_lt hone_lt]
 
-/-- Integer-cleared x=3/K evaluation has exactly the same K-1 shadow as the
-ordinary ternary prefix. -/
 theorem gst_cleared_world_eval_prefix_shadowS
     (R K L : Nat) (hK : 3 ≤ K) :
     gstClearedWorldEvalS R K L % (K-1) =
@@ -84,7 +75,6 @@ theorem gst_cleared_world_eval_prefix_shadowS
       simp only [Nat.mod_mod]
       rw [← Nat.add_mod]
 
-/-- Same theorem directly in terms of the actual integer residue R mod 3^L. -/
 theorem gst_cleared_world_eval_prefix_fingerprintS
     (R K L : Nat) (hK : 3 ≤ K) :
     gstClearedWorldEvalS R K L % (K-1) =
@@ -92,9 +82,6 @@ theorem gst_cleared_world_eval_prefix_fingerprintS
   rw [gst_cleared_world_eval_prefix_shadowS R K L hK,
     gst_ternary_prefix_value_exactS]
 
-/-- At the explicit natural support ceiling the cleared world projection sees
-R itself modulo K-1.  The ceiling is only used to finish the finite-support
-reconstruction; K remains arbitrary. -/
 theorem gst_cleared_world_eval_full_fingerprintS
     (R K : Nat) (hK : 3 ≤ K) :
     gstClearedWorldEvalS R K (R+1) % (K-1) = R % (K-1) := by
@@ -102,16 +89,12 @@ theorem gst_cleared_world_eval_full_fingerprintS
   have hlt : R < 3^(R+1) := gst_self_lt_three_pow_succS R
   rw [Nat.mod_eq_of_lt hlt]
 
-/-- Exact divisibility form: the integer-cleared evaluation and R differ by a
-multiple of K-1, with no rational localization. -/
 theorem gst_world_projection_exact_modEqS
     (R K : Nat) (hK : 3 ≤ K) :
     Nat.ModEq (K-1)
       (gstClearedWorldEvalS R K (R+1)) R := by
   exact gst_cleared_world_eval_full_fingerprintS R K hK
 
-/-- The same result is available at any observation depth that already lies
-beyond the natural ternary support of R. -/
 theorem gst_cleared_world_eval_stable_fingerprintS
     (R K L : Nat) (hK : 3 ≤ K)
     (hL : R + 1 ≤ L) :
@@ -123,8 +106,6 @@ theorem gst_cleared_world_eval_stable_fingerprintS
   have hlt : R < 3^L := lt_of_lt_of_le hbase hpow
   rw [Nat.mod_eq_of_lt hlt]
 
-/-- The world coefficient grows with K, but the exact shadow law does not
-change.  This packages the full all-cardinality family used later by K=6^k. -/
 def GSTExactWorldProjectionFamilyS (R : Nat) : Prop :=
   ∀ K, 3 ≤ K →
     Nat.ModEq (K-1)
