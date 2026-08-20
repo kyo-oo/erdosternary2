@@ -10,6 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Map exact duality theorem source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          grep -n -B 8 -A 90 '^theorem mul4_lift_gst_duality' ErdosTernary2.lean || true
+          grep -n '^theorem gst_omega_termination_s1' ErdosTernary2.lean
+          grep -n '^-- §PREFIX-ONE SEED-ONE SURGERY' ErdosTernary2.lean || true
       - name: Install pinned Lean
         shell: bash
         run: |
