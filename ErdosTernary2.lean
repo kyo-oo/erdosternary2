@@ -9446,7 +9446,7 @@ theorem gst_bad_prefix_u_potential_boundS
       3^K * gstHandwrittenUChargeS (gstAffineMulCarryS 4 D X K) := by
   induction K with
   | zero =>
-      norm_num [gstAffineMulCarryS]
+      simp [gstAffineMulCarryS, Nat.mod_one]
   | succ K ih =>
       have hprev :
           24*(X % 3^K) + gstHandwrittenUChargeS D ≤
@@ -10722,14 +10722,7 @@ theorem gst_canonical_Q4_mod9S
       (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
     have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
       norm_num [Nat.mul_mod, hA3, hQnext1_3]
-    have hdecomp :
-        4^(3^t) * Q (t+1) 1 =
-          1 + 3 * ((4^(3^t) * Q (t+1) 1) / 3) := by
-      have h := Nat.mod_add_div (4^(3^t) * Q (t+1) 1) 3
-      rw [hAq3] at h
-      omega
-    rw [Nat.mul_assoc, hdecomp]
-    simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
+    omega
   norm_num [hthree]
 
 /-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
@@ -10753,14 +10746,7 @@ theorem gst_canonical_Q13_mod27S
       (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
     have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
       norm_num [Nat.mul_mod, hA9, hQ4]
-    have hdecomp :
-        4^(3^s) * Q (s+1) 4 =
-          1 + 9 * ((4^(3^s) * Q (s+1) 4) / 9) := by
-      have h := Nat.mod_add_div (4^(3^s) * Q (s+1) 4) 9
-      rw [hAq9] at h
-      omega
-    rw [Nat.mul_assoc, hdecomp]
-    simp [Nat.mul_add, Nat.add_mod, Nat.mul_mod]
+    omega
   norm_num [hterm]
 
 /-- Canonical origin causality extends the residue-13 calculation to the full
@@ -11491,7 +11477,7 @@ theorem gst_omega_natural_transfer_prefixS
     (Finset.range K).sum (fun i => gstOmegaNaturalTransferS t T i) =
       3^(t+1) * (T % 3^K) := by
   induction K with
-  | zero => simp [gstOmegaNaturalTransferS]
+  | zero => simp [gstOmegaNaturalTransferS, Nat.mod_one]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hstep :
@@ -11641,7 +11627,7 @@ theorem gst_origin_phase_prefixS
         (fun t => 3^(s+t) * gstOriginNaturalTritS n t) =
       3^s * (n % 3^K) := by
   induction K with
-  | zero => simp [gstOriginNaturalTritS]
+  | zero => simp [gstOriginNaturalTritS, Nat.mod_one]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hstep :
@@ -11650,7 +11636,7 @@ theorem gst_origin_phase_prefixS
         rw [Nat.pow_succ, Nat.mod_mul]
       rw [hstep, Nat.mul_add]
       have hpow : 3^s * 3^K = 3^(s+K) := by rw [← Nat.pow_add]
-      rw [hpow]
+      rw [← Nat.mul_assoc, hpow]
       ring
 
 theorem gst_origin_phase_totalS
@@ -11822,7 +11808,11 @@ theorem gst_omega_past_origin_power_fingerprintS
       Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
     rw [hzero, Nat.zero_add]
     rw [Nat.mod_mod]
-    exact Nat.mod_eq_of_lt hsmall
+    have hsmall' :
+        1 + 3^(t+1) * (Q t a % 3^K) < 3^(t+1) * 3^K := by
+      rw [← hM]
+      exact hsmall
+    exact Nat.mod_eq_of_lt hsmall'
   rw [hE]
   change (1 + 3^(t+1) * Q t a) % 3^(t+1+K) = _
   rw [hres, gst_omega_past_is_origin_prefixS Q hQ t n K ht]
