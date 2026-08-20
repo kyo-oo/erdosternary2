@@ -1,0 +1,70 @@
+name: Canonical Clean Build
+
+on:
+  push:
+    branches:
+      - sol/canonical-main-clean-20260818
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: canonical-main-clean
+  cancel-in-progress: true
+
+jobs:
+  canonical:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/canonical-main-clean-20260818
+          fetch-depth: 0
+
+      - name: Reconstruct canonical sources
+        run: python3 .canonical/apply.py
+
+      - name: Record source identity
+        shell: bash
+        run: |
+          mkdir -p .canonical
+          sha256sum ErdosTernary2.lean GSTTactic.lean > .canonical/source.sha256
+          wc -l ErdosTernary2.lean GSTTactic.lean > .canonical/source.lines
+
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        continue-on-error: true
+        with:
+          build: false
+
+      - name: Resolve dependencies and compile canonical root
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          lake update > .canonical/update.txt 2>&1
+          update_code=$?
+          if [ "$update_code" -eq 0 ]; then
+            lake exe cache get >> .canonical/update.txt 2>&1
+            lake build ErdosTernary2 > .canonical/build.txt 2>&1
+            code=$?
+          else
+            cp .canonical/update.txt .canonical/build.txt
+            code=$update_code
+          fi
+          echo "$code" > .canonical/build.exit
+          exit 0
+
+      - name: Persist canonical reconstruction and diagnostics
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean GSTTactic.lean lake-manifest.json .canonical/source.sha256 .canonical/source.lines .canonical/update.txt .canonical/build.txt .canonical/build.exit
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record clean canonical build diagnostics'
+            git push origin HEAD:sol/canonical-main-clean-20260818
+          fi

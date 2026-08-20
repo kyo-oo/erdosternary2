@@ -11,4 +11,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
+      - name: Reconstruct locked canonical sources
+        run: python3 .canonical/apply.py
+      - name: Setup Lean 4.33.0-rc2
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+      - name: Resolve canonical Mathlib manifest
+        run: lake update
+      - name: Restore Mathlib cache
+        run: lake exe cache get
+      - name: Build canonical proof library
+        run: lake build ErdosTernary2
