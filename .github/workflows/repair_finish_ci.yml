@@ -2,6 +2,7 @@ name: Finish One Error
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -50,7 +51,7 @@ jobs:
           lake env lean PreOmega.lean | tee preomega.log
           ! grep -E 'declaration uses .*(sorryAx|propext.*sorry|Classical.choice.*sorry)' preomega.log
       - name: Quarantine verified redundant Omega tail
-        if: github.ref == 'refs/heads/sol/gpt56-close-one-error'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
         shell: bash
         run: |
           set -euxo pipefail
@@ -71,7 +72,7 @@ jobs:
           set -euxo pipefail
           lake env lean Main.lean
       - name: Commit surgical replacement
-        if: github.ref == 'refs/heads/sol/gpt56-close-one-error'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/sol/gpt56-close-one-error'
         shell: bash
         run: |
           set -euxo pipefail
