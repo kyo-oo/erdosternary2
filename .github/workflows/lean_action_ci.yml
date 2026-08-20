@@ -65,6 +65,19 @@ jobs:
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           LEAN_PATH="$SNAP:${LEAN_PATH:-}" lake env lean "$SNAP/GSTGraphV2InfiniteWorldTowerScratch.lean"
+      - name: Prove universal theorem exists before legacy Omega overproof
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          awk '/Legacy residual overproof/{exit} {print}' ErdosTernary2.lean > ErdosTernary2_PreOmegaSmoke.lean
+          cat >> ErdosTernary2_PreOmegaSmoke.lean <<'EOF'
+          #check erdos_ternary_2_even_universal
+          #check erdos_ternary_2_universal
+          #print axioms erdos_ternary_2_even_universal
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean ErdosTernary2_PreOmegaSmoke.lean
       - name: Typecheck exact all-cardinality world projection
         timeout-minutes: 20
         shell: bash
