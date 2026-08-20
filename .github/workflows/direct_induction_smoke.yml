@@ -94,7 +94,7 @@ jobs:
           #print axioms gpt56_direct_even_universal
           #print axioms gpt56_direct_universal
           EOF
-          lake env lean DirectInductionCandidate.lean | tee direct-candidate.log
+          lake env lean DirectInductionCandidate.lean 2>&1 | tee direct-candidate.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' direct-candidate.log
 
       - name: Atomic monolith amputation and replacement
@@ -114,11 +114,10 @@ jobs:
           /- ============================================================================
              AUGUST 20 SOL DIRECT FINISH
 
-             The legacy residual Ω corridor below this point was an overproof: the final
-             digit theorem does not need residual Ω termination.  The already kernelized
-             creation theorem plus GST duality gives a direct well-founded exponent
-             induction.  This is the exact theorem first checked in the Aug-20 direct
-             induction smoke before this source is rewritten.
+             The legacy residual Omega corridor below this point was an overproof: the
+             final digit theorem does not need residual Omega termination. The already
+             kernelized creation theorem plus GST duality gives a direct well-founded
+             exponent induction. This exact theorem was kernel-checked before surgery.
              ============================================================================ -/
 
           theorem gpt56_direct_even_universal (a : Nat) :
@@ -176,34 +175,35 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          lake env lean ErdosTernary2.lean | tee monolith.log
+          lake env lean ErdosTernary2.lean 2>&1 | tee monolith.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' monolith.log
-          lake build
+          lake build 2>&1 | tee build.log
 
       - name: Zero-sorry gate
         shell: bash
         run: |
           set -euxo pipefail
-          bash scripts/sorry_check.sh
+          bash scripts/sorry_check.sh 2>&1 | tee sorry.log
 
       - name: Real V5 comparator gate
         timeout-minutes: 45
         shell: bash
         run: |
           set -euxo pipefail
-          bash scripts/comparator.sh | tee comparator.log
+          bash scripts/comparator.sh 2>&1 | tee comparator.log
           grep -q 'Your solution is okay!' comparator.log
           grep -q 'COMPARATOR RESULT: PASS' comparator.log
 
       - name: Commit only verified green surgery
+        if: success()
         shell: bash
         run: |
           set -euxo pipefail
           cat > SOL_DIRECT_FINISH_RESULT.md <<'EOF'
           # SOL AUG-20 DIRECT FINISH — GREEN
 
-          The exact Aug-20 direct strong-induction proof kernel-checked before surgery.
-          The legacy residual Omega overproof was amputated from the active monolith.
+          Exact Aug-20 direct strong induction: kernel PASS.
+          Legacy residual Omega overproof: removed from active monolith.
           Full monolith compile: PASS.
           lake build: PASS.
           sorry_check.sh: 0 sorries.
@@ -214,3 +214,29 @@ jobs:
           git add ErdosTernary2.lean SOL_DIRECT_FINISH_RESULT.md
           git commit -m 'prove: close final error by Aug20 direct induction' || true
           git push origin HEAD:sol/gpt56-close-one-error
+
+      - name: Commit exact failure diagnostic
+        if: failure()
+        shell: bash
+        run: |
+          set +e
+          {
+            echo '# SOL AUG-20 DIRECT FINISH — RED'
+            echo
+            echo 'The atomic runner failed before the green commit. Exact available log tails follow.'
+            for f in direct-candidate.log monolith.log build.log sorry.log comparator.log; do
+              if [ -f "$f" ]; then
+                echo
+                echo "## $f"
+                echo '```text'
+                tail -120 "$f"
+                echo '```'
+              fi
+            done
+          } > SOL_DIRECT_FINISH_FAILURE.md
+          git checkout -- ErdosTernary2.lean 2>/dev/null || true
+          git config user.name 'gpt56-sol'
+          git config user.email 'gpt56-sol@users.noreply.github.com'
+          git add SOL_DIRECT_FINISH_FAILURE.md
+          git commit -m 'diagnostic: capture remaining direct-finish obstruction' || true
+          git push origin HEAD:sol/gpt56-close-one-error || true
