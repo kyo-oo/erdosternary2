@@ -1,0 +1,31 @@
+name: GST V2 Infinite Collision Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - sol/gpt56-close-one-error
+    paths:
+      - 'ErdosTernary2.lean'
+      - 'GSTInfiniteCollision.lean'
+      - '.github/workflows/gst_v2_infinite_collision_smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sol/gpt56-close-one-error
+      - uses: leanprover/lean-action@v1
+      - name: Compile current monolith
+        run: lake env lean ErdosTernary2.lean
+      - name: Build project
+        run: lake build
+      - name: Sorry check
+        run: bash scripts/sorry_check.sh
+      - name: Comparator
+        run: bash scripts/comparator.sh
