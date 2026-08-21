@@ -58,9 +58,12 @@ theorem gpt56_first_navigation_gate_u_control
   refine ⟨q, hgate.1, hgate.2, hbad, ?_⟩
   intro hC3
   have hU := gst_bad_prefix_u_potential_boundS 0 R q (by decide) hbad
+  have hcarryS : gstAffineCarryS 0 R q = 3 := by
+    simpa [gstAffineCarryS, gstCarry] using hC3
+  rw [hcarryS] at hU
   have hU' :
       24 * (R % 3^q) + 5 ≤ 3^q * 21 := by
-    simpa [gstAffineCarryS, gstCarry, gstHandwrittenUChargeS, hC3] using hU
+    simpa [gstHandwrittenUChargeS] using hU
   omega
 
 #check gpt56_first_navigation_gate_u_control
