@@ -55,7 +55,7 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
       (C = 2 ∨ C = 3) ∧
       D + 4*Z = W + A*C ∧
       W < A ∧
-      ((∃ j, gstDigitS Y j = 1) ∨
+      ((∃ j, GSTInfiniteV2.gstDigitS Y j = 1) ∨
        (∃ r, C + 4*Y = 3^(2*r) + 1) ∨
        (∃ r, C + 4*Y = 3^(2*r+1))) := by
   obtain ⟨q, htrap⟩ :=
@@ -63,8 +63,8 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
   refine ⟨q, ?_⟩
   dsimp only at htrap ⊢
   refine ⟨htrap.1, htrap.2.1, htrap.2.2.1,
-    htrap.2.2.2.1, htrap.2.2.2.2.1, ?_⟩
-  by_cases hbig1 : ∃ j, gstDigitS (T / 3^(q+1)) j = 1
+    htrap.2.2.2.1, htrap.2.2.2.2, ?_⟩
+  by_cases hbig1 : ∃ j, GSTInfiniteV2.gstDigitS (T / 3^(q+1)) j = 1
   · exact Or.inl hbig1
   · have hno : GSTSleepNoBig1S (T / 3^(q+1)) := by
       intro j hj
@@ -74,8 +74,9 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
           (gstAffineMulCarryS 4 0 T (q+1)) (T / 3^(q+1)) := by
       intro j
       have hj := htrap.2.1 j
-      simpa [GSTSleepSeededBadTraceS, gstAffineCarryS,
-        gstAffineMulCarryS] using hj
+      simpa only [_root_.GSTBadPairS, GSTInfiniteV2.GSTBadPairS,
+        _root_.gstAffineMulCarryS, GSTInfiniteV2.gstAffineCarryS,
+        _root_.gstDigitS, GSTInfiniteV2.gstDigitS] using hj
     have hb := gst_sleep_big1_free_last_gate_peel_is_ternary_boundaryS
       (gstAffineMulCarryS 4 0 T (q+1)) (T / 3^(q+1))
       htrap.2.2.1 hbadSleep hno
