@@ -9,6 +9,16 @@ import StripConservationScratch
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
+/-- Local copy of canonical origin-energy, avoiding any dependency on the
+separate deliberately-RED phase-crossing module. -/
+def GSTCanonicalOriginEnergyProbeS (Q : Nat → Nat → Nat) : Prop :=
+  ∀ t n, 1 ≤ t → 4^(3^t*n) = 1 + 3^(t+1) * Q t n
+
+theorem probe_navigation_constant_origin_energy :
+    GSTCanonicalOriginEnergyProbeS gstNavigationConstant := by
+  intro t n ht
+  exact gst_navigation_decomposition t n ht
+
 /-- Local copy of the RED physical-trap certificate, isolated so the probe does
 not import the deliberately unclosed CanonicalPhaseCrossingSurgeryScratch. -/
 def GSTCanonicalPhysicalTrapProbeS
@@ -74,7 +84,7 @@ theorem probe_canonical_physical_trap_s1_n4 :
 
 def GSTCanonicalPrefixOnePhysicalTrapImpossibleProbeS : Prop :=
   ∀ (Q : Nat → Nat → Nat),
-    GSTCanonicalOriginEnergyS Q →
+    GSTCanonicalOriginEnergyProbeS Q →
     ∀ s n c z,
       1 ≤ s → 1 ≤ n →
       4^(3^s) = 1 + 3^(s+1)*c →
@@ -86,7 +96,7 @@ theorem probe_physical_trap_impossibility_is_false :
   intro h
   have hA : 4^(3^1) = 1 + 3^(1+1)*7 := by norm_num
   have hc : 7 = 1 + 3*2 := by norm_num
-  exact (h gstNavigationConstant gst_navigation_constant_origin_energyS
+  exact (h gstNavigationConstant probe_navigation_constant_origin_energy
     1 4 7 2 (by decide) (by decide) hA hc)
     probe_canonical_physical_trap_s1_n4
 
