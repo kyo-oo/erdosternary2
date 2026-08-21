@@ -13,6 +13,7 @@
 -- ====================================================================== -/
 
 import CanonicalPrefixScratch
+import InformationDescentScratch
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -50,7 +51,8 @@ theorem gst_canonical_block_unit_mod3S
   rw [h, Nat.add_mod, Nat.mul_mod]
   have hdiv : 3^(t+1) % 3 = 0 := by
     apply Nat.mod_eq_zero_of_dvd
-    exact Nat.dvd_pow_self 3 (by omega)
+    rw [show (3:Nat) = 3^1 by decide]
+    exact Nat.pow_dvd_pow 3 (by omega)
   rw [hdiv]
   norm_num
 
@@ -64,21 +66,32 @@ theorem gst_canonical_Q4_mod9S
     Q t 4 % 9 = 1 := by
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 1 (by omega)
   norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_9]
   have hA3 : 4^(3^t) % 3 = 1 :=
     gst_canonical_block_unit_mod3S Q hQ t (by omega)
-  have hthree :
-      (3 * 4^(3^t) * Q (t+1) 1) % 9 = 3 := by
-    have hAq3 : (4^(3^t) * Q (t+1) 1) % 3 = 1 := by
-      rw [Nat.mul_mod, hA3, hQnext1_3]
-      decide
-    have hfactor :
-        (3 * 4^(3^t) * Q (t+1) 1) % 9 =
-          3 * ((4^(3^t) * Q (t+1) 1) % 3) := by
-      omega
-    rw [hfactor, hAq3]
-  rw [hthree]
-  decide
+  let U := 4^(3^t) * Q (t+1) 1
+  have hUmod : U % 3 = 1 := by
+    dsimp [U]
+    rw [Nat.mul_mod, hA3, hQnext1_3]
+    decide
+  have hUshape : U = 1 + 3 * (U / 3) := by
+    have h := Nat.mod_add_div U 3
+    rw [hUmod] at h
+    exact h.symm
+  have hthree : (3 * U) % 9 = 3 := by
+    rw [hUshape]
+    have hdvd : 9 ∣ 3 * (3 * (U / 3)) := by
+      refine ⟨U / 3, ?_⟩
+      ring
+    rw [Nat.mul_add, Nat.mul_one, Nat.add_mod,
+      Nat.mod_eq_zero_of_dvd hdvd]
+    norm_num
+  calc
+    Q t 4 % 9 = (Q t 1 + 3 * U) % 9 := by
+      rw [hrec]
+      rfl
+    _ = (Q t 1 % 9 + (3 * U) % 9) % 9 := by rw [Nat.add_mod]
+    _ = (7 + 3) % 9 := by rw [hQ1_9, hthree]
+    _ = 1 := by decide
 
 /-- The exact origin 13=1+3*4 has canonical residue 19 modulo 27. -/
 theorem gst_canonical_Q13_mod27S
@@ -94,21 +107,32 @@ theorem gst_canonical_Q13_mod27S
       hQnext1_9 hQnext2_3
   have hrec := gst_canonical_prefix_recurrenceS Q hQ s 1 1 4 (by omega)
   norm_num at hrec ⊢
-  rw [hrec, Nat.add_mod, Nat.mul_mod, hQ1_27]
+  let U := 4^(3^s) * Q (s+1) 4
   have hA9 : 4^(3^s) % 9 = 1 :=
     gst_canonical_block_unit_mod9S Q hQ s hs
-  have hterm :
-      (3 * 4^(3^s) * Q (s+1) 4) % 27 = 3 := by
-    have hAq9 : (4^(3^s) * Q (s+1) 4) % 9 = 1 := by
-      rw [Nat.mul_mod, hA9, hQ4]
-      decide
-    have hfactor :
-        (3 * 4^(3^s) * Q (s+1) 4) % 27 =
-          3 * ((4^(3^s) * Q (s+1) 4) % 9) := by
-      omega
-    rw [hfactor, hAq9]
-  rw [hterm]
-  decide
+  have hUmod : U % 9 = 1 := by
+    dsimp [U]
+    rw [Nat.mul_mod, hA9, hQ4]
+    decide
+  have hUshape : U = 1 + 9 * (U / 9) := by
+    have h := Nat.mod_add_div U 9
+    rw [hUmod] at h
+    exact h.symm
+  have hterm : (3 * U) % 27 = 3 := by
+    rw [hUshape]
+    have hdvd : 27 ∣ 3 * (9 * (U / 9)) := by
+      refine ⟨U / 9, ?_⟩
+      ring
+    rw [Nat.mul_add, Nat.mul_one, Nat.add_mod,
+      Nat.mod_eq_zero_of_dvd hdvd]
+    norm_num
+  calc
+    Q s 13 % 27 = (Q s 1 + 3 * U) % 27 := by
+      rw [hrec]
+      rfl
+    _ = (Q s 1 % 27 + (3 * U) % 27) % 27 := by rw [Nat.add_mod]
+    _ = (16 + 3) % 27 := by rw [hQ1_27, hterm]
+    _ = 19 := by decide
 
 /-- Canonical origin causality extends the residue-13 calculation to the full
 class b == 13 (mod 27). -/
