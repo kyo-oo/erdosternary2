@@ -1,6 +1,6 @@
 name: Prefix One Modular Blade Smoke
 
-# execution-trigger: current prefix-one production repair
+# execution-trigger: pre-Omega U bridge import verification
 on:
   push:
   pull_request:
