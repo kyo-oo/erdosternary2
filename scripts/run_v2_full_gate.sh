@@ -18,15 +18,21 @@ test "$CUT" -eq 7326
 head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
 lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
-# Compile exactly the local dependency closure needed by the concrete physical
-# trap counterexample probe.  This is topological, never hand-ordered.
+# Compile the sound handwritten/V2 dependency closure needed by the production
+# equation probe and the concrete physical-trap counterexample probe.
 export LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}"
 python3 - <<'PY'
 from pathlib import Path
 import re
 root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
 files = {p.stem:p for p in root.glob('*.lean')}
-seeds = ['InformationRegenerationScratch', 'StripConservationScratch']
+seeds = [
+    'InformationRegenerationScratch',
+    'StripConservationScratch',
+    'GSTGraphV2SleepEquationLabScratch',
+    'GSTGraphV2SleepEquationCollisionScratch',
+    'GSTGraphV2InfiniteBigNDichotomyScratch',
+]
 rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
 imports = {}
 for m,p in files.items():
@@ -59,9 +65,13 @@ PY
 while IFS= read -r mod; do
   lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
 done < .probe-order
+
+lake env lean GSTHandwrittenPrefixOneProductionProbe.lean | tee handwritten-production-probe.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-production-probe.log
+
 bash scripts/probe_physical_trap_counterexample.sh
 
-# Comment-safe physical surgery.  Replace whole semantic corridors between
+# Comment-safe physical surgery. Replace whole semantic corridors between
 # stable markers instead of guessing declaration spans; this preserves the
 # existing legacy quarantine comment and all later public declarations.
 python3 - <<'PY'
@@ -72,8 +82,6 @@ src=p.read_text()
 legacy_start = src.index('theorem gst_omega_termination_s1')
 legacy_marker = '\n/-\n/-- Numerical ceiling used to bound every power-of-four graph witness. -/'
 legacy_end = src.index(legacy_marker, legacy_start)
-# Keep the standalone /- opener: everything from the numerical-ceiling route
-# through its original matching -/ remains quarantined exactly as before.
 src = src[:legacy_start] + legacy_marker + src[legacy_end + len(legacy_marker):]
 
 inline_start = src.index('theorem gst_prefix_one_information_bad_descends_inline')
@@ -116,8 +124,6 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
 src = src[:inline_start] + replacement + src[inline_end:]
 p.write_text(src)
 print('SURGERY_LINES',src.count('\n')+1)
-# Mechanical guards: old production foundations must be gone as declarations,
-# but the quarantined archaeology may still contain their names as comments.
 for bad in ['theorem gst_omega_termination_s1','theorem gst_residual_navigation_lift :']:
     if bad in src[:src.index('/-\n/-- Numerical ceiling')]:
         raise SystemExit('LIVE_LEGACY_DECLARATION '+bad)
