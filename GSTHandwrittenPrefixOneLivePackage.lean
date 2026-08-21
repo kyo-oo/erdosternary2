@@ -33,7 +33,10 @@ theorem gpt56_prefix_one_live_handwritten_package
     exact gstGoodSpace_carry_mod3_zero _ q hspace
   have hClt : gstCarry T q < 4 := by
     cases q with
-    | zero => simp [gstCarry]
+    | zero =>
+        simp only [gstCarry, Nat.pow_zero, Nat.mod_one, Nat.mul_zero,
+          Nat.zero_div]
+        decide
     | succ r =>
         exact gstCarry_lt_four T (r+1) (by omega)
   have hC : gstCarry T q = 0 ∨ gstCarry T q = 3 := by omega
