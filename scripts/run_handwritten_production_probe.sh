@@ -57,11 +57,16 @@ while IFS= read -r mod; do
   lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
 done < .handwritten-order
 
-lake env lean GSTHandwrittenPhysicalNoBig1.lean 2>&1 | tee handwritten-physical-nobig1.log
+lake env lean -o GSTHandwrittenPhysicalNoBig1.olean GSTHandwrittenPhysicalNoBig1.lean 2>&1 | tee handwritten-physical-nobig1.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-physical-nobig1.log
 grep -Fq "'gpt56_binary_residue_gap_doubles' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_noBig1_impossible' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_path_forces_first_big1' depends on axioms:" handwritten-physical-nobig1.log
+
+lake env lean GSTHandwrittenChildFirstBig1.lean 2>&1 | tee handwritten-child-first-big1.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-child-first-big1.log
+grep -Fq "'gpt56_child_happy_forces_first_big1' depends on axioms:" handwritten-child-first-big1.log
+grep -Fq "'gpt56_child_happy_forces_destroy_boundary' depends on axioms:" handwritten-child-first-big1.log
 
 lake env lean GSTHandwrittenPrefixOneProductionProbe.lean 2>&1 | tee handwritten-production-probe.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-production-probe.log
