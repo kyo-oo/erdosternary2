@@ -43,7 +43,7 @@ theorem gpt56_parent_binary_endpoint_carry
 segment, every information vertex through that endpoint is BIG2. -/
 theorem gpt56_no_big1_before_parent_endpoint_forces_big2
     (s T q : Nat)
-    (hgate : GSTSeededHappyS 0 T q)
+    (hd2 : gstDigit T q = 2)
     (hno : ∀ r, r ≤ 2 * 3^s →
       GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1) :
     GSTPhysicalKernel.binaryColumnDigit T q (2 * 3^s) = 2 := by
@@ -53,8 +53,8 @@ theorem gpt56_no_big1_before_parent_endpoint_forces_big2
   have hpath : GSTInfiniteBridgePathS a d := by
     simpa [a, d] using gpt56_binary_row_path T q
   have hd0eq : d 0 = 2 := by
-    dsimp [d, GSTPhysicalKernel.binaryColumnDigit]
-    simpa [_root_.GSTSeededHappyS, _root_.gstDigitS] using hgate.1
+    dsimp [d]
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
   have hd0 : d 0 ≠ 0 := by omega
   obtain ⟨N, hfirst⟩ := gpt56_physical_path_forces_first_big1 T q (by
     simpa [d] using hd0)
@@ -76,12 +76,12 @@ theorem gpt56_no_big1_before_parent_endpoint_forces_big2
 /-- Same endpoint statement in the canonical 4^(3^s)*T coordinates. -/
 theorem gpt56_no_big1_before_parent_endpoint_digit_two
     (s T q : Nat)
-    (hgate : GSTSeededHappyS 0 T q)
+    (hd2 : gstDigit T q = 2)
     (hno : ∀ r, r ≤ 2 * 3^s →
       GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1) :
     gstDigitS (4^(3^s) * T) q = 2 := by
   rw [← gpt56_parent_binary_endpoint_digit]
-  exact gpt56_no_big1_before_parent_endpoint_forces_big2 s T q hgate hno
+  exact gpt56_no_big1_before_parent_endpoint_forces_big2 s T q hd2 hno
 
 #check gpt56_parent_multiplier_is_binary_bridge
 #check gpt56_parent_binary_endpoint_digit
