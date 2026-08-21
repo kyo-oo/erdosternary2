@@ -1,1 +1,1 @@
-Run comment-safe corridor surgery, kernel-check the canonical physical-trap counterexample probe, then compile the rewritten monolith.
+Kernel-certify the concrete canonical physical trap, then run comment-safe V2 surgery and compile the full rewritten monolith.
