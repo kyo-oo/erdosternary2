@@ -291,5 +291,7 @@ jobs:
           #check gpt56_prefix_one_bad_forces_BIG1_v2
           #print axioms gpt56_prefix_one_bad_forces_BIG1_v2
           EOF
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTCanonicalEnergyControl.lean | tee canonical-energy-control.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-energy-control.log
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean PrefixOneModularBladeSmokeV2.lean | tee modular-blade-v2.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' modular-blade-v2.log
