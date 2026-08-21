@@ -40,8 +40,9 @@ theorem gst_sleep_no_finite_origin_all_scalesS (n : Nat) :
   intro h
   apply gst_natural_origin_not_maximal_in_all_six_worldsS n
   intro q
-  rw [gst_sleep_joined_world_code_closedS]
-  exact h q
+  have hq := h q
+  rw [gst_sleep_joined_world_code_closedS] at hq
+  exact hq
 
 /-- Cofinal agreement is already impossible: after every requested cutoff one
 cannot find a later six-world where a finite origin equals the handwritten
