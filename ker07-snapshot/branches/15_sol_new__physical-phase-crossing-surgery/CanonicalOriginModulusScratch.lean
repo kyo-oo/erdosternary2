@@ -62,9 +62,10 @@ theorem gst_canonical_origin_addS
       _ = A * 4^(3^t*b) := hpow
       _ = A * (1 + D * Q t b) := by rw [hb]
       _ = A * (1 + D * 1 * Q t b) := by ring
-  exact origin_navigation_algebraS
-    D A (Q t a) (Q t (a+b)) (Q t b) 1
-    (Nat.pow_pos (by decide)) hA hcur
+  simpa using
+    (origin_navigation_algebraS
+      D A (Q t a) (Q t (a+b)) (Q t b) 1
+      (Nat.pow_pos (by decide)) hA hcur)
 
 /-- Every integral multiple of an origin modulus maps to a physical value
 that is divisible by `Q t m`. -/
@@ -96,16 +97,19 @@ theorem gst_canonical_origin_modulusS
   let r := b % m
   let q := b / m
   have hb : b = r + q*m := by
-    dsimp [r, q]
-    have h := Nat.mod_add_div b m
-    omega
+    simpa [r, q, Nat.mul_comm] using (Nat.mod_add_div b m).symm
   have hadd := gst_canonical_origin_addS Q hQ t r (q*m) ht
   have hdvdQ : Q t m ∣ Q t (q*m) :=
     gst_canonical_origin_multiple_dvdS Q hQ t m q ht
   have hdvdTerm : Q t m ∣ 4^(3^t*r) * Q t (q*m) :=
     dvd_mul_of_dvd_right hdvdQ _
-  rw [hb, hadd, Nat.add_mod, Nat.mod_eq_zero_of_dvd hdvdTerm,
-    Nat.add_zero, Nat.mod_mod]
+  calc
+    Q t b % Q t m = Q t (r + q*m) % Q t m := by rw [hb]
+    _ = (Q t r + 4^(3^t*r) * Q t (q*m)) % Q t m := by rw [hadd]
+    _ = Q t r % Q t m := by
+      rw [Nat.add_mod, Nat.mod_eq_zero_of_dvd hdvdTerm,
+        Nat.add_zero, Nat.mod_mod]
+    _ = Q t (b % m) % Q t m := by rfl
 
 /-- The first binary origin modulus is exactly 455. -/
 theorem gst_canonical_Q_one_two_eq_455S
