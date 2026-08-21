@@ -1,0 +1,172 @@
+import GSTHandwrittenPrefixOneLivePackage
+
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 10000000
+
+open GSTInfiniteV2
+
+/-!
+# Handwritten I = BIG-N and 2^j / 3^j / 6^j factor surgery
+
+The handwritten BIG-N branch already had its operational content in
+`GSTFirstBig1AtS`: N is the first natural information coordinate at which the
+physical bridge reaches BIG1.  This file exposes that content under the literal
+`I = BIG-N` name and couples it to the three exponential worlds appearing in
+the handwritten operator.
+-/
+
+/-- Literal handwritten `I = BIG-N`: the information path first reaches BIG1
+at coordinate N. -/
+def GSTInformationEqualsBigNS (d : Nat → Nat) (N : Nat) : Prop :=
+  GSTFirstBig1AtS d N
+
+/-- Binary-world exponential factor. -/
+def gstBinaryWorldFactorS (j : Nat) : Nat := 2^j
+
+/-- Ternary-world exponential factor. -/
+def gstTernaryWorldFactorS (j : Nat) : Nat := 3^j
+
+/-- Mixed six-state-world exponential factor. -/
+def gstMixedWorldFactorS (j : Nat) : Nat := 6^j
+
+/-- Exact packet of the three handwritten exponential worlds at one depth. -/
+structure GSTThreeWorldExponentialPacketS where
+  binary : Nat
+  ternary : Nat
+  mixed : Nat
+  deriving Repr, DecidableEq
+
+def gstThreeWorldExponentialPacketS (j : Nat) : GSTThreeWorldExponentialPacketS :=
+  ⟨gstBinaryWorldFactorS j, gstTernaryWorldFactorS j, gstMixedWorldFactorS j⟩
+
+/-- `I = BIG-N` is exactly the existing first-BIG1 condition. -/
+theorem gst_information_eq_bigN_iffS
+    (d : Nat → Nat) (N : Nat) :
+    GSTInformationEqualsBigNS d N ↔
+      d N = 1 ∧ ∀ j, j < N → d j ≠ 1 := by
+  rfl
+
+/-- The mixed world is not an independent scale: at every natural depth it is
+exactly the product of the binary and ternary exponential factors. -/
+theorem gst_three_world_factor_rawS (j : Nat) :
+    6^j = 2^j * 3^j := by
+  have h6 : (6 : Nat) = 2 * 3 := by decide
+  rw [h6, mul_pow]
+
+/-- Named-factor form of the same exact three-world identity. -/
+theorem gst_three_world_mixed_factor_exactS (j : Nat) :
+    gstMixedWorldFactorS j =
+      gstBinaryWorldFactorS j * gstTernaryWorldFactorS j := by
+  unfold gstMixedWorldFactorS gstBinaryWorldFactorS gstTernaryWorldFactorS
+  exact gst_three_world_factor_rawS j
+
+/-- All three exponential worlds respect concatenation of information depth. -/
+theorem gst_three_world_factor_addS (j k : Nat) :
+    gstBinaryWorldFactorS (j+k) =
+        gstBinaryWorldFactorS j * gstBinaryWorldFactorS k ∧
+    gstTernaryWorldFactorS (j+k) =
+        gstTernaryWorldFactorS j * gstTernaryWorldFactorS k ∧
+    gstMixedWorldFactorS (j+k) =
+        gstMixedWorldFactorS j * gstMixedWorldFactorS k := by
+  simp [gstBinaryWorldFactorS, gstTernaryWorldFactorS,
+    gstMixedWorldFactorS, pow_add]
+
+/-- Before literal `I = BIG-N`, every information vertex of a nonzero physical
+bridge is BIG2, while coordinate N itself is BIG1. -/
+theorem gst_information_eq_bigN_exact_path_shapeS
+    (a d : Nat → Nat)
+    (hpath : GSTInfiniteBridgePathS a d)
+    (h0 : d 0 ≠ 0)
+    (N : Nat) (hN : 1 ≤ N)
+    (hbig : GSTInformationEqualsBigNS d N) :
+    d N = 1 ∧ ∀ j, j < N → d j = 2 := by
+  change GSTFirstBig1AtS d N at hbig
+  exact ⟨hbig.1,
+    gst_before_first_big1_all_big2S a d hpath h0 N hN hbig⟩
+
+/-- Exact BIG-N projected code written simultaneously in all three worlds.
+The old `5*6^(N-1)-1` code is now explicitly
+`5*(2^(N-1)*3^(N-1))-1`. -/
+theorem gst_information_eq_bigN_exact_three_world_codeS
+    (a d : Nat → Nat)
+    (hpath : GSTInfiniteBridgePathS a d)
+    (h0 : d 0 ≠ 0)
+    (N : Nat) (hN : 1 ≤ N)
+    (hbig : GSTInformationEqualsBigNS d N) :
+    gstBig1ProjectedPathCodeS a d N =
+      5 * (gstBinaryWorldFactorS (N-1) *
+        gstTernaryWorldFactorS (N-1)) - 1 := by
+  change GSTFirstBig1AtS d N at hbig
+  calc
+    gstBig1ProjectedPathCodeS a d N = 5 * 6^(N-1) - 1 :=
+      gst_first_big1_exact_bigN_codeS a d hpath h0 N hN hbig
+    _ = 5 * (2^(N-1) * 3^(N-1)) - 1 := by
+      rw [gst_three_world_factor_rawS (N-1)]
+    _ = 5 * (gstBinaryWorldFactorS (N-1) *
+        gstTernaryWorldFactorS (N-1)) - 1 := by
+      rfl
+
+/-- The canonical horizontal parent segment itself closes the same three-world
+exponential triangle: its binary length is `2*3^s`, and multiplying by the
+aligned ternary factor gives the mixed six-state factor. -/
+theorem gpt56_parent_segment_three_world_factorS (s : Nat) :
+    4^(3^s) * 3^(2 * 3^s) = 6^(2 * 3^s) := by
+  rw [gpt56_parent_multiplier_is_binary_bridge]
+  exact (gst_three_world_factor_rawS (2 * 3^s)).symm
+
+/-- Live prefix-one package with literal `I = BIG-N` and its exact three-world
+code attached to the real child Navigation gate. -/
+theorem gpt56_prefix_one_live_information_bigN_three_world
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    let T := gstNavigationConstant (s+1) n
+    let A := 4^(3^s)
+    let X := c s / 3 + A*T
+    ∃ q N,
+      gstDigit T q = 2 ∧
+      (gstCarry T q = 0 ∨ gstCarry T q = 3) ∧
+      1 ≤ N ∧
+      GSTInformationEqualsBigNS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
+      gstBig1ProjectedPathCodeS
+        (fun r => GSTPhysicalKernel.binaryColumnCarry T q r)
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N =
+          5 * (gstBinaryWorldFactorS (N-1) *
+            gstTernaryWorldFactorS (N-1)) - 1 ∧
+      GSTSeededAffineBadTrace 1 X := by
+  dsimp only
+  let T := gstNavigationConstant (s+1) n
+  let A := 4^(3^s)
+  let X := c s / 3 + A*T
+  obtain ⟨q, N, hd2, hC, hN, hfirst, hseeded⟩ :=
+    gpt56_prefix_one_live_handwritten_package s n hs hn hchild hBad
+  let a : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnCarry T q r
+  let d : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnDigit T q r
+  have hpath : GSTInfiniteBridgePathS a d := by
+    simpa [a, d] using gpt56_binary_row_path T q
+  have hd0eq : d 0 = 2 := by
+    dsimp [d]
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
+  have hd0 : d 0 ≠ 0 := by omega
+  have hcode :
+      gstBig1ProjectedPathCodeS a d N =
+        5 * (gstBinaryWorldFactorS (N-1) *
+          gstTernaryWorldFactorS (N-1)) - 1 := by
+    apply gst_information_eq_bigN_exact_three_world_codeS
+      a d hpath hd0 N hN
+    exact hfirst
+  exact ⟨q, N, hd2, hC, hN, hfirst,
+    by simpa [a, d] using hcode,
+    by simpa [T, A, X] using hseeded⟩
+
+#check GSTInformationEqualsBigNS
+#check gst_three_world_factor_rawS
+#check gst_three_world_mixed_factor_exactS
+#check gst_information_eq_bigN_exact_three_world_codeS
+#check gpt56_parent_segment_three_world_factorS
+#check gpt56_prefix_one_live_information_bigN_three_world
+#print axioms gst_three_world_factor_rawS
+#print axioms gst_information_eq_bigN_exact_three_world_codeS
+#print axioms gpt56_parent_segment_three_world_factorS
+#print axioms gpt56_prefix_one_live_information_bigN_three_world
