@@ -193,7 +193,7 @@ theorem gpt56_prefix_one_live_exact_chord_energy_packet
     refine ⟨q, Or.inl ⟨hnull.1, hnull.2.1, hnull.2.2, ?_, ?_⟩,
       hseeded, henergy⟩
     · simpa [a, d] using hcode
-    · exact hkernel
+    · simpa [T] using hkernel
   · have hd0 : d 0 ≠ 0 := by
       have hd0eq : d 0 = 2 := by
         dsimp [d]
@@ -209,7 +209,7 @@ theorem gpt56_prefix_one_live_exact_chord_energy_packet
     refine ⟨q, Or.inr ⟨hplus.1, hplus.2.1, hplus.2.2, ?_, ?_⟩,
       hseeded, henergy⟩
     · simpa [a, d] using hcode
-    · exact hkernel
+    · simpa [T] using hkernel
 
 #check gpt56_prefix_one_live_bigN_full_energy_packet
 #check gpt56_prefix_one_live_short_bigN_energy_packet
