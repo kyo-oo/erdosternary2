@@ -47,9 +47,7 @@ theorem gpt56_binary_residue_gap_doubles
       (2^(r+1) * R) % M = (2 * L) % M := by
     rw [hpow]
     dsimp [L]
-    simpa [Nat.mul_mod] using
-      (show (2 * (2^r * R)) % M = (2 * ((2^r * R) % M)) % M by
-        simp [Nat.mul_mod])
+    simp [Nat.mul_mod]
   have hdecomp := Nat.mod_add_div (2 * L) M
   rw [hcarry] at hdecomp
   rw [show 3^p = M by rfl, hmod]
@@ -90,12 +88,18 @@ theorem gpt56_physical_noBig1_impossible
         simp only [Nat.pow_zero, Nat.one_mul]
         omega
     | succ r ih =>
-        have hdouble := gpt56_binary_residue_gap_doubles R p r (by
-          simpa [a] using hallCarry r)
-        rw [show M = 3^p by rfl] at ih ⊢
-        rw [Nat.pow_succ]
-        rw [hdouble]
-        exact Nat.mul_le_mul_left 2 ih
+        have hdoubleM :
+            M - ((2^(r+1) * R) % M) =
+              2 * (M - ((2^r * R) % M)) := by
+          simpa [M] using gpt56_binary_residue_gap_doubles R p r (by
+            simpa [a] using hallCarry r)
+        calc
+          2^(r+1) = 2 * 2^r := by
+            rw [Nat.pow_succ]
+            ring
+          _ ≤ 2 * (M - ((2^r * R) % M)) :=
+            Nat.mul_le_mul_left 2 ih
+          _ = M - ((2^(r+1) * R) % M) := hdoubleM.symm
   have hAt := hgap M
   have hresM : (2^M * R) % M < M := Nat.mod_lt _ hM
   have hgapLe : M - ((2^M * R) % M) ≤ M := Nat.sub_le _ _
