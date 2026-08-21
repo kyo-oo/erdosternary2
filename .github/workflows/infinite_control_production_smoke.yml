@@ -1,0 +1,59 @@
+name: Infinite Control Production Smoke
+
+on:
+  push:
+    branches:
+      - sol/gpt56-infinite-control-production
+  pull_request:
+    branches:
+      - sol/gpt56-close-one-error
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+      - name: Compile production infinite core
+        run: lake env lean GSTV2InfiniteCore.lean
+      - name: Compile all-depth coupled transport
+        run: lake env lean GSTInfiniteCollision.lean
+      - name: Compile all-depth bad transport
+        run: lake env lean GSTInfiniteBadTransport.lean
+      - name: Compile coupled Past/Future ledger
+        run: lake env lean GSTInfiniteCoupledLedger.lean
+      - name: Compile Happy-gate latent transport
+        run: lake env lean GSTInfiniteGateTransport.lean
+      - name: Compile prefix-one infinite adapter
+        run: lake env lean GSTPrefixOneInfiniteAdapterSmoke.lean
+      - name: Compile synchronized child-gate adapter
+        run: lake env lean GSTPrefixOneGateAdapterSmoke.lean
+      - name: Compile prefix-one latent-gate transport
+        run: lake env lean GSTPrefixOneLatentGateSmoke.lean
+      - name: Compile prefix-one Past/Future ledger
+        run: lake env lean GSTPrefixOneLedgerSmoke.lean
+      - name: Kernel-check false last-gate route counterexample
+        run: lake env lean GSTPhysicalTrapCounterexample.lean
+      - name: Print transport axioms
+        run: |
+          cat > /tmp/TransportAxioms.lean <<'EOF'
+          import GSTInfiniteGateTransport
+          import GSTInfiniteCoupledLedger
+          #print axioms GSTV2.coupledOrbit_invariant_all
+          #print axioms GSTV2.coupledOrbit_childCarry_exact
+          #print axioms GSTV2.coupledOrbit_parentSeed_exact
+          #print axioms GSTV2.coupledOrbit_parent_bad_suffix
+          #print axioms GSTV2.infinite_bad_coupled_control
+          #print axioms GSTV2.coupled_happy_transports_information
+          #print axioms GSTV2.seeded_mass_past_future
+          #print axioms GSTV2.coupledOrbit_past_synchronization
+          #print axioms GSTV2.infinite_coupled_ledger
+          EOF
+          lake env lean /tmp/TransportAxioms.lean
+      - name: Compile infinite-control production consumer
+        run: lake env lean GSTInfiniteControlProductionSmoke.lean

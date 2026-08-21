@@ -13,9 +13,9 @@ The readable handwritten three-world term is
 
   K(q) = 5 * sum_{j<q} (2^j * 3^j).
 
-The sleep-equation laboratory proves K(q)=6^q-1 at every natural q.  Hence an
-ordinary finite natural origin cannot agree with K(q) at all scales, or even at
-cofinally many scales.
+The three-world join identifies every summand with `6^j`, so the finite
+geometric prefix is exactly `6^q - 1`.  Hence an ordinary finite natural
+origin cannot agree with K(q) at all scales, or even at cofinally many scales.
 -/
 
 def gstSleepJoinedWorldCodeS (q : Nat) : Nat :=
@@ -24,7 +24,14 @@ def gstSleepJoinedWorldCodeS (q : Nat) : Nat :=
 /-- Exact closed form of the joined handwritten world code. -/
 theorem gst_sleep_joined_world_code_closedS (q : Nat) :
     gstSleepJoinedWorldCodeS q = 6^q - 1 := by
-  exact gst_sleep_weighted_join_sumS q
+  unfold gstSleepJoinedWorldCodeS
+  induction q with
+  | zero => simp
+  | succ q ih =>
+      rw [Finset.sum_range_succ, gst_sleep_three_world_joinS q, Nat.mul_add,
+        ih, Nat.pow_succ]
+      have hp : 0 < 6^q := Nat.pow_pos (by decide)
+      omega
 
 /-- No finite natural can equal the handwritten joined-world code modulo every
 6^q world. -/
@@ -33,8 +40,9 @@ theorem gst_sleep_no_finite_origin_all_scalesS (n : Nat) :
   intro h
   apply gst_natural_origin_not_maximal_in_all_six_worldsS n
   intro q
-  rw [gst_sleep_joined_world_code_closedS]
-  exact h q
+  have hq := h q
+  rw [gst_sleep_joined_world_code_closedS] at hq
+  exact hq
 
 /-- Cofinal agreement is already impossible: after every requested cutoff one
 cannot find a later six-world where a finite origin equals the handwritten
