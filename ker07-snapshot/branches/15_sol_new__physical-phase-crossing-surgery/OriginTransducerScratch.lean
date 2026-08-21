@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0124 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/OriginTransducerScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 07:49:05 +0530  (77d6713)
-/-    Last-commit  : 2026-08-15 09:42:25 +0530  (44a7de9)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-15 07:49:05 +0530  77d6713  (ker07-dev)
-/-        test: kernel-check natural-origin information transducer
-/- [02/4] 2026-08-15 07:54:27 +0530  13b1b84  (ker07-dev)
-/-        fix: preserve natural-origin lets during descent
-/- [03/4] 2026-08-15 09:31:14 +0530  4507a6c  (ker07-dev)
-/-        Formalize canonical three-phase GST orbit algebra
-/- [04/4] 2026-08-15 09:42:25 +0530  44a7de9  (ker07-dev)
-/-        Fix canonical phase-wrap algebra
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0124 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/OriginTransducerScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 07:49:05 +0530  (77d6713)
+--    Last-commit  : 2026-08-15 09:42:25 +0530  (44a7de9)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-15 07:49:05 +0530  77d6713  (ker07-dev)
+--        test: kernel-check natural-origin information transducer
+-- [02/4] 2026-08-15 07:54:27 +0530  13b1b84  (ker07-dev)
+--        fix: preserve natural-origin lets during descent
+-- [03/4] 2026-08-15 09:31:14 +0530  4507a6c  (ker07-dev)
+--        Formalize canonical three-phase GST orbit algebra
+-- [04/4] 2026-08-15 09:42:25 +0530  44a7de9  (ker07-dev)
+--        Fix canonical phase-wrap algebra
+-- ====================================================================== -/
 
 import Mathlib
 

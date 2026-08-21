@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0559 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTExponentLiftScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 02:25:06 +0530  (eaddb30)
-/-    Last-commit  : 2026-08-16 02:57:02 +0530  (b00e2a3)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-16 02:25:06 +0530  eaddb30  (ker07-dev)
-/-        Add pure-power exponent trit lift graph
-/- [02/3] 2026-08-16 02:47:04 +0530  48ab484  (ker07-dev)
-/-        simplify exponent-trit lift proof
-/- [03/3] 2026-08-16 02:57:02 +0530  b00e2a3  (ker07-dev)
-/-        remove redundant closed-goal tactics
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0559 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTExponentLiftScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 02:25:06 +0530  (eaddb30)
+--    Last-commit  : 2026-08-16 02:57:02 +0530  (b00e2a3)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-16 02:25:06 +0530  eaddb30  (ker07-dev)
+--        Add pure-power exponent trit lift graph
+-- [02/3] 2026-08-16 02:47:04 +0530  48ab484  (ker07-dev)
+--        simplify exponent-trit lift proof
+-- [03/3] 2026-08-16 02:57:02 +0530  b00e2a3  (ker07-dev)
+--        remove redundant closed-goal tactics
+-- ====================================================================== -/
 
 import InformationDescentScratch
 

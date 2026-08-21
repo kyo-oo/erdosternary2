@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0514 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTResidueSpacetimeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 01:21:28 +0530  (f245249)
-/-    Last-commit  : 2026-08-16 01:22:54 +0530  (c879737)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-16 01:21:28 +0530  f245249  (ker07-dev)
-/-        Add generic prefixed residue spacetime graph
-/- [02/2] 2026-08-16 01:22:54 +0530  c879737  (ker07-dev)
-/-        Add double-jump residue square to GST V2
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0514 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTResidueSpacetimeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 01:21:28 +0530  (f245249)
+--    Last-commit  : 2026-08-16 01:22:54 +0530  (c879737)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-16 01:21:28 +0530  f245249  (ker07-dev)
+--        Add generic prefixed residue spacetime graph
+-- [02/2] 2026-08-16 01:22:54 +0530  c879737  (ker07-dev)
+--        Add double-jump residue square to GST V2
+-- ====================================================================== -/
 
 import GSTGraphV2Scratch
 

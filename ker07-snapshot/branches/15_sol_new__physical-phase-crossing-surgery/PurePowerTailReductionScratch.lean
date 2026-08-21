@@ -1,24 +1,24 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0439 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerTailReductionScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 22:19:40 +0530  (8e6e5e6)
-/-    Last-commit  : 2026-08-16 11:40:00 +0530  (efdacc6)
-/-    Total commits: 5
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/5] 2026-08-15 22:19:40 +0530  8e6e5e6  (ker07-dev)
-/-        Reduce information descent to pure-power high-tail transfer
-/- [02/5] 2026-08-15 22:28:39 +0530  7de30b2  (ker07-dev)
-/-        Expose canonical power residue at every GST cut
-/- [03/5] 2026-08-15 23:24:09 +0530  498f240  (ker07-dev)
-/-        Repair exact pure-power strip residue decomposition
-/- [04/5] 2026-08-15 23:43:47 +0530  c19fe98  (ker07-dev)
-/-        Close pure-power strip double modulus
-/- [05/5] 2026-08-16 11:40:00 +0530  efdacc6  (ker07-dev)
-/-        Compile bad-language magnitude axis through tail reduction
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0439 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerTailReductionScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 22:19:40 +0530  (8e6e5e6)
+--    Last-commit  : 2026-08-16 11:40:00 +0530  (efdacc6)
+--    Total commits: 5
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/5] 2026-08-15 22:19:40 +0530  8e6e5e6  (ker07-dev)
+--        Reduce information descent to pure-power high-tail transfer
+-- [02/5] 2026-08-15 22:28:39 +0530  7de30b2  (ker07-dev)
+--        Expose canonical power residue at every GST cut
+-- [03/5] 2026-08-15 23:24:09 +0530  498f240  (ker07-dev)
+--        Repair exact pure-power strip residue decomposition
+-- [04/5] 2026-08-15 23:43:47 +0530  c19fe98  (ker07-dev)
+--        Close pure-power strip double modulus
+-- [05/5] 2026-08-16 11:40:00 +0530  efdacc6  (ker07-dev)
+--        Compile bad-language magnitude axis through tail reduction
+-- ====================================================================== -/
 
 import PurePowerBadAxisScratch
 import InformationRegenerationScratch

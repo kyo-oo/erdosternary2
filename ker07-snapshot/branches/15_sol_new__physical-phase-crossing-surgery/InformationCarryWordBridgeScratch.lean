@@ -1,24 +1,24 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0229 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationCarryWordBridgeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 11:10:44 +0530  (ee551f5)
-/-    Last-commit  : 2026-08-15 14:47:01 +0530  (c5bba4f)
-/-    Total commits: 5
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/5] 2026-08-15 11:10:44 +0530  ee551f5  (ker07-dev)
-/-        Kernel-check shared information carry-word bridge
-/- [02/5] 2026-08-15 11:36:23 +0530  4fb251d  (ker07-dev)
-/-        Close carry-word bridge quotient rewrite
-/- [03/5] 2026-08-15 14:26:18 +0530  67d258f  (ker07-dev)
-/-        Fix information carry-word bridge normalization
-/- [04/5] 2026-08-15 14:40:24 +0530  adce651  (ker07-dev)
-/-        Close carry-word quotient identity explicitly
-/- [05/5] 2026-08-15 14:47:01 +0530  c5bba4f  (ker07-dev)
-/-        Confine carry-word quotient decomposition rewrite
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0229 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationCarryWordBridgeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 11:10:44 +0530  (ee551f5)
+--    Last-commit  : 2026-08-15 14:47:01 +0530  (c5bba4f)
+--    Total commits: 5
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/5] 2026-08-15 11:10:44 +0530  ee551f5  (ker07-dev)
+--        Kernel-check shared information carry-word bridge
+-- [02/5] 2026-08-15 11:36:23 +0530  4fb251d  (ker07-dev)
+--        Close carry-word bridge quotient rewrite
+-- [03/5] 2026-08-15 14:26:18 +0530  67d258f  (ker07-dev)
+--        Fix information carry-word bridge normalization
+-- [04/5] 2026-08-15 14:40:24 +0530  adce651  (ker07-dev)
+--        Close carry-word quotient identity explicitly
+-- [05/5] 2026-08-15 14:47:01 +0530  c5bba4f  (ker07-dev)
+--        Confine carry-word quotient decomposition rewrite
+-- ====================================================================== -/
 
 import InformationDescentScratch
 import CarryWordScratch

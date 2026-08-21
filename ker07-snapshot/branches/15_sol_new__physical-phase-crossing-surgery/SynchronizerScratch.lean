@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0169 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/SynchronizerScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 10:01:27 +0530  (04ac43f)
-/-    Last-commit  : 2026-08-15 10:01:27 +0530  (04ac43f)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 10:01:27 +0530  04ac43f  (ker07-dev)
-/-        Formalize universal GST 12102 synchronizer
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0169 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/SynchronizerScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 10:01:27 +0530  (04ac43f)
+--    Last-commit  : 2026-08-15 10:01:27 +0530  (04ac43f)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 10:01:27 +0530  04ac43f  (ker07-dev)
+--        Formalize universal GST 12102 synchronizer
+-- ====================================================================== -/
 
 import Mathlib
 

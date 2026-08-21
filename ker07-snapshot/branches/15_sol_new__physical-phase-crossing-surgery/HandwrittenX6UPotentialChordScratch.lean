@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0975 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenX6UPotentialChordScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 10:18:28 +0530  (fd8e920)
-/-    Last-commit  : 2026-08-17 10:18:28 +0530  (fd8e920)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 10:18:28 +0530  fd8e920  (ker07-dev)
-/-        Connect handwritten x-6 fibre to U-potential orientation
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0975 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenX6UPotentialChordScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 10:18:28 +0530  (fd8e920)
+--    Last-commit  : 2026-08-17 10:18:28 +0530  (fd8e920)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 10:18:28 +0530  fd8e920  (ker07-dev)
+--        Connect handwritten x-6 fibre to U-potential orientation
+-- ====================================================================== -/
 
 import HandwrittenKernelV2Scratch
 import HandwrittenUniversalParadoxPotentialScratch

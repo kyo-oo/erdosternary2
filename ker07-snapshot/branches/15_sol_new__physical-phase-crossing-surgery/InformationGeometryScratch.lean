@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0154 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationGeometryScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 09:56:22 +0530  (311824f)
-/-    Last-commit  : 2026-08-15 10:08:10 +0530  (ece839f)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-15 09:56:22 +0530  311824f  (ker07-dev)
-/-        Formalize shared GST information coordinates
-/- [02/3] 2026-08-15 09:59:24 +0530  edd5277  (ker07-dev)
-/-        Formalize aligned 6-power GST information boundary
-/- [03/3] 2026-08-15 10:08:10 +0530  ece839f  (ker07-dev)
-/-        Fix shared information bound and gate endpoint proofs
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0154 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationGeometryScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 09:56:22 +0530  (311824f)
+--    Last-commit  : 2026-08-15 10:08:10 +0530  (ece839f)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-15 09:56:22 +0530  311824f  (ker07-dev)
+--        Formalize shared GST information coordinates
+-- [02/3] 2026-08-15 09:59:24 +0530  edd5277  (ker07-dev)
+--        Formalize aligned 6-power GST information boundary
+-- [03/3] 2026-08-15 10:08:10 +0530  ece839f  (ker07-dev)
+--        Fix shared information bound and gate endpoint proofs
+-- ====================================================================== -/
 
 import Mathlib
 

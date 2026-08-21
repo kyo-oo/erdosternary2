@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0274 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationRegenerationScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 15:19:07 +0530  (5c58cbd)
-/-    Last-commit  : 2026-08-15 15:32:21 +0530  (2d9d22d)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 15:19:07 +0530  5c58cbd  (ker07-dev)
-/-        Formalize canonical information regeneration step
-/- [02/2] 2026-08-15 15:32:21 +0530  2d9d22d  (ker07-dev)
-/-        Make canonical regeneration decomposition explicit
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0274 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationRegenerationScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 15:19:07 +0530  (5c58cbd)
+--    Last-commit  : 2026-08-15 15:32:21 +0530  (2d9d22d)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 15:19:07 +0530  5c58cbd  (ker07-dev)
+--        Formalize canonical information regeneration step
+-- [02/2] 2026-08-15 15:32:21 +0530  2d9d22d  (ker07-dev)
+--        Make canonical regeneration decomposition explicit
+-- ====================================================================== -/
 
 import InformationStateScratch
 import InformationBadTraceScratch

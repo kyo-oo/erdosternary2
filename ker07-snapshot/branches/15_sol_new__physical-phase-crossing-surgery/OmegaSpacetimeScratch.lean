@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0454 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/OmegaSpacetimeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 23:08:39 +0530  (d994046)
-/-    Last-commit  : 2026-08-16 03:08:50 +0530  (ebbdf18)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-15 23:08:39 +0530  d994046  (ker07-dev)
-/-        Kernelize infinite-wave phase sandwich endpoints
-/- [02/3] 2026-08-16 03:01:26 +0530  047bdd2  (ker07-dev)
-/-        add infinite Omega energy-pressure consumer
-/- [03/3] 2026-08-16 03:08:50 +0530  ebbdf18  (ker07-dev)
-/-        fix Omega pressure radix split
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0454 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/OmegaSpacetimeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 23:08:39 +0530  (d994046)
+--    Last-commit  : 2026-08-16 03:08:50 +0530  (ebbdf18)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-15 23:08:39 +0530  d994046  (ker07-dev)
+--        Kernelize infinite-wave phase sandwich endpoints
+-- [02/3] 2026-08-16 03:01:26 +0530  047bdd2  (ker07-dev)
+--        add infinite Omega energy-pressure consumer
+-- [03/3] 2026-08-16 03:08:50 +0530  ebbdf18  (ker07-dev)
+--        fix Omega pressure radix split
+-- ====================================================================== -/
 
 import PurePowerBadAxisScratch
 import OriginTransducerScratch

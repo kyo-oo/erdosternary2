@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0289 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationLocalizationScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 15:26:29 +0530  (607a4b5)
-/-    Last-commit  : 2026-08-15 16:52:47 +0530  (b8cbd8f)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-15 15:26:29 +0530  607a4b5  (ker07-dev)
-/-        Localize shared-information gates without losing seeds
-/- [02/4] 2026-08-15 15:40:28 +0530  8bbed38  (ker07-dev)
-/-        Preserve accumulated seed explicitly at localized row zero
-/- [03/4] 2026-08-15 16:46:13 +0530  1ce88bb  (ker07-dev)
-/-        Close localized gate position-zero simplification
-/- [04/4] 2026-08-15 16:52:47 +0530  b8cbd8f  (ker07-dev)
-/-        Close localized seed modulo-one identity
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0289 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationLocalizationScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 15:26:29 +0530  (607a4b5)
+--    Last-commit  : 2026-08-15 16:52:47 +0530  (b8cbd8f)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-15 15:26:29 +0530  607a4b5  (ker07-dev)
+--        Localize shared-information gates without losing seeds
+-- [02/4] 2026-08-15 15:40:28 +0530  8bbed38  (ker07-dev)
+--        Preserve accumulated seed explicitly at localized row zero
+-- [03/4] 2026-08-15 16:46:13 +0530  1ce88bb  (ker07-dev)
+--        Close localized gate position-zero simplification
+-- [04/4] 2026-08-15 16:52:47 +0530  b8cbd8f  (ker07-dev)
+--        Close localized seed modulo-one identity
+-- ====================================================================== -/
 
 import InformationRegenerationScratch
 

@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0244 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationStateScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 11:26:46 +0530  (ada5717)
-/-    Last-commit  : 2026-08-15 14:26:37 +0530  (c5ca346)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 11:26:46 +0530  ada5717  (ker07-dev)
-/-        Add single shared information-state normalization
-/- [02/2] 2026-08-15 14:26:37 +0530  c5ca346  (ker07-dev)
-/-        Fix shared information state proof seams
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0244 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationStateScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 11:26:46 +0530  (ada5717)
+--    Last-commit  : 2026-08-15 14:26:37 +0530  (c5ca346)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 11:26:46 +0530  ada5717  (ker07-dev)
+--        Add single shared information-state normalization
+-- [02/2] 2026-08-15 14:26:37 +0530  c5ca346  (ker07-dev)
+--        Fix shared information state proof seams
+-- ====================================================================== -/
 
 import InformationDescentScratch
 import InformationGeometryScratch

@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0259 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationFluxScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 14:29:36 +0530  (f8e139c)
-/-    Last-commit  : 2026-08-15 14:54:06 +0530  (db9648e)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 14:29:36 +0530  f8e139c  (ker07-dev)
-/-        Formalize shared information strip coordinates
-/- [02/2] 2026-08-15 14:54:06 +0530  db9648e  (ker07-dev)
-/-        Normalize right shared-information endpoint
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0259 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationFluxScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 14:29:36 +0530  (f8e139c)
+--    Last-commit  : 2026-08-15 14:54:06 +0530  (db9648e)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 14:29:36 +0530  f8e139c  (ker07-dev)
+--        Formalize shared information strip coordinates
+-- [02/2] 2026-08-15 14:54:06 +0530  db9648e  (ker07-dev)
+--        Normalize right shared-information endpoint
+-- ====================================================================== -/
 
 import InformationCarryWordBridgeScratch
 import InformationStateScratch

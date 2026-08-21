@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0199 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/StripConservationScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 10:22:43 +0530  (eec9c9c)
-/-    Last-commit  : 2026-08-15 11:16:42 +0530  (b283307)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-15 10:22:43 +0530  eec9c9c  (ker07-dev)
-/-        Formalize generalized GST strip conservation
-/- [02/4] 2026-08-15 10:34:08 +0530  d70341e  (ker07-dev)
-/-        Fix generalized GST strip quotient and digit proofs
-/- [03/4] 2026-08-15 10:34:43 +0530  2921bce  (ker07-dev)
-/-        Make GST strip quotient and digit normalization explicit
-/- [04/4] 2026-08-15 11:16:42 +0530  b283307  (ker07-dev)
-/-        Fix strip conservation modulo normalization
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0199 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/StripConservationScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 10:22:43 +0530  (eec9c9c)
+--    Last-commit  : 2026-08-15 11:16:42 +0530  (b283307)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-15 10:22:43 +0530  eec9c9c  (ker07-dev)
+--        Formalize generalized GST strip conservation
+-- [02/4] 2026-08-15 10:34:08 +0530  d70341e  (ker07-dev)
+--        Fix generalized GST strip quotient and digit proofs
+-- [03/4] 2026-08-15 10:34:43 +0530  2921bce  (ker07-dev)
+--        Make GST strip quotient and digit normalization explicit
+-- [04/4] 2026-08-15 11:16:42 +0530  b283307  (ker07-dev)
+--        Fix strip conservation modulo normalization
+-- ====================================================================== -/
 
 import Mathlib
 

@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1011 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/RetainedOffsetUStateScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 11:02:14 +0530  (fd54c6b)
-/-    Last-commit  : 2026-08-17 11:02:14 +0530  (fd54c6b)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 11:02:14 +0530  fd54c6b  (ker07-dev)
-/-        Add retained-offset canonical U-state step
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1011 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/RetainedOffsetUStateScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 11:02:14 +0530  (fd54c6b)
+--    Last-commit  : 2026-08-17 11:02:14 +0530  (fd54c6b)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 11:02:14 +0530  fd54c6b  (ker07-dev)
+--        Add retained-offset canonical U-state step
+-- ====================================================================== -/
 
 import ResidualNullTerminalScratch
 import HandwrittenOmegaOriginCommutingSquareScratch

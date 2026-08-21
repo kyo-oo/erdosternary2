@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0897 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PrefixOneTerminalZScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:02:36 +0530  (6be2e4b)
-/-    Last-commit  : 2026-08-17 08:02:36 +0530  (6be2e4b)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:02:36 +0530  6be2e4b  (ker07-dev)
-/-        Add terminal seed-one prefix stripping mechanics
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0897 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PrefixOneTerminalZScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:02:36 +0530  (6be2e4b)
+--    Last-commit  : 2026-08-17 08:02:36 +0530  (6be2e4b)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:02:36 +0530  6be2e4b  (ker07-dev)
+--        Add terminal seed-one prefix stripping mechanics
+-- ====================================================================== -/
 
 import PurePowerBadAxisScratch
 

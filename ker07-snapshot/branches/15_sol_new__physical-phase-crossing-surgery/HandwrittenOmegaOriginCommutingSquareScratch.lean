@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0933 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenOmegaOriginCommutingSquareScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:29:16 +0530  (4055486)
-/-    Last-commit  : 2026-08-17 08:29:16 +0530  (4055486)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:29:16 +0530  4055486  (ker07-dev)
-/-        Add exact Omega-origin commuting square and residue fingerprint
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0933 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenOmegaOriginCommutingSquareScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:29:16 +0530  (4055486)
+--    Last-commit  : 2026-08-17 08:29:16 +0530  (4055486)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:29:16 +0530  4055486  (ker07-dev)
+--        Add exact Omega-origin commuting square and residue fingerprint
+-- ====================================================================== -/
 
 import HandwrittenOmegaOperatorScratch
 import InformationRegenerationScratch

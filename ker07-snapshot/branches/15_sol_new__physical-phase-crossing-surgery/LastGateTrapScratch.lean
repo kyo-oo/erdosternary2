@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0349 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/LastGateTrapScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 17:18:10 +0530  (6c56a4c)
-/-    Last-commit  : 2026-08-15 17:24:37 +0530  (a199940)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 17:18:10 +0530  6c56a4c  (ker07-dev)
-/-        Formalize last-gate seeded bad suffix trap
-/- [02/2] 2026-08-15 17:24:37 +0530  a199940  (ker07-dev)
-/-        Repair last-gate ceiling proof seams
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0349 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/LastGateTrapScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 17:18:10 +0530  (6c56a4c)
+--    Last-commit  : 2026-08-15 17:24:37 +0530  (a199940)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 17:18:10 +0530  6c56a4c  (ker07-dev)
+--        Formalize last-gate seeded bad suffix trap
+-- [02/2] 2026-08-15 17:24:37 +0530  a199940  (ker07-dev)
+--        Repair last-gate ceiling proof seams
+-- ====================================================================== -/
 
 import InformationIterationScratch
 import FiniteSupportScratch

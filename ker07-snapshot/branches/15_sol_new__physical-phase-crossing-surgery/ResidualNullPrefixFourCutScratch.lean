@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1017 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullPrefixFourCutScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 11:08:42 +0530  (4179389)
-/-    Last-commit  : 2026-08-17 11:08:42 +0530  (4179389)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 11:08:42 +0530  4179389  (ker07-dev)
-/-        Eliminate second-trit one in NULL residual
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1017 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullPrefixFourCutScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 11:08:42 +0530  (4179389)
+--    Last-commit  : 2026-08-17 11:08:42 +0530  (4179389)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 11:08:42 +0530  4179389  (ker07-dev)
+--        Eliminate second-trit one in NULL residual
+-- ====================================================================== -/
 
 import ResidualNullTerminalScratch
 import NavigationResidueCutScratch

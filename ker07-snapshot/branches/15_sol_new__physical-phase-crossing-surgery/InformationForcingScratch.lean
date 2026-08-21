@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0319 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationForcingScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 16:38:26 +0530  (c2444a3)
-/-    Last-commit  : 2026-08-15 17:01:42 +0530  (c2740a7)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 16:38:26 +0530  c2444a3  (ker07-dev)
-/-        Formalize localized information forcing step
-/- [02/2] 2026-08-15 17:01:42 +0530  c2740a7  (ker07-dev)
-/-        Repair exact forcing proof argument order
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0319 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationForcingScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 16:38:26 +0530  (c2444a3)
+--    Last-commit  : 2026-08-15 17:01:42 +0530  (c2740a7)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 16:38:26 +0530  c2444a3  (ker07-dev)
+--        Formalize localized information forcing step
+-- [02/2] 2026-08-15 17:01:42 +0530  c2740a7  (ker07-dev)
+--        Repair exact forcing proof argument order
+-- ====================================================================== -/
 
 import InformationLocalizationScratch
 import InformationFluxScratch

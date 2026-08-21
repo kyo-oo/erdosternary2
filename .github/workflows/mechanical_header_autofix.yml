@@ -1,0 +1,62 @@
+name: Mechanical Header Autofix
+
+on:
+  push:
+    branches:
+      - sol/gpt56-infinite-control-production
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-infinite-control-production
+          fetch-depth: 1
+      - name: Sweep malformed chronological headers across active Lean snapshot
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
+          changed_files = []
+          changed_lines = 0
+
+          for p in sorted(root.glob('*.lean')):
+              lines = p.read_text().splitlines(True)
+              import_idx = next((i for i, line in enumerate(lines)
+                                 if line.startswith('import ')), len(lines))
+              header = lines[:import_idx]
+              malformed = sum(1 for line in header if line.startswith('/-')) > 1
+              if not malformed:
+                  continue
+              local = 0
+              for i in range(import_idx):
+                  if lines[i].startswith('/-') and not lines[i].startswith('/-!'):
+                      lines[i] = '--' + lines[i][2:]
+                      local += 1
+              # Never mutate proper documentation comments after imports.
+              p.write_text(''.join(lines))
+              changed_files.append(str(p))
+              changed_lines += local
+              print('REPAIRED', p.name, 'LINES', local)
+
+          print('TOTAL_FILES_REPAIRED', len(changed_files))
+          print('TOTAL_HEADER_LINES_REPAIRED', changed_lines)
+          PY
+
+          if git diff --quiet -- ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery; then
+            echo SNAPSHOT_HEADERS_ALREADY_CLEAN
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/'*.lean'
+          git commit -m 'fix: repair active snapshot Lean headers in one sweep'
+          git push origin HEAD:sol/gpt56-infinite-control-production

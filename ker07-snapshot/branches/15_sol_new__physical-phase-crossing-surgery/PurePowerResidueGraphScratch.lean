@@ -1,32 +1,32 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0499 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerResidueGraphScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 00:57:35 +0530  (d98cfa4)
-/-    Last-commit  : 2026-08-16 05:04:46 +0530  (6d65c16)
-/-    Total commits: 9
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/9] 2026-08-16 00:57:35 +0530  d98cfa4  (ker07-dev)
-/-        Add pure-power residue tower to GST Graph V2
-/- [02/9] 2026-08-16 02:25:28 +0530  080ac16  (ker07-dev)
-/-        Wire exponent-lift graph into pure-power residue tower
-/- [03/9] 2026-08-16 02:38:33 +0530  9979ea4  (ker07-dev)
-/-        identify residue strips with actual power GST rows
-/- [04/9] 2026-08-16 02:48:08 +0530  16651a1  (ker07-dev)
-/-        add exact GST power rectangle conservation
-/- [05/9] 2026-08-16 02:59:32 +0530  d79cd62  (ker07-dev)
-/-        lift block echo to physical power channels
-/- [06/9] 2026-08-16 03:23:02 +0530  b5d8bac  (ker07-dev)
-/-        fix power rectangle normalization
-/- [07/9] 2026-08-16 03:30:56 +0530  295b919  (ker07-dev)
-/-        normalize block carrier before physical substitution
-/- [08/9] 2026-08-16 04:44:15 +0530  ece717f  (ker07-dev)
-/-        fix physical block-channel carrier normalization
-/- [09/9] 2026-08-16 05:04:46 +0530  6d65c16  (ker07-dev)
-/-        fix final pure-power rectangle tactic noise
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0499 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerResidueGraphScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 00:57:35 +0530  (d98cfa4)
+--    Last-commit  : 2026-08-16 05:04:46 +0530  (6d65c16)
+--    Total commits: 9
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/9] 2026-08-16 00:57:35 +0530  d98cfa4  (ker07-dev)
+--        Add pure-power residue tower to GST Graph V2
+-- [02/9] 2026-08-16 02:25:28 +0530  080ac16  (ker07-dev)
+--        Wire exponent-lift graph into pure-power residue tower
+-- [03/9] 2026-08-16 02:38:33 +0530  9979ea4  (ker07-dev)
+--        identify residue strips with actual power GST rows
+-- [04/9] 2026-08-16 02:48:08 +0530  16651a1  (ker07-dev)
+--        add exact GST power rectangle conservation
+-- [05/9] 2026-08-16 02:59:32 +0530  d79cd62  (ker07-dev)
+--        lift block echo to physical power channels
+-- [06/9] 2026-08-16 03:23:02 +0530  b5d8bac  (ker07-dev)
+--        fix power rectangle normalization
+-- [07/9] 2026-08-16 03:30:56 +0530  295b919  (ker07-dev)
+--        normalize block carrier before physical substitution
+-- [08/9] 2026-08-16 04:44:15 +0530  ece717f  (ker07-dev)
+--        fix physical block-channel carrier normalization
+-- [09/9] 2026-08-16 05:04:46 +0530  6d65c16  (ker07-dev)
+--        fix final pure-power rectangle tactic noise
+-- ====================================================================== -/
 
 import GSTGraphV2Scratch
 import GSTExponentLiftScratch

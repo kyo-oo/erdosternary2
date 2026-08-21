@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0711 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalPhaseCrossingSurgeryScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 00:35:44 +0530  (3c51c18)
-/-    Last-commit  : 2026-08-17 00:49:41 +0530  (d2ba42c)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-17 00:35:44 +0530  3c51c18  (ker07-dev)
-/-        Add RED canonical physical crossing target
-/- [02/4] 2026-08-17 00:44:21 +0530  ce77d8f  (ker07-dev)
-/-        Tighten RED target to exact canonical power orbit
-/- [03/4] 2026-08-17 00:45:32 +0530  2078500  (ker07-dev)
-/-        Reduce canonical crossing failure to conserved two-boundary trap
-/- [04/4] 2026-08-17 00:49:41 +0530  d2ba42c  (ker07-dev)
-/-        Attach exact power rectangle and bridge coordinate to canonical trap
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0711 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalPhaseCrossingSurgeryScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 00:35:44 +0530  (3c51c18)
+--    Last-commit  : 2026-08-17 00:49:41 +0530  (d2ba42c)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-17 00:35:44 +0530  3c51c18  (ker07-dev)
+--        Add RED canonical physical crossing target
+-- [02/4] 2026-08-17 00:44:21 +0530  ce77d8f  (ker07-dev)
+--        Tighten RED target to exact canonical power orbit
+-- [03/4] 2026-08-17 00:45:32 +0530  2078500  (ker07-dev)
+--        Reduce canonical crossing failure to conserved two-boundary trap
+-- [04/4] 2026-08-17 00:49:41 +0530  d2ba42c  (ker07-dev)
+--        Attach exact power rectangle and bridge coordinate to canonical trap
+-- ====================================================================== -/
 
 import GSTResidueSpacetimeScratch
 import PurePowerResidueGraphScratch

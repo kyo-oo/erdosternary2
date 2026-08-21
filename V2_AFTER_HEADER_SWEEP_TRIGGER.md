@@ -1,0 +1,1 @@
+Kernel-certify the concrete canonical physical trap, then run comment-safe V2 surgery and compile the full rewritten monolith.

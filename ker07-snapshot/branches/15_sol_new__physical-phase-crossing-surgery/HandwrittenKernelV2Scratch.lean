@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0927 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenKernelV2Scratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:28:38 +0530  (9fcd291)
-/-    Last-commit  : 2026-08-17 08:28:38 +0530  (9fcd291)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:28:38 +0530  9fcd291  (ker07-dev)
-/-        Formalize handwritten kernel six-state V2 orbit
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0927 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenKernelV2Scratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:28:38 +0530  (9fcd291)
+--    Last-commit  : 2026-08-17 08:28:38 +0530  (9fcd291)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:28:38 +0530  9fcd291  (ker07-dev)
+--        Formalize handwritten kernel six-state V2 orbit
+-- ====================================================================== -/
 
 import Mathlib
 

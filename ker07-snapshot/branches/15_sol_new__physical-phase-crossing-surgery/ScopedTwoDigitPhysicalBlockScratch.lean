@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1065 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/ScopedTwoDigitPhysicalBlockScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 21:34:52 +0530  (4421e09)
-/-    Last-commit  : 2026-08-17 21:34:52 +0530  (4421e09)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 21:34:52 +0530  4421e09  (ker07-dev)
-/-        Add physical scoped two-digit 22/35 contradiction
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1065 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/ScopedTwoDigitPhysicalBlockScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 21:34:52 +0530  (4421e09)
+--    Last-commit  : 2026-08-17 21:34:52 +0530  (4421e09)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 21:34:52 +0530  4421e09  (ker07-dev)
+--        Add physical scoped two-digit 22/35 contradiction
+-- ====================================================================== -/
 
 import RightChordCanonicalGateScratch
 

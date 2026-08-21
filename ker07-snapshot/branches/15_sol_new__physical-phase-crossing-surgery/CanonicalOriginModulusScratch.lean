@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0915 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalOriginModulusScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:18:04 +0530  (eed2dc4)
-/-    Last-commit  : 2026-08-17 08:18:04 +0530  (eed2dc4)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:18:04 +0530  eed2dc4  (ker07-dev)
-/-        Formalize universal canonical origin modulus embedding
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0915 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalOriginModulusScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:18:04 +0530  (eed2dc4)
+--    Last-commit  : 2026-08-17 08:18:04 +0530  (eed2dc4)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:18:04 +0530  eed2dc4  (ker07-dev)
+--        Formalize universal canonical origin modulus embedding
+-- ====================================================================== -/
 
 import CanonicalPrefixScratch
 

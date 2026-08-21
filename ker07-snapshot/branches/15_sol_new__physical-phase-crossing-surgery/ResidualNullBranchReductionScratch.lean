@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0999 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullBranchReductionScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 10:51:58 +0530  (b5d61f2)
-/-    Last-commit  : 2026-08-17 10:52:53 +0530  (f371623)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-17 10:51:58 +0530  b5d61f2  (ker07-dev)
-/-        Package locked residual NULL branch reduction
-/- [02/2] 2026-08-17 10:52:53 +0530  f371623  (ker07-dev)
-/-        Harden NULL branch residue proof
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0999 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullBranchReductionScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 10:51:58 +0530  (b5d61f2)
+--    Last-commit  : 2026-08-17 10:52:53 +0530  (f371623)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-17 10:51:58 +0530  b5d61f2  (ker07-dev)
+--        Package locked residual NULL branch reduction
+-- [02/2] 2026-08-17 10:52:53 +0530  f371623  (ker07-dev)
+--        Harden NULL branch residue proof
+-- ====================================================================== -/
 
 import OmegaUPotentialBridgeScratch
 import PrefixOneOriginPhaseRecursionScratch

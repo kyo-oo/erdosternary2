@@ -1,24 +1,24 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0469 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PhaseCycleInformationScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 23:16:14 +0530  (e16e375)
-/-    Last-commit  : 2026-08-16 02:03:41 +0530  (40a28dc)
-/-    Total commits: 5
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/5] 2026-08-15 23:16:14 +0530  e16e375  (ker07-dev)
-/-        Kernelize cyclic shared-information transfer across GST phases
-/- [02/5] 2026-08-15 23:36:00 +0530  f64a2a0  (ker07-dev)
-/-        Fix nonlinear phase-cycle proof tactics
-/- [03/5] 2026-08-16 00:35:38 +0530  2da13f8  (ker07-dev)
-/-        Compile GST Graph V2 through phase-cycle gate
-/- [04/5] 2026-08-16 01:22:11 +0530  8de8e72  (ker07-dev)
-/-        Compile prefixed residue spacetime through phase cycle
-/- [05/5] 2026-08-16 02:03:41 +0530  40a28dc  (ker07-dev)
-/-        Compile GST Graph V2 block law with phase frontier
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0469 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PhaseCycleInformationScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 23:16:14 +0530  (e16e375)
+--    Last-commit  : 2026-08-16 02:03:41 +0530  (40a28dc)
+--    Total commits: 5
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/5] 2026-08-15 23:16:14 +0530  e16e375  (ker07-dev)
+--        Kernelize cyclic shared-information transfer across GST phases
+-- [02/5] 2026-08-15 23:36:00 +0530  f64a2a0  (ker07-dev)
+--        Fix nonlinear phase-cycle proof tactics
+-- [03/5] 2026-08-16 00:35:38 +0530  2da13f8  (ker07-dev)
+--        Compile GST Graph V2 through phase-cycle gate
+-- [04/5] 2026-08-16 01:22:11 +0530  8de8e72  (ker07-dev)
+--        Compile prefixed residue spacetime through phase cycle
+-- [05/5] 2026-08-16 02:03:41 +0530  40a28dc  (ker07-dev)
+--        Compile GST Graph V2 block law with phase frontier
+-- ====================================================================== -/
 
 import InformationDescentScratch
 import OriginTransducerScratch

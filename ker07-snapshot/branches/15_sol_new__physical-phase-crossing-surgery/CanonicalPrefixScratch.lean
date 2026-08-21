@@ -1,26 +1,26 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0409 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalPrefixScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 20:17:00 +0530  (482edc5)
-/-    Last-commit  : 2026-08-15 21:37:25 +0530  (4d7b1f6)
-/-    Total commits: 6
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/6] 2026-08-15 20:17:00 +0530  482edc5  (ker07-dev)
-/-        Formalize canonical finite-prefix origin recurrence
-/- [02/6] 2026-08-15 20:26:44 +0530  ac48ef6  (ker07-dev)
-/-        Add exact canonical origin-to-Navigation residue causality
-/- [03/6] 2026-08-15 20:40:36 +0530  5e1eaed  (ker07-dev)
-/-        Fix canonical prefix recurrence orientation
-/- [04/6] 2026-08-15 21:27:41 +0530  96d984e  (ker07-dev)
-/-        Fix canonical prefix recurrence proof shape
-/- [05/6] 2026-08-15 21:35:33 +0530  9973597  (ker07-dev)
-/-        Finish canonical prefix Lean elaboration repair
-/- [06/6] 2026-08-15 21:37:25 +0530  4d7b1f6  (ker07-dev)
-/-        Restore canonical prefix causality API
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0409 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalPrefixScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 20:17:00 +0530  (482edc5)
+--    Last-commit  : 2026-08-15 21:37:25 +0530  (4d7b1f6)
+--    Total commits: 6
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/6] 2026-08-15 20:17:00 +0530  482edc5  (ker07-dev)
+--        Formalize canonical finite-prefix origin recurrence
+-- [02/6] 2026-08-15 20:26:44 +0530  ac48ef6  (ker07-dev)
+--        Add exact canonical origin-to-Navigation residue causality
+-- [03/6] 2026-08-15 20:40:36 +0530  5e1eaed  (ker07-dev)
+--        Fix canonical prefix recurrence orientation
+-- [04/6] 2026-08-15 21:27:41 +0530  96d984e  (ker07-dev)
+--        Fix canonical prefix recurrence proof shape
+-- [05/6] 2026-08-15 21:35:33 +0530  9973597  (ker07-dev)
+--        Finish canonical prefix Lean elaboration repair
+-- [06/6] 2026-08-15 21:37:25 +0530  4d7b1f6  (ker07-dev)
+--        Restore canonical prefix causality API
+-- ====================================================================== -/
 
 import PurePowerCarrierScratch
 

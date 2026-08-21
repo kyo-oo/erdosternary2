@@ -1,0 +1,1 @@
+Authoritative full V2 comparator gate trigger.

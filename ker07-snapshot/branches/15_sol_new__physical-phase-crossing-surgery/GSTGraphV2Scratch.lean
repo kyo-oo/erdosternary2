@@ -1,30 +1,30 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0484 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2Scratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 00:34:53 +0530  (4cd4426)
-/-    Last-commit  : 2026-08-16 02:29:37 +0530  (d84b9aa)
-/-    Total commits: 8
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/8] 2026-08-16 00:34:53 +0530  4cd4426  (ker07-dev)
-/-        Add GST Graph V2 residue classifier scratch
-/- [02/8] 2026-08-16 00:39:13 +0530  3867634  (ker07-dev)
-/-        Extend GST Graph V2 with closed micro-output phase loop
-/- [03/8] 2026-08-16 00:44:06 +0530  1a9706b  (ker07-dev)
-/-        Add common-two interpretation to GST Graph V2
-/- [04/8] 2026-08-16 00:56:49 +0530  5aedb58  (ker07-dev)
-/-        Fix GST Graph V2 common-two tactic overrun
-/- [05/8] 2026-08-16 01:17:18 +0530  75dcf6e  (ker07-dev)
-/-        Kernelize GST V2 local five-rotation law
-/- [06/8] 2026-08-16 01:33:49 +0530  e47d846  (ker07-dev)
-/-        Expand GST local five-rotation explicitly for Lean 4.33
-/- [07/8] 2026-08-16 02:02:09 +0530  d8279e9  (ker07-dev)
-/-        Fix GST Graph V2 bad-trace import
-/- [08/8] 2026-08-16 02:29:37 +0530  d84b9aa  (ker07-dev)
-/-        model GST V2 as seven-axis three-space graph
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0484 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2Scratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 00:34:53 +0530  (4cd4426)
+--    Last-commit  : 2026-08-16 02:29:37 +0530  (d84b9aa)
+--    Total commits: 8
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/8] 2026-08-16 00:34:53 +0530  4cd4426  (ker07-dev)
+--        Add GST Graph V2 residue classifier scratch
+-- [02/8] 2026-08-16 00:39:13 +0530  3867634  (ker07-dev)
+--        Extend GST Graph V2 with closed micro-output phase loop
+-- [03/8] 2026-08-16 00:44:06 +0530  1a9706b  (ker07-dev)
+--        Add common-two interpretation to GST Graph V2
+-- [04/8] 2026-08-16 00:56:49 +0530  5aedb58  (ker07-dev)
+--        Fix GST Graph V2 common-two tactic overrun
+-- [05/8] 2026-08-16 01:17:18 +0530  75dcf6e  (ker07-dev)
+--        Kernelize GST V2 local five-rotation law
+-- [06/8] 2026-08-16 01:33:49 +0530  e47d846  (ker07-dev)
+--        Expand GST local five-rotation explicitly for Lean 4.33
+-- [07/8] 2026-08-16 02:02:09 +0530  d8279e9  (ker07-dev)
+--        Fix GST Graph V2 bad-trace import
+-- [08/8] 2026-08-16 02:29:37 +0530  d84b9aa  (ker07-dev)
+--        model GST V2 as seven-axis three-space graph
+-- ====================================================================== -/
 
 import InformationRegenerationScratch
 import InformationBadTraceScratch

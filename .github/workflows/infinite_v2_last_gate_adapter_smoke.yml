@@ -2,8 +2,11 @@ name: Infinite V2 Last Gate Adapter Smoke
 
 on:
   push:
+    branches:
+      - sol/gpt56-infinite-control-production
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   smoke:
@@ -28,123 +31,224 @@ jobs:
           lake exe cache get
           lake build GSTTactic
 
-      - name: Compile pre-Omega and independent trap stack
+      - name: Verify full payload and compile baseline monolith
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          set -uo pipefail
+          echo "ROOT_LINES=$(wc -l < ErdosTernary2.lean)" | tee payload.log
+          test "$(wc -l < ErdosTernary2.lean)" -eq 8750
+          status=0
+          lake env lean -o ErdosTernary2.baseline.olean ErdosTernary2.lean 2>&1 | tee baseline.log || status=1
+          echo "$status" > .status-baseline
+          exit 0
+
+      - name: Compile root V2 production modules
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          set -uo pipefail
+          export LEAN_PATH="$PWD:${LEAN_PATH:-}"
+          status=0
+          : > root-v2.log
+          for f in GSTV2InfiniteCore.lean GSTInfiniteCollision.lean GSTInfiniteBadTransport.lean GSTInfiniteCoupledLedger.lean GSTInfiniteGateTransport.lean; do
+            echo "=== $f ===" | tee -a root-v2.log
+            lake env lean -o "${f%.lean}.olean" "$f" 2>&1 | tee -a root-v2.log || status=1
+          done
+          echo "$status" > .status-root-v2
+          exit 0
+
+      - name: Compile complete relevant snapshot import closure topologically
+        timeout-minutes: 90
+        shell: bash
+        run: |
+          set -uo pipefail
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          export LEAN_PATH="$PWD:$SNAP:${LEAN_PATH:-}"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
+          files = {p.stem:p for p in root.glob('*.lean')}
+          seeds = '''
+          InformationDescentScratch InformationBadTraceScratch InformationGeometryScratch InformationStateScratch
+          OriginTransducerScratch InformationRegenerationScratch InformationForcingScratch InformationIterationScratch
+          FiniteSupportScratch LastGateTrapScratch CanonicalTrapScratch CanonicalCausalityScratch
+          CanonicalOriginCutIntersectionScratch CanonicalOriginModulusScratch RetainedOffsetUStateScratch
+          PrefixOneOriginPhaseRecursionScratch ResidualNullBranchReductionScratch ResidualNullTerminalScratch
+          ResidualNullPrefixFourCutScratch CanonicalResidualInfiniteSupportBridgeScratch
+          GSTGraphV2InfiniteControlScratch GSTGraphV2InfiniteNaturalContradictionScratch
+          GSTGraphV2InfiniteBigNDichotomyScratch GSTGraphV2InfiniteCardinalMasterScratch
+          GSTGraphV2InfiniteElevenEquationMasterScratch GSTGraphV2InfiniteOriginWorldCollisionScratch
+          GSTGraphV2InfiniteWorldTowerScratch GSTGraphV2InfiniteExactWorldProjectionScratch
+          GSTGraphV2InfiniteSixWorldCollisionScratch GSTGraphV2InfiniteOmegaLedgerMasterScratch
+          GSTGraphV2SleepEquationLabScratch GSTGraphV2SleepBadLanguageDescentScratch GSTGraphV2SleepEquationCollisionScratch
+          PhysicalSixBridgeGateScratch HorizontalTrapWidthDescentScratch CanonicalPhaseCrossingSurgeryScratch
+          PhaseCycleInformationScratch InformationFluxScratch InformationGeometryScratch
+          SynchronizerScratch InformationCarryWordBridgeScratch InformationLocalizationScratch InformationQuotientScratch
+          OmegaUPotentialBridgeScratch HandwrittenOmegaOriginCommutingSquareScratch
+          GSTGraphV2InfiniteNavigationHorizonScratch AtomicPrefixOneReductionScratch NavigationResidueCutScratch
+          RightChordCanonicalGateScratch StripConservationScratch PrefixOneTerminalZScratch
+          PurePowerBadAxisScratch PurePowerCarrierScratch PurePowerResidueGraphScratch PurePowerTailReductionScratch
+          ScopedTwoDigitPhysicalBlockScratch
+          '''.split()
+          imports = {}
+          rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
+          for m,p in files.items():
+              imps=[]
+              for line in rx.findall(p.read_text()):
+                  line=line.split('--',1)[0].strip()
+                  imps.extend(line.split())
+              imports[m] = {x for x in imps if x in files}
+          needed=set()
+          def add(m):
+              if m in needed: return
+              if m not in files:
+                  print('MISSING_SEED',m)
+                  return
+              needed.add(m)
+              for d in imports[m]: add(d)
+          for s in seeds: add(s)
+          indeg={m:0 for m in needed}
+          out={m:set() for m in needed}
+          for m in needed:
+              for d in imports[m] & needed:
+                  indeg[m]+=1; out[d].add(m)
+          q=sorted([m for m,v in indeg.items() if v==0])
+          order=[]
+          while q:
+              m=q.pop(0); order.append(m)
+              for n in sorted(out[m]):
+                  indeg[n]-=1
+                  if indeg[n]==0:
+                      q.append(n); q.sort()
+          if len(order)!=len(needed):
+              cyc=sorted(set(needed)-set(order))
+              raise SystemExit('IMPORT_CYCLE '+repr(cyc))
+          Path('snapshot-order.txt').write_text('\n'.join(order)+'\n')
+          print('SNAPSHOT_CLOSURE_COUNT',len(order))
+          print('\n'.join(order))
+          PY
+          status=0
+          : > snapshot.log
+          while IFS= read -r mod; do
+            f="$SNAP/$mod.lean"
+            echo "=== $mod ===" | tee -a snapshot.log
+            lake env lean -o "$SNAP/$mod.olean" "$f" 2>&1 | tee -a snapshot.log || status=1
+          done < snapshot-order.txt
+          echo "$status" > .status-snapshot
+          exit 0
+
+      - name: Compile exact 7326-line pre-Omega prefix
         timeout-minutes: 30
         shell: bash
         run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          export LEAN_PATH="$SNAP:${LEAN_PATH:-}"
-          lake env lean -o "$SNAP/InformationDescentScratch.olean" "$SNAP/InformationDescentScratch.lean"
-          lake env lean -o "$SNAP/InformationBadTraceScratch.olean" "$SNAP/InformationBadTraceScratch.lean"
-          lake env lean -o "$SNAP/InformationStateScratch.olean" "$SNAP/InformationStateScratch.lean"
-          lake env lean -o "$SNAP/OriginTransducerScratch.olean" "$SNAP/OriginTransducerScratch.lean"
-          lake env lean -o "$SNAP/InformationRegenerationScratch.olean" "$SNAP/InformationRegenerationScratch.lean"
-          lake env lean -o "$SNAP/InformationForcingScratch.olean" "$SNAP/InformationForcingScratch.lean"
-          lake env lean -o "$SNAP/InformationIterationScratch.olean" "$SNAP/InformationIterationScratch.lean"
-          lake env lean -o "$SNAP/FiniteSupportScratch.olean" "$SNAP/FiniteSupportScratch.lean"
-          lake env lean -o "$SNAP/LastGateTrapScratch.olean" "$SNAP/LastGateTrapScratch.lean"
-          lake env lean -o "$SNAP/CanonicalTrapScratch.olean" "$SNAP/CanonicalTrapScratch.lean"
+          set -uo pipefail
+          status=0
           LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
           CUT=$((LEGACY_LINE - 2))
+          echo "LEGACY_LINE=$LEGACY_LINE CUT=$CUT" | tee preomega.log
+          [ "$CUT" -eq 7326 ] || status=1
           head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
-          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean 2>&1 | tee -a preomega.log || status=1
+          echo "$status" > .status-preomega
+          exit 0
 
-      - name: Kernel-check monolith-to-last-gate adapter
-        timeout-minutes: 20
+      - name: Apply exact seven-declaration V2 surgery
         shell: bash
         run: |
           set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          cat > InfiniteV2LastGateAdapterSmoke.lean <<'EOF'
-          import ErdosPreOmega
-          import CanonicalTrapScratch
+          cp ErdosTernary2.lean ErdosTernary2.before-surgery.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('ErdosTernary2.lean'); src=p.read_text()
+          DECL=re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
+          def span(text,name):
+              m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
+              if not m: raise SystemExit('MISSING_DECL '+name)
+              n=DECL.search(text,m.end()); return m.start(), len(text) if n is None else n.start()
+          def remove(text,name):
+              a,b=span(text,name); return text[:a]+text[b:]
+          dead=['gst_omega_termination_s1','gst_omega_termination_s3','gst_omega_termination_stable',
+                'gst_residual_omega_termination','gst_residual_navigation_lift',
+                'gst_prefix_one_information_bad_descends_inline','gst_prefix_one_child_gate_contradicts_parent_bad_inline']
+          for name in dead: src=remove(src,name)
+          replacement=r'''
+/-- V2 replacement seam for the deleted legacy Omega corridor. -/
+theorem gst_v2_infinite_prefix_one_collision
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  let T := gstNavigationConstant (s+1) n
+  let X := c s / 3 + 4^(3^s) * T
+  have hseeded : GSTSeededAffineBadTrace 1 X := by
+    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad
+    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by
+      rw [Nat.pow_one, c_mod3 s hs]
+      decide
+    rw [hseed] at h
+    simpa [T, X] using h
+  obtain ⟨j, hd, hspace⟩ := hchild
+  have hCmod : gstCarry T j % 3 = 0 := by
+    dsimp [T]
+    exact gstGoodSpace_carry_mod3_zero _ j hspace
+  have hClt : gstCarry T j < 4 := by
+    cases j with
+    | zero => simp [gstCarry]
+    | succ q =>
+        dsimp [T]
+        exact gstCarry_lt_four _ (q+1) (by omega)
+  have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega
+  omega
 
-          theorem gpt56_seeded_affine_bad_to_seededS
-              (D X : Nat) (hbad : GSTSeededAffineBadTrace D X) :
-              GSTSeededBadTraceS D X := by
-            intro j
-            have hj := hbad j
-            simpa [GSTSeededAffineBadTrace, GSTBadPair, GSTSeededBadTraceS,
-              GSTBadPairS, gstAffineMulCarry, gstAffineMulCarryS,
-              gstDigit, gstDigitS] using hj
+theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hnoParent
+  have hBad := gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
 
-          theorem gpt56_navigation_witness_to_seed_zero_happyS
-              (T : Nat) (hnav : GSTNavigationWitness T) :
-              ∃ j, GSTSeededHappyS 0 T j := by
-            obtain ⟨j, hd, hspace⟩ := hnav
-            have hcarry : gstCarry T j = 0 ∨ gstCarry T j = 3 := by
-              by_cases hj0 : j = 0
-              · subst j
-                left
-                simp [gstCarry]
-              · have hj1 : 1 ≤ j := by omega
-                have hmod : gstCarry T j % 3 = 0 :=
-                  gstGoodSpace_carry_mod3_zero T j hspace
-                have hlt : gstCarry T j < 4 := gstCarry_lt_four T j hj1
-                omega
-            refine ⟨j, ?_⟩
-            constructor
-            · simpa [gstDigitS, gstDigit] using hd
-            · rcases hcarry with h0 | h3
-              · left
-                simpa [gstAffineMulCarryS, gstCarry] using h0
-              · right
-                simpa [gstAffineMulCarryS, gstCarry] using h3
+'''
+          a,b=span(src,'gst_prefix_one_navigation_lift'); src=src[:a]+replacement+src[b:]
+          p.write_text(src)
+          print('SURGERY_LINES',src.count('\n')+1)
+          PY
 
-          theorem gpt56_prefix_one_last_gate_trapS
-              (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-              (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-              (hbad : GSTOmegaInfiniteBadTrace s 1 n) :
-              let A := 4^(3^s)
-              let z := c s / 3
-              let T := gstNavigationConstant (s+1) n
-              ∃ q,
-                let D := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
-                let Z := gstAffineMulCarryS A z T (q+1)
-                let W := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
-                let C := gstAffineMulCarryS 4 0 T (q+1)
-                let Y := T / 3^(q+1)
-                GSTSeededBadTraceS D (Z + A*Y) ∧
-                  GSTSeededBadTraceS C Y ∧
-                  (C = 2 ∨ C = 3) ∧
-                  D + 4*Z = W + A*C ∧
-                  W < A := by
-            dsimp only
-            let A := 4^(3^s)
-            let z := c s / 3
-            let T := gstNavigationConstant (s+1) n
-            let X := z + A*T
-            have hseed : (4 * (c s % 3)) / 3 = 1 := by
-              rw [c_mod3 s hs]
-            have hraw := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hbad
-            have hparentOld : GSTSeededAffineBadTrace 1 X := by
-              simpa [X, T, A, z, hseed] using hraw
-            have hparent : GSTSeededBadTraceS 1 X :=
-              gpt56_seeded_affine_bad_to_seededS 1 X hparentOld
-            have hchildS : ∃ j, GSTSeededHappyS 0 T j :=
-              gpt56_navigation_witness_to_seed_zero_happyS T hchild
-            have hApos : 0 < A := by
-              dsimp [A]
-              positivity
-            have hcpos : 1 ≤ c s := by
-              have hc3 := c_mod3 s hs
-              omega
-            have hD9 : 9 ≤ 3^(s+1) := by
-              rw [show (9:Nat) = 3^2 by decide]
-              exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-            have hoff := gst_gst_offsets_lt_multiplierS (3^(s+1)) (c s) hD9 hcpos
-            have hAeq := lte_identity s hs
-            have hz1 : 1 + 4*z < A := by
-              dsimp [z, A]
-              rw [hAeq]
-              exact hoff.2
-            have htrap := gst_canonical_two_boundary_trapS
-              A z T hApos hz1 hparent hchildS
-            simpa [X] using htrap
+      - name: Compile full surgically rewritten monolith
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          set -uo pipefail
+          status=0
+          lake env lean -o ErdosTernary2.surgery.olean ErdosTernary2.lean 2>&1 | tee surgery.log || status=1
+          echo "$status" > .status-surgery
+          exit 0
 
-          #check gpt56_prefix_one_last_gate_trapS
-          #print axioms gpt56_prefix_one_last_gate_trapS
-          EOF
-          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean InfiniteV2LastGateAdapterSmoke.lean | tee adapter.log
-          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' adapter.log
+      - name: Compile production adapters
+        timeout-minutes: 40
+        shell: bash
+        run: |
+          set -uo pipefail
+          export LEAN_PATH="$PWD:${LEAN_PATH:-}"
+          status=0
+          : > adapters.log
+          for f in GSTPrefixOneInfiniteAdapterSmoke.lean GSTPrefixOneGateAdapterSmoke.lean GSTPrefixOneLatentGateSmoke.lean GSTPrefixOneLedgerSmoke.lean GSTInfiniteControlProductionSmoke.lean; do
+            echo "=== $f ===" | tee -a adapters.log
+            lake env lean "$f" 2>&1 | tee -a adapters.log || status=1
+          done
+          echo "$status" > .status-adapters
+          exit 0
+
+      - name: Exact status and comparator gate
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          set -euxo pipefail
+          for f in .status-baseline .status-root-v2 .status-snapshot .status-preomega .status-surgery .status-adapters; do
+            echo "$f=$(cat "$f")"
+            test "$(cat "$f")" -eq 0
+          done
+          bash scripts/sorry_check.sh
+          bash scripts/comparator.sh | tee comparator.log
+          grep -Fq 'Your solution is okay!' comparator.log
+          grep -Fq 'COMPARATOR RESULT: PASS' comparator.log
