@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0529 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2BlockScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 02:02:40 +0530  (6271946)
-/-    Last-commit  : 2026-08-16 02:16:33 +0530  (16e59bc)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-16 02:02:40 +0530  6271946  (ker07-dev)
-/-        Add GST Graph V2 block echo recurrence
-/- [02/2] 2026-08-16 02:16:33 +0530  16e59bc  (ker07-dev)
-/-        Wire GST Graph V2 flux sectors into block graph
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0529 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2BlockScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 02:02:40 +0530  (6271946)
+--    Last-commit  : 2026-08-16 02:16:33 +0530  (16e59bc)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-16 02:02:40 +0530  6271946  (ker07-dev)
+--        Add GST Graph V2 block echo recurrence
+-- [02/2] 2026-08-16 02:16:33 +0530  16e59bc  (ker07-dev)
+--        Wire GST Graph V2 flux sectors into block graph
+-- ====================================================================== -/
 
 import GSTGraphV2FluxScratch
 

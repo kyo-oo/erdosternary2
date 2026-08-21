@@ -1,32 +1,32 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0379 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerBadAxisScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 18:29:37 +0530  (d2c4655)
-/-    Last-commit  : 2026-08-15 22:18:19 +0530  (a69a796)
-/-    Total commits: 9
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/9] 2026-08-15 18:29:37 +0530  d2c4655  (ker07-dev)
-/-        Add pure-power axis certificate scratch
-/- [02/9] 2026-08-15 18:55:02 +0530  7e2945b  (ker07-dev)
-/-        Fix pure-power binary axis rewrite
-/- [03/9] 2026-08-15 19:55:54 +0530  647b2b0  (ker07-dev)
-/-        Fix pure-power binary axis rewrite seam
-/- [04/9] 2026-08-15 20:27:51 +0530  a69e081  (ker07-dev)
-/-        Kernel-check canonical GST causality blade
-/- [05/9] 2026-08-15 21:39:58 +0530  d0a6214  (ker07-dev)
-/-        Add exact canonical prefix-one energy certificates
-/- [06/9] 2026-08-15 21:54:17 +0530  2cfce39  (ker07-dev)
-/-        Use canonical prefix API directly in pure-power axis
-/- [07/9] 2026-08-15 21:56:05 +0530  9d9e6c4  (ker07-dev)
-/-        Kernelize forced-prefix seed zero/one bridge
-/- [08/9] 2026-08-15 22:07:02 +0530  baa8c2e  (ker07-dev)
-/-        Repair forced-prefix quotient elaboration
-/- [09/9] 2026-08-15 22:18:19 +0530  a69a796  (ker07-dev)
-/-        Identify forced parent prefix with seed-one GST tail
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0379 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerBadAxisScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 18:29:37 +0530  (d2c4655)
+--    Last-commit  : 2026-08-15 22:18:19 +0530  (a69a796)
+--    Total commits: 9
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/9] 2026-08-15 18:29:37 +0530  d2c4655  (ker07-dev)
+--        Add pure-power axis certificate scratch
+-- [02/9] 2026-08-15 18:55:02 +0530  7e2945b  (ker07-dev)
+--        Fix pure-power binary axis rewrite
+-- [03/9] 2026-08-15 19:55:54 +0530  647b2b0  (ker07-dev)
+--        Fix pure-power binary axis rewrite seam
+-- [04/9] 2026-08-15 20:27:51 +0530  a69e081  (ker07-dev)
+--        Kernel-check canonical GST causality blade
+-- [05/9] 2026-08-15 21:39:58 +0530  d0a6214  (ker07-dev)
+--        Add exact canonical prefix-one energy certificates
+-- [06/9] 2026-08-15 21:54:17 +0530  2cfce39  (ker07-dev)
+--        Use canonical prefix API directly in pure-power axis
+-- [07/9] 2026-08-15 21:56:05 +0530  9d9e6c4  (ker07-dev)
+--        Kernelize forced-prefix seed zero/one bridge
+-- [08/9] 2026-08-15 22:07:02 +0530  baa8c2e  (ker07-dev)
+--        Repair forced-prefix quotient elaboration
+-- [09/9] 2026-08-15 22:18:19 +0530  a69a796  (ker07-dev)
+--        Identify forced parent prefix with seed-one GST tail
+-- ====================================================================== -/
 
 import InformationDescentScratch
 import CanonicalPrefixScratch

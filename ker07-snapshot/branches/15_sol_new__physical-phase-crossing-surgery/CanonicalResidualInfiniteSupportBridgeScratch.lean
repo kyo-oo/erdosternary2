@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0993 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalResidualInfiniteSupportBridgeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 10:49:36 +0530  (b2570fa)
-/-    Last-commit  : 2026-08-17 10:49:36 +0530  (b2570fa)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 10:49:36 +0530  b2570fa  (ker07-dev)
-/-        Lock residual infinite-support bridge interface
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0993 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalResidualInfiniteSupportBridgeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 10:49:36 +0530  (b2570fa)
+--    Last-commit  : 2026-08-17 10:49:36 +0530  (b2570fa)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 10:49:36 +0530  b2570fa  (ker07-dev)
+--        Lock residual infinite-support bridge interface
+-- ====================================================================== -/
 
 import OmegaUPotentialBridgeScratch
 import FiniteSupportScratch

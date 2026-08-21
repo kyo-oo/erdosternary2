@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0334 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationIterationScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 17:06:28 +0530  (3166a7b)
-/-    Last-commit  : 2026-08-15 17:06:28 +0530  (3166a7b)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 17:06:28 +0530  3166a7b  (ker07-dev)
-/-        Formalize iterable two-endpoint information state
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0334 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationIterationScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 17:06:28 +0530  (3166a7b)
+--    Last-commit  : 2026-08-15 17:06:28 +0530  (3166a7b)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 17:06:28 +0530  3166a7b  (ker07-dev)
+--        Formalize iterable two-endpoint information state
+-- ====================================================================== -/
 
 import InformationForcingScratch
 

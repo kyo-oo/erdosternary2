@@ -1,24 +1,24 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0589 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/BadLanguageMagnitudeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 11:39:01 +0530  (483d6dd)
-/-    Last-commit  : 2026-08-16 16:52:14 +0530  (083724f)
-/-    Total commits: 5
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/5] 2026-08-16 11:39:01 +0530  483d6dd  (ker07-dev)
-/-        Add GST bad-language magnitude bound scratch
-/- [02/5] 2026-08-16 11:51:12 +0530  8ffa873  (ker07-dev)
-/-        Fix GST bad-language magnitude scratch proof surface
-/- [03/5] 2026-08-16 15:00:28 +0530  3719b27  (ker07-dev)
-/-        Fix no22 low-pair normalization before omega
-/- [04/5] 2026-08-16 15:08:12 +0530  9b5de7f  (ker07-dev)
-/-        Normalize no22 pair index before omega
-/- [05/5] 2026-08-16 16:52:14 +0530  083724f  (ker07-dev)
-/-        Preserve no-22 normalization fix
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0589 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/BadLanguageMagnitudeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 11:39:01 +0530  (483d6dd)
+--    Last-commit  : 2026-08-16 16:52:14 +0530  (083724f)
+--    Total commits: 5
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/5] 2026-08-16 11:39:01 +0530  483d6dd  (ker07-dev)
+--        Add GST bad-language magnitude bound scratch
+-- [02/5] 2026-08-16 11:51:12 +0530  8ffa873  (ker07-dev)
+--        Fix GST bad-language magnitude scratch proof surface
+-- [03/5] 2026-08-16 15:00:28 +0530  3719b27  (ker07-dev)
+--        Fix no22 low-pair normalization before omega
+-- [04/5] 2026-08-16 15:08:12 +0530  9b5de7f  (ker07-dev)
+--        Normalize no22 pair index before omega
+-- [05/5] 2026-08-16 16:52:14 +0530  083724f  (ker07-dev)
+--        Preserve no-22 normalization fix
+-- ====================================================================== -/
 
 import InformationBadTraceScratch
 

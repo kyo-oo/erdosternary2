@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0604 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTPhaseCrossingScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 13:11:10 +0530  (98c1fdd)
-/-    Last-commit  : 2026-08-16 15:45:06 +0530  (97ab42d)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-16 13:11:10 +0530  98c1fdd  (ker07-dev)
-/-        Add physical phase-crossing reduction scratch
-/- [02/4] 2026-08-16 14:52:14 +0530  141d403  (ker07-dev)
-/-        Test atomic prefix-one bad-trace contradiction
-/- [03/4] 2026-08-16 15:08:48 +0530  24f7752  (ker07-dev)
-/-        Restore phase-crossing scratch to independent green reduction
-/- [04/4] 2026-08-16 15:45:06 +0530  97ab42d  (ker07-dev)
-/-        Kernel-check atomic reduction helpers through phase scratch
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0604 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTPhaseCrossingScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 13:11:10 +0530  (98c1fdd)
+--    Last-commit  : 2026-08-16 15:45:06 +0530  (97ab42d)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-16 13:11:10 +0530  98c1fdd  (ker07-dev)
+--        Add physical phase-crossing reduction scratch
+-- [02/4] 2026-08-16 14:52:14 +0530  141d403  (ker07-dev)
+--        Test atomic prefix-one bad-trace contradiction
+-- [03/4] 2026-08-16 15:08:48 +0530  24f7752  (ker07-dev)
+--        Restore phase-crossing scratch to independent green reduction
+-- [04/4] 2026-08-16 15:45:06 +0530  97ab42d  (ker07-dev)
+--        Kernel-check atomic reduction helpers through phase scratch
+-- ====================================================================== -/
 
 import GSTResidueSpacetimeScratch
 import AtomicPrefixOneReductionScratch

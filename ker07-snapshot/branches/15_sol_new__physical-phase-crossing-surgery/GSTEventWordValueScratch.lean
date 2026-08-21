@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0921 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTEventWordValueScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:23:24 +0530  (fce9788)
-/-    Last-commit  : 2026-08-17 08:23:24 +0530  (fce9788)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:23:24 +0530  fce9788  (ker07-dev)
-/-        Formalize exact global GST event-word factor 13
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0921 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTEventWordValueScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:23:24 +0530  (fce9788)
+--    Last-commit  : 2026-08-17 08:23:24 +0530  (fce9788)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:23:24 +0530  fce9788  (ker07-dev)
+--        Formalize exact global GST event-word factor 13
+-- ====================================================================== -/
 
 import InformationStateScratch
 import OmegaSpacetimeScratch

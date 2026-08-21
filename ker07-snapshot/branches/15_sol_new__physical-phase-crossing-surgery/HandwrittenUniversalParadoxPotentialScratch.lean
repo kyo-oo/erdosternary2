@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0957 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenUniversalParadoxPotentialScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 09:49:45 +0530  (ff85341)
-/-    Last-commit  : 2026-08-17 09:49:45 +0530  (ff85341)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 09:49:45 +0530  ff85341  (ker07-dev)
-/-        Add handwritten U-potential bad/gate detector scratch
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0957 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenUniversalParadoxPotentialScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 09:49:45 +0530  (ff85341)
+--    Last-commit  : 2026-08-17 09:49:45 +0530  (ff85341)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 09:49:45 +0530  ff85341  (ker07-dev)
+--        Add handwritten U-potential bad/gate detector scratch
+-- ====================================================================== -/
 
 import InformationBadTraceScratch
 

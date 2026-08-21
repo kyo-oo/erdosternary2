@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0885 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBigNBinaryFactorScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 07:43:18 +0530  (fbfebe4)
-/-    Last-commit  : 2026-08-17 07:43:18 +0530  (fbfebe4)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 07:43:18 +0530  fbfebe4  (ker07-dev)
-/-        Factor GST shared carrier through binary bridge layers
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0885 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBigNBinaryFactorScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 07:43:18 +0530  (fbfebe4)
+--    Last-commit  : 2026-08-17 07:43:18 +0530  (fbfebe4)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 07:43:18 +0530  fbfebe4  (ker07-dev)
+--        Factor GST shared carrier through binary bridge layers
+-- ====================================================================== -/
 
 import HandwrittenBigNOmegaScratch
 import CanonicalTrapScratch

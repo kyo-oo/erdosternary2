@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0424 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalCausalityScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 20:27:28 +0530  (91309e8)
-/-    Last-commit  : 2026-08-15 20:27:28 +0530  (91309e8)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 20:27:28 +0530  91309e8  (ker07-dev)
-/-        Formalize exact GST state causality from finite origin prefixes
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0424 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalCausalityScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 20:27:28 +0530  (91309e8)
+--    Last-commit  : 2026-08-15 20:27:28 +0530  (91309e8)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 20:27:28 +0530  91309e8  (ker07-dev)
+--        Formalize exact GST state causality from finite origin prefixes
+-- ====================================================================== -/
 
 import CanonicalPrefixScratch
 import InformationDescentScratch

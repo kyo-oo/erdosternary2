@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1029 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PhysicalSixBridgeGateScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 11:18:13 +0530  (6c6d261)
-/-    Last-commit  : 2026-08-17 11:18:40 +0530  (7745ad1)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-17 11:18:13 +0530  6c6d261  (ker07-dev)
-/-        Add exact physical six-state gate dictionary
-/- [02/2] 2026-08-17 11:18:40 +0530  7745ad1  (ker07-dev)
-/-        Harden physical six-state gate dictionary
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1029 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PhysicalSixBridgeGateScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 11:18:13 +0530  (6c6d261)
+--    Last-commit  : 2026-08-17 11:18:40 +0530  (7745ad1)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-17 11:18:13 +0530  6c6d261  (ker07-dev)
+--        Add exact physical six-state gate dictionary
+-- [02/2] 2026-08-17 11:18:40 +0530  7745ad1  (ker07-dev)
+--        Harden physical six-state gate dictionary
+-- ====================================================================== -/
 
 import CanonicalOriginCutIntersectionScratch
 import HandwrittenKernelV2Scratch

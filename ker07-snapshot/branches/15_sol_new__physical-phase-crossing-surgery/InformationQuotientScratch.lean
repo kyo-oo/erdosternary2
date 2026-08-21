@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0394 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationQuotientScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 19:46:39 +0530  (93fd090)
-/-    Last-commit  : 2026-08-15 19:46:39 +0530  (93fd090)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 19:46:39 +0530  93fd090  (ker07-dev)
-/-        Add exact shared-information quotient invariants
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0394 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationQuotientScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 19:46:39 +0530  (93fd090)
+--    Last-commit  : 2026-08-15 19:46:39 +0530  (93fd090)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 19:46:39 +0530  93fd090  (ker07-dev)
+--        Add exact shared-information quotient invariants
+-- ====================================================================== -/
 
 import InformationDescentScratch
 

@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1005 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullTerminalScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 10:57:21 +0530  (9d900e3)
-/-    Last-commit  : 2026-08-17 11:06:51 +0530  (4ffc57c)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-17 10:57:21 +0530  9d900e3  (ker07-dev)
-/-        Prove stable NULL terminal residue base
-/- [02/4] 2026-08-17 10:57:58 +0530  69e7560  (ker07-dev)
-/-        Harden stable NULL terminal digit proof
-/- [03/4] 2026-08-17 11:01:37 +0530  2aebc7a  (ker07-dev)
-/-        Force deeper origin in stable NULL branch
-/- [04/4] 2026-08-17 11:06:51 +0530  4ffc57c  (ker07-dev)
-/-        Close all finite NULL terminal base levels
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1005 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/ResidualNullTerminalScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 10:57:21 +0530  (9d900e3)
+--    Last-commit  : 2026-08-17 11:06:51 +0530  (4ffc57c)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-17 10:57:21 +0530  9d900e3  (ker07-dev)
+--        Prove stable NULL terminal residue base
+-- [02/4] 2026-08-17 10:57:58 +0530  69e7560  (ker07-dev)
+--        Harden stable NULL terminal digit proof
+-- [03/4] 2026-08-17 11:01:37 +0530  2aebc7a  (ker07-dev)
+--        Force deeper origin in stable NULL branch
+-- [04/4] 2026-08-17 11:06:51 +0530  4ffc57c  (ker07-dev)
+--        Close all finite NULL terminal base levels
+-- ====================================================================== -/
 
 import ResidualNullBranchReductionScratch
 

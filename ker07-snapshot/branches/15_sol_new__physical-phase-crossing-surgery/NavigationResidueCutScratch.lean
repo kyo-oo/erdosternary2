@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0574 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/NavigationResidueCutScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 03:39:00 +0530  (0ee2a2c)
-/-    Last-commit  : 2026-08-16 03:39:00 +0530  (0ee2a2c)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-16 03:39:00 +0530  0ee2a2c  (ker07-dev)
-/-        add canonical mod27 navigation cut scratch
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0574 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/NavigationResidueCutScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 03:39:00 +0530  (0ee2a2c)
+--    Last-commit  : 2026-08-16 03:39:00 +0530  (0ee2a2c)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-16 03:39:00 +0530  0ee2a2c  (ker07-dev)
+--        add canonical mod27 navigation cut scratch
+-- ====================================================================== -/
 
 import CanonicalPrefixScratch
 

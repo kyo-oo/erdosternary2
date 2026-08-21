@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0879 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenOmegaOperatorScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 07:35:45 +0530  (ecd3e30)
-/-    Last-commit  : 2026-08-17 08:13:30 +0530  (1d1b844)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-17 07:35:45 +0530  ecd3e30  (ker07-dev)
-/-        Add exact natural-index Omega transfer budget
-/- [02/4] 2026-08-17 07:50:10 +0530  678e5c5  (ker07-dev)
-/-        Add exact future-past Omega transfer balance
-/- [03/4] 2026-08-17 08:04:09 +0530  e21cc70  (ker07-dev)
-/-        Add exact natural-origin Pi constructor
-/- [04/4] 2026-08-17 08:13:30 +0530  1d1b844  (ker07-dev)
-/-        Realize handwritten simultaneous multiply-divide as exact origin energy transfer
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0879 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenOmegaOperatorScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 07:35:45 +0530  (ecd3e30)
+--    Last-commit  : 2026-08-17 08:13:30 +0530  (1d1b844)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-17 07:35:45 +0530  ecd3e30  (ker07-dev)
+--        Add exact natural-index Omega transfer budget
+-- [02/4] 2026-08-17 07:50:10 +0530  678e5c5  (ker07-dev)
+--        Add exact future-past Omega transfer balance
+-- [03/4] 2026-08-17 08:04:09 +0530  e21cc70  (ker07-dev)
+--        Add exact natural-origin Pi constructor
+-- [04/4] 2026-08-17 08:13:30 +0530  1d1b844  (ker07-dev)
+--        Realize handwritten simultaneous multiply-divide as exact origin energy transfer
+-- ====================================================================== -/
 
 import OmegaSpacetimeScratch
 import CanonicalPrefixScratch

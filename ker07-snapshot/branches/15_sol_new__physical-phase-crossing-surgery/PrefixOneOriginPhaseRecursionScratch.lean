@@ -1,22 +1,22 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0903 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PrefixOneOriginPhaseRecursionScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:04:37 +0530  (348a846)
-/-    Last-commit  : 2026-08-17 08:19:01 +0530  (1ea49db)
-/-    Total commits: 4
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/4] 2026-08-17 08:04:37 +0530  348a846  (ker07-dev)
-/-        Add exact hard-tail origin phase recursion
-/- [02/4] 2026-08-17 08:05:04 +0530  fa64ff0  (ker07-dev)
-/-        Remove unproved regeneration draft from origin recursion scratch
-/- [03/4] 2026-08-17 08:05:57 +0530  d13ca9e  (ker07-dev)
-/-        Add exact bad-trace regeneration for true origin trits
-/- [04/4] 2026-08-17 08:19:01 +0530  1ea49db  (ker07-dev)
-/-        Add exact parent Navigation and binary fixed-point quotient
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0903 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PrefixOneOriginPhaseRecursionScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:04:37 +0530  (348a846)
+--    Last-commit  : 2026-08-17 08:19:01 +0530  (1ea49db)
+--    Total commits: 4
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/4] 2026-08-17 08:04:37 +0530  348a846  (ker07-dev)
+--        Add exact hard-tail origin phase recursion
+-- [02/4] 2026-08-17 08:05:04 +0530  fa64ff0  (ker07-dev)
+--        Remove unproved regeneration draft from origin recursion scratch
+-- [03/4] 2026-08-17 08:05:57 +0530  d13ca9e  (ker07-dev)
+--        Add exact bad-trace regeneration for true origin trits
+-- [04/4] 2026-08-17 08:19:01 +0530  1ea49db  (ker07-dev)
+--        Add exact parent Navigation and binary fixed-point quotient
+-- ====================================================================== -/
 
 import CanonicalOriginModulusScratch
 import InformationRegenerationScratch

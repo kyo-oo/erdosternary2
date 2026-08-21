@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0909 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenSixUniverseScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:15:36 +0530  (d02bd96)
-/-    Last-commit  : 2026-08-17 08:15:36 +0530  (d02bd96)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:15:36 +0530  d02bd96  (ker07-dev)
-/-        Add exact 6^k universe prefix arithmetic
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0909 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenSixUniverseScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:15:36 +0530  (d02bd96)
+--    Last-commit  : 2026-08-17 08:15:36 +0530  (d02bd96)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:15:36 +0530  d02bd96  (ker07-dev)
+--        Add exact 6^k universe prefix arithmetic
+-- ====================================================================== -/
 
 import Mathlib
 

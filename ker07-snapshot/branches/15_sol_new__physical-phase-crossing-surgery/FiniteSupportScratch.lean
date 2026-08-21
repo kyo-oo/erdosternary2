@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0139 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/FiniteSupportScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 09:48:06 +0530  (8b20ae5)
-/-    Last-commit  : 2026-08-15 09:48:06 +0530  (8b20ae5)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 09:48:06 +0530  8b20ae5  (ker07-dev)
-/-        Formalize natural ternary finite-support cutoff
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0139 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/FiniteSupportScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 09:48:06 +0530  (8b20ae5)
+--    Last-commit  : 2026-08-15 09:48:06 +0530  (8b20ae5)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 09:48:06 +0530  8b20ae5  (ker07-dev)
+--        Formalize natural ternary finite-support cutoff
+-- ====================================================================== -/
 
 import Mathlib
 

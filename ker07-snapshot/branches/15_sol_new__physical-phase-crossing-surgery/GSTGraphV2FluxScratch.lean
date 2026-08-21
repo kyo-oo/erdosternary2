@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0544 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2FluxScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 02:16:16 +0530  (886c096)
-/-    Last-commit  : 2026-08-16 02:20:10 +0530  (84a8784)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-16 02:16:16 +0530  886c096  (ker07-dev)
-/-        Add GST Graph V2 event mass sectors
-/- [02/2] 2026-08-16 02:20:10 +0530  84a8784  (ker07-dev)
-/-        Add mod-11 BIG2 species invariant
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0544 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/GSTGraphV2FluxScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 02:16:16 +0530  (886c096)
+--    Last-commit  : 2026-08-16 02:20:10 +0530  (84a8784)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-16 02:16:16 +0530  886c096  (ker07-dev)
+--        Add GST Graph V2 event mass sectors
+-- [02/2] 2026-08-16 02:20:10 +0530  84a8784  (ker07-dev)
+--        Add mod-11 BIG2 species invariant
+-- ====================================================================== -/
 
 import GSTGraphV2Scratch
 

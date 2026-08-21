@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0619 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/AtomicPrefixOneReductionScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-16 15:43:03 +0530  (76ad5a6)
-/-    Last-commit  : 2026-08-16 15:43:03 +0530  (76ad5a6)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-16 15:43:03 +0530  76ad5a6  (ker07-dev)
-/-        Add atomic prefix-one residual reduction helpers
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0619 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/AtomicPrefixOneReductionScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-16 15:43:03 +0530  (76ad5a6)
+--    Last-commit  : 2026-08-16 15:43:03 +0530  (76ad5a6)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-16 15:43:03 +0530  76ad5a6  (ker07-dev)
+--        Add atomic prefix-one residual reduction helpers
+-- ====================================================================== -/
 
 import ErdosTernary2
 

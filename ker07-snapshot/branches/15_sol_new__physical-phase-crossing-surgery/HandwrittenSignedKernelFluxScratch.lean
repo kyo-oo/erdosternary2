@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0969 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenSignedKernelFluxScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 10:16:24 +0530  (dad764d)
-/-    Last-commit  : 2026-08-17 10:16:24 +0530  (dad764d)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 10:16:24 +0530  dad764d  (ker07-dev)
-/-        Add signed handwritten event-kernel flux identities
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0969 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenSignedKernelFluxScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 10:16:24 +0530  (dad764d)
+--    Last-commit  : 2026-08-17 10:16:24 +0530  (dad764d)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 10:16:24 +0530  dad764d  (ker07-dev)
+--        Add signed handwritten event-kernel flux identities
+-- ====================================================================== -/
 
 import Mathlib
 

@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0304 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerCarrierScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 15:34:01 +0530  (9ad31b8)
-/-    Last-commit  : 2026-08-15 16:46:00 +0530  (06d7623)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-15 15:34:01 +0530  9ad31b8  (ker07-dev)
-/-        Formalize canonical pure-power carrier energy
-/- [02/3] 2026-08-15 15:40:12 +0530  343fa82  (ker07-dev)
-/-        Stabilize pure-power origin split proof
-/- [03/3] 2026-08-15 16:46:00 +0530  06d7623  (ker07-dev)
-/-        Stabilize pure-power origin split rewrite
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0304 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/PurePowerCarrierScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 15:34:01 +0530  (9ad31b8)
+--    Last-commit  : 2026-08-15 16:46:00 +0530  (06d7623)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-15 15:34:01 +0530  9ad31b8  (ker07-dev)
+--        Formalize canonical pure-power carrier energy
+-- [02/3] 2026-08-15 15:40:12 +0530  343fa82  (ker07-dev)
+--        Stabilize pure-power origin split proof
+-- [03/3] 2026-08-15 16:46:00 +0530  06d7623  (ker07-dev)
+--        Stabilize pure-power origin split rewrite
+-- ====================================================================== -/
 
 import OriginTransducerScratch
 

@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1023 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalOriginCutIntersectionScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 11:13:39 +0530  (f14277b)
-/-    Last-commit  : 2026-08-17 11:15:11 +0530  (45307f7)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-17 11:13:39 +0530  f14277b  (ker07-dev)
-/-        Add canonical origin-cut physical intersection
-/- [02/3] 2026-08-17 11:14:11 +0530  1178560  (ker07-dev)
-/-        Harden canonical origin-cut intersection
-/- [03/3] 2026-08-17 11:15:11 +0530  45307f7  (ker07-dev)
-/-        Generalize canonical origin-cut intersection to all trits
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1023 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalOriginCutIntersectionScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 11:13:39 +0530  (f14277b)
+--    Last-commit  : 2026-08-17 11:15:11 +0530  (45307f7)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-17 11:13:39 +0530  f14277b  (ker07-dev)
+--        Add canonical origin-cut physical intersection
+-- [02/3] 2026-08-17 11:14:11 +0530  1178560  (ker07-dev)
+--        Harden canonical origin-cut intersection
+-- [03/3] 2026-08-17 11:15:11 +0530  45307f7  (ker07-dev)
+--        Generalize canonical origin-cut intersection to all trits
+-- ====================================================================== -/
 
 import ResidualNullPrefixFourCutScratch
 

@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0214 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationBadTraceScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 10:45:20 +0530  (7e5cadd)
-/-    Last-commit  : 2026-08-15 10:45:20 +0530  (7e5cadd)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-15 10:45:20 +0530  7e5cadd  (ker07-dev)
-/-        Add bad-trace consequences for information surgery
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0214 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationBadTraceScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 10:45:20 +0530  (7e5cadd)
+--    Last-commit  : 2026-08-15 10:45:20 +0530  (7e5cadd)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-15 10:45:20 +0530  7e5cadd  (ker07-dev)
+--        Add bad-trace consequences for information surgery
+-- ====================================================================== -/
 
 import InformationDescentScratch
 

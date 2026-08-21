@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0184 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CarryWordScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 10:05:50 +0530  (3f6e523)
-/-    Last-commit  : 2026-08-15 10:22:15 +0530  (b3477e8)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-15 10:05:50 +0530  3f6e523  (ker07-dev)
-/-        Formalize horizontal GST carry-word decomposition
-/- [02/3] 2026-08-15 10:16:22 +0530  4f5ec51  (ker07-dev)
-/-        Fix horizontal carry append recurrence proof
-/- [03/3] 2026-08-15 10:22:15 +0530  b3477e8  (ker07-dev)
-/-        Use explicit numerator congruence in carry-word recurrence
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0184 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CarryWordScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 10:05:50 +0530  (3f6e523)
+--    Last-commit  : 2026-08-15 10:22:15 +0530  (b3477e8)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-15 10:05:50 +0530  3f6e523  (ker07-dev)
+--        Formalize horizontal GST carry-word decomposition
+-- [02/3] 2026-08-15 10:16:22 +0530  4f5ec51  (ker07-dev)
+--        Fix horizontal carry append recurrence proof
+-- [03/3] 2026-08-15 10:22:15 +0530  b3477e8  (ker07-dev)
+--        Use explicit numerator congruence in carry-word recurrence
+-- ====================================================================== -/
 
 import Mathlib
 

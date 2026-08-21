@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0951 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HorizontalTrapWidthDescentScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:58:46 +0530  (47a4fe4)
-/-    Last-commit  : 2026-08-17 08:58:46 +0530  (47a4fe4)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:58:46 +0530  47a4fe4  (ker07-dev)
-/-        Add exact horizontal width descent of canonical information trap
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0951 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HorizontalTrapWidthDescentScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:58:46 +0530  (47a4fe4)
+--    Last-commit  : 2026-08-17 08:58:46 +0530  (47a4fe4)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:58:46 +0530  47a4fe4  (ker07-dev)
+--        Add exact horizontal width descent of canonical information trap
+-- ====================================================================== -/
 
 import CanonicalTrapScratch
 

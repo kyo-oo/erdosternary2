@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1062 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/RightChordCanonicalGateScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 21:25:35 +0530  (6857400)
-/-    Last-commit  : 2026-08-17 21:25:35 +0530  (6857400)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 21:25:35 +0530  6857400  (ker07-dev)
-/-        Integrate scoped two-digit chord at canonical last gate
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1062 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/RightChordCanonicalGateScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 21:25:35 +0530  (6857400)
+--    Last-commit  : 2026-08-17 21:25:35 +0530  (6857400)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 21:25:35 +0530  6857400  (ker07-dev)
+--        Integrate scoped two-digit chord at canonical last gate
+-- ====================================================================== -/
 
 import CanonicalTrapScratch
 import HandwrittenBig1PathProjectorScratch

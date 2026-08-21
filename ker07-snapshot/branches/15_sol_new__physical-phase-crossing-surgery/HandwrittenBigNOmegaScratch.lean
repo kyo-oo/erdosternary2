@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0873 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBigNOmegaScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 07:27:32 +0530  (1c98216)
-/-    Last-commit  : 2026-08-17 07:27:32 +0530  (1c98216)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 07:27:32 +0530  1c98216  (ker07-dev)
-/-        Add exact six-state bridge and Navigation-horizon scratch
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0873 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBigNOmegaScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 07:27:32 +0530  (1c98216)
+--    Last-commit  : 2026-08-17 07:27:32 +0530  (1c98216)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 07:27:32 +0530  1c98216  (ker07-dev)
+--        Add exact six-state bridge and Navigation-horizon scratch
+-- ====================================================================== -/
 
 import OmegaSpacetimeScratch
 

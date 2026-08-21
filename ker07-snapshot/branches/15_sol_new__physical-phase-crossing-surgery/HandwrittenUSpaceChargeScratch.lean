@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0945 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenUSpaceChargeScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:41:30 +0530  (a387998)
-/-    Last-commit  : 2026-08-17 08:41:30 +0530  (a387998)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:41:30 +0530  a387998  (ker07-dev)
-/-        Derive exact multiply-divide exponents from V2 five-space orbit
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0945 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenUSpaceChargeScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:41:30 +0530  (a387998)
+--    Last-commit  : 2026-08-17 08:41:30 +0530  (a387998)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:41:30 +0530  a387998  (ker07-dev)
+--        Derive exact multiply-divide exponents from V2 five-space orbit
+-- ====================================================================== -/
 
 import GSTGraphV2Scratch
 

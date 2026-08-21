@@ -1,16 +1,16 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0939 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenKernelCanonicalLevelOneScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 08:39:44 +0530  (4c8b342)
-/-    Last-commit  : 2026-08-17 08:39:44 +0530  (4c8b342)
-/-    Total commits: 1
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/1] 2026-08-17 08:39:44 +0530  4c8b342  (ker07-dev)
-/-        Identify handwritten 7/(x-6) with canonical GST level-one data
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0939 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenKernelCanonicalLevelOneScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 08:39:44 +0530  (4c8b342)
+--    Last-commit  : 2026-08-17 08:39:44 +0530  (4c8b342)
+--    Total commits: 1
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/1] 2026-08-17 08:39:44 +0530  4c8b342  (ker07-dev)
+--        Identify handwritten 7/(x-6) with canonical GST level-one data
+-- ====================================================================== -/
 
 import CanonicalPrefixScratch
 import HandwrittenSixUniverseScratch

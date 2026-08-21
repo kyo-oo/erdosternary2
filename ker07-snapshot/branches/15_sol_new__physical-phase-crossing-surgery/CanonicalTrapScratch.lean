@@ -1,18 +1,18 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0364 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalTrapScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 17:25:33 +0530  (c11d099)
-/-    Last-commit  : 2026-08-15 20:19:31 +0530  (9daa91d)
-/-    Total commits: 2
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/2] 2026-08-15 17:25:33 +0530  c11d099  (ker07-dev)
-/-        Package canonical two-boundary information trap
-/- [02/2] 2026-08-15 20:19:31 +0530  9daa91d  (ker07-dev)
-/-        Kernel-check canonical prefix recurrence in active frontier
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0364 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/CanonicalTrapScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 17:25:33 +0530  (c11d099)
+--    Last-commit  : 2026-08-15 20:19:31 +0530  (9daa91d)
+--    Total commits: 2
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/2] 2026-08-15 17:25:33 +0530  c11d099  (ker07-dev)
+--        Package canonical two-boundary information trap
+-- [02/2] 2026-08-15 20:19:31 +0530  9daa91d  (ker07-dev)
+--        Kernel-check canonical prefix recurrence in active frontier
+-- ====================================================================== -/
 
 import LastGateTrapScratch
 import InformationStateScratch

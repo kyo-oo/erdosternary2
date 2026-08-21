@@ -1,20 +1,20 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #1035 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBig1PathProjectorScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-17 12:39:11 +0530  (163d621)
-/-    Last-commit  : 2026-08-17 12:46:18 +0530  (33e93dd)
-/-    Total commits: 3
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/3] 2026-08-17 12:39:11 +0530  163d621  (ker07-dev)
-/-        Add pathwise BIG1 projector chord experiment
-/- [02/3] 2026-08-17 12:44:36 +0530  8b1b808  (ker07-dev)
-/-        Strengthen BIG1 projector with exact two-layer GST+ gate
-/- [03/3] 2026-08-17 12:46:18 +0530  33e93dd  (ker07-dev)
-/-        Add exact 36-state chord identity for projected two-digit sector
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #1035 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/HandwrittenBig1PathProjectorScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-17 12:39:11 +0530  (163d621)
+--    Last-commit  : 2026-08-17 12:46:18 +0530  (33e93dd)
+--    Total commits: 3
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/3] 2026-08-17 12:39:11 +0530  163d621  (ker07-dev)
+--        Add pathwise BIG1 projector chord experiment
+-- [02/3] 2026-08-17 12:44:36 +0530  8b1b808  (ker07-dev)
+--        Strengthen BIG1 projector with exact two-layer GST+ gate
+-- [03/3] 2026-08-17 12:46:18 +0530  33e93dd  (ker07-dev)
+--        Add exact 36-state chord identity for projected two-digit sector
+-- ====================================================================== -/
 
 import HandwrittenBigNOmegaScratch
 import HandwrittenSixUniverseScratch
