@@ -36,9 +36,8 @@ theorem gpt56_handwritten_operator_on_navigation_child
   unfold gstOmegaPressureEnergyS gstOriginRemainingUS
   exact (gst_navigation_decomposition (s+1) n (by omega)).symm
 
-/-- The handwritten infinite x2/base3 bridge is not abstract: every literal
-physical binary row R,2R,4R,... at a fixed ternary position p realizes the
-exact `GSTInfiniteBridgePathS` interface. -/
+/-- Every literal physical binary row R,2R,4R,... at a fixed ternary cut p
+realizes the exact all-Nat handwritten x2/base3 bridge. -/
 theorem gpt56_physical_binary_row_is_infinite_bridge
     (R p : Nat) :
     GSTInfiniteBridgePathS
@@ -54,9 +53,9 @@ theorem gpt56_physical_binary_row_is_infinite_bridge
       GSTPhysicalKernel.microOutput] using
       GSTPhysicalKernel.microOutput_eq_next_binaryColumnDigit R p r
 
-/-- Every actual child Happy gate is physically one of exactly the two
-handwritten microscopic patterns: NULL DESTROY/CREATE=(4,2), or the right
-chord GST+ SURVIVE/SURVIVE=(5,5). -/
+/-- Every actual child Happy gate is physically exactly one of the two
+handwritten microscopic patterns: DESTROY/CREATE=(4,2), or the right-chord
+SURVIVE/SURVIVE=(5,5). -/
 theorem gpt56_child_happy_gate_micro_dichotomy
     (T q : Nat)
     (hgate : GSTSeededHappyS 0 T q) :
@@ -66,8 +65,7 @@ theorem gpt56_child_happy_gate_micro_dichotomy
   simpa [_root_.gstCarryS, _root_.gstAffineMulCarryS] using hgate
 
 /-- A real child Happy gate places the literal binary-column realization of
-that child into the exhaustive handwritten BIG-N / I!=BIG1 controller.  This
-is the physical, not abstract, instantiation of the 2^j/3^j/6^j sector. -/
+that child into the exhaustive handwritten BIG-N / I!=BIG1 controller. -/
 theorem gpt56_child_happy_gate_physical_two_case_quantitative
     (T q : Nat)
     (hgate : GSTSeededHappyS 0 T q) :
@@ -90,9 +88,7 @@ theorem gpt56_child_happy_gate_physical_two_case_quantitative
   exact gst_infinite_two_case_quantitativeS a d hpath hd0
 
 /-- Exact post-last-gate classification supplied by the handwritten S/U
-operator.  Nothing is declared terminal.  If BIG1 is absent from the retained
-child suffix then the conserved high endpoint C+4Y is forced onto one of the
-two exact ternary boundary families. -/
+operator.  No terminal-NULL assumption occurs. -/
 theorem gpt56_last_gate_handwritten_boundary_dichotomy
     (A z T : Nat)
     (hA : 0 < A)
@@ -117,27 +113,35 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
     gst_canonical_two_boundary_trapS A z T hA hz1 hparent hchild
   refine ⟨q, ?_⟩
   dsimp only at htrap ⊢
-  refine ⟨htrap.1, htrap.2.1, htrap.2.2.1,
-    htrap.2.2.2.1, htrap.2.2.2.2, ?_⟩
-  by_cases hbig1 : ∃ j, GSTInfiniteV2.gstDigitS (T / 3^(q+1)) j = 1
+  rcases htrap with ⟨hparentBad, hchildBad, hC, hshared, hW⟩
+  refine ⟨hparentBad, hchildBad, hC, hshared, hW, ?_⟩
+  let C := gstAffineMulCarryS 4 0 T (q+1)
+  let Y := T / 3^(q+1)
+  by_cases hbig1 : ∃ j, GSTInfiniteV2.gstDigitS Y j = 1
   · exact Or.inl hbig1
-  · have hno : GSTSleepNoBig1S (T / 3^(q+1)) := by
+  · have hno : GSTSleepNoBig1S Y := by
       intro j hj
       exact hbig1 ⟨j, hj⟩
-    have hbadSleep :
-        GSTSleepSeededBadTraceS
-          (gstAffineMulCarryS 4 0 T (q+1)) (T / 3^(q+1)) := by
+    have hbadSleep : GSTSleepSeededBadTraceS C Y := by
       intro j
-      have hj := htrap.2.1 j
-      simpa only [_root_.GSTBadPairS, GSTInfiniteV2.GSTBadPairS,
-        _root_.gstAffineMulCarryS, GSTInfiniteV2.gstAffineCarryS,
-        _root_.gstDigitS, GSTInfiniteV2.gstDigitS] using hj
+      change ¬ (GSTInfiniteV2.gstDigitS Y j = 2 ∧
+        (GSTInfiniteV2.gstAffineCarryS C Y j = 0 ∨
+         GSTInfiniteV2.gstAffineCarryS C Y j = 3))
+      intro hhappy
+      have hj := hchildBad j
+      apply hj
+      constructor
+      · simpa [_root_.gstDigitS, GSTInfiniteV2.gstDigitS, Y] using hhappy.1
+      · rcases hhappy.2 with h0 | h3
+        · left
+          simpa [_root_.gstAffineMulCarryS, GSTInfiniteV2.gstAffineCarryS, C, Y] using h0
+        · right
+          simpa [_root_.gstAffineMulCarryS, GSTInfiniteV2.gstAffineCarryS, C, Y] using h3
     have hb := gst_sleep_big1_free_last_gate_peel_is_ternary_boundaryS
-      (gstAffineMulCarryS 4 0 T (q+1)) (T / 3^(q+1))
-      htrap.2.2.1 hbadSleep hno
+      C Y hC hbadSleep hno
     rcases hb with ⟨r, hr⟩ | ⟨r, hr⟩
-    · exact Or.inr (Or.inl ⟨r, hr⟩)
-    · exact Or.inr (Or.inr ⟨r, hr⟩)
+    · exact Or.inr (Or.inl ⟨r, by simpa [C, Y] using hr⟩)
+    · exact Or.inr (Or.inr ⟨r, by simpa [C, Y] using hr⟩)
 
 #check gpt56_handwritten_operator_on_navigation_child
 #check gpt56_physical_binary_row_is_infinite_bridge
