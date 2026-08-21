@@ -67,7 +67,7 @@ lake env lean GSTHandwrittenHorizontalParentBridge.lean 2>&1 | tee handwritten-h
 grep -Fq "'gpt56_binary_residue_gap_doubles' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_noBig1_impossible' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_path_forces_first_big1' depends on axioms:" handwritten-physical-nobig1.log
-grep -Fq "'gpt56_child_happy_forces_first_big1' depends on axioms:" handwritten-child-first-big1.log
-grep -Fq "'gpt56_child_happy_forces_destroy_boundary' depends on axioms:" handwritten-child-first-big1.log
+grep -Fq "'gpt56_child_digit_two_forces_first_big1' depends on axioms:" handwritten-child-first-big1.log
+grep -Fq "'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms:" handwritten-child-first-big1.log
 grep -Fq "'gpt56_parent_multiplier_is_binary_bridge' depends on axioms:" handwritten-horizontal-parent.log
 grep -Fq "'gpt56_no_big1_before_parent_endpoint_digit_two' depends on axioms:" handwritten-horizontal-parent.log
