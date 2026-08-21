@@ -65,14 +65,13 @@ theorem gst_canonical_Q4_mod9S
     (hQnext1_3 : Q (t+1) 1 % 3 = 1) :
     Q t 4 % 9 = 1 := by
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 1 (by omega)
-  norm_num at hrec ⊢
+  norm_num at hrec
   have hA3 : 4^(3^t) % 3 = 1 :=
     gst_canonical_block_unit_mod3S Q hQ t (by omega)
   let U := 4^(3^t) * Q (t+1) 1
   have hUmod : U % 3 = 1 := by
     dsimp [U]
     rw [Nat.mul_mod, hA3, hQnext1_3]
-    decide
   have hUshape : U = 1 + 3 * (U / 3) := by
     have h := Nat.mod_add_div U 3
     rw [hUmod] at h
@@ -84,11 +83,10 @@ theorem gst_canonical_Q4_mod9S
       ring
     rw [Nat.mul_add, Nat.mul_one, Nat.add_mod,
       Nat.mod_eq_zero_of_dvd hdvd]
-    norm_num
   calc
     Q t 4 % 9 = (Q t 1 + 3 * U) % 9 := by
       rw [hrec]
-      rfl
+      simp [U, Nat.mul_assoc]
     _ = (Q t 1 % 9 + (3 * U) % 9) % 9 := by rw [Nat.add_mod]
     _ = (7 + 3) % 9 := by rw [hQ1_9, hthree]
     _ = 1 := by decide
@@ -106,14 +104,13 @@ theorem gst_canonical_Q13_mod27S
     gst_canonical_Q4_mod9S Q hQ (s+1) (by omega)
       hQnext1_9 hQnext2_3
   have hrec := gst_canonical_prefix_recurrenceS Q hQ s 1 1 4 (by omega)
-  norm_num at hrec ⊢
+  norm_num at hrec
   let U := 4^(3^s) * Q (s+1) 4
   have hA9 : 4^(3^s) % 9 = 1 :=
     gst_canonical_block_unit_mod9S Q hQ s hs
   have hUmod : U % 9 = 1 := by
     dsimp [U]
     rw [Nat.mul_mod, hA9, hQ4]
-    decide
   have hUshape : U = 1 + 9 * (U / 9) := by
     have h := Nat.mod_add_div U 9
     rw [hUmod] at h
@@ -125,11 +122,10 @@ theorem gst_canonical_Q13_mod27S
       ring
     rw [Nat.mul_add, Nat.mul_one, Nat.add_mod,
       Nat.mod_eq_zero_of_dvd hdvd]
-    norm_num
   calc
     Q s 13 % 27 = (Q s 1 + 3 * U) % 27 := by
       rw [hrec]
-      rfl
+      simp [U, Nat.mul_assoc]
     _ = (Q s 1 % 27 + (3 * U) % 27) % 27 := by rw [Nat.add_mod]
     _ = (16 + 3) % 27 := by rw [hQ1_27, hterm]
     _ = 19 := by decide
@@ -157,11 +153,13 @@ theorem gst_residue19_is_null_gate2S
     gstDigitS R 2 = 2 ∧ gstCarryS R 2 = 0 := by
   constructor
   · unfold gstDigitS
+    norm_num
     have hdiv : R / 9 % 3 = (R % 27) / 9 := by
       omega
     rw [hdiv, hR]
     decide
   · unfold gstCarryS
+    norm_num
     have hmod9 : R % 9 = 1 := by
       have h := Nat.mod_mod_of_dvd R (by decide : 9 ∣ 27)
       rw [hR] at h
