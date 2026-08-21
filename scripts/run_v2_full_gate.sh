@@ -32,6 +32,8 @@ seeds = [
     'GSTGraphV2SleepEquationLabScratch',
     'GSTGraphV2SleepEquationCollisionScratch',
     'GSTGraphV2InfiniteBigNDichotomyScratch',
+    'GSTGraphV2SleepBadLanguageDescentScratch',
+    'CanonicalTrapScratch',
 ]
 rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
 imports = {}
