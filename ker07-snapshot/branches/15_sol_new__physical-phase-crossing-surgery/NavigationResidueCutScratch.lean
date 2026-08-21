@@ -157,7 +157,6 @@ theorem gst_residue19_is_null_gate2S
     have hdiv : R / 9 % 3 = (R % 27) / 9 := by
       omega
     rw [hdiv, hR]
-    decide
   · unfold gstCarryS
     norm_num
     have hmod9 : R % 9 = 1 := by
@@ -166,4 +165,3 @@ theorem gst_residue19_is_null_gate2S
       norm_num at h ⊢
       exact h.symm
     rw [hmod9]
-    decide
