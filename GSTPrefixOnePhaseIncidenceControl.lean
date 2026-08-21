@@ -243,6 +243,22 @@ theorem gpt56_phase_A_mod_nine (s : Nat) (hs : 1 ≤ s) :
     pow3_mod9 (s+1) (by omega)]
   norm_num
 
+/-- The remaining multiplier after one physical x2 column lies in the other
+nonzero residue class modulo three. -/
+theorem gpt56_phase_A1_mod_three (s : Nat) (hs : 1 ≤ s) :
+    gpt56PhaseA1 s % 3 = 2 := by
+  have hA3 : gpt56PhaseA s % 3 = 1 := by
+    have hdiv : 3 ∣ 9 := by decide
+    calc
+      gpt56PhaseA s % 3 = (gpt56PhaseA s % 9) % 3 := by
+        rw [Nat.mod_mod_of_dvd _ hdiv]
+      _ = 1 := by rw [gpt56_phase_A_mod_nine s hs]
+  have hmul := congrArg (fun z : Nat => z % 3)
+    (gpt56_phase_A1_mul_two s hs)
+  rw [Nat.mul_mod, hA3] at hmul
+  have hlt : gpt56PhaseA1 s % 3 < 3 := Nat.mod_lt _ (by decide)
+  omega
+
 /-- Exact ancestry law for the parent-offset phase.  When `A = 1 (mod 9)`,
 one coupled step exposes the next ternary coordinate of the old offset and
 adds precisely the carry created by its current phase plus the child digit.
@@ -514,6 +530,86 @@ theorem gpt56_plus_chord_one_column_offset_shift
       gpt56PhaseA1 s
   rw [hnum, Nat.add_mul_div_left _ _ hP]
 
+/-- Modulo three, the exact GST+ horizontal bridge crosses to the next offset
+phase.  The equality is a corollary of the full natural-number offset shift,
+not an independently projected residue claim. -/
+theorem gpt56_plus_chord_one_column_phase_shift
+    (s n q : Nat) (hs : 1 ≤ s) (hplus : GPT56PlusChord s n q) :
+    (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).parentOffset % 3 =
+      ((GSTV2.coupledOrbit (gpt56PhaseA1 s)
+          (gpt56PhaseInitialState1 s n) q).parentOffset % 3 + 2) % 3 := by
+  have hshift := gpt56_plus_chord_one_column_offset_shift s n q hs hplus
+  have hmod := congrArg (fun z : Nat => z % 3) hshift
+  simpa [Nat.add_mod, gpt56_phase_A1_mod_three s hs] using hmod
+
+/-- The same one-column move that crosses the parent phase turns the child
+GST+ gate into the exact middle-carry trap: its digit stays two, while its
+ordinary x4 carry becomes two. -/
+theorem gpt56_plus_chord_one_column_child_trap
+    (s n q : Nat) (hplus : GPT56PlusChord s n q) :
+    gstDigit (2 * gpt56PhaseT s n) q = 2 ∧
+      gstCarry (2 * gpt56PhaseT s n) q = 2 := by
+  let T := gpt56PhaseT s n
+  let P := 3^q
+  let R := T % P
+  have hP : 0 < P := by
+    dsimp [P]
+    exact Nat.pow_pos (by decide)
+  have hRlt : R < P := Nat.mod_lt _ hP
+  have hd2raw : T / P % 3 = 2 := by
+    simpa [T, P, GPT56PlusChord, gstDigit] using hplus.1
+  have hcarry4 : (4*R)/P = 3 := by
+    simpa [T, P, R, GPT56PlusChord, gstCarry] using hplus.2.1
+  have hsplit4 : 4*R = P*((4*R)/P) + (4*R)%P :=
+    (Nat.div_add_mod (4*R) P).symm
+  rw [hcarry4] at hsplit4
+  have h2lo : P ≤ 2*R := by omega
+  have h2hi : 2*R < 2*P := by omega
+  have hdiv2lo : 1 ≤ (2*R)/P :=
+    (Nat.le_div_iff_mul_le hP).2 (by simpa using h2lo)
+  have hdiv2hi : (2*R)/P < 2 :=
+    (Nat.div_lt_iff_lt_mul hP).2 (by simpa using h2hi)
+  have hdiv2 : (2*R)/P = 1 := by omega
+  have hdAltRaw : (2*T)/P % 3 = 2 := by
+    have hq2 := gpt56_mul_ternary_quotient_split 2 T q
+    change (2*T)/P = (2*R)/P + 2*(T/P) at hq2
+    rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2raw]
+    norm_num
+  have hd8 : (8*T)/P % 3 = 1 := by
+    have h := hplus.2.2.1.1
+    simpa [GSTPhysicalKernel.binaryColumnDigit, T, P] using h
+  have hq8 := gpt56_mul_ternary_quotient_split 8 T q
+  change (8*T)/P = (8*R)/P + 8*(T/P) at hq8
+  rw [hq8, Nat.add_mod, Nat.mul_mod, hd2raw] at hd8
+  norm_num at hd8
+  have hdiv8mod : ((8*R)/P) % 3 = 0 := by omega
+  have h8lo : 6*P ≤ 8*R := by omega
+  have h8lt8 : (8*R)/P < 8 :=
+    (Nat.div_lt_iff_lt_mul hP).2 (by omega)
+  have hdiv8 : (8*R)/P = 6 := by omega
+  have h8hi : 8*R < 7*P :=
+    (Nat.div_lt_iff_lt_mul hP).1 (by omega)
+  have hmod2 : (2*T) % P = (2*R) % P := by
+    simp [T, R, Nat.mul_mod]
+  have hdecomp2 : (2*R)%P + P = 2*R := by
+    have h := Nat.mod_add_div (2*R) P
+    rw [hdiv2] at h
+    simpa [Nat.mul_comm] using h
+  have hmass : 4*((2*T)%P) + 4*P = 8*R := by
+    rw [hmod2]
+    omega
+  have hcarryAltLo : 2*P ≤ 4*((2*T)%P) := by omega
+  have hcarryAltHi : 4*((2*T)%P) < 3*P := by omega
+  have hcarryAltLo' : 2 ≤ (4*((2*T)%P))/P :=
+    (Nat.le_div_iff_mul_le hP).2 (by simpa using hcarryAltLo)
+  have hcarryAltHi' : (4*((2*T)%P))/P < 3 :=
+    (Nat.div_lt_iff_lt_mul hP).2 (by simpa using hcarryAltHi)
+  have hcarryAlt : (4*((2*T)%P))/P = 2 := by omega
+  constructor
+  · simpa [gstDigit, T, P] using hdAltRaw
+  · simpa [gstCarry, T, P] using hcarryAlt
+
 /-- Canonical exact-gate dichotomy retaining the cross-subspace offset shift
 in the GST+ alternative. -/
 theorem gpt56_prefix_one_exact_gate_horizontal_phase_crossing
@@ -648,11 +744,14 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
 #check gpt56_prefix_one_exact_gate_past_incidence
 #check gpt56_phase_A_mod_nine
 #check gpt56_phase_A1_mul_two
+#check gpt56_phase_A1_mod_three
 #check gpt56_coupledStep_parentOffset_phase
 #check gpt56_prefix_one_exact_gate_offset_phase
 #check GSTV2.coupledOrbit_parentOffset_exact
 #check gpt56_prefix_one_exact_gate_parentOffset_closed
 #check gpt56_plus_chord_one_column_offset_shift
+#check gpt56_plus_chord_one_column_phase_shift
+#check gpt56_plus_chord_one_column_child_trap
 #check gpt56_prefix_one_exact_gate_horizontal_phase_crossing
 #check gpt56_parent_digit_two_phase_table
 #check gpt56_prefix_one_exact_gate_three_phase_table
@@ -660,11 +759,14 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
 #print axioms gpt56_prefix_one_exact_gate_past_incidence
 #print axioms gpt56_phase_A_mod_nine
 #print axioms gpt56_phase_A1_mul_two
+#print axioms gpt56_phase_A1_mod_three
 #print axioms gpt56_coupledStep_parentOffset_phase
 #print axioms gpt56_prefix_one_exact_gate_offset_phase
 #print axioms GSTV2.coupledOrbit_parentOffset_exact
 #print axioms gpt56_prefix_one_exact_gate_parentOffset_closed
 #print axioms gpt56_plus_chord_one_column_offset_shift
+#print axioms gpt56_plus_chord_one_column_phase_shift
+#print axioms gpt56_plus_chord_one_column_child_trap
 #print axioms gpt56_prefix_one_exact_gate_horizontal_phase_crossing
 #print axioms gpt56_parent_digit_two_phase_table
 #print axioms gpt56_prefix_one_exact_gate_three_phase_table
