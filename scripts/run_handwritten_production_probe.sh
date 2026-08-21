@@ -70,6 +70,9 @@ lake env lean -o GSTHandwrittenPrefixOneLivePackage.olean GSTHandwrittenPrefixOn
 lake env lean -o GSTHandwrittenBigNThreeWorldFactors.olean GSTHandwrittenBigNThreeWorldFactors.lean 2>&1 | tee handwritten-bign-three-world.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-bign-three-world.log
 
+lake env lean -o GSTHandwrittenBigNSignedKernel.olean GSTHandwrittenBigNSignedKernel.lean 2>&1 | tee handwritten-bign-signed-kernel.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-bign-signed-kernel.log
+
 grep -Fq "'gpt56_binary_residue_gap_doubles' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_noBig1_impossible' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_path_forces_first_big1' depends on axioms:" handwritten-physical-nobig1.log
@@ -79,6 +82,9 @@ grep -Fq "'gpt56_parent_multiplier_is_binary_bridge' depends on axioms:" handwri
 grep -Fq "'gpt56_no_big1_before_parent_endpoint_digit_two' depends on axioms:" handwritten-horizontal-parent.log
 grep -Fq "'gpt56_prefix_one_live_handwritten_package' depends on axioms:" handwritten-prefix-one-live.log
 grep -Fq "'gst_three_world_factor_rawS' depends on axioms:" handwritten-bign-three-world.log
-grep -Fq "'gst_information_eq_bigN_exact_three_world_codeS' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gst_handwritten_three_world_joined_prefix_closedS' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gst_information_eq_bigN_exact_sum_equationS' depends on axioms:" handwritten-bign-three-world.log
 grep -Fq "'gpt56_parent_segment_three_world_factorS' depends on axioms:" handwritten-bign-three-world.log
-grep -Fq "'gpt56_prefix_one_live_information_bigN_three_world' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gpt56_prefix_one_live_information_bigN_sum_equation' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gpt56_information_bigN_signed_kernel_exact' depends on axioms:" handwritten-bign-signed-kernel.log
+grep -Fq "'gpt56_prefix_one_live_bigN_full_equation_packet' depends on axioms:" handwritten-bign-signed-kernel.log
