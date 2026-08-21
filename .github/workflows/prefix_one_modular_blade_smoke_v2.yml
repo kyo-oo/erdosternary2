@@ -47,6 +47,10 @@ jobs:
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTHandwrittenPrefixOneLivePackage.olean GSTHandwrittenPrefixOneLivePackage.lean
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTHandwrittenBigNThreeWorldFactors.olean GSTHandwrittenBigNThreeWorldFactors.lean
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTHandwrittenBigNSignedKernel.olean GSTHandwrittenBigNSignedKernel.lean
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTV2InfiniteCore.olean GSTV2InfiniteCore.lean
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTInfiniteCollision.olean GSTInfiniteCollision.lean
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTInfiniteBadTransport.olean GSTInfiniteBadTransport.lean
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTInfiniteCoupledLedger.olean GSTInfiniteCoupledLedger.lean
       - name: Kernel-check corrected modular blade
         timeout-minutes: 30
         shell: bash
@@ -302,7 +306,7 @@ jobs:
           EOF
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTCanonicalFirstGateControl.olean GSTCanonicalFirstGateControl.lean | tee canonical-first-gate-control.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-first-gate-control.log
-          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTCanonicalEnergyControl.lean | tee canonical-energy-control.log
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTCanonicalEnergyControl.olean GSTCanonicalEnergyControl.lean | tee canonical-energy-control.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-energy-control.log
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTPrefixOnePhaseIncidenceControl.lean | tee prefix-one-phase-incidence.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' prefix-one-phase-incidence.log
