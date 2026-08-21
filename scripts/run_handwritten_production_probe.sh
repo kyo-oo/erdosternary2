@@ -24,6 +24,7 @@ root=Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
 files={p.stem:p for p in root.glob('*.lean')}
 seeds=['GSTGraphV2SleepEquationLabScratch','GSTGraphV2SleepEquationCollisionScratch',
        'GSTGraphV2InfiniteBigNDichotomyScratch','GSTGraphV2SleepBadLanguageDescentScratch',
+       'GSTGraphV2PhysicalSignedKernelTelescopeScratch','PhysicalSixBridgeGateScratch',
        'CanonicalTrapScratch']
 rx=re.compile(r'^\s*import\s+(.+?)\s*$',re.M)
 imports={}
@@ -59,4 +60,6 @@ done < .handwritten-order
 lake env lean GSTHandwrittenPrefixOneProductionProbe.lean 2>&1 | tee handwritten-production-probe.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-production-probe.log
 grep -Fq "'gpt56_handwritten_operator_on_navigation_child' depends on axioms:" handwritten-production-probe.log
+grep -Fq "'gpt56_physical_binary_row_is_infinite_bridge' depends on axioms:" handwritten-production-probe.log
+grep -Fq "'gpt56_child_happy_gate_micro_dichotomy' depends on axioms:" handwritten-production-probe.log
 grep -Fq "'gpt56_last_gate_handwritten_boundary_dichotomy' depends on axioms:" handwritten-production-probe.log
