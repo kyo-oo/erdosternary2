@@ -165,22 +165,19 @@ theorem gst_first_big1_exact_bigN_codeS
     (N : Nat) (hN : 1 ≤ N)
     (hfirst : GSTFirstBig1AtS d N) :
     gstBig1ProjectedPathCodeS a d N = 5 * 6^(N-1) - 1 := by
-  have hshape : N = (N-1)+1 := by omega
-  have hpre := gst_first_big1_survive_prefix_codeS
-    a d hpath h0 N hN hfirst
-  have hbound := gst_first_big1_boundary_is_destroyS
-    a d hpath h0 N hN hfirst
-  dsimp only at hbound
-  have hsum :
-      gstBig1ProjectedPathCodeS a d N =
-        gstBig1ProjectedPathCodeS a d (N-1) +
-          gstBinaryBridgeMassS (a (N-1)) (d (N-1)) * 6^(N-1) := by
-    unfold gstBig1ProjectedPathCodeS
-    conv_lhs => rw [hshape]
-    rw [Finset.sum_range_succ]
-  rw [hsum, hpre, hbound.2.2.1]
-  have hp : 0 < 6^(N-1) := Nat.pow_pos (by decide)
-  omega
+  cases N with
+  | zero => omega
+  | succ N =>
+      have hpre := gst_first_big1_survive_prefix_codeS
+        a d hpath h0 (N+1) (by omega) hfirst
+      have hbound := gst_first_big1_boundary_is_destroyS
+        a d hpath h0 (N+1) (by omega) hfirst
+      dsimp only at hbound
+      simp only [Nat.add_sub_cancel] at hpre hbound ⊢
+      unfold gstBig1ProjectedPathCodeS at hpre ⊢
+      rw [Finset.sum_range_succ, hpre, hbound.2.2.1]
+      have hp : 0 < 6^N := Nat.pow_pos (by decide)
+      omega
 
 theorem gst_infinite_two_case_controlS
     (a d : Nat → Nat)
