@@ -300,7 +300,7 @@ jobs:
           #check gpt56_prefix_one_bad_forces_BIG1_v2
           #print axioms gpt56_prefix_one_bad_forces_BIG1_v2
           EOF
-          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTCanonicalFirstGateControl.lean | tee canonical-first-gate-control.log
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean -o GSTCanonicalFirstGateControl.olean GSTCanonicalFirstGateControl.lean | tee canonical-first-gate-control.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-first-gate-control.log
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTCanonicalEnergyControl.lean | tee canonical-energy-control.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-energy-control.log
