@@ -60,7 +60,7 @@ def omegaFuture (t N K : Nat) : Nat := 3^(t+1+K) * (N / 3^K)
 theorem digit_prefix_value (N K : Nat) :
     Finset.sum (Finset.range K) (fun k => 3^k * digit N k) = N % 3^K := by
   induction K with
-  | zero => simp [digit]
+  | zero => norm_num
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       unfold digit
