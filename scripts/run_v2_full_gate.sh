@@ -19,6 +19,66 @@ head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
 lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
 export LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}"
+
+# Compile the exact local dependency closure of the RED collision first.  This
+# makes proof iterations reach the production theorem without paying for the
+# unrelated heavyweight probes.  The full closure is still compiled below
+# before monolith surgery/comparator certification.
+python3 - <<'PY'
+from pathlib import Path
+import re
+root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
+files = {p.stem:p for p in root.glob('*.lean')}
+seeds = [
+    'GSTGraphV2InfiniteBigNDichotomyScratch',
+    'GSTGraphV2PhysicalSignedKernelTelescopeScratch',
+]
+rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
+imports = {}
+for m,p in files.items():
+    names=[]
+    for line in rx.findall(p.read_text()):
+        line=line.split('--',1)[0].strip(); names.extend(line.split())
+    imports[m] = {x for x in names if x in files}
+need=set()
+def add(m):
+    if m in need: return
+    if m not in files: raise SystemExit('MISSING_LOCAL_MODULE '+m)
+    need.add(m)
+    for d in imports[m]: add(d)
+for s in seeds: add(s)
+indeg={m:0 for m in need}; out={m:set() for m in need}
+for m in need:
+    for d in imports[m] & need:
+        indeg[m]+=1; out[d].add(m)
+q=sorted(m for m,v in indeg.items() if v==0); order=[]
+while q:
+    m=q.pop(0); order.append(m)
+    for n in sorted(out[m]):
+        indeg[n]-=1
+        if indeg[n]==0: q.append(n); q.sort()
+if len(order)!=len(need): raise SystemExit('IMPORT_CYCLE')
+Path('.collision-order').write_text('\n'.join(order)+'\n')
+print('COLLISION_DEPENDENCY_ORDER', order)
+PY
+while IFS= read -r mod; do
+  lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
+done < .collision-order
+
+for mod in \
+  GSTHandwrittenPhysicalNoBig1 \
+  GSTHandwrittenChildFirstBig1 \
+  GSTHandwrittenHorizontalParentBridge \
+  GSTHandwrittenPrefixOneLivePackage \
+  GSTHandwrittenBigNThreeWorldFactors \
+  GSTHandwrittenBigNSignedKernel; do
+  lake env lean -o "$mod.olean" "$mod.lean"
+done
+lake env lean -o GSTHandwrittenPrefixOneCollisionRepair.olean GSTHandwrittenPrefixOneCollisionRepair.lean 2>&1 | tee handwritten-prefix-one-collision.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-prefix-one-collision.log
+
+# Full authoritative V2/snapshot closure.  Already compiled collision deps are
+# reused from this same job; every remaining module is still kernel-checked.
 python3 - <<'PY'
 from pathlib import Path
 import re
@@ -64,25 +124,13 @@ Path('.probe-order').write_text('\n'.join(order)+'\n')
 print('PROBE_DEPENDENCY_ORDER', order)
 PY
 while IFS= read -r mod; do
-  lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
+  if [[ ! -f "$SNAP/$mod.olean" ]]; then
+    lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
+  fi
 done < .probe-order
 
 lake env lean -o GSTHandwrittenPrefixOneProductionProbe.olean GSTHandwrittenPrefixOneProductionProbe.lean 2>&1 | tee handwritten-production-probe.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-production-probe.log
-
-# Compile the already-green handwritten production chain, then run the exact
-# collision theorem that will be transplanted into the monolith.
-for mod in \
-  GSTHandwrittenPhysicalNoBig1 \
-  GSTHandwrittenChildFirstBig1 \
-  GSTHandwrittenHorizontalParentBridge \
-  GSTHandwrittenPrefixOneLivePackage \
-  GSTHandwrittenBigNThreeWorldFactors \
-  GSTHandwrittenBigNSignedKernel; do
-  lake env lean -o "$mod.olean" "$mod.lean"
-done
-lake env lean -o GSTHandwrittenPrefixOneCollisionRepair.olean GSTHandwrittenPrefixOneCollisionRepair.lean 2>&1 | tee handwritten-prefix-one-collision.log
-! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-prefix-one-collision.log
 
 bash scripts/probe_physical_trap_counterexample.sh
 
