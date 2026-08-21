@@ -194,5 +194,125 @@ theorem gpt56_prefix_one_exact_gate_past_incidence
         gpt56PhaseInitialState] using hmod
     exact Or.inr ⟨by simpa [GPT56PlusChord, gpt56PhaseT] using hplus, hpast⟩
 
+/-- A seed-one affine x4 stream always regenerates inside the four physical
+carry states.  This is an all-depth bound, not a terminal-state argument. -/
+theorem gpt56_affineCarry_one_lt_four (X K : Nat) :
+    GSTV2.affineCarry 1 X K < 4 := by
+  unfold GSTV2.affineCarry
+  have hp : 0 < 3^K := Nat.pow_pos (by decide)
+  have hr : X % 3^K < 3^K := Nat.mod_lt _ hp
+  exact (Nat.div_lt_iff_lt_mul hp).2 (by omega)
+
+/-!
+The zero phase of the parent offset is now a restrictive bad-language event.
+At the child digit-two collision it makes the parent digit two as well.  Parent
+badness excludes the Happy carries zero and three, hence the current seed is
+one or two.  The next regenerated seed is exactly three, so the complete bad
+suffix forbids digit two at the next parent coordinate.
+-/
+theorem gpt56_prefix_one_zero_phase_forces_next_escape
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gpt56PhaseT s n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ∃ q,
+      (GPT56NullChord s n q ∨ GPT56PlusChord s n q) ∧
+      ((GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).parentOffset % 3 = 0 →
+        ((GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentSeed = 1 ∨
+         (GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentSeed = 2) ∧
+        (GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) (q+1)).parentSeed = 3 ∧
+        ((GSTV2.coupledOrbit (gpt56PhaseA s)
+              (gpt56PhaseInitialState s n) (q+1)).parentOffset +
+            gpt56PhaseA s *
+              ((GSTV2.coupledOrbit (gpt56PhaseA s)
+                (gpt56PhaseInitialState s n) (q+1)).childTail % 3)) % 3 ≠ 2) := by
+  obtain ⟨q, _hsync, _hbadSuffix, hbranch⟩ :=
+    gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
+  have hchord : GPT56NullChord s n q ∨ GPT56PlusChord s n q := by
+    rcases hbranch with hnull | hplus
+    · exact Or.inl hnull.1
+    · exact Or.inr hplus.1
+  refine ⟨q, hchord, ?_⟩
+  intro hphase
+  have hd2 : gstDigit (gpt56PhaseT s n) q = 2 := by
+    rcases hchord with hnull | hplus
+    · exact hnull.1
+    · exact hplus.1
+  have hd :
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).childTail % 3 = 2 := by
+    calc
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).childTail % 3 =
+          GSTV2.digit (gpt56PhaseInitialState s n).childTail q :=
+        GSTV2.coupledOrbit_childDigit_exact
+          (gpt56PhaseA s) (gpt56PhaseInitialState s n) q
+      _ = 2 := by
+        simpa [gpt56PhaseInitialState, gpt56PhaseT,
+          GSTV2.digit, gstDigit] using hd2
+  have hAmod : gpt56PhaseA s % 3 = 1 := by
+    simp [gpt56PhaseA, Nat.pow_mod]
+  have hemit :
+      ((GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentOffset +
+          gpt56PhaseA s *
+            ((GSTV2.coupledOrbit (gpt56PhaseA s)
+              (gpt56PhaseInitialState s n) q).childTail % 3)) % 3 = 2 := by
+    simp [Nat.add_mod, Nat.mul_mod, Nat.mod_mod, hphase, hAmod, hd]
+  have hcontrol := gpt56_phase_infinite_bad_control s n hs hBad
+  have hbadCurrent := GSTV2.coupledOrbit_parent_bad_current
+    (gpt56PhaseA s) (gpt56PhaseInitialState s n)
+    hcontrol.parentBad q
+  have hseedlt :
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).parentSeed < 4 := by
+    rw [GSTV2.coupledOrbit_parentSeed_exact]
+    simpa [gpt56PhaseInitialState] using
+      gpt56_affineCarry_one_lt_four
+        ((gpt56PhaseInitialState s n).parentWord (gpt56PhaseA s)) q
+  have hseedNot :
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).parentSeed ≠ 0 ∧
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).parentSeed ≠ 3 := by
+    constructor
+    · intro hzero
+      exact hbadCurrent ⟨hemit, Or.inl hzero⟩
+    · intro hthree
+      exact hbadCurrent ⟨hemit, Or.inr hthree⟩
+  have hmiddle :
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).parentSeed = 1 ∨
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) q).parentSeed = 2 := by
+    omega
+  have hnextSeed :
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) (q+1)).parentSeed = 3 := by
+    rw [GSTV2.coupledOrbit]
+    change GSTV2.cellNextCarry
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).parentSeed
+      (((GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentOffset +
+          gpt56PhaseA s *
+            ((GSTV2.coupledOrbit (gpt56PhaseA s)
+              (gpt56PhaseInitialState s n) q).childTail % 3)) % 3) = 3
+    rw [hemit]
+    rcases hmiddle with h1 | h2
+    · simp [GSTV2.cellNextCarry, GSTV2.cellMass, h1]
+    · simp [GSTV2.cellNextCarry, GSTV2.cellMass, h2]
+  have hbadNext := GSTV2.coupledOrbit_parent_bad_current
+    (gpt56PhaseA s) (gpt56PhaseInitialState s n)
+    hcontrol.parentBad (q+1)
+  refine ⟨hmiddle, hnextSeed, ?_⟩
+  intro hnextDigit
+  exact hbadNext ⟨hnextDigit, Or.inr hnextSeed⟩
+
 #check gpt56_prefix_one_exact_gate_past_incidence
+#check gpt56_prefix_one_zero_phase_forces_next_escape
 #print axioms gpt56_prefix_one_exact_gate_past_incidence
+#print axioms gpt56_prefix_one_zero_phase_forces_next_escape
