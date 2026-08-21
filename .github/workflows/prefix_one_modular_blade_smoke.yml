@@ -6,5 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  full-v2-gate:
-    uses: ./.github/workflows/infinite_v2_last_gate_adapter_smoke.yml
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Execute authoritative full V2 production gate
+        timeout-minutes: 240
+        shell: bash
+        run: bash scripts/run_v2_full_gate.sh
