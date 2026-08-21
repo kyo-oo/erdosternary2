@@ -51,9 +51,10 @@ theorem seeded_mass_past_future
     omega
   calc
     D + 4*X = H + P*(4*(X/P)) := by
-      rw [hX]
       dsimp [H]
-      ring
+      calc
+        D + 4*X = D + 4*(X % P + P*(X/P)) := by rw [← hX]
+        _ = (D + 4*(X % P)) + P*(4*(X/P)) := by ring
     _ = (H % P + P*(H/P)) + P*(4*(X/P)) := by rw [← hH]
     _ = H % P + P*((H/P) + 4*(X/P)) := by ring
     _ = seededPast D X K +
