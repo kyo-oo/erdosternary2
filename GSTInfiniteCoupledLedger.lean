@@ -58,7 +58,7 @@ theorem seeded_mass_past_future
     _ = H % P + P*((H/P) + 4*(X/P)) := by ring
     _ = seededPast D X K +
         3^K * (affineCarry D X K + 4*(X / 3^K)) := by
-      simp [seededPast, affineCarry, P, H]
+      rfl
 
 /-- Generic child carry realization, valid for an arbitrary initial child
 seed, not only seed zero. -/
@@ -148,6 +148,7 @@ theorem coupledOrbit_past_synchronization
   rw [hChild] at hParent
 
   unfold CoupledState.parentPast CoupledState.childPast
+  dsimp [st] at hParent ⊢
   ring_nf at hParent ⊢
   omega
 
