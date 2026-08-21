@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 jobs:
-  red-green:
+  full-gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -35,24 +35,98 @@ jobs:
           lake exe cache get
           lake build GSTTactic
 
-      - name: Compile repaired independent V2 stack
+      - name: Record exact production payload
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "ROOT_MONOLITH_LINES=$(wc -l < ErdosTernary2.lean)" | tee payload.log
+          echo 'ROOT_V2_FILES:' | tee -a payload.log
+          find . -maxdepth 1 -type f -name 'GST*.lean' -printf '%f\n' | sort | tee -a payload.log
+          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          echo "SNAPSHOT=$SNAP" | tee -a payload.log
+
+      - name: Mechanical repair historical scratch header
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/InformationDescentScratch.lean')
+          lines = p.read_text().splitlines(True)
+          changed = 0
+          for i in range(min(40, len(lines))):
+              if lines[i].startswith('/-'):
+                  lines[i] = '--' + lines[i][2:]
+                  changed += 1
+          p.write_text(''.join(lines))
+          print('HEADER_LINES_REPAIRED', changed)
+          PY
+
+      - name: Compile root V2 production stack
         timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export LEAN_PATH="$PWD:${LEAN_PATH:-}"
+          lake env lean -o GSTV2InfiniteCore.olean GSTV2InfiniteCore.lean
+          lake env lean -o GSTInfiniteCollision.olean GSTInfiniteCollision.lean
+          lake env lean -o GSTInfiniteBadTransport.olean GSTInfiniteBadTransport.lean
+          lake env lean -o GSTInfiniteCoupledLedger.olean GSTInfiniteCoupledLedger.lean
+          lake env lean -o GSTInfiniteGateTransport.olean GSTInfiniteGateTransport.lean
+
+      - name: Compile attached transport and information stack
+        timeout-minutes: 45
         shell: bash
         run: |
           set -euxo pipefail
           SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           export LEAN_PATH="$PWD:$SNAP:${LEAN_PATH:-}"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.olean" "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.olean" "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.olean" "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.olean" "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepEquationCollisionScratch.olean" "$SNAP/GSTGraphV2SleepEquationCollisionScratch.lean"
+          files=(
+            InformationDescentScratch.lean
+            GSTGraphV2InfiniteControlScratch.lean
+            GSTGraphV2InfiniteNaturalContradictionScratch.lean
+            GSTGraphV2InfiniteBigNDichotomyScratch.lean
+            GSTGraphV2InfiniteCardinalMasterScratch.lean
+            GSTGraphV2InfiniteElevenEquationMasterScratch.lean
+            GSTGraphV2InfiniteOriginWorldCollisionScratch.lean
+            GSTGraphV2SleepEquationLabScratch.lean
+            GSTGraphV2SleepBadLanguageDescentScratch.lean
+            GSTGraphV2SleepEquationCollisionScratch.lean
+            CanonicalCausalityScratch.lean
+            CanonicalOriginCutIntersectionScratch.lean
+            CanonicalOriginModulusScratch.lean
+            RetainedOffsetUStateScratch.lean
+            PrefixOneOriginPhaseRecursionScratch.lean
+            ResidualNullBranchReductionScratch.lean
+            ResidualNullTerminalScratch.lean
+            ResidualNullPrefixFourCutScratch.lean
+            CanonicalResidualInfiniteSupportBridgeScratch.lean
+            GSTGraphV2InfiniteWorldTowerScratch.lean
+            GSTGraphV2InfiniteExactWorldProjectionScratch.lean
+            GSTGraphV2InfiniteSixWorldCollisionScratch.lean
+            GSTGraphV2InfiniteOmegaLedgerMasterScratch.lean
+            InformationIterationScratch.lean
+            InformationForcingScratch.lean
+            LastGateTrapScratch.lean
+            CanonicalTrapScratch.lean
+            PhysicalSixBridgeGateScratch.lean
+            HorizontalTrapWidthDescentScratch.lean
+            CanonicalPhaseCrossingSurgeryScratch.lean
+            PhaseCycleInformationScratch.lean
+            InformationFluxScratch.lean
+            InformationGeometryScratch.lean
+          )
+          : > attached-stack.log
+          for f in "${files[@]}"; do
+            if [ ! -f "$SNAP/$f" ]; then
+              echo "MISSING $f" | tee -a attached-stack.log
+              exit 1
+            fi
+            echo "=== COMPILE $f ===" | tee -a attached-stack.log
+            lake env lean -o "$SNAP/${f%.lean}.olean" "$SNAP/$f" 2>&1 | tee -a attached-stack.log
+          done
 
-      - name: Compile green pre-Omega monolith
+      - name: Compile green 7326-line pre-Omega prefix
         timeout-minutes: 30
         shell: bash
         run: |
@@ -60,10 +134,12 @@ jobs:
           LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
           test -n "$LEGACY_LINE"
           CUT=$((LEGACY_LINE - 2))
+          echo "LEGACY_LINE=$LEGACY_LINE CUT=$CUT"
+          test "$CUT" -eq 7326
           head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
-      - name: GREEN - factor-three Omega bad-orbit reindex preserves information
+      - name: Kernel-check factor-three normalization
         timeout-minutes: 15
         shell: bash
         run: |
@@ -130,35 +206,42 @@ jobs:
 
           #print axioms gst_omega_bad_mul3_reindex_v2
           EOF
-          lake env lean InfiniteV2NormalizationGreen.lean | tee normalization.log
+          lake env lean InfiniteV2NormalizationGreen.lean 2>&1 | tee normalization.log
           ! grep -q 'sorryAx' normalization.log
 
-      - name: Apply physical one-error surgery
+      - name: Multi-edit full physical monolith surgery
         shell: bash
         run: |
           set -euxo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('ErdosTernary2.lean')
-          src=p.read_text()
-          DECL=re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
-          def span(text,name):
-              m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
-              if not m: raise SystemExit(f'missing declaration: {name}')
-              nxt=DECL.search(text,m.end())
-              return m.start(), (len(text) if nxt is None else nxt.start())
-          def remove(text,name):
-              a,b=span(text,name); return text[:a]+text[b:]
-          for name in [
-              'gst_omega_termination_s1','gst_omega_termination_s3',
-              'gst_omega_termination_stable','gst_residual_omega_termination',
+          p = Path('ErdosTernary2.lean')
+          src = p.read_text()
+          before = src.count('\n') + 1
+          DECL = re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
+          def span(text, name):
+              m = re.search(rf'(?m)^theorem\s+{re.escape(name)}\b', text)
+              if not m:
+                  raise SystemExit(f'missing declaration: {name}')
+              nxt = DECL.search(text, m.end())
+              return m.start(), len(text) if nxt is None else nxt.start()
+          def remove(text, name):
+              a, b = span(text, name)
+              return text[:a] + text[b:]
+          dead = [
+              'gst_omega_termination_s1',
+              'gst_omega_termination_s3',
+              'gst_omega_termination_stable',
+              'gst_residual_omega_termination',
               'gst_residual_navigation_lift',
               'gst_prefix_one_information_bad_descends_inline',
-              'gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
-              src=remove(src,name)
-          replacement=r'''
-/-- One V2 replacement for the deleted legacy Omega corridor. -/
+              'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
+          ]
+          for name in dead:
+              src = remove(src, name)
+          replacement = r'''
+/-- V2 replacement seam for the deleted legacy Omega corridor. -/
 theorem gst_v2_infinite_prefix_one_collision
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -194,70 +277,109 @@ theorem gst_prefix_one_navigation_lift :
   exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
 
 '''
-          a,b=span(src,'gst_prefix_one_navigation_lift')
-          src=src[:a]+replacement+src[b:]
-          for dead in ['theorem gst_omega_termination_s1','theorem gst_omega_termination_s3','theorem gst_omega_termination_stable','theorem gst_residual_omega_termination','theorem gst_residual_navigation_lift :','theorem gst_prefix_one_information_bad_descends_inline','theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
-              if dead in src: raise SystemExit(f'dead declaration survived: {dead}')
+          a, b = span(src, 'gst_prefix_one_navigation_lift')
+          src = src[:a] + replacement + src[b:]
+          for name in dead:
+              if re.search(rf'(?m)^theorem\s+{re.escape(name)}\b', src):
+                  raise SystemExit(f'dead declaration survived: {name}')
           p.write_text(src)
-          print('ONE_ERROR_SURGERY_APPLIED')
-          print('SURGERY_LINES',src.count('\n')+1)
+          after = src.count('\n') + 1
+          print('FULL_MONOLITH_BEFORE', before)
+          print('FULL_MONOLITH_AFTER', after)
+          print('PHYSICAL_SURGERY_APPLIED')
           PY
 
-      - name: Compile surgically rewritten monolith
-        id: compile
-        timeout-minutes: 45
+      - name: Compile full surgically rewritten physical monolith
+        timeout-minutes: 60
         shell: bash
         run: |
           set -o pipefail
-          lake env lean ErdosTernary2.lean 2>&1 | tee one-error.log
+          wc -l ErdosTernary2.lean | tee full-monolith.log
+          lake env lean -o ErdosTernary2.olean ErdosTernary2.lean 2>&1 | tee -a full-monolith.log
 
-      - name: Run exact comparator on green
-        id: comparator
-        timeout-minutes: 45
-        if: success()
+      - name: Compile production adapters against full monolith
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export LEAN_PATH="$PWD:${LEAN_PATH:-}"
+          lake env lean GSTPrefixOneInfiniteAdapterSmoke.lean
+          lake env lean GSTPrefixOneGateAdapterSmoke.lean
+          lake env lean GSTPrefixOneLatentGateSmoke.lean
+          lake env lean GSTPrefixOneLedgerSmoke.lean
+          lake env lean GSTInfiniteControlProductionSmoke.lean
+
+      - name: Full Lake build
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake build ErdosTernary2
+
+      - name: Exact zero-sorry comparator gate
+        timeout-minutes: 60
         shell: bash
         run: |
           set -euxo pipefail
           bash scripts/sorry_check.sh
           bash scripts/comparator.sh | tee comparator.log
-          grep -q 'Your solution is okay!' comparator.log
-          grep -q 'COMPARATOR RESULT: PASS' comparator.log
+          grep -Fq 'Your solution is okay!' comparator.log
+          grep -Fq 'COMPARATOR RESULT: PASS' comparator.log
 
-      - name: Self-report exact result
+      - name: Commit physical surgery only after complete green gate
+        if: success() && github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ErdosTernary2.lean ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/InformationDescentScratch.lean
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'proof: commit comparator-green V2 physical surgery [skip ci]'
+          git push origin HEAD:sol/gpt56-infinite-control-production
+
+      - name: Self-report exact gate result
         if: always() && github.event_name == 'push'
         shell: bash
         run: |
           set -euxo pipefail
           {
-            echo '# V2 One-Error Result'
+            echo '# V2 Full Production Gate Result'
             echo
             echo "Source commit: $GITHUB_SHA"
             echo
-            if [ -f normalization.log ]; then
-              echo '## Normalization'
-              echo '```text'
-              tail -20 normalization.log
-              echo '```'
-            fi
-            if [ -f one-error.log ]; then
-              echo '## Lean diagnostics'
-              echo '```text'
-              grep -E 'error:|unsolved goals|declaration uses|sorryAx|unknown identifier|type mismatch|application type mismatch' one-error.log | tail -120 || true
-              echo '```'
+            echo '## Payload'
+            echo '```text'
+            cat payload.log 2>/dev/null || true
+            echo '```'
+            echo
+            echo '## Attached stack tail'
+            echo '```text'
+            tail -80 attached-stack.log 2>/dev/null || true
+            echo '```'
+            echo
+            echo '## Normalization tail'
+            echo '```text'
+            tail -40 normalization.log 2>/dev/null || true
+            echo '```'
+            echo
+            echo '## Full monolith diagnostics'
+            echo '```text'
+            if [ -f full-monolith.log ]; then
+              grep -E 'error:|unsolved goals|declaration uses|sorryAx|unknown identifier|type mismatch|application type mismatch|omega could not prove' full-monolith.log | tail -160 || true
             else
-              echo 'No monolith Lean log was produced.'
+              echo 'Full monolith compile was not reached.'
             fi
-            if [ -f comparator.log ]; then
-              echo
-              echo '## Comparator'
-              echo '```text'
-              tail -40 comparator.log
-              echo '```'
-            fi
+            echo '```'
+            echo
+            echo '## Comparator'
+            echo '```text'
+            tail -60 comparator.log 2>/dev/null || true
+            echo '```'
           } > V2_ONE_ERROR_RESULT.md
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add V2_ONE_ERROR_RESULT.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'ci: report exact V2 one-error result [skip ci]'
+          git commit -m 'ci: report exact full V2 production gate [skip ci]'
           git push origin HEAD:sol/gpt56-infinite-control-production
