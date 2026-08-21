@@ -122,7 +122,98 @@ theorem gpt56_prefix_one_live_short_bigN_energy_packet
   exact ⟨q, N, hd2, hC, hNcases, hN, hbig, hwidth,
     by simpa [a, d] using hcode, hkernel, hseeded, henergy⟩
 
+/-- Fully resolved earliest-chord packet.  The NULL and GST+ alternatives
+retain their correlated first-BIG1 coordinate, exact three-world code, and
+signed kernel, so the downstream incidence argument has no symbolic BIG-N
+case left to reconstruct. -/
+theorem gpt56_prefix_one_live_exact_chord_energy_packet
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    let T := gstNavigationConstant (s+1) n
+    let A := 4^(3^s)
+    let X := c s / 3 + A*T
+    ∃ q,
+      ((gstDigit T q = 2 ∧
+        gstCarry T q = 0 ∧
+        GSTFirstBig1AtS
+          (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) 1 ∧
+        gstBig1ProjectedPathCodeS
+          (fun r => GSTPhysicalKernel.binaryColumnCarry T q r)
+          (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) 1 = 4 ∧
+        Finset.sum (Finset.range 1)
+          (fun r => GSTPhysicalKernel.signedKernelTwice
+            (GSTPhysicalKernel.binaryColumnCarry T q r)
+            (GSTPhysicalKernel.binaryColumnDigit T q r)) = (-14 : Int)) ∨
+       (gstDigit T q = 2 ∧
+        gstCarry T q = 3 ∧
+        GSTFirstBig1AtS
+          (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) 3 ∧
+        gstBig1ProjectedPathCodeS
+          (fun r => GSTPhysicalKernel.binaryColumnCarry T q r)
+          (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) 3 = 179 ∧
+        Finset.sum (Finset.range 3)
+          (fun r => GSTPhysicalKernel.signedKernelTwice
+            (GSTPhysicalKernel.binaryColumnCarry T q r)
+            (GSTPhysicalKernel.binaryColumnDigit T q r)) = 0)) ∧
+      GSTSeededAffineBadTrace 1 X ∧
+      4^(3^(s+1) * n) = 1 + 3^(s+2) * T := by
+  dsimp only
+  let T := gstNavigationConstant (s+1) n
+  let A := 4^(3^s)
+  let X := c s / 3 + A*T
+  obtain ⟨q, hchord⟩ :=
+    gpt56_first_navigation_gate_exact_binary_chord T hchild
+  let a : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnCarry T q r
+  let d : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnDigit T q r
+  have hpath : GSTInfiniteBridgePathS a d := by
+    simpa [a, d] using gpt56_binary_row_path T q
+  have hseeded : GSTSeededAffineBadTrace 1 X := by
+    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad
+    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by
+      rw [Nat.pow_one, c_mod3 s hs]
+    rw [hseed] at h
+    simpa [T, A, X] using h
+  have henergy : 4^(3^(s+1) * n) = 1 + 3^(s+2) * T := by
+    dsimp [T]
+    exact gst_navigation_decomposition (s+1) n (by omega)
+  rcases hchord with hnull | hplus
+  · have hd0 : d 0 ≠ 0 := by
+      have hd0eq : d 0 = 2 := by
+        dsimp [d]
+        simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hnull.1
+      omega
+    have hbig : GSTInformationEqualsBigNS d 1 := by
+      simpa [GSTInformationEqualsBigNS, d] using hnull.2.2
+    have hcode := gst_information_eq_bigN_exact_sum_equationS
+      a d hpath hd0 1 (by decide) hbig
+    have hkernel := gpt56_information_bigN_signed_kernel_exact
+      T q 1 hnull.1 (by decide) (by simpa [d] using hbig)
+    norm_num at hcode hkernel
+    refine ⟨q, Or.inl ⟨hnull.1, hnull.2.1, hnull.2.2, ?_, ?_⟩,
+      hseeded, henergy⟩
+    · simpa [a, d] using hcode
+    · exact hkernel
+  · have hd0 : d 0 ≠ 0 := by
+      have hd0eq : d 0 = 2 := by
+        dsimp [d]
+        simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hplus.1
+      omega
+    have hbig : GSTInformationEqualsBigNS d 3 := by
+      simpa [GSTInformationEqualsBigNS, d] using hplus.2.2
+    have hcode := gst_information_eq_bigN_exact_sum_equationS
+      a d hpath hd0 3 (by decide) hbig
+    have hkernel := gpt56_information_bigN_signed_kernel_exact
+      T q 3 hplus.1 (by decide) (by simpa [d] using hbig)
+    norm_num at hcode hkernel
+    refine ⟨q, Or.inr ⟨hplus.1, hplus.2.1, hplus.2.2, ?_, ?_⟩,
+      hseeded, henergy⟩
+    · simpa [a, d] using hcode
+    · exact hkernel
+
 #check gpt56_prefix_one_live_bigN_full_energy_packet
 #check gpt56_prefix_one_live_short_bigN_energy_packet
+#check gpt56_prefix_one_live_exact_chord_energy_packet
 #print axioms gpt56_prefix_one_live_bigN_full_energy_packet
 #print axioms gpt56_prefix_one_live_short_bigN_energy_packet
+#print axioms gpt56_prefix_one_live_exact_chord_energy_packet
