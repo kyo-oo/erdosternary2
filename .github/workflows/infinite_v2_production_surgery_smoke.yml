@@ -2,8 +2,15 @@ name: Infinite V2 Production Surgery Smoke
 
 on:
   push:
+    branches:
+      - sol/gpt56-infinite-control-production
+    paths-ignore:
+      - 'V2_ONE_ERROR_RESULT.md'
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   red-green:
@@ -99,6 +106,7 @@ theorem gst_prefix_one_navigation_lift :
           PY
 
       - name: Compile surgically rewritten monolith
+        id: compile
         timeout-minutes: 45
         shell: bash
         run: |
@@ -106,6 +114,7 @@ theorem gst_prefix_one_navigation_lift :
           lake env lean ErdosTernary2.lean 2>&1 | tee one-error.log
 
       - name: Run exact comparator on green
+        id: comparator
         timeout-minutes: 45
         if: success()
         shell: bash
@@ -115,3 +124,36 @@ theorem gst_prefix_one_navigation_lift :
           bash scripts/comparator.sh | tee comparator.log
           grep -q 'Your solution is okay!' comparator.log
           grep -q 'COMPARATOR RESULT: PASS' comparator.log
+
+      - name: Self-report exact result
+        if: always() && github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          {
+            echo '# V2 One-Error Result'
+            echo
+            echo "Source commit: $GITHUB_SHA"
+            echo
+            if [ -f one-error.log ]; then
+              echo '## Lean diagnostics'
+              echo '```text'
+              grep -E 'error:|unsolved goals|declaration uses|sorryAx|unknown identifier|type mismatch|application type mismatch' one-error.log | tail -120 || true
+              echo '```'
+            else
+              echo 'No Lean log was produced.'
+            fi
+            if [ -f comparator.log ]; then
+              echo
+              echo '## Comparator'
+              echo '```text'
+              tail -40 comparator.log
+              echo '```'
+            fi
+          } > V2_ONE_ERROR_RESULT.md
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add V2_ONE_ERROR_RESULT.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'ci: report exact V2 one-error result [skip ci]'
+          git push origin HEAD:sol/gpt56-infinite-control-production
