@@ -6,6 +6,7 @@ on:
       - sol/gpt56-infinite-control-production
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   smoke:
