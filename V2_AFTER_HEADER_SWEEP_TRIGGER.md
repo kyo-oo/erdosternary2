@@ -1,1 +1,1 @@
-Compile the production proof after the active-snapshot chronological-header sweep.
+Direct authoritative V2 gate trigger after workflow unification and import-graph repair.
