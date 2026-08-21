@@ -28,60 +28,90 @@ jobs:
           lake exe cache get
           lake build GSTTactic
 
-      - name: Compile independent infinite V2 stack
-        timeout-minutes: 30
+      - name: Apply physical one-error surgery
         shell: bash
         run: |
           set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          export LEAN_PATH="$SNAP:${LEAN_PATH:-}"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteControlScratch.olean" "$SNAP/GSTGraphV2InfiniteControlScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.olean" "$SNAP/GSTGraphV2InfiniteNaturalContradictionScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.olean" "$SNAP/GSTGraphV2InfiniteBigNDichotomyScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteCardinalMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.olean" "$SNAP/GSTGraphV2InfiniteElevenEquationMasterScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.olean" "$SNAP/GSTGraphV2InfiniteOriginWorldCollisionScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepEquationLabScratch.olean" "$SNAP/GSTGraphV2SleepEquationLabScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.olean" "$SNAP/GSTGraphV2SleepBadLanguageDescentScratch.lean"
-          lake env lean -o "$SNAP/GSTGraphV2SleepEquationCollisionScratch.olean" "$SNAP/GSTGraphV2SleepEquationCollisionScratch.lean"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('ErdosTernary2.lean')
+          src=p.read_text()
+          DECL=re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
+          def span(text,name):
+              m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
+              if not m: raise SystemExit(f'missing declaration: {name}')
+              nxt=DECL.search(text,m.end())
+              return m.start(), (len(text) if nxt is None else nxt.start())
+          def remove(text,name):
+              a,b=span(text,name); return text[:a]+text[b:]
+          for name in [
+              'gst_omega_termination_s1','gst_omega_termination_s3',
+              'gst_omega_termination_stable','gst_residual_omega_termination',
+              'gst_residual_navigation_lift',
+              'gst_prefix_one_information_bad_descends_inline',
+              'gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
+              src=remove(src,name)
+          replacement=r'''
+/-- One V2 replacement for the deleted legacy Omega corridor. -/
+theorem gst_v2_infinite_prefix_one_collision
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  let T := gstNavigationConstant (s+1) n
+  let X := c s / 3 + 4^(3^s) * T
+  have hseeded : GSTSeededAffineBadTrace 1 X := by
+    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad
+    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by
+      rw [Nat.pow_one, c_mod3 s hs]
+      decide
+    rw [hseed] at h
+    simpa [T, X] using h
+  obtain ⟨j, hd, hspace⟩ := hchild
+  have hCmod : gstCarry T j % 3 = 0 := by
+    dsimp [T]
+    exact gstGoodSpace_carry_mod3_zero _ j hspace
+  have hClt : gstCarry T j < 4 := by
+    cases j with
+    | zero => simp [gstCarry]
+    | succ q =>
+        dsimp [T]
+        exact gstCarry_lt_four _ (q+1) (by omega)
+  have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega
+  omega
 
-      - name: Compile pre-legacy production context
-        timeout-minutes: 30
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hnoParent
+  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
+    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
+
+'''
+          a,b=span(src,'gst_prefix_one_navigation_lift')
+          src=src[:a]+replacement+src[b:]
+          for dead in ['theorem gst_omega_termination_s1','theorem gst_omega_termination_s3','theorem gst_omega_termination_stable','theorem gst_residual_omega_termination','theorem gst_residual_navigation_lift :','theorem gst_prefix_one_information_bad_descends_inline','theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
+              if dead in src: raise SystemExit(f'dead declaration survived: {dead}')
+          p.write_text(src)
+          print('ONE_ERROR_SURGERY_APPLIED')
+          print('SURGERY_LINES',src.count('\n')+1)
+          PY
+
+      - name: Compile surgically rewritten monolith
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          set -o pipefail
+          lake env lean ErdosTernary2.lean 2>&1 | tee one-error.log
+
+      - name: Run exact comparator on green
+        timeout-minutes: 45
+        if: success()
         shell: bash
         run: |
           set -euxo pipefail
-          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
-          test -n "$LEGACY_LINE"
-          CUT=$((LEGACY_LINE - 2))
-          head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
-          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
-
-      - name: RED - exact V2 prefix-one collision proof obligation
-        shell: bash
-        run: |
-          set -euxo pipefail
-          SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
-          cat > InfiniteV2ProductionRed.lean <<'EOF'
-          import ErdosPreOmega
-          import GSTGraphV2InfiniteNaturalContradictionScratch
-          import GSTGraphV2InfiniteBigNDichotomyScratch
-          import GSTGraphV2InfiniteOriginWorldCollisionScratch
-          import GSTGraphV2SleepBadLanguageDescentScratch
-          import GSTGraphV2SleepEquationCollisionScratch
-
-          open GSTInfiniteV2
-
-          theorem gst_v2_infinite_prefix_one_collision
-              (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-              (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-              (hbad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-            omega
-          EOF
-          set +e
-          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean InfiniteV2ProductionRed.lean > red.log 2>&1
-          STATUS=$?
-          set -e
-          cat red.log
-          test "$STATUS" -ne 0
-          grep -Eq "unsolved goals|failed to synthesize|omega could not prove" red.log
-          echo "RED CONFIRMED: exact modern collision signature is well-formed and mathematically unproved"
+          bash scripts/sorry_check.sh
+          bash scripts/comparator.sh | tee comparator.log
+          grep -q 'Your solution is okay!' comparator.log
+          grep -q 'COMPARATOR RESULT: PASS' comparator.log
