@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+
 curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
 export PATH="$HOME/.elan/bin:$PATH"
 elan toolchain install leanprover/lean4:v4.33.0-rc2
@@ -16,33 +18,68 @@ test "$CUT" -eq 7326
 head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
 lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
+# Compile exactly the local dependency closure needed by the concrete physical
+# trap counterexample probe.  This is topological, never hand-ordered.
+export LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}"
 python3 - <<'PY'
 from pathlib import Path
 import re
+root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
+files = {p.stem:p for p in root.glob('*.lean')}
+seeds = ['InformationRegenerationScratch', 'StripConservationScratch']
+rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
+imports = {}
+for m,p in files.items():
+    names=[]
+    for line in rx.findall(p.read_text()):
+        line=line.split('--',1)[0].strip()
+        names.extend(line.split())
+    imports[m] = {x for x in names if x in files}
+need=set()
+def add(m):
+    if m in need: return
+    if m not in files: raise SystemExit('MISSING_LOCAL_MODULE '+m)
+    need.add(m)
+    for d in imports[m]: add(d)
+for s in seeds: add(s)
+indeg={m:0 for m in need}; out={m:set() for m in need}
+for m in need:
+    for d in imports[m] & need:
+        indeg[m]+=1; out[d].add(m)
+q=sorted(m for m,v in indeg.items() if v==0); order=[]
+while q:
+    m=q.pop(0); order.append(m)
+    for n in sorted(out[m]):
+        indeg[n]-=1
+        if indeg[n]==0: q.append(n); q.sort()
+if len(order)!=len(need): raise SystemExit('IMPORT_CYCLE')
+Path('.probe-order').write_text('\n'.join(order)+'\n')
+print('PROBE_DEPENDENCY_ORDER', order)
+PY
+while IFS= read -r mod; do
+  lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
+done < .probe-order
+bash scripts/probe_physical_trap_counterexample.sh
+
+# Comment-safe physical surgery.  Replace whole semantic corridors between
+# stable markers instead of guessing declaration spans; this preserves the
+# existing legacy quarantine comment and all later public declarations.
+python3 - <<'PY'
+from pathlib import Path
 p=Path('ErdosTernary2.lean')
 src=p.read_text()
-DECL=re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
-def span(text,name):
-    m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
-    if not m: raise SystemExit('MISSING_DECL '+name)
-    n=DECL.search(text,m.end())
-    return m.start(), len(text) if n is None else n.start()
-def remove(text,name):
-    a,b=span(text,name)
-    return text[:a]+text[b:]
-for name in [
-    'gst_omega_termination_s1',
-    'gst_omega_termination_s3',
-    'gst_omega_termination_stable',
-    'gst_residual_omega_termination',
-    'gst_residual_navigation_lift',
-    'gst_prefix_one_information_bad_descends_inline',
-    'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
-]:
-    src=remove(src,name)
-replacement=r'''
-/-- V2 replacement seam for the deleted legacy Omega corridor. -/
-theorem gst_v2_infinite_prefix_one_collision
+
+legacy_start = src.index('theorem gst_omega_termination_s1')
+legacy_marker = '\n/-\n/-- Numerical ceiling used to bound every power-of-four graph witness. -/'
+legacy_end = src.index(legacy_marker, legacy_start)
+# Keep the standalone /- opener: everything from the numerical-ceiling route
+# through its original matching -/ remains quarantined exactly as before.
+src = src[:legacy_start] + legacy_marker + src[legacy_end + len(legacy_marker):]
+
+inline_start = src.index('theorem gst_prefix_one_information_bad_descends_inline')
+two_wave_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
+inline_end = src.index(two_wave_marker, inline_start)
+replacement = r'''theorem gst_v2_infinite_prefix_one_collision
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
@@ -60,24 +97,30 @@ theorem gst_v2_infinite_prefix_one_collision
     exact gstGoodSpace_carry_mod3_zero _ j hspace
   have hClt : gstCarry T j < 4 := by
     cases j with
-    | zero => simp [gstCarry]
+    | zero => simp [gstCarry, Nat.mod_one]
     | succ q =>
         dsimp [T]
         exact gstCarry_lt_four _ (q+1) (by omega)
   have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega
   omega
 
+-- Public prefix-one theorem now consumes only the V2 collision interface.
 theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
   intro s n hs hn hchild
   by_contra hnoParent
-  have hBad := gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
+    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
   exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
 
 '''
-a,b=span(src,'gst_prefix_one_navigation_lift')
-src=src[:a]+replacement+src[b:]
+src = src[:inline_start] + replacement + src[inline_end:]
 p.write_text(src)
 print('SURGERY_LINES',src.count('\n')+1)
+# Mechanical guards: old production foundations must be gone as declarations,
+# but the quarantined archaeology may still contain their names as comments.
+for bad in ['theorem gst_omega_termination_s1','theorem gst_residual_navigation_lift :']:
+    if bad in src[:src.index('/-\n/-- Numerical ceiling')]:
+        raise SystemExit('LIVE_LEGACY_DECLARATION '+bad)
 PY
 
 lake env lean -o ErdosTernary2.olean ErdosTernary2.lean 2>&1 | tee surgery-first.log
