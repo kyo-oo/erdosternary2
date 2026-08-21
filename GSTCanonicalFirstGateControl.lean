@@ -1,5 +1,7 @@
 import ErdosPreOmega
 import GSTGraphV2InfiniteControlScratch
+import GSTGraphV2InfiniteBigNDichotomyScratch
+import GSTGraphV2PhysicalSignedKernelTelescopeScratch
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -14,6 +16,25 @@ earliest gate does: every lower row is a bad prefix, so the all-scale U
 potential controls the lower ternary residue.  In the carry-three case this
 gives the sharp inequality needed by the first three binary columns.
 -/
+
+/-- Exact quotient split for multiplying a natural while keeping its lower
+ternary residue and upper digit word separate. -/
+theorem gpt56_mul_ternary_quotient_split
+    (k R p : Nat) :
+    (k * R) / 3^p =
+      (k * (R % 3^p)) / 3^p + k * (R / 3^p) := by
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hsplit : R = 3^p * (R / 3^p) + R % 3^p :=
+    (Nat.div_add_mod R (3^p)).symm
+  calc
+    (k*R) / 3^p =
+        (k * (3^p * (R / 3^p) + R % 3^p)) / 3^p := by rw [← hsplit]
+    _ = (k * (R % 3^p) + 3^p * (k * (R / 3^p))) / 3^p := by
+      congr 1
+      rw [Nat.mul_add]
+      ac_rfl
+    _ = (k * (R % 3^p)) / 3^p + k * (R / 3^p) := by
+      rw [Nat.add_mul_div_left _ _ hp]
 
 /-- A Navigation witness has an earliest digit-two gate.  Below it the exact
 four-state bad language holds, and a carry-three earliest gate has lower
@@ -66,5 +87,106 @@ theorem gpt56_first_navigation_gate_u_control
     simpa [gstHandwrittenUChargeS] using hU
   omega
 
+/-- At the earliest Navigation gate, the literal physical binary path reaches
+its first BIG1 after exactly one or three x2 columns.  The result is global in
+the gate depth: no horizon is imposed on the Navigation graph. -/
+theorem gpt56_first_navigation_gate_short_big1
+    (R : Nat) (hnav : GSTNavigationWitness R) :
+    ∃ q N,
+      gstDigit R q = 2 ∧
+      (gstCarry R q = 0 ∨ gstCarry R q = 3) ∧
+      (N = 1 ∨ N = 3) ∧
+      GSTFirstBig1AtS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) N := by
+  obtain ⟨q, hd2, hC, _hbad, hbound⟩ :=
+    gpt56_first_navigation_gate_u_control R hnav
+  have hp : 0 < 3^q := Nat.pow_pos (by decide)
+  have hres : R % 3^q < 3^q := Nat.mod_lt _ hp
+  have hd0 : GSTPhysicalKernel.binaryColumnDigit R q 0 = 2 := by
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
+  rcases hC with hC0 | hC3
+  · have hC0' : (4 * (R % 3^q)) / 3^q = 0 := by
+      simpa [gstCarry] using hC0
+    have hrem4 : (4 * (R % 3^q)) % 3^q < 3^q := Nat.mod_lt _ hp
+    have hsplit4 :
+        4 * (R % 3^q) =
+          ((4 * (R % 3^q)) / 3^q) * 3^q +
+            (4 * (R % 3^q)) % 3^q :=
+      (Nat.div_add_mod (4 * (R % 3^q)) (3^q)).symm
+    rw [hC0'] at hsplit4
+    have h2lt : 2 * (R % 3^q) < 3^q := by omega
+    have hdiv2 : (2 * (R % 3^q)) / 3^q = 0 :=
+      Nat.div_eq_of_lt h2lt
+    have hq2 := gpt56_mul_ternary_quotient_split 2 R q
+    have hd1 : GSTPhysicalKernel.binaryColumnDigit R q 1 = 1 := by
+      unfold GSTPhysicalKernel.binaryColumnDigit
+      norm_num
+      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2]
+      norm_num
+    have hfirst : GSTFirstBig1AtS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 1 := by
+      constructor
+      · exact hd1
+      · intro j hj
+        have hj0 : j = 0 := by omega
+        subst j
+        omega
+    exact ⟨q, 1, hd2, Or.inl hC0, Or.inl rfl, hfirst⟩
+  · have hC3' : (4 * (R % 3^q)) / 3^q = 3 := by
+      simpa [gstCarry] using hC3
+    have hrem4 : (4 * (R % 3^q)) % 3^q < 3^q := Nat.mod_lt _ hp
+    have hsplit4 :
+        4 * (R % 3^q) =
+          ((4 * (R % 3^q)) / 3^q) * 3^q +
+            (4 * (R % 3^q)) % 3^q :=
+      (Nat.div_add_mod (4 * (R % 3^q)) (3^q)).symm
+    rw [hC3'] at hsplit4
+    have h4lo : 3 * 3^q ≤ 4 * (R % 3^q) := by omega
+    have h2lo : 3^q ≤ 2 * (R % 3^q) := by omega
+    have h2hi : 2 * (R % 3^q) < 2 * 3^q := by omega
+    have hdiv2lo : 1 ≤ (2 * (R % 3^q)) / 3^q :=
+      (Nat.le_div_iff_mul_le hp).2 (by simpa using h2lo)
+    have hdiv2hi : (2 * (R % 3^q)) / 3^q < 2 :=
+      (Nat.div_lt_iff_lt_mul hp).2 (by simpa using h2hi)
+    have hdiv2 : (2 * (R % 3^q)) / 3^q = 1 := by omega
+    have hq2 := gpt56_mul_ternary_quotient_split 2 R q
+    have hq4 := gpt56_mul_ternary_quotient_split 4 R q
+    have hq8 := gpt56_mul_ternary_quotient_split 8 R q
+    have hd1 : GSTPhysicalKernel.binaryColumnDigit R q 1 = 2 := by
+      unfold GSTPhysicalKernel.binaryColumnDigit
+      norm_num
+      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2]
+      norm_num
+    have hd2col : GSTPhysicalKernel.binaryColumnDigit R q 2 = 2 := by
+      unfold GSTPhysicalKernel.binaryColumnDigit
+      norm_num
+      rw [hq4, Nat.add_mod, Nat.mul_mod, hC3', hd2]
+      norm_num
+    have h8lo : 6 * 3^q ≤ 8 * (R % 3^q) := by omega
+    have h8hi : 8 * (R % 3^q) < 7 * 3^q := hbound hC3
+    have hdiv8lo : 6 ≤ (8 * (R % 3^q)) / 3^q :=
+      (Nat.le_div_iff_mul_le hp).2 (by simpa using h8lo)
+    have hdiv8hi : (8 * (R % 3^q)) / 3^q < 7 :=
+      (Nat.div_lt_iff_lt_mul hp).2 (by simpa using h8hi)
+    have hdiv8 : (8 * (R % 3^q)) / 3^q = 6 := by omega
+    have hd3 : GSTPhysicalKernel.binaryColumnDigit R q 3 = 1 := by
+      unfold GSTPhysicalKernel.binaryColumnDigit
+      norm_num
+      rw [hq8, Nat.add_mod, Nat.mul_mod, hdiv8, hd2]
+      norm_num
+    have hfirst : GSTFirstBig1AtS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 3 := by
+      constructor
+      · exact hd3
+      · intro j hj
+        have hjcases : j = 0 ∨ j = 1 ∨ j = 2 := by omega
+        rcases hjcases with h0 | h1 | h2
+        · subst j; omega
+        · subst j; omega
+        · subst j; omega
+    exact ⟨q, 3, hd2, Or.inr hC3, Or.inr rfl, hfirst⟩
+
 #check gpt56_first_navigation_gate_u_control
+#check gpt56_first_navigation_gate_short_big1
 #print axioms gpt56_first_navigation_gate_u_control
+#print axioms gpt56_first_navigation_gate_short_big1
