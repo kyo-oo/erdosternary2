@@ -1,1 +1,1 @@
-Direct authoritative V2 gate trigger after workflow unification and import-graph repair.
+Direct visible V2 gate trigger: compile root, complete production snapshot closure, full surgery, adapters, sorry-check, comparator.
