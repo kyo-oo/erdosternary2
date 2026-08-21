@@ -304,5 +304,7 @@ jobs:
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-first-gate-control.log
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTCanonicalEnergyControl.lean | tee canonical-energy-control.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' canonical-energy-control.log
+          LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean GSTPrefixOnePhaseIncidenceControl.lean | tee prefix-one-phase-incidence.log
+          ! grep -E 'sorryAx|declaration uses .*[Ss]orry' prefix-one-phase-incidence.log
           LEAN_PATH="$SNAP:$PWD:${LEAN_PATH:-}" lake env lean PrefixOneModularBladeSmokeV2.lean | tee modular-blade-v2.log
           ! grep -E 'sorryAx|declaration uses .*[Ss]orry' modular-blade-v2.log
