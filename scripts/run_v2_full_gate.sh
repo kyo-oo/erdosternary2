@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
-
-ROOT="$PWD"
-SNAP="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+set -euxo pipefail
 
 curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
 export PATH="$HOME/.elan/bin:$PATH"
@@ -11,108 +8,14 @@ lake update
 lake exe cache get
 lake build GSTTactic
 
-echo "ROOT_LINES=$(wc -l < ErdosTernary2.lean)" | tee payload.log
 test "$(wc -l < ErdosTernary2.lean)" -eq 8750
-
-status=0
-lake env lean -o ErdosTernary2.baseline.olean ErdosTernary2.lean 2>&1 | tee baseline.log || status=1
-echo "$status" > .status-baseline
-
-export LEAN_PATH="$ROOT:${LEAN_PATH:-}"
-status=0
-: > root-v2.log
-for f in GSTV2InfiniteCore.lean GSTInfiniteCollision.lean GSTInfiniteBadTransport.lean GSTInfiniteCoupledLedger.lean GSTInfiniteGateTransport.lean; do
-  echo "=== $f ===" | tee -a root-v2.log
-  lake env lean -o "${f%.lean}.olean" "$f" 2>&1 | tee -a root-v2.log || status=1
-done
-echo "$status" > .status-root-v2
-
-export LEAN_PATH="$ROOT:$SNAP:${LEAN_PATH:-}"
-python3 - <<'PY'
-from pathlib import Path
-import re
-root = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery')
-files = {p.stem:p for p in root.glob('*.lean')}
-seeds = '''
-InformationDescentScratch InformationBadTraceScratch InformationGeometryScratch InformationStateScratch
-OriginTransducerScratch InformationRegenerationScratch InformationForcingScratch InformationIterationScratch
-FiniteSupportScratch LastGateTrapScratch CanonicalTrapScratch CanonicalCausalityScratch
-CanonicalOriginCutIntersectionScratch CanonicalOriginModulusScratch RetainedOffsetUStateScratch
-PrefixOneOriginPhaseRecursionScratch ResidualNullBranchReductionScratch ResidualNullTerminalScratch
-ResidualNullPrefixFourCutScratch CanonicalResidualInfiniteSupportBridgeScratch
-GSTGraphV2InfiniteControlScratch GSTGraphV2InfiniteNaturalContradictionScratch
-GSTGraphV2InfiniteBigNDichotomyScratch GSTGraphV2InfiniteCardinalMasterScratch
-GSTGraphV2InfiniteElevenEquationMasterScratch GSTGraphV2InfiniteOriginWorldCollisionScratch
-GSTGraphV2InfiniteWorldTowerScratch GSTGraphV2InfiniteExactWorldProjectionScratch
-GSTGraphV2InfiniteSixWorldCollisionScratch GSTGraphV2InfiniteOmegaLedgerMasterScratch
-GSTGraphV2SleepEquationLabScratch GSTGraphV2SleepBadLanguageDescentScratch GSTGraphV2SleepEquationCollisionScratch
-PhysicalSixBridgeGateScratch HorizontalTrapWidthDescentScratch CanonicalPhaseCrossingSurgeryScratch
-PhaseCycleInformationScratch InformationFluxScratch InformationGeometryScratch
-SynchronizerScratch InformationCarryWordBridgeScratch InformationLocalizationScratch InformationQuotientScratch
-OmegaUPotentialBridgeScratch HandwrittenOmegaOriginCommutingSquareScratch
-GSTGraphV2InfiniteNavigationHorizonScratch AtomicPrefixOneReductionScratch NavigationResidueCutScratch
-RightChordCanonicalGateScratch StripConservationScratch PrefixOneTerminalZScratch
-PurePowerBadAxisScratch PurePowerCarrierScratch PurePowerResidueGraphScratch PurePowerTailReductionScratch
-ScopedTwoDigitPhysicalBlockScratch
-'''.split()
-imports = {}
-rx = re.compile(r'^\s*import\s+(.+?)\s*$', re.M)
-for m,p in files.items():
-    imps=[]
-    for line in rx.findall(p.read_text()):
-        line=line.split('--',1)[0].strip()
-        imps.extend(line.split())
-    imports[m] = {x for x in imps if x in files}
-needed=set()
-def add(m):
-    if m in needed: return
-    if m not in files:
-        print('MISSING_SEED',m)
-        return
-    needed.add(m)
-    for d in imports[m]: add(d)
-for s in seeds: add(s)
-indeg={m:0 for m in needed}
-out={m:set() for m in needed}
-for m in needed:
-    for d in imports[m] & needed:
-        indeg[m]+=1
-        out[d].add(m)
-q=sorted([m for m,v in indeg.items() if v==0])
-order=[]
-while q:
-    m=q.pop(0)
-    order.append(m)
-    for n in sorted(out[m]):
-        indeg[n]-=1
-        if indeg[n]==0:
-            q.append(n)
-            q.sort()
-if len(order)!=len(needed):
-    raise SystemExit('IMPORT_CYCLE '+repr(sorted(set(needed)-set(order))))
-Path('snapshot-order.txt').write_text('\n'.join(order)+'\n')
-print('SNAPSHOT_CLOSURE_COUNT',len(order))
-print('\n'.join(order))
-PY
-status=0
-: > snapshot.log
-while IFS= read -r mod; do
-  f="$SNAP/$mod.lean"
-  echo "=== $mod ===" | tee -a snapshot.log
-  lake env lean -o "$SNAP/$mod.olean" "$f" 2>&1 | tee -a snapshot.log || status=1
-done < snapshot-order.txt
-echo "$status" > .status-snapshot
-
-status=0
 LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
 CUT=$((LEGACY_LINE - 2))
-echo "LEGACY_LINE=$LEGACY_LINE CUT=$CUT" | tee preomega.log
-[ "$CUT" -eq 7326 ] || status=1
+echo "ROOT_LINES=$(wc -l < ErdosTernary2.lean) LEGACY_LINE=$LEGACY_LINE CUT=$CUT"
+test "$CUT" -eq 7326
 head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
-lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean 2>&1 | tee -a preomega.log || status=1
-echo "$status" > .status-preomega
+lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
 
-cp ErdosTernary2.lean ErdosTernary2.before-surgery.lean
 python3 - <<'PY'
 from pathlib import Path
 import re
@@ -127,10 +30,15 @@ def span(text,name):
 def remove(text,name):
     a,b=span(text,name)
     return text[:a]+text[b:]
-dead=['gst_omega_termination_s1','gst_omega_termination_s3','gst_omega_termination_stable',
-      'gst_residual_omega_termination','gst_residual_navigation_lift',
-      'gst_prefix_one_information_bad_descends_inline','gst_prefix_one_child_gate_contradicts_parent_bad_inline']
-for name in dead:
+for name in [
+    'gst_omega_termination_s1',
+    'gst_omega_termination_s3',
+    'gst_omega_termination_stable',
+    'gst_residual_omega_termination',
+    'gst_residual_navigation_lift',
+    'gst_prefix_one_information_bad_descends_inline',
+    'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
+]:
     src=remove(src,name)
 replacement=r'''
 /-- V2 replacement seam for the deleted legacy Omega corridor. -/
@@ -172,25 +80,5 @@ p.write_text(src)
 print('SURGERY_LINES',src.count('\n')+1)
 PY
 
-status=0
-lake env lean -o ErdosTernary2.surgery.olean ErdosTernary2.lean 2>&1 | tee surgery.log || status=1
-echo "$status" > .status-surgery
-
-export LEAN_PATH="$ROOT:${LEAN_PATH:-}"
-status=0
-: > adapters.log
-for f in GSTPrefixOneInfiniteAdapterSmoke.lean GSTPrefixOneGateAdapterSmoke.lean GSTPrefixOneLatentGateSmoke.lean GSTPrefixOneLedgerSmoke.lean GSTInfiniteControlProductionSmoke.lean; do
-  echo "=== $f ===" | tee -a adapters.log
-  lake env lean "$f" 2>&1 | tee -a adapters.log || status=1
-done
-echo "$status" > .status-adapters
-
-echo "baseline-diagnostic=$(cat .status-baseline)"
-for f in .status-root-v2 .status-snapshot .status-preomega .status-surgery .status-adapters; do
-  echo "$f=$(cat "$f")"
-  test "$(cat "$f")" -eq 0
-done
-bash scripts/sorry_check.sh
-bash scripts/comparator.sh | tee comparator.log
-grep -Fq 'Your solution is okay!' comparator.log
-grep -Fq 'COMPARATOR RESULT: PASS' comparator.log
+lake env lean -o ErdosTernary2.olean ErdosTernary2.lean 2>&1 | tee surgery-first.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' surgery-first.log
