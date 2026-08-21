@@ -57,9 +57,16 @@ while IFS= read -r mod; do
   lake env lean -o "$SNAP/$mod.olean" "$SNAP/$mod.lean"
 done < .handwritten-order
 
+lake env lean GSTHandwrittenPhysicalNoBig1.lean 2>&1 | tee handwritten-physical-nobig1.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-physical-nobig1.log
+grep -Fq "'gpt56_binary_residue_gap_doubles' depends on axioms:" handwritten-physical-nobig1.log
+grep -Fq "'gpt56_physical_noBig1_impossible' depends on axioms:" handwritten-physical-nobig1.log
+grep -Fq "'gpt56_physical_path_forces_first_big1' depends on axioms:" handwritten-physical-nobig1.log
+
 lake env lean GSTHandwrittenPrefixOneProductionProbe.lean 2>&1 | tee handwritten-production-probe.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-production-probe.log
 grep -Fq "'gpt56_handwritten_operator_on_navigation_child' depends on axioms:" handwritten-production-probe.log
 grep -Fq "'gpt56_physical_binary_row_is_infinite_bridge' depends on axioms:" handwritten-production-probe.log
 grep -Fq "'gpt56_child_happy_gate_micro_dichotomy' depends on axioms:" handwritten-production-probe.log
+grep -Fq "'gpt56_child_happy_gate_physical_two_case_quantitative' depends on axioms:" handwritten-production-probe.log
 grep -Fq "'gpt56_last_gate_handwritten_boundary_dichotomy' depends on axioms:" handwritten-production-probe.log
