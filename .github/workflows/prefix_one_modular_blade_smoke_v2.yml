@@ -155,7 +155,6 @@ jobs:
             have hmod := congrArg (fun z : Nat => z % 73) heq
             have hleft : (1 + 4*X) % 73 = 24 := by
               rw [Nat.add_mod, Nat.mul_mod, hX]
-              decide
             rw [hleft] at hmod
             have hraise := congrArg (fun z : Nat => z^6 % 73) hmod
             have hL : 24^6 % 73 = 72 := by decide
@@ -168,6 +167,23 @@ jobs:
               simp
             rw [hL, hR] at hraise
             omega
+
+          /-- Modular subtraction blade with the positivity needed to keep
+          natural subtraction honest.  This is the missing normalization in
+          the former interval-case proof: equal residues may be scaled and
+          then have thirteen removed because both scaled representatives are
+          already at least thirteen. -/
+          theorem gpt56_scaled_sub_mod271_v2
+              (a k : Nat) (hk : a % 271 = k) (hkpos : 1 ≤ k) :
+              (256*a - 13) % 271 = (256*k - 13) % 271 := by
+            have hdecomp := Nat.mod_add_div a 271
+            rw [hk] at hdecomp
+            have hrearr :
+                256*a - 13 =
+                  (256*k - 13) + 271 * (256 * (a / 271)) := by
+              omega
+            rw [hrearr, Nat.add_mod, Nat.mul_mod]
+            simp
 
           theorem gpt56_prefix_one_noBig1_impossible_ge2_v2
               (s n : Nat) (hs : 2 ≤ s)
@@ -223,10 +239,10 @@ jobs:
             have hbase :
                 (256 * 4^(9*n) - 13) % 271 =
                   (256 * (4^(9*q) % 271) - 13) % 271 := by
-              interval_cases q
-              all_goals norm_num at hq3
-              all_goals norm_num [Nat.pow_mod] at h4reduce ⊢
-              all_goals omega
+              apply gpt56_scaled_sub_mod271_v2
+              · exact h4reduce
+              · interval_cases q <;>
+                  norm_num [Nat.pow_mod] at hq3 ⊢
             rw [Nat.pow_mod] at hbad
             rw [hbase] at hbad
             interval_cases q
@@ -244,14 +260,13 @@ jobs:
             have hL : (27 * 9^r)^15 % 271 = 270 := by
               have h27 : 27^15 % 271 = 270 := by decide
               have h9 : (9^r)^15 % 271 = 1 := by
-                rw [← Nat.pow_mod, ← Nat.pow_mul]
+                rw [← Nat.pow_mul]
                 have hcomm : r*15 = 15*r := by omega
                 rw [hcomm, Nat.pow_mul, Nat.pow_mod]
                 have hcycle : 9^15 % 271 = 1 := by decide
                 rw [hcycle]
                 simp
               rw [Nat.mul_pow, Nat.mul_mod, h27, h9]
-              decide
             have hR : ((256 * 4^(9*n) - 13)^15) % 271 ≠ 270 :=
               gpt56_s1_rhs15_not270_mod271_v2 n hn3
             rw [hL] at hmod
