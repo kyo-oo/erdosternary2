@@ -87,17 +87,21 @@ theorem gpt56_first_navigation_gate_u_control
     simpa [gstHandwrittenUChargeS] using hU
   omega
 
-/-- At the earliest Navigation gate, the literal physical binary path reaches
-its first BIG1 after exactly one or three x2 columns.  The result is global in
-the gate depth: no horizon is imposed on the Navigation graph. -/
-theorem gpt56_first_navigation_gate_short_big1
+/-- At the earliest Navigation gate, the two possible Happy spaces determine
+the complete short physical chord: NULL reaches its first BIG1 after one x2
+column, while GST+ reaches its first BIG1 after three.  The carry/chord
+correlation is retained rather than projected to two independent disjunctions. -/
+theorem gpt56_first_navigation_gate_exact_binary_chord
     (R : Nat) (hnav : GSTNavigationWitness R) :
-    ∃ q N,
-      gstDigit R q = 2 ∧
-      (gstCarry R q = 0 ∨ gstCarry R q = 3) ∧
-      (N = 1 ∨ N = 3) ∧
-      GSTFirstBig1AtS
-        (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) N := by
+    ∃ q,
+      (gstDigit R q = 2 ∧
+        gstCarry R q = 0 ∧
+        GSTFirstBig1AtS
+          (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 1) ∨
+      (gstDigit R q = 2 ∧
+        gstCarry R q = 3 ∧
+        GSTFirstBig1AtS
+          (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 3) := by
   obtain ⟨q, hd2, hC, _hbad, hbound⟩ :=
     gpt56_first_navigation_gate_u_control R hnav
   have hp : 0 < 3^q := Nat.pow_pos (by decide)
@@ -133,7 +137,7 @@ theorem gpt56_first_navigation_gate_short_big1
         subst j
         change GSTPhysicalKernel.binaryColumnDigit R q 0 ≠ 1
         omega
-    exact ⟨q, 1, hd2, Or.inl hC0, Or.inl rfl, hfirst⟩
+    exact ⟨q, Or.inl ⟨hd2, hC0, hfirst⟩⟩
   · have hC3' : (4 * (R % 3^q)) / 3^q = 3 := by
       simpa [gstCarry] using hC3
     have hrem4 : (4 * (R % 3^q)) % 3^q < 3^q := Nat.mod_lt _ hp
@@ -189,9 +193,25 @@ theorem gpt56_first_navigation_gate_short_big1
         · subst j
           change GSTPhysicalKernel.binaryColumnDigit R q 2 ≠ 1
           omega
-    exact ⟨q, 3, hd2, Or.inr hC3, Or.inr rfl, hfirst⟩
+    exact ⟨q, Or.inr ⟨hd2, hC3, hfirst⟩⟩
+
+/-- Projected short-BIG1 form used by the canonical energy packet. -/
+theorem gpt56_first_navigation_gate_short_big1
+    (R : Nat) (hnav : GSTNavigationWitness R) :
+    ∃ q N,
+      gstDigit R q = 2 ∧
+      (gstCarry R q = 0 ∨ gstCarry R q = 3) ∧
+      (N = 1 ∨ N = 3) ∧
+      GSTFirstBig1AtS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) N := by
+  obtain ⟨q, hnull | hplus⟩ :=
+    gpt56_first_navigation_gate_exact_binary_chord R hnav
+  · exact ⟨q, 1, hnull.1, Or.inl hnull.2.1, Or.inl rfl, hnull.2.2⟩
+  · exact ⟨q, 3, hplus.1, Or.inr hplus.2.1, Or.inr rfl, hplus.2.2⟩
 
 #check gpt56_first_navigation_gate_u_control
+#check gpt56_first_navigation_gate_exact_binary_chord
 #check gpt56_first_navigation_gate_short_big1
 #print axioms gpt56_first_navigation_gate_u_control
+#print axioms gpt56_first_navigation_gate_exact_binary_chord
 #print axioms gpt56_first_navigation_gate_short_big1
