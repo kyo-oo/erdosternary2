@@ -1,0 +1,66 @@
+name: V2 One-Error Visible Surgery
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  surgery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+      - name: Resolve dependencies
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+      - name: Remove legacy Omega corridor and inject one V2 seam
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('ErdosTernary2.lean')
+          src=p.read_text()
+          def remove_decl(text,name):
+              m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
+              if not m: raise SystemExit(f'missing declaration: {name}')
+              nxt=re.search(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]',text[m.end():])
+              if not nxt: raise SystemExit(f'cannot find end: {name}')
+              e=m.end()+nxt.start()
+              return text[:m.start()]+text[e:]
+          for name in [
+            'gst_omega_termination_s1','gst_omega_termination_s3',
+            'gst_omega_termination_stable','gst_residual_omega_termination',
+            'gst_residual_navigation_lift',
+            'gst_prefix_one_information_bad_descends_inline',
+            'gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
+              src=remove_decl(src,name)
+          marker='theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by'
+          seam='''/-- Single V2 replacement seam. -/\ntheorem gst_v2_infinite_prefix_one_collision\n    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)\n    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))\n    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by\n  let T := gstNavigationConstant (s+1) n\n  let X := c s / 3 + 4^(3^s) * T\n  have hseeded : GSTSeededAffineBadTrace 1 X := by\n    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad\n    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by\n      rw [Nat.pow_one, c_mod3 s hs]\n      decide\n    rw [hseed] at h\n    simpa [T, X] using h\n  obtain ⟨j, hd, hspace⟩ := hchild\n  have hCmod : gstCarry T j % 3 = 0 := by\n    dsimp [T]\n    exact gstGoodSpace_carry_mod3_zero _ j hspace\n  have hClt : gstCarry T j < 4 := by\n    cases j with\n    | zero => simp [gstCarry]\n    | succ q =>\n        dsimp [T]\n        exact gstCarry_lt_four _ (q+1) (by omega)\n  have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega\n  omega\n\n'''
+          if marker not in src: raise SystemExit('prefix-one marker missing')
+          src=src.replace(marker,seam+marker,1)
+          old='''theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by\n  intro s n hs hn hchild\n  by_contra hnoParent\n  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=\n    gst_prefix_one_omega_bad_of_no_parent_navigation_inline\n      s n hs hnoParent\n  let data := gst_prefix_one_omegaData s n hs hchild\n  exact gst_prefix_one_child_gate_contradicts_parent_bad_inline\n    s n hs hn data hBad'''
+          new='''theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by\n  intro s n hs hn hchild\n  by_contra hnoParent\n  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=\n    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent\n  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad'''
+          if old not in src: raise SystemExit('old prefix-one body missing')
+          src=src.replace(old,new,1)
+          p.write_text(src)
+          print('SURGERY_LINES',src.count('\n')+1)
+          PY
+      - name: Compile surgically rewritten monolith
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          set -o pipefail
+          lake env lean ErdosTernary2.lean 2>&1 | tee v2-visible.log
