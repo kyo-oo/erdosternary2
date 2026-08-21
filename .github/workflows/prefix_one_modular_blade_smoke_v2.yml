@@ -241,12 +241,13 @@ jobs:
                   (256 * (4^(9*q) % 271) - 13) % 271 := by
               apply gpt56_scaled_sub_mod271_v2
               · exact h4reduce
-              · interval_cases q <;>
-                  norm_num [Nat.pow_mod] at hq3 ⊢
+              · interval_cases q <;> norm_num at hq3
+                all_goals norm_num [Nat.pow_mod]
             rw [Nat.pow_mod] at hbad
             rw [hbase] at hbad
             interval_cases q
-            all_goals norm_num at hq3 hbad
+            all_goals norm_num at hq3
+            all_goals norm_num at hbad
 
           theorem gpt56_s1_noBig1_impossible_v2
               (n : Nat) (hn3 : n % 3 ≠ 0)
