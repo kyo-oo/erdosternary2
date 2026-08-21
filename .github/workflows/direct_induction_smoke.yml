@@ -48,20 +48,21 @@ jobs:
 
           p = Path('ErdosTernary2.lean')
           src = p.read_text()
+          DECL = re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
 
-          def remove_decl(text: str, name: str) -> str:
-              pat = re.compile(rf'(?m)^theorem\s+{re.escape(name)}\b')
-              m = pat.search(text)
+          def span(text, name):
+              m = re.search(rf'(?m)^theorem\s+{re.escape(name)}\b', text)
               if not m:
                   raise SystemExit(f'missing declaration: {name}')
-              start = m.start()
-              nxt = re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]').search(text, m.end())
+              nxt = DECL.search(text, m.end())
               if not nxt:
-                  raise SystemExit(f'cannot find end of declaration: {name}')
-              return text[:start] + text[nxt.start():]
+                  return m.start(), len(text)
+              return m.start(), nxt.start()
 
-          # Delete the three fake termination obligations and every direct adapter
-          # that depends on them.  They are not allowed to survive in the candidate.
+          def remove(text, name):
+              a, b = span(text, name)
+              return text[:a] + text[b:]
+
           for name in [
               'gst_omega_termination_s1',
               'gst_omega_termination_s3',
@@ -71,19 +72,11 @@ jobs:
               'gst_prefix_one_information_bad_descends_inline',
               'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
           ]:
-              src = remove_decl(src, name)
+              src = remove(src, name)
 
-          # One and only one replacement target.  This is deliberately a RED proof:
-          # all exact hypotheses are constructed, then Lean is left with the genuine
-          # canonical collision goal rather than three obsolete Omega cases.
-          marker = 'theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by'
-          if marker not in src:
-              raise SystemExit('public prefix-one marker not found')
-
-          seam = r'''
+          replacement = r'''
 /-- ONE-ERROR V2 SEAM: child Navigation plus an all-depth canonical parent-bad
-    orbit cannot coexist.  This theorem replaces all three legacy Omega
-    termination implementations. -/
+    orbit cannot coexist. -/
 theorem gst_v2_infinite_prefix_one_collision
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -108,34 +101,19 @@ theorem gst_v2_infinite_prefix_one_collision
         dsimp [T]
         exact gstCarry_lt_four _ (q+1) (by omega)
   have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega
-  -- RED: everything above is kernel-derived.  The sole remaining theorem is
-  -- the canonical V2 information collision itself.
   omega
 
-'''
-          src = src.replace(marker, seam + marker, 1)
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hnoParent
+  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
+    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
 
-          old_body = r'''theorem gst_prefix_one_navigation_lift :
-    GSTPrefixOneNavigationLift := by
-  intro s n hs hn hchild
-  by_contra hnoParent
-  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
-    gst_prefix_one_omega_bad_of_no_parent_navigation_inline
-      s n hs hnoParent
-  let data := gst_prefix_one_omegaData s n hs hchild
-  exact gst_prefix_one_child_gate_contradicts_parent_bad_inline
-    s n hs hn data hBad'''
-          new_body = r'''theorem gst_prefix_one_navigation_lift :
-    GSTPrefixOneNavigationLift := by
-  intro s n hs hn hchild
-  by_contra hnoParent
-  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
-    gst_prefix_one_omega_bad_of_no_parent_navigation_inline
-      s n hs hnoParent
-  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad'''
-          if old_body not in src:
-              raise SystemExit('old public prefix-one body not found')
-          src = src.replace(old_body, new_body, 1)
+'''
+          a, b = span(src, 'gst_prefix_one_navigation_lift')
+          src = src[:a] + replacement + src[b:]
 
           for dead in [
               'theorem gst_omega_termination_s1',
@@ -147,7 +125,8 @@ theorem gst_v2_infinite_prefix_one_collision
               'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline',
           ]:
               if dead in src:
-                  raise SystemExit(f'dead declaration survived surgery: {dead}')
+                  raise SystemExit(f'dead declaration survived: {dead}')
+
           p.write_text(src)
           print('ONE_ERROR_V2_SURGERY_APPLIED')
           print('lines', src.count('\n') + 1)
@@ -181,7 +160,7 @@ theorem gst_v2_infinite_prefix_one_collision
           # SOL V2 ONE-ERROR SURGERY — GREEN
 
           Three legacy Omega termination bodies: removed.
-          Circular prefix-one helper: removed.
+          Circular prefix-one helpers: removed.
           V2 canonical collision seam: kernel closed.
           Full monolith: PASS.
           sorry_check: PASS.
