@@ -70,7 +70,7 @@ theorem coupledOrbit_childCarry_affine_exact
   intro K
   induction K with
   | zero =>
-      simp [coupledOrbit, affineCarry]
+      simp [coupledOrbit, affineCarry, Nat.mod_one]
   | succ K ih =>
       rw [coupledOrbit]
       change cellNextCarry (coupledOrbit A initial K).childCarry

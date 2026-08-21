@@ -67,7 +67,7 @@ theorem coupledOrbit_parentSeed_exact
   intro K
   induction K with
   | zero =>
-      simp [coupledOrbit, affineCarry]
+      simp [coupledOrbit, affineCarry, Nat.mod_one]
   | succ K ih =>
       rw [coupledOrbit]
       change
