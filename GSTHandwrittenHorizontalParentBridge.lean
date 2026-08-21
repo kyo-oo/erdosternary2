@@ -58,17 +58,26 @@ theorem gpt56_no_big1_before_parent_endpoint_forces_big2
   have hd0 : d 0 ≠ 0 := by omega
   obtain ⟨N, hfirst⟩ := gpt56_physical_path_forces_first_big1 T q (by
     simpa [d] using hd0)
-  have hN : 1 ≤ N := by
-    by_contra hN0
-    have hNz : N = 0 := by omega
+  have hfirstRaw :
+      GSTPhysicalKernel.binaryColumnDigit T q N = 1 ∧
+      ∀ j, j < N → GSTPhysicalKernel.binaryColumnDigit T q j ≠ 1 := by
+    simpa [GSTFirstBig1AtS] using hfirst
+  have hNne : N ≠ 0 := by
+    intro hN0
     subst N
-    have hfirst0 := hfirst.1
+    have hd0raw : GSTPhysicalKernel.binaryColumnDigit T q 0 = 2 := by
+      simpa [d] using hd0eq
+    have hbad : (2 : Nat) = 1 := by
+      calc
+        2 = GSTPhysicalKernel.binaryColumnDigit T q 0 := hd0raw.symm
+        _ = 1 := hfirstRaw.1
     omega
+  have hN : 1 ≤ N := Nat.one_le_iff_ne_zero.mpr hNne
   have hKlt : K < N := by
     by_contra hnot
     have hNle : N ≤ K := by omega
     have hneq := hno N (by simpa [K] using hNle)
-    exact hneq hfirst.1
+    exact hneq hfirstRaw.1
   have hbig2 := gst_before_first_big1_all_big2S
     a d hpath hd0 N hN (by simpa [d] using hfirst) K hKlt
   simpa [d, K] using hbig2
