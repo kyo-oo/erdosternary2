@@ -49,7 +49,7 @@ theorem affineCarry_forward (D X k : Nat) :
 theorem naturalCarry_forward (Y k : Nat) :
     naturalCarry Y (k+1) =
       cellNextCarry (naturalCarry Y k) (digit Y k) := by
-  simpa [naturalCarry] using affineCarry_forward 0 Y k
+  simpa [naturalCarry, affineCarry] using affineCarry_forward 0 Y k
 
 /-- Exact ternary digit reindexing. -/
 theorem digit_shift (Y q j : Nat) :
@@ -190,13 +190,15 @@ theorem coupledStep_parentWord_div_three
     dsimp [r]
     have h := Nat.mod_add_div st.childTail 3
     omega
-  rw [hY]
-  have hshape :
-      st.parentOffset + A * (r + 3 * (st.childTail / 3)) =
-        (st.parentOffset + A*r) + 3*(A*(st.childTail/3)) := by ring
-  rw [hshape]
   have h3 : 0 < (3:Nat) := by decide
-  rw [Nat.add_mul_div_left _ _ h3]
+  calc
+    (st.parentOffset + A*r) / 3 + A*(st.childTail/3) =
+        ((st.parentOffset + A*r) + 3*(A*(st.childTail/3))) / 3 := by
+      rw [Nat.add_mul_div_left _ _ h3]
+    _ = (st.parentOffset + A*st.childTail) / 3 := by
+      congr 1
+      rw [hY]
+      ring
 
 /-- The all-Nat coupled orbit.  `K` is an observation depth, not a termination
 bound. -/
@@ -252,7 +254,7 @@ theorem coupledOrbit_childCarry_exact
   intro K
   induction K with
   | zero =>
-      simp [coupledOrbit, naturalCarry, hC0]
+      simp [coupledOrbit, naturalCarry, hC0, Nat.mod_one]
   | succ K ih =>
       rw [coupledOrbit]
       change cellNextCarry (coupledOrbit A initial K).childCarry
