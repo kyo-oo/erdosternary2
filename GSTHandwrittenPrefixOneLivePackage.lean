@@ -5,10 +5,10 @@ set_option maxHeartbeats 10000000
 
 open GSTInfiniteV2
 
-/-- Exact live prefix-one package.  A child Navigation witness is converted to
+/-- Exact live prefix-one package. A child Navigation witness is converted to
 its literal digit/carry gate and then to the physical binary first-BIG1
-DESTROY boundary.  Simultaneously an assumed parent failure is retained as the
-exact seed-one affine bad trace on c(s)/3 + 4^(3^s)*T. -/
+boundary. Simultaneously an assumed parent failure is retained as the exact
+seed-one affine bad trace on c(s)/3 + 4^(3^s)*T. -/
 theorem gpt56_prefix_one_live_handwritten_package
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -47,8 +47,8 @@ theorem gpt56_prefix_one_live_handwritten_package
     simpa [T, A, X] using h
   exact ⟨q, N, hd2, hC, hN, hfirst, hseeded⟩
 
-/-- Same live package, exposing the exact handwritten first-BIG1 boundary
-immediately before the physical information value one. -/
+/-- Same live package, exposing the exact handwritten first-BIG1 DESTROY
+boundary immediately before the physical information value one. -/
 theorem gpt56_prefix_one_live_destroy_boundary
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -73,18 +73,11 @@ theorem gpt56_prefix_one_live_destroy_boundary
         (GSTPhysicalKernel.binaryColumnCarry T q j)
         (GSTPhysicalKernel.binaryColumnDigit T q j) = 5 := by
   dsimp only
-  obtain ⟨q, N, hd2, hC, hN, hfirst, hseeded⟩ :=
+  obtain ⟨q, _, hd2, hC, _, _, hseeded⟩ :=
     gpt56_prefix_one_live_handwritten_package s n hs hn hchild hBad
-  obtain ⟨N', hN', hfirst', hboundary⟩ :=
+  obtain ⟨N, hN, hfirst, hboundary⟩ :=
     gpt56_child_digit_two_forces_destroy_boundary
       (gstNavigationConstant (s+1) n) q hd2
-  have hNN : N' = N := by
-    apply Nat.find_eq_iff.mpr
-    constructor
-    · exact hfirst'.1
-    · intro m hm
-      exact hfirst'.2 m hm
-  subst N'
   exact ⟨q, N, hd2, hC, hseeded, hN, hfirst, hboundary⟩
 
 #check gpt56_prefix_one_live_handwritten_package
