@@ -61,8 +61,14 @@ lake env lean -o GSTHandwrittenPhysicalNoBig1.olean GSTHandwrittenPhysicalNoBig1
 lake env lean -o GSTHandwrittenChildFirstBig1.olean GSTHandwrittenChildFirstBig1.lean 2>&1 | tee handwritten-child-first-big1.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-child-first-big1.log
 
-lake env lean GSTHandwrittenHorizontalParentBridge.lean 2>&1 | tee handwritten-horizontal-parent.log
+lake env lean -o GSTHandwrittenHorizontalParentBridge.olean GSTHandwrittenHorizontalParentBridge.lean 2>&1 | tee handwritten-horizontal-parent.log
 ! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-horizontal-parent.log
+
+lake env lean -o GSTHandwrittenPrefixOneLivePackage.olean GSTHandwrittenPrefixOneLivePackage.lean 2>&1 | tee handwritten-prefix-one-live.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-prefix-one-live.log
+
+lake env lean -o GSTHandwrittenBigNThreeWorldFactors.olean GSTHandwrittenBigNThreeWorldFactors.lean 2>&1 | tee handwritten-bign-three-world.log
+! grep -E 'sorryAx|declaration uses .*[Ss]orry' handwritten-bign-three-world.log
 
 grep -Fq "'gpt56_binary_residue_gap_doubles' depends on axioms:" handwritten-physical-nobig1.log
 grep -Fq "'gpt56_physical_noBig1_impossible' depends on axioms:" handwritten-physical-nobig1.log
@@ -71,3 +77,8 @@ grep -Fq "'gpt56_child_digit_two_forces_first_big1' depends on axioms:" handwrit
 grep -Fq "'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms:" handwritten-child-first-big1.log
 grep -Fq "'gpt56_parent_multiplier_is_binary_bridge' depends on axioms:" handwritten-horizontal-parent.log
 grep -Fq "'gpt56_no_big1_before_parent_endpoint_digit_two' depends on axioms:" handwritten-horizontal-parent.log
+grep -Fq "'gpt56_prefix_one_live_handwritten_package' depends on axioms:" handwritten-prefix-one-live.log
+grep -Fq "'gst_three_world_factor_rawS' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gst_information_eq_bigN_exact_three_world_codeS' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gpt56_parent_segment_three_world_factorS' depends on axioms:" handwritten-bign-three-world.log
+grep -Fq "'gpt56_prefix_one_live_information_bigN_three_world' depends on axioms:" handwritten-bign-three-world.log
