@@ -30,6 +30,34 @@ def gpt56PhaseInitialState (s n : Nat) : GSTV2.CoupledState where
   childCarry := 0
   childTail := gpt56PhaseT s n
 
+/-- Remaining horizontal multiplier after one physical x2 column. -/
+def gpt56PhaseA1 (s : Nat) : Nat := 2^(2 * 3^s - 1)
+
+/-- Alternate coupled representation after moving one physical x2 column
+into the child word. -/
+def gpt56PhaseInitialState1 (s n : Nat) : GSTV2.CoupledState where
+  parentSeed := 1
+  parentOffset := c s / 3
+  childResidue := 1 + 4 * (c s / 3)
+  childCarry := 0
+  childTail := 2 * gpt56PhaseT s n
+
+/-- Moving one x2 column from the multiplier into the child preserves the
+complete horizontal product. -/
+theorem gpt56_phase_A1_mul_two (s : Nat) (hs : 1 ≤ s) :
+    gpt56PhaseA1 s * 2 = gpt56PhaseA s := by
+  have hwidth : 1 ≤ 2 * 3^s := by
+    have hp : 0 < 3^s := Nat.pow_pos (by decide)
+    omega
+  calc
+    gpt56PhaseA1 s * 2 = 2^(2 * 3^s - 1) * 2^1 := by
+      simp [gpt56PhaseA1]
+    _ = 2^((2 * 3^s - 1) + 1) := by rw [Nat.pow_add]
+    _ = 2^(2 * 3^s) := by congr 1 <;> omega
+    _ = gpt56PhaseA s := by
+      rw [← gpt56_parent_multiplier_is_binary_bridge]
+      rfl
+
 def GPT56NullChord (s n q : Nat) : Prop :=
   gstDigit (gpt56PhaseT s n) q = 2 ∧
   gstCarry (gpt56PhaseT s n) q = 0 ∧
@@ -430,6 +458,84 @@ theorem gpt56_prefix_one_exact_gate_parentOffset_closed
     GSTV2.coupledOrbit_parentOffset_exact
       (gpt56PhaseA s) (gpt56PhaseInitialState s n) q
 
+/-- In the GST+ chord, the one-column alternate representation has exactly
+the same parent information word.  The horizontal carry is one, so at the
+certified vertical gate the original parent offset is the alternate offset
+plus the entire remaining multiplier. -/
+theorem gpt56_plus_chord_one_column_offset_shift
+    (s n q : Nat) (hs : 1 ≤ s) (hplus : GPT56PlusChord s n q) :
+    (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).parentOffset =
+      (GSTV2.coupledOrbit (gpt56PhaseA1 s)
+        (gpt56PhaseInitialState1 s n) q).parentOffset +
+        gpt56PhaseA1 s := by
+  let T := gpt56PhaseT s n
+  let P := 3^q
+  let R := T % P
+  have hP : 0 < P := by
+    dsimp [P]
+    exact Nat.pow_pos (by decide)
+  have hcarry4 : (4*R)/P = 3 := by
+    simpa [T, P, R, GPT56PlusChord, gpt56PhaseT, gstCarry] using hplus.2.1
+  have hrem4 : (4*R) % P < P := Nat.mod_lt _ hP
+  have hsplit4 : 4*R = P*((4*R)/P) + (4*R)%P :=
+    (Nat.div_add_mod (4*R) P).symm
+  rw [hcarry4] at hsplit4
+  have h2lo : P ≤ 2*R := by omega
+  have hRlt : R < P := Nat.mod_lt _ hP
+  have h2hi : 2*R < 2*P := by omega
+  have hdiv2lo : 1 ≤ (2*R)/P :=
+    (Nat.le_div_iff_mul_le hP).2 (by simpa using h2lo)
+  have hdiv2hi : (2*R)/P < 2 :=
+    (Nat.div_lt_iff_lt_mul hP).2 (by simpa using h2hi)
+  have hdiv2 : (2*R)/P = 1 := by omega
+  have hmod2 : (2*T) % P = (2*R) % P := by
+    simp [T, R, Nat.mul_mod]
+  have hdecomp2 : (2*R)%P + P = 2*R := by
+    have h := Nat.mod_add_div (2*R) P
+    rw [hdiv2] at h
+    simpa [Nat.mul_comm] using h
+  have hmul := gpt56_phase_A1_mul_two s hs
+  have hnum :
+      c s / 3 + gpt56PhaseA s * R =
+        (c s / 3 + gpt56PhaseA1 s * ((2*T) % P)) +
+          P * gpt56PhaseA1 s := by
+    calc
+      c s / 3 + gpt56PhaseA s * R =
+          c s / 3 + (gpt56PhaseA1 s * 2) * R := by rw [hmul]
+      _ = c s / 3 + gpt56PhaseA1 s * (2*R) := by ring
+      _ = c s / 3 + gpt56PhaseA1 s * ((2*R)%P + P) := by rw [hdecomp2]
+      _ = (c s / 3 + gpt56PhaseA1 s * ((2*T)%P)) +
+          P * gpt56PhaseA1 s := by rw [hmod2]; ring
+  rw [GSTV2.coupledOrbit_parentOffset_exact,
+    GSTV2.coupledOrbit_parentOffset_exact]
+  change (c s / 3 + gpt56PhaseA s * R) / P =
+    (c s / 3 + gpt56PhaseA1 s * ((2*T)%P)) / P +
+      gpt56PhaseA1 s
+  rw [hnum, Nat.add_mul_div_left _ _ hP]
+
+/-- Canonical exact-gate dichotomy retaining the cross-subspace offset shift
+in the GST+ alternative. -/
+theorem gpt56_prefix_one_exact_gate_horizontal_phase_crossing
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gpt56PhaseT s n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ∃ q,
+      GPT56NullChord s n q ∨
+      (GPT56PlusChord s n q ∧
+        (GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentOffset =
+          (GSTV2.coupledOrbit (gpt56PhaseA1 s)
+            (gpt56PhaseInitialState1 s n) q).parentOffset +
+              gpt56PhaseA1 s) := by
+  obtain ⟨q, hchord, _htable⟩ :=
+    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
+  refine ⟨q, ?_⟩
+  rcases hchord with hnull | hplus
+  · exact Or.inl hnull
+  · exact Or.inr ⟨hplus,
+      gpt56_plus_chord_one_column_offset_shift s n q hs hplus⟩
+
 /-!
 The zero phase of the parent offset is now a restrictive bad-language event.
 At the child digit-two collision it makes the parent digit two as well.  Parent
@@ -541,19 +647,25 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
 
 #check gpt56_prefix_one_exact_gate_past_incidence
 #check gpt56_phase_A_mod_nine
+#check gpt56_phase_A1_mul_two
 #check gpt56_coupledStep_parentOffset_phase
 #check gpt56_prefix_one_exact_gate_offset_phase
 #check GSTV2.coupledOrbit_parentOffset_exact
 #check gpt56_prefix_one_exact_gate_parentOffset_closed
+#check gpt56_plus_chord_one_column_offset_shift
+#check gpt56_prefix_one_exact_gate_horizontal_phase_crossing
 #check gpt56_parent_digit_two_phase_table
 #check gpt56_prefix_one_exact_gate_three_phase_table
 #check gpt56_prefix_one_zero_phase_forces_next_escape
 #print axioms gpt56_prefix_one_exact_gate_past_incidence
 #print axioms gpt56_phase_A_mod_nine
+#print axioms gpt56_phase_A1_mul_two
 #print axioms gpt56_coupledStep_parentOffset_phase
 #print axioms gpt56_prefix_one_exact_gate_offset_phase
 #print axioms GSTV2.coupledOrbit_parentOffset_exact
 #print axioms gpt56_prefix_one_exact_gate_parentOffset_closed
+#print axioms gpt56_plus_chord_one_column_offset_shift
+#print axioms gpt56_prefix_one_exact_gate_horizontal_phase_crossing
 #print axioms gpt56_parent_digit_two_phase_table
 #print axioms gpt56_prefix_one_exact_gate_three_phase_table
 #print axioms gpt56_prefix_one_zero_phase_forces_next_escape
