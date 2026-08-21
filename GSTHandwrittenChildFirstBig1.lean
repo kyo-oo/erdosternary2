@@ -18,12 +18,19 @@ theorem gpt56_child_digit_two_forces_first_big1
     simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
   have hd0 : GSTPhysicalKernel.binaryColumnDigit T q 0 ≠ 0 := by omega
   obtain ⟨N, hfirst⟩ := gpt56_physical_path_forces_first_big1 T q hd0
-  have hN : 1 ≤ N := by
-    by_contra hnot
-    have hN0 : N = 0 := by omega
+  have hfirst' :
+      GSTPhysicalKernel.binaryColumnDigit T q N = 1 ∧
+      ∀ j, j < N → GSTPhysicalKernel.binaryColumnDigit T q j ≠ 1 := by
+    simpa [GSTFirstBig1AtS] using hfirst
+  have hNne : N ≠ 0 := by
+    intro hN0
     subst N
-    have hfirst0 := hfirst.1
+    have hbad : (2 : Nat) = 1 := by
+      calc
+        2 = GSTPhysicalKernel.binaryColumnDigit T q 0 := hd0eq.symm
+        _ = 1 := hfirst'.1
     omega
+  have hN : 1 ≤ N := Nat.one_le_iff_ne_zero.mpr hNne
   exact ⟨N, hN, hfirst⟩
 
 /-- The first physical BIG1 is preceded by the exact handwritten DESTROY
