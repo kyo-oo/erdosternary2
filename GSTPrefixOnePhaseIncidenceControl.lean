@@ -300,7 +300,7 @@ theorem gpt56_prefix_one_exact_gate_three_phase_table
       (st.parentOffset % 3 = 2 →
         gpt56ParentEmitted (gpt56PhaseA s) st = 1 ∧
         ((GSTV2.coupledStep (gpt56PhaseA s) st).parentSeed = 1 ∨
-         (GSTV2.coupledStep (gpt56PhaseA s) st).parentSeed = 2) := by
+         (GSTV2.coupledStep (gpt56PhaseA s) st).parentSeed = 2)) := by
   obtain ⟨q, _hsync, _hbadSuffix, hbranch⟩ :=
     gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
   have hchord : GPT56NullChord s n q ∨ GPT56PlusChord s n q := by
