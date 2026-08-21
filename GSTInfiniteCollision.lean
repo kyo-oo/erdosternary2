@@ -197,8 +197,10 @@ theorem coupledStep_parentWord_div_three
       rw [Nat.add_mul_div_left _ _ h3]
     _ = (st.parentOffset + A*st.childTail) / 3 := by
       congr 1
-      rw [hY]
-      ring
+      calc
+        (st.parentOffset + A*r) + 3*(A*(st.childTail/3)) =
+            st.parentOffset + A*(r + 3*(st.childTail/3)) := by ring
+        _ = st.parentOffset + A*st.childTail := by rw [← hY]
 
 /-- The all-Nat coupled orbit.  `K` is an observation depth, not a termination
 bound. -/
