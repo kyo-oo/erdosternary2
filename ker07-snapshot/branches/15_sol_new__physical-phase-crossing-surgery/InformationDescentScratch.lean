@@ -30,7 +30,7 @@
 
 import Mathlib
 
---!
+/-!
 Temporary RED/GREEN scratch for the corrected GST information-descent surgery.
 This file contains only exact arithmetic mechanics; no universal Erdős claim.
 -/
