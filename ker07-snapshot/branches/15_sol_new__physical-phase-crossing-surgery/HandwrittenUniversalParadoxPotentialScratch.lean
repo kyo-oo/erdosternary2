@@ -67,7 +67,7 @@ theorem gst_bad_pair_iff_u_potential_nondecreaseS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
-    decide
+    norm_num [GSTBadPairS, gstHandwrittenUChargeS, gstStepCarryS]
 
 /-- Integer signed jump.  Negative means that the physical cell is SURVIVE. -/
 def gstHandwrittenUJumpS (C d : Nat) : Int :=
@@ -122,7 +122,7 @@ theorem gst_bad_prefix_u_potential_boundS
       3^K * gstHandwrittenUChargeS (gstAffineMulCarryS 4 D X K) := by
   induction K with
   | zero =>
-      simp [gstAffineMulCarryS]
+      norm_num [gstAffineMulCarryS]
   | succ K ih =>
       have hprev :
           24*(X % 3^K) + gstHandwrittenUChargeS D ≤
