@@ -65,6 +65,30 @@ theorem gpt56_child_happy_gate_micro_dichotomy
   apply (gst_physical_micro_pair_happy_iffS T q).1
   simpa [_root_.gstCarryS, _root_.gstAffineMulCarryS] using hgate
 
+/-- A real child Happy gate places the literal binary-column realization of
+that child into the exhaustive handwritten BIG-N / I!=BIG1 controller.  This
+is the physical, not abstract, instantiation of the 2^j/3^j/6^j sector. -/
+theorem gpt56_child_happy_gate_physical_two_case_quantitative
+    (T q : Nat)
+    (hgate : GSTSeededHappyS 0 T q) :
+    let a : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnCarry T q r
+    let d : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnDigit T q r
+    (∃ N, GSTFirstBig1AtS d N ∧
+        (1 ≤ N → gstBig1ProjectedPathCodeS a d N =
+          5 * 6^(N-1) - 1)) ∨
+      (GSTBig1ClearInfinitePathS a d ∧
+        ∀ K, gstBig1ProjectedPathCodeS a d K = 6^K - 1) := by
+  dsimp only
+  let a : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnCarry T q r
+  let d : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnDigit T q r
+  have hpath : GSTInfiniteBridgePathS a d := by
+    simpa [a, d] using gpt56_physical_binary_row_is_infinite_bridge T q
+  have hd0eq : d 0 = 2 := by
+    dsimp [d, GSTPhysicalKernel.binaryColumnDigit]
+    simpa [_root_.GSTSeededHappyS, _root_.gstDigitS] using hgate.1
+  have hd0 : d 0 ≠ 0 := by omega
+  exact gst_infinite_two_case_quantitativeS a d hpath hd0
+
 /-- Exact post-last-gate classification supplied by the handwritten S/U
 operator.  Nothing is declared terminal.  If BIG1 is absent from the retained
 child suffix then the conserved high endpoint C+4Y is forced onto one of the
@@ -118,8 +142,10 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
 #check gpt56_handwritten_operator_on_navigation_child
 #check gpt56_physical_binary_row_is_infinite_bridge
 #check gpt56_child_happy_gate_micro_dichotomy
+#check gpt56_child_happy_gate_physical_two_case_quantitative
 #check gpt56_last_gate_handwritten_boundary_dichotomy
 #print axioms gpt56_handwritten_operator_on_navigation_child
 #print axioms gpt56_physical_binary_row_is_infinite_bridge
 #print axioms gpt56_child_happy_gate_micro_dichotomy
+#print axioms gpt56_child_happy_gate_physical_two_case_quantitative
 #print axioms gpt56_last_gate_handwritten_boundary_dichotomy
