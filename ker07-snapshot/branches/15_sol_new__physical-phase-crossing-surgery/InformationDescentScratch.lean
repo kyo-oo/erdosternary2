@@ -1,36 +1,36 @@
-/- ======================================================================
-/- CHRONOLOGICAL LABEL -- #0109 / 1132
-/-    Path         : branches/sol_physical-phase-crossing-surgery/InformationDescentScratch.lean
-/-    Ref          : origin/sol/physical-phase-crossing-surgery
-/-    First-commit : 2026-08-15 07:05:41 +0530  (48d293d)
-/-    Last-commit  : 2026-08-15 09:36:02 +0530  (a9cbf11)
-/-    Total commits: 9
-/- ======================================================================
-/- GIT HISTORY (chronological, oldest first)
-/- ======================================================================
-/- [01/9] 2026-08-15 07:05:41 +0530  48d293d  (ker07-dev)
-/-        test: kernel-check information descent recurrence lemmas
-/- [02/9] 2026-08-15 07:10:21 +0530  f49a746  (ker07-dev)
-/-        fix: exact seeded recurrence scratch proofs
-/- [03/9] 2026-08-15 07:15:15 +0530  aff2042  (ker07-dev)
-/-        test: add exact affine block memory invariant
-/- [04/9] 2026-08-15 07:19:44 +0530  2df5838  (ker07-dev)
-/-        test: formalize conserved shared-information carry equation
-/- [05/9] 2026-08-15 07:27:15 +0530  850ce9e  (ker07-dev)
-/-        fix: normalize shared-information quotient rewrites
-/- [06/9] 2026-08-15 07:33:32 +0530  9af3c34  (ker07-dev)
-/-        fix: unfold affine carry at quotient seam
-/- [07/9] 2026-08-15 07:39:12 +0530  56cd665  (ker07-dev)
-/-        test: bound affine information carry by multiplier
-/- [08/9] 2026-08-15 09:30:21 +0530  8952344  (ker07-dev)
-/-        Formalize GST information quarter geometry and 22 synchronizer
-/- [09/9] 2026-08-15 09:36:02 +0530  a9cbf11  (ker07-dev)
-/-        Expose GST step arithmetic in 22 synchronizer proof
-/- ====================================================================== -/
+-- ======================================================================
+-- CHRONOLOGICAL LABEL -- #0109 / 1132
+--    Path         : branches/sol_physical-phase-crossing-surgery/InformationDescentScratch.lean
+--    Ref          : origin/sol/physical-phase-crossing-surgery
+--    First-commit : 2026-08-15 07:05:41 +0530  (48d293d)
+--    Last-commit  : 2026-08-15 09:36:02 +0530  (a9cbf11)
+--    Total commits: 9
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/9] 2026-08-15 07:05:41 +0530  48d293d  (ker07-dev)
+--        test: kernel-check information descent recurrence lemmas
+-- [02/9] 2026-08-15 07:10:21 +0530  f49a746  (ker07-dev)
+--        fix: exact seeded recurrence scratch proofs
+-- [03/9] 2026-08-15 07:15:15 +0530  aff2042  (ker07-dev)
+--        test: add exact affine block memory invariant
+-- [04/9] 2026-08-15 07:19:44 +0530  2df5838  (ker07-dev)
+--        test: formalize conserved shared-information carry equation
+-- [05/9] 2026-08-15 07:27:15 +0530  850ce9e  (ker07-dev)
+--        fix: normalize shared-information quotient rewrites
+-- [06/9] 2026-08-15 07:33:32 +0530  9af3c34  (ker07-dev)
+--        fix: unfold affine carry at quotient seam
+-- [07/9] 2026-08-15 07:39:12 +0530  56cd665  (ker07-dev)
+--        test: bound affine information carry by multiplier
+-- [08/9] 2026-08-15 09:30:21 +0530  8952344  (ker07-dev)
+--        Formalize GST information quarter geometry and 22 synchronizer
+-- [09/9] 2026-08-15 09:36:02 +0530  a9cbf11  (ker07-dev)
+--        Expose GST step arithmetic in 22 synchronizer proof
+-- ====================================================================== -/
 
 import Mathlib
 
-/-!
+--!
 Temporary RED/GREEN scratch for the corrected GST information-descent surgery.
 This file contains only exact arithmetic mechanics; no universal Erdős claim.
 -/
