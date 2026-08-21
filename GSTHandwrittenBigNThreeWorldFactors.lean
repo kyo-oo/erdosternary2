@@ -106,6 +106,68 @@ theorem gst_information_eq_bigN_exact_three_world_codeS
         gstTernaryWorldFactorS (N-1)) - 1 := by
       rfl
 
+/-- Literal joined prefix from the handwritten equation.  Every completed
+microscopic world before BIG-N contributes the aligned factor `2^j * 3^j`,
+weighted by the five-unit full SURVIVE mass. -/
+def gstHandwrittenThreeWorldJoinedPrefixS (K : Nat) : Nat :=
+  5 * Finset.sum (Finset.range K)
+    (fun j => gstBinaryWorldFactorS j * gstTernaryWorldFactorS j)
+
+/-- The three exponent worlds collapse exactly to the mixed six-world geometric
+prefix.  This is the finite equation-level `2^j ∪ 3^j ∪ 6^j` identity. -/
+theorem gst_handwritten_three_world_joined_prefix_closedS (K : Nat) :
+    gstHandwrittenThreeWorldJoinedPrefixS K = 6^K - 1 := by
+  unfold gstHandwrittenThreeWorldJoinedPrefixS
+  unfold gstBinaryWorldFactorS gstTernaryWorldFactorS
+  induction K with
+  | zero => simp
+  | succ K ih =>
+      rw [Finset.sum_range_succ, Nat.mul_add, ih]
+      rw [← gst_three_world_factor_rawS K, Nat.pow_succ]
+      have hp : 0 < 6^K := Nat.pow_pos (by decide)
+      omega
+
+/-- The exact finite `I = BIG-N` equation.  The first-BIG1 physical word is
+not merely `5*6^(N-1)-1`: it is literally the joined three-world prefix
+
+  5 * Σ_{j<N-1} (2^j * 3^j)
+
+plus the terminal DESTROY mass `4 * 2^(N-1) * 3^(N-1)` at the first-BIG1
+boundary.  Thus the binary, ternary, and mixed worlds are all present in the
+same equality. -/
+theorem gst_information_eq_bigN_exact_joined_equationS
+    (a d : Nat → Nat)
+    (hpath : GSTInfiniteBridgePathS a d)
+    (h0 : d 0 ≠ 0)
+    (N : Nat) (hN : 1 ≤ N)
+    (hbig : GSTInformationEqualsBigNS d N) :
+    gstBig1ProjectedPathCodeS a d N =
+      gstHandwrittenThreeWorldJoinedPrefixS (N-1) +
+        4 * (gstBinaryWorldFactorS (N-1) *
+          gstTernaryWorldFactorS (N-1)) := by
+  rw [gst_information_eq_bigN_exact_three_world_codeS
+    a d hpath h0 N hN hbig]
+  rw [gst_handwritten_three_world_joined_prefix_closedS]
+  unfold gstBinaryWorldFactorS gstTernaryWorldFactorS
+  rw [← gst_three_world_factor_rawS (N-1)]
+  have hp : 0 < 6^(N-1) := Nat.pow_pos (by decide)
+  omega
+
+/-- Fully expanded form of the handwritten three-world equation at BIG-N. -/
+theorem gst_information_eq_bigN_exact_sum_equationS
+    (a d : Nat → Nat)
+    (hpath : GSTInfiniteBridgePathS a d)
+    (h0 : d 0 ≠ 0)
+    (N : Nat) (hN : 1 ≤ N)
+    (hbig : GSTInformationEqualsBigNS d N) :
+    gstBig1ProjectedPathCodeS a d N =
+      5 * Finset.sum (Finset.range (N-1)) (fun j => 2^j * 3^j) +
+        4 * (2^(N-1) * 3^(N-1)) := by
+  simpa [gstHandwrittenThreeWorldJoinedPrefixS,
+    gstBinaryWorldFactorS, gstTernaryWorldFactorS] using
+    gst_information_eq_bigN_exact_joined_equationS
+      a d hpath h0 N hN hbig
+
 /-- The canonical horizontal parent segment itself closes the same three-world
 exponential triangle: its binary length is `2*3^s`, and multiplying by the
 aligned ternary factor gives the mixed six-state factor. -/
@@ -184,6 +246,47 @@ theorem gpt56_prefix_one_live_information_bigN_three_world
     by simpa [a, d] using hcode,
     by simpa [T, A, X] using hseeded⟩
 
+/-- Live equation package: the actual child Navigation witness now carries the
+fully expanded three-world BIG-N equality used by the handwritten operator. -/
+theorem gpt56_prefix_one_live_information_bigN_sum_equation
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    let T := gstNavigationConstant (s+1) n
+    let A := 4^(3^s)
+    let X := c s / 3 + A*T
+    ∃ q N,
+      gstDigit T q = 2 ∧
+      (gstCarry T q = 0 ∨ gstCarry T q = 3) ∧
+      1 ≤ N ∧
+      GSTInformationEqualsBigNS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
+      gstBig1ProjectedPathCodeS
+        (fun r => GSTPhysicalKernel.binaryColumnCarry T q r)
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N =
+          5 * Finset.sum (Finset.range (N-1)) (fun j => 2^j * 3^j) +
+            4 * (2^(N-1) * 3^(N-1)) ∧
+      GSTSeededAffineBadTrace 1 X := by
+  dsimp only
+  let T := gstNavigationConstant (s+1) n
+  let A := 4^(3^s)
+  let X := c s / 3 + A*T
+  obtain ⟨q, N, hd2, hC, hN, hbig, _hcode, hseeded⟩ :=
+    gpt56_prefix_one_live_information_bigN_three_world s n hs hn hchild hBad
+  let a : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnCarry T q r
+  let d : Nat → Nat := fun r => GSTPhysicalKernel.binaryColumnDigit T q r
+  have hpath : GSTInfiniteBridgePathS a d := by
+    simpa [a, d] using gpt56_binary_row_path T q
+  have hd0eq : d 0 = 2 := by
+    dsimp [d]
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
+  have hd0 : d 0 ≠ 0 := by omega
+  have heq := gst_information_eq_bigN_exact_sum_equationS
+    a d hpath hd0 N hN (by simpa [d] using hbig)
+  exact ⟨q, N, hd2, hC, hN, hbig,
+    by simpa [a, d] using heq,
+    by simpa [T, A, X] using hseeded⟩
+
 /-- Same live package, but with the BIG-N/parent-segment collision split already
 performed.  This is the exact branch object consumed by the next surgery. -/
 theorem gpt56_prefix_one_live_bigN_parent_segment_split
@@ -215,14 +318,22 @@ theorem gpt56_prefix_one_live_bigN_parent_segment_split
 #check GSTInformationEqualsBigNS
 #check gst_three_world_factor_rawS
 #check gst_three_world_mixed_factor_exactS
+#check gst_handwritten_three_world_joined_prefix_closedS
 #check gst_information_eq_bigN_exact_three_world_codeS
+#check gst_information_eq_bigN_exact_joined_equationS
+#check gst_information_eq_bigN_exact_sum_equationS
 #check gpt56_parent_segment_three_world_factorS
 #check gpt56_information_bigN_vs_parent_segmentS
 #check gpt56_prefix_one_live_information_bigN_three_world
+#check gpt56_prefix_one_live_information_bigN_sum_equation
 #check gpt56_prefix_one_live_bigN_parent_segment_split
 #print axioms gst_three_world_factor_rawS
+#print axioms gst_handwritten_three_world_joined_prefix_closedS
 #print axioms gst_information_eq_bigN_exact_three_world_codeS
+#print axioms gst_information_eq_bigN_exact_joined_equationS
+#print axioms gst_information_eq_bigN_exact_sum_equationS
 #print axioms gpt56_parent_segment_three_world_factorS
 #print axioms gpt56_information_bigN_vs_parent_segmentS
 #print axioms gpt56_prefix_one_live_information_bigN_three_world
+#print axioms gpt56_prefix_one_live_information_bigN_sum_equation
 #print axioms gpt56_prefix_one_live_bigN_parent_segment_split
