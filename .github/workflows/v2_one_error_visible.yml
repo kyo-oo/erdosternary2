@@ -24,39 +24,98 @@ jobs:
           lake update
           lake exe cache get
           lake build GSTTactic
-      - name: Remove legacy Omega corridor and inject one V2 seam
+      - name: Remove legacy Omega corridor and install one V2 seam
         shell: bash
         run: |
           set -euxo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('ErdosTernary2.lean')
-          src=p.read_text()
-          def remove_decl(text,name):
-              m=re.search(rf'(?m)^theorem\s+{re.escape(name)}\b',text)
-              if not m: raise SystemExit(f'missing declaration: {name}')
-              nxt=re.search(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]',text[m.end():])
-              if not nxt: raise SystemExit(f'cannot find end: {name}')
-              e=m.end()+nxt.start()
-              return text[:m.start()]+text[e:]
+
+          p = Path('ErdosTernary2.lean')
+          src = p.read_text()
+
+          DECL = re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
+
+          def span(text, name):
+              m = re.search(rf'(?m)^theorem\s+{re.escape(name)}\b', text)
+              if not m:
+                  raise SystemExit(f'missing declaration: {name}')
+              nxt = DECL.search(text, m.end())
+              if not nxt:
+                  return m.start(), len(text)
+              return m.start(), nxt.start()
+
+          def remove(text, name):
+              a, b = span(text, name)
+              return text[:a] + text[b:]
+
           for name in [
-            'gst_omega_termination_s1','gst_omega_termination_s3',
-            'gst_omega_termination_stable','gst_residual_omega_termination',
-            'gst_residual_navigation_lift',
-            'gst_prefix_one_information_bad_descends_inline',
-            'gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
-              src=remove_decl(src,name)
-          marker='theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by'
-          seam='''/-- Single V2 replacement seam. -/\ntheorem gst_v2_infinite_prefix_one_collision\n    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)\n    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))\n    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by\n  let T := gstNavigationConstant (s+1) n\n  let X := c s / 3 + 4^(3^s) * T\n  have hseeded : GSTSeededAffineBadTrace 1 X := by\n    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad\n    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by\n      rw [Nat.pow_one, c_mod3 s hs]\n      decide\n    rw [hseed] at h\n    simpa [T, X] using h\n  obtain ⟨j, hd, hspace⟩ := hchild\n  have hCmod : gstCarry T j % 3 = 0 := by\n    dsimp [T]\n    exact gstGoodSpace_carry_mod3_zero _ j hspace\n  have hClt : gstCarry T j < 4 := by\n    cases j with\n    | zero => simp [gstCarry]\n    | succ q =>\n        dsimp [T]\n        exact gstCarry_lt_four _ (q+1) (by omega)\n  have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega\n  omega\n\n'''
-          if marker not in src: raise SystemExit('prefix-one marker missing')
-          src=src.replace(marker,seam+marker,1)
-          old='''theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by\n  intro s n hs hn hchild\n  by_contra hnoParent\n  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=\n    gst_prefix_one_omega_bad_of_no_parent_navigation_inline\n      s n hs hnoParent\n  let data := gst_prefix_one_omegaData s n hs hchild\n  exact gst_prefix_one_child_gate_contradicts_parent_bad_inline\n    s n hs hn data hBad'''
-          new='''theorem gst_prefix_one_navigation_lift :\n    GSTPrefixOneNavigationLift := by\n  intro s n hs hn hchild\n  by_contra hnoParent\n  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=\n    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent\n  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad'''
-          if old not in src: raise SystemExit('old prefix-one body missing')
-          src=src.replace(old,new,1)
+              'gst_omega_termination_s1',
+              'gst_omega_termination_s3',
+              'gst_omega_termination_stable',
+              'gst_residual_omega_termination',
+              'gst_residual_navigation_lift',
+              'gst_prefix_one_information_bad_descends_inline',
+              'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
+          ]:
+              src = remove(src, name)
+
+          replacement = r'''
+/-- Single V2 replacement seam. -/
+theorem gst_v2_infinite_prefix_one_collision
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  let T := gstNavigationConstant (s+1) n
+  let X := c s / 3 + 4^(3^s) * T
+  have hseeded : GSTSeededAffineBadTrace 1 X := by
+    have h := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad
+    have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by
+      rw [Nat.pow_one, c_mod3 s hs]
+      decide
+    rw [hseed] at h
+    simpa [T, X] using h
+  obtain ⟨j, hd, hspace⟩ := hchild
+  have hCmod : gstCarry T j % 3 = 0 := by
+    dsimp [T]
+    exact gstGoodSpace_carry_mod3_zero _ j hspace
+  have hClt : gstCarry T j < 4 := by
+    cases j with
+    | zero => simp [gstCarry]
+    | succ q =>
+        dsimp [T]
+        exact gstCarry_lt_four _ (q+1) (by omega)
+  have hC : gstCarry T j = 0 ∨ gstCarry T j = 3 := by omega
+  omega
+
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hnoParent
+  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
+    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
+
+'''
+          a, b = span(src, 'gst_prefix_one_navigation_lift')
+          src = src[:a] + replacement + src[b:]
+
+          for dead in [
+              'theorem gst_omega_termination_s1',
+              'theorem gst_omega_termination_s3',
+              'theorem gst_omega_termination_stable',
+              'theorem gst_residual_omega_termination',
+              'theorem gst_residual_navigation_lift :',
+              'theorem gst_prefix_one_information_bad_descends_inline',
+              'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline',
+          ]:
+              if dead in src:
+                  raise SystemExit(f'dead declaration survived: {dead}')
+
           p.write_text(src)
-          print('SURGERY_LINES',src.count('\n')+1)
+          print('ONE_ERROR_SURGERY_APPLIED')
+          print('SURGERY_LINES', src.count('\n') + 1)
           PY
       - name: Compile surgically rewritten monolith
         timeout-minutes: 45
