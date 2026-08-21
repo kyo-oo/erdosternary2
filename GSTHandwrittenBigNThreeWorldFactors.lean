@@ -114,6 +114,30 @@ theorem gpt56_parent_segment_three_world_factorS (s : Nat) :
   rw [gpt56_parent_multiplier_is_binary_bridge]
   exact (gst_three_world_factor_rawS (2 * 3^s)).symm
 
+/-- `I = BIG-N` is now compared directly with the complete binary length of
+the canonical parent multiplier.  Either BIG-N occurs inside that physical
+segment, or the segment ends before BIG-N and its endpoint information is
+forced to remain BIG2. -/
+theorem gpt56_information_bigN_vs_parent_segmentS
+    (s T q N : Nat)
+    (hd2 : gstDigit T q = 2)
+    (hbig : GSTInformationEqualsBigNS
+      (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N) :
+    N ≤ 2 * 3^s ∨
+      (2 * 3^s < N ∧ gstDigitS (4^(3^s) * T) q = 2) := by
+  by_cases hinside : N ≤ 2 * 3^s
+  · exact Or.inl hinside
+  · right
+    have hafter : 2 * 3^s < N := by omega
+    have hno : ∀ r, r ≤ 2 * 3^s →
+        GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1 := by
+      intro r hr
+      change GSTFirstBig1AtS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N at hbig
+      exact hbig.2 r (by omega)
+    exact ⟨hafter,
+      gpt56_no_big1_before_parent_endpoint_digit_two s T q hd2 hno⟩
+
 /-- Live prefix-one package with literal `I = BIG-N` and its exact three-world
 code attached to the real child Navigation gate. -/
 theorem gpt56_prefix_one_live_information_bigN_three_world
@@ -160,13 +184,45 @@ theorem gpt56_prefix_one_live_information_bigN_three_world
     by simpa [a, d] using hcode,
     by simpa [T, A, X] using hseeded⟩
 
+/-- Same live package, but with the BIG-N/parent-segment collision split already
+performed.  This is the exact branch object consumed by the next surgery. -/
+theorem gpt56_prefix_one_live_bigN_parent_segment_split
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    let T := gstNavigationConstant (s+1) n
+    let A := 4^(3^s)
+    let X := c s / 3 + A*T
+    ∃ q N,
+      gstDigit T q = 2 ∧
+      (gstCarry T q = 0 ∨ gstCarry T q = 3) ∧
+      GSTInformationEqualsBigNS
+        (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
+      (N ≤ 2 * 3^s ∨
+        (2 * 3^s < N ∧ gstDigitS (A*T) q = 2)) ∧
+      GSTSeededAffineBadTrace 1 X := by
+  dsimp only
+  let T := gstNavigationConstant (s+1) n
+  let A := 4^(3^s)
+  let X := c s / 3 + A*T
+  obtain ⟨q, N, hd2, hC, _hN, hbig, _hcode, hseeded⟩ :=
+    gpt56_prefix_one_live_information_bigN_three_world s n hs hn hchild hBad
+  have hsplit := gpt56_information_bigN_vs_parent_segmentS s T q N hd2 hbig
+  exact ⟨q, N, hd2, hC, hbig,
+    by simpa [A] using hsplit,
+    by simpa [T, A, X] using hseeded⟩
+
 #check GSTInformationEqualsBigNS
 #check gst_three_world_factor_rawS
 #check gst_three_world_mixed_factor_exactS
 #check gst_information_eq_bigN_exact_three_world_codeS
 #check gpt56_parent_segment_three_world_factorS
+#check gpt56_information_bigN_vs_parent_segmentS
 #check gpt56_prefix_one_live_information_bigN_three_world
+#check gpt56_prefix_one_live_bigN_parent_segment_split
 #print axioms gst_three_world_factor_rawS
 #print axioms gst_information_eq_bigN_exact_three_world_codeS
 #print axioms gpt56_parent_segment_three_world_factorS
+#print axioms gpt56_information_bigN_vs_parent_segmentS
 #print axioms gpt56_prefix_one_live_information_bigN_three_world
+#print axioms gpt56_prefix_one_live_bigN_parent_segment_split
