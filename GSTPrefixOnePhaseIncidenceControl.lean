@@ -410,6 +410,26 @@ theorem gpt56_prefix_one_exact_gate_offset_phase
       (gpt56PhaseInitialState s n) q)
     (gpt56_phase_A_mod_nine s hs)
 
+/-- Exact all-depth parent-offset closed form specialized at the certified
+earliest gate.  This connects the local collision phase directly to the
+canonical origin and its lower ternary residue. -/
+theorem gpt56_prefix_one_exact_gate_parentOffset_closed
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gpt56PhaseT s n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ∃ q,
+      (GPT56NullChord s n q ∨ GPT56PlusChord s n q) ∧
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+        (gpt56PhaseInitialState s n) q).parentOffset =
+          (c s / 3 + gpt56PhaseA s *
+            (gpt56PhaseT s n % 3^q)) / 3^q := by
+  obtain ⟨q, hchord, _htable⟩ :=
+    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
+  refine ⟨q, hchord, ?_⟩
+  simpa [gpt56PhaseInitialState] using
+    GSTV2.coupledOrbit_parentOffset_exact
+      (gpt56PhaseA s) (gpt56PhaseInitialState s n) q
+
 /-!
 The zero phase of the parent offset is now a restrictive bad-language event.
 At the child digit-two collision it makes the parent digit two as well.  Parent
@@ -523,6 +543,8 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
 #check gpt56_phase_A_mod_nine
 #check gpt56_coupledStep_parentOffset_phase
 #check gpt56_prefix_one_exact_gate_offset_phase
+#check GSTV2.coupledOrbit_parentOffset_exact
+#check gpt56_prefix_one_exact_gate_parentOffset_closed
 #check gpt56_parent_digit_two_phase_table
 #check gpt56_prefix_one_exact_gate_three_phase_table
 #check gpt56_prefix_one_zero_phase_forces_next_escape
@@ -530,6 +552,8 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
 #print axioms gpt56_phase_A_mod_nine
 #print axioms gpt56_coupledStep_parentOffset_phase
 #print axioms gpt56_prefix_one_exact_gate_offset_phase
+#print axioms GSTV2.coupledOrbit_parentOffset_exact
+#print axioms gpt56_prefix_one_exact_gate_parentOffset_closed
 #print axioms gpt56_parent_digit_two_phase_table
 #print axioms gpt56_prefix_one_exact_gate_three_phase_table
 #print axioms gpt56_prefix_one_zero_phase_forces_next_escape

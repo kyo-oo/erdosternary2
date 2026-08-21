@@ -246,6 +246,54 @@ theorem coupledOrbit_parentWord_exact
       rw [coupledOrbit, coupledStep_parentWord_div_three, ih,
         Nat.pow_succ, ← Nat.div_div_eq_div_mul]
 
+/-- Closed form for the low parent offset at every natural observation depth.
+It is the quotient of the initial offset plus the multiplier times the exact
+visible child prefix; no information is discarded when the child Future is
+shifted. -/
+theorem coupledOrbit_parentOffset_exact
+    (A : Nat) (initial : CoupledState) :
+    ∀ K,
+      (coupledOrbit A initial K).parentOffset =
+        (initial.parentOffset + A * (initial.childTail % 3^K)) / 3^K := by
+  intro K
+  let P := 3^K
+  have hP : 0 < P := by
+    dsimp [P]
+    exact Nat.pow_pos (by decide)
+  have hTail := coupledOrbit_childTail_exact A initial K
+  have hWord := coupledOrbit_parentWord_exact A initial K
+  have hsplit :
+      initial.childTail = initial.childTail % P +
+        P * (initial.childTail / P) := by
+    have h := Nat.mod_add_div initial.childTail P
+    omega
+  have hnum :
+      initial.parentOffset + A * initial.childTail =
+        (initial.parentOffset + A * (initial.childTail % P)) +
+          P * (A * (initial.childTail / P)) := by
+    calc
+      initial.parentOffset + A * initial.childTail =
+          initial.parentOffset +
+            A * (initial.childTail % P + P * (initial.childTail / P)) := by
+        rw [← hsplit]
+      _ = (initial.parentOffset + A * (initial.childTail % P)) +
+          P * (A * (initial.childTail / P)) := by ring
+  have hdiv :
+      (initial.parentOffset + A * initial.childTail) / P =
+        (initial.parentOffset + A * (initial.childTail % P)) / P +
+          A * (initial.childTail / P) := by
+    rw [hnum, Nat.add_mul_div_left _ _ hP]
+  unfold CoupledState.parentWord at hWord
+  change (coupledOrbit A initial K).childTail =
+    initial.childTail / P at hTail
+  change (coupledOrbit A initial K).parentOffset +
+      A * (coupledOrbit A initial K).childTail =
+    (initial.parentOffset + A * initial.childTail) / P at hWord
+  rw [hTail, hdiv] at hWord
+  change (coupledOrbit A initial K).parentOffset =
+    (initial.parentOffset + A * (initial.childTail % P)) / P
+  omega
+
 /-- If the high endpoint begins at the true zero carry, the all-Nat controller
 tracks the ordinary x4 carry of the child word exactly at every depth. -/
 theorem coupledOrbit_childCarry_exact
