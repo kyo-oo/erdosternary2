@@ -207,6 +207,47 @@ theorem gpt56_affineCarry_one_lt_four (X K : Nat) :
 def gpt56ParentEmitted (A : Nat) (st : GSTV2.CoupledState) : Nat :=
   (st.parentOffset + A * (st.childTail % 3)) % 3
 
+/-- Canonical horizontal multiplier phase at the two-digit ternary scale. -/
+theorem gpt56_phase_A_mod_nine (s : Nat) (hs : 1 ≤ s) :
+    gpt56PhaseA s % 9 = 1 := by
+  unfold gpt56PhaseA
+  rw [lte_identity s hs, Nat.add_mod, Nat.mul_mod,
+    pow3_mod9 (s+1) (by omega)]
+  norm_num
+
+/-- Exact ancestry law for the parent-offset phase.  When `A = 1 (mod 9)`,
+one coupled step exposes the next ternary coordinate of the old offset and
+adds precisely the carry created by its current phase plus the child digit.
+This holds for every state and does not assume badness or termination. -/
+theorem gpt56_coupledStep_parentOffset_phase
+    (A : Nat) (st : GSTV2.CoupledState) (hAmod9 : A % 9 = 1) :
+    (GSTV2.coupledStep A st).parentOffset % 3 =
+      (((st.parentOffset % 3 + st.childTail % 3) / 3) +
+        st.parentOffset / 3) % 3 := by
+  let r := st.childTail % 3
+  let p := st.parentOffset % 3
+  let Q := st.parentOffset / 3
+  let B := A / 9
+  have hA : A = 1 + 9*B := by
+    have h := Nat.mod_add_div A 9
+    rw [hAmod9] at h
+    dsimp [B]
+    omega
+  have hZ : st.parentOffset = p + 3*Q := by
+    have h := Nat.mod_add_div st.parentOffset 3
+    dsimp [p, Q]
+    omega
+  have hnum :
+      st.parentOffset + A*r = (p+r) + 3*(Q + 3*(B*r)) := by
+    rw [hA, hZ]
+    ring
+  unfold GSTV2.coupledStep
+  dsimp only
+  change ((st.parentOffset + A*r) / 3) % 3 =
+    (((p+r)/3) + Q) % 3
+  rw [hnum, Nat.add_mul_div_left _ _ (by decide : 0 < (3:Nat))]
+  simp [Nat.add_mod, Nat.mul_mod]
+
 /-- Complete local phase table at a child digit-two collision.  The table is
 all-Nat and transition-level: it neither invokes a support horizon nor a
 terminal state.  Parent badness is used only in phase zero, where the emitted
@@ -344,6 +385,31 @@ theorem gpt56_prefix_one_exact_gate_three_phase_table
   exact gpt56_parent_digit_two_phase_table
     (gpt56PhaseA s) st hAmod hchildDigit hseedlt hbad
 
+/-- The ancestry law instantiated at the exact canonical earliest gate. -/
+theorem gpt56_prefix_one_exact_gate_offset_phase
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gpt56PhaseT s n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ∃ q,
+      (GPT56NullChord s n q ∨ GPT56PlusChord s n q) ∧
+      (GSTV2.coupledOrbit (gpt56PhaseA s)
+          (gpt56PhaseInitialState s n) (q+1)).parentOffset % 3 =
+        ((((GSTV2.coupledOrbit (gpt56PhaseA s)
+              (gpt56PhaseInitialState s n) q).parentOffset % 3 +
+            (GSTV2.coupledOrbit (gpt56PhaseA s)
+              (gpt56PhaseInitialState s n) q).childTail % 3) / 3) +
+          (GSTV2.coupledOrbit (gpt56PhaseA s)
+            (gpt56PhaseInitialState s n) q).parentOffset / 3) % 3 := by
+  obtain ⟨q, hchord, _htable⟩ :=
+    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
+  refine ⟨q, hchord, ?_⟩
+  rw [GSTV2.coupledOrbit]
+  exact gpt56_coupledStep_parentOffset_phase
+    (gpt56PhaseA s)
+    (GSTV2.coupledOrbit (gpt56PhaseA s)
+      (gpt56PhaseInitialState s n) q)
+    (gpt56_phase_A_mod_nine s hs)
+
 /-!
 The zero phase of the parent offset is now a restrictive bad-language event.
 At the child digit-two collision it makes the parent digit two as well.  Parent
@@ -454,10 +520,16 @@ theorem gpt56_prefix_one_zero_phase_forces_next_escape
   exact hbadNext ⟨hnextDigit, Or.inr hnextSeed⟩
 
 #check gpt56_prefix_one_exact_gate_past_incidence
+#check gpt56_phase_A_mod_nine
+#check gpt56_coupledStep_parentOffset_phase
+#check gpt56_prefix_one_exact_gate_offset_phase
 #check gpt56_parent_digit_two_phase_table
 #check gpt56_prefix_one_exact_gate_three_phase_table
 #check gpt56_prefix_one_zero_phase_forces_next_escape
 #print axioms gpt56_prefix_one_exact_gate_past_incidence
+#print axioms gpt56_phase_A_mod_nine
+#print axioms gpt56_coupledStep_parentOffset_phase
+#print axioms gpt56_prefix_one_exact_gate_offset_phase
 #print axioms gpt56_parent_digit_two_phase_table
 #print axioms gpt56_prefix_one_exact_gate_three_phase_table
 #print axioms gpt56_prefix_one_zero_phase_forces_next_escape
