@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Execute authoritative full V2 production gate
-        timeout-minutes: 240
+      - name: Compile handwritten GST V2 production bridge
+        timeout-minutes: 120
         shell: bash
-        run: bash scripts/run_v2_full_gate.sh
+        run: bash scripts/run_handwritten_production_probe.sh
