@@ -122,10 +122,7 @@ theorem gst_bad_prefix_u_potential_boundS
       3^K * gstHandwrittenUChargeS (gstAffineMulCarryS 4 D X K) := by
   induction K with
   | zero =>
-      simp only [Nat.pow_zero, Nat.mul_one, Nat.mod_one, Nat.mul_zero,
-        Nat.zero_add]
-      unfold gstAffineMulCarryS
-      rw [Nat.pow_zero, Nat.mod_one, Nat.mul_zero, Nat.add_zero, Nat.div_one]
+      simp [gstAffineMulCarryS]
   | succ K ih =>
       have hprev :
           24*(X % 3^K) + gstHandwrittenUChargeS D ≤
