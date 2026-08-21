@@ -1,1 +1,1 @@
-Direct visible V2 gate trigger: compile root, complete production snapshot closure, full surgery, adapters, sorry-check, comparator.
+Run comment-safe corridor surgery, kernel-check the canonical physical-trap counterexample probe, then compile the rewritten monolith.
