@@ -12,7 +12,7 @@
 --        Bridge prefix-one Omega bad trace to U-potential
 -- ====================================================================== -/
 
-import ErdosTernary2
+import ErdosPreOmega
 import HandwrittenUniversalParadoxPotentialScratch
 
 set_option maxRecDepth 1000000
@@ -53,8 +53,8 @@ theorem gst_prefix_one_omega_bad_to_u_seeded_badS
   apply hNe
   apply (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2
   have hc3 : c s % 3 = 1 := c_mod3 s hs
-  simpa [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS,
-    gstAffineMulCarryS, Nat.pow_one, hc3] using hGate
+  simpa [gstPrefixOneUPotentialTailS, gstOmega, gstDigitS, gstDigit,
+    gstAffineMulCarryS, gstAffineMulCarry, Nat.pow_one, hc3] using hGate
 
 /-- The monolith Ω∞ bad hypothesis therefore inherits the exact finite
 U-potential telescope at every information depth K. -/
