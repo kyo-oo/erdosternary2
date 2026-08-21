@@ -105,7 +105,6 @@ theorem gpt56_phase_bad_to_v2_seeded
   have hold := (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).1 hBad
   have hseed : (4 * (c s % 3^1)) / 3^1 = 1 := by
     rw [Nat.pow_one, c_mod3 s hs]
-    decide
   rw [hseed] at hold
   simpa [GSTV2.SeededBadTrace, GSTV2.Happy, GSTV2.affineCarry,
     GSTV2.digit, GSTV2.CoupledState.parentWord,
