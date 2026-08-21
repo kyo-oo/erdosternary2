@@ -575,7 +575,6 @@ theorem gpt56_plus_chord_one_column_child_trap
     have hq2 := gpt56_mul_ternary_quotient_split 2 T q
     change (2*T)/P = (2*R)/P + 2*(T/P) at hq2
     rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2raw]
-    norm_num
   have hd8 : (8*T)/P % 3 = 1 := by
     have h := hplus.2.2.1.1
     simpa [GSTPhysicalKernel.binaryColumnDigit, T, P] using h
@@ -585,6 +584,8 @@ theorem gpt56_plus_chord_one_column_child_trap
   norm_num at hd8
   have hdiv8mod : ((8*R)/P) % 3 = 0 := by omega
   have h8lo : 6*P ≤ 8*R := by omega
+  have hdiv8lo : 6 ≤ (8*R)/P :=
+    (Nat.le_div_iff_mul_le hP).2 (by simpa using h8lo)
   have h8lt8 : (8*R)/P < 8 :=
     (Nat.div_lt_iff_lt_mul hP).2 (by omega)
   have hdiv8 : (8*R)/P = 6 := by omega
