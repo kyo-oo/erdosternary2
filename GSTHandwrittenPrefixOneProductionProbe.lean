@@ -3,6 +3,8 @@ import GSTGraphV2SleepEquationLabScratch
 import GSTGraphV2SleepEquationCollisionScratch
 import GSTGraphV2InfiniteBigNDichotomyScratch
 import GSTGraphV2SleepBadLanguageDescentScratch
+import GSTGraphV2PhysicalSignedKernelTelescopeScratch
+import PhysicalSixBridgeGateScratch
 import CanonicalTrapScratch
 
 set_option maxRecDepth 1000000
@@ -33,6 +35,35 @@ theorem gpt56_handwritten_operator_on_navigation_child
   unfold GSTSleepNavigationEnergyCouplingS
   unfold gstOmegaPressureEnergyS gstOriginRemainingUS
   exact (gst_navigation_decomposition (s+1) n (by omega)).symm
+
+/-- The handwritten infinite x2/base3 bridge is not abstract: every literal
+physical binary row R,2R,4R,... at a fixed ternary position p realizes the
+exact `GSTInfiniteBridgePathS` interface. -/
+theorem gpt56_physical_binary_row_is_infinite_bridge
+    (R p : Nat) :
+    GSTInfiniteBridgePathS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry R p r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit R p r) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro r
+    exact GSTPhysicalKernel.binaryColumnCarry_lt_two R p r
+  · intro r
+    exact GSTPhysicalKernel.binaryColumnDigit_lt_three R p r
+  · intro r
+    simpa [GSTInfiniteV2.gstBinaryBridgeOutputS,
+      GSTPhysicalKernel.microOutput] using
+      GSTPhysicalKernel.microOutput_eq_next_binaryColumnDigit R p r
+
+/-- Every actual child Happy gate is physically one of exactly the two
+handwritten microscopic patterns: NULL DESTROY/CREATE=(4,2), or the right
+chord GST+ SURVIVE/SURVIVE=(5,5). -/
+theorem gpt56_child_happy_gate_micro_dichotomy
+    (T q : Nat)
+    (hgate : GSTSeededHappyS 0 T q) :
+    gstPhysicalMicroPairS T q = (4,2) ∨
+      gstPhysicalMicroPairS T q = (5,5) := by
+  apply (gst_physical_micro_pair_happy_iffS T q).1
+  simpa [_root_.gstCarryS, _root_.gstAffineMulCarryS] using hgate
 
 /-- Exact post-last-gate classification supplied by the handwritten S/U
 operator.  Nothing is declared terminal.  If BIG1 is absent from the retained
@@ -85,6 +116,10 @@ theorem gpt56_last_gate_handwritten_boundary_dichotomy
     · exact Or.inr (Or.inr ⟨r, hr⟩)
 
 #check gpt56_handwritten_operator_on_navigation_child
+#check gpt56_physical_binary_row_is_infinite_bridge
+#check gpt56_child_happy_gate_micro_dichotomy
 #check gpt56_last_gate_handwritten_boundary_dichotomy
 #print axioms gpt56_handwritten_operator_on_navigation_child
+#print axioms gpt56_physical_binary_row_is_infinite_bridge
+#print axioms gpt56_child_happy_gate_micro_dichotomy
 #print axioms gpt56_last_gate_handwritten_boundary_dichotomy
