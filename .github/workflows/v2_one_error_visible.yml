@@ -1,3 +1,4 @@
+# V2 one-error compiler lane
 name: V2 One-Error Visible Surgery
 
 on:
@@ -31,36 +32,18 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           p = Path('ErdosTernary2.lean')
           src = p.read_text()
-
           DECL = re.compile(r'(?m)^(?:theorem|lemma|def|abbrev|structure|inductive|instance|private\s+theorem)\s+[A-Za-z0-9_]')
-
           def span(text, name):
               m = re.search(rf'(?m)^theorem\s+{re.escape(name)}\b', text)
-              if not m:
-                  raise SystemExit(f'missing declaration: {name}')
+              if not m: raise SystemExit(f'missing declaration: {name}')
               nxt = DECL.search(text, m.end())
-              if not nxt:
-                  return m.start(), len(text)
-              return m.start(), nxt.start()
-
+              return (m.start(), len(text) if not nxt else nxt.start())
           def remove(text, name):
-              a, b = span(text, name)
-              return text[:a] + text[b:]
-
-          for name in [
-              'gst_omega_termination_s1',
-              'gst_omega_termination_s3',
-              'gst_omega_termination_stable',
-              'gst_residual_omega_termination',
-              'gst_residual_navigation_lift',
-              'gst_prefix_one_information_bad_descends_inline',
-              'gst_prefix_one_child_gate_contradicts_parent_bad_inline',
-          ]:
-              src = remove(src, name)
-
+              a,b = span(text,name); return text[:a] + text[b:]
+          for name in ['gst_omega_termination_s1','gst_omega_termination_s3','gst_omega_termination_stable','gst_residual_omega_termination','gst_residual_navigation_lift','gst_prefix_one_information_bad_descends_inline','gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
+              src = remove(src,name)
           replacement = r'''
 /-- Single V2 replacement seam. -/
 theorem gst_v2_infinite_prefix_one_collision
@@ -98,21 +81,10 @@ theorem gst_prefix_one_navigation_lift :
   exact gst_v2_infinite_prefix_one_collision s n hs hn hchild hBad
 
 '''
-          a, b = span(src, 'gst_prefix_one_navigation_lift')
+          a,b = span(src,'gst_prefix_one_navigation_lift')
           src = src[:a] + replacement + src[b:]
-
-          for dead in [
-              'theorem gst_omega_termination_s1',
-              'theorem gst_omega_termination_s3',
-              'theorem gst_omega_termination_stable',
-              'theorem gst_residual_omega_termination',
-              'theorem gst_residual_navigation_lift :',
-              'theorem gst_prefix_one_information_bad_descends_inline',
-              'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline',
-          ]:
-              if dead in src:
-                  raise SystemExit(f'dead declaration survived: {dead}')
-
+          for dead in ['theorem gst_omega_termination_s1','theorem gst_omega_termination_s3','theorem gst_omega_termination_stable','theorem gst_residual_omega_termination','theorem gst_residual_navigation_lift :','theorem gst_prefix_one_information_bad_descends_inline','theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline']:
+              if dead in src: raise SystemExit(f'dead declaration survived: {dead}')
           p.write_text(src)
           print('ONE_ERROR_SURGERY_APPLIED')
           print('SURGERY_LINES', src.count('\n') + 1)
