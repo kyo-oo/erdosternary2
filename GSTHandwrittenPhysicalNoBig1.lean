@@ -93,13 +93,17 @@ theorem gpt56_physical_noBig1_impossible
               2 * (M - ((2^r * R) % M)) := by
           simpa [M] using gpt56_binary_residue_gap_doubles R p r (by
             simpa [a] using hallCarry r)
-        calc
-          2^(r+1) = 2 * 2^r := by
-            rw [Nat.pow_succ]
-            ring
-          _ ≤ 2 * (M - ((2^r * R) % M)) :=
-            Nat.mul_le_mul_left 2 ih
-          _ = M - ((2^(r+1) * R) % M) := hdoubleM.symm
+        have hpow : 2^(r+1) = 2 * 2^r := by
+          rw [Nat.pow_succ]
+          ring
+        have hmul :
+            2 * 2^r ≤ 2 * (M - ((2^r * R) % M)) :=
+          Nat.mul_le_mul_left 2 ih
+        have hle :
+            2^(r+1) ≤ 2 * (M - ((2^r * R) % M)) := by
+          rw [hpow]
+          exact hmul
+        exact hle.trans_eq hdoubleM.symm
   have hAt := hgap M
   have hresM : (2^M * R) % M < M := Nat.mod_lt _ hM
   have hgapLe : M - ((2^M * R) % M) ≤ M := Nat.sub_le _ _
