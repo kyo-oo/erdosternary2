@@ -12,7 +12,7 @@
 --        Bridge prefix-one Omega bad trace to U-potential
 -- ====================================================================== -/
 
-import ErdosTernary2
+import ErdosPreOmega
 import HandwrittenUniversalParadoxPotentialScratch
 
 set_option maxRecDepth 1000000
