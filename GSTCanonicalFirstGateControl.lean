@@ -102,6 +102,8 @@ theorem gpt56_first_navigation_gate_short_big1
     gpt56_first_navigation_gate_u_control R hnav
   have hp : 0 < 3^q := Nat.pow_pos (by decide)
   have hres : R % 3^q < 3^q := Nat.mod_lt _ hp
+  have hd2raw : R / 3^q % 3 = 2 := by
+    simpa [gstDigit] using hd2
   have hd0 : GSTPhysicalKernel.binaryColumnDigit R q 0 = 2 := by
     simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
   rcases hC with hC0 | hC3
@@ -110,7 +112,7 @@ theorem gpt56_first_navigation_gate_short_big1
     have hrem4 : (4 * (R % 3^q)) % 3^q < 3^q := Nat.mod_lt _ hp
     have hsplit4 :
         4 * (R % 3^q) =
-          ((4 * (R % 3^q)) / 3^q) * 3^q +
+          3^q * ((4 * (R % 3^q)) / 3^q) +
             (4 * (R % 3^q)) % 3^q :=
       (Nat.div_add_mod (4 * (R % 3^q)) (3^q)).symm
     rw [hC0'] at hsplit4
@@ -121,7 +123,7 @@ theorem gpt56_first_navigation_gate_short_big1
     have hd1 : GSTPhysicalKernel.binaryColumnDigit R q 1 = 1 := by
       unfold GSTPhysicalKernel.binaryColumnDigit
       norm_num
-      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2]
+      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2raw]
       norm_num
     have hfirst : GSTFirstBig1AtS
         (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 1 := by
@@ -130,14 +132,15 @@ theorem gpt56_first_navigation_gate_short_big1
       · intro j hj
         have hj0 : j = 0 := by omega
         subst j
-        omega
+        rw [hd0]
+        decide
     exact ⟨q, 1, hd2, Or.inl hC0, Or.inl rfl, hfirst⟩
   · have hC3' : (4 * (R % 3^q)) / 3^q = 3 := by
       simpa [gstCarry] using hC3
     have hrem4 : (4 * (R % 3^q)) % 3^q < 3^q := Nat.mod_lt _ hp
     have hsplit4 :
         4 * (R % 3^q) =
-          ((4 * (R % 3^q)) / 3^q) * 3^q +
+          3^q * ((4 * (R % 3^q)) / 3^q) +
             (4 * (R % 3^q)) % 3^q :=
       (Nat.div_add_mod (4 * (R % 3^q)) (3^q)).symm
     rw [hC3'] at hsplit4
@@ -155,12 +158,12 @@ theorem gpt56_first_navigation_gate_short_big1
     have hd1 : GSTPhysicalKernel.binaryColumnDigit R q 1 = 2 := by
       unfold GSTPhysicalKernel.binaryColumnDigit
       norm_num
-      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2]
+      rw [hq2, Nat.add_mod, Nat.mul_mod, hdiv2, hd2raw]
       norm_num
     have hd2col : GSTPhysicalKernel.binaryColumnDigit R q 2 = 2 := by
       unfold GSTPhysicalKernel.binaryColumnDigit
       norm_num
-      rw [hq4, Nat.add_mod, Nat.mul_mod, hC3', hd2]
+      rw [hq4, Nat.add_mod, Nat.mul_mod, hC3', hd2raw]
       norm_num
     have h8lo : 6 * 3^q ≤ 8 * (R % 3^q) := by omega
     have h8hi : 8 * (R % 3^q) < 7 * 3^q := hbound hC3
@@ -172,7 +175,7 @@ theorem gpt56_first_navigation_gate_short_big1
     have hd3 : GSTPhysicalKernel.binaryColumnDigit R q 3 = 1 := by
       unfold GSTPhysicalKernel.binaryColumnDigit
       norm_num
-      rw [hq8, Nat.add_mod, Nat.mul_mod, hdiv8, hd2]
+      rw [hq8, Nat.add_mod, Nat.mul_mod, hdiv8, hd2raw]
       norm_num
     have hfirst : GSTFirstBig1AtS
         (fun r => GSTPhysicalKernel.binaryColumnDigit R q r) 3 := by
@@ -181,9 +184,9 @@ theorem gpt56_first_navigation_gate_short_big1
       · intro j hj
         have hjcases : j = 0 ∨ j = 1 ∨ j = 2 := by omega
         rcases hjcases with h0 | h1 | h2
-        · subst j; omega
-        · subst j; omega
-        · subst j; omega
+        · subst j; rw [hd0]; decide
+        · subst j; rw [hd1]; decide
+        · subst j; rw [hd2col]; decide
     exact ⟨q, 3, hd2, Or.inr hC3, Or.inr rfl, hfirst⟩
 
 #check gpt56_first_navigation_gate_u_control
