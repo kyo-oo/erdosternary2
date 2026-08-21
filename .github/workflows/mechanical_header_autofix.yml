@@ -1,0 +1,44 @@
+name: Mechanical Header Autofix
+
+on:
+  push:
+    branches:
+      - sol/gpt56-infinite-control-production
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-infinite-control-production
+          fetch-depth: 1
+      - name: Repair malformed chronological header and commit it
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/InformationDescentScratch.lean')
+          lines = p.read_text().splitlines(True)
+          changed = 0
+          for i in range(min(40, len(lines))):
+              if lines[i].startswith('/-'):
+                  lines[i] = '--' + lines[i][2:]
+                  changed += 1
+          p.write_text(''.join(lines))
+          print('HEADER_LINES_REPAIRED', changed)
+          PY
+          if git diff --quiet -- ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/InformationDescentScratch.lean; then
+            echo HEADER_ALREADY_CLEAN
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery/InformationDescentScratch.lean
+          git commit -m 'fix: repair malformed InformationDescent header'
+          git push origin HEAD:sol/gpt56-infinite-control-production
