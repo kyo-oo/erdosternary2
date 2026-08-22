@@ -1,0 +1,89 @@
+name: Final Event Transfer Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-final-event-transfer-20260823
+  workflow_dispatch:
+
+jobs:
+  kernel-probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+
+      - name: Extract pre-prefix-one kernel context
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          marker = 'def GSTPrefixOneNavigationLift : Prop :='
+          if marker not in src:
+              raise SystemExit('prefix-one marker missing')
+          prefix = src[:src.index(marker)]
+          probe = r'''
+
+/-- Kernel probe: the legacy creation certificate, if valid, already yields
+an honest Happy/Navigation cell of the same full power.  This theorem is kept
+strictly before every prefix-one lift definition to rule out circularity. -/
+theorem h_creation_for_4pow_yields_navigation
+    (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
+    GSTNavigationWitness (4^k) := by
+  obtain ⟨p, hp1, hd, hcase⟩ := h_creation_for_4pow k hk5 hk7
+  have hClt : gstCarry (4^k) p < 4 := gstCarry_lt_four _ _ hp1
+  rcases hcase with hmod0 | hmod1
+  · have hCmod : gstCarry (4^k) p % 3 = 0 := by
+      simpa [gstCarry] using hmod0
+    have hC : gstCarry (4^k) p = 0 ∨ gstCarry (4^k) p = 3 := by
+      omega
+    rcases hC with h0 | h3
+    · exact gstNavigationWitness_of_digit_carry_zero (4^k) p hd h0
+    · exact gstNavigationWitness_of_digit_carry_three (4^k) p hd h3
+  · have hCmod : gstCarry (4^k) p % 3 = 1 := by
+      simpa [gstCarry] using hmod1.1
+    have hC : gstCarry (4^k) p = 1 := by omega
+    have hnext := gstCarry_forward_exact (4^k) p hp1
+    rw [hC, hd] at hnext
+    norm_num [gstStepCarry] at hnext
+    have hdnext : gstDigit (4^k) (p+1) = 2 := by
+      simpa [gstDigit] using hmod1.2
+    exact gstNavigationWitness_of_digit_carry_three (4^k) (p+1) hdnext hnext
+
+#print axioms hCreationCheck_univ
+#print axioms h_creation_for_4pow
+#print axioms h_creation_for_4pow_yields_navigation
+'''
+          Path('FinalEventTransferKernelProbe.lean').write_text(prefix + probe, encoding='utf-8')
+          print('PREFIX_LINES', prefix.count('\n') + 1)
+          PY
+
+      - name: Compile and audit kernel probe
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean FinalEventTransferKernelProbe.lean 2>&1 | tee final-event-kernel.log
+          if grep -E 'error:|sorryAx|unknown tactic|declaration uses.*sorry' final-event-kernel.log; then
+            echo 'FINAL EVENT KERNEL PROBE FAILED AUDIT'
+            exit 1
+          fi
+          echo 'FINAL EVENT KERNEL PROBE GREEN'
