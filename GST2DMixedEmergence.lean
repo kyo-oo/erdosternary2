@@ -188,7 +188,8 @@ theorem mixed_row_emergence
     rw [mixed_cell_emergence (C t) (d t) hC hd, hout, hnext]
     ring
   rw [hlocal, Finset.sum_add_distrib, Finset.sum_add_distrib]
-  rw [horizontal_diff_telescope]
+  have htel := horizontal_diff_telescope (fun t => infoPotential (d t)) N
+  rw [htel]
   rw [Finset.sum_sub_distrib]
   rw [← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum]
   ring
