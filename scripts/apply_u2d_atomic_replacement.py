@@ -61,7 +61,9 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     dsimp [C]
     by_cases hq0 : q = 0
     · rw [hq0]
-      simp [gstCarry]
+      unfold gstCarry
+      rw [Nat.pow_zero]
+      norm_num
     · exact gstCarry_lt_four _ q (by omega)
   have hdlt : ∀ t, t < 3^s → d t < 3 := by
     intro t _ht
