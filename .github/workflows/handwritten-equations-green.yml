@@ -15,6 +15,14 @@ jobs:
       - name: Construct GST graph and run finite experiments
         shell: bash
         run: python3 experiments/handwritten_equations_graph.py
+      - name: Apply explicit red-seam proof to 16K monolith
+        shell: bash
+        run: |
+          python3 experiments/apply_explicit_red_seam.py
+          if grep -n 'gst_end' ErdosTernary2.lean; then
+            echo 'gst_end still occurs in the monolith after surgery'
+            exit 1
+          fi
       - name: Install Lean toolchain
         shell: bash
         run: |
@@ -27,7 +35,7 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Compile 16K monolith
+      - name: Compile patched 16K monolith
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
