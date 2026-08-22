@@ -488,6 +488,75 @@ theorem canonical_full_energy_four_column_digits
       (canonicalFullEnergy s n) (canonicalBinaryWidth s + 2) (s+2) q
       (4 + 3^(s+1)) (1 + 4 * canonicalParentTail s n) hpL2 hL2⟩
 
+/-- The Navigation witness produces a stride-two child incidence on the
+full-energy grid, while phase-one badness excludes every corresponding parent
+incidence on the right boundary of that same grid. -/
+theorem canonical_full_energy_boundary_events
+    (s n : Nat) (hs : 1 ≤ s)
+    (hchild : GSTNavigationWitness (canonicalChildTail s n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    let E := canonicalFullEnergy s n
+    let L := canonicalBinaryWidth s
+    (∃ q,
+      GSTPhysicalKernel.binaryColumnDigit E (s+2+q) 0 = 2 ∧
+      GSTPhysicalKernel.binaryColumnDigit E (s+2+q) 2 = 2) ∧
+    (∀ q, ¬
+      (GSTPhysicalKernel.binaryColumnDigit E (s+2+q) L = 2 ∧
+       GSTPhysicalKernel.binaryColumnDigit E (s+2+q) (L+2) = 2)) := by
+  dsimp only
+  have hparentV2 :
+      GSTV2.SeededBadTrace 1 (canonicalParentTail s n) := by
+    simpa [canonicalParentTail, canonicalChildTail,
+      GSTV2.CoupledState.parentWord, gpt56PhaseInitialState,
+      gpt56PhaseA, gpt56PhaseT] using
+      gpt56_phase_bad_to_v2_seeded s n hs hBad
+  have hparentS :
+      GSTSeededBadTraceS 1 (canonicalParentTail s n) := by
+    simpa [GSTV2.SeededBadTrace, GSTV2.Happy, GSTV2.affineCarry,
+      GSTV2.digit, GSTSeededBadTraceS, GSTBadPairS,
+      gstAffineMulCarryS, gstDigitS] using hparentV2
+  have hparentNo :=
+    (gst_seeded_bad_iff_no_common_twoS
+      1 (canonicalParentTail s n) (by decide)).1 hparentS
+  have hchildCommon : ∃ q,
+      gstDigitS (canonicalChildTail s n) q = 2 ∧
+      gstDigitS (4 * canonicalChildTail s n) q = 2 := by
+    obtain ⟨q, hnull | hplus⟩ :=
+      gpt56_first_navigation_gate_exact_binary_chord
+        (canonicalChildTail s n) hchild
+    · refine ⟨q,
+        (gst_seeded_happy_iff_common_twoS
+          0 (canonicalChildTail s n) q (by decide)).1 ?_⟩
+      refine ⟨?_, Or.inl ?_⟩
+      · simpa [gstDigitS, gstDigit] using hnull.1
+      · simpa [gstAffineMulCarryS, gstCarry] using hnull.2.1
+    · refine ⟨q,
+        (gst_seeded_happy_iff_common_twoS
+          0 (canonicalChildTail s n) q (by decide)).1 ?_⟩
+      refine ⟨?_, Or.inr ?_⟩
+      · simpa [gstDigitS, gstDigit] using hplus.1
+      · simpa [gstAffineMulCarryS, gstCarry] using hplus.2.1
+  constructor
+  · obtain ⟨q, hq0, hq2⟩ := hchildCommon
+    obtain ⟨h0, h2, _hL, _hL2⟩ :=
+      canonical_full_energy_four_column_digits s n q hs
+    refine ⟨q, ?_, ?_⟩
+    · rw [h0]
+      simpa [gstDigitS, gstDigit] using hq0
+    · rw [h2]
+      simpa [gstDigitS, gstDigit] using hq2
+  · intro q hright
+    obtain ⟨_h0, _h2, hL, hL2⟩ :=
+      canonical_full_energy_four_column_digits s n q hs
+    have hx := hright.1
+    have hx4 := hright.2
+    rw [hL] at hx
+    rw [hL2] at hx4
+    apply hparentNo q
+    exact ⟨
+      by simpa [gstDigitS, gstDigit] using hx,
+      by simpa [gstDigitS, gstDigit] using hx4⟩
+
 end GSTSpacetimeV2
 
 #check GSTSpacetimeV2.physical_cell_exact
@@ -495,7 +564,9 @@ end GSTSpacetimeV2
 #check GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #check GSTSpacetimeV2.physical_incidence_exists_of_positive
 #check GSTSpacetimeV2.canonical_full_energy_four_column_digits
+#check GSTSpacetimeV2.canonical_full_energy_boundary_events
 #print axioms GSTSpacetimeV2.physical_rectangle_exact
 #print axioms GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #print axioms GSTSpacetimeV2.physical_incidence_exists_of_positive
 #print axioms GSTSpacetimeV2.canonical_full_energy_four_column_digits
+#print axioms GSTSpacetimeV2.canonical_full_energy_boundary_events
