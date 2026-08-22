@@ -1,0 +1,75 @@
+name: GPT56 Direct Prefix Audit
+
+on:
+  push:
+    branches:
+      - sol/gpt56-2d-emergence-surgery-20260822
+    paths:
+      - 'ErdosTernary2.lean'
+      - '.github/workflows/gpt56_direct_prefix_audit.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Extract earliest universal proof prefix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8').splitlines()
+          starts = [i for i,l in enumerate(src) if l.startswith('theorem erdos_ternary_2_universal')]
+          if not starts:
+              raise SystemExit('missing erdos_ternary_2_universal')
+          start = starts[0]
+          decl = re.compile(r'^(?:theorem|def|structure|inductive|class|instance|abbrev)\s+')
+          end = None
+          for i in range(start + 1, len(src)):
+              if decl.match(src[i]):
+                  end = i
+                  break
+          if end is None:
+              end = len(src)
+          out = src[:end]
+          out += [
+            '',
+            '#print axioms h_creation_for_4pow',
+            '#print axioms mul4_lift_gst_duality',
+            '#print axioms erdos_ternary_2_even_universal',
+            '#print axioms erdos_ternary_2_universal',
+          ]
+          Path('DirectUniversalPrefix.lean').write_text('\n'.join(out) + '\n', encoding='utf-8')
+          print(f'first universal theorem starts line {start+1}; prefix ends line {end}')
+          PY
+          if grep -nE '(^|[^A-Za-z_])(sorry|admit|gst_end)([^A-Za-z_]|$)' DirectUniversalPrefix.lean; then
+            echo 'Forbidden proof token present in direct prefix.'
+            exit 1
+          fi
+      - name: Compile and audit direct universal prefix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean DirectUniversalPrefix.lean 2>&1 | tee direct-prefix.log
+          if grep -E 'sorryAx|unknown tactic|declaration uses.*sorry' direct-prefix.log; then
+            echo 'Axiom audit failed.'
+            exit 1
+          fi
