@@ -37,11 +37,15 @@ jobs:
           set -euxo pipefail
           SNAP15="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
           SNAP16="$PWD/ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
+          cp ErdosTernary2.lean ErdosTernary2.full.lean
+          trap 'cp ErdosTernary2.full.lean ErdosTernary2.lean' EXIT
           LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
           CUT=$((LEGACY_LINE - 2))
           test "$CUT" -eq 7326
           head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+          cp ErdosPreOmega.lean ErdosTernary2.lean
+          lake env lean -o ErdosTernary2.olean ErdosTernary2.lean
           export LEAN_PATH="$PWD:$SNAP16:$SNAP15:${LEAN_PATH:-}"
           python3 - <<'PY'
           from pathlib import Path
@@ -99,6 +103,8 @@ jobs:
           set -o pipefail
           lake env lean GSTHandwrittenPrefixOneCollisionRepair.lean 2>&1 | tee collision-lean.log
           ! grep -E 'error:|declaration uses .*[Ss]orry|sorryAx' collision-lean.log
+          cp ErdosTernary2.full.lean ErdosTernary2.lean
+          trap - EXIT
 
       - name: Typecheck active proof monolith
         timeout-minutes: 45
