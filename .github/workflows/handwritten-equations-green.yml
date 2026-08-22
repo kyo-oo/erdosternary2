@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Construct GST graph and run finite experiments
+        shell: bash
+        run: python3 experiments/handwritten_equations_graph.py
       - name: Install Lean toolchain
         shell: bash
         run: |
