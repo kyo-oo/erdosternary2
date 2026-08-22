@@ -1,0 +1,18 @@
+import GSTGraphV2InfiniteControl
+
+open GSTGraphV2InfiniteControl
+
+#check graph_cell_exact
+#check graph_happy_iff_event_eight
+#check graph_happy_iff_crossing_positive
+#check graph_event_balance_exact
+#check graph_cross_rectangle_exact
+#check prefix_slice_digit_exact
+#check prefix_slice_carry_exact
+#check prefix_slice_seed_zero
+#check prefix_slice_seed_one
+
+#print axioms graph_cell_exact
+#print axioms graph_cross_rectangle_exact
+#print axioms prefix_slice_digit_exact
+#print axioms prefix_slice_carry_exact
