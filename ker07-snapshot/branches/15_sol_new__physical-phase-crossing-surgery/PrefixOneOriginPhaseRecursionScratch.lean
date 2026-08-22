@@ -46,7 +46,7 @@ theorem gst_hard_tail_parent_navigationS
   have hrec := gst_canonical_prefix_recurrenceS Q hQ t 1 1 n ht
   norm_num at hrec
   rw [hrec, hunit t ht]
-  unfold GSTHardPrefixOneTailS GSTCanonicalBlockS
+  unfold GSTHardPrefixOneTailS
   ring
 
 /-- Origin trit one: exact 3-affine copy of the same hard object one level
