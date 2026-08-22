@@ -28,3 +28,38 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GST2DMixedEmergence.lean
+      - name: Extract direct universal prefix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8').splitlines()
+          starts = [i for i,l in enumerate(src) if l.startswith('theorem erdos_ternary_2_universal')]
+          if not starts:
+              raise SystemExit('missing erdos_ternary_2_universal')
+          start = starts[0]
+          decl = re.compile(r'^(?:theorem|def|structure|inductive|class|instance|abbrev)\s+')
+          end = next((i for i in range(start+1, len(src)) if decl.match(src[i])), len(src))
+          out = src[:end]
+          out += [
+            '',
+            '#print axioms h_creation_for_4pow',
+            '#print axioms mul4_lift_gst_duality',
+            '#print axioms erdos_ternary_2_even_universal',
+            '#print axioms erdos_ternary_2_universal',
+          ]
+          Path('DirectUniversalPrefix.lean').write_text('\n'.join(out) + '\n', encoding='utf-8')
+          print(f'universal starts line {start+1}; prefix ends line {end}')
+          PY
+      - name: Compile and axiom-audit direct prefix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean DirectUniversalPrefix.lean 2>&1 | tee direct-prefix.log
+          if grep -E 'sorryAx|unknown tactic|declaration uses.*sorry' direct-prefix.log; then
+            echo 'FORBIDDEN AXIOM IN DIRECT PREFIX'
+            exit 1
+          fi
