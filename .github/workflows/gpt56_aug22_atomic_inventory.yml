@@ -22,9 +22,8 @@ jobs:
           echo '=== TOP LEAN FILES BY LINE COUNT ==='
           find . -type f -name '*.lean' -not -path './.lake/*' -print0 \
             | xargs -0 wc -l \
-            | sort -nr \
-            | head -100 \
-            | tee /tmp/lean-lines.txt
+            | sort -nr > /tmp/all-lean-lines.txt
+          sed -n '1,100p' /tmp/all-lean-lines.txt
           echo '=== LEAN FILES >= 16000 LINES ==='
           found=0
           while IFS= read -r -d '' f; do
@@ -39,11 +38,7 @@ jobs:
           wc -l ErdosTernary2.lean
           grep -n -E '\bsorry\b|\badmit\b|sorryAx' ErdosTernary2.lean || true
           echo '=== PROVENANCE CHECK ==='
-          if [ -f GSTResidueSpacetimeScratch.lean ]; then
-            echo ROOT_RESIDUE_SCRATCH_PRESENT
-          else
-            echo ROOT_RESIDUE_SCRATCH_ABSENT
-          fi
+          if [ -f GSTResidueSpacetimeScratch.lean ]; then echo ROOT_RESIDUE_SCRATCH_PRESENT; else echo ROOT_RESIDUE_SCRATCH_ABSENT; fi
 
       - name: Install pinned Lean
         shell: bash
