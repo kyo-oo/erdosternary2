@@ -157,7 +157,8 @@ theorem physical_ternary_boundary_exact
         (fun r p => GSTPhysicalKernel.binaryColumnDigit R p r) r K =
       (2^r * R) % 3^K := by
   induction K with
-  | zero => simp [ternaryBoundaryWord]
+  | zero =>
+      rw [ternaryBoundaryWord, Nat.pow_zero, Nat.mod_one]
   | succ K ih =>
       rw [ternaryBoundaryWord, ih]
       simpa [gstPrefixedModulusS, GSTPhysicalKernel.binaryColumnDigit,
@@ -205,7 +206,7 @@ theorem physical_rectangle_exact
       physical_ternary_boundary_exact,
       physical_ternary_boundary_exact,
       physical_binary_boundary_exact] at h
-  simpa using h
+  simpa only [Nat.mod_one, Nat.mul_zero, Nat.zero_add] using h
 
 end GSTSpacetimeV2
 
