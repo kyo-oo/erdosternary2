@@ -11,8 +11,12 @@ open GSTGraphV2InfiniteControl
 #check prefix_slice_carry_exact
 #check prefix_slice_seed_zero
 #check prefix_slice_seed_one
+#check graph_prefix_slice_exact
+#check graph_prefix_slice_happy_iff
 
 #print axioms graph_cell_exact
 #print axioms graph_cross_rectangle_exact
 #print axioms prefix_slice_digit_exact
 #print axioms prefix_slice_carry_exact
+#print axioms graph_prefix_slice_exact
+#print axioms graph_prefix_slice_happy_iff
