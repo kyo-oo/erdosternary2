@@ -221,4 +221,40 @@ theorem prefix_slice_seed_one
   have hone : (4 * P) / 3^b = 1 := by omega
   rw [hone]
 
+/-- Literal graph form of the prefix-slice socket.  Any exact decomposition of
+the horizontal full energy gives both the tail trit and the prefix-generated
+seeded carry at the corresponding vertical slice. -/
+theorem graph_prefix_slice_exact
+    (E t b P tail q : Nat)
+    (hE : 4^t * E = P + 3^b * tail)
+    (hP : P < 3^b) :
+    (graph E t (b+q)).seven.digit = digit3 tail q ∧
+      (graph E t (b+q)).seven.carry =
+        seededCarry ((4 * P) / 3^b) tail q := by
+  constructor
+  · change digit3 (4^t * E) (b+q) = digit3 tail q
+    rw [hE]
+    exact prefix_slice_digit_exact b P tail q hP
+  · change carry4 (4^t * E) (b+q) =
+      seededCarry ((4 * P) / 3^b) tail q
+    rw [hE]
+    exact prefix_slice_carry_exact b P tail q hP
+
+/-- On a literal full-energy slice, Happy/event-eight is exactly the seeded
+Happy predicate of the exposed tail.  This is the production adapter used by
+Atomic Surgery V2; no tail-only horizontal surrogate is introduced. -/
+theorem graph_prefix_slice_happy_iff
+    (E t b P tail q : Nat)
+    (hE : 4^t * E = P + 3^b * tail)
+    (hP : P < 3^b) :
+    HappyCell
+        (graph E t (b+q)).seven.carry
+        (graph E t (b+q)).seven.digit ↔
+      digit3 tail q = 2 ∧
+        (seededCarry ((4 * P) / 3^b) tail q = 0 ∨
+         seededCarry ((4 * P) / 3^b) tail q = 3) := by
+  have hslice := graph_prefix_slice_exact E t b P tail q hE hP
+  unfold HappyCell
+  rw [hslice.1, hslice.2]
+
 end GSTGraphV2InfiniteControl
