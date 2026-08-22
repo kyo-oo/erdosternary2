@@ -157,7 +157,7 @@ theorem infoPotential_nonpositive
   · rw [h0.2]
   · rw [h1.2]
   · rw [h2.2]
-  all_goals omega
+  all_goals norm_num
 
 #check gst_u_charge_as_carry_potential
 #check gst_coupled_potential_as_mixed_boundary
