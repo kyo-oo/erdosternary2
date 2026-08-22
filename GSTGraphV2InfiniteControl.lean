@@ -128,7 +128,7 @@ theorem graph_cross_rectangle_exact (E N K : Nat) :
 
 These lemmas are the critical production socket.  They keep the low canonical
 prefix instead of replacing a full energy by the exposed tail.  A slice of
-`prefix + 3^b * tail` at vertical coordinate `b+q` therefore reads the tail
+`P + 3^b * tail` at vertical coordinate `b+q` therefore reads the tail
 information digit together with the correct seeded x4 carry.
 -/
 
@@ -139,88 +139,87 @@ def seededCarry (seed tail q : Nat) : Nat :=
 /-- The shifted quotient of an exact prefix/tail decomposition is the tail
 quotient. -/
 theorem prefix_slice_quotient_exact
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b) :
-    (prefix + 3^b * tail) / 3^(b+q) = tail / 3^q := by
+    (b P tail q : Nat)
+    (hP : P < 3^b) :
+    (P + 3^b * tail) / 3^(b+q) = tail / 3^q := by
   have hp : 0 < 3^b := Nat.pow_pos (by decide)
   rw [pow_add, ← Nat.div_div_eq_div_mul]
-  rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt hprefix, Nat.zero_add]
+  rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt hP, Nat.zero_add]
 
 /-- The information digit on the full-energy slice is literally the tail digit. -/
 theorem prefix_slice_digit_exact
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b) :
-    digit3 (prefix + 3^b * tail) (b+q) = digit3 tail q := by
+    (b P tail q : Nat)
+    (hP : P < 3^b) :
+    digit3 (P + 3^b * tail) (b+q) = digit3 tail q := by
   unfold digit3
-  rw [prefix_slice_quotient_exact b prefix tail q hprefix]
+  rw [prefix_slice_quotient_exact b P tail q hP]
 
 /-- The low prefix of an exact decomposition is recovered modulo its ternary
 place. -/
 private theorem prefix_mod_exact
-    (b prefix tail : Nat)
-    (hprefix : prefix < 3^b) :
-    (prefix + 3^b * tail) % 3^b = prefix := by
-  have hp : 0 < 3^b := Nat.pow_pos (by decide)
+    (b P tail : Nat)
+    (hP : P < 3^b) :
+    (P + 3^b * tail) % 3^b = P := by
   rw [Nat.add_mod, Nat.mul_mod, Nat.mod_self, Nat.zero_mul, Nat.add_zero,
-    Nat.mod_eq_of_lt hprefix]
+    Nat.mod_eq_of_lt hP]
 
 /-- The full remainder at the deeper slice retains the low prefix and only the
 visible tail remainder. -/
 private theorem prefix_deep_mod_exact
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b) :
-    (prefix + 3^b * tail) % (3^b * 3^q) =
-      prefix + 3^b * (tail % 3^q) := by
+    (b P tail q : Nat)
+    (hP : P < 3^b) :
+    (P + 3^b * tail) % (3^b * 3^q) =
+      P + 3^b * (tail % 3^q) := by
   rw [Nat.mod_mul]
-  rw [prefix_mod_exact b prefix tail hprefix]
+  rw [prefix_mod_exact b P tail hP]
   have hp : 0 < 3^b := Nat.pow_pos (by decide)
-  have hdiv : (prefix + 3^b * tail) / 3^b = tail := by
-    rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt hprefix, Nat.zero_add]
+  have hdiv : (P + 3^b * tail) / 3^b = tail := by
+    rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt hP, Nat.zero_add]
   rw [hdiv]
 
 /-- Exact seeded carry projection.  The seed is not assumed: it is generated
-by the canonical low prefix as `floor(4*prefix / 3^b)`. -/
+by the canonical low prefix as `floor(4*P / 3^b)`. -/
 theorem prefix_slice_carry_exact
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b) :
-    carry4 (prefix + 3^b * tail) (b+q) =
-      seededCarry ((4 * prefix) / 3^b) tail q := by
+    (b P tail q : Nat)
+    (hP : P < 3^b) :
+    carry4 (P + 3^b * tail) (b+q) =
+      seededCarry ((4 * P) / 3^b) tail q := by
   unfold carry4 seededCarry
   rw [pow_add]
-  rw [prefix_deep_mod_exact b prefix tail q hprefix]
+  rw [prefix_deep_mod_exact b P tail q hP]
   rw [← Nat.div_div_eq_div_mul]
   have hp : 0 < 3^b := Nat.pow_pos (by decide)
   have hshape :
-      4 * (prefix + 3^b * (tail % 3^q)) =
-        4 * prefix + 3^b * (4 * (tail % 3^q)) := by ring
+      4 * (P + 3^b * (tail % 3^q)) =
+        4 * P + 3^b * (4 * (tail % 3^q)) := by ring
   rw [hshape, Nat.add_mul_div_left _ _ hp]
 
 /-- Seed-zero specialization: a prefix whose fourfold copy remains below the
 slice modulus exposes the ordinary child carry. -/
 theorem prefix_slice_seed_zero
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b)
-    (hseed : 4 * prefix < 3^b) :
-    carry4 (prefix + 3^b * tail) (b+q) = seededCarry 0 tail q := by
-  rw [prefix_slice_carry_exact b prefix tail q hprefix]
-  have hz : (4 * prefix) / 3^b = 0 := Nat.div_eq_of_lt hseed
+    (b P tail q : Nat)
+    (hP : P < 3^b)
+    (hseed : 4 * P < 3^b) :
+    carry4 (P + 3^b * tail) (b+q) = seededCarry 0 tail q := by
+  rw [prefix_slice_carry_exact b P tail q hP]
+  have hz : (4 * P) / 3^b = 0 := Nat.div_eq_of_lt hseed
   rw [hz]
 
 /-- Seed-one specialization: when the fourfold low prefix lies in the first
 nonzero ternary slice, the same full-energy graph exposes a seed-one parent. -/
 theorem prefix_slice_seed_one
-    (b prefix tail q : Nat)
-    (hprefix : prefix < 3^b)
-    (hlo : 3^b ≤ 4 * prefix)
-    (hhi : 4 * prefix < 2 * 3^b) :
-    carry4 (prefix + 3^b * tail) (b+q) = seededCarry 1 tail q := by
-  rw [prefix_slice_carry_exact b prefix tail q hprefix]
+    (b P tail q : Nat)
+    (hP : P < 3^b)
+    (hlo : 3^b ≤ 4 * P)
+    (hhi : 4 * P < 2 * 3^b) :
+    carry4 (P + 3^b * tail) (b+q) = seededCarry 1 tail q := by
+  rw [prefix_slice_carry_exact b P tail q hP]
   have hp : 0 < 3^b := Nat.pow_pos (by decide)
-  have hlo' : 1 ≤ (4 * prefix) / 3^b := by
+  have hlo' : 1 ≤ (4 * P) / 3^b := by
     exact (Nat.le_div_iff_mul_le hp).2 (by simpa using hlo)
-  have hhi' : (4 * prefix) / 3^b < 2 := by
+  have hhi' : (4 * P) / 3^b < 2 := by
     exact (Nat.div_lt_iff_lt_mul hp).2 (by simpa using hhi)
-  have hone : (4 * prefix) / 3^b = 1 := by omega
+  have hone : (4 * P) / 3^b = 1 := by omega
   rw [hone]
 
 end GSTGraphV2InfiniteControl
