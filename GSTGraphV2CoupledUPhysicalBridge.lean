@@ -50,7 +50,8 @@ theorem base4_prefix_value (S N : Nat) :
     Finset.sum (Finset.range N) (fun i => 4^i * base4Digit S i) =
       S % 4^N := by
   induction N with
-  | zero => simp
+  | zero =>
+      simp only [Finset.range_zero, Finset.sum_empty, Nat.pow_zero, Nat.mod_one]
   | succ N ih =>
       rw [Finset.sum_range_succ, ih]
       unfold base4Digit
@@ -88,13 +89,13 @@ theorem horizontal_flux_telescope
       ((4^i : Nat) : Int) * horizontalFluxWith charge S i) =
       reducedChargeWith charge (base4Digit S 0) -
         ((4^N : Nat) : Int) * reducedChargeWith charge (base4Digit S N) +
-        6 * (S % 4^N : Int) := by
+        6 * ((S % 4^N : Nat) : Int) := by
   rw [horizontal_flux_telescope_raw]
   have hp := base4_prefix_value S N
   have hpZ :
       Finset.sum (Finset.range N) (fun i =>
         ((4^i : Nat) : Int) * (base4Digit S i : Int)) =
-        (S % 4^N : Int) := by
+        ((S % 4^N : Nat) : Int) := by
     exact_mod_cast hp
   rw [hpZ]
 
@@ -139,9 +140,13 @@ theorem coupled_potential_is_horizontal_base4_flux
     rw [← hA, hShared, Nat.add_mod, Nat.mul_mod]
     simp [Nat.mod_eq_of_lt hResidue]
   have htel := horizontal_flux_telescope charge S N
-  rw [hLow, hHigh, hPrefix] at htel
+  rw [hLow, hHigh]
+  have hPrefixZ : ((S % 4^N : Nat) : Int) = (st.childResidue : Int) := by
+    exact_mod_cast hPrefix
+  rw [hPrefixZ] at htel
   have hpot := potential_shared_rewrite charge A st hInv
   rw [hA] at hpot
+  dsimp [S] at htel
   exact hpot.trans htel.symm
 
 /-- GST handwritten-U specialization of the physical bridge. -/
