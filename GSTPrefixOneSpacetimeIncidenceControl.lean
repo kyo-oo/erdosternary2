@@ -524,18 +524,28 @@ theorem canonical_full_energy_boundary_events
     obtain ⟨q, hnull | hplus⟩ :=
       gpt56_first_navigation_gate_exact_binary_chord
         (canonicalChildTail s n) hchild
-    · refine ⟨q,
+    · have hhappy :
+          gstDigitS (canonicalChildTail s n) q = 2 ∧
+            (gstAffineMulCarryS 4 0 (canonicalChildTail s n) q = 0 ∨
+             gstAffineMulCarryS 4 0 (canonicalChildTail s n) q = 3) := by
+        exact ⟨
+          by simpa [gstDigitS, gstDigit] using hnull.1,
+          Or.inl (by simpa [gstAffineMulCarryS, gstCarry] using hnull.2.1)⟩
+      have hcommon :=
         (gst_seeded_happy_iff_common_twoS
-          0 (canonicalChildTail s n) q (by decide)).1 ?_⟩
-      refine ⟨?_, Or.inl ?_⟩
-      · simpa [gstDigitS, gstDigit] using hnull.1
-      · simpa [gstAffineMulCarryS, gstCarry] using hnull.2.1
-    · refine ⟨q,
+          0 (canonicalChildTail s n) q (by decide)).1 hhappy
+      exact ⟨q, by simpa only [Nat.zero_add] using hcommon⟩
+    · have hhappy :
+          gstDigitS (canonicalChildTail s n) q = 2 ∧
+            (gstAffineMulCarryS 4 0 (canonicalChildTail s n) q = 0 ∨
+             gstAffineMulCarryS 4 0 (canonicalChildTail s n) q = 3) := by
+        exact ⟨
+          by simpa [gstDigitS, gstDigit] using hplus.1,
+          Or.inr (by simpa [gstAffineMulCarryS, gstCarry] using hplus.2.1)⟩
+      have hcommon :=
         (gst_seeded_happy_iff_common_twoS
-          0 (canonicalChildTail s n) q (by decide)).1 ?_⟩
-      refine ⟨?_, Or.inr ?_⟩
-      · simpa [gstDigitS, gstDigit] using hplus.1
-      · simpa [gstAffineMulCarryS, gstCarry] using hplus.2.1
+          0 (canonicalChildTail s n) q (by decide)).1 hhappy
+      exact ⟨q, by simpa only [Nat.zero_add] using hcommon⟩
   constructor
   · obtain ⟨q, hq0, hq2⟩ := hchildCommon
     obtain ⟨h0, h2, _hL, _hL2⟩ :=
