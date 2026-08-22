@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  inventory-and-spine:
+  inventory-and-clean-spine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -38,6 +38,12 @@ jobs:
           echo '=== ROOT MONOLITH ==='
           wc -l ErdosTernary2.lean
           grep -n -E '\bsorry\b|\badmit\b|sorryAx' ErdosTernary2.lean || true
+          echo '=== PROVENANCE CHECK ==='
+          if [ -f GSTResidueSpacetimeScratch.lean ]; then
+            echo ROOT_RESIDUE_SCRATCH_PRESENT
+          else
+            echo ROOT_RESIDUE_SCRATCH_ABSENT
+          fi
 
       - name: Install pinned Lean
         shell: bash
@@ -56,7 +62,7 @@ jobs:
           lake exe cache get
           lake build GSTTactic
 
-      - name: Compile current Aug22 V2 spine
+      - name: Compile clean Aug22 phase spine
         timeout-minutes: 45
         shell: bash
         run: |
@@ -64,5 +70,12 @@ jobs:
           export LEAN_PATH="$PWD:${LEAN_PATH:-}"
           lake env lean -o GSTPrefixOnePhaseIncidenceControl.olean GSTPrefixOnePhaseIncidenceControl.lean 2>&1 | tee /tmp/phase.log
           ! grep -q 'sorryAx' /tmp/phase.log
-          lake env lean -o GSTPrefixOneSpacetimeIncidenceControl.olean GSTPrefixOneSpacetimeIncidenceControl.lean 2>&1 | tee /tmp/spacetime.log
-          ! grep -q 'sorryAx' /tmp/spacetime.log
+
+      - name: Compile new stride-two layer
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export LEAN_PATH="$PWD:${LEAN_PATH:-}"
+          lake env lean GSTPrefixOneStrideTwoControl.lean 2>&1 | tee /tmp/stride.log
+          ! grep -q 'sorryAx' /tmp/stride.log
