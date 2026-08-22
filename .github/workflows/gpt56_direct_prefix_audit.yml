@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - sol/gpt56-2d-emergence-surgery-20260822
-    paths:
-      - 'ErdosTernary2.lean'
-      - '.github/workflows/gpt56_direct_prefix_audit.yml'
+  pull_request:
   workflow_dispatch:
 
 jobs:
