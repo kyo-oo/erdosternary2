@@ -368,7 +368,8 @@ theorem canonical_phase_multiplier_decomposition
     omega
   calc
     4^(3^s) = 1 + 3^(s+1) * c s := lte_identity s hs
-    _ = 1 + 3^(s+1) * (1 + 3 * (c s / 3)) := by rw [hc]
+    _ = 1 + 3^(s+1) * (1 + 3 * (c s / 3)) := by
+      conv_lhs => rw [hc]
     _ = 1 + 3^(s+1) + 3^(s+2) * (c s / 3) := by
       rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
       ring
