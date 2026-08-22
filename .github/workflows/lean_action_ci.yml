@@ -30,6 +30,13 @@ jobs:
         timeout-minutes: 10
         run: lake build GSTTactic
 
+      - name: Typecheck handwritten GST V2 collision theorem
+        timeout-minutes: 45
+        run: |
+          set -o pipefail
+          lake env lean GSTHandwrittenPrefixOneCollisionRepair.lean 2>&1 | tee collision-lean.log
+          ! grep -E 'error:|declaration uses .*[Ss]orry|sorryAx' collision-lean.log
+
       - name: Typecheck active proof monolith
         timeout-minutes: 45
         run: |
