@@ -94,12 +94,7 @@ def reverseSurviveCode (C d : Nat → Nat) : Nat → Int
   | 0 => 0
   | N+1 => 4 * reverseSurviveCode C d N + surviveI (C N) (d N)
 
-/-- **Exact horizontal crossing telescope.**
-
-For any physical x4 row, the reverse-base-four crossing code is exactly the
-right-minus-left information boundary plus the vertically coupled carry flux
-and the positive microscopic SURVIVE incidence.  This is an identity at every
-finite observation width, not a termination statement. -/
+/-- **Exact horizontal crossing telescope.** -/
 theorem reverseCrossCode_exact
     (C Cnext d : Nat → Nat) : ∀ N : Nat,
     (∀ t, t < N → outDigit (C t) (d t) = d (t+1)) →
@@ -126,12 +121,7 @@ theorem reverseCrossCode_exact
       push_cast
       ring
 
-/-- **All-width horizontal no-erasure.**
-
-Once the first physical cell is Happy, its exact `+105` information charge
-cannot be erased by any later physical x4 continuation.  At each new column
-the retained charge is multiplied by four while the worst possible local loss
-is only `111`, so the invariant remains at least `105` forever. -/
+/-- **All-width horizontal no-erasure.** -/
 theorem reverseCrossCode_ge_105_of_leading_happy
     (C d : Nat → Nat)
     (hfirst : HappyCell (C 0) (d 0)) :
@@ -164,8 +154,120 @@ theorem reverseCrossCode_ge_105_of_leading_happy
         rw [reverseCrossCode]
         omega
 
-/-- The optimized charge therefore gives an exact strict sign separator for a
-single physical event: Happy is `+105`, bad is non-positive. -/
+/-- Exact exponential form of the no-erasure pressure.  The minimum recurrence
+is `x ↦ 4x-111`, started at `105`, hence the closed lower envelope is
+`17·4^N+37`. -/
+theorem reverseCrossCode_ge_exponential_of_leading_happy
+    (C d : Nat → Nat)
+    (hfirst : HappyCell (C 0) (d 0)) :
+    ∀ N : Nat,
+      1 ≤ N →
+      (∀ t, t < N → C t < 4) →
+      (∀ t, t < N → d t < 3) →
+      17 * (((4^N : Nat) : Int)) + 37 ≤ reverseCrossCode C d N := by
+  intro N
+  induction N with
+  | zero =>
+      intro hN
+      omega
+  | succ N ih =>
+      intro hN hC hd
+      by_cases hN0 : N = 0
+      · subst N
+        rw [reverseCrossCode]
+        simp only [reverseCrossCode]
+        rw [crossDensity_happy_exact (C 0) (d 0) hfirst]
+        norm_num
+      · have hNpos : 1 ≤ N := Nat.one_le_iff_ne_zero.mpr hN0
+        have ih' :
+            17 * (((4^N : Nat) : Int)) + 37 ≤ reverseCrossCode C d N :=
+          ih hNpos
+            (fun t ht => hC t (by omega))
+            (fun t ht => hd t (by omega))
+        have hlast : (-111 : Int) ≤ crossDensity (C N) (d N) :=
+          crossDensity_ge_neg111 (C N) (d N)
+            (hC N (by omega)) (hd N (by omega))
+        rw [reverseCrossCode, Nat.pow_succ]
+        push_cast
+        omega
+
+/-- Base-three weighted vertical derivative telescope. -/
+theorem ternaryWeightedDiff_telescope (g : Nat → Int) (K : Nat) :
+    Finset.sum (Finset.range K) (fun p =>
+      (((3^p : Nat) : Int)) * (g p - 3 * g (p+1))) =
+      g 0 - (((3^K : Nat) : Int)) * g K := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih, Nat.pow_succ]
+      push_cast
+      ring
+
+/-- **Exact base-4 × base-3 crossing rectangle.**
+Every interior carry derivative cancels.  The upper boundary remains live and
+explicit; no finite-support, terminal-space, or wave-termination premise is
+used. -/
+theorem reverseCrossRectangle_exact
+    (C d : Nat → Nat → Nat) (N K : Nat)
+    (hcell : ∀ t p, t < N → p < K →
+      C t p < 4 ∧ d t p < 3 ∧
+      outDigit (C t p) (d t p) = d (t+1) p ∧
+      nextCarry (C t p) (d t p) = C t (p+1)) :
+    Finset.sum (Finset.range K) (fun p =>
+      (((3^p : Nat) : Int)) *
+        reverseCrossCode (fun t => C t p) (fun t => d t p) N) =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          (digitPotential (d N p) -
+            (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
+            84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N)) +
+      reverseCarryCode (fun t => C t 0) N -
+        (((3^K : Nat) : Int)) * reverseCarryCode (fun t => C t K) N := by
+  let g : Nat → Int := fun p => reverseCarryCode (fun t => C t p) N
+  have htel := ternaryWeightedDiff_telescope g K
+  calc
+    Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          reverseCrossCode (fun t => C t p) (fun t => d t p) N) =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          ((digitPotential (d N p) -
+              (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
+              84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N) +
+            (g p - 3 * g (p+1)))) := by
+      apply Finset.sum_congr rfl
+      intro p hp
+      have hpK : p < K := Finset.mem_range.mp hp
+      have hrow := reverseCrossCode_exact
+        (fun t => C t p) (fun t => C t (p+1)) (fun t => d t p) N
+        (fun t ht => (hcell t p ht hpK).2.2.1)
+        (fun t ht => (hcell t p ht hpK).2.2.2)
+      dsimp [g]
+      rw [hrow]
+      ring
+    _ =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          (digitPotential (d N p) -
+            (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
+            84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N)) +
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) * (g p - 3 * g (p+1))) := by
+      rw [← Finset.sum_add_distrib]
+      apply Finset.sum_congr rfl
+      intro p hp
+      ring
+    _ =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          (digitPotential (d N p) -
+            (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
+            84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N)) +
+      g 0 - (((3^K : Nat) : Int)) * g K := by rw [htel]
+    _ = _ := by rfl
+
+/-- The optimized charge gives an exact strict sign separator for one physical
+x4 event. -/
 theorem happy_iff_crossDensity_positive
     (C d : Nat) (hC : C < 4) (hd : d < 3) :
     HappyCell C d ↔ 0 < crossDensity C d := by
@@ -180,10 +282,12 @@ theorem happy_iff_crossDensity_positive
 
 #check crossDensity_physical_table
 #check reverseCrossCode_exact
-#check reverseCrossCode_ge_105_of_leading_happy
+#check reverseCrossCode_ge_exponential_of_leading_happy
+#check reverseCrossRectangle_exact
 #check happy_iff_crossDensity_positive
 #print axioms reverseCrossCode_exact
-#print axioms reverseCrossCode_ge_105_of_leading_happy
+#print axioms reverseCrossCode_ge_exponential_of_leading_happy
+#print axioms reverseCrossRectangle_exact
 #print axioms happy_iff_crossDensity_positive
 
 end GSTU2DExactCrossingCharge
