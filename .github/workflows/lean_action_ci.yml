@@ -46,7 +46,7 @@ jobs:
           lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
           cp ErdosPreOmega.lean ErdosTernary2.lean
           lake env lean -o ErdosTernary2.olean ErdosTernary2.lean
-          export LEAN_PATH="$PWD:$SNAP16:$SNAP15:${LEAN_PATH:-}"
+          export LEAN_PATH="$PWD:$SNAP15:$SNAP16:${LEAN_PATH:-}"
           python3 - <<'PY'
           from pathlib import Path
           import os
@@ -56,8 +56,8 @@ jobs:
           root = Path.cwd()
           roots = [
               root,
-              root / 'ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic',
               root / 'ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery',
+              root / 'ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic',
           ]
           done = set()
           active = set()
