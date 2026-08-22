@@ -32,7 +32,70 @@ jobs:
 
       - name: Typecheck handwritten GST V2 collision theorem
         timeout-minutes: 45
+        shell: bash
         run: |
+          set -euxo pipefail
+          SNAP15="$PWD/ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery"
+          SNAP16="$PWD/ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
+          LEGACY_LINE=$(grep -n 'Legacy residual overproof' ErdosTernary2.lean | head -1 | cut -d: -f1)
+          CUT=$((LEGACY_LINE - 2))
+          test "$CUT" -eq 7326
+          head -n "$CUT" ErdosTernary2.lean > ErdosPreOmega.lean
+          lake env lean -o ErdosPreOmega.olean ErdosPreOmega.lean
+          export LEAN_PATH="$PWD:$SNAP16:$SNAP15:${LEAN_PATH:-}"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          import subprocess
+
+          root = Path.cwd()
+          roots = [
+              root,
+              root / 'ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic',
+              root / 'ker07-snapshot/branches/15_sol_new__physical-phase-crossing-surgery',
+          ]
+          done = set()
+          active = set()
+
+          def decode_module(raw: str) -> str:
+              return raw.replace('«', '').replace('»', '')
+
+          def resolve_module(raw: str):
+              rel = Path(*decode_module(raw).split('.')).with_suffix('.lean')
+              for base in roots:
+                  candidate = base / rel
+                  if candidate.is_file():
+                      return candidate
+              return None
+
+          def compile_file(source: Path):
+              source = source.resolve()
+              if source in done:
+                  return
+              if source in active:
+                  raise RuntimeError(f'import cycle at {source}')
+              active.add(source)
+              for line in source.read_text(encoding='utf-8').splitlines():
+                  match = re.match(r'^import\s+(.+?)\s*$', line)
+                  if not match:
+                      continue
+                  dependency = resolve_module(match.group(1))
+                  if dependency is not None:
+                      compile_file(dependency)
+              output = source.with_suffix('.olean')
+              subprocess.run(
+                  ['lake', 'env', 'lean', '-o', str(output), str(source)],
+                  cwd=root,
+                  env=os.environ.copy(),
+                  check=True,
+              )
+              active.remove(source)
+              done.add(source)
+
+          compile_file(root / 'GSTHandwrittenPrefixOneCollisionRepair.lean')
+          print(f'COLLISION_GRAPH_MODULES_COMPILED={len(done)}')
+          PY
           set -o pipefail
           lake env lean GSTHandwrittenPrefixOneCollisionRepair.lean 2>&1 | tee collision-lean.log
           ! grep -E 'error:|declaration uses .*[Ss]orry|sorryAx' collision-lean.log
