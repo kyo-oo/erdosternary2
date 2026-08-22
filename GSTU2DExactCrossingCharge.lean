@@ -187,8 +187,17 @@ theorem reverseCrossCode_ge_exponential_of_leading_happy
         have hlast : (-111 : Int) ≤ crossDensity (C N) (d N) :=
           crossDensity_ge_neg111 (C N) (d N)
             (hC N (by omega)) (hd N (by omega))
-        rw [reverseCrossCode, Nat.pow_succ]
-        push_cast
+        rw [reverseCrossCode]
+        have hpowCast :
+            (((4^(N+1) : Nat) : Int)) =
+              4 * (((4^N : Nat) : Int)) := by
+          rw [Nat.pow_succ]
+          push_cast
+          ring
+        change
+          17 * (((4^(N+1) : Nat) : Int)) + 37 ≤
+            4 * reverseCrossCode C d N + crossDensity (C N) (d N)
+        rw [hpowCast]
         omega
 
 /-- Base-three weighted vertical derivative telescope. -/
@@ -244,6 +253,7 @@ theorem reverseCrossRectangle_exact
         (fun t ht => (hcell t p ht hpK).2.2.2)
       dsimp [g]
       rw [hrow]
+      push_cast
       ring
     _ =
       Finset.sum (Finset.range K) (fun p =>
@@ -264,7 +274,7 @@ theorem reverseCrossRectangle_exact
             (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
             84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N)) +
       g 0 - (((3^K : Nat) : Int)) * g K := by rw [htel]
-    _ = _ := by rfl
+    _ = _ := by ring
 
 /-- The optimized charge gives an exact strict sign separator for one physical
 x4 event. -/
