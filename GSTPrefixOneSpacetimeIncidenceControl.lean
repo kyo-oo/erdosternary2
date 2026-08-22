@@ -315,12 +315,181 @@ theorem physical_incidence_exists_of_positive
     · simp [GSTPhysicalKernel.twoIndicator, hleft]
   omega
 
+/-! ## Canonical full-energy embedding
+
+The affine tails are not external words.  After shifting past the exact
+`3^(s+2)` prefix, they are four literal columns of one perfect-power binary
+spacetime.
+-/
+
+def canonicalFullEnergy (s n : Nat) : Nat :=
+  4^(3^(s+1) * n)
+
+def canonicalBinaryWidth (s : Nat) : Nat :=
+  2 * 3^s
+
+def canonicalChildTail (s n : Nat) : Nat :=
+  gstNavigationConstant (s+1) n
+
+def canonicalParentTail (s n : Nat) : Nat :=
+  c s / 3 + 4^(3^s) * canonicalChildTail s n
+
+/-- If one physical column has a low prefix below `3^t`, every digit above the
+cut is exactly the corresponding digit of its exposed tail. -/
+theorem physical_column_tail_digit_exact
+    (R r t q P Q : Nat)
+    (hP : P < 3^t)
+    (hdecomp : 2^r * R = P + 3^t * Q) :
+    GSTPhysicalKernel.binaryColumnDigit R (t+q) r = gstDigit Q q := by
+  unfold GSTPhysicalKernel.binaryColumnDigit gstDigit
+  have ht : 0 < 3^t := Nat.pow_pos (by decide)
+  rw [Nat.pow_add, ← Nat.div_div_eq_div_mul, hdecomp,
+    Nat.add_mul_div_left _ _ ht, Nat.div_eq_of_lt hP, Nat.zero_add]
+
+/-- The full child energy exposes exactly the child Navigation tail after the
+`s+2` prefix. -/
+theorem canonical_full_energy_decomposition
+    (s n : Nat) :
+    canonicalFullEnergy s n =
+      1 + 3^(s+2) * canonicalChildTail s n := by
+  simpa [canonicalFullEnergy, canonicalChildTail, Nat.add_assoc] using
+    gst_navigation_decomposition (s+1) n (by omega)
+
+/-- The canonical horizontal phase multiplier has the exact phase-one low
+prefix and affine tail offset. -/
+theorem canonical_phase_multiplier_decomposition
+    (s : Nat) (hs : 1 ≤ s) :
+    4^(3^s) =
+      1 + 3^(s+1) + 3^(s+2) * (c s / 3) := by
+  have hcmod : c s % 3 = 1 := c_mod3 s hs
+  have hc : c s = 1 + 3 * (c s / 3) := by
+    have hsplit := Nat.mod_add_div (c s) 3
+    rw [hcmod] at hsplit
+    omega
+  rw [lte_identity s hs, hc]
+  rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+  ring
+
+/-- Exact low-prefix decompositions of the child pair and the phase-one parent
+pair inside one physical binary spacetime. -/
+theorem canonical_full_energy_four_column_decompositions
+    (s n : Nat) (hs : 1 ≤ s) :
+    let E := canonicalFullEnergy s n
+    let T := canonicalChildTail s n
+    let X := canonicalParentTail s n
+    let L := canonicalBinaryWidth s
+    (2^0 * E = 1 + 3^(s+2) * T) ∧
+    (2^2 * E = 4 + 3^(s+2) * (4*T)) ∧
+    (2^L * E =
+      (1 + 3^(s+1)) + 3^(s+2) * X) ∧
+    (2^(L+2) * E =
+      (4 + 3^(s+1)) + 3^(s+2) * (1 + 4*X)) := by
+  dsimp only
+  have hE := canonical_full_energy_decomposition s n
+  have hA := canonical_phase_multiplier_decomposition s hs
+  have hbridge := gpt56_parent_multiplier_is_binary_bridge s
+  constructor
+  · simpa using hE
+  constructor
+  · calc
+      2^2 * canonicalFullEnergy s n = 4 * canonicalFullEnergy s n := by norm_num
+      _ = 4 * (1 + 3^(s+2) * canonicalChildTail s n) := by rw [hE]
+      _ = 4 + 3^(s+2) * (4 * canonicalChildTail s n) := by ring
+  constructor
+  · calc
+      2^(canonicalBinaryWidth s) * canonicalFullEnergy s n =
+          4^(3^s) * canonicalFullEnergy s n := by
+            rw [canonicalBinaryWidth, ← hbridge]
+      _ = 4^(3^s) *
+          (1 + 3^(s+2) * canonicalChildTail s n) := by rw [hE]
+      _ = (1 + 3^(s+1)) +
+          3^(s+2) * canonicalParentTail s n := by
+            rw [hA]
+            unfold canonicalParentTail
+            ring
+  · calc
+      2^(canonicalBinaryWidth s + 2) * canonicalFullEnergy s n =
+          4 * (2^(canonicalBinaryWidth s) * canonicalFullEnergy s n) := by
+            rw [Nat.pow_add]
+            norm_num
+            ring
+      _ = 4 * ((1 + 3^(s+1)) +
+          3^(s+2) * canonicalParentTail s n) := by
+            rw [show 2^(canonicalBinaryWidth s) * canonicalFullEnergy s n =
+              (1 + 3^(s+1)) +
+                3^(s+2) * canonicalParentTail s n by
+                  calc
+                    2^(canonicalBinaryWidth s) * canonicalFullEnergy s n =
+                        4^(3^s) * canonicalFullEnergy s n := by
+                          rw [canonicalBinaryWidth, ← hbridge]
+                    _ = 4^(3^s) *
+                        (1 + 3^(s+2) * canonicalChildTail s n) := by rw [hE]
+                    _ = (1 + 3^(s+1)) +
+                        3^(s+2) * canonicalParentTail s n := by
+                          rw [hA]
+                          unfold canonicalParentTail
+                          ring]
+      _ = (4 + 3^(s+1)) +
+          3^(s+2) * (1 + 4 * canonicalParentTail s n) := by
+            rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+            ring
+
+/-- The child Happy pair and the phase-one parent pair are the stride-two
+boundary columns `(0,2)` and `(L,L+2)` of the same full-energy grid. -/
+theorem canonical_full_energy_four_column_digits
+    (s n q : Nat) (hs : 1 ≤ s) :
+    let E := canonicalFullEnergy s n
+    let T := canonicalChildTail s n
+    let X := canonicalParentTail s n
+    let L := canonicalBinaryWidth s
+    GSTPhysicalKernel.binaryColumnDigit E (s+2+q) 0 = gstDigit T q ∧
+    GSTPhysicalKernel.binaryColumnDigit E (s+2+q) 2 = gstDigit (4*T) q ∧
+    GSTPhysicalKernel.binaryColumnDigit E (s+2+q) L = gstDigit X q ∧
+    GSTPhysicalKernel.binaryColumnDigit E (s+2+q) (L+2) =
+      gstDigit (1+4*X) q := by
+  dsimp only
+  obtain ⟨h0, h2, hL, hL2⟩ :=
+    canonical_full_energy_four_column_decompositions s n hs
+  have hD : 3 ≤ 3^(s+1) := by
+    have h9 : 9 ≤ 3^(s+1) := by
+      rw [show (9:Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hB : 3^(s+2) = 3 * 3^(s+1) := by
+    rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+    ac_rfl
+  have hp0 : 1 < 3^(s+2) := by positivity
+  have hp2 : 4 < 3^(s+2) := by
+    rw [hB]
+    omega
+  have hpL : 1 + 3^(s+1) < 3^(s+2) := by
+    rw [hB]
+    omega
+  have hpL2 : 4 + 3^(s+1) < 3^(s+2) := by
+    rw [hB]
+    omega
+  exact ⟨
+    physical_column_tail_digit_exact
+      (canonicalFullEnergy s n) 0 (s+2) q 1
+      (canonicalChildTail s n) hp0 h0,
+    physical_column_tail_digit_exact
+      (canonicalFullEnergy s n) 2 (s+2) q 4
+      (4 * canonicalChildTail s n) hp2 h2,
+    physical_column_tail_digit_exact
+      (canonicalFullEnergy s n) (canonicalBinaryWidth s) (s+2) q
+      (1 + 3^(s+1)) (canonicalParentTail s n) hpL hL,
+    physical_column_tail_digit_exact
+      (canonicalFullEnergy s n) (canonicalBinaryWidth s + 2) (s+2) q
+      (4 + 3^(s+1)) (1 + 4 * canonicalParentTail s n) hpL2 hL2⟩
+
 end GSTSpacetimeV2
 
 #check GSTSpacetimeV2.physical_cell_exact
 #check GSTSpacetimeV2.physical_rectangle_exact
 #check GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #check GSTSpacetimeV2.physical_incidence_exists_of_positive
+#check GSTSpacetimeV2.canonical_full_energy_four_column_digits
 #print axioms GSTSpacetimeV2.physical_rectangle_exact
 #print axioms GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #print axioms GSTSpacetimeV2.physical_incidence_exists_of_positive
+#print axioms GSTSpacetimeV2.canonical_full_energy_four_column_digits
