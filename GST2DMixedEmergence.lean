@@ -39,15 +39,55 @@ def carryPotential (C : Nat) : Int :=
 def infoPotential (d : Nat) : Int :=
   112 * twoI d - 56*(d : Int)
 
-/-- Desired local mixed 2D equation.  The `56*surviveI` term is the interior
-source; `infoPotential` is the horizontal BIG1 boundary flux and
-`carryPotential` is the vertical carry flux. -/
+/-- The mixed horizontal potential is exactly the BIG1 detector on physical
+ternary digits. -/
+theorem infoPotential_physical_table
+    (d : Nat) (hd : d < 3) :
+    (d = 0 ∧ infoPotential d = 0) ∨
+    (d = 1 ∧ infoPotential d = -56) ∨
+    (d = 2 ∧ infoPotential d = 0) := by
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hdc with rfl | rfl | rfl <;>
+    norm_num [infoPotential, twoI]
+
+/-- The U operator by itself is already a two-direction divergence: horizontal
+information transport plus the ternary carry-potential derivative. -/
+theorem uJump_divergence
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    uJump C d =
+      8 * ((d : Int) - (outDigit C d : Int)) +
+      carryPotential C - 3 * carryPotential (nextCarry C d) := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    norm_num [uJump, uCharge, outDigit, nextCarry, carryPotential]
+
+/-- **Mixed 2D GST emergence equation.**
+
+The handwritten seven-kernel and U operator are not separately forced into a
+2D model.  Their exact physical-cell combination `8*K + 7*U` *becomes* a
+horizontal information boundary derivative, a vertical carry derivative, and
+one positive interior SURVIVE source.
+
+The coefficient ratio is the one for which the horizontal potential agrees on
+BIG0 and BIG2, leaving BIG1 as the unique horizontal defect. -/
 theorem mixed_cell_emergence
     (C d : Nat) (hC : C < 4) (hd : d < 3) :
     8 * sevenKernel C d + 7 * uJump C d =
       infoPotential (outDigit C d) - infoPotential d +
       7 * carryPotential C - 21 * carryPotential (nextCarry C d) +
       56 * surviveI C d := by
-  omega
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    norm_num [sevenKernel, surviveI, twoI, uJump, uCharge,
+      outDigit, nextCarry, carryPotential, infoPotential]
+
+#check mixed_cell_emergence
+#print axioms mixed_cell_emergence
 
 end GST2DMixedEmergence
