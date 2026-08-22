@@ -22,11 +22,11 @@ theorem power_origin_observables_exact
     (graph (4^K) t p).mixedCharge = (graph 1 (K+t) p).mixedCharge ∧
     (graph (4^K) t p).crossingCharge = (graph 1 (K+t) p).crossingCharge ∧
     (graph (4^K) t p).survive = (graph 1 (K+t) p).survive := by
-  have hpow : 4^t * 4^K = 4^(K+t) := by
+  have hpow : 4^t * 4^K = 4^(K+t) * 1 := by
+    rw [Nat.mul_one]
     calc
       4^t * 4^K = 4^(t+K) := (Nat.pow_add 4 t K).symm
       _ = 4^(K+t) := by rw [Nat.add_comm]
-      _ = 4^(K+t) * 1 := by simp
   simp only [graph, cell, GSTCanonicalSevenAxisBridge.vertex]
   rw [hpow]
 
