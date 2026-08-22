@@ -52,6 +52,12 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
           lake env lean GSTGraphV2InfiniteControlSmoke.lean
 
+      - name: Compile perfect-power ancestry surgery
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
+
       - name: Apply atomic production replacement
         shell: bash
         run: python3 scripts/apply_u2d_atomic_replacement.py
@@ -86,6 +92,7 @@ jobs:
               Path('GSTU2DExactCrossingCharge.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTGraphV2InfiniteControl.lean'),
+              Path('GSTGraphV2PerfectPowerAncestry.lean'),
               Path('GSTGraphV2InfiniteControlSmoke.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
