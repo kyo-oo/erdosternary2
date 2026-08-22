@@ -64,7 +64,6 @@ theorem gst_navigation_prefix_four_next_one_mod27S
   have hprod3 :
       (4^(3^s * 4) * gstNavigationConstant (s+2) u) % 3 = 1 := by
     rw [Nat.mul_mod, hA3, hQu3]
-    decide
   have hprodDecomp :
       4^(3^s * 4) * gstNavigationConstant (s+2) u =
         1 + 3 * ((4^(3^s * 4) * gstNavigationConstant (s+2) u) / 3) := by
@@ -87,7 +86,6 @@ theorem gst_navigation_prefix_four_next_one_mod27S
     norm_num
 
   rw [hrec, Nat.add_mod, hQ4, hterm]
-  decide
 
 /-- In the true NULL residual n=3u+1, a second origin trit one contradicts the
 complete parent Omega bad trace. -/
