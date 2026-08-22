@@ -1,0 +1,6 @@
+import GSTU2DAtomicBridge
+
+#check GSTU2DAtomicBridge.gst_u_charge_as_carry_potential
+#check GSTU2DAtomicBridge.gst_coupled_potential_as_mixed_boundary
+#check GSTU2DAtomicBridge.weighted_mixed_rectangle_emergence
+#check GSTU2DAtomicBridge.weighted_info_boundary_exact
