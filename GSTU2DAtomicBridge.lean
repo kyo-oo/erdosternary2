@@ -46,7 +46,7 @@ theorem gst_coupled_potential_as_mixed_boundary
 
 /-- One horizontally weighted row of the mixed 2D law.  The weight is
 arbitrary: the geometric `4`-weights required by Equation III are therefore a
-specialization, not a new axiom. -/
+direct specialization of the proved identity. -/
 theorem weighted_mixed_row_emergence
     (w : Nat → Int)
     (C Cnext d : Nat → Nat) (N : Nat)
