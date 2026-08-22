@@ -51,15 +51,16 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
   let d : Nat → Nat := fun t => gstDigit (4^t * T) q
 
   have hfirst : GSTU2DEventTransport.HappyCell (C 0) (d 0) := by
-    dsimp [C, d]
-    simpa using hGate
+    simpa [GSTU2DEventTransport.HappyCell, C, d] using hGate
 
-  have hNpos : 1 ≤ 3^s := by positivity
+  have hNpos : 1 ≤ 3^s := by
+    have hp : 0 < 3^s := Nat.pow_pos (by decide)
+    omega
   have hClt : ∀ t, t < 3^s → C t < 4 := by
     intro t _ht
     dsimp [C]
     by_cases hq0 : q = 0
-    · subst q
+    · rw [hq0]
       simp [gstCarry]
     · exact gstCarry_lt_four _ q (by omega)
   have hdlt : ∀ t, t < 3^s → d t < 3 := by
