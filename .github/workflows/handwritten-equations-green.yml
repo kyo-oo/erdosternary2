@@ -1,0 +1,47 @@
+name: Handwritten Equations Green
+
+on:
+  push:
+    branches:
+      - sol/handwritten-graph-flux-green-20260822
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean toolchain
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Compile 16K monolith
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
+      - name: Compile handwritten equations and explicit seam proof
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean HandwrittenEquationsGreen.lean
+      - name: Ban proof escapes in new formalization
+        shell: bash
+        run: |
+          if grep -nE '\b(sorry|admit|axiom|gst_end)\b' HandwrittenEquationsGreen.lean; then
+            echo 'Forbidden proof escape found in HandwrittenEquationsGreen.lean'
+            exit 1
+          fi
+      - name: Comparator
+        shell: bash
+        run: |
+          set -o pipefail
+          bash scripts/comparator.sh
