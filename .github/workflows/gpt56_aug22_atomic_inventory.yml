@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
 
       - name: Exact Lean line inventory
         shell: bash
@@ -39,6 +41,44 @@ jobs:
           grep -n -E '\bsorry\b|\badmit\b|sorryAx' ErdosTernary2.lean || true
           echo '=== PROVENANCE CHECK ==='
           if [ -f GSTResidueSpacetimeScratch.lean ]; then echo ROOT_RESIDUE_SCRATCH_PRESENT; else echo ROOT_RESIDUE_SCRATCH_ABSENT; fi
+
+      - name: Exhaustive permitted Sol-head line sweep
+        shell: bash
+        run: |
+          set -euxo pipefail
+          branches=(
+            sol/atomic-gst-v2-final-surgery
+            sol/atomic-gst-v2-surgery-2026-08-18
+            sol/atomic-surgery-2026-08-18
+            sol/canonical-main-clean-20260818
+            sol/gst-v2-atomic-surgery-20260818
+            sol/gpt56-close-one-error
+            sol/gpt56-infinite-control-production
+            sol/gpt56-k1-origin-descent-proof-20260821
+            sol/gpt56-production-repair-20260821
+            sol/gpt56-final-comparator-20260821
+            sol/gpt56-final-comparator-run-20260821
+            sol/gpt56-final-comparator-run2-20260821
+            sol/gpt56-exec-gate-20260821
+            sol/gpt56-atomic-gstv2-final-20260822
+          )
+          : > /tmp/sol-large-files.txt
+          for b in "${branches[@]}"; do
+            git fetch --depth=1 origin "+refs/heads/$b:refs/remotes/origin/$b"
+            echo "=== BRANCH $b ==="
+            maxn=0
+            maxf=''
+            while IFS= read -r f; do
+              n=$(git show "origin/$b:$f" | wc -l)
+              if [ "$n" -gt "$maxn" ]; then maxn=$n; maxf=$f; fi
+              if [ "$n" -ge 16000 ]; then
+                printf '%s\t%d\t%s\n' "$b" "$n" "$f" | tee -a /tmp/sol-large-files.txt
+              fi
+            done < <(git ls-tree -r --name-only "origin/$b" | grep -E '\.lean$' || true)
+            echo "BRANCH_MAX=$maxn $maxf"
+          done
+          echo '=== ALL >=16000 MATCHES ==='
+          cat /tmp/sol-large-files.txt
 
       - name: Install pinned Lean
         shell: bash
