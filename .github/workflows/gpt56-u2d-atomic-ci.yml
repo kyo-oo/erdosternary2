@@ -42,6 +42,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DExactCrossingCharge.olean GSTU2DExactCrossingCharge.lean
+          lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
           lake env lean GSTU2DAtomicSmoke.lean
 
       - name: Apply atomic production replacement
@@ -76,6 +77,7 @@ jobs:
               Path('GSTU2DAtomicBridge.lean'),
               Path('GSTU2DEventTransport.lean'),
               Path('GSTU2DExactCrossingCharge.lean'),
+              Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
           bad = []
