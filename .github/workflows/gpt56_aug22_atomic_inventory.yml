@@ -1,0 +1,64 @@
+name: GPT56 Aug22 Atomic Inventory
+
+on:
+  push:
+    branches:
+      - sol/gpt56-gstv2-universal-charge-20260822
+  workflow_dispatch:
+
+jobs:
+  inventory-and-spine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Exact Lean line inventory
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo '=== TOP LEAN FILES BY LINE COUNT ==='
+          find . -type f -name '*.lean' -not -path './.lake/*' -print0 \
+            | xargs -0 wc -l \
+            | sort -nr \
+            | head -100 \
+            | tee /tmp/lean-lines.txt
+          echo '=== LEAN FILES >= 16000 LINES ==='
+          found=0
+          while IFS= read -r -d '' f; do
+            n=$(wc -l < "$f")
+            if [ "$n" -ge 16000 ]; then
+              printf '%8d %s\n' "$n" "$f"
+              found=1
+            fi
+          done < <(find . -type f -name '*.lean' -not -path './.lake/*' -print0)
+          echo "GE16000_FOUND=$found"
+          echo '=== ROOT MONOLITH ==='
+          wc -l ErdosTernary2.lean
+          grep -n -E '\bsorry\b|\badmit\b|sorryAx' ErdosTernary2.lean || true
+
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.0-rc2
+
+      - name: Resolve dependencies
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake update
+          lake exe cache get
+          lake build GSTTactic
+
+      - name: Compile current Aug22 V2 spine
+        timeout-minutes: 45
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake env lean GSTPrefixOneSpacetimeIncidenceControl.lean 2>&1 | tee /tmp/spacetime.log
+          ! grep -q 'sorryAx' /tmp/spacetime.log
+          lake env lean GSTPrefixOnePhaseIncidenceControl.lean 2>&1 | tee /tmp/phase.log
+          ! grep -q 'sorryAx' /tmp/phase.log
