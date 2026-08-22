@@ -152,12 +152,9 @@ theorem weighted_info_boundary_exact
 is supported exactly on BIG1. -/
 theorem infoPotential_nonpositive
     (d : Nat) (hd : d < 3) : infoPotential d ≤ 0 := by
-  have h := infoPotential_physical_table d hd
-  rcases h with h0 | h1 | h2
-  · rw [h0.2]
-  · rw [h1.2]
-  · rw [h2.2]
-  all_goals norm_num
+  have hcases : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hcases with rfl | rfl | rfl <;>
+    norm_num [infoPotential, twoI]
 
 #check gst_u_charge_as_carry_potential
 #check gst_coupled_potential_as_mixed_boundary
