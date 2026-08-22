@@ -12,25 +12,6 @@ theorem gpt56_prefix_one_collision_bigN
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  -- Exact canonical terminal: n = 1 is impossible under a complete
-  -- prefix-one bad trace at every positive level.
-  by_cases hn_one : n = 1
-  · subst n
-    exact gst_residual_null_origin_one_bad_impossible_allS s hs hBad
-
-  -- At levels s >= 2, a residual NULL branch cannot expose a second
-  -- ordinary origin trit equal to one.  This removes the 11_3 descent
-  -- branch kernel-cleanly before the horizontal collision analysis.
-  by_cases hs_one : s = 1
-  · skip
-  · have hs2 : 2 ≤ s := by omega
-    by_cases hn_mod1 : n % 3 = 1
-    · by_cases hnext_one : (n / 3) % 3 = 1
-      · exact gst_residual_null_second_trit_one_impossibleS
-          s n hs2 hn hn_mod1 hnext_one hBad
-      · skip
-    · skip
-
   let T := gstNavigationConstant (s+1) n
   let A := 4^(3^s)
   let X := c s / 3 + A*T
