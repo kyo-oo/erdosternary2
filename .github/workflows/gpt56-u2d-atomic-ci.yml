@@ -40,6 +40,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GST2DMixedEmergence.olean GST2DMixedEmergence.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
           lake env lean GSTU2DAtomicSmoke.lean
 
       - name: Compile production monolith and expose seam proof
@@ -66,6 +67,7 @@ jobs:
               Path('GSTGraphV2CoupledUPhysicalBridge.lean'),
               Path('GST2DMixedEmergence.lean'),
               Path('GSTU2DAtomicBridge.lean'),
+              Path('GSTU2DEventTransport.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
           bad = []
