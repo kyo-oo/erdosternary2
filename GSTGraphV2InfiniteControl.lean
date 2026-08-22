@@ -160,8 +160,7 @@ private theorem prefix_mod_exact
     (b P tail : Nat)
     (hP : P < 3^b) :
     (P + 3^b * tail) % 3^b = P := by
-  rw [Nat.add_mod, Nat.mul_mod, Nat.mod_self, Nat.zero_mul, Nat.add_zero,
-    Nat.mod_eq_of_lt hP]
+  simpa [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hP]
 
 /-- The full remainder at the deeper slice retains the low prefix and only the
 visible tail remainder. -/
