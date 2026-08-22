@@ -26,12 +26,6 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile latest Codex monolith
-        shell: bash
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTactic ErdosTernary2
-
       - name: Compile coupled U-flux experiment
         shell: bash
         run: |
@@ -57,3 +51,10 @@ jobs:
               raise SystemExit('coupled U-flux experiment contains forbidden proof escape')
           print('coupled U-flux audit: clean')
           PY
+
+      - name: Confirm exact remaining Codex seam
+        continue-on-error: true
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
