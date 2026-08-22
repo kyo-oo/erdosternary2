@@ -206,7 +206,7 @@ theorem physical_rectangle_exact
       physical_ternary_boundary_exact,
       physical_ternary_boundary_exact,
       physical_binary_boundary_exact] at h
-  simpa only [Nat.mod_one, Nat.mul_zero, Nat.zero_add] using h
+  simpa [Nat.mod_one] using h
 
 end GSTSpacetimeV2
 
