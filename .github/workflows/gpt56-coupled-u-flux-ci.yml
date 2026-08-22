@@ -26,11 +26,12 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile coupled U-flux experiment
+      - name: Compile and install coupled U-flux experiment
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTGraphV2CoupledUFlux.lean
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUFlux.olean GSTGraphV2CoupledUFlux.lean
 
       - name: Compile physical U-flux bridge
         shell: bash
