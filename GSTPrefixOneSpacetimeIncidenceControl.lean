@@ -315,6 +315,28 @@ theorem physical_incidence_exists_of_positive
     · simp [GSTPhysicalKernel.twoIndicator, hleft]
   omega
 
+/-- Exact all-depth vertical flux of the handwritten U potential.  The identity
+is valid at every observation height `K`; it keeps the live upper carry and
+never replaces it by a terminal state. -/
+theorem seeded_u_jump_flux_exact
+    (D X K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      ((3^j : Nat) : Int) *
+        gstHandwrittenUJumpS
+          (gstAffineCarryS D X j) (gstDigitS X j)) =
+      ((3^K : Nat) : Int) *
+          (gstHandwrittenUChargeS (gstAffineCarryS D X K) : Int) -
+        (gstHandwrittenUChargeS D : Int) -
+        24 * (X % 3^K : Int) := by
+  induction K with
+  | zero => simp [gstAffineCarryS]
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih, gstHandwrittenUJumpS,
+        gstAffineCarryS_forward_exact_all,
+        gst_prefix_residue_succ_exactS, Nat.pow_succ]
+      push_cast
+      ring
+
 /-! ## Canonical full-energy embedding
 
 The affine tails are not external words.  After shifting past the exact
@@ -573,10 +595,12 @@ end GSTSpacetimeV2
 #check GSTSpacetimeV2.physical_rectangle_exact
 #check GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #check GSTSpacetimeV2.physical_incidence_exists_of_positive
+#check GSTSpacetimeV2.seeded_u_jump_flux_exact
 #check GSTSpacetimeV2.canonical_full_energy_four_column_digits
 #check GSTSpacetimeV2.canonical_full_energy_boundary_events
 #print axioms GSTSpacetimeV2.physical_rectangle_exact
 #print axioms GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
 #print axioms GSTSpacetimeV2.physical_incidence_exists_of_positive
+#print axioms GSTSpacetimeV2.seeded_u_jump_flux_exact
 #print axioms GSTSpacetimeV2.canonical_full_energy_four_column_digits
 #print axioms GSTSpacetimeV2.canonical_full_energy_boundary_events
