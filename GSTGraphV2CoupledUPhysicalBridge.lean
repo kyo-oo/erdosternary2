@@ -140,7 +140,7 @@ theorem coupled_potential_is_horizontal_base4_flux
     rw [← hA, hShared, Nat.add_mod, Nat.mul_mod]
     simp [Nat.mod_eq_of_lt hResidue]
   have htel := horizontal_flux_telescope charge S N
-  rw [hLow, hHigh]
+  rw [hLow, hHigh] at htel
   have hPrefixZ : ((S % 4^N : Nat) : Int) = (st.childResidue : Int) := by
     exact_mod_cast hPrefix
   rw [hPrefixZ] at htel
