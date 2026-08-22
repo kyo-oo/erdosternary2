@@ -29,6 +29,7 @@ theorem power_origin_observables_exact
       _ = 4^(K+t) := by rw [Nat.add_comm]
   simp only [graph, cell, GSTCanonicalSevenAxisBridge.vertex]
   rw [hpow]
+  simp
 
 /-- Happy/event-eight is invariant under the same exact perfect-power
 horizontal reindexing. -/
