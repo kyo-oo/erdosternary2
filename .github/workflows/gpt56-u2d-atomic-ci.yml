@@ -42,6 +42,19 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
           lake env lean GSTU2DAtomicSmoke.lean
 
+      - name: Compile production monolith and expose seam proof
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
+          cat > /tmp/GSTProductionProofPrint.lean <<'EOF'
+          import ErdosTernary2
+          set_option pp.explicit true in
+          #print gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_prefix_one_information_bad_descends_inline
+          EOF
+          lake env lean /tmp/GSTProductionProofPrint.lean
+
       - name: Audit U2D sources
         shell: bash
         run: |
