@@ -118,11 +118,10 @@ theorem coupled_potential_is_horizontal_base4_flux
         ((4^i : Nat) : Int) *
           horizontalFluxWith charge
             (st.core.parentSeed + 4 * st.core.parentOffset) i) := by
+  subst A
   let S := st.core.parentSeed + 4 * st.core.parentOffset
-  have hApos : 0 < A := by
-    rw [hA]
-    exact Nat.pow_pos (by decide)
-  have hShared : S = st.childResidue + A * st.core.childCarry := by
+  have hApos : 0 < 4^N := Nat.pow_pos (by decide)
+  have hShared : S = st.childResidue + 4^N * st.core.childCarry := by
     dsimp [S]
     exact hInv
   have hLow : base4Digit S 0 = st.core.parentSeed := by
@@ -133,19 +132,18 @@ theorem coupled_potential_is_horizontal_base4_flux
     simp [Nat.mod_eq_of_lt hParent]
   have hHigh : base4Digit S N = st.core.childCarry := by
     unfold base4Digit
-    rw [← hA, hShared, Nat.add_mul_div_left _ _ hApos]
+    rw [hShared, Nat.add_mul_div_left _ _ hApos]
     rw [Nat.div_eq_of_lt hResidue]
     simp [Nat.mod_eq_of_lt hChild]
   have hPrefix : S % 4^N = st.childResidue := by
-    rw [← hA, hShared, Nat.add_mod, Nat.mul_mod]
+    rw [hShared, Nat.add_mod, Nat.mul_mod]
     simp [Nat.mod_eq_of_lt hResidue]
   have htel := horizontal_flux_telescope charge S N
   rw [hLow, hHigh] at htel
   have hPrefixZ : ((S % 4^N : Nat) : Int) = (st.childResidue : Int) := by
     exact_mod_cast hPrefix
   rw [hPrefixZ] at htel
-  have hpot := potential_shared_rewrite charge A st hInv
-  rw [hA] at hpot
+  have hpot := potential_shared_rewrite charge (4^N) st hInv
   dsimp [S] at htel
   exact hpot.trans htel.symm
 
