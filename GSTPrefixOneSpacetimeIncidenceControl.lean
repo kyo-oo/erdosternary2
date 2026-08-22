@@ -366,9 +366,12 @@ theorem canonical_phase_multiplier_decomposition
     have hsplit := Nat.mod_add_div (c s) 3
     rw [hcmod] at hsplit
     omega
-  rw [lte_identity s hs, hc]
-  rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
-  ring
+  calc
+    4^(3^s) = 1 + 3^(s+1) * c s := lte_identity s hs
+    _ = 1 + 3^(s+1) * (1 + 3 * (c s / 3)) := by rw [hc]
+    _ = 1 + 3^(s+1) + 3^(s+2) * (c s / 3) := by
+      rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+      ring
 
 /-- Exact low-prefix decompositions of the child pair and the phase-one parent
 pair inside one physical binary spacetime. -/
@@ -404,8 +407,8 @@ theorem canonical_full_energy_four_column_decompositions
           (1 + 3^(s+2) * canonicalChildTail s n) := by rw [hE]
       _ = (1 + 3^(s+1)) +
           3^(s+2) * canonicalParentTail s n := by
-            rw [hA]
             unfold canonicalParentTail
+            rw [hA]
             ring
   · calc
       2^(canonicalBinaryWidth s + 2) * canonicalFullEnergy s n =
@@ -426,8 +429,8 @@ theorem canonical_full_energy_four_column_decompositions
                         (1 + 3^(s+2) * canonicalChildTail s n) := by rw [hE]
                     _ = (1 + 3^(s+1)) +
                         3^(s+2) * canonicalParentTail s n := by
-                          rw [hA]
                           unfold canonicalParentTail
+                          rw [hA]
                           ring]
       _ = (4 + 3^(s+1)) +
           3^(s+2) * (1 + 4 * canonicalParentTail s n) := by
@@ -458,7 +461,9 @@ theorem canonical_full_energy_four_column_digits
   have hB : 3^(s+2) = 3 * 3^(s+1) := by
     rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
     ac_rfl
-  have hp0 : 1 < 3^(s+2) := by positivity
+  have hp0 : 1 < 3^(s+2) := by
+    rw [hB]
+    omega
   have hp2 : 4 < 3^(s+2) := by
     rw [hB]
     omega
