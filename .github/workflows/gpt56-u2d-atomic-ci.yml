@@ -45,6 +45,13 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
           lake env lean GSTU2DAtomicSmoke.lean
 
+      - name: Compile main infinite GST V2 control graph
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
+          lake env lean GSTGraphV2InfiniteControlSmoke.lean
+
       - name: Apply atomic production replacement
         shell: bash
         run: python3 scripts/apply_u2d_atomic_replacement.py
@@ -78,6 +85,8 @@ jobs:
               Path('GSTU2DEventTransport.lean'),
               Path('GSTU2DExactCrossingCharge.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
+              Path('GSTGraphV2InfiniteControl.lean'),
+              Path('GSTGraphV2InfiniteControlSmoke.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
           bad = []
