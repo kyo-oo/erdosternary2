@@ -165,3 +165,4 @@ theorem gst_residue19_is_null_gate2S
       norm_num at h ⊢
       exact h.symm
     rw [hmod9]
+    norm_num
