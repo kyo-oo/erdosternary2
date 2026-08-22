@@ -273,8 +273,10 @@ theorem reverseCrossRectangle_exact
           (digitPotential (d N p) -
             (((4^N : Nat) : Int)) * digitPotential (d 0 p) +
             84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N)) +
-      g 0 - (((3^K : Nat) : Int)) * g K := by rw [htel]
-    _ = _ := by ring
+      g 0 - (((3^K : Nat) : Int)) * g K := by
+        rw [htel]
+        ring
+    _ = _ := by rfl
 
 /-- The optimized charge gives an exact strict sign separator for one physical
 x4 event. -/
