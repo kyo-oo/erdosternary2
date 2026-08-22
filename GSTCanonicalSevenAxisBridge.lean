@@ -71,12 +71,14 @@ theorem digit3_mul_four_exact (R p : Nat) :
   have hsplit : R = R % 3^p + 3^p * (R / 3^p) := by
     have h := Nat.mod_add_div R (3^p)
     omega
+  have hscaled := congrArg (fun x : Nat => 4 * x) hsplit
   have hshape :
       4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
-    rw [hsplit]
-    ring
+    calc
+      4 * R = 4 * (R % 3^p + 3^p * (R / 3^p)) := hscaled
+      _ = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
   rw [hshape, Nat.add_mul_div_left _ _ hp]
-  simp [Nat.add_mod, Nat.mul_mod, Nat.mod_mod]
+  simp [Nat.add_mod, Nat.mul_mod]
 
 /-- The canonical sheet is an exact x4/base3 cell lattice at every pair of
 natural coordinates. -/
