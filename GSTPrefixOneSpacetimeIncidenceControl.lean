@@ -208,8 +208,119 @@ theorem physical_rectangle_exact
       physical_binary_boundary_exact] at h
   simpa [Nat.mod_one] using h
 
+/-!
+The mass rectangle above is now refined by the physical signed kernel.  The
+CREATE/DESTROY component is an exact horizontal boundary difference, while the
+only interior source is a genuine common digit-two edge.  Summing over every
+ternary row in an arbitrary window gives a two-dimensional event divergence,
+not merely an unsigned value identity.
+-/
+
+/-- Signed GST V2 spacetime divergence.  The final double sum is the exact
+interior x2 SURVIVE incidence charge. -/
+theorem physical_signed_rectangle_incidence_exact
+    (R L K : Nat) :
+    Finset.sum (Finset.range K) (fun p =>
+      Finset.sum (Finset.range L) (fun r =>
+        GSTPhysicalKernel.signedKernelTwice
+          (GSTPhysicalKernel.binaryColumnCarry R p r)
+          (GSTPhysicalKernel.binaryColumnDigit R p r))) =
+      14 *
+        (Finset.sum (Finset.range K) (fun p =>
+            GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p L)) -
+          Finset.sum (Finset.range K) (fun p =>
+            GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p 0))) +
+      7 * Finset.sum (Finset.range K) (fun p =>
+        Finset.sum (Finset.range L) (fun r =>
+          GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p r) *
+            GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p (r+1)))) := by
+  calc
+    Finset.sum (Finset.range K) (fun p =>
+        Finset.sum (Finset.range L) (fun r =>
+          GSTPhysicalKernel.signedKernelTwice
+            (GSTPhysicalKernel.binaryColumnCarry R p r)
+            (GSTPhysicalKernel.binaryColumnDigit R p r))) =
+      Finset.sum (Finset.range K) (fun p =>
+        14 *
+          (GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p L) -
+            GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p 0)) +
+        7 * Finset.sum (Finset.range L) (fun r =>
+          GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p r) *
+            GSTPhysicalKernel.twoIndicator
+              (GSTPhysicalKernel.binaryColumnDigit R p (r+1)))) := by
+        apply Finset.sum_congr rfl
+        intro p _hp
+        exact GSTPhysicalKernel.signedKernelTwice_physical_telescope R p L
+    _ = 14 *
+          (Finset.sum (Finset.range K) (fun p =>
+              GSTPhysicalKernel.twoIndicator
+                (GSTPhysicalKernel.binaryColumnDigit R p L)) -
+            Finset.sum (Finset.range K) (fun p =>
+              GSTPhysicalKernel.twoIndicator
+                (GSTPhysicalKernel.binaryColumnDigit R p 0))) +
+        7 * Finset.sum (Finset.range K) (fun p =>
+          Finset.sum (Finset.range L) (fun r =>
+            GSTPhysicalKernel.twoIndicator
+                (GSTPhysicalKernel.binaryColumnDigit R p r) *
+              GSTPhysicalKernel.twoIndicator
+                (GSTPhysicalKernel.binaryColumnDigit R p (r+1)))) := by
+        rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
+          Finset.sum_sub_distrib]
+
+/-- Positive interior incidence charge yields an actual spacetime cell whose
+two consecutive physical binary columns both carry digit two. -/
+theorem physical_incidence_exists_of_positive
+    (R L K : Nat)
+    (hpos : 0 < Finset.sum (Finset.range K) (fun p =>
+      Finset.sum (Finset.range L) (fun r =>
+        GSTPhysicalKernel.twoIndicator
+            (GSTPhysicalKernel.binaryColumnDigit R p r) *
+          GSTPhysicalKernel.twoIndicator
+            (GSTPhysicalKernel.binaryColumnDigit R p (r+1))))) :
+    ∃ p, p < K ∧ ∃ r, r < L ∧
+      GSTPhysicalKernel.binaryColumnDigit R p r = 2 ∧
+      GSTPhysicalKernel.binaryColumnDigit R p (r+1) = 2 := by
+  by_contra hnone
+  have hpoint : ∀ p, p < K → ∀ r, r < L →
+      ¬ (GSTPhysicalKernel.binaryColumnDigit R p r = 2 ∧
+        GSTPhysicalKernel.binaryColumnDigit R p (r+1) = 2) := by
+    intro p hp r hr hpair
+    apply hnone
+    exact ⟨p, hp, r, hr, hpair⟩
+  have hzero : Finset.sum (Finset.range K) (fun p =>
+      Finset.sum (Finset.range L) (fun r =>
+        GSTPhysicalKernel.twoIndicator
+            (GSTPhysicalKernel.binaryColumnDigit R p r) *
+          GSTPhysicalKernel.twoIndicator
+            (GSTPhysicalKernel.binaryColumnDigit R p (r+1)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro p hp
+    apply Finset.sum_eq_zero
+    intro r hr
+    have hpK : p < K := Finset.mem_range.mp hp
+    have hrL : r < L := Finset.mem_range.mp hr
+    have hno := hpoint p hpK r hrL
+    by_cases hleft : GSTPhysicalKernel.binaryColumnDigit R p r = 2
+    · have hright : GSTPhysicalKernel.binaryColumnDigit R p (r+1) ≠ 2 := by
+        intro hright
+        exact hno ⟨hleft, hright⟩
+      simp [GSTPhysicalKernel.twoIndicator, hleft, hright]
+    · simp [GSTPhysicalKernel.twoIndicator, hleft]
+  omega
+
 end GSTSpacetimeV2
 
 #check GSTSpacetimeV2.physical_cell_exact
 #check GSTSpacetimeV2.physical_rectangle_exact
+#check GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
+#check GSTSpacetimeV2.physical_incidence_exists_of_positive
 #print axioms GSTSpacetimeV2.physical_rectangle_exact
+#print axioms GSTSpacetimeV2.physical_signed_rectangle_incidence_exact
+#print axioms GSTSpacetimeV2.physical_incidence_exists_of_positive
