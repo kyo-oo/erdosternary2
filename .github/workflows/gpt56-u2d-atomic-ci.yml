@@ -1,0 +1,105 @@
+name: GPT56 U2D Atomic Fusion
+
+on:
+  push:
+    branches:
+      - sol/gpt56-gstv2-u2d-atomic-20260822
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Build Equation III dependency
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUFlux.olean GSTGraphV2CoupledUFlux.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUPhysicalBridge.olean GSTGraphV2CoupledUPhysicalBridge.lean
+
+      - name: Compile U2D exact replacement stack
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GST2DMixedEmergence.olean GST2DMixedEmergence.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DExactCrossingCharge.olean GSTU2DExactCrossingCharge.lean
+          lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
+          lake env lean GSTU2DAtomicSmoke.lean
+
+      - name: Compile main infinite GST V2 control graph
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
+          lake env lean GSTGraphV2InfiniteControlSmoke.lean
+
+      - name: Apply atomic production replacement
+        shell: bash
+        run: python3 scripts/apply_u2d_atomic_replacement.py
+
+      - name: Reject superseded production seam
+        shell: bash
+        run: |
+          if grep -nE 'theorem gst_prefix_one_information_bad_descends_inline|theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline|theorem gst_prefix_one_bigN_future_zero_inline|^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'Superseded prefix-one theorem path is still present in production.'
+            exit 1
+          fi
+          grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+
+      - name: Compile production monolith after atomic replacement
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
+
+      - name: Audit replacement sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          paths = [
+              Path('GSTGraphV2CoupledUFlux.lean'),
+              Path('GSTGraphV2CoupledUPhysicalBridge.lean'),
+              Path('GST2DMixedEmergence.lean'),
+              Path('GSTU2DAtomicBridge.lean'),
+              Path('GSTU2DEventTransport.lean'),
+              Path('GSTU2DExactCrossingCharge.lean'),
+              Path('GSTCanonicalSevenAxisBridge.lean'),
+              Path('GSTGraphV2InfiniteControl.lean'),
+              Path('GSTGraphV2InfiniteControlSmoke.lean'),
+              Path('GSTU2DAtomicSmoke.lean'),
+          ]
+          bad = []
+          for p in paths:
+              if not p.exists():
+                  continue
+              for i, line in enumerate(p.read_text(encoding='utf-8').splitlines(), 1):
+                  if line.lstrip().startswith('--'):
+                      continue
+                  if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bgst_end\b|\bnative_decide\b', line):
+                      bad.append(f'{p}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('U2D exact replacement source audit failed')
+          print('U2D exact replacement source audit: clean')
+          PY
