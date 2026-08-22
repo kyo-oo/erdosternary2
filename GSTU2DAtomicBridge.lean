@@ -82,7 +82,6 @@ theorem weighted_mixed_row_emergence
   rw [← Finset.mul_sum, ← Finset.mul_sum]
   rw [Finset.sum_sub_distrib]
   rw [← Finset.mul_sum]
-  ring
 
 /-- **Equation III × 2D mixed divergence.**
 
