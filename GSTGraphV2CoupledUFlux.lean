@@ -16,7 +16,6 @@ exact `gstStepCarryS`, `gstHandwrittenUChargeS`, and canonical phase state.
 Nothing terminates here.  `K : Nat` is always an observation coordinate.
 -/
 
-/-- A live node of the coupled graph. -/
 structure State where
   parentSeed : Nat
   parentOffset : Nat
@@ -24,15 +23,11 @@ structure State where
   childTail : Nat
   deriving Repr
 
-/-- Current child information trit. -/
 def childDigit (st : State) : Nat := st.childTail % 3
 
-/-- Current parent information trit represented by horizontal multiplier `A`. -/
 def parentDigit (A : Nat) (st : State) : Nat :=
   (st.parentOffset + A * childDigit st) % 3
 
-/-- One graph edge for an arbitrary carry-regeneration law.  This abstraction
-lets the algebraic theorem be proved before importing the RED monolith. -/
 def stepWith (nextCarry : Nat → Nat → Nat) (A : Nat) (st : State) : State :=
   {
     parentSeed := nextCarry st.parentSeed (parentDigit A st)
@@ -41,7 +36,6 @@ def stepWith (nextCarry : Nat → Nat → Nat) (A : Nat) (st : State) : State :=
     childTail := st.childTail / 3
   }
 
-/-- U-jump generated from an arbitrary charge chart and carry law. -/
 def jumpWith
     (charge : Nat → Int) (nextCarry : Nat → Nat → Nat)
     (C d : Nat) : Int :=
@@ -57,13 +51,10 @@ def childJumpWith
     (st : State) : Int :=
   jumpWith charge nextCarry st.childCarry (childDigit st)
 
-/-- Coupled graph potential.  The `24 = 4*6` coefficient is the mixed
-2/3/6-space information charge appearing in the handwritten U operator. -/
 def potentialWith (charge : Nat → Int) (A : Nat) (st : State) : Int :=
   charge st.parentSeed - (A : Int) * charge st.childCarry +
     24 * (st.parentOffset : Int)
 
-/-- Pure algebraic kernel. -/
 private theorem coupled_u_flux_algebra
     (A Z r e Z' Up Up' Uc Uc' : Int)
     (h : Z + A*r = e + 3*Z') :
@@ -71,14 +62,7 @@ private theorem coupled_u_flux_algebra
       3*(Up' - A*Uc' + 24*Z') - (Up - A*Uc + 24*Z) := by
   nlinarith [h]
 
-/-- **Experimental Equation III — Coupled U-Flux Derivative.**
-
-For *every* charge chart, carry law, multiplier, and live graph node,
-
-`parentJump - A*childJump = 3*Phi(next) - Phi(now)`.
-
-The result is all-depth and representation-independent: no badness assumption,
-last gate, support horizon, finite search, or terminal NULL state occurs. -/
+/-- **Experimental Equation III — Coupled U-Flux Derivative.** -/
 theorem coupled_u_flux_step_exact
     (charge : Nat → Int) (nextCarry : Nat → Nat → Nat)
     (A : Nat) (st : State) :
@@ -108,15 +92,13 @@ theorem coupled_u_flux_step_exact
     stepWith, e, r, Z', parentDigit, childDigit] at halg ⊢
   exact halg
 
-/-- Nat-indexed orbit of the same coupled graph. -/
 def orbitWith
     (nextCarry : Nat → Nat → Nat) (A : Nat) (initial : State) :
     Nat → State
   | 0 => initial
   | K+1 => stepWith nextCarry A (orbitWith nextCarry A initial K)
 
-/-- Weighted Ω-form of Equation III.  Every finite observation window is exact
-and the upper state remains live on the right-hand side. -/
+/-- Weighted Ω-form of Equation III, valid at every observation depth. -/
 theorem coupled_u_flux_telescope_exact
     (charge : Nat → Int) (nextCarry : Nat → Nat → Nat)
     (A : Nat) (initial : State) (K : Nat) :
@@ -138,16 +120,10 @@ theorem coupled_u_flux_telescope_exact
       rw [orbitWith]
       rw [hstep]
       push_cast
-      rw [Nat.pow_succ]
-      push_cast
+      rw [pow_succ]
       ring
 
-/-! ## Exact standalone GST specialization
-
-These three definitions are literal copies of the arithmetic formulas in the
-latest Codex monolith.  They are named locally so this green kernel does not
-need to import the RED file.
--/
+/-! ## Exact standalone GST specialization -/
 
 def gstStepCarryExact (C d : Nat) : Nat := (C + 4*d) / 3
 
@@ -157,7 +133,6 @@ def gstUChargeExact (C : Nat) : Int :=
 def gstUJumpExact (C d : Nat) : Int :=
   jumpWith gstUChargeExact gstStepCarryExact C d
 
-/-- Exact twelve-state U-jump table used by the production GST coordinates. -/
 theorem gst_u_jump_exact_table :
     gstUJumpExact 0 0 = 10 ∧
     gstUJumpExact 0 1 = 16 ∧
@@ -173,7 +148,6 @@ theorem gst_u_jump_exact_table :
     gstUJumpExact 3 2 = -6 := by
   decide
 
-/-- Equation III specialized to the exact GST charge/carry chart. -/
 theorem gst_coupled_u_flux_step_exact (A : Nat) (st : State) :
     parentJumpWith gstUChargeExact gstStepCarryExact A st -
         (A : Int) * childJumpWith gstUChargeExact gstStepCarryExact st =
@@ -182,8 +156,7 @@ theorem gst_coupled_u_flux_step_exact (A : Nat) (st : State) :
         potentialWith gstUChargeExact A st :=
   coupled_u_flux_step_exact gstUChargeExact gstStepCarryExact A st
 
-/-- Equation II — exact mixed exponential coupling from the second handwritten
-page. -/
+/-- Equation II — exact 2/3/6 mixed exponential coupling. -/
 theorem mixed_world_scale_exact (K : Nat) :
     6^K = 2^K * 3^K := by
   rw [show (6 : Nat) = 2*3 by decide, mul_pow]
