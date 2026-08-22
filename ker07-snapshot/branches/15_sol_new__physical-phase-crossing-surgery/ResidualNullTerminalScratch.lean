@@ -58,7 +58,6 @@ theorem gst_navigation_constant_four_mod243_stableS
     c_mod81_stable (s+1) (by omega)
   have hprod81 : (4^(3^s) * c (s+1)) % 81 = 16 := by
     rw [Nat.mul_mod, hA81, hcNext81]
-    decide
   have hprodDecomp :
       4^(3^s) * c (s+1) =
         16 + 81 * ((4^(3^s) * c (s+1)) / 81) := by
@@ -78,7 +77,6 @@ theorem gst_navigation_constant_four_mod243_stableS
     norm_num
 
   rw [hrec, Nat.add_mod, hc243, hterm]
-  decide
 
 /-- Exact regenerated terminal word after the forced prefix and NULL row. -/
 def gstResidualNullTerminalS (s : Nat) : Nat :=
@@ -131,7 +129,6 @@ theorem gst_residual_null_terminal_happyS
   · right
     unfold gstAffineMulCarryS
     rw [show (3:Nat)^2 = 9 by decide, h9]
-    decide
 
 /-- Explicit low-level NULL terminal gates.  These are finite kernel checks,
 not bounded searches used as a universal theorem. -/
