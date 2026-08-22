@@ -152,6 +152,7 @@ theorem reverseCrossCode_ge_105_of_leading_happy
         rw [reverseCrossCode]
         simp only [reverseCrossCode]
         rw [crossDensity_happy_exact (C 0) (d 0) hfirst]
+        norm_num
       · have hNpos : 1 ≤ N := Nat.one_le_iff_ne_zero.mpr hN0
         have ih' : 105 ≤ reverseCrossCode C d N :=
           ih hNpos
