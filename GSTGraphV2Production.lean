@@ -37,8 +37,9 @@ currently-green coordinates into one explicit production state:
 * the exact local U jump;
 * the Equation-I navigation/nullspace residue;
 * canonical phase density and the independent 8x3 density;
-* finite horizontal rectangle state on the same infinite sheet;
-* exact natural-origin prefix/suffix/phase coordinates on the same sheet;
+* explicit horizontal-x4 and vertical-ternary graph edges;
+* finite horizontal rectangle state on the same infinite lattice;
+* exact natural-origin prefix/suffix/phase coordinates on the same lattice;
 * the generalized residual `(s,k,m)` frame used by the production seam;
 * the canonical production-cut frame at `p = s+2+q`.
 
@@ -65,7 +66,7 @@ structure Cell where
   deriving Repr
 
 /-- Assemble every currently-green local observable at one point of the single
-infinite GST Graph V2 sheet. -/
+infinite GST Graph V2 lattice. -/
 def cell (E t p : Nat) : Cell :=
   let g := GSTGraphV2InfiniteControl.graph E t p
   let R := 4^t * E
@@ -89,13 +90,58 @@ def cell (E t p : Nat) : Cell :=
       g.seven.carry g.seven.digit
   }
 
-/-- The production graph is genuinely infinite in both arithmetic coordinates. -/
+/-- The production vertex sheet is genuinely infinite in both arithmetic coordinates. -/
 abbrev Sheet := Nat → Nat → Cell
 
 def graph (E : Nat) : Sheet := fun t p => cell E t p
 
-/-- Explicit local neighborhood of one production cell.  Horizontal means one
-exact x4 step; vertical means one exact base-three information step. -/
+/-- The two primitive directions of GST Graph V2. -/
+inductive Direction
+  | horizontalX4
+  | verticalTernary
+  deriving Repr, DecidableEq
+
+/-- One directed arithmetic edge of GST Graph V2. -/
+structure Edge where
+  direction : Direction
+  source : Cell
+  target : Cell
+  deriving Repr
+
+/-- One exact x4 edge. -/
+def horizontalEdge (E t p : Nat) : Edge :=
+  {
+    direction := .horizontalX4
+    source := cell E t p
+    target := cell E (t+1) p
+  }
+
+/-- One exact base-three information edge. -/
+def verticalEdge (E t p : Nat) : Edge :=
+  {
+    direction := .verticalTernary
+    source := cell E t p
+    target := cell E t (p+1)
+  }
+
+/-- The actual infinite GST Graph V2 object at one source energy.  Its vertices
+and both primitive edge families are explicit data. -/
+structure Lattice where
+  sourceEnergy : Nat
+  vertex : Nat → Nat → Cell
+  horizontal : Nat → Nat → Edge
+  vertical : Nat → Nat → Edge
+
+/-- Construct the full all-depth two-direction GST Graph V2 lattice. -/
+def lattice (E : Nat) : Lattice :=
+  {
+    sourceEnergy := E
+    vertex := graph E
+    horizontal := fun t p => horizontalEdge E t p
+    vertical := fun t p => verticalEdge E t p
+  }
+
+/-- Explicit local neighborhood of one production cell. -/
 structure Neighborhood where
   center : Cell
   horizontalNext : Cell
@@ -198,6 +244,9 @@ def canonicalWidth (s : Nat) : Nat :=
 /-- The canonical prefix-one sheet as an instance of the single production graph. -/
 def canonicalGraph (s n : Nat) : Sheet := graph (canonicalEnergy s n)
 
+/-- The canonical prefix-one infinite lattice. -/
+def canonicalLattice (s n : Nat) : Lattice := lattice (canonicalEnergy s n)
+
 /-- Canonical parent-block rectangle at a vertical observation coordinate. -/
 def canonicalRectangle (s n p : Nat) : Rectangle :=
   rectangle (canonicalEnergy s n) (canonicalWidth s) p
@@ -208,6 +257,9 @@ def residualEnergy (s k m : Nat) : Nat :=
 
 /-- Residual sheet, still the same production graph object. -/
 def residualGraph (s k m : Nat) : Sheet := graph (residualEnergy s k m)
+
+/-- Residual infinite lattice. -/
+def residualLattice (s k m : Nat) : Lattice := lattice (residualEnergy s k m)
 
 /-- Residual one-parent-block rectangle, with no collision assertion attached. -/
 def residualRectangle (s k m p : Nat) : Rectangle :=
@@ -282,6 +334,12 @@ def canonicalCutFrame (s n q : Nat) : CanonicalCutFrame :=
 
 #check Cell
 #check graph
+#check Direction
+#check Edge
+#check horizontalEdge
+#check verticalEdge
+#check Lattice
+#check lattice
 #check Neighborhood
 #check neighborhood
 #check Rectangle
@@ -291,8 +349,10 @@ def canonicalCutFrame (s n q : Nat) : CanonicalCutFrame :=
 #check OriginFrame
 #check originFrame
 #check canonicalGraph
+#check canonicalLattice
 #check canonicalRectangle
 #check residualGraph
+#check residualLattice
 #check residualRectangle
 #check ResidualFrame
 #check residualFrame
