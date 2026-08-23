@@ -37,33 +37,42 @@ replacement = '''  -- Direct residual bridge: recover generalized parent badness
     gst_omega_infiniteBadTrace_blocks s k m hResidualBad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
 
-  -- Split the exact residual classifier before doing any local arithmetic.
-  -- This prevents the unbounded first-level family from exploding simp in the
-  -- bounded level-three/stable young-cut cases.
   rcases hboundary with hfirst | hthree | hstable
   · rcases hfirst with ⟨hs1, hr1 | hr2⟩
     · subst s
       have hm1 : m % 3 = 1 := hr1
-      -- HARD FAMILY: first level, residue one, arbitrary cascade depth.
-      -- Keep a compiler-visible marker so the next RED result is unambiguous.
+      -- HARD FAMILY ONLY: s=1, m%3=1, arbitrary k.
+      -- No gst_omega: the remaining goal is intentionally explicit.
       trace_state
-      gst_omega
+      omega
     · rcases hr2 with ⟨hm2, hk1 | hk3⟩
       · subst s
-        have hk_eq : k = 1 := hk1
         have hm2' : m % 3 = 2 := hm2
         subst k
-        gst_omega
+        simp_all (config := { maxSteps := 1000000 }) only [
+          GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+          GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+        <;> omega
       · subst s
-        have hk_eq : k = 3 := hk3
         have hm2' : m % 3 = 2 := hm2
         subst k
-        gst_omega
+        simp_all (config := { maxSteps := 1000000 }) only [
+          GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+          GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+        <;> omega
   · rcases hthree with ⟨hs3, hk7, hne2, hne4, hne6⟩
     subst s
-    interval_cases k <;> gst_omega
+    interval_cases k <;>
+      simp_all (config := { maxSteps := 1000000 }) only [
+        GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+        GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+      <;> omega
   · rcases hstable with ⟨hs2, hsne3, hk4, hne2⟩
-    interval_cases k <;> gst_omega
+    interval_cases k <;>
+      simp_all (config := { maxSteps := 1000000 }) only [
+        GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+        GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+      <;> omega
 '''
 
 if needle not in s:
@@ -71,4 +80,4 @@ if needle not in s:
 
 s = s.replace(needle, replacement, 1)
 p.write_text(s, encoding='utf-8')
-print('installed boundary-split residual bridge probe')
+print('installed explicit residual arithmetic probe')
