@@ -70,6 +70,9 @@ jobs:
           import re
           p = Path('GSTGraphV2Production.lean')
           s = p.read_text(encoding='utf-8')
+          # Remove block comments first, then line comments.  The audit is about
+          # executable declarations, not explanatory prose.
+          s = re.sub(r'/-.*?-/', '', s, flags=re.S)
           forbidden = []
           for i, line in enumerate(s.splitlines(), 1):
               code = line.split('--', 1)[0]
@@ -85,4 +88,4 @@ jobs:
         shell: bash
         run: |
           echo 'GST Graph V2 production construction compiled GREEN.'
-          echo 'No new theorem/lemma/axiom/sorry/admit/native_decide exists in GSTGraphV2Production.lean.'
+          echo 'No new theorem/lemma/axiom/sorry/admit/native_decide exists in executable GSTGraphV2Production code.'
