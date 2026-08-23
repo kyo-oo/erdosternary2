@@ -42,6 +42,7 @@ currently-green coordinates into one explicit production state:
 * exact natural-origin prefix/suffix/phase coordinates on the same lattice;
 * both the neutral higher-level U tail and its re-phased realization;
 * the generalized residual `(s,k,m)` frame used by the production seam;
+* the exact generalized residual gate row `s+k+1+j`;
 * the canonical production-cut frame at `p = s+2+q`.
 
 No finite rectangle replaces the infinite graph. Rectangles and origin frames
@@ -190,11 +191,6 @@ def originCoordinates (t n K : Nat) : OriginCoordinates :=
     tailEnergy := GSTGraphV2HandwrittenExponentialCascade.uTailEnergy t n K
   }
 
-/-- One full re-coordinatized observation of a perfect-power origin.
-`neutralTail` is the higher-level tail before the consumed origin prefix is
-reapplied horizontally. `phasedTail` is that same tail after the exact phase
-translation. Keeping both prevents a later proof from silently identifying
-the neutral and re-phased states. -/
 structure OriginFrame where
   coordinates : OriginCoordinates
   horizontalOffset : Nat
@@ -272,6 +268,34 @@ def residualFrame (s k m p : Nat) : ResidualFrame :=
     block := residualRectangle s k m p
   }
 
+/-- Absolute Graph V2 row corresponding to relative child Navigation depth j
+in the generalized residual child `Q_(s+k)(m)`. -/
+def residualGateRow (s k j : Nat) : Nat := s + k + 1 + j
+
+/-- Generalized residual frame pinned to the exact physical row of a relative
+child gate. This is data only; it does not assert that a gate exists. -/
+structure ResidualGateFrame where
+  s : Nat
+  k : Nat
+  origin : Nat
+  gateDepth : Nat
+  row : Nat
+  residual : ResidualFrame
+  originFrame : OriginFrame
+  deriving Repr
+
+def residualGateFrame (s k m j : Nat) : ResidualGateFrame :=
+  let p := residualGateRow s k j
+  {
+    s := s
+    k := k
+    origin := m
+    gateDepth := j
+    row := p
+    residual := residualFrame s k m p
+    originFrame := originFrame (s+k) m (j+1) 0 p
+  }
+
 def canonicalCutRow (s q : Nat) : Nat := s + 2 + q
 
 structure CanonicalCutFrame where
@@ -322,6 +346,9 @@ def canonicalCutFrame (s n q : Nat) : CanonicalCutFrame :=
 #check residualRectangle
 #check ResidualFrame
 #check residualFrame
+#check residualGateRow
+#check ResidualGateFrame
+#check residualGateFrame
 #check CanonicalCutFrame
 #check canonicalCutFrame
 
