@@ -42,6 +42,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DExactCrossingCharge.olean GSTU2DExactCrossingCharge.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DSharpCrossingBlock.olean GSTU2DSharpCrossingBlock.lean
           lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
           lake env lean GSTU2DAtomicSmoke.lean
 
@@ -90,6 +91,7 @@ jobs:
               Path('GSTU2DAtomicBridge.lean'),
               Path('GSTU2DEventTransport.lean'),
               Path('GSTU2DExactCrossingCharge.lean'),
+              Path('GSTU2DSharpCrossingBlock.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTGraphV2InfiniteControl.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
