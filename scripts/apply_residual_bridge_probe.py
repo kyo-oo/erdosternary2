@@ -21,12 +21,19 @@ replacement = '''  -- Direct residual bridge probe.  First recover the exact gen
     rw [hparentArg]
     exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
 
+  -- Normalize the child level once.  Here k = r+1, hence s+k = s+1+r.
+  -- Keeping this as an explicit kernel equality avoids relying on elaborator
+  -- associativity during every downstream application.
+  have hchildCoreK :
+      GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
+    simpa [k, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hchildCore
+
   -- Keep the actual child gate and every exact coupled coordinate live.  This
   -- is the minimal context used by the old arithmetic solver, but here it is
   -- reconstructed directly at the production seam rather than importing any
   -- quarantined residual theorem.
   obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildCore
+    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildCoreK
   have hbadChild := hResidualBad j
   have horigin := gst_omega_origin_exact s k m j hs
   have hstep := gst_omega_universal_equation s k m j
