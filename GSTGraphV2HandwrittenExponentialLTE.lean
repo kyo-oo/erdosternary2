@@ -40,8 +40,12 @@ theorem pow4_three_power_lte_exact : ∀ r : Nat,
         _ = 1 + 3^((r+1)+1) * lteCoeff (r+1) := by
           simp only [lteCoeff]
           rw [show (r+1)+1 = r+2 by omega]
-          rw [show 2*r+1 = r + (r+1) by omega,
-              ← Nat.pow_add]
+          have hNext : 3^(r+2) = 3 * 3^(r+1) := by
+            rw [show r+2 = (r+1)+1 by omega, Nat.pow_succ]
+            ring
+          have hCross : 3^(r + (r+1)) = 3^r * 3^(r+1) := by
+            exact Nat.pow_add 3 r (r+1)
+          rw [hNext, hCross, Nat.pow_succ]
           ring
 
 /-- The exact LTE quotient is always one modulo three. -/
@@ -51,11 +55,11 @@ theorem lteCoeff_mod3_one : ∀ r : Nat, lteCoeff r % 3 = 1
       have ih := lteCoeff_mod3_one r
       simp only [lteCoeff]
       have hpow1 : 3^(r+1) % 3 = 0 := by
-        apply Nat.mod_eq_zero_of_dvd
-        exact Nat.dvd_pow (by decide) (by omega)
+        rw [Nat.pow_succ]
+        simp
       have hpow2 : 3^(2*r+1) % 3 = 0 := by
-        apply Nat.mod_eq_zero_of_dvd
-        exact Nat.dvd_pow (by decide) (by omega)
+        rw [Nat.pow_succ]
+        simp
       simp [Nat.add_mod, Nat.mul_mod, hpow1, hpow2, ih]
 
 /-- Any multiple of the scale exponent is one modulo the next ternary cut. -/
@@ -72,7 +76,6 @@ theorem pow4_scaled_mod_next (r u : Nat) :
   have hbase : (1 + 3^(r+1) * lteCoeff r) % 3^(r+1) = 1 := by
     simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hMgt1]
   rw [hbase]
-  simp [Nat.mod_eq_of_lt hMgt1]
 
 /-- The same scaled power is one modulo the current cut once the cut is
 positive. -/
@@ -122,8 +125,14 @@ theorem pow4_scaled_cut_digit_zero
     rw [Nat.mod_mul]
   rw [← Nat.pow_succ, hnext, hcur] at hsplit
   have hp : 0 < 3^r := Nat.pow_pos (by decide)
+  have hprod : 3^r * (R / 3^r % 3) = 0 := by
+    omega
+  have hd : R / 3^r % 3 = 0 := by
+    rcases Nat.mul_eq_zero.mp hprod with hp0 | hd0
+    · exact False.elim ((Nat.ne_of_gt hp) hp0)
+    · exact hd0
   unfold digit3
-  omega
+  exact hd
 
 /-- **Full Graph-V2 U-cut boundary.**  Before the accumulated origin prefix is
 reapplied as a horizontal phase, the unconsumed U tail occupies NULL with
