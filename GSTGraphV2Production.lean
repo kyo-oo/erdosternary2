@@ -35,6 +35,7 @@ currently-green coordinates into one explicit production state:
 * the canonical seven arithmetic axes and physical GST space;
 * event, U, mixed, crossing and SURVIVE observables;
 * the exact local U jump;
+* the Equation-I navigation/nullspace residue;
 * canonical phase density and the independent 8x3 density;
 * finite horizontal rectangle state on the same infinite sheet;
 * exact natural-origin prefix/suffix/phase coordinates on the same sheet;
@@ -58,6 +59,7 @@ structure Cell where
   mixedCharge : Int
   crossingCharge : Int
   survive : Int
+  navigationNullspace : Nat
   phaseDensity : Int
   density83 : Int
   deriving Repr
@@ -66,11 +68,12 @@ structure Cell where
 infinite GST Graph V2 sheet. -/
 def cell (E t p : Nat) : Cell :=
   let g := GSTGraphV2InfiniteControl.graph E t p
+  let R := 4^t * E
   {
     sourceEnergy := E
     horizontal := t
     vertical := p
-    absoluteEnergy := 4^t * E
+    absoluteEnergy := R
     seven := g.seven
     eventCode := g.eventCode
     uCharge := g.uCharge
@@ -78,6 +81,8 @@ def cell (E t p : Nat) : Cell :=
     mixedCharge := g.mixedCharge
     crossingCharge := g.crossingCharge
     survive := g.survive
+    navigationNullspace :=
+      GSTGraphV2HandwrittenExponentialCascade.navigationNullspace R p
     phaseDensity := GSTU2DCanonicalPhaseDensity.phaseDensity
       g.seven.carry g.seven.digit
     density83 := GSTU2DPureDivergence83.density83
