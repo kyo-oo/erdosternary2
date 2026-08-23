@@ -56,43 +56,55 @@ jobs:
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
 
-      - name: Compile GST Graph V2 production object
+      - name: Compile TRUE non-Euclidean GST Graph V2
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclidean.olean GSTGraphV2NonEuclidean.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclideanLaws.olean GSTGraphV2NonEuclideanLaws.lean
 
-      - name: Enforce construction-only boundary
+      - name: Audit true Graph V2 ontology and laws
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p = Path('GSTGraphV2Production.lean')
-          s = p.read_text(encoding='utf-8')
-          s = re.sub(r'/-.*?-/', '', s, flags=re.S)
+          construction = Path('GSTGraphV2NonEuclidean.lean').read_text(encoding='utf-8')
+          stripped = re.sub(r'/-.*?-/', '', construction, flags=re.S)
           forbidden = []
-          for i, line in enumerate(s.splitlines(), 1):
+          for i, line in enumerate(stripped.splitlines(), 1):
               code = line.split('--', 1)[0]
               if re.search(r'\btheorem\b|\blemma\b|\baxiom\b|\bsorry\b|\badmit\b|\bnative_decide\b', code):
                   forbidden.append(f'{i}:{line}')
           if forbidden:
               print('\n'.join(forbidden))
-              raise SystemExit('Graph V2 production object must remain construction-only')
-          print('Graph V2 construction boundary: clean')
+              raise SystemExit('true Graph V2 construction must remain declaration/data only')
+          laws = Path('GSTGraphV2NonEuclideanLaws.lean').read_text(encoding='utf-8')
+          if re.search(r'\b(sorry|admit|axiom|native_decide)\b', laws):
+              raise SystemExit('forbidden proof escape in true Graph V2 laws')
+          required = ['x : Nat', 'xPrime : Nat', 'y : Nat', 'yPrime : Space',
+                      'z : Nat', 'zPrime : Nat', 'nAxis : Nat × Nat']
+          missing = [x for x in required if x not in construction]
+          if missing:
+              raise SystemExit('missing seven-axis fields: ' + ', '.join(missing))
+          for space in ['null', 'altMinus', 'gstPlus']:
+              if f'| {space}' not in construction:
+                  raise SystemExit('missing GST space ' + space)
+          print('True GST Graph V2 ontology: exact 3 spaces + 7 non-dimensional axes.')
           PY
 
-      - name: Compile exact Graph V2 production laws
+      - name: Compile arithmetic projection/subgraph
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
 
-      - name: Audit production laws
+      - name: Audit projection/subgraph
         shell: bash
         run: |
           if grep -nE '\b(sorry|admit|axiom|native_decide)\b' GSTGraphV2ProductionLaws.lean; then
-            echo 'forbidden proof escape in Graph V2 production laws'
+            echo 'forbidden proof escape in arithmetic projection laws'
             exit 1
           fi
-          echo 'GST Graph V2 production object + exact laws compiled GREEN.'
+          echo 'TRUE non-Euclidean Graph V2 + arithmetic subgraph compiled GREEN.'
