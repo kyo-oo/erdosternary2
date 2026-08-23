@@ -7,3 +7,4 @@ import GSTU2DSharpCrossingBlock
 #check GSTU2DAtomicBridge.weighted_info_boundary_exact
 
 #check GSTU2DExactCrossingCharge.reverseCrossCode_ge_sharp_of_leading_happy
+#check GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy
