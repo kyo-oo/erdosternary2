@@ -133,15 +133,146 @@ theorem canonical_power_origin_happy_iff
     GSTGraphV2PerfectPowerAncestry.power_origin_happy_iff
       (3^(s+1) * n) t p
 
+/-! ## Shifted production window
+
+The production socket starts at the exact canonical cut `b = s+2`.  The next
+four lemmas move the all-depth phase equation to that cut without introducing
+a support horizon or terminal row. -/
+
+/-- Phase pressure in the vertical window beginning at the genuine production
+slice `b`. -/
+def graphPhaseWindow (E t b K : Nat) : Int :=
+  weightedPhaseColumnPrefix
+    (fun j => (graph E t (b+j)).seven.carry)
+    (fun j => (graph E t (b+j)).seven.digit) K
+
+/-- A Happy cell at the top of a shifted observation window forces positive
+pressure in that exact window. -/
+theorem graph_phase_window_positive_of_happy
+    (E t b q : Nat)
+    (hHappy : HappyCell
+      (graph E t (b+q)).seven.carry
+      (graph E t (b+q)).seven.digit) :
+    0 < graphPhaseWindow E t b (q+1) := by
+  unfold graphPhaseWindow
+  apply weightedPhaseColumnPrefix_positive_of_top_happy
+  · intro p hp
+    exact graph_carry_lt_four E t (b+p)
+  · intro p hp
+    exact graph_digit_lt_three E t (b+p)
+  · exact hHappy
+
+/-- Complete badness above the same production cut makes every shifted phase
+window nonpositive.  `K` remains an arbitrary observation depth. -/
+theorem graph_phase_window_nonpositive_of_bad
+    (E t b K : Nat)
+    (hBad : ∀ j, j < K → ¬ HappyCell
+      (graph E t (b+j)).seven.carry
+      (graph E t (b+j)).seven.digit) :
+    graphPhaseWindow E t b K ≤ 0 := by
+  unfold graphPhaseWindow
+  induction K with
+  | zero => simp [weightedPhaseColumnPrefix]
+  | succ K ih =>
+      have ih' := ih (fun j hj => hBad j (by omega))
+      have hlocal :
+          phaseDensity
+              (graph E t (b+K)).seven.carry
+              (graph E t (b+K)).seven.digit ≤ 0 :=
+        phaseDensity_nonpositive_of_not_happy
+          (graph E t (b+K)).seven.carry
+          (graph E t (b+K)).seven.digit
+          (graph_carry_lt_four E t (b+K))
+          (graph_digit_lt_three E t (b+K))
+          (hBad K (by omega))
+      have hw : (0 : Int) ≤ (((3^K : Nat) : Int)) := by positivity
+      rw [weightedPhaseColumnPrefix]
+      exact add_nonpos ih' (mul_nonpos_of_nonneg_of_nonpos hw hlocal)
+
+/-- Exact ternary digit shift through the production prefix. -/
+theorem digit3_add_shift (R b q : Nat) :
+    digit3 R (b+q) = digit3 (R / 3^b) q := by
+  unfold digit3
+  rw [Nat.pow_add, ← Nat.div_div_eq_div_mul]
+
+/-- The shifted graph digit boundary is the literal ternary residue of the
+exposed quotient above the production cut. -/
+theorem graph_digit_window_exact (E t b K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (((graph E t (b+j)).seven.digit : Nat) : Int)) =
+      ((((4^t * E) / 3^b) % 3^K : Nat) : Int) := by
+  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex, digit3_add_shift] using
+    digit3_weighted_prefix_int ((4^t * E) / 3^b) K
+
+/-- Exact phase divergence on the shifted production window.  The upper carry
+boundary remains live; nothing is truncated or replaced by a terminal state. -/
+theorem graph_phase_window_exact (E t b K : Nat) :
+    graphPhaseWindow E t b K =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) *
+          (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+           phaseDigitPotential (graph E t (b+j)).seven.digit)) +
+      phaseCarryPotential (graph E t b).seven.carry -
+        (((3^K : Nat) : Int)) *
+          phaseCarryPotential (graph E t (b+K)).seven.carry +
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) *
+          surviveI
+            (graph E t (b+j)).seven.carry
+            (graph E t (b+j)).seven.digit) := by
+  unfold graphPhaseWindow
+  apply phaseColumn_exact
+  intro j hj
+  exact ⟨graph_carry_lt_four E t (b+j),
+    graph_digit_lt_three E t (b+j),
+    (graph_cell_exact E t (b+j)).1,
+    by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩
+
+/-- The digit part of the shifted phase divergence is an exact difference of
+two exposed ternary residues. -/
+theorem graph_phase_digit_window_boundary_exact (E t b K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+         phaseDigitPotential (graph E t (b+j)).seven.digit)) =
+      ((((4^(t+1) * E) / 3^b) % 3^K : Nat) : Int) -
+      ((((4^t * E) / 3^b) % 3^K : Nat) : Int) := by
+  calc
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+         phaseDigitPotential (graph E t (b+j)).seven.digit)) =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E (t+1) (b+j)).seven.digit : Nat) : Int) -
+        (((3^j : Nat) : Int)) * (((graph E t (b+j)).seven.digit : Nat) : Int)) := by
+          apply Finset.sum_congr rfl
+          intro j hj
+          simp [phaseDigitPotential]
+          ring
+    _ =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E (t+1) (b+j)).seven.digit : Nat) : Int)) -
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E t (b+j)).seven.digit : Nat) : Int)) := by
+          rw [Finset.sum_sub_distrib]
+    _ = _ := by
+      rw [graph_digit_window_exact, graph_digit_window_exact]
+
 #check graph_phase_prefix_positive_of_happy
 #check graph_phase_prefix_nonpositive_of_bad
 #check digit3_weighted_prefix_nat
 #check graph_digit_weighted_prefix_exact
 #check graph_phase_column_exact
 #check canonical_power_origin_happy_iff
-#print axioms graph_phase_prefix_positive_of_happy
-#print axioms graph_phase_prefix_nonpositive_of_bad
-#print axioms graph_phase_column_exact
-#print axioms canonical_power_origin_happy_iff
+#check graph_phase_window_positive_of_happy
+#check graph_phase_window_nonpositive_of_bad
+#check graph_digit_window_exact
+#check graph_phase_window_exact
+#check graph_phase_digit_window_boundary_exact
+#print axioms graph_phase_window_positive_of_happy
+#print axioms graph_phase_window_nonpositive_of_bad
+#print axioms graph_phase_window_exact
+#print axioms graph_phase_digit_window_boundary_exact
 
 end GSTGraphV2PerfectPowerBlock
