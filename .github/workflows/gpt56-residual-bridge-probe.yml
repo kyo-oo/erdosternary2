@@ -1,0 +1,58 @@
+name: GPT56 Residual Bridge Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-final-perfect-power-block-20260823
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Install direct residual bridge probe
+        shell: bash
+        run: |
+          python3 scripts/apply_residual_bridge_probe.py
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'literal gst_end survived residual bridge transformation'
+            exit 1
+          fi
+          grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
+      - name: Compile transformed production monolith
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
+      - name: Audit transformed production source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('ErdosTernary2.lean')
+          bad = []
+          for i, line in enumerate(p.read_text(encoding='utf-8').splitlines(), 1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                  bad.append(f'{p}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('transformed production source audit failed')
+          print('transformed production source audit: clean')
+          PY
