@@ -66,11 +66,12 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedPowerRectangle.olean GSTGraphV2UnifiedPowerRectangle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedVerticalTelescope.olean GSTGraphV2UnifiedVerticalTelescope.lean
 
-      - name: Compile perfect-power ancestry surgery
+      - name: Compile perfect-power block surgery
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
+          lake env lean GSTGraphV2PerfectPowerBlockProbe.lean
 
       - name: Apply atomic residual-only production replacement
         shell: bash
@@ -111,6 +112,7 @@ jobs:
               Path('GSTGraphV2UnifiedPowerRectangle.lean'),
               Path('GSTGraphV2UnifiedVerticalTelescope.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
+              Path('GSTGraphV2PerfectPowerBlockProbe.lean'),
               Path('GSTGraphV2InfiniteControlSmoke.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
