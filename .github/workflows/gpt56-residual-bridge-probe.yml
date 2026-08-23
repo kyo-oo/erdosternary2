@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - sol/gpt56-final-perfect-power-block-20260823
-  pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   verify:
@@ -43,14 +45,33 @@ jobs:
           grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
           grep -n 'GSTCanonicalRightChordTrapS A z T' ErdosTernary2.lean
           grep -n 'gst_shared_x4_binary_factor_last_gate_high_bitS' ErdosTernary2.lean
-      - name: Compile transformed production monolith
+      - name: Compile, audit, comparator, and persist exact diagnostic
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTactic ErdosTernary2
-      - name: Audit transformed production source
-        shell: bash
-        run: |
+          set +e
+          lake build GSTTactic ErdosTernary2 > whole-theorem-build.log 2>&1
+          build_rc=$?
+          set -e
+
+          if [ "$build_rc" -ne 0 ]; then
+            {
+              echo "HEAD=$(git rev-parse HEAD)"
+              echo "BUILD_RC=$build_rc"
+              echo "=== WHOLE THEOREM BUILD ERRORS / TRACE ==="
+              grep -nE 'error:|case |⊢|trace_state|gst_prefix_one_information_bad_descends_inline|warning: ErdosTernary2.lean:16[7-9][0-9][0-9]' whole-theorem-build.log | tail -n 500 || true
+              echo "=== TAIL ==="
+              tail -n 320 whole-theorem-build.log
+            } > .surgery/gpt56-whole-theorem-diagnostic.txt
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add .surgery/gpt56-whole-theorem-diagnostic.txt
+            git commit -m 'Record whole-theorem BIG-N compiler diagnostic [skip ci]' || true
+            git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
+            cat .surgery/gpt56-whole-theorem-diagnostic.txt
+            exit "$build_rc"
+          fi
+
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -66,9 +87,37 @@ jobs:
               raise SystemExit('transformed production source audit failed')
           print('transformed production source audit: clean')
           PY
-      - name: Run official comparator
-        shell: bash
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/comparator.sh | tee comparator-whole-theorem.log
-          grep -q 'Your solution is okay!' comparator-whole-theorem.log
+
+          set +e
+          bash scripts/comparator.sh > comparator-whole-theorem.log 2>&1
+          comparator_rc=$?
+          set -e
+          if [ "$comparator_rc" -ne 0 ] || ! grep -q 'Your solution is okay!' comparator-whole-theorem.log; then
+            {
+              echo "HEAD=$(git rev-parse HEAD)"
+              echo "BUILD_RC=0"
+              echo "COMPARATOR_RC=$comparator_rc"
+              echo "=== COMPARATOR ==="
+              tail -n 500 comparator-whole-theorem.log
+            } > .surgery/gpt56-whole-theorem-diagnostic.txt
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add .surgery/gpt56-whole-theorem-diagnostic.txt
+            git commit -m 'Record whole-theorem comparator diagnostic [skip ci]' || true
+            git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
+            cat .surgery/gpt56-whole-theorem-diagnostic.txt
+            exit 1
+          fi
+
+          {
+            echo "HEAD=$(git rev-parse HEAD)"
+            echo "BUILD_RC=0"
+            echo "COMPARATOR_RC=0"
+            echo "Your solution is okay!"
+          } > .surgery/gpt56-whole-theorem-diagnostic.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .surgery/gpt56-whole-theorem-diagnostic.txt
+          git commit -m 'Record whole-theorem comparator GREEN [skip ci]' || true
+          git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
+          cat .surgery/gpt56-whole-theorem-diagnostic.txt
