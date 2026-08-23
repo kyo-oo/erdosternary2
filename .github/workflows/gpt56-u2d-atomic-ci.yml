@@ -59,6 +59,12 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTU2DPureDivergence83.olean GSTU2DPureDivergence83.lean
 
+      - name: Compile unified Old-Sol power rectangle
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedPowerRectangle.olean GSTGraphV2UnifiedPowerRectangle.lean
+
       - name: Compile perfect-power ancestry surgery
         shell: bash
         run: |
@@ -101,6 +107,7 @@ jobs:
               Path('GSTU2DPureDivergence83.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTGraphV2InfiniteControl.lean'),
+              Path('GSTGraphV2UnifiedPowerRectangle.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
               Path('GSTGraphV2InfiniteControlSmoke.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
