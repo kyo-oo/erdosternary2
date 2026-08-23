@@ -9,15 +9,7 @@ open GST2DMixedEmergence
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 
-/-!
-# Pure 8 x 3 GST divergence
-
-This is a finite-state Bellman certificate on the same infinite GST graph.
-Unlike the crossing and mixed densities, the local density below has no
-interior SURVIVE remainder at all: it is a literal horizontal/vertical
-divergence. The coefficients were selected against the complete twelve-cell
-physical transition table.
--/
+/-! Pure 8×3 divergence on the existing infinite GST graph. -/
 
 def digitPotential83 (d : Nat) : Int :=
   if d = 0 then 15 else if d = 1 then -48 else -132
@@ -29,8 +21,6 @@ def density83 (C d : Nat) : Int :=
   digitPotential83 (outDigit C d) - 8 * digitPotential83 d +
     carryPotential83 C - 3 * carryPotential83 (nextCarry C d)
 
-/-- Exact twelve-cell certificate. The two Happy cells are strictly positive;
-all ten bad cells are nonpositive, and the global physical floor is -105. -/
 theorem density83_physical_table :
     density83 0 0 = -105 ∧ density83 0 1 = -84 ∧ density83 0 2 = 168 ∧
     density83 1 0 = -28 ∧ density83 1 1 = -28 ∧ density83 1 2 = -49 ∧
@@ -38,7 +28,6 @@ theorem density83_physical_table :
     density83 3 0 = -105 ∧ density83 3 1 = 0 ∧ density83 3 2 = 84 := by
   decide
 
-/-- Positivity is exactly the physical Happy sector. -/
 theorem happy_iff_density83_positive
     (C d : Nat) (hC : C < 4) (hd : d < 3) :
     HappyCell C d ↔ 0 < density83 C d := by
@@ -50,7 +39,6 @@ theorem happy_iff_density83_positive
     norm_num [HappyCell, density83, digitPotential83, carryPotential83,
       outDigit, nextCarry]
 
-/-- Uniform physical floor. -/
 theorem density83_ge_neg105
     (C d : Nat) (hC : C < 4) (hd : d < 3) :
     (-105 : Int) ≤ density83 C d := by
@@ -61,7 +49,6 @@ theorem density83_ge_neg105
     subst C <;> subst d <;>
     norm_num [density83, digitPotential83, carryPotential83, outDigit, nextCarry]
 
-/-- Every bad physical cell is nonpositive. -/
 theorem density83_nonpositive_of_not_happy
     (C d : Nat) (hC : C < 4) (hd : d < 3)
     (hbad : ¬ HappyCell C d) :
@@ -70,18 +57,14 @@ theorem density83_nonpositive_of_not_happy
   have hp : 0 < density83 C d := by omega
   exact hbad ((happy_iff_density83_positive C d hC hd).2 hp)
 
-/-- Reverse-base-eight accumulation along one horizontal GST row. -/
 def reverseDensity83 (C d : Nat → Nat) : Nat → Int
   | 0 => 0
   | N+1 => 8 * reverseDensity83 C d N + density83 (C N) (d N)
 
-/-- Matching reverse-base-eight carry boundary word. -/
 def reverseCarry83 (C : Nat → Nat) : Nat → Int
   | 0 => 0
   | N+1 => 8 * reverseCarry83 C N + carryPotential83 (C N)
 
-/-- Arbitrary physical rows have the exact geometric floor
-`-15*(8^N-1)`. -/
 theorem reverseDensity83_ge_floor
     (C d : Nat → Nat) : ∀ N : Nat,
       (∀ t, t < N → C t < 4) →
@@ -107,8 +90,6 @@ theorem reverseDensity83_ge_floor
       rw [reverseDensity83, hpow]
       nlinarith
 
-/-- A row whose first cell is Happy remains strictly positive at every width.
-The sharp lower envelope is `69*8^(N-1)+15`. -/
 theorem reverseDensity83_ge_of_leading_happy
     (C d : Nat → Nat)
     (hHappy : HappyCell (C 0) (d 0)) :
@@ -160,7 +141,6 @@ theorem reverseDensity83_ge_of_leading_happy
         rw [hpow]
         nlinarith
 
-/-- Pure horizontal telescope. There is no interior correction term. -/
 theorem reverseDensity83_exact
     (C Cnext d : Nat → Nat) : ∀ N : Nat,
     (∀ t, t < N → outDigit (C t) (d t) = d (t+1)) →
@@ -186,7 +166,6 @@ theorem reverseDensity83_exact
       push_cast
       ring_nf
 
-/-- Base-three telescope for an arbitrary vertical boundary function. -/
 theorem ternaryWeightedDiff83 (g : Nat → Int) (K : Nat) :
     Finset.sum (Finset.range K) (fun p =>
       (((3^p : Nat) : Int)) * (g p - 3 * g (p+1))) =
@@ -198,7 +177,6 @@ theorem ternaryWeightedDiff83 (g : Nat → Int) (K : Nat) :
       push_cast
       ring
 
-/-- Exact pure-boundary 8x3 rectangle identity on any physical GST grid. -/
 theorem density83_rectangle_exact
     (C d : Nat → Nat → Nat) (N K : Nat)
     (hcell : ∀ t p, t < N → p < K →
@@ -232,11 +210,9 @@ theorem density83_rectangle_exact
         (fun t => C t p) (fun t => C t (p+1)) (fun t => d t p) N
         (fun t ht => (hcell t p ht hpK).2.2.1)
         (fun t ht => (hcell t p ht hpK).2.2.2)
-      have hrw := congrArg
-        (fun x : Int => (((3^p : Nat) : Int)) * x) hr
+      rw [hr]
       dsimp [g]
-      ring_nf at hrw ⊢
-      exact hrw
+      ring
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
@@ -253,7 +229,6 @@ theorem density83_rectangle_exact
       dsimp [g]
       ring
 
-/-- Vertical weighted prefix of the reverse-base-eight rows. -/
 def weightedRectanglePrefix83
     (C d : Nat → Nat → Nat) (N : Nat) : Nat → Int
   | 0 => 0
@@ -261,11 +236,6 @@ def weightedRectanglePrefix83
       (((3^K : Nat) : Int)) *
         reverseDensity83 (fun t => C t K) (fun t => d t K) N
 
-/-- All lower rows obey the exact geometric rectangle floor, stated without
-integer division:
-
-  -15(8^N-1)(3^K-1) ≤ 2 R_{N,K}.
--/
 theorem weightedRectanglePrefix83_ge_floor
     (C d : Nat → Nat → Nat) (N : Nat) : ∀ K : Nat,
     (∀ t p, t < N → p < K → C t p < 4) →
@@ -312,8 +282,6 @@ theorem weightedRectanglePrefix83_ge_floor
                 reverseDensity83 (fun t => C t K) (fun t => d t K) N) := by
           ring
 
-/-- A Happy cell in the upper-left corner dominates every possible bad mass
-below it after any positive horizontal width. -/
 theorem weightedRectanglePrefix83_positive_of_top_leading_happy
     (C d : Nat → Nat → Nat) (N q : Nat)
     (hN : 1 ≤ N)
@@ -332,17 +300,12 @@ theorem weightedRectanglePrefix83_positive_of_top_leading_happy
   let w : Int := (((3^q : Nat) : Int))
   let P : Int := weightedRectanglePrefix83 C d N q
   let R : Int := reverseDensity83 (fun t => C t q) (fun t => d t q) N
-  have ha : 0 < a := by
-    dsimp [a]
-    positivity
-  have hw : 0 < w := by
-    dsimp [w]
-    positivity
+  have ha : 0 < a := by dsimp [a]; positivity
+  have hw : 0 < w := by dsimp [w]; positivity
   have hNm1 : (N - 1) + 1 = N := by omega
   have hpowNat : 8^N = 8 * 8^(N-1) := by
     calc
-      8^N = 8^((N-1)+1) :=
-        congrArg (fun k : Nat => 8^k) hNm1.symm
+      8^N = 8^((N-1)+1) := congrArg (fun k : Nat => 8^k) hNm1.symm
       _ = 8^(N-1) * 8 := Nat.pow_succ 8 (N-1)
       _ = 8 * 8^(N-1) := by ac_rfl
   have hpow : (((8^N : Nat) : Int)) = 8 * a := by
@@ -375,7 +338,6 @@ theorem weightedRectanglePrefix83_positive_of_top_leading_happy
     nlinarith
   nlinarith
 
-/-- Literal wrapper on the main infinite GST V2 graph. -/
 theorem graph_density83_rectangle_exact (E N K : Nat) :
     Finset.sum (Finset.range K) (fun p =>
       (((3^p : Nat) : Int)) *
