@@ -13,15 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install exact collision surgery into production source
+      - name: Install exact residual surgery into production source
         shell: bash
         run: |
-          python3 scripts/apply_u2d_atomic_replacement.py
+          python3 scripts/apply_residual_bridge_probe.py
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
             echo 'literal gst_end survived production surgery'
             exit 1
           fi
-          grep -n 'have hPerfectPowerCollision : False := by' ErdosTernary2.lean
+          grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
 
       - name: Materialize clean judge modules and exact package
         shell: bash
@@ -54,12 +54,14 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile collision dependency stack
+      - name: Compile exact Graph V2 dependency stack
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .lake/build/lib/lean
           for f in \
+            GSTGraphV2NonEuclidean \
+            GSTGraphV2NonEuclideanLaws \
             GSTGraphV2CoupledUFlux \
             GSTGraphV2CoupledUPhysicalBridge \
             GST2DMixedEmergence \
@@ -78,8 +80,7 @@ jobs:
             GSTGraphV2HandwrittenOmegaUBlock \
             GSTGraphV2HandwrittenExponentialCascade \
             GSTGraphV2HandwrittenExponentialLTE \
-            GSTGraphV2HandwrittenAnchoredCocycle \
-            GSTGraphV2PerfectPowerBlockCollision; do
+            GSTGraphV2HandwrittenAnchoredCocycle; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
 
@@ -97,7 +98,8 @@ jobs:
           import re
           names = [
               'GSTTactic.lean', 'ErdosTernary2.lean', 'Solution.lean',
-              'GSTGraphV2PerfectPowerBlockCollision.lean',
+              'GSTGraphV2NonEuclidean.lean',
+              'GSTGraphV2NonEuclideanLaws.lean',
               'GSTGraphV2PerfectPowerBlockProbe.lean',
               'GSTGraphV2PerfectPowerAncestry.lean',
               'GSTGraphV2UnifiedPowerRectangle.lean',
