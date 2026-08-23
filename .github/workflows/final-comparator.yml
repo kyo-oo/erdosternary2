@@ -3,14 +3,26 @@ name: Final Lean Comparator
 on:
   push:
     branches:
-      - sol/gst-v2-atomic-surgery-20260818
+      - sol/gpt56-final-perfect-power-block-20260823
   pull_request:
+  workflow_dispatch:
 
 jobs:
   comparator:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+
+      - name: Install exact collision surgery into production source
+        shell: bash
+        run: |
+          python3 scripts/apply_u2d_atomic_replacement.py
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'literal gst_end survived production surgery'
+            exit 1
+          fi
+          grep -n 'have hPerfectPowerCollision : False := by' ErdosTernary2.lean
+
       - name: Materialize clean judge modules and exact package
         shell: bash
         run: |
@@ -32,6 +44,7 @@ jobs:
           Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
           Path('lake-manifest.json').unlink(missing_ok=True)
           PY
+
       - name: Install exact Lean and Mathlib
         shell: bash
         run: |
@@ -40,30 +53,70 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
+
+      - name: Compile collision dependency stack
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          for f in \
+            GSTGraphV2CoupledUFlux \
+            GSTGraphV2CoupledUPhysicalBridge \
+            GST2DMixedEmergence \
+            GSTU2DAtomicBridge \
+            GSTU2DEventTransport \
+            GSTU2DExactCrossingCharge \
+            GSTU2DSharpCrossingBlock \
+            GSTCanonicalSevenAxisBridge \
+            GSTGraphV2InfiniteControl \
+            GSTU2DPureDivergence83 \
+            GSTU2DCanonicalPhaseDensity \
+            GSTGraphV2UnifiedPowerRectangle \
+            GSTGraphV2UnifiedVerticalTelescope \
+            GSTGraphV2PerfectPowerAncestry \
+            GSTGraphV2PerfectPowerBlockProbe \
+            GSTGraphV2HandwrittenOmegaUBlock \
+            GSTGraphV2HandwrittenExponentialCascade \
+            GSTGraphV2HandwrittenExponentialLTE \
+            GSTGraphV2HandwrittenAnchoredCocycle \
+            GSTGraphV2PerfectPowerBlockCollision; do
+              lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
+          done
+
       - name: Compile canonical proof and solution
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake build GSTTactic ErdosTernary2 Challenge Solution
+
       - name: Audit executable solution sources
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
+          names = [
+              'GSTTactic.lean', 'ErdosTernary2.lean', 'Solution.lean',
+              'GSTGraphV2PerfectPowerBlockCollision.lean',
+              'GSTGraphV2PerfectPowerBlockProbe.lean',
+              'GSTGraphV2PerfectPowerAncestry.lean',
+              'GSTGraphV2UnifiedPowerRectangle.lean',
+              'GSTGraphV2UnifiedVerticalTelescope.lean',
+              'GSTU2DPureDivergence83.lean',
+          ]
           bad = []
-          for name in ['GSTTactic.lean', 'ErdosTernary2.lean', 'Solution.lean']:
+          for name in names:
               for i, line in enumerate(Path(name).read_text(encoding='utf-8').splitlines(), 1):
-                  stripped = line.lstrip()
-                  if stripped.startswith('--'):
+                  if line.lstrip().startswith('--'):
                       continue
-                  if re.search(r'\bsorry\b', line):
+                  if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
                       bad.append(f'{name}:{i}:{line}')
           if bad:
               print('\n'.join(bad))
-              raise SystemExit('executable solution contains forbidden placeholder token')
+              raise SystemExit('executable solution contains forbidden proof escape')
           print('executable solution audit: clean')
           PY
+
       - name: Build pinned lean4export
         shell: bash
         run: |
@@ -75,6 +128,7 @@ jobs:
           cp ../../lean-toolchain lean-toolchain
           lake update
           lake build lean4export
+
       - name: Build pinned comparator
         shell: bash
         run: |
@@ -92,6 +146,7 @@ jobs:
           cp ../../lean-toolchain lean-toolchain
           lake update
           lake build comparator
+
       - name: Run official comparator
         shell: bash
         run: |
