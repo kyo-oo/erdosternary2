@@ -1,0 +1,334 @@
+HEAD=6144f92410beff6be4f72347fc8987d047d5ad49
+BUILD_RC=1
+=== WHOLE THEOREM BUILD ERRORS / TRACE ===
+374:warning: ErdosTernary2.lean:16721:17: Variable name `hs` is not explicitly referenced.
+380:error: ErdosTernary2.lean:16773:13: unsolved goals
+381:case zero
+395:⊢ T % 1 = 0
+396:error: ErdosTernary2.lean:16789:4: Type mismatch
+402:error: ErdosTernary2.lean:16848:2: Tactic `contradiction` failed
+455:⊢ False
+507:⊢ False
+508:error: Lean exited with code 1
+511:error: build failed
+=== TAIL ===
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6149:5: Variable name `h_has` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _h_has
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6150:5: Variable name `hd_start` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hd_start
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6337:15: Variable name `hp1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hp1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:7013:21: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+warning: ErdosTernary2.lean:7019:46: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+warning: ErdosTernary2.lean:7020:23: This simp argument is unused:
+  not_not
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [GSTOmegaBadSet, GSTOmegaZeroSet, Set.mem_setOf_eq, Set.mem_compl_iff]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ErdosTernary2.lean:7161:2: Try this: intro m hm j hj
+warning: ErdosTernary2.lean:7230:36: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+warning: ErdosTernary2.lean:7237:5: Variable name `hk` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hk
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:7237:18: Variable name `hm` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hm
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:7803:21: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:9132:21: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:9936:5: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:9971:2: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: ErdosTernary2.lean:10196:23: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ErdosTernary2.lean:10508:32: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [hshape2, Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ErdosTernary2.lean:10535:21: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ErdosTernary2.lean:10558:4: 'norm_num at hsplit' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: ErdosTernary2.lean:10874:32: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [hshape2, Nat.add_mod]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ErdosTernary2.lean:11149:34: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:11365:5: Variable name `hDN` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hDN
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:11800:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: ErdosTernary2.lean:11800:39: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: ErdosTernary2.lean:11800:39: 'omega' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: ErdosTernary2.lean:13041:5: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:13261:32: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:13414:34: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+info: ErdosTernary2.lean:13870:30: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+warning: ErdosTernary2.lean:13870:26: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: ErdosTernary2.lean:13906:21: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15308:7: Variable name `T` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _T
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15308:9: Variable name `H` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _H
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15367:5: Variable name `hn` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hn
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15445:31: Variable name `c` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _c
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:15513:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: ErdosTernary2.lean:15514:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: ErdosTernary2.lean:16587:5: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:16669:5: Variable name `hc` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hc
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:16721:17: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: ErdosTernary2.lean:16773:13: unsolved goals
+case zero
+s n : ℕ
+hs : 1 ≤ s
+hn : 1 ≤ n
+hBad : GSTOmegaInfiniteBadTrace s 1 n
+hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n)
+T : ℕ := gstNavigationConstant (s + 1) n
+A : ℕ := 4 ^ 3 ^ s
+z : ℕ := gstCanonicalPrefixOffsetS s
+H : ℕ := z + A * T
+hparent : GSTSeededBadTraceS 1 H
+hd : gstDigit T 0 = 2
+hspace : gstSpaceAt T 0 = GSTSpace.gstPlus ∨ gstSpaceAt T 0 = GSTSpace.null
+hmod : gstCarry T 0 % 3 = 0
+⊢ T % 1 = 0
+error: ErdosTernary2.lean:16789:4: Type mismatch
+  gst_navigation_decomposition s 1 hs
+has type
+  4 ^ (3 ^ s * 1) = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
+but is expected to have type
+  4 ^ 3 ^ s = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
+error: ErdosTernary2.lean:16848:2: Tactic `contradiction` failed
+
+s n : ℕ
+hs : 1 ≤ s
+hn : 1 ≤ n
+hBad : GSTOmegaInfiniteBadTrace s 1 n
+hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n)
+T : ℕ := gstNavigationConstant (s + 1) n
+A : ℕ := 4 ^ 3 ^ s
+z : ℕ := gstCanonicalPrefixOffsetS s
+H : ℕ := z + A * T
+hchildT : GSTNavigationWitness T
+hparent : GSTSeededBadTraceS 1 H
+hchildGate : ∃ q, GSTSeededHappyS 0 T q
+hApos : 0 < A
+hAunit : A = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
+hunitPrefix : gstNavigationConstant s 1 = 1 + 3 * z
+hz1 : 1 + 4 * z < A
+q : ℕ
+hgate : GSTSeededHappyS 0 T q
+hparentSuffix :
+  GSTSeededBadTraceS (gstAffineMulCarryS 4 1 (z + A * T) (q + 1))
+    (gstAffineMulCarryS A z T (q + 1) + A * (T / 3 ^ (q + 1)))
+hchildSuffix : GSTSeededBadTraceS (gstAffineMulCarryS 4 0 T (q + 1)) (T / 3 ^ (q + 1))
+hC : gstAffineMulCarryS 4 0 T (q + 1) = 2 ∨ gstAffineMulCarryS 4 0 T (q + 1) = 3
+hlocal : GSTLocalTwoDigitRightChordS T q
+hclass3 : gstAffineMulCarryS 4 0 T (q + 1) = 3 ↔ GSTPhysicalTwoDigitBig1ClearS T q
+hclass2 : gstAffineMulCarryS 4 0 T (q + 1) = 2 ↔ ¬GSTPhysicalTwoDigitBig1ClearS T q
+hshared :
+  gstAffineMulCarryS 4 1 (z + A * T) (q + 1) + 4 * gstAffineMulCarryS A z T (q + 1) =
+    gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1) + A * gstAffineMulCarryS 4 0 T (q + 1)
+hW : gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1) < A
+D : ℕ := gstAffineMulCarryS 4 1 (z + A * T) (q + 1)
+Z : ℕ := gstAffineMulCarryS A z T (q + 1)
+W : ℕ := gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1)
+C : ℕ := gstAffineMulCarryS 4 0 T (q + 1)
+Y : ℕ := T / 3 ^ (q + 1)
+hparentSuffix' : GSTSeededBadTraceS D (Z + A * Y)
+hchildSuffix' : GSTSeededBadTraceS C Y
+hC' : C = 2 ∨ C = 3
+hshared' : D + 4 * Z = W + A * C
+hW' : W < A
+hDlt : D < 4
+a b e Wmid : ℕ
+hDb : D = 2 * a + b
+hCe : C = 2 + e
+ha : a < 2
+hb : b < 2
+he : e < 2
+hWmid : Wmid < A
+hmid : a + 2 * Z = Wmid + A
+hlow : b + 2 * Wmid = W + A * e
+hfuture0 : T / 3 ^ T = 0
+⊢ False
+info: ErdosTernary2.lean:16847:2: s n : ℕ
+hs : 1 ≤ s
+hn : 1 ≤ n
+hBad : GSTOmegaInfiniteBadTrace s 1 n
+hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n)
+T : ℕ := gstNavigationConstant (s + 1) n
+A : ℕ := 4 ^ 3 ^ s
+z : ℕ := gstCanonicalPrefixOffsetS s
+H : ℕ := z + A * T
+hchildT : GSTNavigationWitness T
+hparent : GSTSeededBadTraceS 1 H
+hchildGate : ∃ q, GSTSeededHappyS 0 T q
+hApos : 0 < A
+hAunit : A = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
+hunitPrefix : gstNavigationConstant s 1 = 1 + 3 * z
+hz1 : 1 + 4 * z < A
+q : ℕ
+hgate : GSTSeededHappyS 0 T q
+hparentSuffix :
+  GSTSeededBadTraceS (gstAffineMulCarryS 4 1 (z + A * T) (q + 1))
+    (gstAffineMulCarryS A z T (q + 1) + A * (T / 3 ^ (q + 1)))
+hchildSuffix : GSTSeededBadTraceS (gstAffineMulCarryS 4 0 T (q + 1)) (T / 3 ^ (q + 1))
+hC : gstAffineMulCarryS 4 0 T (q + 1) = 2 ∨ gstAffineMulCarryS 4 0 T (q + 1) = 3
+hlocal : GSTLocalTwoDigitRightChordS T q
+hclass3 : gstAffineMulCarryS 4 0 T (q + 1) = 3 ↔ GSTPhysicalTwoDigitBig1ClearS T q
+hclass2 : gstAffineMulCarryS 4 0 T (q + 1) = 2 ↔ ¬GSTPhysicalTwoDigitBig1ClearS T q
+hshared :
+  gstAffineMulCarryS 4 1 (z + A * T) (q + 1) + 4 * gstAffineMulCarryS A z T (q + 1) =
+    gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1) + A * gstAffineMulCarryS 4 0 T (q + 1)
+hW : gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1) < A
+D : ℕ := gstAffineMulCarryS 4 1 (z + A * T) (q + 1)
+Z : ℕ := gstAffineMulCarryS A z T (q + 1)
+W : ℕ := gstAffineMulCarryS A (1 + 4 * z) (4 * T) (q + 1)
+C : ℕ := gstAffineMulCarryS 4 0 T (q + 1)
+Y : ℕ := T / 3 ^ (q + 1)
+hparentSuffix' : GSTSeededBadTraceS D (Z + A * Y)
+hchildSuffix' : GSTSeededBadTraceS C Y
+hC' : C = 2 ∨ C = 3
+hshared' : D + 4 * Z = W + A * C
+hW' : W < A
+hDlt : D < 4
+a b e Wmid : ℕ
+hDb : D = 2 * a + b
+hCe : C = 2 + e
+ha : a < 2
+hb : b < 2
+he : e < 2
+hWmid : Wmid < A
+hmid : a + 2 * Z = Wmid + A
+hlow : b + 2 * Wmid = W + A * e
+hfuture0 : T / 3 ^ T = 0
+⊢ False
+error: Lean exited with code 1
+Some required targets logged failures:
+- ErdosTernary2
+error: build failed
