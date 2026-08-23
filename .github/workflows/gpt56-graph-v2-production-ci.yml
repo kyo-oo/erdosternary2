@@ -70,8 +70,6 @@ jobs:
           import re
           p = Path('GSTGraphV2Production.lean')
           s = p.read_text(encoding='utf-8')
-          # Remove block comments first, then line comments.  The audit is about
-          # executable declarations, not explanatory prose.
           s = re.sub(r'/-.*?-/', '', s, flags=re.S)
           forbidden = []
           for i, line in enumerate(s.splitlines(), 1):
@@ -84,8 +82,17 @@ jobs:
           print('Graph V2 construction boundary: clean')
           PY
 
-      - name: Report production object
+      - name: Compile exact Graph V2 production laws
         shell: bash
         run: |
-          echo 'GST Graph V2 production construction compiled GREEN.'
-          echo 'No new theorem/lemma/axiom/sorry/admit/native_decide exists in executable GSTGraphV2Production code.'
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
+
+      - name: Audit production laws
+        shell: bash
+        run: |
+          if grep -nE '\b(sorry|admit|axiom|native_decide)\b' GSTGraphV2ProductionLaws.lean; then
+            echo 'forbidden proof escape in Graph V2 production laws'
+            exit 1
+          fi
+          echo 'GST Graph V2 production object + exact laws compiled GREEN.'
