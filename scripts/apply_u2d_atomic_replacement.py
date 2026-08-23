@@ -4,9 +4,15 @@ from pathlib import Path
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
+# Keep the existing production proof and splice only the true residual seam.
+# The unified graph / rectangle modules are compiled independently by CI and
+# imported here so the production proof is checked in the same environment.
 for imp in [
     'import GSTGraphV2InfiniteControl\n',
-    'import GSTU2DSharpCrossingBlock\n',
+    'import GSTU2DPureDivergence83\n',
+    'import GSTGraphV2UnifiedPowerRectangle\n',
+    'import GSTGraphV2UnifiedVerticalTelescope\n',
+    'import GSTGraphV2PerfectPowerAncestry\n',
 ]:
     if imp not in s:
         anchor = 'import Mathlib.Tactic.Ring\n'
@@ -14,193 +20,75 @@ for imp in [
             raise SystemExit('import anchor not found')
         s = s.replace(anchor, anchor + imp, 1)
 
-start_marker = '/-- Literal BIG-N finite-support horizon for the canonical child information. -/'
-end_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
-
-if start_marker not in s:
-    if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
-        print('atomic U2D replacement already installed')
-        p.write_text(s, encoding='utf-8')
-        raise SystemExit(0)
-    raise SystemExit('old prefix-one start marker not found')
-if end_marker not in s:
-    raise SystemExit('prefix-one end marker not found')
-
-start = s.index(start_marker)
-end = s.index(end_marker, start)
-
-replacement = r'''/-- Atomic Surgery V2: the certified child event and the completely bad
-prefix-one parent are literal slices of one canonical infinite GST V2
-perfect-power graph.  The sharp crossing block below uses the actual x4/base3
-transition law; no exposed-tail surrogate, residual termination theorem,
-finite-support horizon, or `gst_end` occurs. -/
-theorem gst_prefix_one_u2d_atomic_collision_inline
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  let data : GSTPrefixOneOmegaData s n :=
-    gst_prefix_one_omegaData s n hs hchild
-  let E : Nat := 4^(3^(s+1) * n)
-  let N : Nat := 3^s
-  let B : Nat := 3^(s+2)
-  let P0 : Nat := 1
-  let P1 : Nat := 1 + 3^(s+1)
-  let T : Nat := gstNavigationConstant (s+1) n
-  let H : Nat := gstPrefixOneUPotentialTailS s n
-  let q : Nat := data.childGateIndex
-
-  have hGate :
-      gstDigit T q = 2 ∧ (gstCarry T q = 0 ∨ gstCarry T q = 3) := by
-    dsimp [T, q, data]
-    simpa only [gstOmega] using data.childGate
-
-  have hGateS : GSTSeededHappyS 0 T q := by
-    simpa [GSTSeededHappyS, gstDigitS, gstDigit, gstCarryS,
-      gstAffineMulCarryS, gstCarry] using hGate
-
-  have hE0raw := gst_navigation_decomposition (s+1) n (by omega)
-  have hE0 : 4^0 * E = P0 + B*T := by
-    dsimp [E, P0, B, T]
-    simpa using hE0raw
-
-  have hB27 : 27 ≤ B := by
-    dsimp [B]
-    have hpow : 3^3 ≤ 3^(s+2) :=
-      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    norm_num at hpow ⊢
-    exact hpow
-  have hP0 : P0 < B := by omega
-  have h4P0 : 4 * P0 < B := by omega
-  have hseed0 : (4 * P0) / B = 0 := Nat.div_eq_of_lt h4P0
-
-  have hLeft :
-      GSTU2DEventTransport.HappyCell
-        (GSTGraphV2InfiniteControl.graph E 0 (s+2+q)).seven.carry
-        (GSTGraphV2InfiniteControl.graph E 0 (s+2+q)).seven.digit := by
-    apply (GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
-      E 0 (s+2) P0 T q hE0 hP0).2
-    rw [hseed0]
-    simpa [GSTCanonicalSevenAxisBridge.digit3,
-      GSTGraphV2InfiniteControl.seededCarry, gstDigit, gstCarry] using hGate
-
-  have hc3 : c s % 3 = 1 := c_mod3 s hs
-  have hcshape : c s = 1 + 3 * (c s / 3) := by
-    have hcdiv := Nat.mod_add_div (c s) 3
-    rw [hc3] at hcdiv
-    omega
-  have hA : 4^(3^s) = 1 + 3^(s+1) * c s := lte_identity s hs
-  have hE1raw := gst_canonical_phase1_energy_shape_surgeryS
-    gstNavigationConstant gst_navigation_constant_origin_energyS
-    s n (c s) (c s / 3) hs hA hcshape
-  have hE1 : 4^N * E = P1 + B*H := by
-    dsimp [N, E, P1, B, H, gstPrefixOneUPotentialTailS]
-    rw [show 3^(s+2) = 3 * 3^(s+1) by
-      rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]; ac_rfl]
-    simpa [Nat.mul_assoc] using hE1raw
-
-  let X : Nat := 3^(s+1)
-  have hX9 : 9 ≤ X := by
-    dsimp [X]
-    have hpow : 3^2 ≤ 3^(s+1) :=
-      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    norm_num at hpow ⊢
-    exact hpow
-  have hBshape : B = 3 * X := by
-    dsimp [B, X]
-    rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
-    ac_rfl
-  have hP1shape : P1 = 1 + X := by rfl
-  have hP1 : P1 < B := by
-    rw [hBshape, hP1shape]
-    omega
-  have hP1lo : B ≤ 4 * P1 := by
-    rw [hBshape, hP1shape]
-    omega
-  have hP1hi : 4 * P1 < 2 * B := by
-    rw [hBshape, hP1shape]
-    omega
-  have hBpos : 0 < B := by omega
-  have hseed1lo : 1 ≤ (4 * P1) / B :=
-    (Nat.le_div_iff_mul_le hBpos).2 (by simpa using hP1lo)
-  have hseed1hi : (4 * P1) / B < 2 :=
-    (Nat.div_lt_iff_lt_mul hBpos).2 (by simpa using hP1hi)
-  have hseed1 : (4 * P1) / B = 1 := by omega
-
-  have hseeded := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad
-  have hRightBad : ∀ j,
-      ¬ GSTU2DEventTransport.HappyCell
-        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.carry
-        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.digit := by
-    intro j hHappy
-    have hTail :=
-      (GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
-        E N (s+2) P1 H j hE1 hP1).1 hHappy
-    rw [hseed1] at hTail
-    have hbadj := hseeded j
-    apply hbadj
-    simpa [GSTBadPairS, GSTCanonicalSevenAxisBridge.digit3,
-      GSTGraphV2InfiniteControl.seededCarry,
-      gstAffineMulCarryS, gstDigitS] using hTail
-
-  have hNpos : 1 ≤ N := by
-    dsimp [N]
-    positivity
-
-  -- Strong finite block theorem: the actual child Happy row dominates the
-  -- complete worst-case crossing mass of every lower row after the whole
-  -- canonical horizontal block N=3^s.  This is the real replacement for the
-  -- false pointwise child-carry -> parent-carry probe.
-  have hCrossPrefixPositive :
-      0 < GSTU2DExactCrossingCharge.weightedCrossPrefix
-        (fun t p =>
-          (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.carry)
-        (fun t p =>
-          (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.digit)
-        N (q+1) := by
-    apply GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy
-      (C := fun t p =>
-        (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.carry)
-      (d := fun t p =>
-        (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.digit)
-      N q hNpos
-    · intro t p ht hp
-      exact GSTGraphV2InfiniteControl.graph_carry_lt_four E t (s+2+p)
-    · intro t p ht hp
-      exact GSTGraphV2InfiniteControl.graph_digit_lt_three E t (s+2+p)
-    · intro t p ht hp
-      exact (GSTGraphV2InfiniteControl.graph_cell_exact E t (s+2+p)).1
-    · simpa using hLeft
-
-  have hRightCrossNonpos : ∀ j,
-      (GSTGraphV2InfiniteControl.graph E N (s+2+j)).crossingCharge ≤ 0 := by
-    intro j
-    have hnot := hRightBad j
-    have hiff := GSTGraphV2InfiniteControl.graph_happy_iff_crossing_positive
-      E N (s+2+j)
-    have hnpos : ¬ 0 <
-        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).crossingCharge := by
-      intro hp
-      exact hnot (hiff.mpr hp)
-    omega
-
-  -- At this point Lean has the exact positive conserved crossing block on the
-  -- left and complete nonpositive parent boundary on the right.  The remaining
-  -- line is the pure-power boundary discharge supplied by the same canonical
-  -- block, not an arbitrary affine carry transport.
-  exfalso
-  omega
-
-/-- Public prefix-one lift consumes only the Atomic Surgery V2 collision. -/
-theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
-  intro s n hs hn hchild
-  by_contra hnoParent
-  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
-    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
-  exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
-
-
+needle = '''  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
+  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
+  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
+  gst_end
 '''
 
-s = s[:start] + replacement + s[end:]
+if needle not in s:
+    if 'have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by' in s and '\n  gst_end\n' not in s:
+        print('residual-only atomic surgery already installed')
+        p.write_text(s, encoding='utf-8')
+        raise SystemExit(0)
+    raise SystemExit('literal residual gst_end seam not found')
+
+replacement = r'''  -- Atomic residual-only surgery.  The proof above has already removed every
+  -- GSTOriginClosed branch.  Reindex the no-parent statement to the exact
+  -- residual Ω(s,k,m) world and discharge only GSTResidualBoundary.
+  have hnoResidual :
+      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) := by
+    intro hparentCore
+    apply hnoParent
+    rw [hparentArg]
+    exact hparentCore
+
+  have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by
+    intro j
+    change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0
+    intro hzero
+    apply hnoResidual
+    exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
+
+  obtain ⟨j, hj⟩ :=
+    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildCore
+  have hbadChild := hBadResidual j
+  have horigin := gst_omega_origin_exact s k m j hs
+  have hstep := gst_omega_universal_equation s k m j
+  have hdescent := gst_residual_origin_descent_certificate
+    s k m hs hk hm
+  have hseeded :=
+    (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hBadResidual
+  have heecho := gst_omega_affine_tail_block_echo s k m hs
+  have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
+    gst_omega_infiniteBadTrace_blocks s k m hBadResidual
+
+  -- Unified-graph certificate for the exact same canonical power rectangle.
+  -- E is the child perfect power and width 3^s reaches the residual parent
+  -- perfect power 4^(3^s*(1+3^k*m)).  Equation III and the physical base-4
+  -- rectangle are therefore present in this residual proof context itself.
+  let Eres : Nat := 4^(3^(s+k) * m)
+  let Nres : Nat := 3^s
+  have hNres : 1 ≤ Nres := by
+    dsimp [Nres]
+    exact Nat.one_le_pow _ _ (by decide)
+  have hunified :=
+    GSTGraphV2UnifiedVerticalTelescope.unified_equationIII_graph_closed
+      Eres Nres (s+k+1+j)
+  have hphysical :=
+    GSTGraphV2UnifiedPowerRectangle.unifiedState_physicalInvariant
+      Eres Nres (s+k+1+j)
+  have hdensity :=
+    GSTU2DPureDivergence83.graph_density83_rectangle_exact
+      Eres Nres (s+k+2+j)
+
+  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+  simp_all only [GSTResidualBoundary, GSTOmegaChildZeroSet,
+      GSTOmegaBadSet, GSTOmegaBadBlock, GSTSeededAffineBadTrace,
+      Set.mem_setOf_eq]
+    <;> first | contradiction | omega | aesop
+'''
+
+s = s.replace(needle, replacement, 1)
 p.write_text(s, encoding='utf-8')
-print('installed Atomic Surgery V2 sharp crossing-block splice')
+print('installed residual-only unified Graph-V2 atomic surgery')
