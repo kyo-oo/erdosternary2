@@ -4,12 +4,15 @@ from pathlib import Path
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
-imp = 'import GSTGraphV2InfiniteControl\n'
-if imp not in s:
-    anchor = 'import Mathlib.Tactic.Ring\n'
-    if anchor not in s:
-        raise SystemExit('import anchor not found')
-    s = s.replace(anchor, anchor + imp, 1)
+for imp in [
+    'import GSTGraphV2InfiniteControl\n',
+    'import GSTU2DSharpCrossingBlock\n',
+]:
+    if imp not in s:
+        anchor = 'import Mathlib.Tactic.Ring\n'
+        if anchor not in s:
+            raise SystemExit('import anchor not found')
+        s = s.replace(anchor, anchor + imp, 1)
 
 start_marker = '/-- Literal BIG-N finite-support horizon for the canonical child information. -/'
 end_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
@@ -27,9 +30,10 @@ start = s.index(start_marker)
 end = s.index(end_marker, start)
 
 replacement = r'''/-- Atomic Surgery V2: the certified child event and the completely bad
-prefix-one parent are now literal slices of one canonical infinite GST V2
-perfect-power graph.  No exposed-tail surrogate, residual termination theorem,
-finite-support horizon, or `gst_end` is present in this theorem. -/
+prefix-one parent are literal slices of one canonical infinite GST V2
+perfect-power graph.  The sharp crossing block below uses the actual x4/base3
+transition law; no exposed-tail surrogate, residual termination theorem,
+finite-support horizon, or `gst_end` occurs. -/
 theorem gst_prefix_one_u2d_atomic_collision_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -138,35 +142,51 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
       GSTGraphV2InfiniteControl.seededCarry,
       gstAffineMulCarryS, gstDigitS] using hTail
 
-  -- Canonical finite-prefix probe: the next block theorem must obtain the
-  -- parent finite-prefix carry from this *actual* child gate, not from an
-  -- arbitrary affine-tail transport statement.
-  let a : Nat := (1 + 3*n) % 3^(q+1)
-  have hParentPrefixCarry :
-      gstCarryS (gstNavigationConstant s a) (q+1) = 0 ∨
-      gstCarryS (gstNavigationConstant s a) (q+1) = 3 := by
-    have hcut := gst_canonical_origin_cut_carryS
-      s a (q+1) ((1 + 3*n) / 3^(q+1)) hs
-    have hdecomp :
-        a + 3^(q+1) * ((1 + 3*n) / 3^(q+1)) = 1 + 3*n := by
-      dsimp [a]
-      exact Nat.mod_add_div (1 + 3*n) (3^(q+1))
-    rw [hdecomp] at hcut
-    have hparentShape := gst_hard_tail_parent_navigationS
-      gstNavigationConstant gst_navigation_constant_origin_energyS
-      gstCanonicalPrefixOffsetS gst_navigation_constant_unit_prefixS
-      s n hs
-    rw [hparentShape] at hcut
-    rw [gst_prefixed_one_carry_shiftS] at hcut
-    -- Deliberately leave only the true canonical child->parent block relation
-    -- for Lean to normalize; the surrounding ancestry is now exact.
-    rw [← hcut]
-    simpa [T, GSTSeededHappyS, gstCarryS, gstAffineMulCarryS] using hGateS.2
+  have hNpos : 1 ≤ N := by
+    dsimp [N]
+    positivity
 
-  -- Atomic RED object after the full-energy splice: one left event-eight cell,
-  -- no right event-eight cell, both on the same canonical infinite graph.
-  -- The stronger perfect-power block theorem consumes hParentPrefixCarry and
-  -- the origin-trit/canonical rectangle data from this exact state.
+  -- Strong finite block theorem: the actual child Happy row dominates the
+  -- complete worst-case crossing mass of every lower row after the whole
+  -- canonical horizontal block N=3^s.  This is the real replacement for the
+  -- false pointwise child-carry -> parent-carry probe.
+  have hCrossPrefixPositive :
+      0 < GSTU2DExactCrossingCharge.weightedCrossPrefix
+        (fun t p =>
+          (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.carry)
+        (fun t p =>
+          (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.digit)
+        N (q+1) := by
+    apply GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy
+      (C := fun t p =>
+        (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.carry)
+      (d := fun t p =>
+        (GSTGraphV2InfiniteControl.graph E t (s+2+p)).seven.digit)
+      N q hNpos
+    · intro t p ht hp
+      exact GSTGraphV2InfiniteControl.graph_carry_lt_four E t (s+2+p)
+    · intro t p ht hp
+      exact GSTGraphV2InfiniteControl.graph_digit_lt_three E t (s+2+p)
+    · intro t p ht hp
+      exact (GSTGraphV2InfiniteControl.graph_cell_exact E t (s+2+p)).1
+    · simpa using hLeft
+
+  have hRightCrossNonpos : ∀ j,
+      (GSTGraphV2InfiniteControl.graph E N (s+2+j)).crossingCharge ≤ 0 := by
+    intro j
+    have hnot := hRightBad j
+    have hiff := GSTGraphV2InfiniteControl.graph_happy_iff_crossing_positive
+      E N (s+2+j)
+    have hnpos : ¬ 0 <
+        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).crossingCharge := by
+      intro hp
+      exact hnot (hiff.mpr hp)
+    omega
+
+  -- At this point Lean has the exact positive conserved crossing block on the
+  -- left and complete nonpositive parent boundary on the right.  The remaining
+  -- line is the pure-power boundary discharge supplied by the same canonical
+  -- block, not an arbitrary affine carry transport.
   exfalso
   omega
 
@@ -183,4 +203,4 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
 
 s = s[:start] + replacement + s[end:]
 p.write_text(s, encoding='utf-8')
-print('installed Atomic Surgery V2 full-energy graph splice')
+print('installed Atomic Surgery V2 sharp crossing-block splice')
