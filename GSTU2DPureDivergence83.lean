@@ -146,8 +146,11 @@ theorem reverseDensity83_ge_of_leading_happy
           (hC N (by omega)) (hd N (by omega))
         have hNm1 : (N - 1) + 1 = N := by omega
         have hpowNat : 8^N = 8 * 8^(N-1) := by
-          rw [← hNm1, Nat.pow_succ]
-          ac_rfl
+          calc
+            8^N = 8^((N-1)+1) :=
+              congrArg (fun k : Nat => 8^k) hNm1.symm
+            _ = 8^(N-1) * 8 := Nat.pow_succ 8 (N-1)
+            _ = 8 * 8^(N-1) := by ac_rfl
         have hpow :
             (((8^N : Nat) : Int)) = 8 * (((8^(N-1) : Nat) : Int)) := by
           exact_mod_cast hpowNat
@@ -229,9 +232,11 @@ theorem density83_rectangle_exact
         (fun t => C t p) (fun t => C t (p+1)) (fun t => d t p) N
         (fun t ht => (hcell t p ht hpK).2.2.1)
         (fun t ht => (hcell t p ht hpK).2.2.2)
+      have hrw := congrArg
+        (fun x : Int => (((3^p : Nat) : Int)) * x) hr
       dsimp [g]
-      rw [hr]
-      ring_nf
+      simpa [mul_add, mul_sub, Nat.add_comm, mul_assoc, mul_comm,
+        mul_left_comm] using hrw
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
@@ -335,8 +340,11 @@ theorem weightedRectanglePrefix83_positive_of_top_leading_happy
     positivity
   have hNm1 : (N - 1) + 1 = N := by omega
   have hpowNat : 8^N = 8 * 8^(N-1) := by
-    rw [← hNm1, Nat.pow_succ]
-    ac_rfl
+    calc
+      8^N = 8^((N-1)+1) :=
+        congrArg (fun k : Nat => 8^k) hNm1.symm
+      _ = 8^(N-1) * 8 := Nat.pow_succ 8 (N-1)
+      _ = 8 * 8^(N-1) := by ac_rfl
   have hpow : (((8^N : Nat) : Int)) = 8 * a := by
     dsimp [a]
     exact_mod_cast hpowNat
