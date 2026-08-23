@@ -7,6 +7,7 @@ set_option maxHeartbeats 10000000
 namespace GSTGraphV2HandwrittenAnchoredCocycle
 
 open GSTCanonicalSevenAxisBridge
+open GST2DMixedEmergence
 open GSTGraphV2InfiniteControl
 open GSTGraphV2CoupledUFlux
 open GSTGraphV2UnifiedPowerRectangle
@@ -43,8 +44,8 @@ def graphUPotential (E start N p : Nat) : Int :=
     (((4^N : Nat) : Int)) * gstUChargeExact (graph E start p).seven.carry +
     24 * (carryWord E p start N : Int)
 
-/-- Reverse-base-four words concatenate exactly.  The older prefix is shifted
-by the width of the newly appended right block. -/
+/-- Reverse-base-four words concatenate exactly.  The older/left word is
+shifted by the width of the newly appended right block. -/
 theorem carryWord_append_exact
     (E p start P : Nat) : ∀ N : Nat,
     carryWord E p start (P+N) =
@@ -59,9 +60,9 @@ theorem carryWord_append_exact
       rw [hlen, carryWord, ih, carryWord, Nat.pow_succ, hidx]
       ring
 
-/-- **Invented universal equation — GST Graph-V2 U cocycle.**
-The retained physical U potential of a long rectangle is exactly the translated
-right-block potential plus `4^N` copies of the left-prefix potential. -/
+/-- **Universal Graph-V2 U cocycle.**  The retained physical U potential of a
+long rectangle is exactly the translated right-block potential plus `4^N`
+copies of the left-prefix potential. -/
 theorem graph_u_potential_cocycle_exact
     (E start P N p : Nat) :
     graphUPotential E start (P+N) p =
@@ -69,6 +70,78 @@ theorem graph_u_potential_cocycle_exact
         (((4^N : Nat) : Int)) * graphUPotential E start P p := by
   unfold graphUPotential
   rw [carryWord_append_exact]
+  have hidx : start + (P+N) = (start+P)+N := by omega
+  have hpow : 4^(P+N) = 4^P * 4^N := Nat.pow_add 4 P N
+  rw [hidx, hpow]
+  push_cast
+  ring
+
+/-- **Shifted Equation III on an arbitrary interval of the same Graph-V2
+sheet.**  This is the vertical derivative of `graphUPotential`, with no
+zero-start restriction. -/
+theorem graph_u_equationIII_shifted_exact
+    (E start N p : Nat) :
+    gstUJumpExact
+        (graph E (start+N) p).seven.carry
+        (graph E (start+N) p).seven.digit -
+      (((4^N : Nat) : Int)) *
+        gstUJumpExact
+          (graph E start p).seven.carry
+          (graph E start p).seven.digit =
+      3 * graphUPotential E start N (p+1) -
+        graphUPotential E start N p := by
+  have hLeftNext :
+      gstStepCarryExact
+          (graph E start p).seven.carry
+          (graph E start p).seven.digit =
+        (graph E start (p+1)).seven.carry := by
+    simpa [gstStepCarryExact, nextCarry] using
+      (graph_cell_exact E start p).2
+  have hRightNext :
+      gstStepCarryExact
+          (graph E (start+N) p).seven.carry
+          (graph E (start+N) p).seven.digit =
+        (graph E (start+N) (p+1)).seven.carry := by
+    simpa [gstStepCarryExact, nextCarry] using
+      (graph_cell_exact E (start+N) p).2
+  have hWordNat := carryWord_vertical_balance E p start N
+  have hWordInt :
+      (carryWord E p start N : Int) +
+          (((4^N : Nat) : Int)) * ((graph E start p).seven.digit : Int) =
+        ((graph E (start+N) p).seven.digit : Int) +
+          3 * (carryWord E (p+1) start N : Int) := by
+    exact_mod_cast hWordNat
+  unfold graphUPotential gstUJumpExact jumpWith
+  rw [hLeftNext, hRightNext]
+  nlinarith [hWordInt]
+
+/-- The horizontal cocycle and shifted Equation III commute exactly.  The
+vertical U-jump defect of a concatenated interval is the right defect plus
+`4^N` copies of the left defect. -/
+theorem graph_u_jump_cocycle_exact
+    (E start P N p : Nat) :
+    (gstUJumpExact
+        (graph E (start+(P+N)) p).seven.carry
+        (graph E (start+(P+N)) p).seven.digit -
+      (((4^(P+N) : Nat) : Int)) *
+        gstUJumpExact
+          (graph E start p).seven.carry
+          (graph E start p).seven.digit) =
+      (gstUJumpExact
+          (graph E ((start+P)+N) p).seven.carry
+          (graph E ((start+P)+N) p).seven.digit -
+        (((4^N : Nat) : Int)) *
+          gstUJumpExact
+            (graph E (start+P) p).seven.carry
+            (graph E (start+P) p).seven.digit) +
+      (((4^N : Nat) : Int)) *
+        (gstUJumpExact
+            (graph E (start+P) p).seven.carry
+            (graph E (start+P) p).seven.digit -
+          (((4^P : Nat) : Int)) *
+            gstUJumpExact
+              (graph E start p).seven.carry
+              (graph E start p).seven.digit) := by
   have hidx : start + (P+N) = (start+P)+N := by omega
   have hpow : 4^(P+N) = 4^P * 4^N := Nat.pow_add 4 P N
   rw [hidx, hpow]
@@ -134,9 +207,12 @@ theorem handwritten_u_anchored_cocycle_exact
 
 #check carryWord_append_exact
 #check graph_u_potential_cocycle_exact
+#check graph_u_equationIII_shifted_exact
+#check graph_u_jump_cocycle_exact
 #check canonical_u_recoordinate_exact
 #check handwritten_u_anchored_cocycle_exact
 #print axioms graph_u_potential_cocycle_exact
+#print axioms graph_u_equationIII_shifted_exact
 #print axioms handwritten_u_anchored_cocycle_exact
 
 end GSTGraphV2HandwrittenAnchoredCocycle
