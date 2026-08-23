@@ -47,7 +47,10 @@ theorem null_big2_regenerates_alt
     (axes R N (p+1)).y = 2 ∧
       (axes R N (p+1)).yPrime = .altMinus := by
   have hC0 : carry4 R p = 0 := by
-    simpa [axes, spaceOfCarry] using hnull
+    by_contra h0
+    by_cases h3 : carry4 R p = 3
+    · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3] at hnull
+    · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3] at hnull
   have hd2 : digit3 R p = 2 := by
     simpa [axes] using hbig2
   have hnext : carry4 R (p+1) = 2 := by
@@ -55,7 +58,7 @@ theorem null_big2_regenerates_alt
     norm_num [GST2DMixedEmergence.nextCarry]
   constructor
   · simpa [axes] using hnext
-  · simp [axes, spaceOfCarry, hnext]
+  · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, hnext]
 
 /-- GST+ BIG2 stays GST+ on the next forward edge. -/
 theorem gstPlus_big2_propagates
@@ -65,7 +68,10 @@ theorem gstPlus_big2_propagates
     (axes R N (p+1)).y = 3 ∧
       (axes R N (p+1)).yPrime = .gstPlus := by
   have hC3 : carry4 R p = 3 := by
-    simpa [axes, spaceOfCarry] using hplus
+    by_contra h3
+    by_cases h0 : carry4 R p = 0
+    · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, h0] at hplus
+    · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3] at hplus
   have hd2 : digit3 R p = 2 := by
     simpa [axes] using hbig2
   have hnext : carry4 R (p+1) = 3 := by
@@ -73,7 +79,7 @@ theorem gstPlus_big2_propagates
     norm_num [GST2DMixedEmergence.nextCarry]
   constructor
   · simpa [axes] using hnext
-  · simp [axes, spaceOfCarry, hnext]
+  · simp [axes, GSTGraphV2NonEuclidean.spaceOfCarry, hnext]
 
 /-- The old arithmetic sheet's carry is exactly the y coordinate of its
 ambient GST projection. -/
@@ -96,28 +102,39 @@ theorem physical_projection_space_exact (E N t p : Nat) :
       | GSTCanonicalSevenAxisBridge.Space.null => .null
       | GSTCanonicalSevenAxisBridge.Space.altMinus => .altMinus
       | GSTCanonicalSevenAxisBridge.Space.gstPlus => .gstPlus := by
-  unfold physicalProjection axes GSTGraphV2InfiniteControl.graph
-    GSTGraphV2InfiniteControl.cell GSTCanonicalSevenAxisBridge.vertex
-  simp [spaceOfCarry, GSTCanonicalSevenAxisBridge.spaceOfCarry]
+  change GSTGraphV2NonEuclidean.spaceOfCarry (carry4 (4^t * E) p) =
+    match GSTCanonicalSevenAxisBridge.spaceOfCarry (carry4 (4^t * E) p) with
+    | GSTCanonicalSevenAxisBridge.Space.null => GSTGraphV2NonEuclidean.Space.null
+    | GSTCanonicalSevenAxisBridge.Space.altMinus => GSTGraphV2NonEuclidean.Space.altMinus
+    | GSTCanonicalSevenAxisBridge.Space.gstPlus => GSTGraphV2NonEuclidean.Space.gstPlus
+  by_cases h0 : carry4 (4^t * E) p = 0
+  · simp [GSTGraphV2NonEuclidean.spaceOfCarry,
+      GSTCanonicalSevenAxisBridge.spaceOfCarry, h0]
+  · by_cases h3 : carry4 (4^t * E) p = 3
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry,
+        GSTCanonicalSevenAxisBridge.spaceOfCarry, h0, h3]
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry,
+        GSTCanonicalSevenAxisBridge.spaceOfCarry, h0, h3]
 
 /-- A physical-sheet Happy cell is exactly an ambient GST witness realization
 at the same arithmetic energy and ternary position. -/
 theorem physical_happy_iff_ambient_witness
     (E N t p : Nat) :
-    GST2DMixedEmergence.HappyCell
+    GSTU2DEventTransport.HappyCell
         (GSTGraphV2InfiniteControl.graph E t p).seven.carry
         (GSTGraphV2InfiniteControl.graph E t p).seven.digit ↔
       WitnessAt (physicalProjection E N t p) := by
-  unfold WitnessAt GST2DMixedEmergence.HappyCell
-  rw [← physical_projection_y_exact E N t p,
-      ← physical_projection_z_exact E N t p]
-  simp only [physicalProjection, axes]
-  unfold spaceOfCarry
+  change GSTU2DEventTransport.HappyCell
+      (carry4 (4^t * E) p) (digit3 (4^t * E) p) ↔
+    (digit3 (4^t * E) p = 2 ∧
+      (GSTGraphV2NonEuclidean.spaceOfCarry (carry4 (4^t * E) p) = .null ∨
+       GSTGraphV2NonEuclidean.spaceOfCarry (carry4 (4^t * E) p) = .gstPlus))
+  unfold GSTU2DEventTransport.HappyCell
   by_cases h0 : carry4 (4^t * E) p = 0
-  · simp [h0]
+  · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0]
   · by_cases h3 : carry4 (4^t * E) p = 3
-    · simp [h0, h3]
-    · simp [h0, h3]
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3]
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3]
 
 #check xPrime_exact
 #check forward_edge_exact
