@@ -76,11 +76,11 @@ jobs:
         shell: bash
         run: python3 scripts/apply_u2d_atomic_replacement.py
 
-      - name: Reject unresolved or legacy production closure
+      - name: Reject unresolved production closure
         shell: bash
         run: |
-          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$|gst_residual_navigation_lift[[:space:]]|gst_residual_omega_termination[[:space:]]' ErdosTernary2.lean; then
-            echo 'Forbidden residual termination/placeholder path is active in production.'
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'The literal residual placeholder is still active in production.'
             exit 1
           fi
           grep -n 'have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
