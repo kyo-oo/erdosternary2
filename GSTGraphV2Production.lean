@@ -25,11 +25,11 @@ open GSTU2DPureDivergence83
 # GST Graph V2 — production object
 
 This file constructs the one graph object that all later production mathematics
-must use.  It deliberately introduces no closing theorem and no alternative
+must use. It deliberately introduces no closing theorem and no alternative
 surrogate graph.
 
 The underlying sheet remains the already-defined all-depth arithmetic graph
-`GSTGraphV2InfiniteControl.graph E t p`.  This module only assembles all of its
+`GSTGraphV2InfiniteControl.graph E t p`. This module only assembles all of its
 currently-green coordinates into one explicit production state:
 
 * the canonical seven arithmetic axes and physical GST space;
@@ -40,14 +40,14 @@ currently-green coordinates into one explicit production state:
 * explicit horizontal-x4 and vertical-ternary graph edges;
 * finite horizontal rectangle state on the same infinite lattice;
 * exact natural-origin prefix/suffix/phase coordinates on the same lattice;
+* both the neutral higher-level U tail and its re-phased realization;
 * the generalized residual `(s,k,m)` frame used by the production seam;
 * the canonical production-cut frame at `p = s+2+q`.
 
-No finite rectangle replaces the infinite graph.  Rectangles and origin frames
+No finite rectangle replaces the infinite graph. Rectangles and origin frames
 below are observations/re-coordinatizations of the same absolute energy.
 -/
 
-/-- One complete production cell of GST Graph V2. -/
 structure Cell where
   sourceEnergy : Nat
   horizontal : Nat
@@ -65,8 +65,6 @@ structure Cell where
   density83 : Int
   deriving Repr
 
-/-- Assemble every currently-green local observable at one point of the single
-infinite GST Graph V2 lattice. -/
 def cell (E t p : Nat) : Cell :=
   let g := GSTGraphV2InfiniteControl.graph E t p
   let R := 4^t * E
@@ -90,25 +88,21 @@ def cell (E t p : Nat) : Cell :=
       g.seven.carry g.seven.digit
   }
 
-/-- The production vertex sheet is genuinely infinite in both arithmetic coordinates. -/
 abbrev Sheet := Nat → Nat → Cell
 
 def graph (E : Nat) : Sheet := fun t p => cell E t p
 
-/-- The two primitive directions of GST Graph V2. -/
 inductive Direction
   | horizontalX4
   | verticalTernary
   deriving Repr, DecidableEq
 
-/-- One directed arithmetic edge of GST Graph V2. -/
 structure Edge where
   direction : Direction
   source : Cell
   target : Cell
   deriving Repr
 
-/-- One exact x4 edge. -/
 def horizontalEdge (E t p : Nat) : Edge :=
   {
     direction := .horizontalX4
@@ -116,7 +110,6 @@ def horizontalEdge (E t p : Nat) : Edge :=
     target := cell E (t+1) p
   }
 
-/-- One exact base-three information edge. -/
 def verticalEdge (E t p : Nat) : Edge :=
   {
     direction := .verticalTernary
@@ -124,15 +117,12 @@ def verticalEdge (E t p : Nat) : Edge :=
     target := cell E t (p+1)
   }
 
-/-- The actual infinite GST Graph V2 object at one source energy.  Its vertices
-and both primitive edge families are explicit data. -/
 structure Lattice where
   sourceEnergy : Nat
   vertex : Nat → Nat → Cell
   horizontal : Nat → Nat → Edge
   vertical : Nat → Nat → Edge
 
-/-- Construct the full all-depth two-direction GST Graph V2 lattice. -/
 def lattice (E : Nat) : Lattice :=
   {
     sourceEnergy := E
@@ -141,7 +131,6 @@ def lattice (E : Nat) : Lattice :=
     vertical := fun t p => verticalEdge E t p
   }
 
-/-- Explicit local neighborhood of one production cell. -/
 structure Neighborhood where
   center : Cell
   horizontalNext : Cell
@@ -155,9 +144,6 @@ def neighborhood (E t p : Nat) : Neighborhood :=
     verticalNext := cell E t (p+1)
   }
 
-/-- A finite horizontal observation of the one infinite graph.  It retains the
-literal endpoint cells, the base-four carry word, the old coupled physical
-state and the direct U potential. -/
 structure Rectangle where
   sourceEnergy : Nat
   width : Nat
@@ -169,7 +155,6 @@ structure Rectangle where
   uPotential : Int
   deriving Repr
 
-/-- Width-N production rectangle beginning at horizontal coordinate zero. -/
 def rectangle (E N p : Nat) : Rectangle :=
   {
     sourceEnergy := E
@@ -182,8 +167,6 @@ def rectangle (E N p : Nat) : Rectangle :=
     uPotential := GSTGraphV2HandwrittenAnchoredCocycle.graphUPotential E 0 N p
   }
 
-/-- Exact natural-origin coordinates used by the handwritten U operation.
-This is data only: no limit and no terminal-space interpretation is added. -/
 structure OriginCoordinates where
   level : Nat
   origin : Nat
@@ -195,7 +178,6 @@ structure OriginCoordinates where
   tailEnergy : Nat
   deriving Repr
 
-/-- Consume exactly `K` ternary origin trits into the horizontal phase. -/
 def originCoordinates (t n K : Nat) : OriginCoordinates :=
   {
     level := t
@@ -208,20 +190,21 @@ def originCoordinates (t n K : Nat) : OriginCoordinates :=
     tailEnergy := GSTGraphV2HandwrittenExponentialCascade.uTailEnergy t n K
   }
 
-/-- One full re-coordinatized observation of a perfect-power origin.  The
-`full` and `tail` cells are stored simultaneously; later proofs must identify
-them through the existing exact transport laws rather than by replacing either
-side with a surrogate. -/
+/-- One full re-coordinatized observation of a perfect-power origin.
+`neutralTail` is the higher-level tail before the consumed origin prefix is
+reapplied horizontally. `phasedTail` is that same tail after the exact phase
+translation. Keeping both prevents a later proof from silently identifying
+the neutral and re-phased states. -/
 structure OriginFrame where
   coordinates : OriginCoordinates
   horizontalOffset : Nat
   vertical : Nat
   fullEnergy : Nat
   full : Cell
-  tail : Cell
+  neutralTail : Cell
+  phasedTail : Cell
   deriving Repr
 
-/-- Build the `K`-trit origin frame at arbitrary horizontal/vertical location. -/
 def originFrame (t n K x p : Nat) : OriginFrame :=
   let o := originCoordinates t n K
   {
@@ -230,45 +213,34 @@ def originFrame (t n K x p : Nat) : OriginFrame :=
     vertical := p
     fullEnergy := 4^(3^t * n)
     full := cell (4^(3^t * n)) x p
-    tail := cell o.tailEnergy (o.phaseShift + x) p
+    neutralTail := cell o.tailEnergy 0 p
+    phasedTail := cell o.tailEnergy (o.phaseShift + x) p
   }
 
-/-- Canonical production energy for the prefix-one problem. -/
 def canonicalEnergy (s n : Nat) : Nat :=
   GSTGraphV2PerfectPowerBlock.canonicalEnergy s n
 
-/-- Exact one-parent-block horizontal width. -/
 def canonicalWidth (s : Nat) : Nat :=
   GSTGraphV2PerfectPowerBlock.canonicalWidth s
 
-/-- The canonical prefix-one sheet as an instance of the single production graph. -/
 def canonicalGraph (s n : Nat) : Sheet := graph (canonicalEnergy s n)
 
-/-- The canonical prefix-one infinite lattice. -/
 def canonicalLattice (s n : Nat) : Lattice := lattice (canonicalEnergy s n)
 
-/-- Canonical parent-block rectangle at a vertical observation coordinate. -/
 def canonicalRectangle (s n p : Nat) : Rectangle :=
   rectangle (canonicalEnergy s n) (canonicalWidth s) p
 
-/-- Residual perfect-power energy in generalized `(s,k,m)` coordinates. -/
 def residualEnergy (s k m : Nat) : Nat :=
   GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m
 
-/-- Residual sheet, still the same production graph object. -/
 def residualGraph (s k m : Nat) : Sheet := graph (residualEnergy s k m)
 
-/-- Residual infinite lattice. -/
 def residualLattice (s k m : Nat) : Lattice := lattice (residualEnergy s k m)
 
-/-- Residual one-parent-block rectangle, with no collision assertion attached. -/
 def residualRectangle (s k m p : Nat) : Rectangle :=
   rectangle (residualEnergy s k m)
     (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s) p
 
-/-- Complete generalized residual coordinates.  This stores both exponent
-labels and the exact physical rectangle on which the later residual argument
-must operate. -/
 structure ResidualFrame where
   s : Nat
   k : Nat
@@ -284,8 +256,6 @@ structure ResidualFrame where
   block : Rectangle
   deriving Repr
 
-/-- Build the actual `(s,k,m)` residual production frame without making any
-termination or collision claim. -/
 def residualFrame (s k m p : Nat) : ResidualFrame :=
   {
     s := s
@@ -302,11 +272,8 @@ def residualFrame (s k m p : Nat) : ResidualFrame :=
     block := residualRectangle s k m p
   }
 
-/-- Canonical row used by the production prefix-one seam. -/
 def canonicalCutRow (s q : Nat) : Nat := s + 2 + q
 
-/-- The exact canonical cut packet.  It contains the physical parent block and
-the corresponding `q+1`-trit U re-coordinatization simultaneously. -/
 structure CanonicalCutFrame where
   s : Nat
   origin : Nat
@@ -318,7 +285,6 @@ structure CanonicalCutFrame where
   uFrame : OriginFrame
   deriving Repr
 
-/-- Build the production cut at the exact row `s+2+q`. -/
 def canonicalCutFrame (s n q : Nat) : CanonicalCutFrame :=
   let p := canonicalCutRow s q
   {
