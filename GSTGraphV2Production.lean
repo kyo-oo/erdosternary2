@@ -37,7 +37,9 @@ currently-green coordinates into one explicit production state:
 * the exact local U jump;
 * canonical phase density and the independent 8x3 density;
 * finite horizontal rectangle state on the same infinite sheet;
-* exact natural-origin prefix/suffix/phase coordinates on the same sheet.
+* exact natural-origin prefix/suffix/phase coordinates on the same sheet;
+* the generalized residual `(s,k,m)` frame used by the production seam;
+* the canonical production-cut frame at `p = s+2+q`.
 
 No finite rectangle replaces the infinite graph.  Rectangles and origin frames
 below are observations/re-coordinatizations of the same absolute energy.
@@ -86,6 +88,21 @@ def cell (E t p : Nat) : Cell :=
 abbrev Sheet := Nat → Nat → Cell
 
 def graph (E : Nat) : Sheet := fun t p => cell E t p
+
+/-- Explicit local neighborhood of one production cell.  Horizontal means one
+exact x4 step; vertical means one exact base-three information step. -/
+structure Neighborhood where
+  center : Cell
+  horizontalNext : Cell
+  verticalNext : Cell
+  deriving Repr
+
+def neighborhood (E t p : Nat) : Neighborhood :=
+  {
+    center := cell E t p
+    horizontalNext := cell E (t+1) p
+    verticalNext := cell E t (p+1)
+  }
 
 /-- A finite horizontal observation of the one infinite graph.  It retains the
 literal endpoint cells, the base-four carry word, the old coupled physical
@@ -141,9 +158,9 @@ def originCoordinates (t n K : Nat) : OriginCoordinates :=
   }
 
 /-- One full re-coordinatized observation of a perfect-power origin.  The
-`full` and `tail` cells live on the same absolute arithmetic energy; later
-proofs must establish facts through the existing exact transport laws rather
-than by replacing either side with a surrogate. -/
+`full` and `tail` cells are stored simultaneously; later proofs must identify
+them through the existing exact transport laws rather than by replacing either
+side with a surrogate. -/
 structure OriginFrame where
   coordinates : OriginCoordinates
   horizontalOffset : Nat
@@ -192,8 +209,76 @@ def residualRectangle (s k m p : Nat) : Rectangle :=
   rectangle (residualEnergy s k m)
     (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s) p
 
+/-- Complete generalized residual coordinates.  This stores both exponent
+labels and the exact physical rectangle on which the later residual argument
+must operate. -/
+structure ResidualFrame where
+  s : Nat
+  k : Nat
+  origin : Nat
+  vertical : Nat
+  childExponent : Nat
+  parentExponent : Nat
+  childEnergy : Nat
+  parentWidth : Nat
+  originTrit : Nat
+  originTail : Nat
+  nextTailEnergy : Nat
+  block : Rectangle
+  deriving Repr
+
+/-- Build the actual `(s,k,m)` residual production frame without making any
+termination or collision claim. -/
+def residualFrame (s k m p : Nat) : ResidualFrame :=
+  {
+    s := s
+    k := k
+    origin := m
+    vertical := p
+    childExponent := GSTGraphV2HandwrittenOmegaUBlock.residualChildExponent s k m
+    parentExponent := GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m
+    childEnergy := residualEnergy s k m
+    parentWidth := GSTGraphV2HandwrittenOmegaUBlock.residualWidth s
+    originTrit := GSTGraphV2HandwrittenOmegaUBlock.originTrit m
+    originTail := GSTGraphV2HandwrittenOmegaUBlock.originTail m
+    nextTailEnergy := 4^(3^(s+k+1) * GSTGraphV2HandwrittenOmegaUBlock.originTail m)
+    block := residualRectangle s k m p
+  }
+
+/-- Canonical row used by the production prefix-one seam. -/
+def canonicalCutRow (s q : Nat) : Nat := s + 2 + q
+
+/-- The exact canonical cut packet.  It contains the physical parent block and
+the corresponding `q+1`-trit U re-coordinatization simultaneously. -/
+structure CanonicalCutFrame where
+  s : Nat
+  origin : Nat
+  gateDepth : Nat
+  row : Nat
+  energy : Nat
+  width : Nat
+  block : Rectangle
+  uFrame : OriginFrame
+  deriving Repr
+
+/-- Build the production cut at the exact row `s+2+q`. -/
+def canonicalCutFrame (s n q : Nat) : CanonicalCutFrame :=
+  let p := canonicalCutRow s q
+  {
+    s := s
+    origin := n
+    gateDepth := q
+    row := p
+    energy := canonicalEnergy s n
+    width := canonicalWidth s
+    block := canonicalRectangle s n p
+    uFrame := originFrame (s+1) n (q+1) 0 p
+  }
+
 #check Cell
 #check graph
+#check Neighborhood
+#check neighborhood
 #check Rectangle
 #check rectangle
 #check OriginCoordinates
@@ -204,5 +289,9 @@ def residualRectangle (s k m p : Nat) : Rectangle :=
 #check canonicalRectangle
 #check residualGraph
 #check residualRectangle
+#check ResidualFrame
+#check residualFrame
+#check CanonicalCutFrame
+#check canonicalCutFrame
 
 end GSTGraphV2Production
