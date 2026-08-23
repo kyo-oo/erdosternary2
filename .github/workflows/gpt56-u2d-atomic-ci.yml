@@ -58,6 +58,7 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTU2DPureDivergence83.olean GSTU2DPureDivergence83.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DCanonicalPhaseDensity.olean GSTU2DCanonicalPhaseDensity.lean
 
       - name: Compile unified Old-Sol power rectangle
         shell: bash
@@ -107,6 +108,7 @@ jobs:
               Path('GSTU2DExactCrossingCharge.lean'),
               Path('GSTU2DSharpCrossingBlock.lean'),
               Path('GSTU2DPureDivergence83.lean'),
+              Path('GSTU2DCanonicalPhaseDensity.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTGraphV2InfiniteControl.lean'),
               Path('GSTGraphV2UnifiedPowerRectangle.lean'),
