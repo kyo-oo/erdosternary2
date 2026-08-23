@@ -44,9 +44,9 @@ theorem happy_iff_phaseDensity_positive
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   rcases hCc with rfl | rfl | rfl | rfl <;>
     rcases hdc with rfl | rfl | rfl <;>
-    simp [HappyCell, phaseDensity, phaseDigitPotential,
+    norm_num [HappyCell, phaseDensity, phaseDigitPotential,
       phaseCarryPotential, outDigit, nextCarry, surviveI,
-      midDigit, finalMicroDigit]
+      midDigit, finalMicroDigit, microOutput, highBit, lowBit, twoI]
 
 /-- Uniform physical floor used by highest-row domination. -/
 theorem phaseDensity_ge_neg_four
@@ -203,6 +203,7 @@ theorem phaseColumn_exact
         ring
   have hcarry := vertical_phase_carry_telescope C K
   rw [hlocal, hcarry]
+  ring
 
 /-- Exact 2D rectangle identity for the new phase density. The only interior
 term is the nonnegative microscopic SURVIVE incidence. -/
@@ -275,7 +276,6 @@ theorem phaseRectangle_exact
         Finset.sum (Finset.range N) Srv := by
     simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
   rw [hsplit, hDigit, hTop]
-  rfl
 
 #check phaseDensity_physical_table
 #check happy_iff_phaseDensity_positive
