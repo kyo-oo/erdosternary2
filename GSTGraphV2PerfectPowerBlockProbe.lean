@@ -67,6 +67,17 @@ theorem graph_phase_prefix_nonpositive_of_bad
       rw [weightedPhaseColumnPrefix]
       exact add_nonpos ih' (mul_nonpos_of_nonneg_of_nonpos hw hlocal)
 
+/-- Recursive phase prefix equals its literal base-three weighted finite sum. -/
+theorem weightedPhaseColumnPrefix_eq_sum
+    (C d : Nat → Nat) (K : Nat) :
+    weightedPhaseColumnPrefix C d K =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) * phaseDensity (C p) (d p)) := by
+  induction K with
+  | zero => simp [weightedPhaseColumnPrefix]
+  | succ K ih =>
+      rw [weightedPhaseColumnPrefix, Finset.sum_range_succ, ih]
+
 /-- Exact reconstruction of the first `K` ternary digits.  This is the
 arithmetic boundary identity needed to turn the phase-density divergence into
 an equality of literal residues of the same perfect-power sheet. -/
@@ -74,7 +85,7 @@ theorem digit3_weighted_prefix_nat (R K : Nat) :
     Finset.sum (Finset.range K) (fun p => 3^p * digit3 R p) =
       R % 3^K := by
   induction K with
-  | zero => simp
+  | zero => simp [Nat.mod_one]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih, Nat.pow_succ]
       unfold digit3
@@ -112,12 +123,18 @@ theorem graph_phase_column_exact (E t K : Nat) :
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
           surviveI (graph E t p).seven.carry (graph E t p).seven.digit) := by
-  apply phaseColumn_exact
-  intro p hp
-  exact ⟨graph_carry_lt_four E t p,
-    graph_digit_lt_three E t p,
-    (graph_cell_exact E t p).1,
-    (graph_cell_exact E t p).2⟩
+  rw [weightedPhaseColumnPrefix_eq_sum]
+  have h := phaseColumn_exact
+    (fun p => (graph E t p).seven.carry)
+    (fun p => (graph E t p).seven.digit)
+    (fun p => (graph E (t+1) p).seven.digit) K
+    (by
+      intro p hp
+      exact ⟨graph_carry_lt_four E t p,
+        graph_digit_lt_three E t p,
+        (graph_cell_exact E t p).1,
+        (graph_cell_exact E t p).2⟩)
+  simpa using h
 
 /-- Perfect-power ancestry can be used at the block level without changing any
 physical Happy observable. -/
@@ -222,12 +239,18 @@ theorem graph_phase_window_exact (E t b K : Nat) :
             (graph E t (b+j)).seven.carry
             (graph E t (b+j)).seven.digit) := by
   unfold graphPhaseWindow
-  apply phaseColumn_exact
-  intro j hj
-  exact ⟨graph_carry_lt_four E t (b+j),
-    graph_digit_lt_three E t (b+j),
-    (graph_cell_exact E t (b+j)).1,
-    by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩
+  rw [weightedPhaseColumnPrefix_eq_sum]
+  have h := phaseColumn_exact
+    (fun j => (graph E t (b+j)).seven.carry)
+    (fun j => (graph E t (b+j)).seven.digit)
+    (fun j => (graph E (t+1) (b+j)).seven.digit) K
+    (by
+      intro j hj
+      exact ⟨graph_carry_lt_four E t (b+j),
+        graph_digit_lt_three E t (b+j),
+        (graph_cell_exact E t (b+j)).1,
+        by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩)
+  simpa [Nat.add_zero] using h
 
 /-- The digit part of the shifted phase divergence is an exact difference of
 two exposed ternary residues. -/
@@ -261,6 +284,7 @@ theorem graph_phase_digit_window_boundary_exact (E t b K : Nat) :
 
 #check graph_phase_prefix_positive_of_happy
 #check graph_phase_prefix_nonpositive_of_bad
+#check weightedPhaseColumnPrefix_eq_sum
 #check digit3_weighted_prefix_nat
 #check graph_digit_weighted_prefix_exact
 #check graph_phase_column_exact
