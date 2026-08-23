@@ -129,10 +129,10 @@ theorem happy_iff_gst_u_jump_negative
     HappyCell C d ↔ gstUJumpExact C d < 0 := by
   have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with h0 | h1 | h2 | h3 <;>
-    rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;>
-    decide
+  rcases hCc with rfl | rfl | rfl | rfl <;>
+    rcases hdc with rfl | rfl | rfl <;>
+    norm_num [HappyCell, gstUJumpExact, jumpWith, gstUChargeExact,
+      gstStepCarryExact]
 
 /-- A non-Happy physical cell has nonnegative U jump. -/
 theorem gst_u_jump_nonnegative_of_not_happy
