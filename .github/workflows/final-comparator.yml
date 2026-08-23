@@ -60,8 +60,6 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .lake/build/lib/lean
           for f in \
-            GSTGraphV2NonEuclidean \
-            GSTGraphV2NonEuclideanLaws \
             GSTGraphV2CoupledUFlux \
             GSTGraphV2CoupledUPhysicalBridge \
             GST2DMixedEmergence \
@@ -79,6 +77,8 @@ jobs:
             GSTGraphV2PerfectPowerBlockProbe \
             GSTGraphV2HandwrittenOmegaUBlock \
             GSTGraphV2HandwrittenExponentialCascade \
+            GSTGraphV2NonEuclidean \
+            GSTGraphV2NonEuclideanLaws \
             GSTGraphV2HandwrittenExponentialLTE \
             GSTGraphV2HandwrittenAnchoredCocycle; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
