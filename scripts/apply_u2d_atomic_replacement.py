@@ -50,8 +50,16 @@ replacement = r'''  -- Atomic residual-only surgery.  The proof above has alread
     apply hnoResidual
     exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
 
+  have hsk : s + k = s + 1 + r := by
+    dsimp [k]
+    omega
+  have hchildResidual :
+      GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
+    rw [hsk]
+    exact hchildCore
+
   obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildCore
+    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildResidual
   have hbadChild := hBadResidual j
   have horigin := gst_omega_origin_exact s k m j hs
   have hstep := gst_omega_universal_equation s k m j
@@ -64,9 +72,6 @@ replacement = r'''  -- Atomic residual-only surgery.  The proof above has alread
     gst_omega_infiniteBadTrace_blocks s k m hBadResidual
 
   -- Unified-graph certificate for the exact same canonical power rectangle.
-  -- E is the child perfect power and width 3^s reaches the residual parent
-  -- perfect power 4^(3^s*(1+3^k*m)).  Equation III and the physical base-4
-  -- rectangle are therefore present in this residual proof context itself.
   let Eres : Nat := 4^(3^(s+k) * m)
   let Nres : Nat := 3^s
   have hNres : 1 ≤ Nres := by
@@ -83,10 +88,24 @@ replacement = r'''  -- Atomic residual-only surgery.  The proof above has alread
       Eres Nres (s+k+2+j)
 
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all only [GSTResidualBoundary, GSTOmegaChildZeroSet,
-      GSTOmegaBadSet, GSTOmegaBadBlock, GSTSeededAffineBadTrace,
-      Set.mem_setOf_eq]
-    <;> first | contradiction | omega | aesop
+
+  -- Expose the exact finite residual decision surface.  No global simp/aesop:
+  -- each branch is now a concrete s/k/residue geometry for the unified graph.
+  rcases hboundary with hS1 | hS3 | hStable
+  · rcases hS1 with ⟨hs1, hcase⟩
+    subst s
+    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
+      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    <;> first | contradiction | omega
+  · rcases hS3 with ⟨hs3, hk7, h21, h41, h62⟩
+    subst s
+    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
+      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    <;> first | contradiction | omega
+  · rcases hStable with ⟨hs2, hs3, hk4, h21⟩
+    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
+      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    <;> first | contradiction | omega
 '''
 
 s = s.replace(needle, replacement, 1)
