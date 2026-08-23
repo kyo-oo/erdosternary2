@@ -261,6 +261,9 @@ theorem weightedCrossPrefix_positive_of_top_leading_happy
             (2*w) * (94*A + 149) =
           3*A*w + 185*A + 483*w - 185 := by ring
     rw [hshape]
+    have hAw1 : (1 : Int) ≤ A*w := by omega
+    have hA1 : (1 : Int) ≤ A := by omega
+    have hw1 : (1 : Int) ≤ w := by omega
     omega
 
   have hbound :
