@@ -10,9 +10,17 @@ open GSTGraphV2CoupledUFlux
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2InfiniteControl
 
-/-- Exact macro x4/base3 balance of one horizontal carry word.  This is the
-missing compatibility equation between Old Sol's rectangle state and the
-vertical coordinate of the existing infinite graph. -/
+private theorem state_eq_of_fields
+    (a b : State)
+    (hParentSeed : a.parentSeed = b.parentSeed)
+    (hParentOffset : a.parentOffset = b.parentOffset)
+    (hChildCarry : a.childCarry = b.childCarry)
+    (hChildTail : a.childTail = b.childTail) : a = b := by
+  cases a
+  cases b
+  simp_all
+
+/-- Exact macro x4/base3 balance of one horizontal carry word. -/
 theorem carryWord_vertical_balance
     (E p start : Nat) : ∀ N : Nat,
     carryWord E p start N +
@@ -40,7 +48,6 @@ theorem carryWord_vertical_balance
         rw [← hidx, ← hcell.1, ← hcell.2]
         exact hmass0
       rw [carryWord, carryWord, Nat.pow_succ]
-      have hidx : start + (N+1) = (start+N)+1 := by omega
       calc
         4 * carryWord E p start N + C +
             (4^N * 4) * (graph E start p).seven.digit =
@@ -51,8 +58,8 @@ theorem carryWord_vertical_balance
         _ = (graph E (start+(N+1)) p).seven.digit +
               3 * (4 * carryWord E (p+1) start N +
                 (graph E (start+N) (p+1)).seven.carry) := by
-          rw [← hmass]
-          ring
+          dsimp [C, d] at hmass ⊢
+          omega
 
 /-- The macro parent-offset update of Equation III is exactly the next
 vertical carry word of the same rectangle. -/
@@ -70,25 +77,22 @@ theorem unifiedState_parentOffset_step_exact
   have h3 : 0 < (3:Nat) := by decide
   rw [Nat.add_mul_div_left _ _ h3, Nat.div_eq_of_lt hd, Nat.zero_add]
 
-/-- **Old-Sol state / infinite-graph vertical compatibility.**
-A vertical Equation-III step is not merely analogous to the next rectangle:
-it is definitionally the same physical rectangle state after the exact macro
-carry balance is supplied. -/
+/-- A vertical Equation-III step is exactly the next rectangle state. -/
 theorem unifiedState_core_step_exact
     (E N p : Nat) :
     stepWith gstStepCarryExact (4^N) (unifiedState E N p).core =
       (unifiedState E N (p+1)).core := by
-  apply State.ext
-  · dsimp [stepWith, unifiedState]
+  apply state_eq_of_fields
+  · dsimp [stepWith]
     rw [unifiedState_parentDigit_exact]
     have h := (graph_cell_exact E N p).2
-    simpa [gstStepCarryExact, nextCarry] using h
+    simpa [unifiedState, gstStepCarryExact, nextCarry] using h
   · dsimp [stepWith]
     exact unifiedState_parentOffset_step_exact E N p
-  · dsimp [stepWith, unifiedState]
+  · dsimp [stepWith]
     rw [unifiedState_childDigit_exact]
     have h := (graph_cell_exact E 0 p).2
-    simpa [gstStepCarryExact, nextCarry] using h
+    simpa [unifiedState, gstStepCarryExact, nextCarry] using h
   · dsimp [stepWith, unifiedState]
     rw [Nat.div_div_eq_div_mul, Nat.pow_succ]
     congr 2
