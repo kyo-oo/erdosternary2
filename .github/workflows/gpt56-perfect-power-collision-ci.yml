@@ -1,6 +1,9 @@
 name: GPT56 Perfect Power Collision
 
 on:
+  push:
+    branches:
+      - sol/gpt56-final-perfect-power-block-20260823
   pull_request:
   workflow_dispatch:
 
@@ -45,7 +48,48 @@ jobs:
             GSTGraphV2HandwrittenOmegaUBlock \
             GSTGraphV2HandwrittenExponentialCascade \
             GSTGraphV2HandwrittenExponentialLTE \
-            GSTGraphV2HandwrittenAnchoredCocycle; do
+            GSTGraphV2HandwrittenAnchoredCocycle \
+            GSTGraphV2PerfectPowerBlockCollision; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
-          lake env lean GSTGraphV2PerfectPowerBlockCollision.lean
+      - name: Apply the one-line production surgery
+        shell: bash
+        run: |
+          python3 scripts/apply_u2d_atomic_replacement.py
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'literal gst_end survived the production transformation'
+            exit 1
+          fi
+          grep -n 'have hPerfectPowerCollision : False := by' ErdosTernary2.lean
+      - name: Compile transformed monolith
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2
+      - name: Audit production sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          paths = [
+              Path('ErdosTernary2.lean'),
+              Path('GSTGraphV2PerfectPowerBlockCollision.lean'),
+              Path('GSTGraphV2PerfectPowerBlockProbe.lean'),
+              Path('GSTGraphV2PerfectPowerAncestry.lean'),
+              Path('GSTGraphV2UnifiedPowerRectangle.lean'),
+              Path('GSTGraphV2UnifiedVerticalTelescope.lean'),
+              Path('GSTU2DPureDivergence83.lean'),
+          ]
+          bad = []
+          for p in paths:
+              for i, line in enumerate(p.read_text(encoding='utf-8').splitlines(), 1):
+                  if line.lstrip().startswith('--'):
+                      continue
+                  if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                      bad.append(f'{p}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('production source audit failed')
+          print('production source audit: clean')
+          PY
