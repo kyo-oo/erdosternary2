@@ -12,6 +12,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-final-perfect-power-block-20260823
+          fetch-depth: 1
+      - name: Assert exact production branch
+        shell: bash
+        run: |
+          test "$(git branch --show-current)" = "sol/gpt56-final-perfect-power-block-20260823"
+          echo "HEAD=$(git rev-parse HEAD)"
       - name: Install exact Lean toolchain
         shell: bash
         run: |
@@ -33,6 +41,7 @@ jobs:
             exit 1
           fi
           grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
+          grep -n 'have hchildCoreK' ErdosTernary2.lean
       - name: Compile transformed production monolith
         shell: bash
         run: |
