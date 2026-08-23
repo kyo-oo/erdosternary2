@@ -40,12 +40,20 @@ theorem pow4_three_power_lte_exact : ∀ r : Nat,
         _ = 1 + 3^((r+1)+1) * lteCoeff (r+1) := by
           simp only [lteCoeff]
           rw [show (r+1)+1 = r+2 by omega]
-          have hNext : 3^(r+2) = 3 * 3^(r+1) := by
-            rw [show r+2 = (r+1)+1 by omega, Nat.pow_succ]
-            ring
-          have hCross : 3^(r + (r+1)) = 3^r * 3^(r+1) := by
-            exact Nat.pow_add 3 r (r+1)
-          rw [hNext, hCross, Nat.pow_succ]
+          have h1 : 3^(r+1) = 3^r * 3 := by
+            rw [Nat.pow_succ]
+          have h2 : 3^(2*r+1) = (3^r)^2 * 3 := by
+            calc
+              3^(2*r+1) = 3^((r+r)+1) := by congr 1 <;> omega
+              _ = 3^(r+r) * 3 := by rw [Nat.pow_succ]
+              _ = (3^r * 3^r) * 3 := by rw [Nat.pow_add]
+              _ = (3^r)^2 * 3 := by ring
+          have h3 : 3^(r+2) = 3^r * 9 := by
+            calc
+              3^(r+2) = 3^((r+1)+1) := by congr 1 <;> omega
+              _ = 3^(r+1) * 3 := by rw [Nat.pow_succ]
+              _ = 3^r * 9 := by rw [h1]; ring
+          rw [h3, h1, h2]
           ring
 
 /-- The exact LTE quotient is always one modulo three. -/
@@ -67,7 +75,6 @@ theorem pow4_scaled_mod_next (r u : Nat) :
     4^(3^r * u) % 3^(r+1) = 1 := by
   have hA := pow4_three_power_lte_exact r
   rw [Nat.pow_mul, hA, Nat.pow_mod]
-  have hMpos : 0 < 3^(r+1) := Nat.pow_pos (by decide)
   have hMgt1 : 1 < 3^(r+1) := by
     have h3 : 3^1 ≤ 3^(r+1) :=
       Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
@@ -75,7 +82,7 @@ theorem pow4_scaled_mod_next (r u : Nat) :
     omega
   have hbase : (1 + 3^(r+1) * lteCoeff r) % 3^(r+1) = 1 := by
     simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hMgt1]
-  rw [hbase]
+  simpa [hbase, Nat.mod_eq_of_lt hMgt1]
 
 /-- The same scaled power is one modulo the current cut once the cut is
 positive. -/
