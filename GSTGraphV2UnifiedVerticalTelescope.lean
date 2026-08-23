@@ -96,7 +96,6 @@ theorem unifiedState_core_step_exact
   · dsimp [stepWith, unifiedState]
     rw [Nat.div_div_eq_div_mul, Nat.pow_succ]
     congr 2
-    ac_rfl
 
 /-- Equation III with its derivative closed entirely inside the existing graph. -/
 theorem unified_equationIII_graph_closed
