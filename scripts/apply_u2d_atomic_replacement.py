@@ -10,15 +10,17 @@ raw_theorems = len(re.findall(r'(?m)^\s*(?:private\s+)?theorem\s+', s))
 raw_defs = len(re.findall(r'(?m)^\s*(?:noncomputable\s+)?def\s+', s))
 print(f'PRODUCTION_STATS raw_lines={raw_lines} raw_theorems={raw_theorems} raw_defs={raw_defs}')
 
-# Keep the existing production proof and splice only the true residual seam.
-# The unified graph / rectangle modules are compiled independently by CI and
-# imported here so the production proof is checked in the same environment.
+# Keep the production theorem unchanged except for the one RED seam.  Import
+# the already-kernel-green perfect-power collision theorem and its exact graph
+# dependencies into the transformed monolith.
 for imp in [
     'import GSTGraphV2InfiniteControl\n',
     'import GSTU2DPureDivergence83\n',
     'import GSTGraphV2UnifiedPowerRectangle\n',
     'import GSTGraphV2UnifiedVerticalTelescope\n',
     'import GSTGraphV2PerfectPowerAncestry\n',
+    'import GSTGraphV2PerfectPowerBlockProbe\n',
+    'import GSTGraphV2PerfectPowerBlockCollision\n',
 ]:
     if imp not in s:
         anchor = 'import Mathlib.Tactic.Ring\n'
@@ -32,86 +34,153 @@ needle = '''  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physicall
   gst_end
 '''
 
+installed_marker = 'have hPerfectPowerCollision : False := by'
 if needle not in s:
-    if 'have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by' in s and '\n  gst_end\n' not in s:
-        print('residual-only atomic surgery already installed')
+    if installed_marker in s and '\n  gst_end\n' not in s:
+        print('perfect-power collision surgery already installed')
         p.write_text(s, encoding='utf-8')
         raise SystemExit(0)
     raise SystemExit('literal residual gst_end seam not found')
 
-replacement = r'''  -- Atomic infinite-graph surgery.  The proof above has already removed every
-  -- origin state that closes immediately.  Reindex the no-parent statement
-  -- to the exact residual Ω(s,k,m) graph; no terminal/support argument enters.
-  have hnoResidual :
-      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) := by
-    intro hparentCore
-    apply hnoParent
-    rw [hparentArg]
-    exact hparentCore
+replacement = r'''  -- Final Graph-V2 collision bridge.  The dedicated collision theorem is
+  -- already kernel-green.  Here we only identify the monolith child witness
+  -- with the left physical perfect-power boundary and the Omega bad trace
+  -- with the all-depth bad right boundary of the same rectangle.
+  have hchildOriginal :
+      GSTNavigationWitness (gstNavigationConstant (s+1) n) := by
+    rw [hscale]
+    exact hchild
 
-  have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by
+  obtain ⟨q, hqDigit, hqSpace⟩ := hchildOriginal
+
+  have hqCarry :
+      gstCarry (gstNavigationConstant (s+1) n) q = 0 ∨
+      gstCarry (gstNavigationConstant (s+1) n) q = 3 := by
+    cases q with
+    | zero =>
+        left
+        simp [gstCarry]
+    | succ q =>
+        have hmod3 :
+            gstCarry (gstNavigationConstant (s+1) n) (q+1) % 3 = 0 :=
+          gstGoodSpace_carry_mod3_zero _ _ hqSpace
+        have hlt :
+            gstCarry (gstNavigationConstant (s+1) n) (q+1) < 4 :=
+          gstCarry_lt_four _ _ (by omega)
+        omega
+
+  have hChildGateS :
+      gstDigitS (gstNavigationConstant (s+1) n) q = 2 ∧
+      (gstCarryS (gstNavigationConstant (s+1) n) q = 0 ∨
+       gstCarryS (gstNavigationConstant (s+1) n) q = 3) := by
+    constructor
+    · simpa [gstDigitS, gstDigit] using hqDigit
+    · simpa [gstCarryS, gstCarry] using hqCarry
+
+  have hChildEnergyGate :=
+    gst_child_gate_embeds_phase_zero_energyS
+      s (gstNavigationConstant (s+1) n) q hs hChildGateS
+  dsimp only at hChildEnergyGate
+
+  have hChildEnergy :
+      GSTGraphV2PerfectPowerBlock.canonicalEnergy s n =
+        1 + 3^(s+2) * gstNavigationConstant (s+1) n := by
+    unfold GSTGraphV2PerfectPowerBlock.canonicalEnergy
+    have h := gst_navigation_decomposition (s+1) n (by omega)
+    simpa [show (s+1)+1 = s+2 by omega] using h
+
+  have hChildPhysical :
+      GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2PerfectPowerBlock.canonicalEnergy s n)
+          0 (s+2+q)).seven.carry
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2PerfectPowerBlock.canonicalEnergy s n)
+          0 (s+2+q)).seven.digit := by
+    simpa [GSTU2DEventTransport.HappyCell,
+      GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex,
+      GSTCanonicalSevenAxisBridge.carry4,
+      GSTCanonicalSevenAxisBridge.digit3,
+      gstCarryS, gstDigitS, hChildEnergy] using hChildEnergyGate
+
+  let H : Nat := gstPrefixOneUPotentialTailS s n
+
+  have hSeededParentBad :
+      ∀ j, GSTBadPairS
+        (gstAffineMulCarryS 4 1 H j) (gstDigitS H j) := by
     intro j
-    change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0
-    intro hzero
-    apply hnoResidual
-    exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
+    simpa [H] using
+      (gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j)
 
-  have hsk : s + k = s + 1 + r := by
-    dsimp [k]
-    omega
-  have hchildResidual :
-      GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
-    rw [hsk]
-    exact hchildCore
+  have hAunit :
+      4^(3^s) = 1 + 3^(s+1) * gstNavigationConstant s 1 :=
+    gst_navigation_decomposition s 1 hs
 
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildResidual
-  have hbadChild := hBadResidual j
-  have horigin := gst_omega_origin_exact s k m j hs
-  have hstep := gst_omega_universal_equation s k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    s k m hs hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hBadResidual
-  have heecho := gst_omega_affine_tail_block_echo s k m hs
-  have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-    gst_omega_infiniteBadTrace_blocks s k m hBadResidual
+  have hUnitPrefix :
+      gstNavigationConstant s 1 = 1 + 3 * gstCanonicalPrefixOffsetS s :=
+    gst_navigation_constant_unit_prefixS s hs
 
-  -- Unified-graph certificate for the exact same canonical power rectangle.
-  let Eres : Nat := 4^(3^(s+k) * m)
-  let Nres : Nat := 3^s
-  have hNres : 1 ≤ Nres := by
-    dsimp [Nres]
-    exact Nat.one_le_pow _ _ (by decide)
-  have hunified :=
-    GSTGraphV2UnifiedVerticalTelescope.unified_equationIII_graph_closed
-      Eres Nres (s+k+1+j)
-  have hphysical :=
-    GSTGraphV2UnifiedPowerRectangle.unifiedState_physicalInvariant
-      Eres Nres (s+k+1+j)
-  have hdensity :=
-    GSTU2DPureDivergence83.graph_density83_rectangle_exact
-      Eres Nres (s+k+2+j)
+  have hRightEnergy0 :=
+    gst_canonical_phase1_energy_shape_surgeryS
+      gstNavigationConstant gst_navigation_constant_origin_energyS
+      s n (gstNavigationConstant s 1) gstCanonicalPrefixOffsetS s
+      hs hAunit hUnitPrefix
 
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+  have hRightEnergy :
+      4^(3^s) * GSTGraphV2PerfectPowerBlock.canonicalEnergy s n =
+        (1 + 3^(s+1)) + 3^(s+2) * H := by
+    unfold GSTGraphV2PerfectPowerBlock.canonicalEnergy
+    have hpow : 3 * 3^(s+1) = 3^(s+2) := by
+      rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+      ac_rfl
+    rw [hpow] at hRightEnergy0
+    simpa [H, gstPrefixOneUPotentialTailS, gstCanonicalPrefixOffsetS,
+      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hRightEnergy0
 
-  -- TEMPORARY RED ENDPOINT: this is the one infinite-graph closure now being
-  -- replaced by the conserved perfect-power block transfer theorem.
-  rcases hboundary with hS1 | hS3 | hStable
-  · rcases hS1 with ⟨hs1, hcase⟩
-    subst s
-    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
-      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega
-  · rcases hS3 with ⟨hs3, hk7, h21, h41, h62⟩
-    subst s
-    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
-      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega
-  · rcases hStable with ⟨hs2, hs3, hk4, h21⟩
-    simp_all only [GSTOmegaChildZeroSet, GSTOmegaBadSet,
-      GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega
+  have hRightBad : ∀ j,
+      ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2PerfectPowerBlock.canonicalEnergy s n)
+          (GSTGraphV2PerfectPowerBlock.canonicalWidth s) (s+2+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2PerfectPowerBlock.canonicalEnergy s n)
+          (GSTGraphV2PerfectPowerBlock.canonicalWidth s) (s+2+j)).seven.digit := by
+    intro j hHappy
+    have hParentState := gst_parent_energy_stateS s H j hs
+    dsimp only at hParentState
+
+    have hPhysicalGate :
+        gstDigitS ((1 + 3^(s+1)) + 3^(s+2)*H) (s+2+j) = 2 ∧
+        (gstCarryS ((1 + 3^(s+1)) + 3^(s+2)*H) (s+2+j) = 0 ∨
+         gstCarryS ((1 + 3^(s+1)) + 3^(s+2)*H) (s+2+j) = 3) := by
+      simpa [GSTU2DEventTransport.HappyCell,
+        GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex,
+        GSTCanonicalSevenAxisBridge.carry4,
+        GSTCanonicalSevenAxisBridge.digit3,
+        GSTGraphV2PerfectPowerBlock.canonicalWidth,
+        gstCarryS, gstDigitS, hRightEnergy,
+        Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] using hHappy
+
+    have hTailGate :
+        gstDigitS H j = 2 ∧
+        (gstAffineMulCarryS 4 1 H j = 0 ∨
+         gstAffineMulCarryS 4 1 H j = 3) := by
+      constructor
+      · rw [← hParentState.1]
+        exact hPhysicalGate.1
+      · rw [← hParentState.2]
+        exact hPhysicalGate.2
+
+    exact hSeededParentBad j hTailGate
+
+  have hPerfectPowerCollision : False := by
+    exact
+      GSTGraphV2PerfectPowerBlockCollision.canonical_perfect_power_block_collision
+        s n q hs hn hChildPhysical hRightBad
+
+  exact hPerfectPowerCollision
 '''
 
 s = s.replace(needle, replacement, 1)
@@ -120,4 +189,4 @@ transformed_lines = len(s.splitlines())
 transformed_theorems = len(re.findall(r'(?m)^\s*(?:private\s+)?theorem\s+', s))
 transformed_defs = len(re.findall(r'(?m)^\s*(?:noncomputable\s+)?def\s+', s))
 print(f'PRODUCTION_STATS transformed_lines={transformed_lines} transformed_theorems={transformed_theorems} transformed_defs={transformed_defs}')
-print('installed residual-only unified Graph-V2 atomic surgery')
+print('installed perfect-power collision production surgery')
