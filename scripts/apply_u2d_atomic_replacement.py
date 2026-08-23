@@ -50,6 +50,10 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     dsimp [T, q, data]
     simpa only [gstOmega] using data.childGate
 
+  have hGateS : GSTSeededHappyS 0 T q := by
+    simpa [GSTSeededHappyS, gstDigitS, gstDigit, gstCarryS,
+      gstAffineMulCarryS, gstCarry] using hGate
+
   have hE0raw := gst_navigation_decomposition (s+1) n (by omega)
   have hE0 : 4^0 * E = P0 + B*T := by
     dsimp [E, P0, B, T]
@@ -134,9 +138,35 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
       GSTGraphV2InfiniteControl.seededCarry,
       gstAffineMulCarryS, gstDigitS] using hTail
 
+  -- Canonical finite-prefix probe: the next block theorem must obtain the
+  -- parent finite-prefix carry from this *actual* child gate, not from an
+  -- arbitrary affine-tail transport statement.
+  let a : Nat := (1 + 3*n) % 3^(q+1)
+  have hParentPrefixCarry :
+      gstCarryS (gstNavigationConstant s a) (q+1) = 0 ∨
+      gstCarryS (gstNavigationConstant s a) (q+1) = 3 := by
+    have hcut := gst_canonical_origin_cut_carryS
+      s a (q+1) ((1 + 3*n) / 3^(q+1)) hs
+    have hdecomp :
+        a + 3^(q+1) * ((1 + 3*n) / 3^(q+1)) = 1 + 3*n := by
+      dsimp [a]
+      exact Nat.mod_add_div (1 + 3*n) (3^(q+1))
+    rw [hdecomp] at hcut
+    have hparentShape := gst_hard_tail_parent_navigationS
+      gstNavigationConstant gst_navigation_constant_origin_energyS
+      gstCanonicalPrefixOffsetS gst_navigation_constant_unit_prefixS
+      s n hs
+    rw [hparentShape] at hcut
+    rw [gst_prefixed_one_carry_shiftS] at hcut
+    -- Deliberately leave only the true canonical child->parent block relation
+    -- for Lean to normalize; the surrounding ancestry is now exact.
+    rw [← hcut]
+    simpa [T, GSTSeededHappyS, gstCarryS, gstAffineMulCarryS] using hGateS.2
+
   -- Atomic RED object after the full-energy splice: one left event-eight cell,
   -- no right event-eight cell, both on the same canonical infinite graph.
-  -- The next theorem inserted here is the all-depth V2 event-transfer law.
+  -- The stronger perfect-power block theorem consumes hParentPrefixCarry and
+  -- the origin-trit/canonical rectangle data from this exact state.
   exfalso
   omega
 
