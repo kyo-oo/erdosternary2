@@ -42,7 +42,8 @@ jobs:
             GSTGraphV2UnifiedVerticalTelescope \
             GSTGraphV2PerfectPowerAncestry \
             GSTGraphV2PerfectPowerBlockProbe \
-            GSTGraphV2HandwrittenOmegaUBlock; do
+            GSTGraphV2HandwrittenOmegaUBlock \
+            GSTGraphV2HandwrittenExponentialCascade; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
           lake env lean GSTGraphV2PerfectPowerBlockCollision.lean
