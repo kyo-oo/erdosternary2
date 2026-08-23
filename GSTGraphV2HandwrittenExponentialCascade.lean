@@ -46,12 +46,15 @@ theorem origin_block_split_exact (n K : Nat) :
 theorem u_exponent_block_split_exact (t n K : Nat) :
     3^t * n = uPhaseShift t n K + uTailExponent t n K := by
   have hs := origin_block_split_exact n K
-  unfold uPhaseShift uTailExponent originPrefix originSuffix
-  rw [hs]
-  rw [Nat.mul_add]
-  have hp : 3^(t+K) = 3^t * 3^K := by rw [Nat.pow_add]
-  rw [hp]
-  ring
+  unfold uPhaseShift uTailExponent
+  calc
+    3^t * n =
+        3^t * (originPrefix n K + 3^K * originSuffix n K) :=
+      congrArg (fun x : Nat => 3^t * x) hs
+    _ = 3^t * originPrefix n K +
+        3^(t+K) * originSuffix n K := by
+      rw [Nat.pow_add]
+      ring
 
 /-- Advanced finite product form of the handwritten exponential operator.
 Every consumed origin trit has been accumulated into the left phase factor;
