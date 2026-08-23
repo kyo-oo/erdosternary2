@@ -128,7 +128,7 @@ theorem handwritten_u_anchored_cocycle_exact
   · simpa using hchild.2.1
   · simpa [Nat.add_assoc] using hparent.1
   · simpa [Nat.add_assoc] using hparent.2.1
-  · exact graph_u_potential_cocycle_exact
+  · simpa using graph_u_potential_cocycle_exact
       (uTailEnergy (s+1) n (q+1)) 0
       (uPhaseShift (s+1) n (q+1)) (canonicalWidth s) (s+2+q)
 
