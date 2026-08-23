@@ -8,6 +8,7 @@ namespace GSTGraphV2HandwrittenAnchoredCocycle
 
 open GSTCanonicalSevenAxisBridge
 open GST2DMixedEmergence
+open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2CoupledUFlux
 open GSTGraphV2UnifiedPowerRectangle
@@ -23,19 +24,6 @@ This is the missing horizontal composition law for the handwritten exponential
 operator.  It does not move a Happy bit by assumption.  Instead it composes the
 exact retained U potential of two adjacent rectangles of the *same* infinite
 Graph-V2 sheet.
-
-For widths P and N the reverse-base-four carry word obeys
-
-  W(P+N) = 4^N W(P) + W_P(N),
-
-and therefore the physical U potential obeys the exact cocycle
-
-  Phi(P+N) = Phi_P(N) + 4^N Phi(P).
-
-The handwritten exponential cascade supplies a canonical horizontal phase P,
-while LTE supplies a genuine NULL/zero-information anchor at x=0.  Thus the
-child block [P,P+N] is not a separate graph: it is the translated middle block
-of one anchored full Graph-V2 rectangle [0,P+N].
 -/
 
 /-- Direct physical U potential of an arbitrary horizontal Graph-V2 interval. -/
@@ -44,25 +32,21 @@ def graphUPotential (E start N p : Nat) : Int :=
     (((4^N : Nat) : Int)) * gstUChargeExact (graph E start p).seven.carry +
     24 * (carryWord E p start N : Int)
 
-/-- Reverse-base-four words concatenate exactly.  The older/left word is
-shifted by the width of the newly appended right block. -/
+/-- Reverse-base-four words concatenate exactly. -/
 theorem carryWord_append_exact
     (E p start P : Nat) : ∀ N : Nat,
     carryWord E p start (P+N) =
       4^N * carryWord E p start P + carryWord E p (start+P) N := by
   intro N
   induction N with
-  | zero =>
-      simp [carryWord]
+  | zero => simp [carryWord]
   | succ N ih =>
       have hlen : P + (N+1) = (P+N)+1 := by omega
       have hidx : start + (P+N) = (start+P)+N := by omega
       rw [hlen, carryWord, ih, carryWord, Nat.pow_succ, hidx]
       ring
 
-/-- **Universal Graph-V2 U cocycle.**  The retained physical U potential of a
-long rectangle is exactly the translated right-block potential plus `4^N`
-copies of the left-prefix potential. -/
+/-- **Universal Graph-V2 U cocycle.** -/
 theorem graph_u_potential_cocycle_exact
     (E start P N p : Nat) :
     graphUPotential E start (P+N) p =
@@ -77,8 +61,7 @@ theorem graph_u_potential_cocycle_exact
   ring
 
 /-- **Shifted Equation III on an arbitrary interval of the same Graph-V2
-sheet.**  This is the vertical derivative of `graphUPotential`, with no
-zero-start restriction. -/
+sheet.** -/
 theorem graph_u_equationIII_shifted_exact
     (E start N p : Nat) :
     gstUJumpExact
@@ -115,9 +98,78 @@ theorem graph_u_equationIII_shifted_exact
   rw [hLeftNext, hRightNext]
   nlinarith [hWordInt]
 
-/-- The horizontal cocycle and shifted Equation III commute exactly.  The
-vertical U-jump defect of a concatenated interval is the right defect plus
-`4^N` copies of the left defect. -/
+/-- Weighted vertical telescope of the shifted Equation III. -/
+theorem graph_u_equationIII_shifted_telescope
+    (E start N p K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (gstUJumpExact
+            (graph E (start+N) (p+j)).seven.carry
+            (graph E (start+N) (p+j)).seven.digit -
+          (((4^N : Nat) : Int)) *
+            gstUJumpExact
+              (graph E start (p+j)).seven.carry
+              (graph E start (p+j)).seven.digit)) =
+      (((3^K : Nat) : Int)) * graphUPotential E start N (p+K) -
+        graphUPotential E start N p := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih]
+      rw [graph_u_equationIII_shifted_exact E start N (p+K)]
+      have hidx : p + (K+1) = (p+K)+1 := by omega
+      rw [hidx, Nat.pow_succ]
+      push_cast
+      ring
+
+/-- On the twelve physical GST cells, a Happy Gate is exactly a negative U
+jump.  This gives the ordered form needed by the monolith surgery. -/
+theorem happy_iff_gst_u_jump_negative
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    HappyCell C d ↔ gstUJumpExact C d < 0 := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with h0 | h1 | h2 | h3 <;>
+    rcases hdc with d0 | d1 | d2 <;>
+    subst C <;> subst d <;>
+    decide
+
+/-- A non-Happy physical cell has nonnegative U jump. -/
+theorem gst_u_jump_nonnegative_of_not_happy
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hbad : ¬ HappyCell C d) :
+    0 ≤ gstUJumpExact C d := by
+  by_contra hneg
+  have hj : gstUJumpExact C d < 0 := by omega
+  exact hbad ((happy_iff_gst_u_jump_negative C d hC hd).2 hj)
+
+/-- At a child Happy Gate whose right endpoint is bad, the shifted Equation-III
+derivative is strictly positive. -/
+theorem graph_u_derivative_positive_of_child_happy_right_bad
+    (E start N p : Nat)
+    (hChild : HappyCell
+      (graph E start p).seven.carry (graph E start p).seven.digit)
+    (hRight : ¬ HappyCell
+      (graph E (start+N) p).seven.carry (graph E (start+N) p).seven.digit) :
+    0 < 3 * graphUPotential E start N (p+1) -
+      graphUPotential E start N p := by
+  have hLc := graph_carry_lt_four E start p
+  have hLd := graph_digit_lt_three E start p
+  have hRc := graph_carry_lt_four E (start+N) p
+  have hRd := graph_digit_lt_three E (start+N) p
+  have hLneg :
+      gstUJumpExact (graph E start p).seven.carry
+        (graph E start p).seven.digit < 0 :=
+    (happy_iff_gst_u_jump_negative _ _ hLc hLd).1 hChild
+  have hRnonneg :
+      0 ≤ gstUJumpExact (graph E (start+N) p).seven.carry
+        (graph E (start+N) p).seven.digit :=
+    gst_u_jump_nonnegative_of_not_happy _ _ hRc hRd hRight
+  have hpow : (0 : Int) < (((4^N : Nat) : Int)) := by positivity
+  have hEq := graph_u_equationIII_shifted_exact E start N p
+  nlinarith
+
+/-- The horizontal cocycle and shifted Equation III commute exactly. -/
 theorem graph_u_jump_cocycle_exact
     (E start P N p : Nat) :
     (gstUJumpExact
@@ -167,11 +219,7 @@ theorem canonical_u_recoordinate_exact
   have h := graph_u_block_observables_exact (s+1) n (q+1) x p
   simpa [canonicalEnergy] using ⟨h.1, h.2.1, h.2.2.2.2.2.1, h.2.2.2.2.2.2.1⟩
 
-/-- **Advanced handwritten application at the production cut.**
-The full canonical child/parent block is embedded in a single tail-energy
-Graph-V2 sheet whose origin is the exact LTE-neutral NULL vertex, and the
-retained U potential of the complete anchored rectangle satisfies the cocycle
-at that same cut. -/
+/-- **Advanced handwritten application at the production cut.** -/
 theorem handwritten_u_anchored_cocycle_exact
     (s n q : Nat) (hs : 1 ≤ s) :
     let T := uTailEnergy (s+1) n (q+1)
@@ -208,11 +256,14 @@ theorem handwritten_u_anchored_cocycle_exact
 #check carryWord_append_exact
 #check graph_u_potential_cocycle_exact
 #check graph_u_equationIII_shifted_exact
+#check graph_u_equationIII_shifted_telescope
+#check happy_iff_gst_u_jump_negative
+#check graph_u_derivative_positive_of_child_happy_right_bad
 #check graph_u_jump_cocycle_exact
 #check canonical_u_recoordinate_exact
 #check handwritten_u_anchored_cocycle_exact
-#print axioms graph_u_potential_cocycle_exact
-#print axioms graph_u_equationIII_shifted_exact
+#print axioms graph_u_equationIII_shifted_telescope
+#print axioms graph_u_derivative_positive_of_child_happy_right_bad
 #print axioms handwritten_u_anchored_cocycle_exact
 
 end GSTGraphV2HandwrittenAnchoredCocycle
