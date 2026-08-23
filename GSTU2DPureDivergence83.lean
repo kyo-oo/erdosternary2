@@ -15,7 +15,7 @@ open GSTGraphV2InfiniteControl
 This is a finite-state Bellman certificate on the same infinite GST graph.
 Unlike the crossing and mixed densities, the local density below has no
 interior SURVIVE remainder at all: it is a literal horizontal/vertical
-divergence.  The coefficients were selected against the complete twelve-cell
+divergence. The coefficients were selected against the complete twelve-cell
 physical transition table.
 -/
 
@@ -29,7 +29,7 @@ def density83 (C d : Nat) : Int :=
   digitPotential83 (outDigit C d) - 8 * digitPotential83 d +
     carryPotential83 C - 3 * carryPotential83 (nextCarry C d)
 
-/-- Exact twelve-cell certificate.  The two Happy cells are strictly positive;
+/-- Exact twelve-cell certificate. The two Happy cells are strictly positive;
 all ten bad cells are nonpositive, and the global physical floor is -105. -/
 theorem density83_physical_table :
     density83 0 0 = -105 ∧ density83 0 1 = -84 ∧ density83 0 2 = 168 ∧
@@ -46,7 +46,9 @@ theorem happy_iff_density83_positive
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
+    subst C <;> subst d <;>
+    norm_num [HappyCell, density83, digitPotential83, carryPotential83,
+      outDigit, nextCarry]
 
 /-- Uniform physical floor. -/
 theorem density83_ge_neg105
@@ -56,7 +58,8 @@ theorem density83_ge_neg105
   have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
-    subst C <;> subst d <;> decide
+    subst C <;> subst d <;>
+    norm_num [density83, digitPotential83, carryPotential83, outDigit, nextCarry]
 
 /-- Every bad physical cell is nonpositive. -/
 theorem density83_nonpositive_of_not_happy
@@ -123,19 +126,17 @@ theorem reverseDensity83_ge_of_leading_happy
       intro hN hC hd
       by_cases hN0 : N = 0
       · subst N
-        have hpos := (happy_iff_density83_positive (C 0) (d 0)
-          (hC 0 (by omega)) (hd 0 (by omega))).1 hHappy
         have htab : 84 ≤ density83 (C 0) (d 0) := by
-          have hCc : C 0 = 0 ∨ C 0 = 3 := hHappy.2
           have hd2 : d 0 = 2 := hHappy.1
-          rcases hCc with h0 | h3
+          rcases hHappy.2 with h0 | h3
           · rw [h0, hd2]
-            decide
+            norm_num [density83, digitPotential83, carryPotential83,
+              outDigit, nextCarry]
           · rw [h3, hd2]
-            decide
+            norm_num [density83, digitPotential83, carryPotential83,
+              outDigit, nextCarry]
         rw [reverseDensity83]
-        simp only [reverseDensity83]
-        norm_num at htab ⊢
+        norm_num [reverseDensity83] at htab ⊢
         exact htab
       · have hNpos : 1 ≤ N := Nat.one_le_iff_ne_zero.mpr hN0
         have ih' := ih hNpos
@@ -143,19 +144,20 @@ theorem reverseDensity83_ge_of_leading_happy
           (fun t ht => hd t (by omega))
         have hlocal := density83_ge_neg105 (C N) (d N)
           (hC N (by omega)) (hd N (by omega))
+        have hNm1 : (N - 1) + 1 = N := by omega
+        have hpowNat : 8^N = 8 * 8^(N-1) := by
+          rw [← hNm1, Nat.pow_succ]
+          ac_rfl
         have hpow :
             (((8^N : Nat) : Int)) = 8 * (((8^(N-1) : Nat) : Int)) := by
-          have hNm1 : (N - 1) + 1 = N := by omega
-          rw [← hNm1, Nat.pow_succ]
-          push_cast
-          ring
-        have hpowNext :
-            (((8^((N+1)-1) : Nat) : Int)) = (((8^N : Nat) : Int)) := by
-          congr 2 <;> omega
-        rw [reverseDensity83, hpowNext]
+          exact_mod_cast hpowNat
+        rw [reverseDensity83]
+        change 69 * (((8^N : Nat) : Int)) + 15 ≤
+          8 * reverseDensity83 C d N + density83 (C N) (d N)
+        rw [hpow]
         nlinarith
 
-/-- Pure horizontal telescope.  There is no interior correction term. -/
+/-- Pure horizontal telescope. There is no interior correction term. -/
 theorem reverseDensity83_exact
     (C Cnext d : Nat → Nat) : ∀ N : Nat,
     (∀ t, t < N → outDigit (C t) (d t) = d (t+1)) →
@@ -179,7 +181,7 @@ theorem reverseDensity83_exact
       rw [reverseDensity83, reverseCarry83, reverseCarry83,
         ih', density83, ho, hc, Nat.pow_succ]
       push_cast
-      ring
+      ring_nf
 
 /-- Base-three telescope for an arbitrary vertical boundary function. -/
 theorem ternaryWeightedDiff83 (g : Nat → Int) (K : Nat) :
@@ -229,7 +231,7 @@ theorem density83_rectangle_exact
         (fun t ht => (hcell t p ht hpK).2.2.2)
       dsimp [g]
       rw [hr]
-      ring
+      ring_nf
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
@@ -243,7 +245,8 @@ theorem density83_rectangle_exact
       ring
     _ = _ := by
       rw [htel]
-      rfl
+      dsimp [g]
+      ring
 
 /-- Vertical weighted prefix of the reverse-base-eight rows. -/
 def weightedRectanglePrefix83
@@ -253,14 +256,18 @@ def weightedRectanglePrefix83
       (((3^K : Nat) : Int)) *
         reverseDensity83 (fun t => C t K) (fun t => d t K) N
 
-/-- All lower rows obey the exact geometric rectangle floor. -/
+/-- All lower rows obey the exact geometric rectangle floor, stated without
+integer division:
+
+  -15(8^N-1)(3^K-1) ≤ 2 R_{N,K}.
+-/
 theorem weightedRectanglePrefix83_ge_floor
     (C d : Nat → Nat → Nat) (N : Nat) : ∀ K : Nat,
     (∀ t p, t < N → p < K → C t p < 4) →
     (∀ t p, t < N → p < K → d t p < 3) →
     (-15 : Int) * ((((8^N : Nat) : Int)) - 1) *
-        (((((3^K : Nat) : Int)) - 1) / 2) ≤
-      weightedRectanglePrefix83 C d N K := by
+        ((((3^K : Nat) : Int)) - 1) ≤
+      2 * weightedRectanglePrefix83 C d N K := by
   intro K
   induction K with
   | zero =>
@@ -275,33 +282,30 @@ theorem weightedRectanglePrefix83_ge_floor
         (fun t => C t K) (fun t => d t K) N
         (fun t ht => hC t K ht (by omega))
         (fun t ht => hd t K ht (by omega))
-      have hw : (0 : Int) ≤ (((3^K : Nat) : Int)) := by positivity
+      have hw : (0 : Int) ≤ 2 * (((3^K : Nat) : Int)) := by positivity
       have hrowW := mul_le_mul_of_nonneg_left hrow hw
-      rw [weightedRectanglePrefix83]
-      -- Avoid closed-form integer division algebra here: retain the induction
-      -- lower bound through the exact nonnegative row weight.
-      have hgeom :
-          (((((3^(K+1) : Nat) : Int)) - 1) / 2) =
-            (((((3^K : Nat) : Int)) - 1) / 2) + (((3^K : Nat) : Int)) := by
-        have hkpos : (0 : Int) < (((3^K : Nat) : Int)) := by positivity
+      have hpow :
+          (((3^(K+1) : Nat) : Int)) = 3 * (((3^K : Nat) : Int)) := by
         rw [Nat.pow_succ]
         push_cast
-        omega
-      rw [hgeom]
-      have hcoef : (-15 : Int) * ((((8^N : Nat) : Int)) - 1) ≤ 0 := by
-        have hp : (1 : Int) ≤ (((8^N : Nat) : Int)) := by positivity
-        nlinarith
+        ring
+      rw [weightedRectanglePrefix83, hpow]
       calc
         (-15 : Int) * ((((8^N : Nat) : Int)) - 1) *
-            (((((3^K : Nat) : Int)) - 1) / 2 + (((3^K : Nat) : Int))) =
+            (3 * (((3^K : Nat) : Int)) - 1) =
           (-15 : Int) * ((((8^N : Nat) : Int)) - 1) *
-              (((((3^K : Nat) : Int)) - 1) / 2) +
-            (((3^K : Nat) : Int)) *
+              ((((3^K : Nat) : Int)) - 1) +
+            (2 * (((3^K : Nat) : Int))) *
               ((-15 : Int) * ((((8^N : Nat) : Int)) - 1)) := by ring
-        _ ≤ weightedRectanglePrefix83 C d N K +
-            (((3^K : Nat) : Int)) *
+        _ ≤ 2 * weightedRectanglePrefix83 C d N K +
+            (2 * (((3^K : Nat) : Int))) *
               reverseDensity83 (fun t => C t K) (fun t => d t K) N :=
           add_le_add ih' hrowW
+        _ = 2 *
+            (weightedRectanglePrefix83 C d N K +
+              (((3^K : Nat) : Int)) *
+                reverseDensity83 (fun t => C t K) (fun t => d t K) N) := by
+          ring
 
 /-- A Happy cell in the upper-left corner dominates every possible bad mass
 below it after any positive horizontal width. -/
@@ -319,14 +323,48 @@ theorem weightedRectanglePrefix83_positive_of_top_leading_happy
     (fun t => C t q) (fun t => d t q) hHappy N hN
     (fun t ht => hC t q ht (by omega))
     (fun t ht => hd t q ht (by omega))
+  let a : Int := (((8^(N-1) : Nat) : Int))
+  let w : Int := (((3^q : Nat) : Int))
+  let P : Int := weightedRectanglePrefix83 C d N q
+  let R : Int := reverseDensity83 (fun t => C t q) (fun t => d t q) N
+  have ha : 0 < a := by
+    dsimp [a]
+    positivity
+  have hw : 0 < w := by
+    dsimp [w]
+    positivity
+  have hNm1 : (N - 1) + 1 = N := by omega
+  have hpowNat : 8^N = 8 * 8^(N-1) := by
+    rw [← hNm1, Nat.pow_succ]
+    ac_rfl
+  have hpow : (((8^N : Nat) : Int)) = 8 * a := by
+    dsimp [a]
+    exact_mod_cast hpowNat
+  have hlower' :
+      (-15 : Int) * (8*a - 1) * (w - 1) ≤ 2*P := by
+    simpa [P, w, hpow] using hlower
+  have htop' : 69*a + 15 ≤ R := by
+    simpa [a, R] using htop
   rw [weightedRectanglePrefix83]
-  have h3pos : 0 < (((3^q : Nat) : Int)) := by positivity
-  have h8pos : 0 < (((8^(N-1) : Nat) : Int)) := by positivity
-  have h3geom :
-      (((((3^q : Nat) : Int)) - 1) / 2) ≤
-        ((((3^q : Nat) : Int)) - 1) / 2 := by rfl
-  -- `omega`/`nlinarith` sees the exact geometric domination after the two
-  -- sharp row bounds are exposed.
+  change 0 < P + w*R
+  by_contra hnot
+  have hnonpos : P + w*R ≤ 0 := by omega
+  have htopW := mul_le_mul_of_nonneg_left htop'
+    (show (0 : Int) ≤ 2*w by positivity)
+  have hcombined :
+      (-15 : Int) * (8*a - 1) * (w - 1) +
+          (2*w) * (69*a + 15) ≤
+        2 * (P + w*R) := by
+    calc
+      (-15 : Int) * (8*a - 1) * (w - 1) +
+          (2*w) * (69*a + 15) ≤
+        2*P + (2*w)*R := add_le_add hlower' htopW
+      _ = 2 * (P + w*R) := by ring
+  have haw : 0 < a*w := mul_pos ha hw
+  have hpositive :
+      0 < (-15 : Int) * (8*a - 1) * (w - 1) +
+          (2*w) * (69*a + 15) := by
+    nlinarith
   nlinarith
 
 /-- Literal wrapper on the main infinite GST V2 graph. -/
