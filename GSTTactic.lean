@@ -109,7 +109,7 @@ elab "gst_omega" : tactic => do
            | decreasing_trivial)
       | contradiction
       | omega
-      | (simp_all only [GSTResidualBoundary, GSTOmegaChildZeroSet,
+      | (simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary, GSTOmegaChildZeroSet,
             GSTOmegaBadSet, GSTOmegaBadBlock, GSTSeededAffineBadTrace,
             Set.mem_setOf_eq]
          <;> first | contradiction | omega | aesop)
@@ -163,26 +163,19 @@ macro_rules
 
 elab "gst_end" : tactic => do
   Lean.Elab.Tactic.evalTactic (← `(tactic|
-    -- Try approach 1: find ¬ GSTNavigationWitness and GSTNavigationWitness of the same object
     first
       | (apply_assumption)
       | (exact absurd (by assumption) (by assumption))
-      -- Try approach 2: use the gate polynomial structure
       | (simp only [GSTOmegaGatePolynomial, gstOmega, gstDigit, gstCarry,
             gstNavigationConstant, Nat.pow_one, Nat.add_mod, Nat.mul_mod,
             Nat.mod_mod, Nat.div_one, Nat.pow_zero] <;>
          omega)
-      -- Try approach 3: unfold everything and let omega handle it
       | (simp only [GSTOmegaInfiniteBadTrace, GSTOmegaGatePolynomial,
             gstOmega, GSTOmegaState.parentDigit, GSTOmegaState.parentCarry,
             gstDigit, gstCarry, gstNavigationConstant,
             gstAffineMulCarry, Nat.pow_one, Nat.add_mod, Nat.mul_mod,
             Nat.mod_mod, Nat.div_one, Nat.pow_zero,
-            GSTNavigationWitness, gstDigit, gstCarry,
-            gstCompleteBadTrace, GSTBadPair] <;>
+            Set.mem_setOf_eq] at * <;>
          omega)
-      -- Try approach 4: classical reasoning with all hypotheses
-      | (by_contra hcontra <;> simp at hcontra <;> omega)
-      -- Try approach 5: use first | omega | assumption to close any remaining goal
-      | (first | omega | assumption | exact absurd (by assumption) (by assumption))
+      | (first | contradiction | omega | aesop)
   ))
