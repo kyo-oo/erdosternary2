@@ -10,9 +10,8 @@ needle = '''  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physicall
   gst_end
 '''
 
-replacement = '''  -- Direct residual bridge probe.  First recover the exact generalized
-  -- Omega bad trace from the already-proved absence of a parent Navigation
-  -- witness.  This does not use the quarantined residual termination theorem.
+replacement = '''  -- Direct residual bridge: recover generalized parent badness without any
+  -- quarantined residual theorem.
   have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by
     intro j
     change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0
@@ -21,17 +20,10 @@ replacement = '''  -- Direct residual bridge probe.  First recover the exact gen
     rw [hparentArg]
     exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
 
-  -- Normalize the child level once.  Here k = r+1, hence s+k = s+1+r.
-  -- Keeping this as an explicit kernel equality avoids relying on elaborator
-  -- associativity during every downstream application.
   have hchildCoreK :
       GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
     simpa [k, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hchildCore
 
-  -- Keep the actual child gate and every exact coupled coordinate live.  This
-  -- is the minimal context used by the old arithmetic solver, but here it is
-  -- reconstructed directly at the production seam rather than importing any
-  -- quarantined residual theorem.
   obtain ⟨j, hj⟩ :=
     gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchildCoreK
   have hbadChild := hResidualBad j
@@ -45,10 +37,33 @@ replacement = '''  -- Direct residual bridge probe.  First recover the exact gen
     gst_omega_infiniteBadTrace_blocks s k m hResidualBad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
 
-  -- RED probe: if the current exact arithmetic context already closes, this
-  -- produces an ordinary kernel term.  Otherwise CI reports the irreducible
-  -- residual context and we refine only that branch.
-  gst_omega
+  -- Split the exact residual classifier before doing any local arithmetic.
+  -- This prevents the unbounded first-level family from exploding simp in the
+  -- bounded level-three/stable young-cut cases.
+  rcases hboundary with hfirst | hthree | hstable
+  · rcases hfirst with ⟨hs1, hr1 | hr2⟩
+    · subst s
+      have hm1 : m % 3 = 1 := hr1
+      -- HARD FAMILY: first level, residue one, arbitrary cascade depth.
+      -- Keep a compiler-visible marker so the next RED result is unambiguous.
+      trace_state
+      gst_omega
+    · rcases hr2 with ⟨hm2, hk1 | hk3⟩
+      · subst s
+        have hk_eq : k = 1 := hk1
+        have hm2' : m % 3 = 2 := hm2
+        subst k
+        gst_omega
+      · subst s
+        have hk_eq : k = 3 := hk3
+        have hm2' : m % 3 = 2 := hm2
+        subst k
+        gst_omega
+  · rcases hthree with ⟨hs3, hk7, hne2, hne4, hne6⟩
+    subst s
+    interval_cases k <;> gst_omega
+  · rcases hstable with ⟨hs2, hsne3, hk4, hne2⟩
+    interval_cases k <;> gst_omega
 '''
 
 if needle not in s:
@@ -56,4 +71,4 @@ if needle not in s:
 
 s = s.replace(needle, replacement, 1)
 p.write_text(s, encoding='utf-8')
-print('installed direct residual bridge probe')
+print('installed boundary-split residual bridge probe')
