@@ -79,7 +79,6 @@ theorem pow4_scaled_mod_next (r u : Nat) :
     have h3 : 3^1 ≤ 3^(r+1) :=
       Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
     norm_num at h3 ⊢
-    omega
   have hbase : (1 + 3^(r+1) * lteCoeff r) % 3^(r+1) = 1 := by
     simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hMgt1]
   simpa [hbase, Nat.mod_eq_of_lt hMgt1]
