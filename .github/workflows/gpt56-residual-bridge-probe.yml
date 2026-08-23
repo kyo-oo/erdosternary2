@@ -32,16 +32,17 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Install direct residual bridge probe
+      - name: Install whole-theorem BIG-N surgery
         shell: bash
         run: |
           python3 scripts/apply_residual_bridge_probe.py
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'literal gst_end survived residual bridge transformation'
+            echo 'literal gst_end survived whole-theorem transformation'
             exit 1
           fi
-          grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
-          grep -n 'have hchildCoreK' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
+          grep -n 'GSTCanonicalRightChordTrapS A z T' ErdosTernary2.lean
+          grep -n 'gst_shared_x4_binary_factor_last_gate_high_bitS' ErdosTernary2.lean
       - name: Compile transformed production monolith
         shell: bash
         run: |
@@ -65,3 +66,9 @@ jobs:
               raise SystemExit('transformed production source audit failed')
           print('transformed production source audit: clean')
           PY
+      - name: Run official comparator
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee comparator-whole-theorem.log
+          grep -q 'Your solution is okay!' comparator-whole-theorem.log
