@@ -53,6 +53,12 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
           lake env lean GSTGraphV2InfiniteControlSmoke.lean
 
+      - name: Compile canonical phase-density experiment
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTU2DCanonicalPhaseDensity.olean GSTU2DCanonicalPhaseDensity.lean
+
       - name: Compile perfect-power ancestry surgery
         shell: bash
         run: |
@@ -92,6 +98,7 @@ jobs:
               Path('GSTU2DEventTransport.lean'),
               Path('GSTU2DExactCrossingCharge.lean'),
               Path('GSTU2DSharpCrossingBlock.lean'),
+              Path('GSTU2DCanonicalPhaseDensity.lean'),
               Path('GSTCanonicalSevenAxisBridge.lean'),
               Path('GSTGraphV2InfiniteControl.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
