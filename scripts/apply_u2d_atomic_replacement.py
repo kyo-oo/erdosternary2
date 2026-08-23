@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import re
 
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
+
+raw_lines = len(s.splitlines())
+raw_theorems = len(re.findall(r'(?m)^\s*(?:private\s+)?theorem\s+', s))
+raw_defs = len(re.findall(r'(?m)^\s*(?:noncomputable\s+)?def\s+', s))
+print(f'PRODUCTION_STATS raw_lines={raw_lines} raw_theorems={raw_theorems} raw_defs={raw_defs}')
 
 # Keep the existing production proof and splice only the true residual seam.
 # The unified graph / rectangle modules are compiled independently by CI and
@@ -33,9 +39,9 @@ if needle not in s:
         raise SystemExit(0)
     raise SystemExit('literal residual gst_end seam not found')
 
-replacement = r'''  -- Atomic residual-only surgery.  The proof above has already removed every
-  -- GSTOriginClosed branch.  Reindex the no-parent statement to the exact
-  -- residual Ω(s,k,m) world and discharge only GSTResidualBoundary.
+replacement = r'''  -- Atomic infinite-graph surgery.  The proof above has already removed every
+  -- origin state that closes immediately.  Reindex the no-parent statement
+  -- to the exact residual Ω(s,k,m) graph; no terminal/support argument enters.
   have hnoResidual :
       ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) := by
     intro hparentCore
@@ -89,8 +95,8 @@ replacement = r'''  -- Atomic residual-only surgery.  The proof above has alread
 
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
 
-  -- Expose the exact finite residual decision surface.  No global simp/aesop:
-  -- each branch is now a concrete s/k/residue geometry for the unified graph.
+  -- TEMPORARY RED ENDPOINT: this is the one infinite-graph closure now being
+  -- replaced by the conserved perfect-power block transfer theorem.
   rcases hboundary with hS1 | hS3 | hStable
   · rcases hS1 with ⟨hs1, hcase⟩
     subst s
@@ -110,4 +116,8 @@ replacement = r'''  -- Atomic residual-only surgery.  The proof above has alread
 
 s = s.replace(needle, replacement, 1)
 p.write_text(s, encoding='utf-8')
+transformed_lines = len(s.splitlines())
+transformed_theorems = len(re.findall(r'(?m)^\s*(?:private\s+)?theorem\s+', s))
+transformed_defs = len(re.findall(r'(?m)^\s*(?:noncomputable\s+)?def\s+', s))
+print(f'PRODUCTION_STATS transformed_lines={transformed_lines} transformed_theorems={transformed_theorems} transformed_defs={transformed_defs}')
 print('installed residual-only unified Graph-V2 atomic surgery')
