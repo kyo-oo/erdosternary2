@@ -235,8 +235,8 @@ theorem density83_rectangle_exact
       have hrw := congrArg
         (fun x : Int => (((3^p : Nat) : Int)) * x) hr
       dsimp [g]
-      simpa [mul_add, mul_sub, Nat.add_comm, mul_assoc, mul_comm,
-        mul_left_comm] using hrw
+      ring_nf at hrw ⊢
+      exact hrw
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
