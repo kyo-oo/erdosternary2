@@ -38,12 +38,13 @@ theorem perfect_power_u_mul_div_exact (t n : Nat) :
     4^(3^t * n) =
       4^(3^t * originTrit n) *
         4^(3^(t+1) * originTail n) := by
+  have hs := origin_split_exact n
   have hexp :
       3^t * n =
         3^t * originTrit n + 3^(t+1) * originTail n := by
     calc
-      3^t * n = 3^t * (originTrit n + 3 * originTail n) := by
-        rw [origin_split_exact n]
+      3^t * n = 3^t * (originTrit n + 3 * originTail n) :=
+        congrArg (fun x : Nat => 3^t * x) hs
       _ = 3^t * originTrit n + 3^(t+1) * originTail n := by
         rw [Nat.pow_succ]
         ring
@@ -88,9 +89,17 @@ theorem residual_parent_u_mul_div_exact (s k m : Nat) :
     4^(residualParentExponent s k m) =
       (4^(3^s) * 4^(3^(s+k) * originTrit m)) *
         4^(3^(s+k+1) * originTail m) := by
-  rw [← residual_parent_energy_exact s k m,
-      residual_energy_u_mul_div_exact s k m]
-  ring
+  calc
+    4^(residualParentExponent s k m) =
+        4^(residualWidth s) * residualEnergy s k m :=
+      (residual_parent_energy_exact s k m).symm
+    _ = 4^(3^s) *
+        (4^(3^(s+k) * originTrit m) *
+          4^(3^(s+k+1) * originTail m)) := by
+      rw [residualWidth, residual_energy_u_mul_div_exact]
+    _ = (4^(3^s) * 4^(3^(s+k) * originTrit m)) *
+        4^(3^(s+k+1) * originTail m) := by
+      ac_rfl
 
 /-- Full Graph-V2 realization of the same identity.  Every physical observable
 at the alleged all-bad right boundary is literally the absolute perfect-power
@@ -119,7 +128,8 @@ theorem residual_parent_observables_exact
     unfold residualChildExponent residualWidth residualParentExponent
     rw [Nat.pow_add]
     ring
-  simpa [residualEnergy, residualChildExponent, hexp] using h
+  rw [hexp] at h
+  simpa [residualEnergy, residualChildExponent] using h
 
 /-- Happy/event-eight transport at the actual residual parent boundary. -/
 theorem residual_parent_happy_iff
