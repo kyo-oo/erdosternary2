@@ -83,16 +83,11 @@ theorem nat_lt_of_add_one_le (n m : Nat) (h : n + 1 ≤ m) : n < m := by omega
 theorem nat_lt_succ_of_le' (n m : Nat) (h : n ≤ m) : n < m + 1 := by omega
 
 /-!
-`gst_omega` has two jobs.
-
-1. Preserve the original decreasing-goal solver used by recursive GST definitions.
-2. At the residual Ω seam, stop treating `False` like a termination side-goal:
-   normalize the finite residual boundary and all already-certified local state,
-   then let `aesop`/`omega` combine those kernel lemmas.
-
-The second phase deliberately contains no axiom, `sorry`, `native_decide`, or
-unsafe escape hatch.  It only composes declarations already present at the
-call site, so every success still produces an ordinary kernel proof term.
+`gst_omega` keeps the original decreasing-goal solver and a deliberately
+small residual arithmetic normalizer.  During final surgery it does not call
+Aesop: if the listed kernel equalities and Presburger arithmetic do not close
+a residual branch, Lean must leave that branch visible rather than hiding it
+behind unbounded proof search.
 -/
 elab "gst_omega" : tactic => do
   Lean.Elab.Tactic.evalTactic (← `(tactic|
@@ -112,8 +107,7 @@ elab "gst_omega" : tactic => do
       | (simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary, GSTOmegaChildZeroSet,
             GSTOmegaBadSet, GSTOmegaBadBlock, GSTSeededAffineBadTrace,
             Set.mem_setOf_eq]
-         <;> first | contradiction | omega | aesop)
-      | (aesop (add safe (by omega)))
+         <;> first | contradiction | omega | skip)
   ))
 
 syntax "gst_carry_cases " ident : tactic
@@ -145,22 +139,7 @@ macro_rules
 
 /-!
   ## gst_end — the final closing tactic for the RED incision
-
-  This tactic closes the goal `⊢ False` when the context contains:
-  - hBad : GSTOmegaInfiniteBadTrace s 1 n
-  - hnoParent : ¬ GSTNavigationWitness (gstNavigationConstant s (1+3*n))
-  - hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n) (or scaled variant)
-
-  Strategy:
-  1. If hnoParent is in scope, derive a parent Navigation witness from hchild
-     via the Omega projection, then apply hnoParent to get False.
-  2. If that fails, try: use the inverse theorem
-     gst_prefix_one_omega_bad_of_no_parent_navigation_inline to get a
-     contradiction between hnoParent and the gate polynomial.
-  3. If that fails, try: apply the bridge consumer with a classical bridge.
-  4. Final fallback: use all hypotheses to find any contradiction.
 -/
-
 elab "gst_end" : tactic => do
   Lean.Elab.Tactic.evalTactic (← `(tactic|
     first
@@ -177,5 +156,5 @@ elab "gst_end" : tactic => do
             Nat.mod_mod, Nat.div_one, Nat.pow_zero,
             Set.mem_setOf_eq] at * <;>
          omega)
-      | (first | contradiction | omega | aesop)
+      | (first | contradiction | omega)
   ))
