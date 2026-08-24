@@ -43,7 +43,8 @@ theorem digit_prefix_value (N K : Nat) :
     Finset.sum (Finset.range K) (fun k => 3^k * digit N k) = N % 3^K := by
   induction K with
   | zero =>
-      simp [digit, Nat.mod_one]
+      change 0 = N % 1
+      exact (Nat.mod_one N).symm
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       unfold digit
