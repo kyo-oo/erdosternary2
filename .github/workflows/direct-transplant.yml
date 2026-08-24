@@ -1,0 +1,91 @@
+name: SOL56 Direct Transplant Only
+
+on:
+  pull_request:
+    branches:
+      - sol/sol56-transplant-only-base-20260824
+
+permissions:
+  contents: write
+
+jobs:
+  transplant:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
+      - name: Edit production monolith
+        shell: bash
+        run: |
+          python3 scripts/run_final_infinite_monolith_transplant.py
+          sed -n '/theorem gst_prefix_one_information_bad_descends_inline/,/Corrected information-wave closure/p' ErdosTernary2.lean > /tmp/transplanted-theorem.txt
+          grep -F 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' /tmp/transplanted-theorem.txt
+          if grep -F 'let r := v3 n' /tmp/transplanted-theorem.txt; then
+            echo 'old classifier survived'
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'gst_end survived'
+            exit 1
+          fi
+
+      - name: Persist edited ErdosTernary2.lean
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ErdosTernary2.lean
+          git diff --cached --quiet && { echo 'MONOLITH_ALREADY_TRANSPLANTED'; exit 0; }
+          git commit -m "Direct whole-theorem transplant into ErdosTernary2 [skip ci]"
+          git push origin HEAD:sol/sol56-final-residual-production-green-20260824
+
+      - name: Install Lean 4.33.0-rc2
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile edited monolith
+        id: lean
+        continue-on-error: true
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .surgery
+          set +e
+          lake build GSTTactic ErdosTernary2 > .surgery/direct-transplant-build.txt 2>&1
+          rc=$?
+          set -e
+          cat .surgery/direct-transplant-build.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Run official comparator
+        id: cmp
+        if: steps.lean.outputs.rc == '0'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          bash scripts/comparator.sh > .surgery/direct-transplant-comparator.txt 2>&1
+          rc=$?
+          set -e
+          cat .surgery/direct-transplant-comparator.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce
+        shell: bash
+        run: |
+          test "${{ steps.lean.outputs.rc }}" = "0"
+          test "${{ steps.cmp.outputs.rc }}" = "0"
+          grep -F 'Your solution is okay!' .surgery/direct-transplant-comparator.txt
