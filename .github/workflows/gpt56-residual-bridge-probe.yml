@@ -34,17 +34,17 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Install whole-theorem BIG-N surgery
+      - name: Install exact residual bridge probe
         shell: bash
         run: |
           python3 scripts/apply_residual_bridge_probe.py
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'literal gst_end survived whole-theorem transformation'
+            echo 'literal gst_end survived residual transformation'
             exit 1
           fi
-          grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
-          grep -n 'GSTCanonicalRightChordTrapS A z T' ErdosTernary2.lean
-          grep -n 'gst_shared_x4_binary_factor_last_gate_high_bitS' ErdosTernary2.lean
+          grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
+          grep -n 'have hchildResidual :' ErdosTernary2.lean
+          grep -n 'gst_omega_childZeroSet_nonempty_of_navigation_witness' ErdosTernary2.lean
       - name: Compile, audit, comparator, and persist exact diagnostic
         shell: bash
         run: |
@@ -58,7 +58,7 @@ jobs:
             {
               echo "HEAD=$(git rev-parse HEAD)"
               echo "BUILD_RC=$build_rc"
-              echo "=== WHOLE THEOREM BUILD ERRORS / TRACE ==="
+              echo "=== RESIDUAL BUILD ERRORS / TRACE ==="
               grep -nE 'error:|case |⊢|trace_state|gst_prefix_one_information_bad_descends_inline|warning: ErdosTernary2.lean:16[7-9][0-9][0-9]' whole-theorem-build.log | tail -n 500 || true
               echo "=== TAIL ==="
               tail -n 320 whole-theorem-build.log
@@ -66,7 +66,7 @@ jobs:
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add .surgery/gpt56-whole-theorem-diagnostic.txt
-            git commit -m 'Record whole-theorem BIG-N compiler diagnostic [skip ci]' || true
+            git commit -m 'Record residual bridge compiler diagnostic [skip ci]' || true
             git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
             cat .surgery/gpt56-whole-theorem-diagnostic.txt
             exit "$build_rc"
@@ -103,7 +103,7 @@ jobs:
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add .surgery/gpt56-whole-theorem-diagnostic.txt
-            git commit -m 'Record whole-theorem comparator diagnostic [skip ci]' || true
+            git commit -m 'Record residual bridge comparator diagnostic [skip ci]' || true
             git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
             cat .surgery/gpt56-whole-theorem-diagnostic.txt
             exit 1
@@ -116,8 +116,8 @@ jobs:
             echo "Your solution is okay!"
           } > .surgery/gpt56-whole-theorem-diagnostic.txt
           git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add .surgery/gpt56-whole-theorem-diagnostic.txt
-          git commit -m 'Record whole-theorem comparator GREEN [skip ci]' || true
+          git commit -m 'Record residual bridge comparator GREEN [skip ci]' || true
           git push origin HEAD:sol/gpt56-final-perfect-power-block-20260823 || true
           cat .surgery/gpt56-whole-theorem-diagnostic.txt
