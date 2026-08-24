@@ -161,11 +161,17 @@ theorem coupledStep_parentWord_div_three
   have hY : st.childTail = r + 3 * (st.childTail / 3) := by
     dsimp [r]
     exact (Nat.mod_add_div st.childTail 3).symm
+  have hmul :
+      A * st.childTail = A * r + 3 * (A * (st.childTail / 3)) := by
+    calc
+      A * st.childTail = A * (r + 3 * (st.childTail / 3)) :=
+        congrArg (fun x : Nat => A * x) hY
+      _ = A * r + 3 * (A * (st.childTail / 3)) := by ring
   have hshape :
       st.parentOffset + A * st.childTail =
         (st.parentOffset + A * r) + 3 * (A * (st.childTail / 3)) := by
-    rw [hY]
-    ring
+    rw [hmul]
+    omega
   change (st.parentOffset + A * r) / 3 + A * (st.childTail / 3) =
     (st.parentOffset + A * st.childTail) / 3
   rw [hshape]
@@ -219,7 +225,6 @@ theorem coupledOrbit_childCarry_exact
   | zero =>
       change initial.childCarry = 4 * (initial.childTail % 1) / 1
       rw [hC0, Nat.mod_one]
-      norm_num
   | succ K ih =>
       rw [coupledOrbit]
       change cellNextCarry (coupledOrbit A initial K).childCarry
