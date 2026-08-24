@@ -38,6 +38,8 @@ anchor = 'import GSTFinalPurePowerResidueTransplant\n'
 extra = '''import GSTFinalPurePowerResidueTransplant
 import PurePowerResidueGraphScratch
 import InformationQuotientScratch
+import InformationIterationScratch
+import HorizontalTrapWidthDescentScratch
 import PhaseCycleInformationScratch
 import CanonicalCausalityScratch
 import CanonicalOriginModulusScratch
