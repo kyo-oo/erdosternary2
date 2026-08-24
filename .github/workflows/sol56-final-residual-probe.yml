@@ -1,133 +1,14 @@
-name: SOL56 Direct Monolith Transplant
+name: SOL56 Direct Monolith Transplant (manual legacy lane)
 
+# FINAL RUN LOCK: automatic execution disabled.
+# The only active writer/compiler is sol56-atomic-monolith-only.yml.
 on:
-  push:
-    branches:
-      - sol/sol56-final-residual-production-green-20260824
-  pull_request:
-    branches:
-      - sol/sol56-base-perfect-power-78b-20260824
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
-concurrency:
-  group: sol56-direct-monolith-transplant
-  cancel-in-progress: true
-
-permissions:
-  contents: write
-
 jobs:
-  transplant-compile-compare:
+  legacy-disabled:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: sol/sol56-final-residual-production-green-20260824
-          fetch-depth: 1
-
-      - name: Physically absorb local theorem closure into ErdosTernary2.lean
-        shell: bash
-        run: |
-          python3 scripts/run_final_infinite_monolith_transplant.py
-          grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
-          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'gst_end survived direct monolith transplant'
-            exit 1
-          fi
-
-      - name: Persist physically edited ErdosTernary2.lean
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ErdosTernary2.lean
-          if ! git diff --cached --quiet; then
-            git commit -m "Physically absorb local theorem closure into ErdosTernary2 [skip ci]"
-            git push origin HEAD:sol/sol56-final-residual-production-green-20260824
-          fi
-
-      - name: Install Lean 4.33.0-rc2
-        shell: bash
-        run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-
-      - name: Resolve Mathlib
-        shell: bash
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          rm -f lake-manifest.json
-          lake update
-          lake exe cache get
-
-      - name: Compile edited monolith directly
-        id: monolith
-        continue-on-error: true
-        shell: bash
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          mkdir -p .surgery
-          set +e
-          lake build GSTTactic ErdosTernary2 > .surgery/sol56-current-monolith-build.txt 2>&1
-          rc=$?
-          set -e
-          echo "MONOLITH_RC=$rc" | cat - .surgery/sol56-current-monolith-build.txt > .surgery/.tmp
-          mv .surgery/.tmp .surgery/sol56-current-monolith-build.txt
-          cat .surgery/sol56-current-monolith-build.txt
-          echo "rc=$rc" >> "$GITHUB_OUTPUT"
-
-      - name: Audit edited monolith
-        if: steps.monolith.outputs.rc == '0'
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p = Path('ErdosTernary2.lean')
-          bad=[]
-          for i,line in enumerate(p.read_text(encoding='utf-8').splitlines(),1):
-              stripped = line.strip()
-              if line.lstrip().startswith('--'):
-                  continue
-              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line) or stripped == 'gst_end':
-                  bad.append(f'{i}:{line}')
-          if bad:
-              print('\n'.join(bad))
-              raise SystemExit(1)
-          print('MONOLITH_AUDIT_CLEAN')
-          PY
-
-      - name: Run official comparator
-        id: comparator
-        if: steps.monolith.outputs.rc == '0'
-        continue-on-error: true
-        shell: bash
-        run: |
-          set +e
-          bash scripts/comparator.sh > .surgery/sol56-current-comparator.txt 2>&1
-          rc=$?
-          set -e
-          cat .surgery/sol56-current-comparator.txt
-          echo "rc=$rc" >> "$GITHUB_OUTPUT"
-
-      - name: Persist current monolith diagnostics
-        if: always()
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin sol/sol56-final-residual-production-green-20260824 || true
-          git add .surgery/sol56-current-monolith-build.txt || true
-          git add .surgery/sol56-current-comparator.txt || true
-          if ! git diff --cached --quiet; then
-            git commit -m "Record current transplanted monolith diagnostics [skip ci]"
-            git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
-          fi
-
-      - name: Require green monolith and comparator
-        shell: bash
-        run: |
-          test "${{ steps.monolith.outputs.rc }}" = "0"
-          test "${{ steps.comparator.outputs.rc }}" = "0"
-          grep -F 'Your solution is okay!' .surgery/sol56-current-comparator.txt
+      - run: |
+          echo 'Legacy direct-transplant lane intentionally disabled during FINAL RUN.'
+          echo 'Use SOL56 Atomic Monolith Only.'
