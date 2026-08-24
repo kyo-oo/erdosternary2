@@ -18,6 +18,26 @@ if original_bytes < MIN_MONOLITH_BYTES:
         f'refusing transplant into truncated ErdosTernary2.lean: {original_bytes} bytes'
     )
 
+# Concurrent historical surgery runs may have attached the same source packet
+# more than once. Normalize the physical monolith first: exactly one packet per
+# source filename, preserving the first complete body and deleting later copies.
+packet_re = re.compile(
+    r'(?ms)^-- BEGIN ATTACHED (?P<name>[^\n]+\.lean)\s*\n'
+    r'.*?^-- END ATTACHED (?P=name)\s*\n?'
+)
+packet_names_seen = set()
+duplicate_packets_removed = []
+
+def dedupe_packet(match):
+    name = match.group('name')
+    if name in packet_names_seen:
+        duplicate_packets_removed.append(name)
+        return ''
+    packet_names_seen.add(name)
+    return match.group(0)
+
+s = packet_re.sub(dedupe_packet, s)
+
 
 def source_path(mod: str):
     if mod in PRESERVE_IMPORTS or mod == 'ErdosTernary2':
@@ -25,7 +45,6 @@ def source_path(mod: str):
     rel = Path(*mod.split('.')).with_suffix('.lean')
     if rel.exists() and rel != MONOLITH:
         return rel
-    # The locked Aug-18 branch contains later branch-unique surgery modules.
     snap = SNAPSHOT_ROOT / rel.name
     if snap.exists():
         return snap
@@ -48,16 +67,12 @@ def packet_end(path: Path):
     return f'-- END ATTACHED {path.name}'
 
 
-# The current monolith already carries many Aug-15/Aug-18 scratch modules as
-# physical source packets.  Keep those bodies and only attach missing local
-# dependencies.  This is deliberately not a module-by-module compilation lane.
 existing_packet_names = set(
     re.findall(r'(?m)^-- BEGIN ATTACHED ([^\n]+\.lean)\s*$', s)
 )
 
-# Collect every local module imported by the monolith.  Repeated historical
-# import lines collapse to one root; their whole local dependency closure is
-# transplanted as source.
+# Every local import becomes literal source in the monolith. Repeated imports
+# collapse to one dependency root and dependencies are topologically ordered.
 root_modules = []
 for mod in imports_of(s):
     if source_path(mod) is not None and mod not in root_modules:
@@ -80,8 +95,6 @@ def visit(mod: str):
     text = path.read_text(encoding='utf-8')
     for dep in imports_of(text):
         if dep == 'ErdosTernary2':
-            # Source is being inserted after the monolith core and before the
-            # production seam, so a historical back-import becomes unnecessary.
             continue
         if source_path(dep) is not None:
             visit(dep)
@@ -93,8 +106,7 @@ def visit(mod: str):
 for root in root_modules:
     visit(root)
 
-# Remove every local import that is now supplied as literal source.  External
-# Mathlib imports and GSTTactic remain normal imports.
+
 def remove_local_import(match):
     mod = match.group(1)
     if source_path(mod) is not None:
@@ -107,9 +119,8 @@ s = re.sub(
     s,
 )
 
-# Attach only bodies that are not already physically present.  Dependencies are
-# ordered first.  All source-level imports are stripped because the dependency
-# bodies are now in the same Lean file.
+# Attach only bodies not already in the physical monolith. All source-level
+# imports are stripped because their dependency bodies are in this same file.
 packets = []
 new_packet_names = []
 for mod, path in order:
@@ -124,6 +135,7 @@ for mod, path in order:
         f'{packet_end(path)}\n'
     )
     new_packet_names.append(path.name)
+    existing_packet_names.add(path.name)
 
 if s.count(TARGET) != 1:
     raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
@@ -131,7 +143,6 @@ insert_at = s.index(TARGET)
 if packets:
     s = s[:insert_at] + ''.join(packets) + '\n' + s[insert_at:]
 
-# Recompute the surgical region after source absorption.
 if s.count(TARGET) != 1:
     raise SystemExit('production theorem multiplicity changed during source absorption')
 start = s.index(TARGET)
@@ -245,7 +256,6 @@ s2 = s[:start] + replacement + s[end:]
 if re.search(r'(?m)^\s*gst_end\s*$', s2):
     raise SystemExit('gst_end survived final theorem transplant')
 
-# Old five-case residual body must be physically absent from this theorem.
 region_end = s2.find(TARGET_END, start)
 region = s2[start:region_end]
 for forbidden in (
@@ -257,12 +267,19 @@ for forbidden in (
     if forbidden in region:
         raise SystemExit(f'old residual body survived direct transplant: {forbidden}')
 
-# Every local import removed from the monolith must now have a physical packet.
 remaining_local_imports = [
     mod for mod in imports_of(s2) if source_path(mod) is not None
 ]
 if remaining_local_imports:
     raise SystemExit(f'local imports survived physical transplant: {remaining_local_imports}')
+
+# Final physical-packet multiplicity audit: no attached module may occur twice.
+final_packet_names = re.findall(
+    r'(?m)^-- BEGIN ATTACHED ([^\n]+\.lean)\s*$', s2
+)
+if len(final_packet_names) != len(set(final_packet_names)):
+    dupes = sorted({n for n in final_packet_names if final_packet_names.count(n) > 1})
+    raise SystemExit(f'duplicate source packets survived normalization: {dupes}')
 
 final_bytes = len(s2.encode('utf-8'))
 if final_bytes < MIN_MONOLITH_BYTES:
@@ -277,6 +294,9 @@ if written != s2 or len(written.encode('utf-8')) < MIN_MONOLITH_BYTES:
 
 print(f'DIRECT_MONOLITH_INPUT_BYTES={original_bytes}')
 print(f'DIRECT_MONOLITH_OUTPUT_BYTES={len(written.encode("utf-8"))}')
+print(f'DUPLICATE_PACKETS_REMOVED={len(duplicate_packets_removed)}')
+for name in duplicate_packets_removed:
+    print(f'REMOVED_DUPLICATE_SOURCE={name}')
 print(f'LOCAL_IMPORT_ROOTS={len(root_modules)}')
 print(f'LOCAL_DEPENDENCY_CLOSURE={len(order)}')
 print(f'NEW_SOURCE_PACKETS={len(new_packet_names)}')
@@ -287,4 +307,4 @@ for i, line in enumerate(written.splitlines(), 1):
         print(f'TRANSPLANT_TARGET_START={i}')
     if 'Exact recovered RED frontier.' in line:
         print(f'TRANSPLANT_RED_FRONTIER={i}')
-print('DIRECT_MONOLITH_TRANSPLANT=LOCAL_DEPENDENCY_CLOSURE_ABSORBED')
+print('DIRECT_MONOLITH_TRANSPLANT=DEDUPED_LOCAL_DEPENDENCY_CLOSURE')
