@@ -33,8 +33,6 @@ if begin_marker in s:
 runpy.run_path('scripts/apply_final_infinite_monolith_transplant.py', run_name='__main__')
 
 # Make the exact copied theorem modules part of the live monolith itself.
-# Add missing imports individually so later transplant iterations can grow the
-# block without being frozen by imports persisted by an earlier iteration.
 s = p.read_text(encoding='utf-8')
 anchor = 'import GSTFinalPurePowerResidueTransplant\n'
 imports = [
@@ -48,6 +46,8 @@ imports = [
     'CanonicalOriginCutIntersectionScratch',
     'NavigationResidueCutScratch',
     'PrefixOneOriginPhaseRecursionScratch',
+    'GSTPrefixOnePhaseIncidenceControl',
+    'GSTPrefixOneSpacetimeIncidenceControl',
 ]
 if anchor not in s:
     raise SystemExit('transplanted import anchor not found')
@@ -59,6 +59,35 @@ for mod in imports:
 if insert != anchor:
     s = s.replace(anchor, insert, 1)
     print('TRANSPLANT: wired missing copied modules into ErdosTernary2.lean')
+
+# Install the original all-depth phase/spacetime packet at the live seam before
+# any v3 classifier reduction.  This consumes exactly hchild and hBad from the
+# theorem being proved.
+old_live = '''  apply gst_complete_bad_of_no_navigation
+  intro hchild
+
+  have hnoParent :
+'''
+new_live = '''  apply gst_complete_bad_of_no_navigation
+  intro hchild
+
+  -- Full Aug-22 phase/incidence transplant, applied to the original live state.
+  have hPhaseIncidence :=
+    gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
+  have hPhaseTable :=
+    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
+  have hPhaseCrossing :=
+    gpt56_prefix_one_exact_gate_horizontal_phase_crossing s n hs hn hchild hBad
+  have hPhaseEscape :=
+    gpt56_prefix_one_zero_phase_forces_next_escape s n hs hn hchild hBad
+  have hSpacetimeBoundary :=
+    GSTSpacetimeV2.canonical_full_energy_boundary_events s n hs hchild hBad
+
+  have hnoParent :
+'''
+if old_live not in s:
+    raise SystemExit('live hchild seam not found in generated monolith')
+s = s.replace(old_live, new_live, 1)
 
 # Replace the obsolete one-trit hard-family shortcut in the generated proof
 # body.  The live hard branch must retain all k-1 preceding zero origin trits.
@@ -94,7 +123,6 @@ new_cut = '''      -- Exact arbitrary-k cut: do not collapse 1+3^k*m to the one-
         exact gst_level_one_prefix_one_cut_digit_oneS k m hk2 hm1
 
       -- Align the literal transplanted A=64,D=9 strip with the live row.
-      -- qStrip retains the k-1 leading zero trits before the first nonzero m trit.
       let qStrip := (k-1) + q
       let Tstrip := 3^(k-1) * gstNavigationConstant (1+k) m
       let Hstrip := 2 + 64*Tstrip
@@ -119,4 +147,4 @@ if old_cut not in s:
 s = s.replace(old_cut, new_cut, 1)
 
 p.write_text(s, encoding='utf-8')
-print('TRANSPLANT: exact arbitrary-k hard-family cut installed in ErdosTernary2.lean')
+print('TRANSPLANT: phase/spacetime and arbitrary-k hard-family layers installed')
