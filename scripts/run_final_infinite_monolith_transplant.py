@@ -5,9 +5,19 @@ import re
 
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
+MIN_MONOLITH_BYTES = 300_000
+
+# Atomic-surgery guard: never operate on, or write back, a truncated monolith.
+if len(s.encode('utf-8')) < MIN_MONOLITH_BYTES:
+    raise SystemExit(
+        f'refusing direct transplant into truncated ErdosTernary2.lean: '
+        f'{len(s.encode("utf-8"))} bytes'
+    )
 
 start_marker = 'theorem gst_prefix_one_information_bad_descends_inline\n'
 end_marker = '\n/-- Corrected information-wave closure:'
+if s.count(start_marker) != 1:
+    raise SystemExit(f'expected exactly one production theorem start, found {s.count(start_marker)}')
 start = s.find(start_marker)
 if start < 0:
     raise SystemExit('production theorem start not found')
@@ -135,12 +145,26 @@ for forbidden in (
     if forbidden in region:
         raise SystemExit(f'old residual body survived direct transplant: {forbidden}')
 
+if len(s2.encode('utf-8')) < MIN_MONOLITH_BYTES:
+    raise SystemExit(
+        f'refusing to write truncated ErdosTernary2.lean: '
+        f'{len(s2.encode("utf-8"))} bytes'
+    )
+if s2.count('theorem gst_prefix_one_information_bad_descends_inline\n') != 1:
+    raise SystemExit('post-transplant theorem multiplicity check failed')
+
 p.write_text(s2, encoding='utf-8')
 
-lines = s2.splitlines()
+# Re-read the bytes we actually wrote before returning success.
+written = p.read_text(encoding='utf-8')
+if written != s2 or len(written.encode('utf-8')) < MIN_MONOLITH_BYTES:
+    raise SystemExit('post-write monolith integrity check failed')
+
+lines = written.splitlines()
 for i, line in enumerate(lines, 1):
     if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
         print(f'TRANSPLANT_TARGET_START={i}')
     if 'Exact recovered RED frontier:' in line:
         print(f'TRANSPLANT_RED_FRONTIER={i}')
+print(f'DIRECT_MONOLITH_BYTES={len(written.encode("utf-8"))}')
 print('DIRECT_MONOLITH_TRANSPLANT=WHOLE_THEOREM_REPLACED')
