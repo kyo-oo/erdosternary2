@@ -33,6 +33,11 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTV2InfiniteCore.olean GSTV2InfiniteCore.lean
+          lake env lean -o .lake/build/lib/lean/GSTInfiniteCollision.olean GSTInfiniteCollision.lean
+          lake env lean -o .lake/build/lib/lean/GSTInfiniteBadTransport.olean GSTInfiniteBadTransport.lean
+          lake env lean -o .lake/build/lib/lean/GSTInfiniteGateTransport.olean GSTInfiniteGateTransport.lean
+          lake env lean -o .lake/build/lib/lean/GSTInfiniteCoupledLedger.olean GSTInfiniteCoupledLedger.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUFlux.olean GSTGraphV2CoupledUFlux.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUPhysicalBridge.olean GSTGraphV2CoupledUPhysicalBridge.lean
           lake env lean -o .lake/build/lib/lean/GST2DMixedEmergence.olean GST2DMixedEmergence.lean
