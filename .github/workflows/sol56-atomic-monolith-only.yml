@@ -36,16 +36,92 @@ jobs:
         with:
           use-mathlib-cache: true
 
-      - name: Direct monolith build and comparator
-        id: verdict
+      - name: Discover exact local import closure
         if: always()
         shell: bash
         run: |
           mkdir -p .surgery
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          target = 'ErdosTernary2'
+          root = Path('.')
+          order = []
+          done = set()
+          active = []
+
+          def source_for(mod: str):
+              p = Path(*mod.split('.')).with_suffix('.lean')
+              return p if p.is_file() else None
+
+          def imports_of(mod: str):
+              p = source_for(mod)
+              if p is None:
+                  return []
+              text = p.read_text(encoding='utf-8')
+              return re.findall(r'(?m)^\s*import\s+([A-Za-z0-9_.]+)\s*$', text)
+
+          def visit(mod: str):
+              p = source_for(mod)
+              if p is None:
+                  return
+              if mod in done:
+                  return
+              if mod in active:
+                  cycle = ' -> '.join(active + [mod])
+                  raise SystemExit(f'LOCAL_IMPORT_CYCLE={cycle}')
+              if mod == target:
+                  cycle = ' -> '.join(active + [mod])
+                  raise SystemExit(f'MONOLITH_IMPORT_CYCLE={cycle}')
+              active.append(mod)
+              for dep in imports_of(mod):
+                  visit(dep)
+              active.pop()
+              done.add(mod)
+              order.append(mod)
+
+          for dep in imports_of(target):
+              visit(dep)
+
+          Path('.surgery/local_import_order.txt').write_text(
+              '\n'.join(order) + ('\n' if order else ''), encoding='utf-8')
+          print(f'LOCAL_IMPORT_COUNT={len(order)}')
+          print('\n'.join(order))
+          PY
+
+      - name: Direct dependency build, monolith build, comparator
+        id: verdict
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p .surgery .lake/build/lib/lean
           export PATH="$HOME/.elan/bin:$PATH"
+          : > .surgery/final_build.log
           set +e
-          lake build ErdosTernary2 > .surgery/final_build.log 2>&1
-          BUILD_RC=$?
+          DEP_RC=0
+          while IFS= read -r mod; do
+            [ -z "$mod" ] && continue
+            src="${mod//.//}.lean"
+            out=".lake/build/lib/lean/${mod//.//}.olean"
+            mkdir -p "$(dirname "$out")"
+            echo "=== LOCAL MODULE: $mod ===" | tee -a .surgery/final_build.log
+            lake env lean -o "$out" "$src" >> .surgery/final_build.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              echo "LOCAL_MODULE_FAILED=$mod RC=$rc" | tee -a .surgery/final_build.log
+              DEP_RC=$rc
+              break
+            fi
+          done < .surgery/local_import_order.txt
+
+          BUILD_RC=$DEP_RC
+          if [ "$DEP_RC" -eq 0 ]; then
+            echo '=== EDITED MONOLITH ===' | tee -a .surgery/final_build.log
+            lake build ErdosTernary2 >> .surgery/final_build.log 2>&1
+            BUILD_RC=$?
+          fi
+
           CMP_RC=99
           if [ "$BUILD_RC" -eq 0 ]; then
             bash scripts/comparator.sh > .surgery/final_comparator.log 2>&1
@@ -53,6 +129,7 @@ jobs:
           else
             printf '%s\n' 'COMPARATOR_SKIPPED_BECAUSE_MONOLITH_BUILD_FAILED' > .surgery/final_comparator.log
           fi
+
           GREEN=0
           if [ "$CMP_RC" -eq 0 ] && grep -Fq 'Your solution is okay!' .surgery/final_comparator.log; then
             GREEN=1
@@ -60,13 +137,16 @@ jobs:
           {
             echo "FINAL_RUN_HEAD=$(git rev-parse HEAD)"
             echo "LEAN_PREP_OUTCOME=${{ steps.leanprep.outcome }}"
+            echo "DEPENDENCY_BUILD_RC=$DEP_RC"
             echo "MONOLITH_BUILD_RC=$BUILD_RC"
             echo "COMPARATOR_RC=$CMP_RC"
             echo "GREEN_COMPARATOR=$GREEN"
+            echo '--- LOCAL IMPORT ORDER ---'
+            cat .surgery/local_import_order.txt
             echo '--- MONOLITH BUILD TAIL ---'
-            tail -n 220 .surgery/final_build.log
+            tail -n 260 .surgery/final_build.log
             echo '--- COMPARATOR TAIL ---'
-            tail -n 120 .surgery/final_comparator.log
+            tail -n 140 .surgery/final_comparator.log
           } > .surgery/FINAL_RUN_STATUS.txt
           cat .surgery/FINAL_RUN_STATUS.txt
           exit 0
@@ -77,7 +157,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ErdosTernary2.lean .surgery/final_transplant.log .surgery/final_build.log .surgery/final_comparator.log .surgery/FINAL_RUN_STATUS.txt
+          git add ErdosTernary2.lean .surgery/local_import_order.txt .surgery/final_transplant.log .surgery/final_build.log .surgery/final_comparator.log .surgery/FINAL_RUN_STATUS.txt
           if ! git diff --cached --quiet; then
             git commit -m "FINAL RUN: persist atomic monolith verdict [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824
@@ -87,6 +167,7 @@ jobs:
         if: always()
         shell: bash
         run: |
+          grep -F 'DEPENDENCY_BUILD_RC=0' .surgery/FINAL_RUN_STATUS.txt
           grep -F 'MONOLITH_BUILD_RC=0' .surgery/FINAL_RUN_STATUS.txt
           grep -F 'COMPARATOR_RC=0' .surgery/FINAL_RUN_STATUS.txt
           grep -F 'GREEN_COMPARATOR=1' .surgery/FINAL_RUN_STATUS.txt
