@@ -1,0 +1,26 @@
+name: SOL56 Atomic Monolith Only
+
+on:
+  push:
+    branches:
+      - sol/sol56-final-residual-production-green-20260824
+  workflow_dispatch:
+
+concurrency:
+  group: sol56-atomic-monolith-only
+  cancel-in-progress: true
+
+jobs:
+  monolith:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Apply seam-only transplant
+        run: python3 scripts/run_final_infinite_monolith_transplant.py
+      - name: Lean RC2 + Mathlib cache + build
+        uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+      - name: Comparator V5
+        shell: bash
+        run: bash scripts/comparator.sh
