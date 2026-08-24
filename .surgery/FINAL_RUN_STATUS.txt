@@ -1,4 +1,4 @@
-FINAL_RUN_HEAD=265a792e3d19450cc9169875735b3473f225be44
+FINAL_RUN_HEAD=88852dfe4b4cfe60cd28751232ca9a635e392523
 LEAN_PREP_OUTCOME=success
 DEPENDENCY_BUILD_RC=1
 MONOLITH_BUILD_RC=1
@@ -38,6 +38,7 @@ GSTGraphV2InfiniteControlScratch
 GSTGraphV2InfiniteBigNDichotomyScratch
 GSTGraphV2PhysicalSignedKernelTelescopeScratch
 GSTHandwrittenPhysicalNoBig1
+InformationDescentScratch
 GSTHandwrittenChildFirstBig1
 GSTHandwrittenHorizontalParentBridge
 GSTHandwrittenPrefixOneLivePackage
@@ -46,7 +47,6 @@ GSTHandwrittenBigNSignedKernel
 GSTCanonicalFirstGateControl
 GSTCanonicalEnergyControl
 GSTPrefixOnePhaseIncidenceControl
-InformationDescentScratch
 InformationGeometryScratch
 InformationStateScratch
 InformationBadTraceScratch
@@ -80,17 +80,6 @@ CanonicalCausalityScratch
 NavigationResidueCutScratch
 CanonicalOriginCutIntersectionScratch
 --- MONOLITH BUILD TAIL ---
-            (graph (canonicalEnergy s n) N p).seven.digit = (graph T (P + N) p).seven.digit ∧
-              graphUPotential T 0 (P + N) p = graphUPotential T P N p + ↑(4 ^ N) * graphUPotential T 0 P p
-'GSTGraphV2HandwrittenAnchoredCocycle.graph_u_equationIII_shifted_telescope' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-'GSTGraphV2HandwrittenAnchoredCocycle.graph_u_derivative_positive_of_child_happy_right_bad' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-'GSTGraphV2HandwrittenAnchoredCocycle.handwritten_u_anchored_cocycle_exact' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
 === LOCAL MODULE: GSTU2DPureDivergence83 ===
 GSTU2DPureDivergence83.density83_physical_table :
   density83 0 0 = -105 ∧
@@ -301,30 +290,41 @@ gpt56_physical_path_forces_first_big1 (R p : ℕ) (h0 : GSTPhysicalKernel.binary
 'gpt56_binary_residue_gap_doubles' depends on axioms: [propext, Quot.sound]
 'gpt56_physical_noBig1_impossible' depends on axioms: [propext, Quot.sound]
 'gpt56_physical_path_forces_first_big1' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: InformationDescentScratch ===
+InformationDescentScratch.lean:199:21: warning: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
 === LOCAL MODULE: GSTHandwrittenChildFirstBig1 ===
-GSTHandwrittenChildFirstBig1.lean:13:11: error: Function expected at
-  gstDigit
-but this term has type
-  ?m.1
-
-Note: Expected a function because this term is being applied to the argument
-  T
-
-Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
-GSTHandwrittenChildFirstBig1.lean:18:48: error: Invalid argument: Variable `gstDigit` is not a proposition or let-declaration
-GSTHandwrittenChildFirstBig1.lean:40:11: error: Function expected at
-  gstDigit
-but this term has type
-  ?m.1
-
-Note: Expected a function because this term is being applied to the argument
-  T
-
-Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
-GSTHandwrittenChildFirstBig1.lean:61:48: error: Invalid argument: Variable `gstDigit` is not a proposition or let-declaration
-gpt56_child_digit_two_forces_first_big1.{u_1} {x✝ : Sort u_1} {gstDigit : x✝} (T q : ℕ) (hd2 : sorry = 2) :
+GSTHandwrittenChildFirstBig1.lean:14:11: error: Ambiguous term
+  gstDigitS
+Possible interpretations:
+  _root_.gstDigitS T q : ℕ
+  
+  GSTInfiniteV2.gstDigitS T q : ℕ
+GSTHandwrittenChildFirstBig1.lean:19:48: error: Ambiguous term
+  gstDigitS
+Possible interpretations:
+  _root_.gstDigitS : ℕ → ℕ → ℕ
+  
+  GSTInfiniteV2.gstDigitS : ℕ → ℕ → ℕ
+GSTHandwrittenChildFirstBig1.lean:41:11: error: Ambiguous term
+  gstDigitS
+Possible interpretations:
+  _root_.gstDigitS T q : ℕ
+  
+  GSTInfiniteV2.gstDigitS T q : ℕ
+GSTHandwrittenChildFirstBig1.lean:62:48: error: Ambiguous term
+  gstDigitS
+Possible interpretations:
+  _root_.gstDigitS : ℕ → ℕ → ℕ
+  
+  GSTInfiniteV2.gstDigitS : ℕ → ℕ → ℕ
+gpt56_child_digit_two_forces_first_big1 (T q : ℕ) (hd2 : sorry = 2) :
   ∃ N, 1 ≤ N ∧ GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N
-gpt56_child_digit_two_forces_destroy_boundary.{u_1} {x✝ : Sort u_1} {gstDigit : x✝} (T q : ℕ) (hd2 : sorry = 2) :
+gpt56_child_digit_two_forces_destroy_boundary (T q : ℕ) (hd2 : sorry = 2) :
   ∃ N,
     1 ≤ N ∧
       GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
@@ -338,7 +338,7 @@ gpt56_child_digit_two_forces_destroy_boundary.{u_1} {x✝ : Sort u_1} {gstDigit 
                   (GSTPhysicalKernel.binaryColumnDigit T q j) =
                 5
 'gpt56_child_digit_two_forces_first_big1' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
-'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms: [propext, sorryAx]
+'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
 LOCAL_MODULE_FAILED=GSTHandwrittenChildFirstBig1 RC=1
 --- COMPARATOR TAIL ---
 COMPARATOR_SKIPPED_BECAUSE_MONOLITH_BUILD_FAILED
