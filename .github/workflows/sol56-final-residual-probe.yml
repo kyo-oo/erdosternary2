@@ -63,6 +63,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenOmegaUBlock.olean GSTGraphV2HandwrittenOmegaUBlock.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialCascade.olean GSTGraphV2HandwrittenExponentialCascade.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialLTE.olean GSTGraphV2HandwrittenExponentialLTE.lean
+          lake env lean -o .lake/build/lib/lean/GSTFinalPurePowerResidueTransplant.olean GSTFinalPurePowerResidueTransplant.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
