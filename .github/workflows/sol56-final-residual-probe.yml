@@ -72,7 +72,7 @@ jobs:
       - name: Apply bulk transplant directly to ErdosTernary2.lean
         shell: bash
         run: |
-          python3 scripts/apply_final_infinite_monolith_transplant.py
+          python3 scripts/run_final_infinite_monolith_transplant.py
           grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
             echo 'gst_end survived final transplant'
