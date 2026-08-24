@@ -1,23 +1,20 @@
-name: SOL56 Final Infinite Monolith Transplant
+name: SOL56 Direct Monolith Transplant
 
 on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
-  pull_request:
-    branches:
-      - sol/sol56-base-perfect-power-78b-20260824
   workflow_dispatch:
 
 concurrency:
-  group: sol56-final-infinite-monolith-transplant
+  group: sol56-direct-monolith-transplant
   cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  transplant-build-compare:
+  transplant-compile-compare:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -25,34 +22,34 @@ jobs:
           ref: sol/sol56-final-residual-production-green-20260824
           fetch-depth: 1
 
-      - name: Apply bulk transplant directly to ErdosTernary2.lean
+      - name: Transplant theorem body into ErdosTernary2.lean
         shell: bash
         run: |
           python3 scripts/run_final_infinite_monolith_transplant.py
           grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'gst_end survived final transplant'
+            echo 'gst_end survived direct monolith transplant'
             exit 1
           fi
 
-      - name: Persist transformed monolith itself
+      - name: Commit edited ErdosTernary2.lean
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ErdosTernary2.lean
           if ! git diff --cached --quiet; then
-            git commit -m "Transplant infinite Graph V2 stack into monolith [skip ci]"
+            git commit -m "Directly transplant Aug23 theorem body into ErdosTernary2 [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824
           fi
 
-      - name: Install pinned Lean
+      - name: Install Lean 4.33.0-rc2
         shell: bash
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Resolve pinned Mathlib
+      - name: Resolve Mathlib
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -60,76 +57,13 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile transplanted infinite dependency spine
-        shell: bash
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          mkdir -p .lake/build/lib/lean .surgery
-          lake env lean -o .lake/build/lib/lean/GSTV2InfiniteCore.olean GSTV2InfiniteCore.lean
-          lake env lean -o .lake/build/lib/lean/GSTInfiniteCollision.olean GSTInfiniteCollision.lean
-          lake env lean -o .lake/build/lib/lean/GSTInfiniteBadTransport.olean GSTInfiniteBadTransport.lean
-          lake env lean -o .lake/build/lib/lean/GSTInfiniteGateTransport.olean GSTInfiniteGateTransport.lean
-          lake env lean -o .lake/build/lib/lean/GSTInfiniteCoupledLedger.olean GSTInfiniteCoupledLedger.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUFlux.olean GSTGraphV2CoupledUFlux.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUPhysicalBridge.olean GSTGraphV2CoupledUPhysicalBridge.lean
-          lake env lean -o .lake/build/lib/lean/GST2DMixedEmergence.olean GST2DMixedEmergence.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DExactCrossingCharge.olean GSTU2DExactCrossingCharge.lean
-          lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DCanonicalPhaseDensity.olean GSTU2DCanonicalPhaseDensity.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DPureDivergence83.olean GSTU2DPureDivergence83.lean
-          lake env lean -o .lake/build/lib/lean/GSTU2DSharpCrossingBlock.olean GSTU2DSharpCrossingBlock.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedPowerRectangle.olean GSTGraphV2UnifiedPowerRectangle.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedVerticalTelescope.olean GSTGraphV2UnifiedVerticalTelescope.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockProbe.olean GSTGraphV2PerfectPowerBlockProbe.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenOmegaUBlock.olean GSTGraphV2HandwrittenOmegaUBlock.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialCascade.olean GSTGraphV2HandwrittenExponentialCascade.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialLTE.olean GSTGraphV2HandwrittenExponentialLTE.lean
-          lake env lean -o .lake/build/lib/lean/GSTFinalPurePowerResidueTransplant.olean GSTFinalPurePowerResidueTransplant.lean
-
-          # Exact Aug-15/16 module transplant, compiled as the original theorem block.
-          lake env lean -o .lake/build/lib/lean/InformationDescentScratch.olean InformationDescentScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationGeometryScratch.olean InformationGeometryScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationStateScratch.olean InformationStateScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationBadTraceScratch.olean InformationBadTraceScratch.lean
-          lake env lean -o .lake/build/lib/lean/OriginTransducerScratch.olean OriginTransducerScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationRegenerationScratch.olean InformationRegenerationScratch.lean
-          lake env lean -o .lake/build/lib/lean/CarryWordScratch.olean CarryWordScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationCarryWordBridgeScratch.olean InformationCarryWordBridgeScratch.lean
-          lake env lean -o .lake/build/lib/lean/PurePowerCarrierScratch.olean PurePowerCarrierScratch.lean
-          lake env lean -o .lake/build/lib/lean/CanonicalPrefixScratch.olean CanonicalPrefixScratch.lean
-          lake env lean -o .lake/build/lib/lean/PurePowerBadAxisScratch.olean PurePowerBadAxisScratch.lean
-          lake env lean -o .lake/build/lib/lean/BadLanguageMagnitudeScratch.olean BadLanguageMagnitudeScratch.lean
-          lake env lean -o .lake/build/lib/lean/PurePowerTailReductionScratch.olean PurePowerTailReductionScratch.lean
-          lake env lean -o .lake/build/lib/lean/StripConservationScratch.olean StripConservationScratch.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2Scratch.olean GSTGraphV2Scratch.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2FluxScratch.olean GSTGraphV2FluxScratch.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2BlockScratch.olean GSTGraphV2BlockScratch.lean
-          lake env lean -o .lake/build/lib/lean/GSTExponentLiftScratch.olean GSTExponentLiftScratch.lean
-          lake env lean -o .lake/build/lib/lean/PurePowerResidueGraphScratch.olean PurePowerResidueGraphScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationLocalizationScratch.olean InformationLocalizationScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationFluxScratch.olean InformationFluxScratch.lean
-          lake env lean -o .lake/build/lib/lean/InformationForcingScratch.olean InformationForcingScratch.lean
-          lake env lean -o .lake/build/lib/lean/GSTResidueSpacetimeScratch.olean GSTResidueSpacetimeScratch.lean
-          lake env lean -o .lake/build/lib/lean/PhaseCycleInformationScratch.olean PhaseCycleInformationScratch.lean
-          lake env lean -o .lake/build/lib/lean/CanonicalCausalityScratch.olean CanonicalCausalityScratch.lean
-          lake env lean -o .lake/build/lib/lean/CanonicalOriginModulusScratch.olean CanonicalOriginModulusScratch.lean
-          lake env lean -o .lake/build/lib/lean/PrefixOneOriginPhaseRecursionScratch.olean PrefixOneOriginPhaseRecursionScratch.lean
-
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControllerBridge.olean GSTGraphV2InfiniteControllerBridge.lean
-
-      - name: Compile transformed ErdosTernary2 monolith
+      - name: Compile edited monolith directly
         id: monolith
         continue-on-error: true
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .surgery
           set +e
           lake build GSTTactic ErdosTernary2 > .surgery/sol56-final-monolith-build.txt 2>&1
           rc=$?
@@ -139,7 +73,7 @@ jobs:
           cat .surgery/sol56-final-monolith-build.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
-      - name: Audit transformed monolith
+      - name: Audit edited monolith
         if: steps.monolith.outputs.rc == '0'
         shell: bash
         run: |
@@ -173,7 +107,7 @@ jobs:
           cat .surgery/sol56-final-comparator.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
-      - name: Persist final monolith diagnostics
+      - name: Commit compiler/comparator diagnostic
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -181,11 +115,11 @@ jobs:
           git add .surgery/sol56-final-monolith-build.txt || true
           git add .surgery/sol56-final-comparator.txt || true
           if ! git diff --cached --quiet; then
-            git commit -m "Record final monolith transplant diagnostic [skip ci]"
+            git commit -m "Record direct monolith compile diagnostic [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
           fi
 
-      - name: Enforce final result
+      - name: Require green monolith and comparator
         shell: bash
         run: |
           test "${{ steps.monolith.outputs.rc }}" = "0"
