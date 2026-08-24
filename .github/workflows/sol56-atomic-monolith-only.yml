@@ -160,7 +160,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ErdosTernary2.lean .surgery/local_import_order.txt .surgery/final_transplant.log .surgery/final_build.log .surgery/final_comparator.log .surgery/FINAL_RUN_STATUS.txt
+          git add ErdosTernary2.lean .surgery/local_import_order.txt .surgery/FINAL_RUN_STATUS.txt
+          git add -f .surgery/final_transplant.log .surgery/final_build.log .surgery/final_comparator.log
           if ! git diff --cached --quiet; then
             git commit -m "FINAL RUN: persist atomic monolith verdict [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824
