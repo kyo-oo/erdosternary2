@@ -37,6 +37,7 @@ s = p.read_text(encoding='utf-8')
 anchor = 'import GSTFinalPurePowerResidueTransplant\n'
 extra = '''import GSTFinalPurePowerResidueTransplant
 import PurePowerResidueGraphScratch
+import InformationQuotientScratch
 import PhaseCycleInformationScratch
 import CanonicalCausalityScratch
 import CanonicalOriginModulusScratch
