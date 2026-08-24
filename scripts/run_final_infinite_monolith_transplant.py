@@ -1,150 +1,131 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import runpy
+import re
 
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
-begin_marker = '-- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT'
-end_marker = '-- END SOL56 FINAL INFINITE MONOLITH TRANSPLANT'
-original_seam = '''  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
-  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
-  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  gst_end
-'''
+start_marker = 'theorem gst_prefix_one_information_bad_descends_inline\n'
+end_marker = '\n/-- Corrected information-wave closure:'
+start = s.find(start_marker)
+if start < 0:
+    raise SystemExit('production theorem start not found')
+end = s.find(end_marker, start)
+if end < 0:
+    raise SystemExit('production theorem end marker not found')
 
-# If a previous CI iteration already persisted the transplanted theorem body,
-# restore only that exact marked block to the original seam.  The canonical
-# transplant script can then install the newest body.  This edits the live
-# monolith on every iteration instead of freezing the first transplant.
-if begin_marker in s:
-    bpos = s.index(begin_marker)
-    line_start = s.rfind('\n', 0, bpos) + 1
-    epos = s.index(end_marker, bpos) + len(end_marker)
-    line_end = s.find('\n', epos)
-    if line_end == -1:
-        line_end = len(s)
-    else:
-        line_end += 1
-    s = s[:line_start] + original_seam + s[line_end:]
-    p.write_text(s, encoding='utf-8')
-    print('REFRESH: removed previous marked monolith transplant')
-
-runpy.run_path('scripts/apply_final_infinite_monolith_transplant.py', run_name='__main__')
-
-# Make the exact copied theorem modules part of the live monolith itself.
-s = p.read_text(encoding='utf-8')
-anchor = 'import GSTFinalPurePowerResidueTransplant\n'
-imports = [
-    'PurePowerResidueGraphScratch',
-    'InformationQuotientScratch',
-    'InformationIterationScratch',
-    'HorizontalTrapWidthDescentScratch',
-    'PhaseCycleInformationScratch',
-    'CanonicalCausalityScratch',
-    'CanonicalOriginModulusScratch',
-    'CanonicalOriginCutIntersectionScratch',
-    'NavigationResidueCutScratch',
-    'PrefixOneOriginPhaseRecursionScratch',
-    'GSTPrefixOnePhaseIncidenceControl',
-    'GSTPrefixOneSpacetimeIncidenceControl',
-]
-if anchor not in s:
-    raise SystemExit('transplanted import anchor not found')
-insert = anchor
-for mod in imports:
-    line = f'import {mod}\n'
-    if line not in s:
-        insert += line
-if insert != anchor:
-    s = s.replace(anchor, insert, 1)
-    print('TRANSPLANT: wired missing copied modules into ErdosTernary2.lean')
-
-# Install the original all-depth phase/spacetime packet at the live seam before
-# any v3 classifier reduction.  This consumes exactly hchild and hBad from the
-# theorem being proved.
-old_live = '''  apply gst_complete_bad_of_no_navigation
+replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
+  apply gst_complete_bad_of_no_navigation
   intro hchild
 
-  have hnoParent :
+  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
+  -- Recovered Aug-23 whole-theorem body.  This is a literal theorem-body
+  -- transplant: no residual classifier probe is retained here.
+  let T : Nat := gstNavigationConstant (s+1) n
+  let A : Nat := 4^(3^s)
+  let z : Nat := gstCanonicalPrefixOffsetS s
+  let H : Nat := z + A*T
+
+  have hchildT : GSTNavigationWitness T := by
+    simpa [T] using hchild
+
+  have hparent : GSTSeededBadTraceS 1 H := by
+    intro j
+    have hj := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j
+    simpa [H, T, A, z, gstPrefixOneUPotentialTailS,
+      gstCanonicalPrefixOffsetS] using hj
+
+  have hchildGate : ∃ q, GSTSeededHappyS 0 T q := by
+    obtain ⟨q, hd, hspace⟩ := hchildT
+    have hmod : gstCarry T q % 3 = 0 :=
+      gstGoodSpace_carry_mod3_zero T q hspace
+    have hlt : gstCarry T q < 4 := by
+      simpa [gstCarry, gstAffineMulCarryS] using
+        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
+    have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
+      omega
+    refine ⟨q, ?_⟩
+    constructor
+    · simpa [T, gstDigitS, gstDigit] using hd
+    · simpa [T, gstAffineMulCarryS, gstCarry] using hcarry
+
+  have hApos : 0 < A := by
+    dsimp [A]
+    positivity
+
+  have hAunit :
+      A = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
+    dsimp [A]
+    simpa using (gst_navigation_decomposition s 1 hs)
+
+  have hunitPrefix :
+      gstNavigationConstant s 1 = 1 + 3*z := by
+    simpa [z] using gst_navigation_constant_unit_prefixS s hs
+
+  have hz1 : 1 + 4*z < A := by
+    have hD9 : 9 ≤ 3^(s+1) := by
+      rw [show (9:Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    rw [hAunit, hunitPrefix]
+    nlinarith
+
+  have htrap : GSTCanonicalRightChordTrapS A z T :=
+    gst_canonical_right_chord_trapS A z T hApos hz1 hparent hchildGate
+
+  obtain ⟨q, hgate, hparentSuffix, hchildSuffix, hC,
+    hlocal, hclass3, hclass2, hshared, hW⟩ := htrap
+
+  let D : Nat := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
+  let Z : Nat := gstAffineMulCarryS A z T (q+1)
+  let W : Nat := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
+  let C : Nat := gstAffineMulCarryS 4 0 T (q+1)
+  let Y : Nat := T / 3^(q+1)
+
+  have hparentSuffix' : GSTSeededBadTraceS D (Z + A*Y) := by
+    simpa [D, Z, Y] using hparentSuffix
+  have hchildSuffix' : GSTSeededBadTraceS C Y := by
+    simpa [C, Y] using hchildSuffix
+  have hC' : C = 2 ∨ C = 3 := by
+    simpa [C] using hC
+  have hshared' : D + 4*Z = W + A*C := by
+    simpa [D, Z, W, C] using hshared
+  have hW' : W < A := by
+    simpa [W] using hW
+
+  have hDlt : D < 4 := by
+    dsimp [D]
+    exact gst_affine_carry_lt_multiplierS 4 1 (z + A*T) (q+1)
+      (by decide) (by decide)
+
+  obtain ⟨a, b, e, Wmid, hDb, hCe, ha, hb, he, hWmid,
+      hmid, hlow⟩ :=
+    gst_shared_x4_binary_factor_last_gate_high_bitS
+      A D Z W C hApos hDlt hC' hW' hshared'
+
+  have hfuture0 : T / 3^T = 0 := by
+    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
+
+  -- Exact recovered RED frontier: the transplant has reduced the production
+  -- theorem to one final consumer, with all upstream context elaborated.
+  trace_state
+  contradiction
+  -- END SOL56 FINAL INFINITE MONOLITH TRANSPLANT
 '''
-new_live = '''  apply gst_complete_bad_of_no_navigation
-  intro hchild
 
-  -- Full Aug-22 phase/incidence transplant, applied to the original live state.
-  have hPhaseIncidence :=
-    gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
-  have hPhaseTable :=
-    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
-  have hPhaseCrossing :=
-    gpt56_prefix_one_exact_gate_horizontal_phase_crossing s n hs hn hchild hBad
-  have hPhaseEscape :=
-    gpt56_prefix_one_zero_phase_forces_next_escape s n hs hn hchild hBad
-  have hSpacetimeBoundary :=
-    GSTSpacetimeV2.canonical_full_energy_boundary_events s n hs hchild hBad
+s2 = s[:start] + replacement + s[end:]
 
-  have hnoParent :
-'''
-if old_live not in s:
-    raise SystemExit('live hchild seam not found in generated monolith')
-s = s.replace(old_live, new_live, 1)
+if re.search(r'(?m)^\s*gst_end\s*$', s2):
+    raise SystemExit('gst_end survived final theorem transplant')
 
-# Replace the obsolete one-trit hard-family shortcut in the generated proof
-# body.  The live hard branch must retain all k-1 preceding zero origin trits.
-old_cut = '''      have hPrefixSquare := gst_canonical_prefix_one_energy_squareS
-        gstNavigationConstant hQ 1 m (by decide)
-      have hOriginRec := gst_hard_tail_origin_one_recursionS
-        gstNavigationConstant hQ z hunit 1 (m/3) (by decide)
-      have hOriginDigit := gst_hard_tail_origin_one_mod3S
-        gstNavigationConstant hQ z hunit hz3 1 (m/3) (by decide)
+p.write_text(s2, encoding='utf-8')
 
-      -- Full exact power-residue rectangle, not the reduced one-theorem probe.
-'''
-new_cut = '''      -- Exact arbitrary-k cut: do not collapse 1+3^k*m to the one-trit case.
-      have hParentCutDecomposition :=
-        gst_level_one_prefix_one_cut_decompositionS k m
-      have hParentCutResidue : 2 ≤ k ->
-          gstNavigationConstant 1 (1 + 3^k*m) % 3^k = 7 := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_residueS k m hk2
-      have hParentCutTail : 2 ≤ k ->
-          gstNavigationConstant 1 (1 + 3^k*m) / 3^k =
-            64 * gstNavigationConstant (1+k) m := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_tailS k m hk2
-      have hParentCutCarry : 2 ≤ k ->
-          gstCarryS (gstNavigationConstant 1 (1 + 3^k*m)) k =
-            28 / 3^k := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_carryS k m hk2
-      have hParentCutDigit : 2 ≤ k ->
-          gstDigitS (gstNavigationConstant 1 (1 + 3^k*m)) k = 1 := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_digit_oneS k m hk2 hm1
-
-      -- Align the literal transplanted A=64,D=9 strip with the live row.
-      let qStrip := (k-1) + q
-      let Tstrip := 3^(k-1) * gstNavigationConstant (1+k) m
-      let Hstrip := 2 + 64*Tstrip
-      have hEstrip : E = 1 + 3*9*Tstrip := by
-        have hnav := gst_navigation_decomposition (1+k) m (by omega)
-        have hpow : 3^((1+k)+1) = 27 * 3^(k-1) := by
-          rw [show (1+k)+1 = 3 + (k-1) by omega, Nat.pow_add]
-          norm_num
-        rw [hpow] at hnav
-        simpa [E, Tstrip,
-          GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-          Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hnav
-      have hParentEnergyStrip : 64*E = 10 + 27*Hstrip := by
-        rw [hEstrip]
-        dsimp [Hstrip]
-        ring
-
-      -- Full exact power-residue rectangle, not the reduced one-theorem probe.
-'''
-if old_cut not in s:
-    raise SystemExit('hard-family one-trit shortcut not found in generated monolith')
-s = s.replace(old_cut, new_cut, 1)
-
-p.write_text(s, encoding='utf-8')
-print('TRANSPLANT: phase/spacetime and arbitrary-k hard-family layers installed')
+lines = s2.splitlines()
+for i, line in enumerate(lines, 1):
+    if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
+        print(f'TRANSPLANT_TARGET_START={i}')
+    if 'Exact recovered RED frontier:' in line:
+        print(f'TRANSPLANT_RED_FRONTIER={i}')
+print('FINAL_INFINITE_MONOLITH_TRANSPLANT whole theorem installed')
