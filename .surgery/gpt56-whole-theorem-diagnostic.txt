@@ -1,17 +1,35 @@
-HEAD=6144f92410beff6be4f72347fc8987d047d5ad49
+HEAD=9225e36adeb32e51b8808fbbd63c8c67d90e332a
 BUILD_RC=1
 === WHOLE THEOREM BUILD ERRORS / TRACE ===
 374:warning: ErdosTernary2.lean:16721:17: Variable name `hs` is not explicitly referenced.
-380:error: ErdosTernary2.lean:16773:13: unsolved goals
-381:case zero
-395:⊢ T % 1 = 0
-396:error: ErdosTernary2.lean:16789:4: Type mismatch
-402:error: ErdosTernary2.lean:16848:2: Tactic `contradiction` failed
-455:⊢ False
-507:⊢ False
-508:error: Lean exited with code 1
-511:error: build failed
+380:error: ErdosTernary2.lean:16847:2: Tactic `contradiction` failed
+433:⊢ False
+485:⊢ False
+486:error: Lean exited with code 1
+489:error: build failed
 === TAIL ===
+warning: ErdosTernary2.lean:6146:23: Variable name `hR_mod3` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hR_mod3
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6147:19: Variable name `hstart_pos` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hstart_pos
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6147:44: Variable name `hstart_lt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hstart_lt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ErdosTernary2.lean:6148:5: Variable name `hC_lt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hC_lt
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
 warning: ErdosTernary2.lean:6149:5: Variable name `h_has` is not explicitly referenced.
@@ -200,29 +218,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hs
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-error: ErdosTernary2.lean:16773:13: unsolved goals
-case zero
-s n : ℕ
-hs : 1 ≤ s
-hn : 1 ≤ n
-hBad : GSTOmegaInfiniteBadTrace s 1 n
-hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n)
-T : ℕ := gstNavigationConstant (s + 1) n
-A : ℕ := 4 ^ 3 ^ s
-z : ℕ := gstCanonicalPrefixOffsetS s
-H : ℕ := z + A * T
-hparent : GSTSeededBadTraceS 1 H
-hd : gstDigit T 0 = 2
-hspace : gstSpaceAt T 0 = GSTSpace.gstPlus ∨ gstSpaceAt T 0 = GSTSpace.null
-hmod : gstCarry T 0 % 3 = 0
-⊢ T % 1 = 0
-error: ErdosTernary2.lean:16789:4: Type mismatch
-  gst_navigation_decomposition s 1 hs
-has type
-  4 ^ (3 ^ s * 1) = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
-but is expected to have type
-  4 ^ 3 ^ s = 1 + 3 ^ (s + 1) * gstNavigationConstant s 1
-error: ErdosTernary2.lean:16848:2: Tactic `contradiction` failed
+error: ErdosTernary2.lean:16847:2: Tactic `contradiction` failed
 
 s n : ℕ
 hs : 1 ≤ s
@@ -276,7 +272,7 @@ hmid : a + 2 * Z = Wmid + A
 hlow : b + 2 * Wmid = W + A * e
 hfuture0 : T / 3 ^ T = 0
 ⊢ False
-info: ErdosTernary2.lean:16847:2: s n : ℕ
+info: ErdosTernary2.lean:16846:2: s n : ℕ
 hs : 1 ≤ s
 hn : 1 ≤ n
 hBad : GSTOmegaInfiniteBadTrace s 1 n
