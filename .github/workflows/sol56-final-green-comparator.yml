@@ -1,0 +1,169 @@
+name: SOL56 Final Green Comparator
+
+on:
+  push:
+    branches:
+      - sol/sol56-final-event-transfer-green-20260824
+
+permissions:
+  contents: write
+
+jobs:
+  prove-and-judge:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+          mkdir -p .lake/build/lib/lean
+          lake build GSTTactic
+
+      - name: Compile exact GST Graph V2 ontology stack
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUFlux.olean GSTGraphV2CoupledUFlux.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2CoupledUPhysicalBridge.olean GSTGraphV2CoupledUPhysicalBridge.lean
+          lake env lean -o .lake/build/lib/lean/GST2DMixedEmergence.olean GST2DMixedEmergence.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DAtomicBridge.olean GSTU2DAtomicBridge.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DEventTransport.olean GSTU2DEventTransport.lean
+          lake env lean -o .lake/build/lib/lean/GSTU2DExactCrossingCharge.olean GSTU2DExactCrossingCharge.lean
+          lake env lean -o .lake/build/lib/lean/GSTCanonicalSevenAxisBridge.olean GSTCanonicalSevenAxisBridge.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControl.olean GSTGraphV2InfiniteControl.lean
+
+      - name: Apply repaired Aug23 atomic surgery
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 scripts/apply_final_event_transfer_green.py
+
+      - name: Reject superseded seam and placeholders
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if grep -nE 'theorem gst_prefix_one_information_bad_descends_inline|theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline|theorem gst_prefix_one_bigN_future_zero_inline|^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'Superseded prefix-one seam still present.'
+            exit 1
+          fi
+          grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean
+          bash scripts/sorry_check.sh
+          if grep -nE '^[[:space:]]*(admit|axiom|native_decide|gst_end)([[:space:]]|$)' ErdosTernary2.lean; then
+            echo 'Forbidden executable placeholder/escape hatch found.'
+            exit 1
+          fi
+
+      - name: Compile surgically replaced production monolith
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2 2>&1 | tee monolith-build.log
+          if grep -E 'error:|sorryAx|declaration uses.*sorry' monolith-build.log; then
+            echo 'MONOLITH KERNEL AUDIT FAILED'
+            exit 1
+          fi
+          echo 'MONOLITH KERNEL BUILD GREEN'
+
+      - name: Materialize clean comparator judge package
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['Challenge.lean', 'Solution.lean']:
+              src = Path('ker07-snapshot') / name
+              text = src.read_text(encoding='utf-8')
+              i = text.find('import ')
+              if i < 0:
+                  raise SystemExit(f'no import marker in {src}')
+              Path(name).write_text(text[i:], encoding='utf-8')
+          raw = Path('modules/0009_comparator_config.json').read_text(encoding='utf-8')
+          j = raw.find('{')
+          if j < 0:
+              raise SystemExit('comparator config payload not found')
+          Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
+          Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
+          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
+          Path('lake-manifest.json').unlink(missing_ok=True)
+          PY
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake build GSTTactic ErdosTernary2 Challenge Solution
+          bash scripts/sorry_check.sh
+
+      - name: Build pinned lean4export
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .tools
+          git clone https://github.com/leanprover/lean4export.git .tools/lean4export
+          cd .tools/lean4export
+          git checkout 9fb131bb100eb32ccf6836f14e4f8328d13b6792
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build lean4export
+
+      - name: Build pinned official comparator
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git .tools/comparator
+          cd .tools/comparator
+          git checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('rev = "master"', 'rev = "9fb131bb100eb32ccf6836f14e4f8328d13b6792"')
+          p.write_text(s, encoding='utf-8')
+          PY
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build comparator
+
+      - name: Run official comparator and require exact verdict
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          ROOT="$PWD"
+          CMP_ROOT="$ROOT/.tools/comparator"
+          EXPORT_ROOT="$ROOT/.tools/lean4export"
+          COMPARATOR_LANDRUN="$CMP_ROOT/scripts/fake-landrun.sh" \
+          COMPARATOR_LEAN4EXPORT="$EXPORT_ROOT/.lake/build/bin/lean4export" \
+          lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee comparator.log
+          grep -F "Your solution is okay!" comparator.log
+
+      - name: Persist proven monolith only after comparator acceptance
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean
+          if git diff --cached --quiet; then
+            echo 'Monolith already persisted.'
+          else
+            git commit -m 'proof: persist comparator-accepted atomic monolith [skip ci]'
+            git push origin HEAD:sol/sol56-final-event-transfer-green-20260824
+          fi
