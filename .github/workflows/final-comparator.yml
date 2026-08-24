@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install exact whole-theorem surgery into production source
+      - name: Install direct Omega production splice
         shell: bash
         run: |
           python3 scripts/apply_residual_bridge_probe.py
@@ -21,9 +21,18 @@ jobs:
             echo 'literal gst_end survived production surgery'
             exit 1
           fi
-          grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
-          grep -n 'GSTCanonicalRightChordTrapS A z T' ErdosTernary2.lean
-          grep -n 'gst_shared_x4_binary_factor_last_gate_high_bitS' ErdosTernary2.lean
+          if grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean; then
+            echo 'obsolete information-descent theorem survived production surgery'
+            exit 1
+          fi
+          if grep -n 'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline' ErdosTernary2.lean; then
+            echo 'obsolete child-gate contradiction theorem survived production surgery'
+            exit 1
+          fi
+          grep -n 'theorem gst_omega_prefix_one_gate_exists' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean
+          grep -n 'gst_omega_prefix_one_gate_exists s n hs hn hchild' ErdosTernary2.lean
+          grep -n 'gst_omega_gate_zero_closes_parent s 1 n hs hzero' ErdosTernary2.lean
 
       - name: Materialize clean judge modules and exact package
         shell: bash
@@ -82,7 +91,9 @@ jobs:
             GSTGraphV2NonEuclidean \
             GSTGraphV2NonEuclideanLaws \
             GSTGraphV2HandwrittenExponentialLTE \
-            GSTGraphV2HandwrittenAnchoredCocycle; do
+            GSTGraphV2HandwrittenAnchoredCocycle \
+            GSTGraphV2Production \
+            GSTGraphV2ProductionLaws; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
 
@@ -107,6 +118,8 @@ jobs:
               'GSTGraphV2UnifiedPowerRectangle.lean',
               'GSTGraphV2UnifiedVerticalTelescope.lean',
               'GSTU2DPureDivergence83.lean',
+              'GSTGraphV2Production.lean',
+              'GSTGraphV2ProductionLaws.lean',
           ]
           bad = []
           for name in names:
