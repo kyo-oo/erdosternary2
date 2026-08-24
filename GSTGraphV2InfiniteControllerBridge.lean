@@ -1,6 +1,7 @@
 import GSTInfiniteGateTransport
 import GSTInfiniteCoupledLedger
 import GSTGraphV2UnifiedVerticalTelescope
+import GSTU2DEventTransport
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -83,12 +84,12 @@ theorem graphCoupledState_step_exact (E N p : Nat) :
   · dsimp [GSTV2.coupledStep]
     have hout :
         GSTV2.cellOutput
-            (graph E 0 p).seven.carry
+            (graphCoupledState E N p).childCarry
             ((graphCoupledState E N p).childTail % 3) =
           (graph E 1 p).seven.digit := by
       rw [graphCoupledState_childDigit_exact]
       have h := (graph_cell_exact E 0 p).1
-      simpa [GSTV2.cellOutput, GSTV2.cellMass,
+      simpa [graphCoupledState, GSTV2.cellOutput, GSTV2.cellMass,
         GST2DMixedEmergence.outDigit] using h
     rw [hout]
     have hbal := carryWord_vertical_balance E p 1 N
@@ -116,15 +117,15 @@ theorem graphCoupledOrbit_exact (E N b : Nat) : ∀ K,
   | zero => simp [GSTV2.coupledOrbit]
   | succ K ih =>
       rw [GSTV2.coupledOrbit, ih, graphCoupledState_step_exact]
-      congr 2
-      omega
+      have hidx : b + K + 1 = b + (K+1) := by omega
+      exact congrArg (graphCoupledState E N) hidx
 
 /-- A complete bad right edge on the Graph-V2 sheet becomes the transplanted
 controller's exact all-Nat seeded bad language. -/
 theorem graph_right_bad_to_seededBadTrace
     (E N b : Nat)
     (hRightBad : ∀ j,
-      ¬ GST2DMixedEmergence.HappyCell
+      ¬ GSTU2DEventTransport.HappyCell
         (graph E N (b+j)).seven.carry
         (graph E N (b+j)).seven.digit) :
     GSTV2.SeededBadTrace
@@ -168,7 +169,7 @@ theorem graph_infinite_bad_control
     (E N b : Nat)
     (hChildCarryZero : (graph E 0 b).seven.carry = 0)
     (hRightBad : ∀ j,
-      ¬ GST2DMixedEmergence.HappyCell
+      ¬ GSTU2DEventTransport.HappyCell
         (graph E N (b+j)).seven.carry
         (graph E N (b+j)).seven.digit) :
     GSTV2.InfiniteBadCoupledControl
@@ -183,7 +184,7 @@ theorem graph_infinite_bad_control
 all-Nat controller depth. -/
 theorem graph_child_happy_to_controller
     (E N b q : Nat)
-    (hChild : GST2DMixedEmergence.HappyCell
+    (hChild : GSTU2DEventTransport.HappyCell
       (graph E 0 (b+q)).seven.carry
       (graph E 0 (b+q)).seven.digit) :
     GSTV2.Happy
@@ -203,10 +204,10 @@ theorem graph_child_happy_latent_transfer
     (E N b q : Nat)
     (hChildCarryZero : (graph E 0 b).seven.carry = 0)
     (hRightBad : ∀ j,
-      ¬ GST2DMixedEmergence.HappyCell
+      ¬ GSTU2DEventTransport.HappyCell
         (graph E N (b+j)).seven.carry
         (graph E N (b+j)).seven.digit)
-    (hChild : GST2DMixedEmergence.HappyCell
+    (hChild : GSTU2DEventTransport.HappyCell
       (graph E 0 (b+q)).seven.carry
       (graph E 0 (b+q)).seven.digit) :
     GSTV2.LatentGateTransfer (4^N) (graphCoupledState E N b) q := by
