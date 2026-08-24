@@ -26,7 +26,7 @@ jobs:
           ref: sol/sol56-final-residual-production-green-20260824
           fetch-depth: 1
 
-      - name: Transplant theorem body into ErdosTernary2.lean
+      - name: Physically absorb local theorem closure into ErdosTernary2.lean
         shell: bash
         run: |
           python3 scripts/run_final_infinite_monolith_transplant.py
@@ -36,15 +36,14 @@ jobs:
             exit 1
           fi
 
-      - name: Commit edited ErdosTernary2.lean
-        if: github.event_name == 'push'
+      - name: Persist physically edited ErdosTernary2.lean
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ErdosTernary2.lean
           if ! git diff --cached --quiet; then
-            git commit -m "Directly transplant Aug23 theorem body into ErdosTernary2 [skip ci]"
+            git commit -m "Physically absorb local theorem closure into ErdosTernary2 [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824
           fi
 
@@ -111,6 +110,20 @@ jobs:
           set -e
           cat .surgery/sol56-current-comparator.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Persist current monolith diagnostics
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin sol/sol56-final-residual-production-green-20260824 || true
+          git add .surgery/sol56-current-monolith-build.txt || true
+          git add .surgery/sol56-current-comparator.txt || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record current transplanted monolith diagnostics [skip ci]"
+            git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
+          fi
 
       - name: Require green monolith and comparator
         shell: bash
