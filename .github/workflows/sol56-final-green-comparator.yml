@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          python3 scripts/apply_final_event_transfer_green.py
+          python3 scripts/apply_u2d_atomic_replacement.py
 
       - name: Reject superseded seam and placeholders
         shell: bash
