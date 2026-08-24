@@ -1,27 +1,141 @@
 #!/usr/bin/env python3
-# Push-only execution marker: direct monolith transplant, no PR theorem fan-out.
 from pathlib import Path
 import re
 
-p = Path('ErdosTernary2.lean')
-s = p.read_text(encoding='utf-8')
+MONOLITH = Path('ErdosTernary2.lean')
+SNAPSHOT_ROOT = Path(
+    'ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic'
+)
 MIN_MONOLITH_BYTES = 300_000
+PRESERVE_IMPORTS = {'GSTTactic'}
+TARGET = 'theorem gst_prefix_one_information_bad_descends_inline\n'
+TARGET_END = '\n/-- Corrected information-wave closure:'
 
-# Atomic-surgery guard: never operate on, or write back, a truncated monolith.
-if len(s.encode('utf-8')) < MIN_MONOLITH_BYTES:
+s = MONOLITH.read_text(encoding='utf-8')
+original_bytes = len(s.encode('utf-8'))
+if original_bytes < MIN_MONOLITH_BYTES:
     raise SystemExit(
-        f'refusing direct transplant into truncated ErdosTernary2.lean: '
-        f'{len(s.encode("utf-8"))} bytes'
+        f'refusing transplant into truncated ErdosTernary2.lean: {original_bytes} bytes'
     )
 
-start_marker = 'theorem gst_prefix_one_information_bad_descends_inline\n'
-end_marker = '\n/-- Corrected information-wave closure:'
-if s.count(start_marker) != 1:
-    raise SystemExit(f'expected exactly one production theorem start, found {s.count(start_marker)}')
-start = s.find(start_marker)
-if start < 0:
-    raise SystemExit('production theorem start not found')
-end = s.find(end_marker, start)
+
+def source_path(mod: str):
+    if mod in PRESERVE_IMPORTS or mod == 'ErdosTernary2':
+        return None
+    rel = Path(*mod.split('.')).with_suffix('.lean')
+    if rel.exists() and rel != MONOLITH:
+        return rel
+    # The locked Aug-18 branch contains later branch-unique surgery modules.
+    snap = SNAPSHOT_ROOT / rel.name
+    if snap.exists():
+        return snap
+    return None
+
+
+def imports_of(text: str):
+    return re.findall(r'(?m)^\s*import\s+([A-Za-z0-9_.]+)\s*$', text)
+
+
+def strip_imports(text: str):
+    return re.sub(r'(?m)^\s*import\s+[A-Za-z0-9_.]+\s*\n?', '', text)
+
+
+def packet_begin(path: Path):
+    return f'-- BEGIN ATTACHED {path.name}'
+
+
+def packet_end(path: Path):
+    return f'-- END ATTACHED {path.name}'
+
+
+# The current monolith already carries many Aug-15/Aug-18 scratch modules as
+# physical source packets.  Keep those bodies and only attach missing local
+# dependencies.  This is deliberately not a module-by-module compilation lane.
+existing_packet_names = set(
+    re.findall(r'(?m)^-- BEGIN ATTACHED ([^\n]+\.lean)\s*$', s)
+)
+
+# Collect every local module imported by the monolith.  Repeated historical
+# import lines collapse to one root; their whole local dependency closure is
+# transplanted as source.
+root_modules = []
+for mod in imports_of(s):
+    if source_path(mod) is not None and mod not in root_modules:
+        root_modules.append(mod)
+
+order = []
+seen = set()
+active = set()
+
+
+def visit(mod: str):
+    if mod in seen or mod in PRESERVE_IMPORTS or mod == 'ErdosTernary2':
+        return
+    path = source_path(mod)
+    if path is None:
+        return
+    if mod in active:
+        raise SystemExit(f'local import cycle while packing monolith: {mod}')
+    active.add(mod)
+    text = path.read_text(encoding='utf-8')
+    for dep in imports_of(text):
+        if dep == 'ErdosTernary2':
+            # Source is being inserted after the monolith core and before the
+            # production seam, so a historical back-import becomes unnecessary.
+            continue
+        if source_path(dep) is not None:
+            visit(dep)
+    active.remove(mod)
+    seen.add(mod)
+    order.append((mod, path))
+
+
+for root in root_modules:
+    visit(root)
+
+# Remove every local import that is now supplied as literal source.  External
+# Mathlib imports and GSTTactic remain normal imports.
+def remove_local_import(match):
+    mod = match.group(1)
+    if source_path(mod) is not None:
+        return ''
+    return match.group(0)
+
+s = re.sub(
+    r'(?m)^\s*import\s+([A-Za-z0-9_.]+)\s*\n?',
+    remove_local_import,
+    s,
+)
+
+# Attach only bodies that are not already physically present.  Dependencies are
+# ordered first.  All source-level imports are stripped because the dependency
+# bodies are now in the same Lean file.
+packets = []
+new_packet_names = []
+for mod, path in order:
+    if path.name in existing_packet_names:
+        continue
+    body = strip_imports(path.read_text(encoding='utf-8')).strip()
+    if not body:
+        raise SystemExit(f'empty local theorem source: {path}')
+    packets.append(
+        f'\n\n{packet_begin(path)}\n'
+        f'{body}\n'
+        f'{packet_end(path)}\n'
+    )
+    new_packet_names.append(path.name)
+
+if s.count(TARGET) != 1:
+    raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
+insert_at = s.index(TARGET)
+if packets:
+    s = s[:insert_at] + ''.join(packets) + '\n' + s[insert_at:]
+
+# Recompute the surgical region after source absorption.
+if s.count(TARGET) != 1:
+    raise SystemExit('production theorem multiplicity changed during source absorption')
+start = s.index(TARGET)
+end = s.find(TARGET_END, start)
 if end < 0:
     raise SystemExit('production theorem end marker not found')
 
@@ -33,8 +147,8 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
   intro hchild
 
   -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
-  -- Recovered Aug-23 whole-theorem body.  This is a literal theorem-body
-  -- transplant: no residual classifier probe is retained here.
+  -- Recovered Aug-23 whole-theorem body.  All local theorem dependencies above
+  -- are now literal source in this same ErdosTernary2.lean file.
   let T : Nat := gstNavigationConstant (s+1) n
   let A : Nat := 4^(3^s)
   let z : Nat := gstCanonicalPrefixOffsetS s
@@ -119,8 +233,8 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
   have hfuture0 : T / 3^T = 0 := by
     simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
 
-  -- Exact recovered RED frontier: the transplant has reduced the production
-  -- theorem to one final consumer, with all upstream context elaborated.
+  -- Exact recovered RED frontier.  The next edit is the final consumer only;
+  -- all dependency modules have been physically transplanted above.
   trace_state
   contradiction
   -- END SOL56 FINAL INFINITE MONOLITH TRANSPLANT
@@ -131,40 +245,46 @@ s2 = s[:start] + replacement + s[end:]
 if re.search(r'(?m)^\s*gst_end\s*$', s2):
     raise SystemExit('gst_end survived final theorem transplant')
 
-# This is a transplant, not a coexistence experiment.  The old residual
-# classifier body must be physically absent from the edited production theorem.
-new_end = s2.find(end_marker, start)
-region = s2[start:new_end]
+# Old five-case residual body must be physically absent from this theorem.
+region_end = s2.find(TARGET_END, start)
+region = s2[start:region_end]
 for forbidden in (
     'let r := v3 n',
     'have hboundary : GSTResidualBoundary',
     'have hResidualBad : GSTOmegaInfiniteBadTrace s k m',
     'rcases hboundary with hlevel1 | hlevel3 | hstable',
-    'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT\n  -- The residual failure',
 ):
     if forbidden in region:
         raise SystemExit(f'old residual body survived direct transplant: {forbidden}')
 
-if len(s2.encode('utf-8')) < MIN_MONOLITH_BYTES:
-    raise SystemExit(
-        f'refusing to write truncated ErdosTernary2.lean: '
-        f'{len(s2.encode("utf-8"))} bytes'
-    )
-if s2.count('theorem gst_prefix_one_information_bad_descends_inline\n') != 1:
+# Every local import removed from the monolith must now have a physical packet.
+remaining_local_imports = [
+    mod for mod in imports_of(s2) if source_path(mod) is not None
+]
+if remaining_local_imports:
+    raise SystemExit(f'local imports survived physical transplant: {remaining_local_imports}')
+
+final_bytes = len(s2.encode('utf-8'))
+if final_bytes < MIN_MONOLITH_BYTES:
+    raise SystemExit(f'refusing to write truncated monolith: {final_bytes} bytes')
+if s2.count(TARGET) != 1:
     raise SystemExit('post-transplant theorem multiplicity check failed')
 
-p.write_text(s2, encoding='utf-8')
-
-# Re-read the bytes we actually wrote before returning success.
-written = p.read_text(encoding='utf-8')
+MONOLITH.write_text(s2, encoding='utf-8')
+written = MONOLITH.read_text(encoding='utf-8')
 if written != s2 or len(written.encode('utf-8')) < MIN_MONOLITH_BYTES:
     raise SystemExit('post-write monolith integrity check failed')
 
-lines = written.splitlines()
-for i, line in enumerate(lines, 1):
+print(f'DIRECT_MONOLITH_INPUT_BYTES={original_bytes}')
+print(f'DIRECT_MONOLITH_OUTPUT_BYTES={len(written.encode("utf-8"))}')
+print(f'LOCAL_IMPORT_ROOTS={len(root_modules)}')
+print(f'LOCAL_DEPENDENCY_CLOSURE={len(order)}')
+print(f'NEW_SOURCE_PACKETS={len(new_packet_names)}')
+for name in new_packet_names:
+    print(f'ATTACHED_SOURCE={name}')
+for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
         print(f'TRANSPLANT_TARGET_START={i}')
-    if 'Exact recovered RED frontier:' in line:
+    if 'Exact recovered RED frontier.' in line:
         print(f'TRANSPLANT_RED_FRONTIER={i}')
-print(f'DIRECT_MONOLITH_BYTES={len(written.encode("utf-8"))}')
-print('DIRECT_MONOLITH_TRANSPLANT=WHOLE_THEOREM_REPLACED')
+print('DIRECT_MONOLITH_TRANSPLANT=LOCAL_DEPENDENCY_CLOSURE_ABSORBED')
