@@ -45,6 +45,7 @@ imports = [
     'PhaseCycleInformationScratch',
     'CanonicalCausalityScratch',
     'CanonicalOriginModulusScratch',
+    'CanonicalOriginCutIntersectionScratch',
     'PrefixOneOriginPhaseRecursionScratch',
 ]
 if anchor not in s:
