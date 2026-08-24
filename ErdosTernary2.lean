@@ -17037,356 +17037,97 @@ theorem gst_prefix_one_information_bad_descends_inline
   apply gst_complete_bad_of_no_navigation
   intro hchild
 
-  -- Full Aug-22 phase/incidence transplant, applied to the original live state.
-  have hPhaseIncidence :=
-    gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
-  have hPhaseTable :=
-    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
-  have hPhaseCrossing :=
-    gpt56_prefix_one_exact_gate_horizontal_phase_crossing s n hs hn hchild hBad
-  have hPhaseEscape :=
-    gpt56_prefix_one_zero_phase_forces_next_escape s n hs hn hchild hBad
-  have hSpacetimeBoundary :=
-    GSTSpacetimeV2.canonical_full_energy_boundary_events s n hs hchild hBad
-
-  have hnoParent :
-      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
-    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic s n hs hn hBad
-
-  let r := v3 n
-  let m := n / 3^r
-  have hnpos : 0 < n := by omega
-  have hdvd : 3^r ∣ n := by
-    dsimp [r]
-    exact pow_v3_dvd n hnpos
-  have hmod : n % 3^r = 0 := Nat.mod_eq_zero_of_dvd hdvd
-  have hnfac : n = 3^r * m := by
-    dsimp [m]
-    have h := Nat.div_add_mod n (3^r)
-    rw [hmod, Nat.add_zero] at h
-    exact h.symm
-  have hmne : m ≠ 0 := by
-    intro hmz
-    have hnzero : n = 0 := by simpa [hmz] using hnfac
-    omega
-  have hm : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hmne
-  have hm3 : m % 3 ≠ 0 := by
-    dsimp [m, r]
-    exact v3_maximal n hnpos
-
-  have hscale :
-      gstNavigationConstant (s+1) n =
-        3^r * gstNavigationConstant (s+1+r) m := by
-    rw [hnfac]
-    exact gst_navigation_constant_mul3_pow_atomic (s+1) r m (by omega)
-  rw [hscale] at hchild
-  have hchildCore :
-      GSTNavigationWitness (gstNavigationConstant (s+1+r) m) :=
-    gstNavigationWitness_of_mul_three_pow_atomic r
-      (gstNavigationConstant (s+1+r) m) hchild
-
-  let k := r + 1
-  have hk : 1 ≤ k := by dsimp [k]; omega
-  have hparentArg : 1 + 3*n = 1 + 3^k*m := by
-    dsimp [k]
-    rw [hnfac, Nat.pow_succ]
-    ring
-
-  by_cases hclosed : GSTOriginClosed s k (m % 3)
-  · have hparentCore :
-        GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) :=
-      gst_navigation_constant_origin_closed_witness
-        s k m (m % 3) hs hm hm3 rfl hclosed
-    apply hnoParent
-    rw [hparentArg]
-    exact hparentCore
-
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary : GSTResidualBoundary s k (m % 3) :=
-    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
-
   -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
-  -- The residual failure is converted directly into the all-Nat Graph-V2
-  -- boundary language.  No finite-support endpoint and no legacy residual
-  -- Omega termination theorem occurs below.
-  have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by
+  -- Recovered Aug-23 whole-theorem body.  This is a literal theorem-body
+  -- transplant: no residual classifier probe is retained here.
+  let T : Nat := gstNavigationConstant (s+1) n
+  let A : Nat := 4^(3^s)
+  let z : Nat := gstCanonicalPrefixOffsetS s
+  let H : Nat := z + A*T
+
+  have hchildT : GSTNavigationWitness T := by
+    simpa [T] using hchild
+
+  have hparent : GSTSeededBadTraceS 1 H := by
     intro j
-    change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0
-    intro hzero
-    apply hnoParent
-    rw [hparentArg]
-    exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
+    have hj := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j
+    simpa [H, T, A, z, gstPrefixOneUPotentialTailS,
+      gstCanonicalPrefixOffsetS] using hj
 
-  have hchildResidual :
-      GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
-    simpa [k, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hchildCore
-
-  -- TRANSPLANTED CONNECTOR A:
-  -- residual child Navigation witness -> literal Happy left boundary.
-  have hChildLeftExists :
-      ∃ j,
-        GST2DMixedEmergence.HappyCell
-          (GSTGraphV2InfiniteControl.graph
-            (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m)
-            0 (s+k+1+j)).seven.carry
-          (GSTGraphV2InfiniteControl.graph
-            (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m)
-            0 (s+k+1+j)).seven.digit := by
-    obtain ⟨j, hd, hspace⟩ := hchildResidual
-    have hmod : gstCarry (gstNavigationConstant (s+k) m) j % 3 = 0 :=
-      gstGoodSpace_carry_mod3_zero _ j hspace
-    have hlt : gstCarry (gstNavigationConstant (s+k) m) j < 4 := by
-      cases j with
-      | zero => simp [gstCarry, Nat.mod_one]
-      | succ t => exact gstCarry_lt_four _ (t+1) (by omega)
-    have hcarry :
-        gstCarry (gstNavigationConstant (s+k) m) j = 0 ∨
-        gstCarry (gstNavigationConstant (s+k) m) j = 3 := by
+  have hchildGate : ∃ q, GSTSeededHappyS 0 T q := by
+    obtain ⟨q, hd, hspace⟩ := hchildT
+    have hmod : gstCarry T q % 3 = 0 :=
+      gstGoodSpace_carry_mod3_zero T q hspace
+    have hlt : gstCarry T q < 4 := by
+      simpa [gstCarry, gstAffineMulCarryS] using
+        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
+    have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
       omega
-    refine ⟨j, ?_⟩
-    have hb3 : 3 ≤ s+k+1 := by omega
-    have hpow : 3^3 ≤ 3^(s+k+1) :=
-      Nat.pow_le_pow_of_le (by decide : 1 < 3) hb3
-    have hfour : 4 < 3^(s+k+1) := by
-      norm_num at hpow ⊢
-      omega
-    have hone : 1 < 3^(s+k+1) := by omega
-    have hE :
-        4^0 * GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m =
-          1 + 3^(s+k+1) * gstNavigationConstant (s+k) m := by
-      simpa [GSTGraphV2HandwrittenOmegaUBlock.residualEnergy] using
-        gst_navigation_decomposition (s+k) m (by omega)
-    have hiff := GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
-      (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m)
-      0 (s+k+1) 1 (gstNavigationConstant (s+k) m) j hE hone
-    apply hiff.2
-    have hseed : (4 * 1) / 3^(s+k+1) = 0 := Nat.div_eq_of_lt hfour
-    simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit,
-      GSTGraphV2InfiniteControl.seededCarry, gstCarry, hseed] using
-      ⟨hd, hcarry⟩
+    refine ⟨q, ?_⟩
+    constructor
+    · simpa [T, gstDigitS, gstDigit] using hd
+    · simpa [T, gstAffineMulCarryS, gstCarry] using hcarry
 
-  -- TRANSPLANTED CONNECTOR B:
-  -- all-depth residual Omega bad trace -> all-depth bad right boundary.
-  have hRightBad : ∀ j,
-      ¬ GST2DMixedEmergence.HappyCell
-        (GSTGraphV2InfiniteControl.graph
-          (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m)
-          (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
-          (s+k+1+j)).seven.carry
-        (GSTGraphV2InfiniteControl.graph
-          (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s k m)
-          (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
-          (s+k+1+j)).seven.digit := by
-    intro j hright
-    have habs :
-        GST2DMixedEmergence.HappyCell
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
-            (s+k+1+j)).seven.carry
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
-            (s+k+1+j)).seven.digit :=
-      (GSTGraphV2HandwrittenOmegaUBlock.residual_parent_happy_iff
-        s k m (s+k+1+j)).1 hright
-    have hb2 : 2 ≤ s+1 := by omega
-    have hpow : 3^2 ≤ 3^(s+1) :=
-      Nat.pow_le_pow_of_le (by decide : 1 < 3) hb2
-    have hfour : 4 < 3^(s+1) := by
-      norm_num at hpow ⊢
-      omega
-    have hone : 1 < 3^(s+1) := by omega
-    have hE :
-        4^(GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m) * 1 =
-          1 + 3^(s+1) * gstNavigationConstant s (1 + 3^k*m) := by
-      simpa [GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent] using
-        gst_navigation_decomposition s (1 + 3^k*m) hs
-    have hiff := GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
-      1 (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
-      (s+1) 1 (gstNavigationConstant s (1 + 3^k*m)) (k+j) hE hone
-    have hq := hiff.1 habs
-    have hseed : (4 * 1) / 3^(s+1) = 0 := Nat.div_eq_of_lt hfour
-    have hproj := gst_omega_parent_projection s k m j hs
-    have hdOmega : (gstOmega s k m j).parentDigit = 2 := by
-      rw [← hproj.1]
-      simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit] using hq.1
-    have hcOmega :
-        (gstOmega s k m j).parentCarry = 0 ∨
-        (gstOmega s k m j).parentCarry = 3 := by
-      rw [← hproj.2]
-      simpa [GSTGraphV2InfiniteControl.seededCarry, gstCarry, hseed] using hq.2
-    have hzero : GSTOmegaGatePolynomial (gstOmega s k m j) = 0 :=
-      (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).2
-        ⟨hdOmega, hcOmega⟩
-    have hneq := hResidualBad j
-    change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0 at hneq
-    exact hneq hzero
+  have hApos : 0 < A := by
+    dsimp [A]
+    positivity
 
-  -- The exact classifier remains the only split.  Each branch consumes the
-  -- same transplanted infinite Graph-V2 boundary objects.
-  rcases hboundary with hlevel1 | hlevel3 | hstable
-  · rcases hlevel1 with ⟨hs1, hcase⟩
-    subst s
-    rcases hcase with hm1 | hm2
-    · -- Unbounded hard family: s=1 and m mod 3 = 1.
-      obtain ⟨q, hChild⟩ := hChildLeftExists
-      have hRightBad3 : ∀ j,
-          ¬ GST2DMixedEmergence.HappyCell
-            (GSTGraphV2InfiniteControl.graph
-              (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy 1 k m)
-              3 (k+2+j)).seven.carry
-            (GSTGraphV2InfiniteControl.graph
-              (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy 1 k m)
-              3 (k+2+j)).seven.digit := by
-        intro j
-        have h := hRightBad j
-        simpa [GSTGraphV2HandwrittenOmegaUBlock.residualWidth,
-          Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+  have hAunit :
+      A = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
+    dsimp [A]
+    simpa using (gst_navigation_decomposition s 1 hs)
 
-      let E := GSTGraphV2HandwrittenOmegaUBlock.residualEnergy 1 k m
-      let b := k + 2
-      let Kexp := 3^(k+1) * m
-      have hEpow : E = 4^Kexp := by rfl
+  have hunitPrefix :
+      gstNavigationConstant s 1 = 1 + 3*z := by
+    simpa [z] using gst_navigation_constant_unit_prefixS s hs
 
-      -- Canonical prefix-one constants transplanted from the Aug-17 stack.
-      have hQ : GSTCanonicalOriginEnergyS gstNavigationConstant := by
-        intro t n ht
-        exact gst_navigation_decomposition t n ht
-      let z : Nat → Nat := fun t => c t / 3
-      have hunit : ∀ t, 1 ≤ t →
-          gstNavigationConstant t 1 = 1 + 3 * z t := by
-        intro t ht
-        dsimp [z]
-        rw [gstNavigationConstant_one t ht]
-        have hc3 : c t % 3 = 1 := c_mod3 t ht
-        have hsplit := Nat.mod_add_div (c t) 3
-        omega
-      have hz3 : ∀ t, 1 ≤ t → z t % 3 = 2 := by
-        intro t ht
-        dsimp [z]
-        have hc9 : c t % 9 = 7 := c_mod9 t ht
-        have hc3 : c t % 3 = 1 := c_mod3 t ht
-        have hsplit : c t % 9 = c t % 3 + 3 * (c t / 3 % 3) := by
-          rw [show (9:Nat) = 3 * 3 by decide, Nat.mod_mul]
-        rw [hc9, hc3] at hsplit
-        omega
+  have hz1 : 1 + 4*z < A := by
+    have hD9 : 9 ≤ 3^(s+1) := by
+      rw [show (9:Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    rw [hAunit, hunitPrefix]
+    nlinarith
 
-      -- Exact A=64, c=7, z=2 canonical block identities.  These are now
-      -- instantiated inside the hard branch rather than left in scratch files.
-      have hA64 : (64 : Nat) = 4^(3^1) := by norm_num
-      have hLTE64 : (64 : Nat) = 1 + 3^(1+1) * 7 := by norm_num
-      have hc72 : (7 : Nat) = 1 + 3 * 2 := by norm_num
-      -- Exact arbitrary-k cut: do not collapse 1+3^k*m to the one-trit case.
-      have hParentCutDecomposition :=
-        gst_level_one_prefix_one_cut_decompositionS k m
-      have hParentCutResidue : 2 ≤ k ->
-          gstNavigationConstant 1 (1 + 3^k*m) % 3^k = 7 := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_residueS k m hk2
-      have hParentCutTail : 2 ≤ k ->
-          gstNavigationConstant 1 (1 + 3^k*m) / 3^k =
-            64 * gstNavigationConstant (1+k) m := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_tailS k m hk2
-      have hParentCutCarry : 2 ≤ k ->
-          gstCarryS (gstNavigationConstant 1 (1 + 3^k*m)) k =
-            28 / 3^k := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_carryS k m hk2
-      have hParentCutDigit : 2 ≤ k ->
-          gstDigitS (gstNavigationConstant 1 (1 + 3^k*m)) k = 1 := by
-        intro hk2
-        exact gst_level_one_prefix_one_cut_digit_oneS k m hk2 hm1
+  have htrap : GSTCanonicalRightChordTrapS A z T :=
+    gst_canonical_right_chord_trapS A z T hApos hz1 hparent hchildGate
 
-      -- Align the literal transplanted A=64,D=9 strip with the live row.
-      let qStrip := (k-1) + q
-      let Tstrip := 3^(k-1) * gstNavigationConstant (1+k) m
-      let Hstrip := 2 + 64*Tstrip
-      have hEstrip : E = 1 + 3*9*Tstrip := by
-        have hnav := gst_navigation_decomposition (1+k) m (by omega)
-        have hpow : 3^((1+k)+1) = 27 * 3^(k-1) := by
-          rw [show (1+k)+1 = 3 + (k-1) by omega, Nat.pow_add]
-          norm_num
-        rw [hpow] at hnav
-        simpa [E, Tstrip,
-          GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-          Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hnav
-      have hParentEnergyStrip : 64*E = 10 + 27*Hstrip := by
-        rw [hEstrip]
-        dsimp [Hstrip]
-        ring
+  obtain ⟨q, hgate, hparentSuffix, hchildSuffix, hC,
+    hlocal, hclass3, hclass2, hshared, hW⟩ := htrap
 
-      -- Full exact power-residue rectangle, not the reduced one-theorem probe.
-      have hPowerRectangle :=
-        gst_exact_power_rectangle_conservationS k 2 Kexp q
-      have hPowerCarry0 :=
-        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 0
-      have hPowerCarry1 :=
-        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 1
-      have hPowerCarry2 :=
-        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 2
-      have hPowerCarry3 :=
-        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 3
+  let D : Nat := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
+  let Z : Nat := gstAffineMulCarryS A z T (q+1)
+  let W : Nat := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
+  let C : Nat := gstAffineMulCarryS 4 0 T (q+1)
+  let Y : Nat := T / 3^(q+1)
 
-      have hBaseCarryZero :
-          (GSTGraphV2InfiniteControl.graph E 0 b).seven.carry = 0 := by
-        have hmodE : E % 3^b = 1 := by
-          have h := GSTGraphV2HandwrittenExponentialLTE.pow4_scaled_mod_next
-            (k+1) m
-          simpa [E, b, GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-            Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
-        change GSTCanonicalSevenAxisBridge.carry4 E b = 0
-        unfold GSTCanonicalSevenAxisBridge.carry4
-        rw [hmodE]
-        apply Nat.div_eq_of_lt
-        have hb9 : 9 ≤ 3^b := by
-          rw [show (9 : Nat) = 3^2 by decide]
-          exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
-        omega
+  have hparentSuffix' : GSTSeededBadTraceS D (Z + A*Y) := by
+    simpa [D, Z, Y] using hparentSuffix
+  have hchildSuffix' : GSTSeededBadTraceS C Y := by
+    simpa [C, Y] using hchildSuffix
+  have hC' : C = 2 ∨ C = 3 := by
+    simpa [C] using hC
+  have hshared' : D + 4*Z = W + A*C := by
+    simpa [D, Z, W, C] using hshared
+  have hW' : W < A := by
+    simpa [W] using hW
 
-      have hInfiniteControl :=
-        GSTGraphV2InfiniteControllerBridge.graph_infinite_bad_control
-          E 3 b hBaseCarryZero (by
-            intro j
-            simpa [E, b, Nat.add_assoc] using hRightBad3 j)
-      have hLatentGate :=
-        GSTGraphV2InfiniteControllerBridge.graph_child_happy_latent_transfer
-          E 3 b q hBaseCarryZero
-          (by intro j; simpa [E, b, Nat.add_assoc] using hRightBad3 j)
-          (by simpa [E, b, Nat.add_assoc] using hChild)
-      have hInfiniteLedger :=
-        GSTV2.infinite_coupled_ledger
-          (4^3)
-          (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
-          (by positivity)
-          (GSTGraphV2InfiniteControllerBridge.graphCoupledState_invariant E 3 b)
-      have hLedgerGate := hInfiniteLedger.pastSynchronized q
-      have hBadSuffix := hLatentGate.nextParentBadSuffix
-      have hLatentCarry := hLatentGate.nextCarryTwoOrThree
-      have hLatentCarryNonzero := hLatentGate.nextCarryNonzero
-      have hNextInvariant := hLatentGate.nextInvariant
+  have hDlt : D < 4 := by
+    dsimp [D]
+    exact gst_affine_carry_lt_multiplierS 4 1 (z + A*T) (q+1)
+      (by decide) (by decide)
 
-      -- The only remaining goal after this point is the canonical no-erasure
-      -- collision between the transplanted origin recursion / residue rectangle
-      -- and the all-depth right-bad suffix.  Keep it visible to Lean.
-      trace_state
-      omega
-    · rcases hm2 with ⟨hm2, hk13⟩
-      rcases hk13 with hk1 | hk3
-      · subst k
-        trace_state
-        omega
-      · subst k
-        trace_state
-        omega
-  · rcases hlevel3 with ⟨hs3, hk7, hnot2, hnot4, hnot6⟩
-    subst s
-    trace_state
-    omega
-  · rcases hstable with ⟨hs2, hs3, hk4, hnot2⟩
-    trace_state
-    omega
+  obtain ⟨a, b, e, Wmid, hDb, hCe, ha, hb, he, hWmid,
+      hmid, hlow⟩ :=
+    gst_shared_x4_binary_factor_last_gate_high_bitS
+      A D Z W C hApos hDlt hC' hW' hshared'
+
+  have hfuture0 : T / 3^T = 0 := by
+    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
+
+  -- Exact recovered RED frontier: the transplant has reduced the production
+  -- theorem to one final consumer, with all upstream context elaborated.
+  trace_state
+  contradiction
   -- END SOL56 FINAL INFINITE MONOLITH TRANSPLANT
 
 /-- Corrected information-wave closure: once parent badness descends to the
