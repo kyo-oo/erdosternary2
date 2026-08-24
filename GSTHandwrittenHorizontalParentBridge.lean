@@ -26,8 +26,8 @@ segment is the ordinary ternary digit of the horizontally transported child. -/
 theorem gpt56_parent_binary_endpoint_digit
     (s T q : Nat) :
     GSTPhysicalKernel.binaryColumnDigit T q (2 * 3^s) =
-      gstDigitS (4^(3^s) * T) q := by
-  unfold GSTPhysicalKernel.binaryColumnDigit gstDigitS
+      _root_.gstDigitS (4^(3^s) * T) q := by
+  unfold GSTPhysicalKernel.binaryColumnDigit _root_.gstDigitS
   rw [gpt56_parent_binary_column_exact]
 
 /-- And the incoming x2 carry at that endpoint is the literal carry generated
@@ -43,7 +43,7 @@ theorem gpt56_parent_binary_endpoint_carry
 segment, every information vertex through that endpoint is BIG2. -/
 theorem gpt56_no_big1_before_parent_endpoint_forces_big2
     (s T q : Nat)
-    (hd2 : gstDigitS T q = 2)
+    (hd2 : _root_.gstDigitS T q = 2)
     (hno : ∀ r, r ≤ 2 * 3^s →
       GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1) :
     GSTPhysicalKernel.binaryColumnDigit T q (2 * 3^s) = 2 := by
@@ -54,7 +54,7 @@ theorem gpt56_no_big1_before_parent_endpoint_forces_big2
     simpa [a, d] using gpt56_binary_row_path T q
   have hd0eq : d 0 = 2 := by
     dsimp [d]
-    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigitS] using hd2
+    simpa [GSTPhysicalKernel.binaryColumnDigit, _root_.gstDigitS] using hd2
   have hd0 : d 0 ≠ 0 := by omega
   obtain ⟨N, hfirst⟩ := gpt56_physical_path_forces_first_big1 T q (by
     simpa [d] using hd0)
@@ -85,10 +85,10 @@ theorem gpt56_no_big1_before_parent_endpoint_forces_big2
 /-- Same endpoint statement in the canonical 4^(3^s)*T coordinates. -/
 theorem gpt56_no_big1_before_parent_endpoint_digit_two
     (s T q : Nat)
-    (hd2 : gstDigitS T q = 2)
+    (hd2 : _root_.gstDigitS T q = 2)
     (hno : ∀ r, r ≤ 2 * 3^s →
       GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1) :
-    gstDigitS (4^(3^s) * T) q = 2 := by
+    _root_.gstDigitS (4^(3^s) * T) q = 2 := by
   rw [← gpt56_parent_binary_endpoint_digit]
   exact gpt56_no_big1_before_parent_endpoint_forces_big2 s T q hd2 hno
 
