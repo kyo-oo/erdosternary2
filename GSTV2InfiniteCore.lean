@@ -42,8 +42,7 @@ between the visible output coordinate and the transported carry coordinate. -/
 theorem cell_mass_conservation (carry d : Nat) :
     cellMass carry d = cellOutput carry d + 3 * cellNextCarry carry d := by
   unfold cellMass cellOutput cellNextCarry
-  have h := Nat.mod_add_div (carry + 4*d) 3
-  omega
+  exact (Nat.mod_add_div (carry + 4*d) 3).symm
 
 /-- Information transferred from the origin packet at coordinate `k`, kept in
 the original absolute scale. -/
@@ -59,7 +58,7 @@ def omegaFuture (t N K : Nat) : Nat := 3^(t+1+K) * (N / 3^K)
 
 /-- Exact ternary prefix reconstruction. -/
 theorem digit_prefix_value (N K : Nat) :
-    (∑ k in Finset.range K, 3^k * digit N k) = N % 3^K := by
+    Finset.sum (Finset.range K) (fun k => 3^k * digit N k) = N % 3^K := by
   induction K with
   | zero => simp [digit]
   | succ K ih =>
@@ -72,13 +71,13 @@ theorem omega_past_closed (t N K : Nat) :
     omegaPast t N K = 3^(t+1) * (N % 3^K) := by
   unfold omegaPast omegaTransfer
   calc
-    (∑ k in Finset.range K, 3^(t+1+k) * digit N k) =
-        ∑ k in Finset.range K, 3^(t+1) * (3^k * digit N k) := by
+    Finset.sum (Finset.range K) (fun k => 3^(t+1+k) * digit N k) =
+        Finset.sum (Finset.range K) (fun k => 3^(t+1) * (3^k * digit N k)) := by
           apply Finset.sum_congr rfl
           intro k hk
           rw [Nat.pow_add]
           ring
-    _ = 3^(t+1) * (∑ k in Finset.range K, 3^k * digit N k) := by
+    _ = 3^(t+1) * Finset.sum (Finset.range K) (fun k => 3^k * digit N k) := by
           rw [Finset.mul_sum]
     _ = 3^(t+1) * (N % 3^K) := by
           rw [digit_prefix_value]
