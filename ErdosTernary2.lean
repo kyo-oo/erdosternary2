@@ -17037,9 +17037,7 @@ theorem gst_prefix_one_information_bad_descends_inline
   apply gst_complete_bad_of_no_navigation
   intro hchild
 
-  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
-  -- Recovered Aug-23 whole-theorem body.  This is a literal theorem-body
-  -- transplant: no residual classifier probe is retained here.
+  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY
   let T : Nat := gstNavigationConstant (s+1) n
   let A : Nat := 4^(3^s)
   let z : Nat := gstCanonicalPrefixOffsetS s
@@ -17124,11 +17122,11 @@ theorem gst_prefix_one_information_bad_descends_inline
   have hfuture0 : T / 3^T = 0 := by
     simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
 
-  -- Exact recovered RED frontier: the transplant has reduced the production
-  -- theorem to one final consumer, with all upstream context elaborated.
+  -- Exact RED frontier.  This line is intentionally the only remaining
+  -- mathematical consumer to replace after the compiler exposes its context.
   trace_state
   contradiction
-  -- END SOL56 FINAL INFINITE MONOLITH TRANSPLANT
+  -- END SOL56 FINAL ATOMIC SEAM SURGERY
 
 /-- Corrected information-wave closure: once parent badness descends to the
     shared child information, the certified child Happy Gate is an immediate

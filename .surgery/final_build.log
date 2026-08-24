@@ -1,0 +1,757 @@
+=== LOCAL MODULE: GSTTactic ===
+GSTTactic.lean:69:5: warning: Variable name `hd2` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hd2
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+GSTTactic.lean:75:5: warning: Variable name `hd2` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hd2
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+=== LOCAL MODULE: GSTGraphV2CoupledUFlux ===
+GSTGraphV2CoupledUFlux.coupled_u_flux_step_exact (charge : ℕ → ℤ) (nextCarry : ℕ → ℕ → ℕ) (A : ℕ) (st : State) :
+  parentJumpWith charge nextCarry A st - ↑A * childJumpWith charge nextCarry st =
+    3 * potentialWith charge A (stepWith nextCarry A st) - potentialWith charge A st
+GSTGraphV2CoupledUFlux.coupled_u_flux_telescope_exact (charge : ℕ → ℤ) (nextCarry : ℕ → ℕ → ℕ) (A : ℕ) (initial : State)
+  (K : ℕ) :
+  ∑ j ∈ Finset.range K,
+      ↑(3 ^ j) *
+        (parentJumpWith charge nextCarry A (orbitWith nextCarry A initial j) -
+          ↑A * childJumpWith charge nextCarry (orbitWith nextCarry A initial j)) =
+    ↑(3 ^ K) * potentialWith charge A (orbitWith nextCarry A initial K) - potentialWith charge A initial
+GSTGraphV2CoupledUFlux.gst_coupled_u_flux_step_exact (A : ℕ) (st : State) :
+  parentJumpWith gstUChargeExact gstStepCarryExact A st - ↑A * childJumpWith gstUChargeExact gstStepCarryExact st =
+    3 * potentialWith gstUChargeExact A (stepWith gstStepCarryExact A st) - potentialWith gstUChargeExact A st
+GSTGraphV2CoupledUFlux.mixed_world_scale_exact (K : ℕ) : 6 ^ K = 2 ^ K * 3 ^ K
+'GSTGraphV2CoupledUFlux.coupled_u_flux_step_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2CoupledUFlux.coupled_u_flux_telescope_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2CoupledUFlux.gst_coupled_u_flux_step_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2CoupledUFlux.mixed_world_scale_exact' depends on axioms: [propext]
+=== LOCAL MODULE: GSTGraphV2CoupledUPhysicalBridge ===
+GSTGraphV2CoupledUPhysicalBridge.potential_shared_rewrite (charge : ℕ → ℤ) (A : ℕ) (st : PhysicalState)
+  (hInv : PhysicalInvariant A st) :
+  potentialWith charge A st.core =
+    reducedChargeWith charge st.core.parentSeed - ↑A * reducedChargeWith charge st.core.childCarry +
+      6 * ↑st.childResidue
+GSTGraphV2CoupledUPhysicalBridge.base4_prefix_value (S N : ℕ) : ∑ i ∈ Finset.range N, 4 ^ i * base4Digit S i = S % 4 ^ N
+GSTGraphV2CoupledUPhysicalBridge.horizontal_flux_telescope (charge : ℕ → ℤ) (S N : ℕ) :
+  ∑ i ∈ Finset.range N, ↑(4 ^ i) * horizontalFluxWith charge S i =
+    reducedChargeWith charge (base4Digit S 0) - ↑(4 ^ N) * reducedChargeWith charge (base4Digit S N) + 6 * ↑(S % 4 ^ N)
+GSTGraphV2CoupledUPhysicalBridge.coupled_potential_is_horizontal_base4_flux (charge : ℕ → ℤ) (A N : ℕ)
+  (st : PhysicalState) (hA : A = 4 ^ N) (hInv : PhysicalInvariant A st) (hResidue : st.childResidue < A)
+  (hParent : st.core.parentSeed < 4) (hChild : st.core.childCarry < 4) :
+  potentialWith charge A st.core =
+    ∑ i ∈ Finset.range N, ↑(4 ^ i) * horizontalFluxWith charge (st.core.parentSeed + 4 * st.core.parentOffset) i
+GSTGraphV2CoupledUPhysicalBridge.gst_u_potential_is_horizontal_base4_flux (A N : ℕ) (st : PhysicalState)
+  (hA : A = 4 ^ N) (hInv : PhysicalInvariant A st) (hResidue : st.childResidue < A) (hParent : st.core.parentSeed < 4)
+  (hChild : st.core.childCarry < 4) :
+  potentialWith gstUChargeExact A st.core =
+    ∑ i ∈ Finset.range N,
+      ↑(4 ^ i) * horizontalFluxWith gstUChargeExact (st.core.parentSeed + 4 * st.core.parentOffset) i
+'GSTGraphV2CoupledUPhysicalBridge.coupled_potential_is_horizontal_base4_flux' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2CoupledUPhysicalBridge.gst_u_potential_is_horizontal_base4_flux' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GST2DMixedEmergence ===
+GST2DMixedEmergence.mixed_cell_emergence (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  mixedDensity C d =
+    infoPotential (outDigit C d) - infoPotential d + 7 * carryPotential C - 21 * carryPotential (nextCarry C d) +
+      56 * surviveI C d
+GST2DMixedEmergence.happy_chord_dichotomy (C : ℕ) (hC : C = 0 ∨ C = 3) :
+  C = 0 ∧ midDigit C 2 = 1 ∧ finalMicroDigit C 2 = 2 ∧ surviveI C 2 = 0 ∨
+    C = 3 ∧ midDigit C 2 = 2 ∧ finalMicroDigit C 2 = 2 ∧ surviveI C 2 = 2
+GST2DMixedEmergence.mixed_rectangle_emergence (C d : ℕ → ℕ → ℕ) (N K : ℕ)
+  (hcell :
+    ∀ (t p : ℕ),
+      t < N →
+        p < K →
+          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
+  ∑ p ∈ Finset.range K, 3 ^ p * ∑ t ∈ Finset.range N, mixedDensity (C t p) (d t p) =
+    ∑ p ∈ Finset.range K, 3 ^ p * (infoPotential (d N p) - infoPotential (d 0 p)) +
+        7 * (∑ t ∈ Finset.range N, carryPotential (C t 0) - 3 ^ K * ∑ t ∈ Finset.range N, carryPotential (C t K)) +
+      56 * ∑ p ∈ Finset.range K, 3 ^ p * ∑ t ∈ Finset.range N, surviveI (C t p) (d t p)
+'GST2DMixedEmergence.mixed_cell_emergence' depends on axioms: [propext, Quot.sound]
+'GST2DMixedEmergence.mixed_rectangle_emergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTU2DAtomicBridge ===
+GSTU2DAtomicBridge.gst_u_charge_as_carry_potential (C : ℕ) (hC : C < 4) : gstUChargeExact C = 8 * ↑C - carryPotential C
+GSTU2DAtomicBridge.gst_coupled_potential_as_mixed_boundary (A : ℕ) (st : PhysicalState) (hInv : PhysicalInvariant A st)
+  (hParent : st.core.parentSeed < 4) (hChild : st.core.childCarry < 4) :
+  potentialWith gstUChargeExact A st.core =
+    ↑A * carryPotential st.core.childCarry - carryPotential st.core.parentSeed +
+      8 * (↑st.childResidue - ↑st.core.parentOffset)
+GSTU2DAtomicBridge.weighted_mixed_row_emergence (w : ℕ → ℤ) (C Cnext d : ℕ → ℕ) (N : ℕ)
+  (hcell : ∀ t < N, C t < 4 ∧ d t < 3 ∧ outDigit (C t) (d t) = d (t + 1) ∧ nextCarry (C t) (d t) = Cnext t) :
+  ∑ t ∈ Finset.range N, w t * mixedDensity (C t) (d t) =
+    ∑ t ∈ Finset.range N, w t * (infoPotential (d (t + 1)) - infoPotential (d t)) +
+        7 *
+          (∑ t ∈ Finset.range N, w t * carryPotential (C t) -
+            3 * ∑ t ∈ Finset.range N, w t * carryPotential (Cnext t)) +
+      56 * ∑ t ∈ Finset.range N, w t * surviveI (C t) (d t)
+GSTU2DAtomicBridge.weighted_mixed_rectangle_emergence (w : ℕ → ℤ) (C d : ℕ → ℕ → ℕ) (N K : ℕ)
+  (hcell :
+    ∀ (t p : ℕ),
+      t < N →
+        p < K →
+          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
+  ∑ p ∈ Finset.range K, 3 ^ p * ∑ t ∈ Finset.range N, w t * mixedDensity (C t p) (d t p) =
+    ∑ p ∈ Finset.range K, 3 ^ p * ∑ t ∈ Finset.range N, w t * (infoPotential (d (t + 1) p) - infoPotential (d t p)) +
+        7 *
+          (∑ t ∈ Finset.range N, w t * carryPotential (C t 0) -
+            3 ^ K * ∑ t ∈ Finset.range N, w t * carryPotential (C t K)) +
+      56 * ∑ p ∈ Finset.range K, 3 ^ p * ∑ t ∈ Finset.range N, w t * surviveI (C t p) (d t p)
+GSTU2DAtomicBridge.weighted_info_boundary_exact (f : ℕ → ℤ) (N : ℕ) :
+  ∑ t ∈ Finset.range (N + 1), 4 ^ t * (f (t + 1) - f t) =
+    4 ^ N * f (N + 1) - f 0 - 3 * ∑ t ∈ Finset.range N, 4 ^ t * f (t + 1)
+'GSTU2DAtomicBridge.gst_coupled_potential_as_mixed_boundary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DAtomicBridge.weighted_mixed_rectangle_emergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DAtomicBridge.weighted_info_boundary_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTU2DEventTransport ===
+GSTU2DEventTransport.eventDensity_physical_table :
+  eventDensity 0 0 = -6 ∧
+    eventDensity 0 1 = 0 ∧
+      eventDensity 0 2 = 3 ∧
+        eventDensity 1 0 = -8 ∧
+          eventDensity 1 1 = 0 ∧
+            eventDensity 1 2 = 0 ∧
+              eventDensity 2 0 = -8 ∧
+                eventDensity 2 1 = 0 ∧
+                  eventDensity 2 2 = 0 ∧ eventDensity 3 0 = -3 ∧ eventDensity 3 1 = 0 ∧ eventDensity 3 2 = 2
+GSTU2DEventTransport.eventDensity_ge_neg_eight (C d : ℕ) (hC : C < 4) (hd : d < 3) : -8 ≤ eventDensity C d
+GSTU2DEventTransport.happyCell_positive_and_preserves_big2 (C d : ℕ) (h : HappyCell C d) :
+  2 ≤ eventDensity C d ∧ outDigit C d = 2
+GSTU2DEventTransport.reverseEventCode_ge_eight_of_leading_happy (C d : ℕ → ℕ) (hfirst : HappyCell (C 0) (d 0)) (N : ℕ) :
+  2 ≤ N →
+    (∀ t < N, C t < 4) → (∀ t < N, d t < 3) → (∀ t < N, outDigit (C t) (d t) = d (t + 1)) → 8 ≤ reverseEventCode C d N
+'GSTU2DEventTransport.reverseEventCode_ge_eight_of_leading_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTU2DExactCrossingCharge ===
+GSTU2DExactCrossingCharge.crossDensity_physical_table :
+  crossDensity 0 0 = -57 ∧
+    crossDensity 0 1 = -111 ∧
+      crossDensity 0 2 = 105 ∧
+        crossDensity 1 0 = -39 ∧
+          crossDensity 1 1 = -81 ∧
+            crossDensity 1 2 = -84 ∧
+              crossDensity 2 0 = -111 ∧
+                crossDensity 2 1 = -93 ∧
+                  crossDensity 2 2 = 0 ∧ crossDensity 3 0 = 0 ∧ crossDensity 3 1 = 0 ∧ crossDensity 3 2 = 105
+GSTU2DExactCrossingCharge.reverseCrossCode_exact (C Cnext d : ℕ → ℕ) (N : ℕ) :
+  (∀ t < N, outDigit (C t) (d t) = d (t + 1)) →
+    (∀ t < N, nextCarry (C t) (d t) = Cnext t) →
+      reverseCrossCode C d N =
+        digitPotential (d N) - ↑(4 ^ N) * digitPotential (d 0) + reverseCarryCode C N - 3 * reverseCarryCode Cnext N +
+          84 * reverseSurviveCode C d N
+GSTU2DExactCrossingCharge.reverseCrossCode_ge_exponential_of_leading_happy (C d : ℕ → ℕ)
+  (hfirst : HappyCell (C 0) (d 0)) (N : ℕ) :
+  1 ≤ N → (∀ t < N, C t < 4) → (∀ t < N, d t < 3) → 17 * ↑(4 ^ N) + 37 ≤ reverseCrossCode C d N
+GSTU2DExactCrossingCharge.reverseCrossRectangle_exact (C d : ℕ → ℕ → ℕ) (N K : ℕ)
+  (hcell :
+    ∀ (t p : ℕ),
+      t < N →
+        p < K →
+          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
+  ∑ p ∈ Finset.range K, ↑(3 ^ p) * reverseCrossCode (fun t => C t p) (fun t => d t p) N =
+    ∑ p ∈ Finset.range K,
+          ↑(3 ^ p) *
+            (digitPotential (d N p) - ↑(4 ^ N) * digitPotential (d 0 p) +
+              84 * reverseSurviveCode (fun t => C t p) (fun t => d t p) N) +
+        reverseCarryCode (fun t => C t 0) N -
+      ↑(3 ^ K) * reverseCarryCode (fun t => C t K) N
+GSTU2DExactCrossingCharge.happy_iff_crossDensity_positive (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  HappyCell C d ↔ 0 < crossDensity C d
+'GSTU2DExactCrossingCharge.reverseCrossCode_exact' depends on axioms: [propext, Quot.sound]
+'GSTU2DExactCrossingCharge.reverseCrossCode_ge_exponential_of_leading_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTU2DExactCrossingCharge.reverseCrossRectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DExactCrossingCharge.happy_iff_crossDensity_positive' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTCanonicalSevenAxisBridge ===
+GSTCanonicalSevenAxisBridge.canonical_cell_exact (E t p : ℕ) :
+  outDigit (vertex E t p).carry (vertex E t p).digit = (vertex E (t + 1) p).digit ∧
+    nextCarry (vertex E t p).carry (vertex E t p).digit = (vertex E t (p + 1)).carry
+GSTCanonicalSevenAxisBridge.event_balance_exact (C d : ℕ) : event C d + 9 * nextCarry C d = 13 * d + 3 * C
+GSTCanonicalSevenAxisBridge.canonical_happy_iff_event_eight (E t p : ℕ) :
+  HappyCell (vertex E t p).carry (vertex E t p).digit ↔ event (vertex E t p).carry (vertex E t p).digit = 8
+'GSTCanonicalSevenAxisBridge.canonical_cell_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTCanonicalSevenAxisBridge.event_balance_exact' depends on axioms: [propext, Quot.sound]
+'GSTCanonicalSevenAxisBridge.canonical_happy_iff_event_eight' depends on axioms: [propext, Quot.sound]
+=== LOCAL MODULE: GSTGraphV2InfiniteControl ===
+GSTGraphV2InfiniteControl.lean:163:2: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+=== LOCAL MODULE: GSTGraphV2PerfectPowerAncestry ===
+GSTGraphV2PerfectPowerAncestry.power_origin_observables_exact (K t p : ℕ) :
+  (graph (4 ^ K) t p).seven.carry = (graph 1 (K + t) p).seven.carry ∧
+    (graph (4 ^ K) t p).seven.digit = (graph 1 (K + t) p).seven.digit ∧
+      (graph (4 ^ K) t p).eventCode = (graph 1 (K + t) p).eventCode ∧
+        (graph (4 ^ K) t p).uCharge = (graph 1 (K + t) p).uCharge ∧
+          (graph (4 ^ K) t p).mixedCharge = (graph 1 (K + t) p).mixedCharge ∧
+            (graph (4 ^ K) t p).crossingCharge = (graph 1 (K + t) p).crossingCharge ∧
+              (graph (4 ^ K) t p).survive = (graph 1 (K + t) p).survive
+GSTGraphV2PerfectPowerAncestry.power_origin_happy_iff (K t p : ℕ) :
+  HappyCell (graph (4 ^ K) t p).seven.carry (graph (4 ^ K) t p).seven.digit ↔
+    HappyCell (graph 1 (K + t) p).seven.carry (graph 1 (K + t) p).seven.digit
+GSTGraphV2PerfectPowerAncestry.power_origin_event_eight_iff (K t p : ℕ) :
+  (graph (4 ^ K) t p).eventCode = 8 ↔ (graph 1 (K + t) p).eventCode = 8
+'GSTGraphV2PerfectPowerAncestry.power_origin_observables_exact' depends on axioms: [propext]
+'GSTGraphV2PerfectPowerAncestry.power_origin_happy_iff' depends on axioms: [propext]
+'GSTGraphV2PerfectPowerAncestry.power_origin_event_eight_iff' depends on axioms: [propext]
+=== LOCAL MODULE: GSTU2DCanonicalPhaseDensity ===
+GSTU2DCanonicalPhaseDensity.phaseDensity_physical_table :
+  phaseDensity 0 0 = -4 ∧
+    phaseDensity 0 1 = -1 ∧
+      phaseDensity 0 2 = 2 ∧
+        phaseDensity 1 0 = -4 ∧
+          phaseDensity 1 1 = 0 ∧
+            phaseDensity 1 2 = -1 ∧
+              phaseDensity 2 0 = -4 ∧
+                phaseDensity 2 1 = -1 ∧
+                  phaseDensity 2 2 = 0 ∧ phaseDensity 3 0 = -3 ∧ phaseDensity 3 1 = 0 ∧ phaseDensity 3 2 = 2
+GSTU2DCanonicalPhaseDensity.happy_iff_phaseDensity_positive (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  HappyCell C d ↔ 0 < phaseDensity C d
+GSTU2DCanonicalPhaseDensity.weightedPhaseColumnPrefix_ge_floor (C d : ℕ → ℕ) (K : ℕ) (hC : ∀ p < K, C p < 4)
+  (hd : ∀ p < K, d p < 3) : -2 * (↑(3 ^ K) - 1) ≤ weightedPhaseColumnPrefix C d K
+GSTU2DCanonicalPhaseDensity.weightedPhaseColumnPrefix_positive_of_top_happy (C d : ℕ → ℕ) (q : ℕ)
+  (hC : ∀ p ≤ q, C p < 4) (hd : ∀ p ≤ q, d p < 3) (hHappy : HappyCell (C q) (d q)) :
+  0 < weightedPhaseColumnPrefix C d (q + 1)
+GSTU2DCanonicalPhaseDensity.phaseRectangle_exact (C d : ℕ → ℕ → ℕ) (N K : ℕ)
+  (hcell :
+    ∀ (t p : ℕ),
+      t < N →
+        p < K →
+          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
+  ∑ t ∈ Finset.range N, ∑ p ∈ Finset.range K, ↑(3 ^ p) * phaseDensity (C t p) (d t p) =
+    ∑ p ∈ Finset.range K, ↑(3 ^ p) * (phaseDigitPotential (d N p) - phaseDigitPotential (d 0 p)) +
+          ∑ t ∈ Finset.range N, phaseCarryPotential (C t 0) -
+        ↑(3 ^ K) * ∑ t ∈ Finset.range N, phaseCarryPotential (C t K) +
+      ∑ t ∈ Finset.range N, ∑ p ∈ Finset.range K, ↑(3 ^ p) * surviveI (C t p) (d t p)
+'GSTU2DCanonicalPhaseDensity.phaseDensity_physical_table' does not depend on any axioms
+'GSTU2DCanonicalPhaseDensity.weightedPhaseColumnPrefix_positive_of_top_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTU2DCanonicalPhaseDensity.phaseRectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTGraphV2UnifiedPowerRectangle ===
+GSTGraphV2UnifiedPowerRectangle.unifiedState_physicalInvariant (E N p : ℕ) :
+  PhysicalInvariant (4 ^ N) (unifiedState E N p)
+GSTGraphV2UnifiedPowerRectangle.unifiedState_parentDigit_exact (E N p : ℕ) :
+  parentDigit (4 ^ N) (unifiedState E N p).core = (graph E N p).seven.digit
+GSTGraphV2UnifiedPowerRectangle.unified_equationIII_graph_exact (E N p : ℕ) :
+  gstUJumpExact (graph E N p).seven.carry (graph E N p).seven.digit -
+      ↑(4 ^ N) * gstUJumpExact (graph E 0 p).seven.carry (graph E 0 p).seven.digit =
+    3 * potentialWith gstUChargeExact (4 ^ N) (stepWith gstStepCarryExact (4 ^ N) (unifiedState E N p).core) -
+      potentialWith gstUChargeExact (4 ^ N) (unifiedState E N p).core
+GSTGraphV2UnifiedPowerRectangle.unified_u_potential_is_graph_horizontal_flux (E N p : ℕ) :
+  potentialWith gstUChargeExact (4 ^ N) (unifiedState E N p).core =
+    ∑ i ∈ Finset.range N,
+      ↑(4 ^ i) *
+        horizontalFluxWith gstUChargeExact
+          ((unifiedState E N p).core.parentSeed + 4 * (unifiedState E N p).core.parentOffset) i
+'GSTGraphV2UnifiedPowerRectangle.unifiedState_physicalInvariant' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2UnifiedPowerRectangle.unified_equationIII_graph_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2UnifiedPowerRectangle.unified_u_potential_is_graph_horizontal_flux' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTGraphV2UnifiedVerticalTelescope ===
+GSTGraphV2UnifiedVerticalTelescope.carryWord_vertical_balance (E p start N : ℕ) :
+  carryWord E p start N + 4 ^ N * (graph E start p).seven.digit =
+    (graph E (start + N) p).seven.digit + 3 * carryWord E (p + 1) start N
+GSTGraphV2UnifiedVerticalTelescope.unifiedState_core_step_exact (E N p : ℕ) :
+  stepWith gstStepCarryExact (4 ^ N) (unifiedState E N p).core = (unifiedState E N (p + 1)).core
+GSTGraphV2UnifiedVerticalTelescope.unified_equationIII_graph_closed (E N p : ℕ) :
+  gstUJumpExact (graph E N p).seven.carry (graph E N p).seven.digit -
+      ↑(4 ^ N) * gstUJumpExact (graph E 0 p).seven.carry (graph E 0 p).seven.digit =
+    3 * potentialWith gstUChargeExact (4 ^ N) (unifiedState E N (p + 1)).core -
+      potentialWith gstUChargeExact (4 ^ N) (unifiedState E N p).core
+GSTGraphV2UnifiedVerticalTelescope.unified_equationIII_vertical_telescope (E N p K : ℕ) :
+  ∑ j ∈ Finset.range K,
+      ↑(3 ^ j) *
+        (gstUJumpExact (graph E N (p + j)).seven.carry (graph E N (p + j)).seven.digit -
+          ↑(4 ^ N) * gstUJumpExact (graph E 0 (p + j)).seven.carry (graph E 0 (p + j)).seven.digit) =
+    ↑(3 ^ K) * potentialWith gstUChargeExact (4 ^ N) (unifiedState E N (p + K)).core -
+      potentialWith gstUChargeExact (4 ^ N) (unifiedState E N p).core
+'GSTGraphV2UnifiedVerticalTelescope.unifiedState_core_step_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2UnifiedVerticalTelescope.unified_equationIII_vertical_telescope' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTGraphV2PerfectPowerBlockProbe ===
+GSTGraphV2PerfectPowerBlock.graph_phase_prefix_positive_of_happy (E t q : ℕ)
+  (hHappy : HappyCell (graph E t q).seven.carry (graph E t q).seven.digit) :
+  0 < weightedPhaseColumnPrefix (fun p => (graph E t p).seven.carry) (fun p => (graph E t p).seven.digit) (q + 1)
+GSTGraphV2PerfectPowerBlock.graph_phase_prefix_nonpositive_of_bad (E t K : ℕ)
+  (hBad : ∀ p < K, ¬HappyCell (graph E t p).seven.carry (graph E t p).seven.digit) :
+  weightedPhaseColumnPrefix (fun p => (graph E t p).seven.carry) (fun p => (graph E t p).seven.digit) K ≤ 0
+GSTGraphV2PerfectPowerBlock.weightedPhaseColumnPrefix_eq_sum (C d : ℕ → ℕ) (K : ℕ) :
+  weightedPhaseColumnPrefix C d K = ∑ p ∈ Finset.range K, ↑(3 ^ p) * phaseDensity (C p) (d p)
+GSTGraphV2PerfectPowerBlock.digit3_weighted_prefix_nat (R K : ℕ) : ∑ p ∈ Finset.range K, 3 ^ p * digit3 R p = R % 3 ^ K
+GSTGraphV2PerfectPowerBlock.graph_digit_weighted_prefix_exact (E t K : ℕ) :
+  ∑ p ∈ Finset.range K, ↑(3 ^ p) * ↑(graph E t p).seven.digit = ↑(4 ^ t * E % 3 ^ K)
+GSTGraphV2PerfectPowerBlock.graph_phase_column_exact (E t K : ℕ) :
+  weightedPhaseColumnPrefix (fun p => (graph E t p).seven.carry) (fun p => (graph E t p).seven.digit) K =
+    ∑ p ∈ Finset.range K,
+            ↑(3 ^ p) *
+              (phaseDigitPotential (graph E (t + 1) p).seven.digit - phaseDigitPotential (graph E t p).seven.digit) +
+          phaseCarryPotential (graph E t 0).seven.carry -
+        ↑(3 ^ K) * phaseCarryPotential (graph E t K).seven.carry +
+      ∑ p ∈ Finset.range K, ↑(3 ^ p) * surviveI (graph E t p).seven.carry (graph E t p).seven.digit
+GSTGraphV2PerfectPowerBlock.canonical_power_origin_happy_iff (s n t p : ℕ) :
+  HappyCell (graph (canonicalEnergy s n) t p).seven.carry (graph (canonicalEnergy s n) t p).seven.digit ↔
+    HappyCell (graph 1 (3 ^ (s + 1) * n + t) p).seven.carry (graph 1 (3 ^ (s + 1) * n + t) p).seven.digit
+GSTGraphV2PerfectPowerBlock.graph_phase_window_positive_of_happy (E t b q : ℕ)
+  (hHappy : HappyCell (graph E t (b + q)).seven.carry (graph E t (b + q)).seven.digit) :
+  0 < graphPhaseWindow E t b (q + 1)
+GSTGraphV2PerfectPowerBlock.graph_phase_window_nonpositive_of_bad (E t b K : ℕ)
+  (hBad : ∀ j < K, ¬HappyCell (graph E t (b + j)).seven.carry (graph E t (b + j)).seven.digit) :
+  graphPhaseWindow E t b K ≤ 0
+GSTGraphV2PerfectPowerBlock.graph_digit_window_exact (E t b K : ℕ) :
+  ∑ j ∈ Finset.range K, ↑(3 ^ j) * ↑(graph E t (b + j)).seven.digit = ↑(4 ^ t * E / 3 ^ b % 3 ^ K)
+GSTGraphV2PerfectPowerBlock.graph_phase_window_exact (E t b K : ℕ) :
+  graphPhaseWindow E t b K =
+    ∑ j ∈ Finset.range K,
+            ↑(3 ^ j) *
+              (phaseDigitPotential (graph E (t + 1) (b + j)).seven.digit -
+                phaseDigitPotential (graph E t (b + j)).seven.digit) +
+          phaseCarryPotential (graph E t b).seven.carry -
+        ↑(3 ^ K) * phaseCarryPotential (graph E t (b + K)).seven.carry +
+      ∑ j ∈ Finset.range K, ↑(3 ^ j) * surviveI (graph E t (b + j)).seven.carry (graph E t (b + j)).seven.digit
+GSTGraphV2PerfectPowerBlock.graph_phase_digit_window_boundary_exact (E t b K : ℕ) :
+  ∑ j ∈ Finset.range K,
+      ↑(3 ^ j) *
+        (phaseDigitPotential (graph E (t + 1) (b + j)).seven.digit -
+          phaseDigitPotential (graph E t (b + j)).seven.digit) =
+    ↑(4 ^ (t + 1) * E / 3 ^ b % 3 ^ K) - ↑(4 ^ t * E / 3 ^ b % 3 ^ K)
+'GSTGraphV2PerfectPowerBlock.graph_phase_window_positive_of_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2PerfectPowerBlock.graph_phase_window_nonpositive_of_bad' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2PerfectPowerBlock.graph_phase_window_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2PerfectPowerBlock.graph_phase_digit_window_boundary_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTGraphV2HandwrittenOmegaUBlock ===
+GSTGraphV2HandwrittenOmegaUBlock.origin_split_exact (n : ℕ) : n = originTrit n + 3 * originTail n
+GSTGraphV2HandwrittenOmegaUBlock.perfect_power_u_mul_div_exact (t n : ℕ) :
+  4 ^ (3 ^ t * n) = 4 ^ (3 ^ t * originTrit n) * 4 ^ (3 ^ (t + 1) * originTail n)
+GSTGraphV2HandwrittenOmegaUBlock.residual_energy_u_mul_div_exact (s k m : ℕ) :
+  residualEnergy s k m = 4 ^ (3 ^ (s + k) * originTrit m) * 4 ^ (3 ^ (s + k + 1) * originTail m)
+GSTGraphV2HandwrittenOmegaUBlock.residual_parent_energy_exact (s k m : ℕ) :
+  4 ^ residualWidth s * residualEnergy s k m = 4 ^ residualParentExponent s k m
+GSTGraphV2HandwrittenOmegaUBlock.residual_parent_u_mul_div_exact (s k m : ℕ) :
+  4 ^ residualParentExponent s k m = 4 ^ 3 ^ s * 4 ^ (3 ^ (s + k) * originTrit m) * 4 ^ (3 ^ (s + k + 1) * originTail m)
+GSTGraphV2HandwrittenOmegaUBlock.residual_parent_observables_exact (s k m p : ℕ) :
+  (graph (residualEnergy s k m) (residualWidth s) p).seven.carry =
+      (graph 1 (residualParentExponent s k m) p).seven.carry ∧
+    (graph (residualEnergy s k m) (residualWidth s) p).seven.digit =
+        (graph 1 (residualParentExponent s k m) p).seven.digit ∧
+      (graph (residualEnergy s k m) (residualWidth s) p).eventCode =
+          (graph 1 (residualParentExponent s k m) p).eventCode ∧
+        (graph (residualEnergy s k m) (residualWidth s) p).uCharge =
+            (graph 1 (residualParentExponent s k m) p).uCharge ∧
+          (graph (residualEnergy s k m) (residualWidth s) p).mixedCharge =
+              (graph 1 (residualParentExponent s k m) p).mixedCharge ∧
+            (graph (residualEnergy s k m) (residualWidth s) p).crossingCharge =
+                (graph 1 (residualParentExponent s k m) p).crossingCharge ∧
+              (graph (residualEnergy s k m) (residualWidth s) p).survive =
+                (graph 1 (residualParentExponent s k m) p).survive
+GSTGraphV2HandwrittenOmegaUBlock.residual_parent_happy_iff (s k m p : ℕ) :
+  HappyCell (graph (residualEnergy s k m) (residualWidth s) p).seven.carry
+      (graph (residualEnergy s k m) (residualWidth s) p).seven.digit ↔
+    HappyCell (graph 1 (residualParentExponent s k m) p).seven.carry
+      (graph 1 (residualParentExponent s k m) p).seven.digit
+'GSTGraphV2HandwrittenOmegaUBlock.perfect_power_u_mul_div_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2HandwrittenOmegaUBlock.residual_parent_u_mul_div_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2HandwrittenOmegaUBlock.residual_parent_observables_exact' depends on axioms: [propext]
+=== LOCAL MODULE: GSTGraphV2HandwrittenExponentialCascade ===
+GSTGraphV2HandwrittenExponentialCascade.origin_block_split_exact (n K : ℕ) :
+  n = originPrefix n K + 3 ^ K * originSuffix n K
+GSTGraphV2HandwrittenExponentialCascade.perfect_power_u_block_exact (t n K : ℕ) :
+  4 ^ (3 ^ t * n) = 4 ^ uPhaseShift t n K * uTailEnergy t n K
+GSTGraphV2HandwrittenExponentialCascade.graph_u_block_observables_exact (t n K x p : ℕ) :
+  (graph (4 ^ (3 ^ t * n)) x p).seven.carry = (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.carry ∧
+    (graph (4 ^ (3 ^ t * n)) x p).seven.digit = (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.digit ∧
+      (graph (4 ^ (3 ^ t * n)) x p).seven.space = (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.space ∧
+        (graph (4 ^ (3 ^ t * n)) x p).seven.descent =
+            (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.descent ∧
+          (graph (4 ^ (3 ^ t * n)) x p).seven.nextDescent =
+              (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.nextDescent ∧
+            (graph (4 ^ (3 ^ t * n)) x p).eventCode = (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).eventCode ∧
+              (graph (4 ^ (3 ^ t * n)) x p).uCharge = (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).uCharge ∧
+                (graph (4 ^ (3 ^ t * n)) x p).mixedCharge =
+                    (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).mixedCharge ∧
+                  (graph (4 ^ (3 ^ t * n)) x p).crossingCharge =
+                      (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).crossingCharge ∧
+                    (graph (4 ^ (3 ^ t * n)) x p).survive =
+                      (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).survive
+GSTGraphV2HandwrittenExponentialCascade.graph_u_block_horizontal_axes_exact (t n K x p : ℕ) :
+  (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.horizontal =
+      uPhaseShift t n K + (graph (4 ^ (3 ^ t * n)) x p).seven.horizontal ∧
+    (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.horizontalNext =
+        uPhaseShift t n K + (graph (4 ^ (3 ^ t * n)) x p).seven.horizontalNext ∧
+      (graph (uTailEnergy t n K) (uPhaseShift t n K + x) p).seven.vertical =
+        (graph (4 ^ (3 ^ t * n)) x p).seven.vertical
+GSTGraphV2HandwrittenExponentialCascade.graph_navigation_nullspace_flux_exact (E x p : ℕ) :
+  4 * (4 ^ x * E % 3 ^ p) = navigationNullspace (4 ^ x * E) p + 3 ^ p * (graph E x p).seven.carry
+GSTGraphV2HandwrittenExponentialCascade.handwritten_exponential_navigation_flux_exact (t n K x p : ℕ) :
+  4 * (4 ^ (uPhaseShift t n K + x) * uTailEnergy t n K % 3 ^ p) =
+    navigationNullspace (4 ^ (uPhaseShift t n K + x) * uTailEnergy t n K) p +
+      3 ^ p * (graph (4 ^ (3 ^ t * n)) x p).seven.carry
+GSTGraphV2HandwrittenExponentialCascade.originSuffix_eventually_zero (n : ℕ) : originSuffix n (n + 1) = 0
+GSTGraphV2HandwrittenExponentialCascade.uTailEnergy_eventually_one (t n : ℕ) : uTailEnergy t n (n + 1) = 1
+'GSTGraphV2HandwrittenExponentialCascade.perfect_power_u_block_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2HandwrittenExponentialCascade.graph_u_block_observables_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2HandwrittenExponentialCascade.handwritten_exponential_navigation_flux_exact' depends on axioms: [propext,
+ Quot.sound]
+=== LOCAL MODULE: GSTGraphV2HandwrittenExponentialLTE ===
+GSTGraphV2HandwrittenExponentialLTE.lean:53:54: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+GSTGraphV2HandwrittenExponentialLTE.lean:47:52: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+GSTGraphV2HandwrittenExponentialLTE.lean:53:54: warning: 'omega' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+GSTGraphV2HandwrittenExponentialLTE.lean:84:2: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+GSTGraphV2HandwrittenExponentialLTE.lean:83:23: warning: This simp argument is unused:
+  Nat.mul_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mod, Nat.mod_eq_of_lt hMgt1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+GSTGraphV2HandwrittenExponentialLTE.pow4_three_power_lte_exact (r : ℕ) : 4 ^ 3 ^ r = 1 + 3 ^ (r + 1) * lteCoeff r
+GSTGraphV2HandwrittenExponentialLTE.lteCoeff_mod3_one (r : ℕ) : lteCoeff r % 3 = 1
+GSTGraphV2HandwrittenExponentialLTE.pow4_scaled_mod_next (r u : ℕ) : 4 ^ (3 ^ r * u) % 3 ^ (r + 1) = 1
+GSTGraphV2HandwrittenExponentialLTE.pow4_scaled_cut_carry_zero (r u : ℕ) (hr : 2 ≤ r) : carry4 (4 ^ (3 ^ r * u)) r = 0
+GSTGraphV2HandwrittenExponentialLTE.pow4_scaled_cut_digit_zero (r u : ℕ) (hr : 2 ≤ r) : digit3 (4 ^ (3 ^ r * u)) r = 0
+GSTGraphV2HandwrittenExponentialLTE.uTailEnergy_cut_neutral (t n K : ℕ) (hcut : 2 ≤ t + K) :
+  (graph (uTailEnergy t n K) 0 (t + K)).seven.carry = 0 ∧
+    (graph (uTailEnergy t n K) 0 (t + K)).seven.digit = 0 ∧
+      (graph (uTailEnergy t n K) 0 (t + K)).seven.space = Space.null
+GSTGraphV2HandwrittenExponentialLTE.canonical_child_u_cut_neutral (s n q : ℕ) (hs : 1 ≤ s) :
+  (graph (uTailEnergy (s + 1) n (q + 1)) 0 (s + 2 + q)).seven.carry = 0 ∧
+    (graph (uTailEnergy (s + 1) n (q + 1)) 0 (s + 2 + q)).seven.digit = 0 ∧
+      (graph (uTailEnergy (s + 1) n (q + 1)) 0 (s + 2 + q)).seven.space = Space.null
+'GSTGraphV2HandwrittenExponentialLTE.pow4_three_power_lte_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2HandwrittenExponentialLTE.uTailEnergy_cut_neutral' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTGraphV2HandwrittenAnchoredCocycle ===
+GSTGraphV2HandwrittenAnchoredCocycle.carryWord_append_exact (E p start P N : ℕ) :
+  carryWord E p start (P + N) = 4 ^ N * carryWord E p start P + carryWord E p (start + P) N
+GSTGraphV2HandwrittenAnchoredCocycle.graph_u_potential_cocycle_exact (E start P N p : ℕ) :
+  graphUPotential E start (P + N) p = graphUPotential E (start + P) N p + ↑(4 ^ N) * graphUPotential E start P p
+GSTGraphV2HandwrittenAnchoredCocycle.graph_u_equationIII_shifted_exact (E start N p : ℕ) :
+  gstUJumpExact (graph E (start + N) p).seven.carry (graph E (start + N) p).seven.digit -
+      ↑(4 ^ N) * gstUJumpExact (graph E start p).seven.carry (graph E start p).seven.digit =
+    3 * graphUPotential E start N (p + 1) - graphUPotential E start N p
+GSTGraphV2HandwrittenAnchoredCocycle.graph_u_equationIII_shifted_telescope (E start N p K : ℕ) :
+  ∑ j ∈ Finset.range K,
+      ↑(3 ^ j) *
+        (gstUJumpExact (graph E (start + N) (p + j)).seven.carry (graph E (start + N) (p + j)).seven.digit -
+          ↑(4 ^ N) * gstUJumpExact (graph E start (p + j)).seven.carry (graph E start (p + j)).seven.digit) =
+    ↑(3 ^ K) * graphUPotential E start N (p + K) - graphUPotential E start N p
+GSTGraphV2HandwrittenAnchoredCocycle.happy_iff_gst_u_jump_negative (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  HappyCell C d ↔ gstUJumpExact C d < 0
+GSTGraphV2HandwrittenAnchoredCocycle.graph_u_derivative_positive_of_child_happy_right_bad (E start N p : ℕ)
+  (hChild : HappyCell (graph E start p).seven.carry (graph E start p).seven.digit)
+  (hRight : ¬HappyCell (graph E (start + N) p).seven.carry (graph E (start + N) p).seven.digit) :
+  0 < 3 * graphUPotential E start N (p + 1) - graphUPotential E start N p
+GSTGraphV2HandwrittenAnchoredCocycle.graph_u_jump_cocycle_exact (E start P N p : ℕ) :
+  gstUJumpExact (graph E (start + (P + N)) p).seven.carry (graph E (start + (P + N)) p).seven.digit -
+      ↑(4 ^ (P + N)) * gstUJumpExact (graph E start p).seven.carry (graph E start p).seven.digit =
+    gstUJumpExact (graph E (start + P + N) p).seven.carry (graph E (start + P + N) p).seven.digit -
+        ↑(4 ^ N) * gstUJumpExact (graph E (start + P) p).seven.carry (graph E (start + P) p).seven.digit +
+      ↑(4 ^ N) *
+        (gstUJumpExact (graph E (start + P) p).seven.carry (graph E (start + P) p).seven.digit -
+          ↑(4 ^ P) * gstUJumpExact (graph E start p).seven.carry (graph E start p).seven.digit)
+GSTGraphV2HandwrittenAnchoredCocycle.canonical_u_recoordinate_exact (s n q x p : ℕ) :
+  (graph (canonicalEnergy s n) x p).seven.carry =
+      (graph (uTailEnergy (s + 1) n (q + 1)) (uPhaseShift (s + 1) n (q + 1) + x) p).seven.carry ∧
+    (graph (canonicalEnergy s n) x p).seven.digit =
+        (graph (uTailEnergy (s + 1) n (q + 1)) (uPhaseShift (s + 1) n (q + 1) + x) p).seven.digit ∧
+      (graph (canonicalEnergy s n) x p).eventCode =
+          (graph (uTailEnergy (s + 1) n (q + 1)) (uPhaseShift (s + 1) n (q + 1) + x) p).eventCode ∧
+        (graph (canonicalEnergy s n) x p).uCharge =
+          (graph (uTailEnergy (s + 1) n (q + 1)) (uPhaseShift (s + 1) n (q + 1) + x) p).uCharge
+GSTGraphV2HandwrittenAnchoredCocycle.handwritten_u_anchored_cocycle_exact (s n q : ℕ) (hs : 1 ≤ s) :
+  have T := uTailEnergy (s + 1) n (q + 1);
+  have P := uPhaseShift (s + 1) n (q + 1);
+  have N := canonicalWidth s;
+  have p := s + 2 + q;
+  (graph T 0 p).seven.carry = 0 ∧
+    (graph T 0 p).seven.digit = 0 ∧
+      (graph (canonicalEnergy s n) 0 p).seven.carry = (graph T P p).seven.carry ∧
+        (graph (canonicalEnergy s n) 0 p).seven.digit = (graph T P p).seven.digit ∧
+          (graph (canonicalEnergy s n) N p).seven.carry = (graph T (P + N) p).seven.carry ∧
+            (graph (canonicalEnergy s n) N p).seven.digit = (graph T (P + N) p).seven.digit ∧
+              graphUPotential T 0 (P + N) p = graphUPotential T P N p + ↑(4 ^ N) * graphUPotential T 0 P p
+'GSTGraphV2HandwrittenAnchoredCocycle.graph_u_equationIII_shifted_telescope' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2HandwrittenAnchoredCocycle.graph_u_derivative_positive_of_child_happy_right_bad' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTGraphV2HandwrittenAnchoredCocycle.handwritten_u_anchored_cocycle_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTU2DPureDivergence83 ===
+GSTU2DPureDivergence83.density83_physical_table :
+  density83 0 0 = -105 ∧
+    density83 0 1 = -84 ∧
+      density83 0 2 = 168 ∧
+        density83 1 0 = -28 ∧
+          density83 1 1 = -28 ∧
+            density83 1 2 = -49 ∧
+              density83 2 0 = 0 ∧
+                density83 2 1 = -105 ∧ density83 2 2 = 0 ∧ density83 3 0 = -105 ∧ density83 3 1 = 0 ∧ density83 3 2 = 84
+GSTU2DPureDivergence83.happy_iff_density83_positive (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  HappyCell C d ↔ 0 < density83 C d
+GSTU2DPureDivergence83.reverseDensity83_exact (C Cnext d : ℕ → ℕ) (N : ℕ) :
+  (∀ t < N, outDigit (C t) (d t) = d (t + 1)) →
+    (∀ t < N, nextCarry (C t) (d t) = Cnext t) →
+      reverseDensity83 C d N =
+        digitPotential83 (d N) - ↑(8 ^ N) * digitPotential83 (d 0) + reverseCarry83 C N - 3 * reverseCarry83 Cnext N
+GSTU2DPureDivergence83.density83_rectangle_exact (C d : ℕ → ℕ → ℕ) (N K : ℕ)
+  (hcell :
+    ∀ (t p : ℕ),
+      t < N →
+        p < K →
+          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
+  ∑ p ∈ Finset.range K, ↑(3 ^ p) * reverseDensity83 (fun t => C t p) (fun t => d t p) N =
+    ∑ p ∈ Finset.range K, ↑(3 ^ p) * (digitPotential83 (d N p) - ↑(8 ^ N) * digitPotential83 (d 0 p)) +
+        reverseCarry83 (fun t => C t 0) N -
+      ↑(3 ^ K) * reverseCarry83 (fun t => C t K) N
+GSTU2DPureDivergence83.weightedRectanglePrefix83_positive_of_top_leading_happy (C d : ℕ → ℕ → ℕ) (N q : ℕ) (hN : 1 ≤ N)
+  (hC : ∀ (t p : ℕ), t < N → p ≤ q → C t p < 4) (hd : ∀ (t p : ℕ), t < N → p ≤ q → d t p < 3)
+  (hHappy : HappyCell (C 0 q) (d 0 q)) : 0 < weightedRectanglePrefix83 C d N (q + 1)
+GSTU2DPureDivergence83.graph_density83_rectangle_exact (E N K : ℕ) :
+  ∑ p ∈ Finset.range K,
+      ↑(3 ^ p) * reverseDensity83 (fun t => (graph E t p).seven.carry) (fun t => (graph E t p).seven.digit) N =
+    ∑ p ∈ Finset.range K,
+          ↑(3 ^ p) *
+            (digitPotential83 (graph E N p).seven.digit - ↑(8 ^ N) * digitPotential83 (graph E 0 p).seven.digit) +
+        reverseCarry83 (fun t => (graph E t 0).seven.carry) N -
+      ↑(3 ^ K) * reverseCarry83 (fun t => (graph E t K).seven.carry) N
+'GSTU2DPureDivergence83.density83_rectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DPureDivergence83.weightedRectanglePrefix83_positive_of_top_leading_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTU2DPureDivergence83.graph_density83_rectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTGraphV2Production ===
+GSTGraphV2Production.Cell : Type
+GSTGraphV2Production.graph (E : ℕ) : Sheet
+GSTGraphV2Production.Direction : Type
+GSTGraphV2Production.Edge : Type
+GSTGraphV2Production.horizontalEdge (E t p : ℕ) : Edge
+GSTGraphV2Production.verticalEdge (E t p : ℕ) : Edge
+GSTGraphV2Production.Lattice : Type
+GSTGraphV2Production.lattice (E : ℕ) : Lattice
+GSTGraphV2Production.Neighborhood : Type
+GSTGraphV2Production.neighborhood (E t p : ℕ) : Neighborhood
+GSTGraphV2Production.Rectangle : Type
+GSTGraphV2Production.rectangle (E N p : ℕ) : Rectangle
+GSTGraphV2Production.OriginCoordinates : Type
+GSTGraphV2Production.originCoordinates (t n K : ℕ) : OriginCoordinates
+GSTGraphV2Production.OriginFrame : Type
+GSTGraphV2Production.originFrame (t n K x p : ℕ) : OriginFrame
+GSTGraphV2Production.canonicalGraph (s n : ℕ) : Sheet
+GSTGraphV2Production.canonicalLattice (s n : ℕ) : Lattice
+GSTGraphV2Production.canonicalRectangle (s n p : ℕ) : Rectangle
+GSTGraphV2Production.residualGraph (s k m : ℕ) : Sheet
+GSTGraphV2Production.residualLattice (s k m : ℕ) : Lattice
+GSTGraphV2Production.residualRectangle (s k m p : ℕ) : Rectangle
+GSTGraphV2Production.ResidualFrame : Type
+GSTGraphV2Production.residualFrame (s k m p : ℕ) : ResidualFrame
+GSTGraphV2Production.residualGateRow (s k j : ℕ) : ℕ
+GSTGraphV2Production.ResidualGateFrame : Type
+GSTGraphV2Production.residualGateFrame (s k m j : ℕ) : ResidualGateFrame
+GSTGraphV2Production.CanonicalCutFrame : Type
+GSTGraphV2Production.canonicalCutFrame (s n q : ℕ) : CanonicalCutFrame
+=== LOCAL MODULE: GSTGraphV2ProductionLaws ===
+GSTGraphV2ProductionLaws.horizontal_digit_exact (E t p : ℕ) :
+  GST2DMixedEmergence.outDigit (cell E t p).seven.carry (cell E t p).seven.digit = (cell E (t + 1) p).seven.digit
+GSTGraphV2ProductionLaws.vertical_carry_exact (E t p : ℕ) :
+  GST2DMixedEmergence.nextCarry (cell E t p).seven.carry (cell E t p).seven.digit = (cell E t (p + 1)).seven.carry
+GSTGraphV2ProductionLaws.navigation_nullspace_flux_exact (E t p : ℕ) :
+  4 * ((cell E t p).absoluteEnergy % 3 ^ p) = (cell E t p).navigationNullspace + 3 ^ p * (cell E t p).seven.carry
+GSTGraphV2ProductionLaws.origin_frame_phased_state_exact (t n K x p : ℕ) :
+  (originFrame t n K x p).full.seven.carry = (originFrame t n K x p).phasedTail.seven.carry ∧
+    (originFrame t n K x p).full.seven.digit = (originFrame t n K x p).phasedTail.seven.digit
+GSTGraphV2ProductionLaws.canonical_cut_neutral_tail (s n q : ℕ) (hs : 1 ≤ s) :
+  have F := canonicalCutFrame s n q;
+  F.uFrame.neutralTail.seven.carry = 0 ∧
+    F.uFrame.neutralTail.seven.digit = 0 ∧ F.uFrame.neutralTail.seven.space = Space.null
+GSTGraphV2ProductionLaws.residual_gate_neutral_tail (s k m j : ℕ) (hs : 1 ≤ s) (hk : 1 ≤ k) :
+  have F := residualGateFrame s k m j;
+  F.originFrame.neutralTail.seven.carry = 0 ∧
+    F.originFrame.neutralTail.seven.digit = 0 ∧ F.originFrame.neutralTail.seven.space = Space.null
+GSTGraphV2ProductionLaws.residual_gate_left_is_phased_tail (s k m j : ℕ) :
+  have F := residualGateFrame s k m j;
+  F.residual.block.left.seven.carry = F.originFrame.phasedTail.seven.carry ∧
+    F.residual.block.left.seven.digit = F.originFrame.phasedTail.seven.digit
+GSTGraphV2ProductionLaws.residual_right_absolute_state_exact (s k m p : ℕ) :
+  have F := residualFrame s k m p;
+  F.block.right.seven.carry = (cell 1 F.parentExponent p).seven.carry ∧
+    F.block.right.seven.digit = (cell 1 F.parentExponent p).seven.digit ∧
+      F.block.right.eventCode = (cell 1 F.parentExponent p).eventCode ∧
+        F.block.right.uCharge = (cell 1 F.parentExponent p).uCharge ∧
+          F.block.right.mixedCharge = (cell 1 F.parentExponent p).mixedCharge ∧
+            F.block.right.crossingCharge = (cell 1 F.parentExponent p).crossingCharge ∧
+              F.block.right.survive = (cell 1 F.parentExponent p).survive
+GSTGraphV2ProductionLaws.residual_level_one_width (k m p : ℕ) : (residualFrame 1 k m p).parentWidth = 3
+GSTGraphV2ProductionLaws.residual_level_one_parent_exponent (k m p : ℕ) :
+  (residualFrame 1 k m p).parentExponent = 3 + 3 ^ (k + 1) * m
+GSTGraphV2ProductionLaws.residual_level_one_origin_one_energy_step (k m p : ℕ) (hm1 : m % 3 = 1) :
+  (residualFrame 1 k m p).childEnergy = 4 ^ 3 ^ (k + 1) * (residualFrame 1 k m p).nextTailEnergy
+'GSTGraphV2ProductionLaws.horizontal_digit_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2ProductionLaws.origin_frame_phased_state_exact' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2ProductionLaws.canonical_cut_neutral_tail' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2ProductionLaws.residual_gate_neutral_tail' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTGraphV2ProductionLaws.residual_gate_left_is_phased_tail' depends on axioms: [propext, Quot.sound]
+'GSTGraphV2ProductionLaws.residual_right_absolute_state_exact' depends on axioms: [propext]
+'GSTGraphV2ProductionLaws.residual_level_one_origin_one_energy_step' depends on axioms: [propext, Quot.sound]
+=== LOCAL MODULE: GSTV2InfiniteCore ===
+=== LOCAL MODULE: GSTInfiniteCollision ===
+GSTInfiniteCollision.lean:119:21: warning: Variable name `hA` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+=== LOCAL MODULE: GSTInfiniteBadTransport ===
+=== LOCAL MODULE: GSTInfiniteGateTransport ===
+=== LOCAL MODULE: GSTInfiniteCoupledLedger ===
+=== LOCAL MODULE: GSTGraphV2InfiniteControllerBridge ===
+=== LOCAL MODULE: GSTU2DSharpCrossingBlock ===
+GSTU2DExactCrossingCharge.sharpTerminalPotential_step (C d : ℕ) (hC : C < 4) (hd : d < 3) :
+  sharpTerminalPotential (outDigit C d) ≤ 4 * sharpTerminalPotential d + 5 * crossDensity C d
+GSTU2DExactCrossingCharge.reverseCrossCode_ge_sharp_of_leading_happy (C d : ℕ → ℕ) (hfirst : HappyCell (C 0) (d 0))
+  (N : ℕ) :
+  1 ≤ N →
+    (∀ t < N, C t < 4) →
+      (∀ t < N, d t < 3) →
+        (∀ t < N, outDigit (C t) (d t) = d (t + 1)) →
+          94 * ↑(4 ^ N) + sharpTerminalPotential (d N) ≤ 5 * reverseCrossCode C d N
+GSTU2DExactCrossingCharge.reverseCrossCode_ge_global_floor (C d : ℕ → ℕ) (N : ℕ) :
+  (∀ t < N, C t < 4) → (∀ t < N, d t < 3) → 37 - 37 * ↑(4 ^ N) ≤ reverseCrossCode C d N
+GSTU2DExactCrossingCharge.weightedCrossPrefix_ge_global_floor (C d : ℕ → ℕ → ℕ) (N K : ℕ) :
+  (∀ (t p : ℕ), t < N → p < K → C t p < 4) →
+    (∀ (t p : ℕ), t < N → p < K → d t p < 3) → (37 - 37 * ↑(4 ^ N)) * (↑(3 ^ K) - 1) ≤ 2 * weightedCrossPrefix C d N K
+GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy (C d : ℕ → ℕ → ℕ) (N q : ℕ) (hN : 1 ≤ N)
+  (hC : ∀ (t p : ℕ), t < N → p ≤ q → C t p < 4) (hd : ∀ (t p : ℕ), t < N → p ≤ q → d t p < 3)
+  (hout : ∀ (t p : ℕ), t < N → p ≤ q → outDigit (C t p) (d t p) = d (t + 1) p) (hHappy : HappyCell (C 0 q) (d 0 q)) :
+  0 < weightedCrossPrefix C d N (q + 1)
+'GSTU2DExactCrossingCharge.sharpTerminalPotential_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DExactCrossingCharge.reverseCrossCode_ge_sharp_of_leading_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTU2DExactCrossingCharge.reverseCrossCode_ge_global_floor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GSTU2DExactCrossingCharge.weightedCrossPrefix_ge_global_floor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+=== LOCAL MODULE: GSTFinalPurePowerResidueTransplant ===
+GSTFinalPurePowerResidueTransplant.lean:308:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+GSTFinalPurePowerResidueTransplant.lean:350:34: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+GSTFinalPurePowerResidueTransplant.stripQuotient_succ (r M j : ℕ) (hM : 0 < M) :
+  stripQuotient r M (j + 1) = 4 * stripQuotient r M j + stripCarry r M j
+GSTFinalPurePowerResidueTransplant.stripCarry_is_information_digit (r M i k : ℕ) (hM : 0 < M) :
+  stripQuotient r M (i + k + 1) / 4 ^ k % 4 = stripCarry r M i
+GSTFinalPurePowerResidueTransplant.stripConservation_exact (B R p : ℕ) :
+  B * wideDigit R p + wideCarry B R p = wideDigit (B * R) p + 3 * wideCarry B R (p + 1)
+GSTFinalPurePowerResidueTransplant.pow4_exponent_trit_lift_digit (p m c a : ℕ) (ha : a < 3)
+  (hA : 4 ^ 3 ^ p = 1 + 3 ^ (p + 1) * c) (hc : c % 3 = 1) :
+  digit3 (4 ^ (m + a * 3 ^ p)) (p + 1) = (digit3 (4 ^ m) (p + 1) + a) % 3
+GSTFinalPurePowerResidueTransplant.purePowerStripInputResidue (D T E K q : ℕ) (hD : 1 ≤ D) (hE : E = 1 + 3 * D * T)
+  (hPow : E = 4 ^ K) : 4 ^ K % (3 * D * 3 ^ q) = 1 + 3 * D * (T % 3 ^ q)
+GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry (s K q i : ℕ) :
+  stripCarry (4 ^ K % residueTowerModulus (3 ^ (s + 1)) q) (residueTowerModulus (3 ^ (s + 1)) q) i =
+    carry4 (4 ^ (K + i)) (s + 2 + q)
+GSTFinalPurePowerResidueTransplant.exactPowerRectangle_conservation (s N K q : ℕ) :
+  4 ^ (N + 1) * digit3 (4 ^ K) (s + 2 + q) + wideCarry (4 ^ (N + 1)) (4 ^ K) (s + 2 + q) =
+    digit3 (4 ^ (K + N + 1)) (s + 2 + q) + 3 * wideCarry (4 ^ (N + 1)) (4 ^ K) (s + 2 + q + 1)
+=== LOCAL MODULE: GSTGraphV2InfiniteControlScratch ===
+=== LOCAL MODULE: GSTGraphV2InfiniteBigNDichotomyScratch ===
+GSTGraphV2InfiniteBigNDichotomyScratch.lean:59:15: warning: Variable name `hN` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hN
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+GSTGraphV2InfiniteBigNDichotomyScratch.lean:185:5: warning: Variable name `h0` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _h0
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+=== LOCAL MODULE: GSTGraphV2PhysicalSignedKernelTelescopeScratch ===
+=== LOCAL MODULE: GSTHandwrittenPhysicalNoBig1 ===
+gpt56_binary_residue_gap_doubles (R p r : ℕ) (ha : GSTPhysicalKernel.binaryColumnCarry R p r = 1) :
+  3 ^ p - 2 ^ (r + 1) * R % 3 ^ p = 2 * (3 ^ p - 2 ^ r * R % 3 ^ p)
+gpt56_physical_noBig1_impossible (R p : ℕ)
+  (hclear :
+    GSTBig1ClearInfinitePathS (fun r => GSTPhysicalKernel.binaryColumnCarry R p r) fun r =>
+      GSTPhysicalKernel.binaryColumnDigit R p r)
+  (h0 : GSTPhysicalKernel.binaryColumnDigit R p 0 ≠ 0) : False
+gpt56_physical_path_forces_first_big1 (R p : ℕ) (h0 : GSTPhysicalKernel.binaryColumnDigit R p 0 ≠ 0) :
+  ∃ N, GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit R p r) N
+'gpt56_binary_residue_gap_doubles' depends on axioms: [propext, Quot.sound]
+'gpt56_physical_noBig1_impossible' depends on axioms: [propext, Quot.sound]
+'gpt56_physical_path_forces_first_big1' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTHandwrittenChildFirstBig1 ===
+GSTHandwrittenChildFirstBig1.lean:13:11: error: Function expected at
+  gstDigit
+but this term has type
+  ?m.1
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenChildFirstBig1.lean:18:48: error: Invalid argument: Variable `gstDigit` is not a proposition or let-declaration
+GSTHandwrittenChildFirstBig1.lean:40:11: error: Function expected at
+  gstDigit
+but this term has type
+  ?m.1
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenChildFirstBig1.lean:61:48: error: Invalid argument: Variable `gstDigit` is not a proposition or let-declaration
+gpt56_child_digit_two_forces_first_big1.{u_1} {x✝ : Sort u_1} {gstDigit : x✝} (T q : ℕ) (hd2 : sorry = 2) :
+  ∃ N, 1 ≤ N ∧ GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N
+gpt56_child_digit_two_forces_destroy_boundary.{u_1} {x✝ : Sort u_1} {gstDigit : x✝} (T q : ℕ) (hd2 : sorry = 2) :
+  ∃ N,
+    1 ≤ N ∧
+      GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
+        have j := N - 1;
+        GSTPhysicalKernel.binaryColumnCarry T q j = 0 ∧
+          GSTPhysicalKernel.binaryColumnDigit T q j = 2 ∧
+            gstBinaryBridgeMassS (GSTPhysicalKernel.binaryColumnCarry T q j)
+                  (GSTPhysicalKernel.binaryColumnDigit T q j) =
+                4 ∧
+              gstBinaryBridgeEventS (GSTPhysicalKernel.binaryColumnCarry T q j)
+                  (GSTPhysicalKernel.binaryColumnDigit T q j) =
+                5
+'gpt56_child_digit_two_forces_first_big1' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms: [propext, sorryAx]
+LOCAL_MODULE_FAILED=GSTHandwrittenChildFirstBig1 RC=1
