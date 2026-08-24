@@ -1,5 +1,6 @@
 import GSTGraphV2ProductionLaws
 import GSTU2DSharpCrossingBlock
+import GSTGraphV2PerfectPowerBlockProbe
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -14,6 +15,7 @@ open GSTGraphV2HandwrittenExponentialLTE
 open GSTGraphV2HandwrittenAnchoredCocycle
 open GSTGraphV2Production
 open GSTGraphV2ProductionLaws
+open GSTU2DCanonicalPhaseDensity
 open GSTU2DPureDivergence83
 open GSTU2DExactCrossingCharge
 
@@ -88,6 +90,139 @@ theorem uTailEnergy_below_cut_neutral
       GSTCanonicalSevenAxisBridge.vertex,
       GSTCanonicalSevenAxisBridge.spaceOfCarry, R, hc]
 
+/-! -----------------------------------------------------------------------
+TRANSPLANTED PERFECT-POWER PHASE BLOCK
+
+These declarations are copied into the final residual compositor itself so the
+hard seam consumes the exact shifted perfect-power window directly.  They are
+not left as a detached candidate theorem or external TODO.
+------------------------------------------------------------------------ -/
+
+/-- Shifted phase pressure beginning at the live production cut. -/
+def transplantedGraphPhaseWindow (E t b K : Nat) : Int :=
+  weightedPhaseColumnPrefix
+    (fun j => (graph E t (b+j)).seven.carry)
+    (fun j => (graph E t (b+j)).seven.digit) K
+
+/-- Transplanted Happy-to-positive shifted window. -/
+theorem transplanted_graph_phase_window_positive_of_happy
+    (E t b q : Nat)
+    (hHappy : HappyCell
+      (graph E t (b+q)).seven.carry
+      (graph E t (b+q)).seven.digit) :
+    0 < transplantedGraphPhaseWindow E t b (q+1) := by
+  unfold transplantedGraphPhaseWindow
+  apply weightedPhaseColumnPrefix_positive_of_top_happy
+  · intro p hp
+    exact graph_carry_lt_four E t (b+p)
+  · intro p hp
+    exact graph_digit_lt_three E t (b+p)
+  · exact hHappy
+
+/-- Transplanted complete-badness-to-nonpositive shifted window. -/
+theorem transplanted_graph_phase_window_nonpositive_of_bad
+    (E t b K : Nat)
+    (hBad : ∀ j, j < K → ¬ HappyCell
+      (graph E t (b+j)).seven.carry
+      (graph E t (b+j)).seven.digit) :
+    transplantedGraphPhaseWindow E t b K ≤ 0 := by
+  unfold transplantedGraphPhaseWindow
+  induction K with
+  | zero => simp [weightedPhaseColumnPrefix]
+  | succ K ih =>
+      have ih' := ih (fun j hj => hBad j (by omega))
+      have hlocal :
+          phaseDensity
+              (graph E t (b+K)).seven.carry
+              (graph E t (b+K)).seven.digit ≤ 0 :=
+        phaseDensity_nonpositive_of_not_happy
+          (graph E t (b+K)).seven.carry
+          (graph E t (b+K)).seven.digit
+          (graph_carry_lt_four E t (b+K))
+          (graph_digit_lt_three E t (b+K))
+          (hBad K (by omega))
+      have hw : (0 : Int) ≤ (((3^K : Nat) : Int)) := by positivity
+      rw [weightedPhaseColumnPrefix]
+      exact add_nonpos ih' (mul_nonpos_of_nonneg_of_nonpos hw hlocal)
+
+/-- Transplanted exact ternary digit shift through the production prefix. -/
+theorem transplanted_digit3_add_shift (R b q : Nat) :
+    digit3 R (b+q) = digit3 (R / 3^b) q := by
+  unfold digit3
+  rw [Nat.pow_add, ← Nat.div_div_eq_div_mul]
+
+/-- Transplanted exact residue identity for the shifted graph digits. -/
+theorem transplanted_graph_digit_window_exact (E t b K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (((graph E t (b+j)).seven.digit : Nat) : Int)) =
+      ((((4^t * E) / 3^b) % 3^K : Nat) : Int) := by
+  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
+    transplanted_digit3_add_shift] using
+    GSTGraphV2PerfectPowerBlock.digit3_weighted_prefix_int
+      ((4^t * E) / 3^b) K
+
+/-- Transplanted exact divergence equation on the shifted production window. -/
+theorem transplanted_graph_phase_window_exact (E t b K : Nat) :
+    transplantedGraphPhaseWindow E t b K =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) *
+          (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+           phaseDigitPotential (graph E t (b+j)).seven.digit)) +
+      phaseCarryPotential (graph E t b).seven.carry -
+        (((3^K : Nat) : Int)) *
+          phaseCarryPotential (graph E t (b+K)).seven.carry +
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) *
+          surviveI
+            (graph E t (b+j)).seven.carry
+            (graph E t (b+j)).seven.digit) := by
+  unfold transplantedGraphPhaseWindow
+  rw [GSTGraphV2PerfectPowerBlock.weightedPhaseColumnPrefix_eq_sum]
+  have h := phaseColumn_exact
+    (fun j => (graph E t (b+j)).seven.carry)
+    (fun j => (graph E t (b+j)).seven.digit)
+    (fun j => (graph E (t+1) (b+j)).seven.digit) K
+    (by
+      intro j hj
+      exact ⟨graph_carry_lt_four E t (b+j),
+        graph_digit_lt_three E t (b+j),
+        (graph_cell_exact E t (b+j)).1,
+        by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩)
+  simpa [Nat.add_zero] using h
+
+/-- Transplanted exact phase digit boundary: literal exposed residues, no
+terminal row and no finite-support replacement. -/
+theorem transplanted_graph_phase_digit_window_boundary_exact
+    (E t b K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+         phaseDigitPotential (graph E t (b+j)).seven.digit)) =
+      ((((4^(t+1) * E) / 3^b) % 3^K : Nat) : Int) -
+      ((((4^t * E) / 3^b) % 3^K : Nat) : Int) := by
+  calc
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (phaseDigitPotential (graph E (t+1) (b+j)).seven.digit -
+         phaseDigitPotential (graph E t (b+j)).seven.digit)) =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E (t+1) (b+j)).seven.digit : Nat) : Int) -
+        (((3^j : Nat) : Int)) * (((graph E t (b+j)).seven.digit : Nat) : Int)) := by
+          apply Finset.sum_congr rfl
+          intro j hj
+          simp [phaseDigitPotential]
+          ring
+    _ =
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E (t+1) (b+j)).seven.digit : Nat) : Int)) -
+      Finset.sum (Finset.range K) (fun j =>
+        (((3^j : Nat) : Int)) * (((graph E t (b+j)).seven.digit : Nat) : Int)) := by
+          rw [Finset.sum_sub_distrib]
+    _ = _ := by
+      rw [transplanted_graph_digit_window_exact,
+        transplanted_graph_digit_window_exact]
+
 /-- Hard unbounded residual family only: level one, origin trit one.  This probe
 contains no legacy Omega termination and no generic perfect-power collision. -/
 theorem residual_level_one_origin_one_probe
@@ -155,6 +290,27 @@ theorem residual_level_one_origin_one_probe
     · simpa [E, T, P, GSTGraphV2Production.residualEnergy,
         GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
         Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.2.1
+
+  /- The transplanted block is consumed here, inside the hard proof. -/
+  have hPhaseLeftPositive :
+      0 < transplantedGraphPhaseWindow E 0 b (q+1) := by
+    apply transplanted_graph_phase_window_positive_of_happy
+    simpa [E, b, Nat.add_assoc] using hChild
+
+  have hPhaseRightNonpositive :
+      transplantedGraphPhaseWindow E 3 b (q+1) ≤ 0 := by
+    apply transplanted_graph_phase_window_nonpositive_of_bad
+    intro j hj
+    simpa [E, b, Nat.add_assoc] using hRightBad j
+
+  have hPhaseLeftExact :=
+    transplanted_graph_phase_window_exact E 0 b (q+1)
+  have hPhaseRightExact :=
+    transplanted_graph_phase_window_exact E 3 b (q+1)
+  have hPhaseLeftBoundary :=
+    transplanted_graph_phase_digit_window_boundary_exact E 0 b (q+1)
+  have hPhaseRightBoundary :=
+    transplanted_graph_phase_digit_window_boundary_exact E 3 b (q+1)
 
   have hPositive83 :
       0 < weightedRectanglePrefix83
