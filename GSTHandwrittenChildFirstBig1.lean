@@ -1,4 +1,5 @@
 import GSTHandwrittenPhysicalNoBig1
+import InformationDescentScratch
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -10,12 +11,12 @@ sector forever. Its physical binary-column path hits BIG1 at a finite first
 column.  No abstract Happy-gate wrapper is required. -/
 theorem gpt56_child_digit_two_forces_first_big1
     (T q : Nat)
-    (hd2 : gstDigit T q = 2) :
+    (hd2 : gstDigitS T q = 2) :
     ∃ N, 1 ≤ N ∧
       GSTFirstBig1AtS
         (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N := by
   have hd0eq : GSTPhysicalKernel.binaryColumnDigit T q 0 = 2 := by
-    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigitS] using hd2
   have hd0 : GSTPhysicalKernel.binaryColumnDigit T q 0 ≠ 0 := by omega
   obtain ⟨N, hfirst⟩ := gpt56_physical_path_forces_first_big1 T q hd0
   have hfirst' :
@@ -37,7 +38,7 @@ theorem gpt56_child_digit_two_forces_first_big1
 boundary: incoming bit 0, information BIG2, mass 4, event 5. -/
 theorem gpt56_child_digit_two_forces_destroy_boundary
     (T q : Nat)
-    (hd2 : gstDigit T q = 2) :
+    (hd2 : gstDigitS T q = 2) :
     ∃ N, 1 ≤ N ∧
       GSTFirstBig1AtS
         (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
@@ -58,7 +59,7 @@ theorem gpt56_child_digit_two_forces_destroy_boundary
     simpa [a, d] using gpt56_binary_row_path T q
   have hd0eq : d 0 = 2 := by
     dsimp [d]
-    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigit] using hd2
+    simpa [GSTPhysicalKernel.binaryColumnDigit, gstDigitS] using hd2
   have hd0 : d 0 ≠ 0 := by omega
   have hboundary := gst_first_big1_boundary_is_destroyS
     a d hpath hd0 N hN (by simpa [d] using hfirst)
