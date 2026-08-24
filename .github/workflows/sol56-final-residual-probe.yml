@@ -1,10 +1,12 @@
 name: SOL56 Final Residual Probe
 
-# isolated push trigger; compiler output is persisted back to the locked branch
 on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
+  pull_request:
+    branches:
+      - sol/sol56-base-perfect-power-78b-20260824
 
 permissions:
   contents: write
@@ -64,9 +66,11 @@ jobs:
           lake env lean GSTFinalResidualCompositorProbe.lean > .surgery/sol56-final-residual-probe.txt 2>&1
           rc=$?
           echo "LEAN_RC=$rc" | cat - .surgery/sol56-final-residual-probe.txt > .surgery/.tmp && mv .surgery/.tmp .surgery/sol56-final-residual-probe.txt
+          cat .surgery/sol56-final-residual-probe.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
-      - name: Persist compiler diagnostic
+      - name: Persist compiler diagnostic on push
+        if: github.event_name == 'push'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
