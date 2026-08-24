@@ -1,10 +1,10 @@
 name: SOL56 Final Residual Probe
 
+# isolated push trigger after closing the broad PR execution surface
 on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
-  pull_request:
 
 jobs:
   probe:
