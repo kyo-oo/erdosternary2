@@ -1,0 +1,112 @@
+name: SOL56 Direct Whole-Theorem Transplant Exec
+
+on:
+  pull_request:
+    branches:
+      - sol/sol56-direct-transplant-ci-base-20260824
+
+permissions:
+  contents: write
+
+jobs:
+  transplant-compile-compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
+      - name: Directly transplant production theorem into ErdosTernary2.lean
+        shell: bash
+        run: |
+          python3 scripts/run_final_infinite_monolith_transplant.py
+          grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
+          if sed -n '/theorem gst_prefix_one_information_bad_descends_inline/,/Corrected information-wave closure/p' ErdosTernary2.lean | grep -F 'let r := v3 n'; then
+            echo 'old residual classifier survived direct transplant'
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'gst_end survived direct transplant'
+            exit 1
+          fi
+
+      - name: Commit edited ErdosTernary2.lean to production branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ErdosTernary2.lean
+          if git diff --cached --quiet; then
+            echo 'TRANSPLANT_FILE_ALREADY_CURRENT'
+          else
+            git commit -m "Directly transplant whole prefix-one theorem into monolith [skip ci]"
+            git push origin HEAD:sol/sol56-final-residual-production-green-20260824
+          fi
+
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile edited monolith
+        id: lean
+        continue-on-error: true
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .surgery
+          set +e
+          lake build GSTTactic ErdosTernary2 > .surgery/direct-transplant-build.txt 2>&1
+          rc=$?
+          set -e
+          cat .surgery/direct-transplant-build.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Audit edited monolith
+        if: steps.lean.outputs.rc == '0'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          bad=[]
+          for i,line in enumerate(Path('ErdosTernary2.lean').read_text(encoding='utf-8').splitlines(),1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line) or line.strip() == 'gst_end':
+                  bad.append(f'{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit(1)
+          print('DIRECT_TRANSPLANT_AUDIT_CLEAN')
+          PY
+
+      - name: Run official comparator
+        id: cmp
+        if: steps.lean.outputs.rc == '0'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          bash scripts/comparator.sh > .surgery/direct-transplant-comparator.txt 2>&1
+          rc=$?
+          set -e
+          cat .surgery/direct-transplant-comparator.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce result
+        shell: bash
+        run: |
+          test "${{ steps.lean.outputs.rc }}" = "0"
+          test "${{ steps.cmp.outputs.rc }}" = "0"
+          grep -F 'Your solution is okay!' .surgery/direct-transplant-comparator.txt
