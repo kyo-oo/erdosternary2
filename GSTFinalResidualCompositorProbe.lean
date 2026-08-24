@@ -53,7 +53,6 @@ theorem uTailEnergy_below_cut_neutral
     have h3 : 3^1 ≤ 3^(p+1) :=
       Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
     norm_num at h3 ⊢
-    omega
   have hnextAtP : R % 3^(p+1) = 1 := by
     have hdvd : 3^(p+1) ∣ 3^(r+1) :=
       Nat.pow_dvd_pow 3 (by omega)
@@ -133,9 +132,13 @@ theorem residual_level_one_origin_one_probe
     intro p hpq
     have h := graph_u_block_observables_exact
       (1+k) m (q+1) 0 (b+p)
-    simpa [E, T, P, GSTGraphV2Production.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ⟨h.1, h.2.1⟩
+    constructor
+    · simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+        GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.1
+    · simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+        GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.2.1
 
   have hRephaseRightWindow : ∀ p, p ≤ q →
       (GSTGraphV2InfiniteControl.graph E 3 (b+p)).seven.carry =
@@ -145,9 +148,13 @@ theorem residual_level_one_origin_one_probe
     intro p hpq
     have h := graph_u_block_observables_exact
       (1+k) m (q+1) 3 (b+p)
-    simpa [E, T, P, GSTGraphV2Production.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ⟨h.1, h.2.1⟩
+    constructor
+    · simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+        GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.1
+    · simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+        GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.2.1
 
   have hPositive83 :
       0 < weightedRectanglePrefix83
