@@ -50,11 +50,13 @@ theorem seeded_mass_past_future
     have h := Nat.mod_add_div H P
     omega
   calc
-    D + 4*X = H + P*(4*(X/P)) := by
-      rw [hX]
+    D + 4*X = D + 4*(X % P + P*(X/P)) :=
+      congrArg (fun Y : Nat => D + 4*Y) hX
+    _ = H + P*(4*(X/P)) := by
       dsimp [H]
       ring
-    _ = (H % P + P*(H/P)) + P*(4*(X/P)) := by rw [← hH]
+    _ = (H % P + P*(H/P)) + P*(4*(X/P)) :=
+      congrArg (fun Y : Nat => Y + P*(4*(X/P))) hH
     _ = H % P + P*((H/P) + 4*(X/P)) := by ring
     _ = seededPast D X K +
         3^K * (affineCarry D X K + 4*(X / 3^K)) := by
