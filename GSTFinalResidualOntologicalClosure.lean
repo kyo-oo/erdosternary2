@@ -2,6 +2,7 @@ import GSTGraphV2ProductionLaws
 import GSTU2DSharpCrossingBlock
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2InfiniteControllerBridge
+import GSTPrefixOneSpacetimeIncidenceControl
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -85,9 +86,6 @@ theorem residual_level_one_origin_one_ontological
       GSTGraphV2InfiniteControl.cell,
       GSTCanonicalSevenAxisBridge.vertex] using hc
 
-  /- The hard family must enter the proof here: the least origin trit is
-     literally one, so the residual child is the consumed one-trit phase
-     times the next exact perfect-power tail. -/
   have hOriginTrit : originTrit m = 1 := by
     simpa [originTrit] using hm1
 
@@ -101,10 +99,6 @@ theorem residual_level_one_origin_one_ontological
   have hOriginStep :=
     residual_level_one_origin_one_energy_step k m (b+q) hm1
 
-  /- Transplant the already-green all-Nat controller onto this exact width-3
-     physical rectangle.  The child gate is not an endpoint: its information
-     survives into the next carry while the complete right bad language
-     remains active. -/
   have hController :
       GSTV2.InfiniteBadCoupledControl
         (4^3)
@@ -139,8 +133,6 @@ theorem residual_level_one_origin_one_ontological
           (q+1)).childCarry ≠ 0 :=
     hLatent.nextCarryNonzero
 
-  /- The same production frame has an exact neutral higher-level U tail and
-     identifies the residual left edge with the consumed-prefix phased tail. -/
   have hGateNeutral :=
     residual_gate_neutral_tail 1 k m q (by decide) hk
   have hGateLeftPhased :=
@@ -233,6 +225,88 @@ theorem residual_level_one_origin_one_ontological
         graph_digit_lt_three E t (b+p),
         (graph_cell_exact E t (b+p)).1,
         by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+p)).2⟩)
+
+  /- Exact coordinate weld: this residual origin-one child is the canonical
+     s=1 full energy.  Width three x4 columns are therefore six literal x2
+     columns on the same physical spacetime sheet. -/
+  let n0 : Nat := 3^(k-1) * m
+  have hCanonicalEnergy :
+      E = GSTSpacetimeV2.canonicalFullEnergy 1 n0 := by
+    dsimp [E, n0, GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      GSTSpacetimeV2.canonicalFullEnergy]
+    congr 1
+    have hkshape : 1 + k = 2 + (k - 1) := by omega
+    rw [hkshape, Nat.pow_add]
+    norm_num
+    ring
+
+  have hBinaryWidth : GSTSpacetimeV2.canonicalBinaryWidth 1 = 6 := by
+    norm_num [GSTSpacetimeV2.canonicalBinaryWidth]
+
+  /- A Happy x4 child cell is precisely a common BIG2 chord two binary
+     columns apart: physical columns 0 and 2. -/
+  have hChildOutputTwo :
+      outDigit
+        (GSTGraphV2InfiniteControl.graph E 0 (b+q)).seven.carry
+        (GSTGraphV2InfiniteControl.graph E 0 (b+q)).seven.digit = 2 :=
+    (happyCell_positive_and_preserves_big2 _ _ hChild).2
+
+  have hGraphOneDigitTwo :
+      (GSTGraphV2InfiniteControl.graph E 1 (b+q)).seven.digit = 2 := by
+    have hstep := (graph_cell_exact E 0 (b+q)).1
+    rw [← hstep]
+    exact hChildOutputTwo
+
+  have hPhysicalLeftChord :
+      GSTPhysicalKernel.binaryColumnDigit E (b+q) 0 = 2 ∧
+      GSTPhysicalKernel.binaryColumnDigit E (b+q) 2 = 2 := by
+    constructor
+    · simpa [GSTPhysicalKernel.binaryColumnDigit,
+        GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
+        using hChild.1
+    · simpa [GSTPhysicalKernel.binaryColumnDigit,
+        GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
+        using hGraphOneDigitTwo
+
+  /- The alleged all-bad x4 right edge is exactly exclusion of the matching
+     common-BIG2 chord at binary columns 6 and 8, at every remaining row. -/
+  have hPhysicalRightNoChord : ∀ j,
+      ¬ (GSTPhysicalKernel.binaryColumnDigit E (b+j) 6 = 2 ∧
+         GSTPhysicalKernel.binaryColumnDigit E (b+j) 8 = 2) := by
+    intro j hpair
+    have hd3 :
+        (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit = 2 := by
+      simpa [GSTPhysicalKernel.binaryColumnDigit,
+        GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
+        using hpair.1
+    have hd4 :
+        (GSTGraphV2InfiniteControl.graph E 4 (b+j)).seven.digit = 2 := by
+      simpa [GSTPhysicalKernel.binaryColumnDigit,
+        GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
+        using hpair.2
+    have hout :
+        outDigit
+          (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
+          (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit = 2 := by
+      have hstep := (graph_cell_exact E 3 (b+j)).1
+      rw [hstep, hd4]
+    have hevent :
+        GSTCanonicalSevenAxisBridge.event
+          (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
+          (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit = 8 := by
+      simp [GSTCanonicalSevenAxisBridge.event, hd3, hout]
+    have hhappy : HappyCell
+        (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit :=
+      (GSTCanonicalSevenAxisBridge.happy_iff_event_eight _ _
+        (graph_carry_lt_four E 3 (b+j))
+        (graph_digit_lt_three E 3 (b+j))).2 hevent
+    exact (by simpa [E, b, Nat.add_assoc] using hRightBad j) hhappy
 
   trace_state
   omega
