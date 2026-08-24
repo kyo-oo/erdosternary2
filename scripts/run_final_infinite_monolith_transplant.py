@@ -31,3 +31,20 @@ if begin_marker in s:
     print('REFRESH: removed previous marked monolith transplant')
 
 runpy.run_path('scripts/apply_final_infinite_monolith_transplant.py', run_name='__main__')
+
+# Make the exact copied theorem modules part of the live monolith itself.
+s = p.read_text(encoding='utf-8')
+anchor = 'import GSTFinalPurePowerResidueTransplant\n'
+extra = '''import GSTFinalPurePowerResidueTransplant
+import PurePowerResidueGraphScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+'''
+if 'import PrefixOneOriginPhaseRecursionScratch\n' not in s:
+    if anchor not in s:
+        raise SystemExit('transplanted import anchor not found')
+    s = s.replace(anchor, extra, 1)
+    p.write_text(s, encoding='utf-8')
+    print('TRANSPLANT: wired exact copied modules into ErdosTernary2.lean')
