@@ -85,6 +85,67 @@ theorem residual_level_one_origin_one_ontological
       GSTGraphV2InfiniteControl.cell,
       GSTCanonicalSevenAxisBridge.vertex] using hc
 
+  /- The hard family must enter the proof here: the least origin trit is
+     literally one, so the residual child is the consumed one-trit phase
+     times the next exact perfect-power tail. -/
+  have hOriginTrit : originTrit m = 1 := by
+    simpa [originTrit] using hm1
+
+  have hOriginFactor :
+      E = 4^(3^(k+1)) * 4^(3^(k+2) * originTail m) := by
+    have h := residual_energy_u_mul_div_exact 1 k m
+    rw [hOriginTrit] at h
+    simpa [E, GSTGraphV2Production.residualEnergy,
+      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+  have hOriginStep :=
+    residual_level_one_origin_one_energy_step k m (b+q) hm1
+
+  /- Transplant the already-green all-Nat controller onto this exact width-3
+     physical rectangle.  The child gate is not an endpoint: its information
+     survives into the next carry while the complete right bad language
+     remains active. -/
+  have hController :
+      GSTV2.InfiniteBadCoupledControl
+        (4^3)
+        (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b) := by
+    apply GSTGraphV2InfiniteControllerBridge.graph_infinite_bad_control
+      E 3 b hBaseCarryZero
+    intro j
+    simpa [E, b, Nat.add_assoc] using hRightBad j
+
+  have hLatent :
+      GSTV2.LatentGateTransfer
+        (4^3)
+        (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b) q := by
+    apply GSTGraphV2InfiniteControllerBridge.graph_child_happy_latent_transfer
+      E 3 b q hBaseCarryZero
+    · intro j
+      simpa [E, b, Nat.add_assoc] using hRightBad j
+    · simpa [E, b, Nat.add_assoc] using hChild
+
+  have hLatentNextCarry :
+      (GSTV2.coupledOrbit (4^3)
+          (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
+          (q+1)).childCarry = 2 ∨
+      (GSTV2.coupledOrbit (4^3)
+          (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
+          (q+1)).childCarry = 3 :=
+    hLatent.nextCarryTwoOrThree
+
+  have hLatentNextNonzero :
+      (GSTV2.coupledOrbit (4^3)
+          (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
+          (q+1)).childCarry ≠ 0 :=
+    hLatent.nextCarryNonzero
+
+  /- The same production frame has an exact neutral higher-level U tail and
+     identifies the residual left edge with the consumed-prefix phased tail. -/
+  have hGateNeutral :=
+    residual_gate_neutral_tail 1 k m q (by decide) hk
+  have hGateLeftPhased :=
+    residual_gate_left_is_phased_tail 1 k m q
+
   have hPhaseLeftPositive :
       0 < GSTGraphV2PerfectPowerBlock.graphPhaseWindow E 0 b (q+1) := by
     apply GSTGraphV2PerfectPowerBlock.graph_phase_window_positive_of_happy
