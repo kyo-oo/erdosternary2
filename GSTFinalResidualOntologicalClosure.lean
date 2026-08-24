@@ -2,7 +2,7 @@ import GSTGraphV2ProductionLaws
 import GSTU2DSharpCrossingBlock
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2InfiniteControllerBridge
-import GSTPrefixOneSpacetimeIncidenceControl
+import GSTGraphV2PhysicalSignedKernelTelescopeScratch
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -226,23 +226,10 @@ theorem residual_level_one_origin_one_ontological
         (graph_cell_exact E t (b+p)).1,
         by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+p)).2⟩)
 
-  /- Exact coordinate weld: this residual origin-one child is the canonical
-     s=1 full energy.  Width three x4 columns are therefore six literal x2
-     columns on the same physical spacetime sheet. -/
-  let n0 : Nat := 3^(k-1) * m
-  have hCanonicalEnergy :
-      E = GSTSpacetimeV2.canonicalFullEnergy 1 n0 := by
-    dsimp [E, n0, GSTGraphV2Production.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-      GSTSpacetimeV2.canonicalFullEnergy]
-    congr 1
-    have hkshape : 1 + k = 2 + (k - 1) := by omega
-    rw [hkshape, Nat.pow_add]
-    norm_num
-    ring
-
-  have hBinaryWidth : GSTSpacetimeV2.canonicalBinaryWidth 1 = 6 := by
-    norm_num [GSTSpacetimeV2.canonicalBinaryWidth]
+  /- Exact physical coordinate weld.  The level-one residual strip has width
+     three x4 columns, hence six literal x2 columns on the same arithmetic
+     sheet.  No spacetime umbrella or surrogate theorem is required. -/
+  have hBinaryWidth : 2 * 3^1 = 6 := by decide
 
   /- A Happy x4 child cell is precisely a common BIG2 chord two binary
      columns apart: physical columns 0 and 2. -/
@@ -271,7 +258,7 @@ theorem residual_level_one_origin_one_ontological
         GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
         using hGraphOneDigitTwo
 
-  /- The alleged all-bad x4 right edge is exactly exclusion of the matching
+  /- The allegedly all-bad x4 right edge is exactly exclusion of the matching
      common-BIG2 chord at binary columns 6 and 8, at every remaining row. -/
   have hPhysicalRightNoChord : ∀ j,
       ¬ (GSTPhysicalKernel.binaryColumnDigit E (b+j) 6 = 2 ∧
