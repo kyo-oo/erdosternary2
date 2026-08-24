@@ -92,6 +92,9 @@ theorem graphCoupledState_step_exact (E N p : Nat) :
       simpa [graphCoupledState, GSTV2.cellOutput, GSTV2.cellMass,
         GST2DMixedEmergence.outDigit] using h
     rw [hout]
+    change
+      (carryWord E p 1 N + 4^N * (graph E 1 p).seven.digit) / 3 =
+        carryWord E (p+1) 1 N
     have hbal := carryWord_vertical_balance E p 1 N
     have hdlt := graph_digit_lt_three E (1+N) p
     have h3 : 0 < (3 : Nat) := by decide
