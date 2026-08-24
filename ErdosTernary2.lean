@@ -37,6 +37,47 @@ import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
+import GSTPrefixOnePhaseIncidenceControl
+import GSTPrefixOneSpacetimeIncidenceControl
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
@@ -16996,6 +17037,18 @@ theorem gst_prefix_one_information_bad_descends_inline
   apply gst_complete_bad_of_no_navigation
   intro hchild
 
+  -- Full Aug-22 phase/incidence transplant, applied to the original live state.
+  have hPhaseIncidence :=
+    gpt56_prefix_one_exact_gate_past_incidence s n hs hn hchild hBad
+  have hPhaseTable :=
+    gpt56_prefix_one_exact_gate_three_phase_table s n hs hn hchild hBad
+  have hPhaseCrossing :=
+    gpt56_prefix_one_exact_gate_horizontal_phase_crossing s n hs hn hchild hBad
+  have hPhaseEscape :=
+    gpt56_prefix_one_zero_phase_forces_next_escape s n hs hn hchild hBad
+  have hSpacetimeBoundary :=
+    GSTSpacetimeV2.canonical_full_energy_boundary_events s n hs hchild hBad
+
   have hnoParent :
       ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
     gst_prefix_one_no_parent_navigation_of_omega_bad_atomic s n hs hn hBad
@@ -17247,7 +17300,6 @@ theorem gst_prefix_one_information_bad_descends_inline
         exact gst_level_one_prefix_one_cut_digit_oneS k m hk2 hm1
 
       -- Align the literal transplanted A=64,D=9 strip with the live row.
-      -- qStrip retains the k-1 leading zero trits before the first nonzero m trit.
       let qStrip := (k-1) + q
       let Tstrip := 3^(k-1) * gstNavigationConstant (1+k) m
       let Hstrip := 2 + 64*Tstrip
