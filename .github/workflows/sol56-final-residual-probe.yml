@@ -1,10 +1,13 @@
 name: SOL56 Final Residual Probe
 
-# isolated push trigger after closing the broad PR execution surface
+# isolated push trigger; compiler output is persisted back to the locked branch
 on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
+
+permissions:
+  contents: write
 
 jobs:
   probe:
@@ -48,7 +51,29 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
       - name: Compile hard residual compositor probe
+        id: residual
+        continue-on-error: true
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTFinalResidualCompositorProbe.lean
+          mkdir -p .surgery
+          set +e
+          lake env lean GSTFinalResidualCompositorProbe.lean > .surgery/sol56-final-residual-probe.txt 2>&1
+          rc=$?
+          echo "LEAN_RC=$rc" | cat - .surgery/sol56-final-residual-probe.txt > .surgery/.tmp && mv .surgery/.tmp .surgery/sol56-final-residual-probe.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Persist compiler diagnostic
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .surgery/sol56-final-residual-probe.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record SOL56 residual compositor diagnostic [skip ci]"
+            git push origin HEAD:sol/sol56-final-residual-production-green-20260824
+          fi
+      - name: Enforce probe result
+        shell: bash
+        run: |
+          test "${{ steps.residual.outputs.rc }}" = "0"
