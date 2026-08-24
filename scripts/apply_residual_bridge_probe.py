@@ -42,9 +42,15 @@ replacement = '''  -- Recover the exact generalized residual Omega bad trace dir
     gst_omega_infiniteBadTrace_blocks s k m hResidualBad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
 
-  -- Feed the full kernel-green residual packet to the arithmetic tactic.  CI
-  -- now reports only the genuinely missing branch, if any.
-  gst_omega
+  -- Expose the exact residual classifier to Lean.  The previous `gst_omega`
+  -- wrapper stopped at its first failing `contradiction` branch and obscured
+  -- the live case.  These are precisely the definitions that wrapper was
+  -- intended to normalize, now applied directly so CI reports the true
+  -- remaining branch (or closes it by Presburger arithmetic).
+  simp_all (config := { maxSteps := 1000000 }) only [
+    GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+    GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+  all_goals omega
 '''
 
 if needle not in s:
