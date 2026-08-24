@@ -31,6 +31,58 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
+      - name: Compile exact compositor dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          target = 'GSTFinalResidualOntologicalClosure'
+          order = []
+          done = set()
+          active = []
+
+          def source_for(mod):
+              p = Path(*mod.split('.')).with_suffix('.lean')
+              return p if p.is_file() else None
+
+          def imports_of(mod):
+              p = source_for(mod)
+              if p is None:
+                  return []
+              return re.findall(r'(?m)^\s*import\s+([A-Za-z0-9_.]+)\s*$', p.read_text(encoding='utf-8'))
+
+          def visit(mod):
+              p = source_for(mod)
+              if p is None or mod in done:
+                  return
+              if mod in active:
+                  raise SystemExit('IMPORT_CYCLE=' + ' -> '.join(active + [mod]))
+              active.append(mod)
+              for dep in imports_of(mod):
+                  visit(dep)
+              active.pop()
+              done.add(mod)
+              order.append(mod)
+
+          for dep in imports_of(target):
+              visit(dep)
+          Path('/tmp/closure-import-order.txt').write_text('\n'.join(order) + '\n', encoding='utf-8')
+          print('CLOSURE_IMPORT_COUNT=' + str(len(order)))
+          PY
+
+          while IFS= read -r mod; do
+            [ -z "$mod" ] && continue
+            src="${mod//.//}.lean"
+            out=".lake/build/lib/lean/${mod//.//}.olean"
+            mkdir -p "$(dirname "$out")"
+            echo "=== CLOSURE DEP: $mod ==="
+            lake env lean -o "$out" "$src"
+          done < /tmp/closure-import-order.txt
+
       - name: Compile final ontological closure
         shell: bash
         run: |
