@@ -58,7 +58,7 @@ theorem seeded_mass_past_future
     _ = H % P + P*((H/P) + 4*(X/P)) := by ring
     _ = seededPast D X K +
         3^K * (affineCarry D X K + 4*(X / 3^K)) := by
-      simp [seededPast, affineCarry, P, H]
+      rfl
 
 /-- Generic child carry realization, valid for an arbitrary initial child
 seed, not only seed zero. -/
@@ -70,7 +70,7 @@ theorem coupledOrbit_childCarry_affine_exact
   intro K
   induction K with
   | zero =>
-      simp [coupledOrbit, affineCarry]
+      simp [coupledOrbit, affineCarry, Nat.mod_one]
   | succ K ih =>
       rw [coupledOrbit]
       change cellNextCarry (coupledOrbit A initial K).childCarry
@@ -147,9 +147,29 @@ theorem coupledOrbit_past_synchronization
   rw [hFull0] at hParent
   rw [hChild] at hParent
 
-  unfold CoupledState.parentPast CoupledState.childPast
-  ring_nf at hParent ⊢
-  omega
+  have hCancel :
+      (initial.childResidue + A * initial.childPast K) +
+          3^K * A * (st.childCarry + 4*st.childTail) =
+        (initial.parentPast A K + 3^K * st.childResidue) +
+          3^K * A * (st.childCarry + 4*st.childTail) := by
+    calc
+      (initial.childResidue + A * initial.childPast K) +
+          3^K * A * (st.childCarry + 4*st.childTail) =
+        initial.childResidue +
+          A * (initial.childPast K +
+            3^K * (st.childCarry + 4*st.childTail)) := by ring
+      _ = initial.parentPast A K +
+          3^K * (st.childResidue +
+            A * (st.childCarry + 4*st.childTail)) := by
+        simpa [CoupledState.parentPast, CoupledState.childPast] using hParent
+      _ = (initial.parentPast A K + 3^K * st.childResidue) +
+          3^K * A * (st.childCarry + 4*st.childTail) := by ring
+
+  have hCore :
+      initial.childResidue + A * initial.childPast K =
+        initial.parentPast A K + 3^K * st.childResidue :=
+    Nat.add_right_cancel hCancel
+  simpa [st] using hCore.symm
 
 /-- The same synchronization packaged as an all-Nat controller. -/
 structure InfiniteCoupledLedger
