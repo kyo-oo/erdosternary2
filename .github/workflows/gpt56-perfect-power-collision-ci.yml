@@ -55,6 +55,7 @@ jobs:
       - name: Apply the one-line production surgery
         shell: bash
         run: |
+          # Aug-24 verification: transplant the existing GREEN stack into the literal production seam.
           python3 scripts/apply_u2d_atomic_replacement.py
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
             echo 'literal gst_end survived the production transformation'
