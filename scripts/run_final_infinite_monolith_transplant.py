@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Push-only execution marker: direct monolith transplant, no PR theorem fan-out.
 from pathlib import Path
 import re
 
