@@ -15,7 +15,7 @@ jobs:
         with:
           ref: sol/gpt56-final-perfect-power-block-20260823
 
-      - name: Install direct Omega production splice
+      - name: Install direct residual production splice
         shell: bash
         run: |
           python3 scripts/apply_residual_bridge_probe.py
@@ -23,18 +23,14 @@ jobs:
             echo 'literal gst_end survived production surgery'
             exit 1
           fi
-          if grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean; then
-            echo 'obsolete information-descent theorem survived production surgery'
-            exit 1
-          fi
           if grep -n 'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline' ErdosTernary2.lean; then
             echo 'obsolete child-gate contradiction theorem survived production surgery'
             exit 1
           fi
-          grep -n 'theorem gst_omega_prefix_one_gate_exists' ErdosTernary2.lean
-          grep -n 'theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean
-          grep -n 'gst_omega_prefix_one_gate_exists s n hs hn hchild' ErdosTernary2.lean
-          grep -n 'gst_omega_gate_zero_closes_parent s 1 n hs hzero' ErdosTernary2.lean
+          grep -n 'have hResidualBad : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
+          grep -n 'have hchildResidual :' ErdosTernary2.lean
+          grep -n 'gst_omega_childZeroSet_nonempty_of_navigation_witness' ErdosTernary2.lean
+          grep -n 'gst_omega_gate_zero_closes_parent s k m hs' ErdosTernary2.lean
 
       - name: Materialize clean judge modules and exact package
         shell: bash
