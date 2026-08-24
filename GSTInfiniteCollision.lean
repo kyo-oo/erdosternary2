@@ -38,7 +38,7 @@ theorem affineCarry_forward (D X k : Nat) :
 theorem naturalCarry_forward (Y k : Nat) :
     naturalCarry Y (k+1) =
       cellNextCarry (naturalCarry Y k) (digit Y k) := by
-  simpa [naturalCarry] using affineCarry_forward 0 Y k
+  simpa [naturalCarry, affineCarry, Nat.zero_add] using affineCarry_forward 0 Y k
 
 theorem digit_shift (Y q j : Nat) :
     digit Y (q+j) = digit (Y / 3^q) j := by
@@ -157,19 +157,19 @@ theorem coupledStep_preserves_invariant
 theorem coupledStep_parentWord_div_three
     (A : Nat) (st : CoupledState) :
     (coupledStep A st).parentWord A = st.parentWord A / 3 := by
-  unfold CoupledState.parentWord coupledStep
-  dsimp only
   let r := st.childTail % 3
-  have hY : st.childTail = r + 3*(st.childTail/3) := by
+  have hY : st.childTail = r + 3 * (st.childTail / 3) := by
     dsimp [r]
-    have h := Nat.mod_add_div st.childTail 3
-    omega
-  rw [hY]
+    exact (Nat.mod_add_div st.childTail 3).symm
   have hshape :
-      st.parentOffset + A * (r + 3 * (st.childTail / 3)) =
-        (st.parentOffset + A*r) + 3*(A*(st.childTail/3)) := by ring
+      st.parentOffset + A * st.childTail =
+        (st.parentOffset + A * r) + 3 * (A * (st.childTail / 3)) := by
+    rw [hY]
+    ring
+  change (st.parentOffset + A * r) / 3 + A * (st.childTail / 3) =
+    (st.parentOffset + A * st.childTail) / 3
   rw [hshape]
-  have h3 : 0 < (3:Nat) := by decide
+  have h3 : 0 < (3 : Nat) := by decide
   rw [Nat.add_mul_div_left _ _ h3]
 
 def coupledOrbit (A : Nat) (initial : CoupledState) : Nat → CoupledState
@@ -217,7 +217,9 @@ theorem coupledOrbit_childCarry_exact
   intro K
   induction K with
   | zero =>
-      simp [coupledOrbit, naturalCarry, hC0]
+      change initial.childCarry = 4 * (initial.childTail % 1) / 1
+      rw [hC0, Nat.mod_one]
+      norm_num
   | succ K ih =>
       rw [coupledOrbit]
       change cellNextCarry (coupledOrbit A initial K).childCarry
