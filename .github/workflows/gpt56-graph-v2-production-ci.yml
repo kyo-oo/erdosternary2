@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - sol/gpt56-final-perfect-power-block-20260823
+      - sol/gpt56-residual-origin-one-locked-20260824
   pull_request:
   workflow_dispatch:
 
@@ -100,10 +101,16 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
 
+      - name: Compile locked hard residual specification
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTGraphV2ResidualOriginOneSmoke.lean
+
       - name: Audit projection/subgraph
         shell: bash
         run: |
-          if grep -nE '\b(sorry|admit|axiom|native_decide)\b' GSTGraphV2ProductionLaws.lean; then
+          if grep -nE '\b(sorry|admit|axiom|native_decide)\b' GSTGraphV2ProductionLaws.lean GSTGraphV2ResidualOriginOneSmoke.lean; then
             echo 'forbidden proof escape in arithmetic projection laws'
             exit 1
           fi
