@@ -16,9 +16,6 @@ if original_bytes < MIN_MONOLITH_BYTES:
 if s.count(TARGET) != 1:
     raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
 
-# Historical attached packets already present in the clean pre-bulk monolith are
-# immutable baseline. Atomic surgery may neither add, delete, reorder, nor alter
-# packet boundary markers.
 packet_marker_re = re.compile(r'(?m)^-- (?:BEGIN|END) ATTACHED [^\n]+$')
 packet_markers_before = packet_marker_re.findall(s)
 
@@ -116,11 +113,7 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
     gst_shared_x4_binary_factor_last_gate_high_bitS
       A D Z W C hApos hDlt hC' hW' hshared'
 
-  have hfuture0 : T / 3^T = 0 := by
-    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
-
-  -- Exact RED frontier.  This line is intentionally the only remaining
-  -- mathematical consumer to replace after the compiler exposes its context.
+  -- Exact all-Nat RED frontier: no finite-support/future-zero hypothesis.
   trace_state
   contradiction
   -- END SOL56 FINAL ATOMIC SEAM SURGERY
@@ -128,8 +121,6 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
 
 s2 = s[:start] + replacement + s[end:]
 
-# Atomic means atomic: imports and every declaration outside the target theorem
-# remain byte-for-byte untouched.
 if s2[:start] != s[:start]:
     raise SystemExit('prefix outside target theorem changed')
 new_end = s2.find(TARGET_END, start)
@@ -150,6 +141,7 @@ for forbidden in (
     'let r := v3 n',
     'have hboundary : GSTResidualBoundary',
     'have hResidualBad : GSTOmegaInfiniteBadTrace s k m',
+    'gst_prefix_one_bigN_future_zero_inline',
 ):
     if forbidden in region:
         raise SystemExit(f'forbidden legacy path survived target theorem: {forbidden}')
@@ -166,6 +158,6 @@ print(f'ATOMIC_BASELINE_PACKET_MARKERS={len(packet_markers_before)}')
 for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
         print(f'ATOMIC_TARGET_START={i}')
-    if 'Exact RED frontier.' in line:
+    if 'Exact all-Nat RED frontier' in line:
         print(f'ATOMIC_RED_FRONTIER={i}')
 print('ATOMIC_SURGERY=ONE_THEOREM_ONLY')
