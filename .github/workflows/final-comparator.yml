@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-final-perfect-power-block-20260823
 
       - name: Install direct Omega production splice
         shell: bash
