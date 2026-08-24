@@ -1,4 +1,4 @@
-FINAL_RUN_HEAD=88852dfe4b4cfe60cd28751232ca9a635e392523
+FINAL_RUN_HEAD=6ece49ec49847b343d7e66beb6d70d750b4ae1f3
 LEAN_PREP_OUTCOME=success
 DEPENDENCY_BUILD_RC=1
 MONOLITH_BUILD_RC=1
@@ -80,209 +80,6 @@ CanonicalCausalityScratch
 NavigationResidueCutScratch
 CanonicalOriginCutIntersectionScratch
 --- MONOLITH BUILD TAIL ---
-=== LOCAL MODULE: GSTU2DPureDivergence83 ===
-GSTU2DPureDivergence83.density83_physical_table :
-  density83 0 0 = -105 ∧
-    density83 0 1 = -84 ∧
-      density83 0 2 = 168 ∧
-        density83 1 0 = -28 ∧
-          density83 1 1 = -28 ∧
-            density83 1 2 = -49 ∧
-              density83 2 0 = 0 ∧
-                density83 2 1 = -105 ∧ density83 2 2 = 0 ∧ density83 3 0 = -105 ∧ density83 3 1 = 0 ∧ density83 3 2 = 84
-GSTU2DPureDivergence83.happy_iff_density83_positive (C d : ℕ) (hC : C < 4) (hd : d < 3) :
-  HappyCell C d ↔ 0 < density83 C d
-GSTU2DPureDivergence83.reverseDensity83_exact (C Cnext d : ℕ → ℕ) (N : ℕ) :
-  (∀ t < N, outDigit (C t) (d t) = d (t + 1)) →
-    (∀ t < N, nextCarry (C t) (d t) = Cnext t) →
-      reverseDensity83 C d N =
-        digitPotential83 (d N) - ↑(8 ^ N) * digitPotential83 (d 0) + reverseCarry83 C N - 3 * reverseCarry83 Cnext N
-GSTU2DPureDivergence83.density83_rectangle_exact (C d : ℕ → ℕ → ℕ) (N K : ℕ)
-  (hcell :
-    ∀ (t p : ℕ),
-      t < N →
-        p < K →
-          C t p < 4 ∧ d t p < 3 ∧ outDigit (C t p) (d t p) = d (t + 1) p ∧ nextCarry (C t p) (d t p) = C t (p + 1)) :
-  ∑ p ∈ Finset.range K, ↑(3 ^ p) * reverseDensity83 (fun t => C t p) (fun t => d t p) N =
-    ∑ p ∈ Finset.range K, ↑(3 ^ p) * (digitPotential83 (d N p) - ↑(8 ^ N) * digitPotential83 (d 0 p)) +
-        reverseCarry83 (fun t => C t 0) N -
-      ↑(3 ^ K) * reverseCarry83 (fun t => C t K) N
-GSTU2DPureDivergence83.weightedRectanglePrefix83_positive_of_top_leading_happy (C d : ℕ → ℕ → ℕ) (N q : ℕ) (hN : 1 ≤ N)
-  (hC : ∀ (t p : ℕ), t < N → p ≤ q → C t p < 4) (hd : ∀ (t p : ℕ), t < N → p ≤ q → d t p < 3)
-  (hHappy : HappyCell (C 0 q) (d 0 q)) : 0 < weightedRectanglePrefix83 C d N (q + 1)
-GSTU2DPureDivergence83.graph_density83_rectangle_exact (E N K : ℕ) :
-  ∑ p ∈ Finset.range K,
-      ↑(3 ^ p) * reverseDensity83 (fun t => (graph E t p).seven.carry) (fun t => (graph E t p).seven.digit) N =
-    ∑ p ∈ Finset.range K,
-          ↑(3 ^ p) *
-            (digitPotential83 (graph E N p).seven.digit - ↑(8 ^ N) * digitPotential83 (graph E 0 p).seven.digit) +
-        reverseCarry83 (fun t => (graph E t 0).seven.carry) N -
-      ↑(3 ^ K) * reverseCarry83 (fun t => (graph E t K).seven.carry) N
-'GSTU2DPureDivergence83.density83_rectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTU2DPureDivergence83.weightedRectanglePrefix83_positive_of_top_leading_happy' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-'GSTU2DPureDivergence83.graph_density83_rectangle_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
-=== LOCAL MODULE: GSTGraphV2Production ===
-GSTGraphV2Production.Cell : Type
-GSTGraphV2Production.graph (E : ℕ) : Sheet
-GSTGraphV2Production.Direction : Type
-GSTGraphV2Production.Edge : Type
-GSTGraphV2Production.horizontalEdge (E t p : ℕ) : Edge
-GSTGraphV2Production.verticalEdge (E t p : ℕ) : Edge
-GSTGraphV2Production.Lattice : Type
-GSTGraphV2Production.lattice (E : ℕ) : Lattice
-GSTGraphV2Production.Neighborhood : Type
-GSTGraphV2Production.neighborhood (E t p : ℕ) : Neighborhood
-GSTGraphV2Production.Rectangle : Type
-GSTGraphV2Production.rectangle (E N p : ℕ) : Rectangle
-GSTGraphV2Production.OriginCoordinates : Type
-GSTGraphV2Production.originCoordinates (t n K : ℕ) : OriginCoordinates
-GSTGraphV2Production.OriginFrame : Type
-GSTGraphV2Production.originFrame (t n K x p : ℕ) : OriginFrame
-GSTGraphV2Production.canonicalGraph (s n : ℕ) : Sheet
-GSTGraphV2Production.canonicalLattice (s n : ℕ) : Lattice
-GSTGraphV2Production.canonicalRectangle (s n p : ℕ) : Rectangle
-GSTGraphV2Production.residualGraph (s k m : ℕ) : Sheet
-GSTGraphV2Production.residualLattice (s k m : ℕ) : Lattice
-GSTGraphV2Production.residualRectangle (s k m p : ℕ) : Rectangle
-GSTGraphV2Production.ResidualFrame : Type
-GSTGraphV2Production.residualFrame (s k m p : ℕ) : ResidualFrame
-GSTGraphV2Production.residualGateRow (s k j : ℕ) : ℕ
-GSTGraphV2Production.ResidualGateFrame : Type
-GSTGraphV2Production.residualGateFrame (s k m j : ℕ) : ResidualGateFrame
-GSTGraphV2Production.CanonicalCutFrame : Type
-GSTGraphV2Production.canonicalCutFrame (s n q : ℕ) : CanonicalCutFrame
-=== LOCAL MODULE: GSTGraphV2ProductionLaws ===
-GSTGraphV2ProductionLaws.horizontal_digit_exact (E t p : ℕ) :
-  GST2DMixedEmergence.outDigit (cell E t p).seven.carry (cell E t p).seven.digit = (cell E (t + 1) p).seven.digit
-GSTGraphV2ProductionLaws.vertical_carry_exact (E t p : ℕ) :
-  GST2DMixedEmergence.nextCarry (cell E t p).seven.carry (cell E t p).seven.digit = (cell E t (p + 1)).seven.carry
-GSTGraphV2ProductionLaws.navigation_nullspace_flux_exact (E t p : ℕ) :
-  4 * ((cell E t p).absoluteEnergy % 3 ^ p) = (cell E t p).navigationNullspace + 3 ^ p * (cell E t p).seven.carry
-GSTGraphV2ProductionLaws.origin_frame_phased_state_exact (t n K x p : ℕ) :
-  (originFrame t n K x p).full.seven.carry = (originFrame t n K x p).phasedTail.seven.carry ∧
-    (originFrame t n K x p).full.seven.digit = (originFrame t n K x p).phasedTail.seven.digit
-GSTGraphV2ProductionLaws.canonical_cut_neutral_tail (s n q : ℕ) (hs : 1 ≤ s) :
-  have F := canonicalCutFrame s n q;
-  F.uFrame.neutralTail.seven.carry = 0 ∧
-    F.uFrame.neutralTail.seven.digit = 0 ∧ F.uFrame.neutralTail.seven.space = Space.null
-GSTGraphV2ProductionLaws.residual_gate_neutral_tail (s k m j : ℕ) (hs : 1 ≤ s) (hk : 1 ≤ k) :
-  have F := residualGateFrame s k m j;
-  F.originFrame.neutralTail.seven.carry = 0 ∧
-    F.originFrame.neutralTail.seven.digit = 0 ∧ F.originFrame.neutralTail.seven.space = Space.null
-GSTGraphV2ProductionLaws.residual_gate_left_is_phased_tail (s k m j : ℕ) :
-  have F := residualGateFrame s k m j;
-  F.residual.block.left.seven.carry = F.originFrame.phasedTail.seven.carry ∧
-    F.residual.block.left.seven.digit = F.originFrame.phasedTail.seven.digit
-GSTGraphV2ProductionLaws.residual_right_absolute_state_exact (s k m p : ℕ) :
-  have F := residualFrame s k m p;
-  F.block.right.seven.carry = (cell 1 F.parentExponent p).seven.carry ∧
-    F.block.right.seven.digit = (cell 1 F.parentExponent p).seven.digit ∧
-      F.block.right.eventCode = (cell 1 F.parentExponent p).eventCode ∧
-        F.block.right.uCharge = (cell 1 F.parentExponent p).uCharge ∧
-          F.block.right.mixedCharge = (cell 1 F.parentExponent p).mixedCharge ∧
-            F.block.right.crossingCharge = (cell 1 F.parentExponent p).crossingCharge ∧
-              F.block.right.survive = (cell 1 F.parentExponent p).survive
-GSTGraphV2ProductionLaws.residual_level_one_width (k m p : ℕ) : (residualFrame 1 k m p).parentWidth = 3
-GSTGraphV2ProductionLaws.residual_level_one_parent_exponent (k m p : ℕ) :
-  (residualFrame 1 k m p).parentExponent = 3 + 3 ^ (k + 1) * m
-GSTGraphV2ProductionLaws.residual_level_one_origin_one_energy_step (k m p : ℕ) (hm1 : m % 3 = 1) :
-  (residualFrame 1 k m p).childEnergy = 4 ^ 3 ^ (k + 1) * (residualFrame 1 k m p).nextTailEnergy
-'GSTGraphV2ProductionLaws.horizontal_digit_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTGraphV2ProductionLaws.origin_frame_phased_state_exact' depends on axioms: [propext, Quot.sound]
-'GSTGraphV2ProductionLaws.canonical_cut_neutral_tail' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTGraphV2ProductionLaws.residual_gate_neutral_tail' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTGraphV2ProductionLaws.residual_gate_left_is_phased_tail' depends on axioms: [propext, Quot.sound]
-'GSTGraphV2ProductionLaws.residual_right_absolute_state_exact' depends on axioms: [propext]
-'GSTGraphV2ProductionLaws.residual_level_one_origin_one_energy_step' depends on axioms: [propext, Quot.sound]
-=== LOCAL MODULE: GSTV2InfiniteCore ===
-=== LOCAL MODULE: GSTInfiniteCollision ===
-GSTInfiniteCollision.lean:119:21: warning: Variable name `hA` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _hA
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-=== LOCAL MODULE: GSTInfiniteBadTransport ===
-=== LOCAL MODULE: GSTInfiniteGateTransport ===
-=== LOCAL MODULE: GSTInfiniteCoupledLedger ===
-=== LOCAL MODULE: GSTGraphV2InfiniteControllerBridge ===
-=== LOCAL MODULE: GSTU2DSharpCrossingBlock ===
-GSTU2DExactCrossingCharge.sharpTerminalPotential_step (C d : ℕ) (hC : C < 4) (hd : d < 3) :
-  sharpTerminalPotential (outDigit C d) ≤ 4 * sharpTerminalPotential d + 5 * crossDensity C d
-GSTU2DExactCrossingCharge.reverseCrossCode_ge_sharp_of_leading_happy (C d : ℕ → ℕ) (hfirst : HappyCell (C 0) (d 0))
-  (N : ℕ) :
-  1 ≤ N →
-    (∀ t < N, C t < 4) →
-      (∀ t < N, d t < 3) →
-        (∀ t < N, outDigit (C t) (d t) = d (t + 1)) →
-          94 * ↑(4 ^ N) + sharpTerminalPotential (d N) ≤ 5 * reverseCrossCode C d N
-GSTU2DExactCrossingCharge.reverseCrossCode_ge_global_floor (C d : ℕ → ℕ) (N : ℕ) :
-  (∀ t < N, C t < 4) → (∀ t < N, d t < 3) → 37 - 37 * ↑(4 ^ N) ≤ reverseCrossCode C d N
-GSTU2DExactCrossingCharge.weightedCrossPrefix_ge_global_floor (C d : ℕ → ℕ → ℕ) (N K : ℕ) :
-  (∀ (t p : ℕ), t < N → p < K → C t p < 4) →
-    (∀ (t p : ℕ), t < N → p < K → d t p < 3) → (37 - 37 * ↑(4 ^ N)) * (↑(3 ^ K) - 1) ≤ 2 * weightedCrossPrefix C d N K
-GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy (C d : ℕ → ℕ → ℕ) (N q : ℕ) (hN : 1 ≤ N)
-  (hC : ∀ (t p : ℕ), t < N → p ≤ q → C t p < 4) (hd : ∀ (t p : ℕ), t < N → p ≤ q → d t p < 3)
-  (hout : ∀ (t p : ℕ), t < N → p ≤ q → outDigit (C t p) (d t p) = d (t + 1) p) (hHappy : HappyCell (C 0 q) (d 0 q)) :
-  0 < weightedCrossPrefix C d N (q + 1)
-'GSTU2DExactCrossingCharge.sharpTerminalPotential_step' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTU2DExactCrossingCharge.reverseCrossCode_ge_sharp_of_leading_happy' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-'GSTU2DExactCrossingCharge.reverseCrossCode_ge_global_floor' depends on axioms: [propext, Classical.choice, Quot.sound]
-'GSTU2DExactCrossingCharge.weightedCrossPrefix_ge_global_floor' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-'GSTU2DExactCrossingCharge.weightedCrossPrefix_positive_of_top_leading_happy' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
-=== LOCAL MODULE: GSTFinalPurePowerResidueTransplant ===
-GSTFinalPurePowerResidueTransplant.lean:308:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
-
-Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-GSTFinalPurePowerResidueTransplant.lean:350:34: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
-
-Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-GSTFinalPurePowerResidueTransplant.stripQuotient_succ (r M j : ℕ) (hM : 0 < M) :
-  stripQuotient r M (j + 1) = 4 * stripQuotient r M j + stripCarry r M j
-GSTFinalPurePowerResidueTransplant.stripCarry_is_information_digit (r M i k : ℕ) (hM : 0 < M) :
-  stripQuotient r M (i + k + 1) / 4 ^ k % 4 = stripCarry r M i
-GSTFinalPurePowerResidueTransplant.stripConservation_exact (B R p : ℕ) :
-  B * wideDigit R p + wideCarry B R p = wideDigit (B * R) p + 3 * wideCarry B R (p + 1)
-GSTFinalPurePowerResidueTransplant.pow4_exponent_trit_lift_digit (p m c a : ℕ) (ha : a < 3)
-  (hA : 4 ^ 3 ^ p = 1 + 3 ^ (p + 1) * c) (hc : c % 3 = 1) :
-  digit3 (4 ^ (m + a * 3 ^ p)) (p + 1) = (digit3 (4 ^ m) (p + 1) + a) % 3
-GSTFinalPurePowerResidueTransplant.purePowerStripInputResidue (D T E K q : ℕ) (hD : 1 ≤ D) (hE : E = 1 + 3 * D * T)
-  (hPow : E = 4 ^ K) : 4 ^ K % (3 * D * 3 ^ q) = 1 + 3 * D * (T % 3 ^ q)
-GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry (s K q i : ℕ) :
-  stripCarry (4 ^ K % residueTowerModulus (3 ^ (s + 1)) q) (residueTowerModulus (3 ^ (s + 1)) q) i =
-    carry4 (4 ^ (K + i)) (s + 2 + q)
-GSTFinalPurePowerResidueTransplant.exactPowerRectangle_conservation (s N K q : ℕ) :
-  4 ^ (N + 1) * digit3 (4 ^ K) (s + 2 + q) + wideCarry (4 ^ (N + 1)) (4 ^ K) (s + 2 + q) =
-    digit3 (4 ^ (K + N + 1)) (s + 2 + q) + 3 * wideCarry (4 ^ (N + 1)) (4 ^ K) (s + 2 + q + 1)
-=== LOCAL MODULE: GSTGraphV2InfiniteControlScratch ===
-=== LOCAL MODULE: GSTGraphV2InfiniteBigNDichotomyScratch ===
-GSTGraphV2InfiniteBigNDichotomyScratch.lean:59:15: warning: Variable name `hN` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _hN
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-GSTGraphV2InfiniteBigNDichotomyScratch.lean:185:5: warning: Variable name `h0` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _h0
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-=== LOCAL MODULE: GSTGraphV2PhysicalSignedKernelTelescopeScratch ===
-=== LOCAL MODULE: GSTHandwrittenPhysicalNoBig1 ===
-gpt56_binary_residue_gap_doubles (R p r : ℕ) (ha : GSTPhysicalKernel.binaryColumnCarry R p r = 1) :
-  3 ^ p - 2 ^ (r + 1) * R % 3 ^ p = 2 * (3 ^ p - 2 ^ r * R % 3 ^ p)
-gpt56_physical_noBig1_impossible (R p : ℕ)
-  (hclear :
-    GSTBig1ClearInfinitePathS (fun r => GSTPhysicalKernel.binaryColumnCarry R p r) fun r =>
       GSTPhysicalKernel.binaryColumnDigit R p r)
   (h0 : GSTPhysicalKernel.binaryColumnDigit R p 0 ≠ 0) : False
 gpt56_physical_path_forces_first_big1 (R p : ℕ) (h0 : GSTPhysicalKernel.binaryColumnDigit R p 0 ≠ 0) :
@@ -298,33 +95,9 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
 === LOCAL MODULE: GSTHandwrittenChildFirstBig1 ===
-GSTHandwrittenChildFirstBig1.lean:14:11: error: Ambiguous term
-  gstDigitS
-Possible interpretations:
-  _root_.gstDigitS T q : ℕ
-  
-  GSTInfiniteV2.gstDigitS T q : ℕ
-GSTHandwrittenChildFirstBig1.lean:19:48: error: Ambiguous term
-  gstDigitS
-Possible interpretations:
-  _root_.gstDigitS : ℕ → ℕ → ℕ
-  
-  GSTInfiniteV2.gstDigitS : ℕ → ℕ → ℕ
-GSTHandwrittenChildFirstBig1.lean:41:11: error: Ambiguous term
-  gstDigitS
-Possible interpretations:
-  _root_.gstDigitS T q : ℕ
-  
-  GSTInfiniteV2.gstDigitS T q : ℕ
-GSTHandwrittenChildFirstBig1.lean:62:48: error: Ambiguous term
-  gstDigitS
-Possible interpretations:
-  _root_.gstDigitS : ℕ → ℕ → ℕ
-  
-  GSTInfiniteV2.gstDigitS : ℕ → ℕ → ℕ
-gpt56_child_digit_two_forces_first_big1 (T q : ℕ) (hd2 : sorry = 2) :
+gpt56_child_digit_two_forces_first_big1 (T q : ℕ) (hd2 : _root_.gstDigitS T q = 2) :
   ∃ N, 1 ≤ N ∧ GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N
-gpt56_child_digit_two_forces_destroy_boundary (T q : ℕ) (hd2 : sorry = 2) :
+gpt56_child_digit_two_forces_destroy_boundary (T q : ℕ) (hd2 : _root_.gstDigitS T q = 2) :
   ∃ N,
     1 ≤ N ∧
       GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
@@ -337,8 +110,235 @@ gpt56_child_digit_two_forces_destroy_boundary (T q : ℕ) (hd2 : sorry = 2) :
               gstBinaryBridgeEventS (GSTPhysicalKernel.binaryColumnCarry T q j)
                   (GSTPhysicalKernel.binaryColumnDigit T q j) =
                 5
-'gpt56_child_digit_two_forces_first_big1' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
-'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
-LOCAL_MODULE_FAILED=GSTHandwrittenChildFirstBig1 RC=1
+'gpt56_child_digit_two_forces_first_big1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'gpt56_child_digit_two_forces_destroy_boundary' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTHandwrittenHorizontalParentBridge ===
+gpt56_parent_multiplier_is_binary_bridge (s : ℕ) : 4 ^ 3 ^ s = 2 ^ (2 * 3 ^ s)
+gpt56_parent_binary_endpoint_digit (s T q : ℕ) :
+  GSTPhysicalKernel.binaryColumnDigit T q (2 * 3 ^ s) = _root_.gstDigitS (4 ^ 3 ^ s * T) q
+gpt56_no_big1_before_parent_endpoint_digit_two (s T q : ℕ) (hd2 : _root_.gstDigitS T q = 2)
+  (hno : ∀ r ≤ 2 * 3 ^ s, GSTPhysicalKernel.binaryColumnDigit T q r ≠ 1) : _root_.gstDigitS (4 ^ 3 ^ s * T) q = 2
+'gpt56_parent_multiplier_is_binary_bridge' depends on axioms: [propext]
+'gpt56_no_big1_before_parent_endpoint_digit_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+=== LOCAL MODULE: GSTHandwrittenPrefixOneLivePackage ===
+GSTHandwrittenPrefixOneLivePackage.lean:14:14: error: Function expected at
+  GSTNavigationWitness
+but this term has type
+  ?m.1
+
+Note: Expected a function because this term is being applied to the argument
+  (gstNavigationConstant (s + 1) n)
+
+Hint: The identifier `GSTNavigationWitness` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:15:12: error: Function expected at
+  GSTOmegaInfiniteBadTrace
+but this term has type
+  ?m.2
+
+Note: Expected a function because this term is being applied to the argument
+  s
+
+Hint: The identifier `GSTOmegaInfiniteBadTrace` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:16:13: error: Function expected at
+  gstNavigationConstant
+but this term has type
+  ?m.3
+
+Note: Expected a function because this term is being applied to the argument
+  (s + 1)
+
+Hint: The identifier `gstNavigationConstant` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:18:13: error: Function expected at
+  c
+but this term has type
+  ?m.4
+
+Note: Expected a function because this term is being applied to the argument
+  s
+
+Hint: The identifier `c` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:20:6: error: Function expected at
+  gstDigit
+but this term has type
+  ?m.5
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:21:7: error: Function expected at
+  gstCarry
+but this term has type
+  ?m.6
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstCarry` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:21:26: error: Function expected at
+  gstCarry
+but this term has type
+  ?m.6
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstCarry` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:25:6: error: Function expected at
+  GSTSeededAffineBadTrace
+but this term has type
+  ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  1
+
+Hint: The identifier `GSTSeededAffineBadTrace` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:27:11: error: Function expected at
+  gstNavigationConstant
+but this term has type
+  x✝⁴
+
+Note: Expected a function because this term is being applied to the argument
+  (s + 1)
+GSTHandwrittenPrefixOneLivePackage.lean:25:37: error: unsolved goals
+x✝⁶ : Sort u_1
+GSTNavigationWitness : x✝⁶
+x✝⁵ : Sort u_2
+GSTOmegaInfiniteBadTrace : x✝⁵
+x✝⁴ : Sort u_3
+gstNavigationConstant : x✝⁴
+x✝³ : Sort u_4
+c : x✝³
+x✝² : Sort u_5
+gstDigit : x✝²
+x✝¹ : Sort u_6
+gstCarry : x✝¹
+x✝ : Sort u_7
+GSTSeededAffineBadTrace : x✝
+s n : ℕ
+hs : 1 ≤ s
+hn : 1 ≤ n
+hchild : sorry
+hBad : sorry
+⊢ ∃ q N,
+    sorry = 2 ∧
+      (sorry = 0 ∨ sorry = 3) ∧
+        1 ≤ N ∧ GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit sorry q r) N ∧ sorry
+GSTHandwrittenPrefixOneLivePackage.lean:57:14: error: Function expected at
+  GSTNavigationWitness
+but this term has type
+  ?m.1
+
+Note: Expected a function because this term is being applied to the argument
+  (gstNavigationConstant (s + 1) n)
+
+Hint: The identifier `GSTNavigationWitness` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:58:12: error: Function expected at
+  GSTOmegaInfiniteBadTrace
+but this term has type
+  ?m.2
+
+Note: Expected a function because this term is being applied to the argument
+  s
+
+Hint: The identifier `GSTOmegaInfiniteBadTrace` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:59:13: error: Function expected at
+  gstNavigationConstant
+but this term has type
+  ?m.3
+
+Note: Expected a function because this term is being applied to the argument
+  (s + 1)
+
+Hint: The identifier `gstNavigationConstant` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:61:13: error: Function expected at
+  c
+but this term has type
+  ?m.4
+
+Note: Expected a function because this term is being applied to the argument
+  s
+
+Hint: The identifier `c` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:63:6: error: Function expected at
+  gstDigit
+but this term has type
+  ?m.5
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstDigit` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:64:7: error: Function expected at
+  gstCarry
+but this term has type
+  ?m.6
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstCarry` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:64:26: error: Function expected at
+  gstCarry
+but this term has type
+  ?m.6
+
+Note: Expected a function because this term is being applied to the argument
+  T
+
+Hint: The identifier `gstCarry` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:65:6: error: Function expected at
+  GSTSeededAffineBadTrace
+but this term has type
+  ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  1
+
+Hint: The identifier `GSTSeededAffineBadTrace` is unknown, and Lean's `autoImplicit` option causes an unknown identifier to be treated as an implicitly bound variable with an unknown type. However, the unknown type cannot be a function, and a function is what Lean expects here. This is often the result of a typo or a missing `import` or `open` statement.
+GSTHandwrittenPrefixOneLivePackage.lean:83:7: error: Function expected at
+  gstNavigationConstant
+but this term has type
+  x✝⁴
+
+Note: Expected a function because this term is being applied to the argument
+  (s + 1)
+gpt56_prefix_one_live_handwritten_package.{u_1, u_2, u_3, u_4, u_5, u_6, u_7, u_8, u_9} {x✝ : Sort u_1}
+  {GSTNavigationWitness : x✝} {x✝¹ : Sort u_2} {GSTOmegaInfiniteBadTrace : x✝¹} {x✝² : Sort u_3}
+  {gstNavigationConstant : x✝²} {x✝³ : Sort u_4} {c : x✝³} {x✝⁴ : Sort u_5} {gstDigit : x✝⁴} {x✝⁵ : Sort u_6}
+  {gstCarry : x✝⁵} {x✝⁶ : Sort u_7} {GSTSeededAffineBadTrace : x✝⁶} (s n : ℕ) (hs : 1 ≤ s) (hn : 1 ≤ n) (hchild : sorry)
+  (hBad : sorry) :
+  have T := sorry;
+  have A := 4 ^ 3 ^ s;
+  have X := sorry / 3 + A * T;
+  ∃ q N,
+    sorry = 2 ∧
+      (sorry = 0 ∨ sorry = 3) ∧ 1 ≤ N ∧ GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧ sorry
+gpt56_prefix_one_live_destroy_boundary.{u_1, u_2, u_3, u_4, u_5, u_6, u_7, u_8, u_9} {x✝ : Sort u_1}
+  {GSTNavigationWitness : x✝} {x✝¹ : Sort u_2} {GSTOmegaInfiniteBadTrace : x✝¹} {x✝² : Sort u_3}
+  {gstNavigationConstant : x✝²} {x✝³ : Sort u_4} {c : x✝³} {x✝⁴ : Sort u_5} {gstDigit : x✝⁴} {x✝⁵ : Sort u_6}
+  {gstCarry : x✝⁵} {x✝⁶ : Sort u_7} {GSTSeededAffineBadTrace : x✝⁶} (s n : ℕ) (hs : 1 ≤ s) (hn : 1 ≤ n) (hchild : sorry)
+  (hBad : sorry) :
+  have T := sorry;
+  have A := 4 ^ 3 ^ s;
+  have X := sorry / 3 + A * T;
+  ∃ q N,
+    sorry = 2 ∧
+      (sorry = 0 ∨ sorry = 3) ∧
+        sorry ∧
+          1 ≤ N ∧
+            GSTFirstBig1AtS (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N ∧
+              have j := N - 1;
+              GSTPhysicalKernel.binaryColumnCarry T q j = 0 ∧
+                GSTPhysicalKernel.binaryColumnDigit T q j = 2 ∧
+                  gstBinaryBridgeMassS (GSTPhysicalKernel.binaryColumnCarry T q j)
+                        (GSTPhysicalKernel.binaryColumnDigit T q j) =
+                      4 ∧
+                    gstBinaryBridgeEventS (GSTPhysicalKernel.binaryColumnCarry T q j)
+                        (GSTPhysicalKernel.binaryColumnDigit T q j) =
+                      5
+'gpt56_prefix_one_live_handwritten_package' depends on axioms: [propext, sorryAx]
+'gpt56_prefix_one_live_destroy_boundary' depends on axioms: [propext, sorryAx]
+LOCAL_MODULE_FAILED=GSTHandwrittenPrefixOneLivePackage RC=1
 --- COMPARATOR TAIL ---
 COMPARATOR_SKIPPED_BECAUSE_MONOLITH_BUILD_FAILED
