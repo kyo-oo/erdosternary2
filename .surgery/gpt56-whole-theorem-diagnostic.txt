@@ -1,4 +1,4 @@
-HEAD=9225e36adeb32e51b8808fbbd63c8c67d90e332a
+HEAD=3fdf07e9155cf2c9c5997f1b2014ee468c3d61c8
 BUILD_RC=1
 === WHOLE THEOREM BUILD ERRORS / TRACE ===
 374:warning: ErdosTernary2.lean:16721:17: Variable name `hs` is not explicitly referenced.
