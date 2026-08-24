@@ -8,7 +8,6 @@ namespace GSTGraphV2ProductionLaws
 
 open GSTCanonicalSevenAxisBridge
 open GSTU2DEventTransport
-open GSTGraphV2InfiniteControl
 open GSTGraphV2Production
 open GSTGraphV2HandwrittenOmegaUBlock
 open GSTGraphV2HandwrittenExponentialCascade
@@ -16,23 +15,27 @@ open GSTGraphV2HandwrittenExponentialLTE
 
 /-- The horizontal edge of the production lattice is the exact x4 digit edge. -/
 theorem horizontal_digit_exact (E t p : Nat) :
-    outDigit (cell E t p).seven.carry (cell E t p).seven.digit =
-      (cell E (t+1) p).seven.digit := by
+    GST2DMixedEmergence.outDigit
+        (GSTGraphV2Production.cell E t p).seven.carry
+        (GSTGraphV2Production.cell E t p).seven.digit =
+      (GSTGraphV2Production.cell E (t+1) p).seven.digit := by
   simpa [GSTGraphV2Production.cell] using
     (GSTGraphV2InfiniteControl.graph_cell_exact E t p).1
 
 /-- The vertical edge of the production lattice is the exact ternary carry edge. -/
 theorem vertical_carry_exact (E t p : Nat) :
-    nextCarry (cell E t p).seven.carry (cell E t p).seven.digit =
-      (cell E t (p+1)).seven.carry := by
+    GST2DMixedEmergence.nextCarry
+        (GSTGraphV2Production.cell E t p).seven.carry
+        (GSTGraphV2Production.cell E t p).seven.digit =
+      (GSTGraphV2Production.cell E t (p+1)).seven.carry := by
   simpa [GSTGraphV2Production.cell] using
     (GSTGraphV2InfiniteControl.graph_cell_exact E t p).2
 
 /-- Equation I is literally one coordinate identity of each production cell. -/
 theorem navigation_nullspace_flux_exact (E t p : Nat) :
-    4 * ((cell E t p).absoluteEnergy % 3^p) =
-      (cell E t p).navigationNullspace +
-        3^p * (cell E t p).seven.carry := by
+    4 * ((GSTGraphV2Production.cell E t p).absoluteEnergy % 3^p) =
+      (GSTGraphV2Production.cell E t p).navigationNullspace +
+        3^p * (GSTGraphV2Production.cell E t p).seven.carry := by
   simpa [GSTGraphV2Production.cell] using
     GSTGraphV2HandwrittenExponentialCascade.graph_navigation_nullspace_flux_exact
       E t p
@@ -111,6 +114,7 @@ theorem residual_gate_left_is_phased_tail
       GSTGraphV2Production.residualRectangle,
       GSTGraphV2Production.rectangle,
       GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
       GSTGraphV2Production.originFrame,
       GSTGraphV2Production.originCoordinates,
       GSTGraphV2Production.cell] using h.1
@@ -120,6 +124,7 @@ theorem residual_gate_left_is_phased_tail
       GSTGraphV2Production.residualRectangle,
       GSTGraphV2Production.rectangle,
       GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
       GSTGraphV2Production.originFrame,
       GSTGraphV2Production.originCoordinates,
       GSTGraphV2Production.cell] using h.2.1
@@ -130,25 +135,26 @@ theorem residual_right_absolute_state_exact
     (s k m p : Nat) :
     let F := residualFrame s k m p
     F.block.right.seven.carry =
-        (cell 1 F.parentExponent p).seven.carry ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).seven.carry ∧
       F.block.right.seven.digit =
-        (cell 1 F.parentExponent p).seven.digit ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).seven.digit ∧
       F.block.right.eventCode =
-        (cell 1 F.parentExponent p).eventCode ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).eventCode ∧
       F.block.right.uCharge =
-        (cell 1 F.parentExponent p).uCharge ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).uCharge ∧
       F.block.right.mixedCharge =
-        (cell 1 F.parentExponent p).mixedCharge ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).mixedCharge ∧
       F.block.right.crossingCharge =
-        (cell 1 F.parentExponent p).crossingCharge ∧
+        (GSTGraphV2Production.cell 1 F.parentExponent p).crossingCharge ∧
       F.block.right.survive =
-        (cell 1 F.parentExponent p).survive := by
+        (GSTGraphV2Production.cell 1 F.parentExponent p).survive := by
   dsimp only
   have h := residual_parent_observables_exact s k m p
   simpa [GSTGraphV2Production.residualFrame,
     GSTGraphV2Production.residualRectangle,
     GSTGraphV2Production.rectangle,
     GSTGraphV2Production.residualEnergy,
+    GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
     GSTGraphV2Production.cell] using h
 
 /-- In the sole unbounded classifier level `s=1`, the parent block is exactly
@@ -178,6 +184,7 @@ theorem residual_level_one_origin_one_energy_step
   have h := residual_energy_u_mul_div_exact 1 k m
   simpa [GSTGraphV2Production.residualFrame,
     GSTGraphV2Production.residualEnergy,
+    GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
     GSTGraphV2HandwrittenOmegaUBlock.originTrit,
     GSTGraphV2HandwrittenOmegaUBlock.originTail,
     hm1, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
