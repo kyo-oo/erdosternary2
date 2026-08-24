@@ -1,4 +1,4 @@
-HEAD=4592b6610df1478a906c4039b9cc54000b94ecad
+HEAD=d28a2f107971563dce94c0aae2fc7cc3117f1443
 BUILD_RC=1
 === RESIDUAL BUILD ERRORS / TRACE ===
 374:warning: ErdosTernary2.lean:16721:17: Variable name `hs` is not explicitly referenced.
