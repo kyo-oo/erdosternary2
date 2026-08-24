@@ -64,6 +64,34 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialCascade.olean GSTGraphV2HandwrittenExponentialCascade.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenExponentialLTE.olean GSTGraphV2HandwrittenExponentialLTE.lean
           lake env lean -o .lake/build/lib/lean/GSTFinalPurePowerResidueTransplant.olean GSTFinalPurePowerResidueTransplant.lean
+
+          # Exact Aug-15/16 module transplant, compiled as the original theorem block.
+          lake env lean -o .lake/build/lib/lean/InformationDescentScratch.olean InformationDescentScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationGeometryScratch.olean InformationGeometryScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationStateScratch.olean InformationStateScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationBadTraceScratch.olean InformationBadTraceScratch.lean
+          lake env lean -o .lake/build/lib/lean/OriginTransducerScratch.olean OriginTransducerScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationRegenerationScratch.olean InformationRegenerationScratch.lean
+          lake env lean -o .lake/build/lib/lean/CarryWordScratch.olean CarryWordScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationCarryWordBridgeScratch.olean InformationCarryWordBridgeScratch.lean
+          lake env lean -o .lake/build/lib/lean/PurePowerCarrierScratch.olean PurePowerCarrierScratch.lean
+          lake env lean -o .lake/build/lib/lean/CanonicalPrefixScratch.olean CanonicalPrefixScratch.lean
+          lake env lean -o .lake/build/lib/lean/PurePowerBadAxisScratch.olean PurePowerBadAxisScratch.lean
+          lake env lean -o .lake/build/lib/lean/BadLanguageMagnitudeScratch.olean BadLanguageMagnitudeScratch.lean
+          lake env lean -o .lake/build/lib/lean/PurePowerTailReductionScratch.olean PurePowerTailReductionScratch.lean
+          lake env lean -o .lake/build/lib/lean/StripConservationScratch.olean StripConservationScratch.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2Scratch.olean GSTGraphV2Scratch.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2FluxScratch.olean GSTGraphV2FluxScratch.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2BlockScratch.olean GSTGraphV2BlockScratch.lean
+          lake env lean -o .lake/build/lib/lean/GSTExponentLiftScratch.olean GSTExponentLiftScratch.lean
+          lake env lean -o .lake/build/lib/lean/PurePowerResidueGraphScratch.olean PurePowerResidueGraphScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationLocalizationScratch.olean InformationLocalizationScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationFluxScratch.olean InformationFluxScratch.lean
+          lake env lean -o .lake/build/lib/lean/InformationForcingScratch.olean InformationForcingScratch.lean
+          lake env lean -o .lake/build/lib/lean/GSTResidueSpacetimeScratch.olean GSTResidueSpacetimeScratch.lean
+          lake env lean -o .lake/build/lib/lean/PhaseCycleInformationScratch.olean PhaseCycleInformationScratch.lean
+          lake env lean -o .lake/build/lib/lean/CanonicalCausalityScratch.olean CanonicalCausalityScratch.lean
+
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
