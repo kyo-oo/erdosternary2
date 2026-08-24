@@ -42,6 +42,8 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTU2DCanonicalPhaseDensity.olean GSTU2DCanonicalPhaseDensity.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DPureDivergence83.olean GSTU2DPureDivergence83.lean
           lake env lean -o .lake/build/lib/lean/GSTU2DSharpCrossingBlock.olean GSTU2DSharpCrossingBlock.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedPowerRectangle.olean GSTGraphV2UnifiedPowerRectangle.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedVerticalTelescope.olean GSTGraphV2UnifiedVerticalTelescope.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockProbe.olean GSTGraphV2PerfectPowerBlockProbe.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenOmegaUBlock.olean GSTGraphV2HandwrittenOmegaUBlock.lean
@@ -50,6 +52,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
+          lake env lean -o .lake/build/lib/lean/GSTFinalResidualConnector.olean GSTFinalResidualConnector.lean
       - name: Compile hard residual compositor probe
         id: residual
         continue-on-error: true
