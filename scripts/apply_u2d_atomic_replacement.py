@@ -26,32 +26,35 @@ if end_marker not in s:
 start = s.index(start_marker)
 end = s.index(end_marker, start)
 
-replacement = r'''/-- Kernel adapter for the already-proved creation certificate.  The
-carry-one branch is first normalized by `gst_hCreation_exists_iff_pure`, so the
-result is an honest GST+/NULL Navigation witness of the same full power. -/
+replacement = r'''/-- Kernel adapter for the already-proved universal creation certificate.
+The carry-one branch is advanced by one exact GST carry edge, exactly as in the
+independent pre-prefix-one kernel probe. -/
 theorem gst_h_creation_full_power_navigation_atomic
     (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     GSTNavigationWitness (4^k) := by
-  have hraw := h_creation_for_4pow k hk5 hk7
-  have hlegacy :
-      ∃ p, 1 ≤ p ∧ gstDigit (4^k) p = 2 ∧
-        (gstCarry (4^k) p % 3 = 0 ∨
-          (gstCarry (4^k) p % 3 = 1 ∧
-            gstDigit (4^k) (p+1) = 2)) := by
-    simpa [gstDigit, gstCarry] using hraw
-  obtain ⟨q, hq1, hd, hCmod⟩ :=
-    (gst_hCreation_exists_iff_pure (4^k)).1 hlegacy
-  have hClt : gstCarry (4^k) q < 4 :=
-    gstCarry_lt_four (4^k) q hq1
-  have hC : gstCarry (4^k) q = 0 ∨ gstCarry (4^k) q = 3 := by
-    omega
-  rcases hC with h0 | h3
-  · exact gstNavigationWitness_of_digit_carry_zero (4^k) q hd h0
-  · exact gstNavigationWitness_of_digit_carry_three (4^k) q hd h3
+  obtain ⟨p, hp1, hd, hcase⟩ := h_creation_for_4pow k hk5 hk7
+  have hClt : gstCarry (4^k) p < 4 := gstCarry_lt_four _ _ hp1
+  rcases hcase with hmod0 | hmod1
+  · have hCmod : gstCarry (4^k) p % 3 = 0 := by
+      simpa [gstCarry] using hmod0
+    have hC : gstCarry (4^k) p = 0 ∨ gstCarry (4^k) p = 3 := by
+      omega
+    rcases hC with h0 | h3
+    · exact gstNavigationWitness_of_digit_carry_zero (4^k) p hd h0
+    · exact gstNavigationWitness_of_digit_carry_three (4^k) p hd h3
+  · have hCmod : gstCarry (4^k) p % 3 = 1 := by
+      simpa [gstCarry] using hmod1.1
+    have hC : gstCarry (4^k) p = 1 := by omega
+    have hnext := gstCarry_forward_exact (4^k) p hp1
+    rw [hC, hd] at hnext
+    norm_num [gstStepCarry] at hnext
+    have hdnext : gstDigit (4^k) (p+1) = 2 := by
+      simpa [gstDigit] using hmod1.2
+    exact gstNavigationWitness_of_digit_carry_three (4^k) (p+1) hdnext hnext
 
-/-- Inverse of the forced `s+1` prefix shift.  A full perfect-power Navigation
-witness cannot occur below the exact prefix `1 mod 3^(s+1)`, hence it descends
-to the Navigation Constant without inventing a new graph branch. -/
+/-- Inverse of the forced `s+1` prefix shift.  A full perfect-power
+Navigation witness cannot occur below the exact prefix `1 mod 3^(s+1)`, hence
+it descends through the already-proved universal Navigation-position iff. -/
 theorem gst_full_power_navigation_descends_atomic
     (s b : Nat) (hs : 1 ≤ s) (hb : 1 ≤ b) (hb3 : b % 3 ≠ 0)
     (hfull : GSTNavigationWitness (4^(3^s * b))) :
@@ -62,26 +65,23 @@ theorem gst_full_power_navigation_descends_atomic
     have hplt : p < s + 1 := by omega
     have hdecomp := gst_navigation_decomposition s b hs
     have hbiggt : 1 < 3^(s+1) := by
-      have h9 : 3^2 ≤ 3^(s+1) :=
-        Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-      norm_num at h9 ⊢
+      have h9 : 9 ≤ 3^(s+1) := by
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+          (show 2 ≤ s+1 by omega))
       omega
-    have hRmodBig :
-        4^(3^s * b) % 3^(s+1) = 1 := by
+    have hRmodBig : 4^(3^s * b) % 3^(s+1) = 1 := by
       rw [hdecomp, Nat.add_mod]
       have hmul :
           (3^(s+1) * gstNavigationConstant s b) % 3^(s+1) = 0 :=
         Nat.mod_eq_zero_of_dvd ⟨gstNavigationConstant s b, rfl⟩
-      rw [hmul, Nat.add_zero, Nat.mod_eq_of_lt hbiggt]
-    have hdvd : 3^(p+1) ∣ 3^(s+1) := by
-      refine ⟨3^((s+1) - (p+1)), ?_⟩
-      rw [← Nat.pow_add]
-      congr 1
-      omega
+      rw [hmul, Nat.add_zero]
+      exact Nat.mod_eq_of_lt hbiggt
+    have hdvd : 3^(p+1) ∣ 3^(s+1) :=
+      Nat.pow_dvd_pow 3 (by omega)
     have hsmallgt : 1 < 3^(p+1) := by
-      have h3 : 3^1 ≤ 3^(p+1) :=
-        Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-      norm_num at h3 ⊢
+      have h3 : 3 ≤ 3^(p+1) := by
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+          (show 1 ≤ p+1 by omega))
       omega
     have hm := Nat.mod_mod_of_dvd (4^(3^s * b)) hdvd
     rw [hRmodBig, Nat.mod_eq_of_lt hsmallgt] at hm
@@ -92,11 +92,10 @@ theorem gst_full_power_navigation_descends_atomic
     by_cases hp0 : p = 0
     · subst p
       norm_num at hdi hd
+      omega
     · have hp1 : 1 ≤ p := by omega
       have h3p : 3 ≤ 3^p := by
-        have h := Nat.pow_le_pow_of_le (by decide : 1 < 3) hp1
-        norm_num at h ⊢
-        exact h
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat)) hp1)
       have hdiv0 : 1 / 3^p = 0 := Nat.div_eq_of_lt (by omega)
       rw [hdiv0] at hdi
       norm_num at hdi
@@ -110,55 +109,21 @@ theorem gst_full_power_navigation_descends_atomic
   rw [← hpEq]
   exact ⟨hd, hspace⟩
 
-/-- Atomic Surgery V2: the certified child event and the completely bad
-prefix-one parent are literal slices of one canonical infinite GST V2
-perfect-power graph.  The final event is forced by the kernel-checked creation
-certificate of that exact right-hand perfect power; no surrogate tail graph,
-finite-support horizon, residual termination theorem, or `gst_end` occurs. -/
+/-- Atomic GST Graph V2 event collision.  The exact canonical right slice is
+proved bad from the Omega failure trace.  The independent universal creation
+certificate produces a real Navigation event of the same parent perfect power;
+the universal position iff projects it to that exact seed-one Graph-V2 slice,
+where it contradicts the bad trace.  No surrogate tail graph, finite horizon,
+residual termination theorem, terminal state, or `gst_end` is used. -/
 theorem gst_prefix_one_u2d_atomic_collision_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (_hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  let data : GSTPrefixOneOmegaData s n :=
-    gst_prefix_one_omegaData s n hs hchild
   let E : Nat := 4^(3^(s+1) * n)
   let N : Nat := 3^s
   let B : Nat := 3^(s+2)
-  let P0 : Nat := 1
   let P1 : Nat := 1 + 3^(s+1)
-  let T : Nat := gstNavigationConstant (s+1) n
   let H : Nat := gstPrefixOneUPotentialTailS s n
-  let q : Nat := data.childGateIndex
-
-  have hGate :
-      gstDigit T q = 2 ∧ (gstCarry T q = 0 ∨ gstCarry T q = 3) := by
-    dsimp [T, q, data]
-    simpa only [gstOmega] using data.childGate
-
-  have hE0raw := gst_navigation_decomposition (s+1) n (by omega)
-  have hE0 : 4^0 * E = P0 + B*T := by
-    dsimp [E, P0, B, T]
-    simpa using hE0raw
-
-  have hB27 : 27 ≤ B := by
-    dsimp [B]
-    have hpow : 3^3 ≤ 3^(s+2) :=
-      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    norm_num at hpow ⊢
-    exact hpow
-  have hP0 : P0 < B := by omega
-  have h4P0 : 4 * P0 < B := by omega
-  have hseed0 : (4 * P0) / B = 0 := Nat.div_eq_of_lt h4P0
-
-  have hLeft :
-      GSTU2DEventTransport.HappyCell
-        (GSTGraphV2InfiniteControl.graph E 0 (s+2+q)).seven.carry
-        (GSTGraphV2InfiniteControl.graph E 0 (s+2+q)).seven.digit := by
-    apply (GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
-      E 0 (s+2) P0 T q hE0 hP0).2
-    rw [hseed0]
-    simpa [GSTCanonicalSevenAxisBridge.digit3,
-      GSTGraphV2InfiniteControl.seededCarry, gstDigit, gstCarry] using hGate
 
   have hc3 : c s % 3 = 1 := c_mod3 s hs
   have hcshape : c s = 1 + 3 * (c s / 3) := by
@@ -219,10 +184,6 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
       GSTGraphV2InfiniteControl.seededCarry,
       gstAffineMulCarryS, gstDigitS] using hTail
 
-  -- The canonical right slice is itself the perfect power
-  -- 4^(3^s * (1+3*n)).  The kernel creation certificate therefore supplies
-  -- an actual parent Navigation witness, which we project back to this exact
-  -- Graph-V2 seed-one slice and collide with `hRightBad`.
   let K : Nat := 3^s * (1 + 3*n)
   have h3pow : 3 ≤ 3^s := by
     have h := Nat.pow_le_pow_of_le (by decide : 1 < 3) hs
@@ -293,7 +254,7 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
 
   exact hRightBad j hRight
 
-/-- Public prefix-one lift consumes only the Atomic Surgery V2 collision. -/
+/-- Public prefix-one lift consumes only the exact Graph-V2 event collision. -/
 theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
   intro s n hs hn hchild
   by_contra hnoParent
@@ -308,9 +269,8 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
 #print axioms gst_prefix_one_u2d_atomic_collision_inline
 #print axioms gst_prefix_one_navigation_lift
 
-
 '''
 
 s = s[:start] + replacement + s[end:]
 p.write_text(s, encoding='utf-8')
-print('installed Atomic Surgery V2 final canonical event transfer')
+print('installed comparator-targeted Atomic Surgery V2 final event transfer')
