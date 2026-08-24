@@ -1,0 +1,71 @@
+name: SOL56 Direct Edited Monolith CI
+
+on:
+  pull_request:
+    branches:
+      - sol/sol56-direct-ci-base2-78b-20260824
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: sol56-direct-edited-monolith-ci
+  cancel-in-progress: true
+
+jobs:
+  direct-monolith:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
+      - name: Verify actual theorem transplant
+        shell: bash
+        run: |
+          grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
+          ! grep -n 'have hboundary : GSTResidualBoundary' ErdosTernary2.lean
+
+      - name: Install Lean 4.33.0-rc2
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile edited ErdosTernary2 directly
+        id: monolith
+        continue-on-error: true
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          set +e
+          lake build GSTTactic ErdosTernary2 2>&1 | tee /tmp/monolith.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Run official comparator
+        id: comparator
+        if: steps.monolith.outputs.rc == '0'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          bash scripts/comparator.sh 2>&1 | tee /tmp/comparator.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Require final success
+        shell: bash
+        run: |
+          test "${{ steps.monolith.outputs.rc }}" = "0"
+          test "${{ steps.comparator.outputs.rc }}" = "0"
+          grep -F 'Your solution is okay!' /tmp/comparator.log
