@@ -1,0 +1,95 @@
+name: SOL56 Direct Monolith Transplant
+
+on:
+  pull_request:
+    branches:
+      - sol/sol56-direct-ci-base-78b-20260824
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: sol56-direct-monolith-transplant
+  cancel-in-progress: true
+
+jobs:
+  transplant-compile-compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
+      - name: Verify transplanted theorem body
+        shell: bash
+        run: |
+          grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'gst_end survived direct monolith transplant'
+            exit 1
+          fi
+
+      - name: Install Lean 4.33.0-rc2
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile edited monolith directly
+        id: monolith
+        continue-on-error: true
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          set +e
+          lake build GSTTactic ErdosTernary2 2>&1 | tee /tmp/monolith.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Audit edited monolith
+        if: steps.monolith.outputs.rc == '0'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('ErdosTernary2.lean')
+          bad=[]
+          for i,line in enumerate(p.read_text(encoding='utf-8').splitlines(),1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b',line) or line.strip()=='gst_end':
+                  bad.append(f'{i}:{line}')
+          if bad:
+              print('\n'.join(bad)); raise SystemExit(1)
+          print('MONOLITH_AUDIT_CLEAN')
+          PY
+
+      - name: Run official comparator
+        id: comparator
+        if: steps.monolith.outputs.rc == '0'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          bash scripts/comparator.sh 2>&1 | tee /tmp/comparator.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Require final success
+        shell: bash
+        run: |
+          test "${{ steps.monolith.outputs.rc }}" = "0"
+          test "${{ steps.comparator.outputs.rc }}" = "0"
+          grep -F 'Your solution is okay!' /tmp/comparator.log
