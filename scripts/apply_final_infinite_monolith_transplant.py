@@ -15,6 +15,7 @@ import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
 '''
 if import_anchor not in s:
     raise SystemExit('import anchor not found')
@@ -165,6 +166,10 @@ replacement = r'''  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
 
       let E := GSTGraphV2HandwrittenOmegaUBlock.residualEnergy 1 k m
       let b := k + 2
+      let Kexp := 3^(k+1) * m
+      have hEpow : E = 4^Kexp := by
+        rfl
+
       have hBaseCarryZero :
           (GSTGraphV2InfiniteControl.graph E 0 b).seven.carry = 0 := by
         have hmodE : E % 3^b = 1 := by
@@ -208,9 +213,27 @@ replacement = r'''  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
       have hLatentCarryNonzero := hLatentGate.nextCarryNonzero
       have hNextInvariant := hLatentGate.nextInvariant
 
-      -- The imported production/phase/crossing stack is now physically wired
-      -- into the monolith.  Compiler state from this point is the true final
-      -- all-Nat compositor seam.
+      -- PURE-POWER RESIDUE TRANSPLANT CONSUMED IN THE LIVE MONOLITH.
+      -- This is the literal width-three power rectangle E -> 4^3*E at the
+      -- exact residual gate row b+q.
+      have hPowerRectangle :=
+        GSTFinalPurePowerResidueTransplant.exactPowerRectangle_conservation
+          k 2 Kexp q
+      have hPowerCarry0 :=
+        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
+          k Kexp q 0
+      have hPowerCarry1 :=
+        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
+          k Kexp q 1
+      have hPowerCarry2 :=
+        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
+          k Kexp q 2
+      have hPowerCarry3 :=
+        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
+          k Kexp q 3
+
+      -- The imported production/phase/crossing stack and the transplanted
+      -- pure-power carry word are now physically in the theorem body.
       trace_state
       omega
     · rcases hm2 with ⟨hm2, hk13⟩
