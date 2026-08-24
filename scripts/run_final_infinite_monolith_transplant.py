@@ -16,6 +16,12 @@ if original_bytes < MIN_MONOLITH_BYTES:
 if s.count(TARGET) != 1:
     raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
 
+# Historical attached packets already present in the clean pre-bulk monolith are
+# immutable baseline. Atomic surgery may neither add, delete, reorder, nor alter
+# packet boundary markers.
+packet_marker_re = re.compile(r'(?m)^-- (?:BEGIN|END) ATTACHED [^\n]+$')
+packet_markers_before = packet_marker_re.findall(s)
+
 start = s.index(TARGET)
 end = s.find(TARGET_END, start)
 if end < 0:
@@ -123,7 +129,7 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
 s2 = s[:start] + replacement + s[end:]
 
 # Atomic means atomic: imports and every declaration outside the target theorem
-# must remain byte-for-byte untouched.
+# remain byte-for-byte untouched.
 if s2[:start] != s[:start]:
     raise SystemExit('prefix outside target theorem changed')
 new_end = s2.find(TARGET_END, start)
@@ -133,8 +139,8 @@ if s2.count(TARGET) != 1:
     raise SystemExit('post-surgery theorem multiplicity check failed')
 if re.search(r'(?m)^\s*gst_end\s*$', s2):
     raise SystemExit('gst_end survived final theorem surgery')
-if 'BEGIN ATTACHED ' in s2 or 'END ATTACHED ' in s2:
-    raise SystemExit('bulk attached-source packet detected; refusing non-atomic surgery')
+if packet_marker_re.findall(s2) != packet_markers_before:
+    raise SystemExit('historical attached-packet structure changed; refusing non-atomic surgery')
 
 region = s2[start:new_end]
 for forbidden in (
@@ -156,6 +162,7 @@ if written != s2:
 print(f'ATOMIC_INPUT_BYTES={original_bytes}')
 print(f'ATOMIC_OUTPUT_BYTES={len(written.encode("utf-8"))}')
 print(f'ATOMIC_CHANGED_REGION_BYTES={len(replacement.encode("utf-8"))}')
+print(f'ATOMIC_BASELINE_PACKET_MARKERS={len(packet_markers_before)}')
 for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
         print(f'ATOMIC_TARGET_START={i}')
