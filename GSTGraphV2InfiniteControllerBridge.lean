@@ -145,16 +145,22 @@ theorem graph_right_bad_to_seededBadTrace
           (graphCoupledState E N b).parentSeed
           ((graphCoupledState E N b).parentWord (4^N)) K := by
     simpa [graphCoupledState] using hseed
+  have hLocalDigit := graphCoupledState_parentDigit_exact E N (b+K)
   have hDigit :
       (graph E N (b+K)).seven.digit =
         GSTV2.digit ((graphCoupledState E N b).parentWord (4^N)) K := by
-    simpa [graphCoupledState] using hdigit
+    calc
+      (graph E N (b+K)).seven.digit =
+          ((graphCoupledState E N (b+K)).parentOffset +
+            4^N * ((graphCoupledState E N (b+K)).childTail % 3)) % 3 :=
+        hLocalDigit.symm
+      _ = GSTV2.digit
+          ((graphCoupledState E N b).parentWord (4^N)) K := hdigit
   rcases hHappy with ⟨hd2, hC⟩
-  refine ⟨?_, ?_⟩
-  · simpa [hDigit] using hd2
-  · rcases hC with h0 | h3
-    · exact Or.inl (by simpa [hCarry] using h0)
-    · exact Or.inr (by simpa [hCarry] using h3)
+  refine ⟨hDigit.trans hd2, ?_⟩
+  rcases hC with h0 | h3
+  · exact Or.inl (hCarry.trans h0)
+  · exact Or.inr (hCarry.trans h3)
 
 /-- If the left boundary begins with the true zero carry, a bad right edge
 constructs the full transplanted all-Nat bad coupled controller. -/
@@ -186,8 +192,10 @@ theorem graph_child_happy_to_controller
         (graphCoupledState E N b) q).childTail % 3) := by
   have horbit := graphCoupledOrbit_exact E N b q
   rw [horbit]
-  simpa [GSTV2.Happy, GST2DMixedEmergence.HappyCell,
-    graphCoupledState, Nat.add_assoc] using hChild
+  have hDigit := graphCoupledState_childDigit_exact E N (b+q)
+  rcases hChild with ⟨hd2, hC⟩
+  refine ⟨hDigit.trans hd2, ?_⟩
+  simpa [graphCoupledState] using hC
 
 /-- The Graph-V2 child gate therefore yields the transplanted latent-gate
 packet while all-depth right-edge badness continues. -/
