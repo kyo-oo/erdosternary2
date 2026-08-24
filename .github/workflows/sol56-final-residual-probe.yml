@@ -28,7 +28,7 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Compile locked green dependency stack
+      - name: Compile locked green infinite dependency stack
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -54,8 +54,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
-          lake env lean -o .lake/build/lib/lean/GSTFinalResidualConnector.olean GSTFinalResidualConnector.lean
-      - name: Compile hard residual compositor probe
+      - name: Compile hard residual infinite compositor probe
         id: residual
         continue-on-error: true
         shell: bash
