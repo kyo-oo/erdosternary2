@@ -100,7 +100,6 @@ theorem graphCoupledState_step_exact (E N p : Nat) :
     have h3 : 0 < (3 : Nat) := by decide
     rw [hbal, Nat.add_mul_div_left _ _ h3,
       Nat.div_eq_of_lt hdlt, Nat.zero_add]
-    rfl
   · dsimp [GSTV2.coupledStep]
     rw [graphCoupledState_childDigit_exact]
     have h := (graph_cell_exact E 0 p).2
