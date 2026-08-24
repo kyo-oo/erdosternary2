@@ -1,5 +1,5 @@
 MONOLITH_RC=1
-⚠ [8697/8700] Built GSTTactic (4.9s)
+⚠ [8697/8700] Built GSTTactic (5.4s)
 warning: GSTTactic.lean:69:5: Variable name `hd2` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -12,7 +12,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hd2
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-✖ [8699/8700] Building ErdosTernary2 (58s)
+✖ [8699/8700] Building ErdosTernary2 (77s)
 trace: .> LEAN_PATH=/home/runner/work/erdosternary2/erdosternary2/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.33.0-rc2/bin/lean /home/runner/work/erdosternary2/erdosternary2/ErdosTernary2.lean -o /home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean/ErdosTernary2.olean -i /home/runner/work/erdosternary2/erdosternary2/.lake/build/lib/lean/ErdosTernary2.ilean -c /home/runner/work/erdosternary2/erdosternary2/.lake/build/ir/ErdosTernary2.c --setup /home/runner/work/erdosternary2/erdosternary2/.lake/build/ir/ErdosTernary2.setup.json --json
 warning: ErdosTernary2.lean:262:33: Variable name `hm` is not explicitly referenced.
 
