@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
+  pull_request:
+    branches:
+      - sol/sol56-base-perfect-power-78b-20260824
   workflow_dispatch:
 
 permissions:
@@ -111,9 +114,10 @@ jobs:
           p = Path('ErdosTernary2.lean')
           bad=[]
           for i,line in enumerate(p.read_text(encoding='utf-8').splitlines(),1):
+              stripped = line.strip()
               if line.lstrip().startswith('--'):
                   continue
-              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b|^[[:space:]]*gst_end[[:space:]]*$', line):
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line) or stripped == 'gst_end':
                   bad.append(f'{i}:{line}')
           if bad:
               print('\n'.join(bad))
