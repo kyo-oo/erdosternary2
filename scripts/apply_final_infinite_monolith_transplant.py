@@ -16,6 +16,40 @@ import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
 '''
 if import_anchor not in s:
     raise SystemExit('import anchor not found')
@@ -167,8 +201,54 @@ replacement = r'''  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
       let E := GSTGraphV2HandwrittenOmegaUBlock.residualEnergy 1 k m
       let b := k + 2
       let Kexp := 3^(k+1) * m
-      have hEpow : E = 4^Kexp := by
-        rfl
+      have hEpow : E = 4^Kexp := by rfl
+
+      -- Canonical prefix-one constants transplanted from the Aug-17 stack.
+      have hQ : GSTCanonicalOriginEnergyS gstNavigationConstant := by
+        intro t n ht
+        exact gst_navigation_decomposition t n ht
+      let z : Nat → Nat := fun t => c t / 3
+      have hunit : ∀ t, 1 ≤ t →
+          gstNavigationConstant t 1 = 1 + 3 * z t := by
+        intro t ht
+        dsimp [z]
+        rw [gstNavigationConstant_one t ht]
+        have hc3 : c t % 3 = 1 := c_mod3 t ht
+        have hsplit := Nat.mod_add_div (c t) 3
+        omega
+      have hz3 : ∀ t, 1 ≤ t → z t % 3 = 2 := by
+        intro t ht
+        dsimp [z]
+        have hc9 : c t % 9 = 7 := c_mod9 t ht
+        have hc3 : c t % 3 = 1 := c_mod3 t ht
+        have hsplit : c t % 9 = c t % 3 + 3 * (c t / 3 % 3) := by
+          rw [show (9:Nat) = 3 * 3 by decide, Nat.mod_mul]
+        rw [hc9, hc3] at hsplit
+        omega
+
+      -- Exact A=64, c=7, z=2 canonical block identities.  These are now
+      -- instantiated inside the hard branch rather than left in scratch files.
+      have hA64 : (64 : Nat) = 4^(3^1) := by norm_num
+      have hLTE64 : (64 : Nat) = 1 + 3^(1+1) * 7 := by norm_num
+      have hc72 : (7 : Nat) = 1 + 3 * 2 := by norm_num
+      have hPrefixSquare := gst_canonical_prefix_one_energy_squareS
+        gstNavigationConstant hQ 1 m (by decide)
+      have hOriginRec := gst_hard_tail_origin_one_recursionS
+        gstNavigationConstant hQ z hunit 1 (m/3) (by decide)
+      have hOriginDigit := gst_hard_tail_origin_one_mod3S
+        gstNavigationConstant hQ z hunit hz3 1 (m/3) (by decide)
+
+      -- Full exact power-residue rectangle, not the reduced one-theorem probe.
+      have hPowerRectangle :=
+        gst_exact_power_rectangle_conservationS k 2 Kexp q
+      have hPowerCarry0 :=
+        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 0
+      have hPowerCarry1 :=
+        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 1
+      have hPowerCarry2 :=
+        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 2
+      have hPowerCarry3 :=
+        gst_residue_strip_carry_is_exact_power_carryS k Kexp q 3
 
       have hBaseCarryZero :
           (GSTGraphV2InfiniteControl.graph E 0 b).seven.carry = 0 := by
@@ -191,49 +271,26 @@ replacement = r'''  -- BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT
           E 3 b hBaseCarryZero (by
             intro j
             simpa [E, b, Nat.add_assoc] using hRightBad3 j)
-
       have hLatentGate :=
         GSTGraphV2InfiniteControllerBridge.graph_child_happy_latent_transfer
           E 3 b q hBaseCarryZero
-          (by
-            intro j
-            simpa [E, b, Nat.add_assoc] using hRightBad3 j)
+          (by intro j; simpa [E, b, Nat.add_assoc] using hRightBad3 j)
           (by simpa [E, b, Nat.add_assoc] using hChild)
-
       have hInfiniteLedger :=
         GSTV2.infinite_coupled_ledger
           (4^3)
           (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
           (by positivity)
           (GSTGraphV2InfiniteControllerBridge.graphCoupledState_invariant E 3 b)
-
       have hLedgerGate := hInfiniteLedger.pastSynchronized q
       have hBadSuffix := hLatentGate.nextParentBadSuffix
       have hLatentCarry := hLatentGate.nextCarryTwoOrThree
       have hLatentCarryNonzero := hLatentGate.nextCarryNonzero
       have hNextInvariant := hLatentGate.nextInvariant
 
-      -- PURE-POWER RESIDUE TRANSPLANT CONSUMED IN THE LIVE MONOLITH.
-      -- This is the literal width-three power rectangle E -> 4^3*E at the
-      -- exact residual gate row b+q.
-      have hPowerRectangle :=
-        GSTFinalPurePowerResidueTransplant.exactPowerRectangle_conservation
-          k 2 Kexp q
-      have hPowerCarry0 :=
-        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
-          k Kexp q 0
-      have hPowerCarry1 :=
-        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
-          k Kexp q 1
-      have hPowerCarry2 :=
-        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
-          k Kexp q 2
-      have hPowerCarry3 :=
-        GSTFinalPurePowerResidueTransplant.residueStripCarry_is_exact_power_carry
-          k Kexp q 3
-
-      -- The imported production/phase/crossing stack and the transplanted
-      -- pure-power carry word are now physically in the theorem body.
+      -- The only remaining goal after this point is the canonical no-erasure
+      -- collision between the transplanted origin recursion / residue rectangle
+      -- and the all-depth right-bad suffix.  Keep it visible to Lean.
       trace_state
       omega
     · rcases hm2 with ⟨hm2, hk13⟩
