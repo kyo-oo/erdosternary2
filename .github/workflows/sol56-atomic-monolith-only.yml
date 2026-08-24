@@ -29,11 +29,15 @@ jobs:
           mkdir -p .surgery
           python3 scripts/run_final_infinite_monolith_transplant.py 2>&1 | tee .surgery/final_transplant.log
 
-      - name: Prepare Lean RC2 and Mathlib cache
+      - name: Prepare Lean RC2 and Mathlib cache only
         id: leanprep
         continue-on-error: true
         uses: leanprover/lean-action@v1
         with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
           use-mathlib-cache: true
 
       - name: Discover exact local import closure
@@ -46,7 +50,6 @@ jobs:
           import re
 
           target = 'ErdosTernary2'
-          root = Path('.')
           order = []
           done = set()
           active = []
