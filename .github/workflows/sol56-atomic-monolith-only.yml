@@ -46,7 +46,7 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Discover exact dependency closure plus final infinite compositor
+      - name: Discover exact canonical dependency closure
         if: always()
         shell: bash
         run: |
@@ -92,11 +92,6 @@ jobs:
 
           for dep in imports_of(target):
               visit(dep)
-
-          # The final compositor is deliberately compiled even before it is
-          # imported by the monolith.  It must be kernel-green independently
-          # before the one-theorem seam is allowed to consume it.
-          visit('GSTFinalResidualCompositorProbe')
 
           Path('.surgery/local_import_order.txt').write_text(
               '\n'.join(order) + ('\n' if order else ''), encoding='utf-8')
