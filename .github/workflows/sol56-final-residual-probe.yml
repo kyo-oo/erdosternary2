@@ -112,19 +112,6 @@ jobs:
           cat .surgery/sol56-current-comparator.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
-      - name: Persist current monolith diagnostics
-        if: always() && github.event_name == 'push'
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .surgery/sol56-current-monolith-build.txt || true
-          git add .surgery/sol56-current-comparator.txt || true
-          if ! git diff --cached --quiet; then
-            git commit -m "Record current transplanted monolith diagnostics [skip ci]"
-            git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
-          fi
-
       - name: Require green monolith and comparator
         shell: bash
         run: |
