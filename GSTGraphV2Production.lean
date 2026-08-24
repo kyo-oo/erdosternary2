@@ -172,8 +172,8 @@ structure OriginCoordinates where
   level : Nat
   origin : Nat
   depth : Nat
-  prefix : Nat
-  suffix : Nat
+  originPrefixValue : Nat
+  originSuffixValue : Nat
   phaseShift : Nat
   tailExponent : Nat
   tailEnergy : Nat
@@ -184,8 +184,8 @@ def originCoordinates (t n K : Nat) : OriginCoordinates :=
     level := t
     origin := n
     depth := K
-    prefix := GSTGraphV2HandwrittenExponentialCascade.originPrefix n K
-    suffix := GSTGraphV2HandwrittenExponentialCascade.originSuffix n K
+    originPrefixValue := GSTGraphV2HandwrittenExponentialCascade.originPrefix n K
+    originSuffixValue := GSTGraphV2HandwrittenExponentialCascade.originSuffix n K
     phaseShift := GSTGraphV2HandwrittenExponentialCascade.uPhaseShift t n K
     tailExponent := GSTGraphV2HandwrittenExponentialCascade.uTailExponent t n K
     tailEnergy := GSTGraphV2HandwrittenExponentialCascade.uTailEnergy t n K
