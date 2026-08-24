@@ -1,6 +1,7 @@
 import GSTGraphV2ProductionLaws
 import GSTU2DSharpCrossingBlock
 import GSTGraphV2PerfectPowerBlockProbe
+import GSTGraphV2InfiniteControllerBridge
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -250,6 +251,48 @@ theorem residual_level_one_origin_one_probe
   have hLeftPhased := residual_gate_left_is_phased_tail 1 k m q
   have hRightAbsolute := residual_right_absolute_state_exact 1 k m (b+q)
 
+  /- Direct all-Nat controller transplant for the exact hard width-3 strip. -/
+  have hBaseCarryZero :
+      (GSTGraphV2InfiniteControl.graph E 0 b).seven.carry = 0 := by
+    have hmod : E % 3^b = 1 := by
+      have h := pow4_scaled_mod_next (k+1) m
+      simpa [E, b, GSTGraphV2Production.residualEnergy,
+        GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+        Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+    change carry4 E b = 0
+    unfold carry4
+    rw [hmod]
+    apply Nat.div_eq_of_lt
+    have hb9 : 9 ≤ 3^b := by
+      rw [show (9 : Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
+    omega
+
+  have hControllerBad :=
+    GSTGraphV2InfiniteControllerBridge.graph_infinite_bad_control
+      E 3 b hBaseCarryZero (by
+        intro j
+        simpa [E, b, Nat.add_assoc] using hRightBad j)
+
+  have hLatentGate :=
+    GSTGraphV2InfiniteControllerBridge.graph_child_happy_latent_transfer
+      E 3 b q hBaseCarryZero
+      (by
+        intro j
+        simpa [E, b, Nat.add_assoc] using hRightBad j)
+      (by simpa [E, b, Nat.add_assoc] using hChild)
+
+  have hControllerLedger :=
+    GSTV2.infinite_coupled_ledger
+      (4^3)
+      (GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b)
+      (by positivity)
+      (GSTGraphV2InfiniteControllerBridge.graphCoupledState_invariant E 3 b)
+
+  have hLedgerAtGate := hControllerLedger.pastSynchronized q
+  have hBadSuffixAfterGate := hLatentGate.nextParentBadSuffix
+  have hLatentChildCarry := hLatentGate.nextChildCarryLatent
+
   have hNeutralWindow : ∀ p, p ≤ q →
       (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.carry = 0 ∧
       (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.digit = 0 ∧
@@ -291,7 +334,7 @@ theorem residual_level_one_origin_one_probe
         GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
         Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h.2.1
 
-  /- The transplanted block is consumed here, inside the hard proof. -/
+  /- The transplanted phase block is consumed here, inside the hard proof. -/
   have hPhaseLeftPositive :
       0 < transplantedGraphPhaseWindow E 0 b (q+1) := by
     apply transplanted_graph_phase_window_positive_of_happy
