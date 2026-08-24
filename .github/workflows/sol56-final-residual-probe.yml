@@ -70,12 +70,12 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .surgery
           set +e
-          lake build GSTTactic ErdosTernary2 > .surgery/sol56-final-monolith-build.txt 2>&1
+          lake build GSTTactic ErdosTernary2 > .surgery/sol56-current-monolith-build.txt 2>&1
           rc=$?
           set -e
-          echo "MONOLITH_RC=$rc" | cat - .surgery/sol56-final-monolith-build.txt > .surgery/.tmp
-          mv .surgery/.tmp .surgery/sol56-final-monolith-build.txt
-          cat .surgery/sol56-final-monolith-build.txt
+          echo "MONOLITH_RC=$rc" | cat - .surgery/sol56-current-monolith-build.txt > .surgery/.tmp
+          mv .surgery/.tmp .surgery/sol56-current-monolith-build.txt
+          cat .surgery/sol56-current-monolith-build.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
       - name: Audit edited monolith
@@ -106,15 +106,28 @@ jobs:
         shell: bash
         run: |
           set +e
-          bash scripts/comparator.sh > .surgery/sol56-final-comparator.txt 2>&1
+          bash scripts/comparator.sh > .surgery/sol56-current-comparator.txt 2>&1
           rc=$?
           set -e
-          cat .surgery/sol56-final-comparator.txt
+          cat .surgery/sol56-current-comparator.txt
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Persist current monolith diagnostics
+        if: always() && github.event_name == 'push'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .surgery/sol56-current-monolith-build.txt || true
+          git add .surgery/sol56-current-comparator.txt || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record current transplanted monolith diagnostics [skip ci]"
+            git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
+          fi
 
       - name: Require green monolith and comparator
         shell: bash
         run: |
           test "${{ steps.monolith.outputs.rc }}" = "0"
           test "${{ steps.comparator.outputs.rc }}" = "0"
-          grep -F 'Your solution is okay!' .surgery/sol56-final-comparator.txt
+          grep -F 'Your solution is okay!' .surgery/sol56-current-comparator.txt
