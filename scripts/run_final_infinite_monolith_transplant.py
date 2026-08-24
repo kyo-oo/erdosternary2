@@ -120,6 +120,20 @@ s2 = s[:start] + replacement + s[end:]
 if re.search(r'(?m)^\s*gst_end\s*$', s2):
     raise SystemExit('gst_end survived final theorem transplant')
 
+# This is a transplant, not a coexistence experiment.  The old residual
+# classifier body must be physically absent from the edited production theorem.
+new_end = s2.find(end_marker, start)
+region = s2[start:new_end]
+for forbidden in (
+    'let r := v3 n',
+    'have hboundary : GSTResidualBoundary',
+    'have hResidualBad : GSTOmegaInfiniteBadTrace s k m',
+    'rcases hboundary with hlevel1 | hlevel3 | hstable',
+    'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT\n  -- The residual failure',
+):
+    if forbidden in region:
+        raise SystemExit(f'old residual body survived direct transplant: {forbidden}')
+
 p.write_text(s2, encoding='utf-8')
 
 lines = s2.splitlines()
@@ -128,4 +142,4 @@ for i, line in enumerate(lines, 1):
         print(f'TRANSPLANT_TARGET_START={i}')
     if 'Exact recovered RED frontier:' in line:
         print(f'TRANSPLANT_RED_FRONTIER={i}')
-print('FINAL_INFINITE_MONOLITH_TRANSPLANT whole theorem installed')
+print('DIRECT_MONOLITH_TRANSPLANT=WHOLE_THEOREM_REPLACED')
