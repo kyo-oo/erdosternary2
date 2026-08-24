@@ -1,0 +1,32 @@
+name: SOL56 Final Ontological Closure
+
+on:
+  push:
+    branches:
+      - sol/sol56-final-residual-production-green-20260824
+  workflow_dispatch:
+
+concurrency:
+  group: sol56-final-ontological-closure
+  cancel-in-progress: true
+
+jobs:
+  closure:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
+      - name: Prepare Lean RC2
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Compile final ontological closure
+        run: lake env lean GSTFinalResidualOntologicalClosure.lean
