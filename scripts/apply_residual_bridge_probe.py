@@ -42,9 +42,8 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
     have hmod : gstCarry T q % 3 = 0 :=
       gstGoodSpace_carry_mod3_zero T q hspace
     have hlt : gstCarry T q < 4 := by
-      cases q with
-      | zero => simp [gstCarry]
-      | succ q => exact gstCarry_lt_four T (q+1) (by omega)
+      simpa [gstCarry, gstAffineMulCarryS] using
+        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
     have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
       omega
     refine ⟨q, ?_⟩
@@ -59,7 +58,7 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
   have hAunit :
       A = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
     dsimp [A]
-    exact gst_navigation_decomposition s 1 hs
+    simpa using (gst_navigation_decomposition s 1 hs)
 
   have hunitPrefix :
       gstNavigationConstant s 1 = 1 + 3*z := by
