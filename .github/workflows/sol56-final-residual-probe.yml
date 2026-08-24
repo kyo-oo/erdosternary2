@@ -1,26 +1,29 @@
-name: SOL56 Final Residual Probe
+name: SOL56 Final Infinite Monolith Transplant
 
 on:
   push:
     branches:
       - sol/sol56-final-residual-production-green-20260824
-  pull_request:
-    branches:
-      - sol/sol56-base-perfect-power-78b-20260824
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  probe:
+  transplant-build-compare:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: sol/sol56-final-residual-production-green-20260824
+          fetch-depth: 1
+
       - name: Install pinned Lean
         shell: bash
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
       - name: Resolve pinned Mathlib
         shell: bash
         run: |
@@ -28,11 +31,12 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Compile locked green infinite dependency stack
+
+      - name: Compile transplanted infinite dependency spine
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          mkdir -p .lake/build/lib/lean
+          mkdir -p .lake/build/lib/lean .surgery
           lake env lean -o .lake/build/lib/lean/GSTV2InfiniteCore.olean GSTV2InfiniteCore.lean
           lake env lean -o .lake/build/lib/lean/GSTInfiniteCollision.olean GSTInfiniteCollision.lean
           lake env lean -o .lake/build/lib/lean/GSTInfiniteBadTransport.olean GSTInfiniteBadTransport.lean
@@ -60,32 +64,91 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControllerBridge.olean GSTGraphV2InfiniteControllerBridge.lean
-      - name: Compile hard residual infinite compositor probe
-        id: residual
-        continue-on-error: true
+
+      - name: Apply bulk transplant directly to ErdosTernary2.lean
         shell: bash
         run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          mkdir -p .surgery
-          set +e
-          lake env lean GSTFinalResidualCompositorProbe.lean > .surgery/sol56-final-residual-probe.txt 2>&1
-          rc=$?
-          echo "LEAN_RC=$rc" | cat - .surgery/sol56-final-residual-probe.txt > .surgery/.tmp && mv .surgery/.tmp .surgery/sol56-final-residual-probe.txt
-          cat .surgery/sol56-final-residual-probe.txt
-          echo "rc=$rc" >> "$GITHUB_OUTPUT"
-          exit 0
-      - name: Persist compiler diagnostic on push
-        if: github.event_name == 'push'
+          python3 scripts/apply_final_infinite_monolith_transplant.py
+          grep -n 'BEGIN SOL56 FINAL INFINITE MONOLITH TRANSPLANT' ErdosTernary2.lean
+          if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
+            echo 'gst_end survived final transplant'
+            exit 1
+          fi
+
+      - name: Persist transformed monolith itself
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .surgery/sol56-final-residual-probe.txt
+          git add ErdosTernary2.lean
           if ! git diff --cached --quiet; then
-            git commit -m "Record SOL56 residual compositor diagnostic [skip ci]"
+            git commit -m "Transplant infinite Graph V2 stack into monolith [skip ci]"
             git push origin HEAD:sol/sol56-final-residual-production-green-20260824
           fi
-      - name: Enforce probe result
+
+      - name: Compile transformed ErdosTernary2 monolith
+        id: monolith
+        continue-on-error: true
         shell: bash
         run: |
-          test "${{ steps.residual.outputs.rc }}" = "0"
+          export PATH="$HOME/.elan/bin:$PATH"
+          set +e
+          lake build GSTTactic ErdosTernary2 > .surgery/sol56-final-monolith-build.txt 2>&1
+          rc=$?
+          set -e
+          echo "MONOLITH_RC=$rc" | cat - .surgery/sol56-final-monolith-build.txt > .surgery/.tmp
+          mv .surgery/.tmp .surgery/sol56-final-monolith-build.txt
+          cat .surgery/sol56-final-monolith-build.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Audit transformed monolith
+        if: steps.monolith.outputs.rc == '0'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('ErdosTernary2.lean')
+          bad=[]
+          for i,line in enumerate(p.read_text(encoding='utf-8').splitlines(),1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b|^[[:space:]]*gst_end[[:space:]]*$', line):
+                  bad.append(f'{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit(1)
+          print('MONOLITH_AUDIT_CLEAN')
+          PY
+
+      - name: Run official comparator
+        id: comparator
+        if: steps.monolith.outputs.rc == '0'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          bash scripts/comparator.sh > .surgery/sol56-final-comparator.txt 2>&1
+          rc=$?
+          set -e
+          cat .surgery/sol56-final-comparator.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Persist final monolith diagnostics
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .surgery/sol56-final-monolith-build.txt || true
+          git add .surgery/sol56-final-comparator.txt || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record final monolith transplant diagnostic [skip ci]"
+            git push origin HEAD:sol/sol56-final-residual-production-green-20260824 || true
+          fi
+
+      - name: Enforce final result
+        shell: bash
+        run: |
+          test "${{ steps.monolith.outputs.rc }}" = "0"
+          test "${{ steps.comparator.outputs.rc }}" = "0"
+          grep -F 'Your solution is okay!' .surgery/sol56-final-comparator.txt
