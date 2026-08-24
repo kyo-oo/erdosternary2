@@ -9,6 +9,10 @@ on:
       - sol/sol56-base-perfect-power-78b-20260824
   workflow_dispatch:
 
+concurrency:
+  group: sol56-final-infinite-monolith-transplant
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -112,6 +116,8 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTResidueSpacetimeScratch.olean GSTResidueSpacetimeScratch.lean
           lake env lean -o .lake/build/lib/lean/PhaseCycleInformationScratch.olean PhaseCycleInformationScratch.lean
           lake env lean -o .lake/build/lib/lean/CanonicalCausalityScratch.olean CanonicalCausalityScratch.lean
+          lake env lean -o .lake/build/lib/lean/CanonicalOriginModulusScratch.olean CanonicalOriginModulusScratch.lean
+          lake env lean -o .lake/build/lib/lean/PrefixOneOriginPhaseRecursionScratch.olean PrefixOneOriginPhaseRecursionScratch.lean
 
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
