@@ -14,7 +14,6 @@ open GSTGraphV2HandwrittenOmegaUBlock
 open GSTGraphV2HandwrittenExponentialCascade
 open GSTGraphV2HandwrittenExponentialLTE
 open GSTGraphV2HandwrittenAnchoredCocycle
-open GSTGraphV2Production
 open GSTGraphV2ProductionLaws
 open GSTU2DCanonicalPhaseDensity
 open GSTU2DPureDivergence83
@@ -259,14 +258,17 @@ theorem residual_level_one_origin_one_probe
       simpa [E, b, GSTGraphV2Production.residualEnergy,
         GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
         Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
-    change carry4 E b = 0
-    unfold carry4
-    rw [hmod]
-    apply Nat.div_eq_of_lt
-    have hb9 : 9 ≤ 3^b := by
-      rw [show (9 : Nat) = 3^2 by decide]
-      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
-    omega
+    have hc : carry4 E b = 0 := by
+      unfold carry4
+      rw [hmod]
+      apply Nat.div_eq_of_lt
+      have hb9 : 9 ≤ 3^b := by
+        rw [show (9 : Nat) = 3^2 by decide]
+        exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
+      omega
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex] using hc
 
   have hControllerBad :=
     GSTGraphV2InfiniteControllerBridge.graph_infinite_bad_control
@@ -291,7 +293,6 @@ theorem residual_level_one_origin_one_probe
 
   have hLedgerAtGate := hControllerLedger.pastSynchronized q
   have hBadSuffixAfterGate := hLatentGate.nextParentBadSuffix
-  have hLatentChildCarry := hLatentGate.nextChildCarryLatent
 
   have hNeutralWindow : ∀ p, p ≤ q →
       (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.carry = 0 ∧
