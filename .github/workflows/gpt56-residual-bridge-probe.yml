@@ -35,6 +35,11 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
+      - name: Compile isolated residual Graph V2 connector
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFinalResidualConnector.lean
       - name: Install exact residual bridge probe
         shell: bash
         run: |
