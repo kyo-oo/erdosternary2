@@ -9,12 +9,85 @@ open GST2DMixedEmergence
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenOmegaUBlock
+open GSTGraphV2HandwrittenExponentialCascade
+open GSTGraphV2HandwrittenExponentialLTE
+open GSTGraphV2HandwrittenAnchoredCocycle
 open GSTGraphV2Production
 open GSTGraphV2ProductionLaws
 open GSTU2DPureDivergence83
 open GSTU2DExactCrossingCharge
 
 namespace GSTFinalResidualCompositorProbe
+
+/-- Exact lower-window strengthening of the existing LTE cut theorem.  A
+perfect-power U tail is neutral at every positive row below its defining cut,
+not only at the top cut. -/
+theorem uTailEnergy_below_cut_neutral
+    (t n K p : Nat) (hp2 : 2 ≤ p) (hp : p ≤ t+K) :
+    (GSTGraphV2InfiniteControl.graph
+        (uTailEnergy t n K) 0 p).seven.carry = 0 ∧
+    (GSTGraphV2InfiniteControl.graph
+        (uTailEnergy t n K) 0 p).seven.digit = 0 ∧
+    (GSTGraphV2InfiniteControl.graph
+        (uTailEnergy t n K) 0 p).seven.space = .null := by
+  let r := t + K
+  let u := originSuffix n K
+  let R := uTailEnergy t n K
+  have hR : R = 4^(3^r * u) := by
+    rfl
+  have hnext : R % 3^(r+1) = 1 := by
+    rw [hR]
+    exact pow4_scaled_mod_next r u
+  have hpPow : 1 < 3^p := by
+    have h9 : 9 ≤ 3^p := by
+      rw [show (9 : Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hp2
+    omega
+  have hcur : R % 3^p = 1 := by
+    have hdvd : 3^p ∣ 3^(r+1) :=
+      Nat.pow_dvd_pow 3 (by omega)
+    have hmod := Nat.mod_mod_of_dvd R hdvd
+    rw [hnext, Nat.mod_eq_of_lt hpPow] at hmod
+    exact hmod.symm
+  have hp1Pow : 1 < 3^(p+1) := by
+    have h3 : 3^1 ≤ 3^(p+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    norm_num at h3 ⊢
+    omega
+  have hnextAtP : R % 3^(p+1) = 1 := by
+    have hdvd : 3^(p+1) ∣ 3^(r+1) :=
+      Nat.pow_dvd_pow 3 (by omega)
+    have hmod := Nat.mod_mod_of_dvd R hdvd
+    rw [hnext, Nat.mod_eq_of_lt hp1Pow] at hmod
+    exact hmod.symm
+  have hc : carry4 R p = 0 := by
+    unfold carry4
+    rw [hcur]
+    apply Nat.div_eq_of_lt
+    have h9 : 9 ≤ 3^p := by
+      rw [show (9 : Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hp2
+    omega
+  have hd : digit3 R p = 0 := by
+    have hsplit :
+        R % (3^p * 3) = R % 3^p + 3^p * (R / 3^p % 3) := by
+      rw [Nat.mod_mul]
+    rw [← Nat.pow_succ, hnextAtP, hcur] at hsplit
+    have hprod : 3^p * (R / 3^p % 3) = 0 := by omega
+    have hd0 : R / 3^p % 3 = 0 := by
+      rcases Nat.mul_eq_zero.mp hprod with hp0 | hd0
+      · exact False.elim ((Nat.ne_of_gt (Nat.pow_pos (by decide : 0 < 3))) hp0)
+      · exact hd0
+    exact hd0
+  constructor
+  · simpa [GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex, R] using hc
+  constructor
+  · simpa [GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex, R] using hd
+  · simp [GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex,
+      GSTCanonicalSevenAxisBridge.spaceOfCarry, R, hc]
 
 /-- Hard unbounded residual family only: level one, origin trit one.  This probe
 contains no legacy Omega termination and no generic perfect-power collision. -/
@@ -33,6 +106,8 @@ theorem residual_level_one_origin_one_probe
     False := by
   let E := GSTGraphV2Production.residualEnergy 1 k m
   let b := k + 2
+  let T := uTailEnergy (1+k) m (q+1)
+  let P := uPhaseShift (1+k) m (q+1)
 
   have hWidth := residual_level_one_width k m (b+q)
   have hParentExponent := residual_level_one_parent_exponent k m (b+q)
@@ -40,6 +115,39 @@ theorem residual_level_one_origin_one_probe
   have hNeutral := residual_gate_neutral_tail 1 k m q (by decide) hk
   have hLeftPhased := residual_gate_left_is_phased_tail 1 k m q
   have hRightAbsolute := residual_right_absolute_state_exact 1 k m (b+q)
+
+  have hNeutralWindow : ∀ p, p ≤ q →
+      (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.carry = 0 ∧
+      (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.digit = 0 ∧
+      (GSTGraphV2InfiniteControl.graph T 0 (b+p)).seven.space = .null := by
+    intro p hpq
+    have h := uTailEnergy_below_cut_neutral
+      (1+k) m (q+1) (b+p) (by dsimp [b]; omega) (by dsimp [b]; omega)
+    simpa [T, b, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+  have hRephaseWindow : ∀ p, p ≤ q →
+      (GSTGraphV2InfiniteControl.graph E 0 (b+p)).seven.carry =
+        (GSTGraphV2InfiniteControl.graph T P (b+p)).seven.carry ∧
+      (GSTGraphV2InfiniteControl.graph E 0 (b+p)).seven.digit =
+        (GSTGraphV2InfiniteControl.graph T P (b+p)).seven.digit := by
+    intro p hpq
+    have h := graph_u_block_observables_exact
+      (1+k) m (q+1) 0 (b+p)
+    simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ⟨h.1, h.2.1⟩
+
+  have hRephaseRightWindow : ∀ p, p ≤ q →
+      (GSTGraphV2InfiniteControl.graph E 3 (b+p)).seven.carry =
+        (GSTGraphV2InfiniteControl.graph T (P+3) (b+p)).seven.carry ∧
+      (GSTGraphV2InfiniteControl.graph E 3 (b+p)).seven.digit =
+        (GSTGraphV2InfiniteControl.graph T (P+3) (b+p)).seven.digit := by
+    intro p hpq
+    have h := graph_u_block_observables_exact
+      (1+k) m (q+1) 3 (b+p)
+    simpa [E, T, P, GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using ⟨h.1, h.2.1⟩
 
   have hPositive83 :
       0 < weightedRectanglePrefix83
