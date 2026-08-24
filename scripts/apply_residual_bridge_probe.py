@@ -21,9 +21,6 @@ replacement = '''  -- Recover the exact generalized residual Omega bad trace dir
     rw [hparentArg]
     exact gst_omega_gate_zero_closes_parent s k m hs ⟨j, hzero⟩
 
-  -- `k = r+1`, so the normalized child witness is exactly the residual child
-  -- expected by the generalized Omega controller.  Make that index equality
-  -- explicit instead of relying on elaborator unification.
   have hchildResidual :
       GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
     simpa [k, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hchildCore
@@ -42,15 +39,29 @@ replacement = '''  -- Recover the exact generalized residual Omega bad trace dir
     gst_omega_infiniteBadTrace_blocks s k m hResidualBad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
 
-  -- Expose the exact residual classifier to Lean.  The previous `gst_omega`
-  -- wrapper stopped at its first failing `contradiction` branch and obscured
-  -- the live case.  These are precisely the definitions that wrapper was
-  -- intended to normalize, now applied directly so CI reports the true
-  -- remaining branch (or closes it by Presburger arithmetic).
-  simp_all (config := { maxSteps := 1000000 }) only [
-    GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
-    GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-  all_goals omega
+  -- Split the exact residual classifier.  This is diagnostic only until each
+  -- branch below is consumed by its already-green branch theorem.
+  rcases hboundary with hlevel1 | hlevel3 | hstable
+  · rcases hlevel1 with ⟨hs1, hcase⟩
+    subst s
+    rcases hcase with hm1 | hm2
+    · trace_state
+      omega
+    · rcases hm2 with ⟨hm2, hk13⟩
+      rcases hk13 with hk1 | hk3
+      · subst k
+        trace_state
+        omega
+      · subst k
+        trace_state
+        omega
+  · rcases hlevel3 with ⟨hs3, hk7, hnot2, hnot4, hnot6⟩
+    subst s
+    trace_state
+    omega
+  · rcases hstable with ⟨hs2, hs3, hk4, hnot2⟩
+    trace_state
+    omega
 '''
 
 if needle not in s:
@@ -63,4 +74,4 @@ if 'gst_omega_prefix_one_gate_exists' in s:
 
 p.write_text(s, encoding='utf-8')
 print('RESIDUAL_BRIDGE_PROBE installed')
-print('RESIDUAL_BRIDGE_PROBE normalized_child_index=true')
+print('RESIDUAL_BRIDGE_PROBE explicit_classifier_split=true')
