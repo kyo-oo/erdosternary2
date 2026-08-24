@@ -59,6 +59,7 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2HandwrittenAnchoredCocycle.olean GSTGraphV2HandwrittenAnchoredCocycle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2Production.olean GSTGraphV2Production.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2ProductionLaws.olean GSTGraphV2ProductionLaws.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2InfiniteControllerBridge.olean GSTGraphV2InfiniteControllerBridge.lean
       - name: Compile hard residual infinite compositor probe
         id: residual
         continue-on-error: true
