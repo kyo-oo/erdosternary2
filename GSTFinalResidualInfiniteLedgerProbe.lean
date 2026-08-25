@@ -35,7 +35,7 @@ theorem residual_level_one_origin_one_infinite_ledger
 
   have hBaseCarryZero : (graph E 0 b).seven.carry = 0 := by
     have hmod : E % 3^b = 1 := by
-      have h := pow4_scaled_mod_next (k+1) m
+      have h := GSTGraphV2HandwrittenExponentialLTE.pow4_scaled_mod_next (k+1) m
       simpa [E, b, GSTGraphV2Production.residualEnergy,
         GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
         Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
