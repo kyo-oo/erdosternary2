@@ -8,6 +8,7 @@ open GSTCanonicalSevenAxisBridge
 open GST2DMixedEmergence
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
+open GSTInfiniteV2
 
 namespace GSTFinalResidualBinaryBoundaryBridge
 
@@ -51,11 +52,13 @@ theorem graph_happy_iff_binary_big2_chord
         (graph E t p).seven.digit = 2 := by
       rw [hcell.1, ← hright]
       exact hd1
+    have hOut2 : outDigit (graph E t p).seven.carry 2 = 2 := by
+      simpa [hDigit] using hOut
     have hevent :
         GSTCanonicalSevenAxisBridge.event
           (graph E t p).seven.carry
           (graph E t p).seven.digit = 8 := by
-      rw [GSTCanonicalSevenAxisBridge.event, hDigit, hOut]
+      rw [GSTCanonicalSevenAxisBridge.event, hDigit, hOut2]
     exact (GSTCanonicalSevenAxisBridge.happy_iff_event_eight _ _
       (graph_carry_lt_four E t p)
       (graph_digit_lt_three E t p)).2 hevent
