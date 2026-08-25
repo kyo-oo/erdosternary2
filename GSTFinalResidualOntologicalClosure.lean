@@ -3,7 +3,7 @@ import GSTU2DSharpCrossingBlock
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PhysicalSignedKernelTelescopeScratch
-import GSTCanonicalFirstGateControl
+import GSTCanonicalFirstGateStandalone
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
