@@ -195,7 +195,6 @@ theorem gst_level_one_prefix_one_cut_carryS
       28 / 3^k := by
   unfold gstCarryS
   rw [gst_level_one_prefix_one_cut_residueS k m hk]
-  norm_num
 
 /-- In the hard origin-one family the first exposed parent digit at the cut is
 one; the child origin trit is retained exactly rather than discarded. -/
@@ -207,4 +206,3 @@ theorem gst_level_one_prefix_one_cut_digit_oneS
   rw [Nat.mul_mod]
   have hQ := gst_navigation_constant_mod3_allS (1+k) m (by omega)
   rw [hQ, hm1]
-  norm_num
