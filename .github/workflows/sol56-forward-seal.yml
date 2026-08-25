@@ -30,15 +30,36 @@ jobs:
           from pathlib import Path
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
-          stale = [
-              'import GSTPrefixOnePhaseIncidenceControl\n',
-              'import GSTPrefixOneSpacetimeIncidenceControl\n',
-          ]
-          for imp in stale:
-              count = s.count(imp)
-              print(f'FORWARD_DROP_UNUSED_IMPORT {imp.strip()} count={count}')
-              s = s.replace(imp, '')
+
+          # Forward-only import surgery.  The monolith already contains the
+          # attached scratch/controller declarations inline; importing those
+          # standalone copies again causes Lean's "already been declared"
+          # errors.  Neutralize only the import edges, preserving every line
+          # and every theorem body in the 17K monolith.
+          exact_drop = {
+              'GSTPrefixOnePhaseIncidenceControl',
+              'GSTPrefixOneSpacetimeIncidenceControl',
+              'GSTGraphV2InfiniteControllerBridge',
+          }
+          out = []
+          neutralized = []
+          for line in s.splitlines(keepends=True):
+              stripped = line.strip()
+              if stripped.startswith('import '):
+                  mods = stripped[len('import '):].split()
+                  if len(mods) == 1:
+                      mod = mods[0]
+                      if mod in exact_drop or mod.endswith('Scratch'):
+                          nl = '\n' if line.endswith('\n') else ''
+                          out.append(f'-- SOL56 FORWARD NEUTRALIZED DUPLICATE IMPORT: {mod}{nl}')
+                          neutralized.append(mod)
+                          continue
+              out.append(line)
+          s = ''.join(out)
           p.write_text(s, encoding='utf-8')
+          print(f'FORWARD_NEUTRALIZED_IMPORT_COUNT={len(neutralized)}')
+          print('FORWARD_NEUTRALIZED_IMPORTS=' + ','.join(neutralized))
+
           lines = len(s.splitlines())
           print(f'TRANSFORMED_LINES={lines}')
           if lines < 17000:
