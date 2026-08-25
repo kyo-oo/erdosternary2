@@ -31,7 +31,7 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Compile exact compositor dependency closure
+      - name: Compile exact all-Nat ledger dependency closure
         shell: bash
         run: |
           set -euo pipefail
@@ -40,7 +40,7 @@ jobs:
           from pathlib import Path
           import re
 
-          target = 'GSTFinalResidualOntologicalClosure'
+          target = 'GSTFinalResidualInfiniteLedgerProbe'
           order = []
           done = set()
           active = []
@@ -83,8 +83,8 @@ jobs:
             lake env lean -o "$out" "$src"
           done < /tmp/closure-import-order.txt
 
-      - name: Compile final ontological closure
+      - name: Compile all-Nat infinite ledger compositor
         shell: bash
         run: |
           set -o pipefail
-          lake env lean GSTFinalResidualOntologicalClosure.lean 2>&1 | tee /tmp/ontological-closure.log
+          lake env lean GSTFinalResidualInfiniteLedgerProbe.lean 2>&1 | tee /tmp/ontological-closure.log
