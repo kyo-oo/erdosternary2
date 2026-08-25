@@ -16,7 +16,7 @@ STALE_UNUSED_IMPORTS = (
     'import GSTPrefixOneSpacetimeIncidenceControl\n',
 )
 
-# After direct attached-module imports are removed, these six packets are
+# After direct attached-module imports are removed, these five packets are
 # still supplied transitively by the surviving production imports. The live
 # compiler proved they are duplicate-declaration owners. Keep the imported
 # compiled copies and remove only their redundant inline packets.
@@ -26,7 +26,6 @@ TRANSITIVE_ATTACHED_DUPLICATES = (
     'CanonicalPrefixScratch',
     'InformationDescentScratch',
     'CanonicalOriginModulusScratch',
-    'HorizontalTrapWidthDescentScratch',
 )
 
 # These six declarations are now owned by GSTNavigationCore so standalone
@@ -174,7 +173,7 @@ for module in attached_modules:
         removed_attached_imports += count
         removed_attached_modules.append(module)
 
-# Six attached packets are nevertheless imported through the surviving
+# Five attached packets are nevertheless imported through the surviving
 # production dependency graph. Keep those compiled imports and delete only the
 # duplicate inline copies, exactly between their BEGIN/END packet markers.
 removed_transitive_packets = 0
