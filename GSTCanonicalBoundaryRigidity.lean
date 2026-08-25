@@ -182,6 +182,7 @@ theorem canonical_parent_offset_exact
   have hM : 0 < 3^(s+2) := Nat.pow_pos (by decide)
   rw [Nat.add_mul_div_left _ _ hM]
   rw [Nat.div_eq_of_lt (canonical_low_block_lt_cut s)]
+  simp
 
 /-- The retained high/child residue is also fixed: `1 + 4*z`. -/
 theorem canonical_child_residue_exact
