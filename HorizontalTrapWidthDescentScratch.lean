@@ -53,7 +53,14 @@ theorem gst_trap_width_peel_quotientS
       4^N = 4^((N-1)+1) := by congr 1 <;> omega
       _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
       _ = 4 * 4^(N-1) := by ac_rfl
-  rw [hW, hpow] at hEq
+  have hfactored :
+      D + 4*Z = D + 4*(W/4 + 4^(N-1)*C) := by
+    calc
+      D + 4*Z = W + 4^N*C := hEq
+      _ = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by rw [hW, hpow]
+      _ = D + 4*(W/4 + 4^(N-1)*C) := by ring
+  have hmul : 4*Z = 4*(W/4 + 4^(N-1)*C) :=
+    Nat.add_left_cancel hfactored
   omega
 
 /-- The full trapped parent tail after the cut can therefore be rewritten with one fewer x4 column. -/
