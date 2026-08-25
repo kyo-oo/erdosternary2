@@ -19,23 +19,21 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Apply current atomic proof forward only
+      - name: Apply direct prefix-one proof once
         shell: bash
         run: |
           set -euo pipefail
           echo "SOURCE_HEAD=$(git rev-parse HEAD)"
           echo "SOURCE_LINES=$(wc -l < ErdosTernary2.lean)"
-          python3 scripts/apply_u2d_one_theorem_transplant.py
-          python3 scripts/apply_prefix_one_residual_lift_closure.py
+          python3 scripts/apply_u2d_atomic_replacement.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
-          # Forward-only import surgery. The monolith already contains the
-          # attached scratch/controller declarations inline; importing those
-          # standalone copies again causes Lean's "already been declared"
-          # errors. Neutralize only the import edges, preserving every theorem.
+          # The monolith already contains these scratch declarations inline.
+          # Neutralize only duplicate import edges; never delete the inline
+          # packets themselves.
           exact_drop = {
               'GSTPrefixOnePhaseIncidenceControl',
               'GSTPrefixOneSpacetimeIncidenceControl',
@@ -76,9 +74,9 @@ jobs:
           ]
           for marker in forbidden_live:
               if marker in s:
-                  raise SystemExit(f'obsolete live theorem survived residual closure: {marker}')
+                  raise SystemExit(f'obsolete live theorem survived direct replacement: {marker}')
           if 'trace_state\n  contradiction' in s:
-              raise SystemExit('old red trace_state/contradiction seam survived atomic replacement')
+              raise SystemExit('old red trace_state/contradiction seam survived direct replacement')
           print('FORWARD_DIRECT_RESIDUAL_TRANSFORM_VERIFIED=1')
           PY
 
