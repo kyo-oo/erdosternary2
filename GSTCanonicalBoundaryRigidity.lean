@@ -104,7 +104,6 @@ theorem canonical_four_low_block_div_cut
   rw [show 4 * (1 + B) = (B + 4) + (B * 3) * 1 by ring]
   rw [Nat.add_mul_div_left _ _ hM]
   rw [Nat.div_eq_of_lt hrem]
-  norm_num
 
 /-- Every canonical full energy is literally one modulo the production cut
 `3^(s+2)`. -/
@@ -146,24 +145,28 @@ theorem canonical_right_residue_exact
 theorem canonical_left_carry_zero
     (s n : Nat) (hs : 1 ≤ s) :
     (graph (canonicalEnergy s n) 0 (s+2)).seven.carry = 0 := by
-  change carry4 (canonicalEnergy s n) (s+2) = 0
-  unfold carry4
-  rw [canonicalEnergy_mod_production_cut]
-  apply Nat.div_eq_of_lt
-  have h27 : 27 ≤ 3^(s+2) := by
-    rw [show (27 : Nat) = 3^3 by decide]
-    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-  omega
+  have hc : carry4 (canonicalEnergy s n) (s+2) = 0 := by
+    unfold carry4
+    rw [canonicalEnergy_mod_production_cut]
+    apply Nat.div_eq_of_lt
+    have h27 : 27 ≤ 3^(s+2) := by
+      rw [show (27 : Nat) = 3^3 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  simpa [GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+    GSTCanonicalSevenAxisBridge.vertex] using hc
 
 /-- Right endpoint carry one canonical block later is forced to seed one. -/
 theorem canonical_right_carry_one
     (s n : Nat) (hs : 1 ≤ s) :
     (graph (canonicalEnergy s n) (canonicalWidth s) (s+2)).seven.carry = 1 := by
-  change carry4
-    (4^(canonicalWidth s) * canonicalEnergy s n) (s+2) = 1
-  unfold carry4
-  rw [canonical_right_residue_exact]
-  exact canonical_four_low_block_div_cut s hs
+  have hc : carry4
+      (4^(canonicalWidth s) * canonicalEnergy s n) (s+2) = 1 := by
+    unfold carry4
+    rw [canonical_right_residue_exact]
+    exact canonical_four_low_block_div_cut s hs
+  simpa [GSTGraphV2InfiniteControl.graph, GSTGraphV2InfiniteControl.cell,
+    GSTCanonicalSevenAxisBridge.vertex] using hc
 
 /-- The parent offset at the canonical cut is exactly the LTE prefix offset. -/
 theorem canonical_parent_offset_exact
@@ -179,7 +182,6 @@ theorem canonical_parent_offset_exact
   have hM : 0 < 3^(s+2) := Nat.pow_pos (by decide)
   rw [Nat.add_mul_div_left _ _ hM]
   rw [Nat.div_eq_of_lt (canonical_low_block_lt_cut s)]
-  norm_num
 
 /-- The retained high/child residue is also fixed: `1 + 4*z`. -/
 theorem canonical_child_residue_exact
@@ -200,7 +202,8 @@ theorem canonical_child_residue_exact
       (4 * canonicalEnergy s n) % 3^(s+2) =
           (4 * (canonicalEnergy s n % 3^(s+2))) % 3^(s+2) :=
         mul_mod_reduce_right 4 (canonicalEnergy s n) (3^(s+2))
-      _ = 4 % 3^(s+2) := by rw [canonicalEnergy_mod_production_cut]; norm_num
+      _ = 4 % 3^(s+2) := by
+        rw [canonicalEnergy_mod_production_cut]
       _ = 4 := Nat.mod_eq_of_lt h4lt
   rw [hstart]
   simp only [canonicalWidth]
@@ -212,7 +215,6 @@ theorem canonical_child_residue_exact
           3^(s+2) * (4 * canonicalPrefixOffsetV2 s) := by ring
   rw [hshape, Nat.add_mul_div_left _ _ hM]
   rw [canonical_four_low_block_div_cut s hs]
-  ring
 
 /-- **Canonical boundary rigidity.**  At the production cut the entire finite
 horizontal boundary packet is forced by `s`; `n` survives only in the child
