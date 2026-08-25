@@ -82,8 +82,9 @@ if s2.count(TARGET) != 1:
     raise SystemExit('post-surgery target theorem multiplicity check failed')
 if s2.count('theorem gst_prefix_one_u2d_atomic_collision_inline') != 1:
     raise SystemExit('post-surgery U2D collision theorem multiplicity check failed')
-if s2.count('theorem gst_prefix_one_navigation_lift') != 1:
-    raise SystemExit('public prefix-one theorem multiplicity changed')
+public_lift_count = len(re.findall(r'(?m)^theorem gst_prefix_one_navigation_lift\b', s2))
+if public_lift_count != 1:
+    raise SystemExit(f'public prefix-one theorem multiplicity changed: {public_lift_count}')
 if packet_marker_re.findall(s2) != packet_markers_before:
     raise SystemExit('historical attached-packet structure changed')
 
