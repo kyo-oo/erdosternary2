@@ -276,18 +276,26 @@ theorem residual_level_one_origin_one_ontological
           (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit = 2 := by
       have hstep := (graph_cell_exact E 3 (b+j)).1
       rw [hstep, hd4]
+    have hout2 :
+        outDigit
+          (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry 2 = 2 := by
+      simpa [hd3] using hout
     have hevent :
         GSTCanonicalSevenAxisBridge.event
           (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
           (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit = 8 := by
-      simp [GSTCanonicalSevenAxisBridge.event, hd3, hout]
+      simp [GSTCanonicalSevenAxisBridge.event, hd3, hout2]
     have hhappy : HappyCell
         (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
         (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit :=
       (GSTCanonicalSevenAxisBridge.happy_iff_event_eight _ _
         (graph_carry_lt_four E 3 (b+j))
         (graph_digit_lt_three E 3 (b+j))).2 hevent
-    exact (by simpa [E, b, Nat.add_assoc] using hRightBad j) hhappy
+    have hbadj : ¬ HappyCell
+        (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph E 3 (b+j)).seven.digit := by
+      simpa [E, b, Nat.add_assoc] using hRightBad j
+    exact hbadj hhappy
 
   trace_state
   omega
