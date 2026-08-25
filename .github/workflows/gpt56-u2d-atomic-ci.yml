@@ -74,6 +74,22 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
           lake env lean GSTGraphV2PerfectPowerBlockProbe.lean
 
+      - name: Compile exact Graph V2 production-law dependency spine
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          for f in \
+            GSTGraphV2HandwrittenOmegaUBlock \
+            GSTGraphV2HandwrittenExponentialCascade \
+            GSTGraphV2HandwrittenExponentialLTE \
+            GSTGraphV2HandwrittenAnchoredCocycle \
+            GSTGraphV2Production \
+            GSTGraphV2ProductionLaws; do
+              echo "=== compiling $f ==="
+              lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
+          done
+
       - name: Apply strict one-theorem U2D production transplant
         shell: bash
         run: python3 scripts/apply_u2d_one_theorem_transplant.py
@@ -119,6 +135,12 @@ jobs:
               Path('GSTGraphV2UnifiedVerticalTelescope.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
               Path('GSTGraphV2PerfectPowerBlockProbe.lean'),
+              Path('GSTGraphV2HandwrittenOmegaUBlock.lean'),
+              Path('GSTGraphV2HandwrittenExponentialCascade.lean'),
+              Path('GSTGraphV2HandwrittenExponentialLTE.lean'),
+              Path('GSTGraphV2HandwrittenAnchoredCocycle.lean'),
+              Path('GSTGraphV2Production.lean'),
+              Path('GSTGraphV2ProductionLaws.lean'),
               Path('GSTGraphV2InfiniteControlSmoke.lean'),
               Path('GSTU2DAtomicSmoke.lean'),
           ]
