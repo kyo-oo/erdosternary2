@@ -105,7 +105,7 @@ jobs:
           grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
           grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
           grep -n 'exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad' ErdosTernary2.lean
-          test "$(grep -c '^theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean)" -eq 1
+          test "$(grep -Ec '^theorem gst_prefix_one_navigation_lift([[:space:]]|:)' ErdosTernary2.lean)" -eq 1
 
       - name: Compile production monolith after strict U2D transplant
         shell: bash
