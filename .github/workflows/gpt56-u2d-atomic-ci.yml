@@ -74,22 +74,24 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
           lake env lean GSTGraphV2PerfectPowerBlockProbe.lean
 
-      - name: Apply exact U2D production replacement
+      - name: Apply strict one-theorem U2D production transplant
         shell: bash
-        run: python3 scripts/apply_u2d_atomic_replacement.py
+        run: python3 scripts/apply_u2d_one_theorem_transplant.py
 
-      - name: Verify exact U2D replacement landed
+      - name: Verify strict U2D transplant landed
         shell: bash
         run: |
           set -euo pipefail
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'The literal residual placeholder survived the U2D replacement.'
+            echo 'The literal residual placeholder survived the U2D transplant.'
             exit 1
           fi
           grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
-          grep -n 'theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
+          grep -n 'exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad' ErdosTernary2.lean
+          test "$(grep -c '^theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean)" -eq 1
 
-      - name: Compile production monolith after U2D replacement
+      - name: Compile production monolith after strict U2D transplant
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
