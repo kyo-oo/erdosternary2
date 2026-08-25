@@ -14,13 +14,12 @@ CORE_IMPORT = 'import GSTNavigationCore\n'
 STALE_UNUSED_IMPORTS = (
     'import GSTPrefixOnePhaseIncidenceControl\n',
     'import GSTPrefixOneSpacetimeIncidenceControl\n',
-    'import CanonicalOriginCutIntersectionScratch\n',
 )
 
 # These six declarations are now owned by GSTNavigationCore so standalone
-# scratch modules can use the exact same concrete Navigation objects without
-# importing ErdosTernary2 and creating a cycle.  Theorems built on top of them
-# remain in the monolith under their original names.
+# U2D modules and the monolith share the same concrete Navigation objects.
+# Their immediately attached doc-comments are removed with them; leaving a
+# declaration doc-comment behind is invalid Lean syntax.
 CORE_DECLARATIONS = (
     '''inductive GSTSpace where
   | gstPlus
@@ -74,6 +73,27 @@ def extract_green_helpers() -> str:
     return helpers
 
 
+def remove_decl_with_immediate_doc(source: str, declaration: str) -> str:
+    count = source.count(declaration)
+    if count != 1:
+        first_line = declaration.splitlines()[0]
+        raise SystemExit(
+            f'expected exactly one monolith core declaration {first_line!r}, found {count}'
+        )
+    decl_start = source.index(declaration)
+    decl_end = decl_start + len(declaration)
+    prefix = source[:decl_start]
+    doc_start = prefix.rfind('/--')
+    if doc_start < 0:
+        raise SystemExit(f'missing doc-comment before {declaration.splitlines()[0]!r}')
+    doc_end = prefix.find('-/', doc_start)
+    if doc_end < 0 or prefix[doc_end + 2:].strip():
+        raise SystemExit(
+            f'core declaration does not have one immediate doc-comment: {declaration.splitlines()[0]!r}'
+        )
+    return source[:doc_start] + source[decl_end:]
+
+
 s = MONOLITH.read_text(encoding='utf-8')
 original_bytes = len(s.encode('utf-8'))
 if original_bytes < MIN_MONOLITH_BYTES:
@@ -88,11 +108,8 @@ for required_import in (IMPORT, CORE_IMPORT):
     if required_import not in s:
         s = s.replace(anchor, anchor + required_import, 1)
 
-# These imports are detached/experimental packages whose declarations are
-# either unused by the live U2D seam or already copied into this monolith.
-# Keeping them in the transient production splice only expands the build into
-# stale side packages and can create circular/duplicate declaration boundaries.
-# Remove exactly these known redundant imports; do not edit their mathematics.
+# These two imports are detached incidence branches that are not used by the
+# live U2D seam and pull circular historical packages into the transient build.
 removed_stale_imports = 0
 for stale_import in STALE_UNUSED_IMPORTS:
     count = s.count(stale_import)
@@ -103,17 +120,28 @@ for stale_import in STALE_UNUSED_IMPORTS:
     s = s.replace(stale_import, '', 1)
     removed_stale_imports += 1
 
-# Remove exactly one source copy of each declaration now supplied by the core.
-# Exact-string multiplicity checks prevent broad regex surgery on the monolith.
+# The production monolith contains literal BEGIN/END ATTACHED copies of many
+# historical scratch modules. Importing the same module as well declares every
+# copied theorem twice.  Remove only imports whose exact module name has a
+# literal attached packet in this same source.  No theorem text is altered.
+attached_modules = sorted(set(re.findall(
+    r'(?m)^-- BEGIN ATTACHED ([A-Za-z_][A-Za-z0-9_]*)\.lean\s*$', s
+)))
+removed_attached_imports = 0
+removed_attached_modules = []
+for module in attached_modules:
+    import_line = f'import {module}\n'
+    count = s.count(import_line)
+    if count:
+        s = s.replace(import_line, '')
+        removed_attached_imports += count
+        removed_attached_modules.append(module)
+
+# Remove exactly one source copy of each declaration now supplied by the core,
+# together with the immediately preceding declaration doc-comment.
 removed_core_declarations = 0
 for declaration in CORE_DECLARATIONS:
-    count = s.count(declaration)
-    if count != 1:
-        first_line = declaration.splitlines()[0]
-        raise SystemExit(
-            f'expected exactly one monolith core declaration {first_line!r}, found {count}'
-        )
-    s = s.replace(declaration, '', 1)
+    s = remove_decl_with_immediate_doc(s, declaration)
     removed_core_declarations += 1
 
 if s.count(TARGET) != 1:
@@ -154,6 +182,9 @@ if packet_marker_re.findall(s2) != packet_markers_before:
 for stale_import in STALE_UNUSED_IMPORTS:
     if stale_import in s2:
         raise SystemExit(f'stale circular import survived: {stale_import.strip()}')
+for module in attached_modules:
+    if f'import {module}\n' in s2:
+        raise SystemExit(f'attached duplicate import survived: {module}')
 for declaration in CORE_DECLARATIONS:
     if declaration in s2:
         raise SystemExit(f'extracted core declaration survived: {declaration.splitlines()[0]}')
@@ -188,8 +219,10 @@ print('ATOMIC_GREEN_HELPERS=3')
 print('ATOMIC_TARGET_SIGNATURE_PRESERVED=1')
 print('ATOMIC_PUBLIC_LIFT_MULTIPLICITY=1')
 print(f'ATOMIC_STALE_CIRCULAR_IMPORTS_REMOVED={removed_stale_imports}')
+print(f'ATOMIC_ATTACHED_DUPLICATE_IMPORTS_REMOVED={removed_attached_imports}')
+print(f'ATOMIC_ATTACHED_DUPLICATE_MODULES_REMOVED={len(removed_attached_modules)}')
 print(f'ATOMIC_NAVIGATION_CORE_DECLARATIONS_REMOVED={removed_core_declarations}')
-print('ATOMIC_SURGERY=U2D_HELPERS_PLUS_ONE_THEOREM_BODY_PLUS_NAVIGATION_CORE_SANITATION')
+print('ATOMIC_SURGERY=U2D_HELPERS_PLUS_ONE_THEOREM_BODY_PLUS_MECHANICAL_SOURCE_DEDUP')
 for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in line:
         print(f'ATOMIC_COLLISION_START={i}')
