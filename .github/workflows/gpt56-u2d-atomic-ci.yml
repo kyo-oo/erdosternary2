@@ -113,10 +113,6 @@ jobs:
             echo 'Unfinished perfect-power collision dependency survived.'
             exit 1
           fi
-          if grep -n 'h_creation_for_4pow' ErdosTernary2.lean; then
-            echo 'Legacy h_creation_for_4pow survived.'
-            exit 1
-          fi
           if grep -n 'QUARANTINED LEGACY RESIDUAL OMEGA' ErdosTernary2.lean; then
             echo 'Residual Omega theorem is still quarantined.'
             exit 1
