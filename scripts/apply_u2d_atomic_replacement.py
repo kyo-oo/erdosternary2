@@ -75,7 +75,7 @@ theorem gst_full_power_navigation_descends_atomic
           (3^(s+1) * gstNavigationConstant s b) % 3^(s+1) = 0 :=
         Nat.mod_eq_zero_of_dvd ⟨gstNavigationConstant s b, rfl⟩
       rw [hmul, Nat.add_zero]
-      exact Nat.mod_eq_of_lt hbiggt
+      simpa [Nat.mod_mod] using (Nat.mod_eq_of_lt hbiggt)
     have hdvd : 3^(p+1) ∣ 3^(s+1) :=
       Nat.pow_dvd_pow 3 (by omega)
     have hsmallgt : 1 < 3^(p+1) := by
@@ -272,5 +272,15 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
 '''
 
 s = s[:start] + replacement + s[end:]
+
+# RC2 mechanical scar: this localized ring conversion already normalizes under
+# `ring_nf`; plain `ring` leaves a residual normal-form goal in the 17K file.
+old_ring = 'convert hshared using 1 <;> ring'
+ring_count = s.count(old_ring)
+if ring_count != 1:
+    raise SystemExit(f'expected exactly one localized ring scar, found {ring_count}')
+s = s.replace(old_ring, 'convert hshared using 1 <;> ring_nf', 1)
+
 p.write_text(s, encoding='utf-8')
 print('installed comparator-targeted Atomic Surgery V2 final event transfer')
+print('forward mechanical RC2 fixes installed')
