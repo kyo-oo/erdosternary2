@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - sol/gpt56-final-u2d-transplant-20260825
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: sol56-canonical-rectangle-${{ github.sha }}
+  group: sol56-canonical-rectangle-${{ github.event_name }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
