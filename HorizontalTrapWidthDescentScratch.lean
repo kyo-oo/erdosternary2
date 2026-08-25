@@ -10,10 +10,14 @@ theorem gst_trap_low_digit_exactS
     (hD : D < 4)
     (hEq : D + 4*Z = W + 4^N*C) :
     W % 4 = D := by
-  have h4pow : 4 ∣ 4^N := by
-    exact Nat.dvd_pow_self 4 (by omega)
-  have hhigh : (4^N*C) % 4 = 0 :=
-    Nat.mod_eq_zero_of_dvd (dvd_mul_of_dvd_left h4pow C)
+  have hpow : 4^N = 4 * 4^(N-1) := by
+    calc
+      4^N = 4^((N-1)+1) := by congr 1 <;> omega
+      _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
+      _ = 4 * 4^(N-1) := by ac_rfl
+  have hhigh : (4^N*C) % 4 = 0 := by
+    rw [hpow]
+    simp [Nat.mul_assoc]
   have hleft : (D + 4*Z) % 4 = D := by
     rw [Nat.add_mod, Nat.mul_mod]
     simp [Nat.mod_eq_of_lt hD]
@@ -21,7 +25,7 @@ theorem gst_trap_low_digit_exactS
     rw [Nat.add_mod, hhigh, Nat.add_zero, Nat.mod_mod]
   rw [hEq] at hleft
   rw [hright] at hleft
-  exact hleft.symm
+  exact hleft
 
 /-- Therefore W has the exact form D+4*w. -/
 theorem gst_trap_high_remainder_splitS
@@ -45,9 +49,10 @@ theorem gst_trap_width_peel_quotientS
     Z = W/4 + 4^(N-1)*C := by
   have hW := gst_trap_high_remainder_splitS N D Z W C hN hD hEq
   have hpow : 4^N = 4 * 4^(N-1) := by
-    have hidx : N = (N-1)+1 := by omega
-    rw [hidx, Nat.pow_succ]
-    ac_rfl
+    calc
+      4^N = 4^((N-1)+1) := by congr 1 <;> omega
+      _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
+      _ = 4 * 4^(N-1) := by ac_rfl
   rw [hW, hpow] at hEq
   omega
 
@@ -61,8 +66,9 @@ theorem gst_trap_width_peel_tailS
       W/4 + 4^(N-1) * (C + 4*Y) := by
   rw [gst_trap_width_peel_quotientS N D Z W C hN hD hEq]
   have hpow : 4^N = 4^(N-1) * 4 := by
-    have hidx : N = (N-1)+1 := by omega
-    rw [hidx, Nat.pow_succ]
+    calc
+      4^N = 4^((N-1)+1) := by congr 1 <;> omega
+      _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
   rw [hpow]
   ring
 
@@ -73,8 +79,9 @@ theorem gst_trap_width_peel_remainder_boundS
     (hW : W < 4^N) :
     W/4 < 4^(N-1) := by
   have hpow : 4^N = 4^(N-1) * 4 := by
-    have hidx : N = (N-1)+1 := by omega
-    rw [hidx, Nat.pow_succ]
+    calc
+      4^N = 4^((N-1)+1) := by congr 1 <;> omega
+      _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
   rw [hpow] at hW
   exact (Nat.div_lt_iff_lt_mul (by decide : 0 < 4)).2 (by
     simpa [Nat.mul_comm] using hW)
