@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           echo "SOURCE_HEAD=$(git rev-parse HEAD)"
           echo "SOURCE_LINES=$(wc -l < ErdosTernary2.lean)"
-          python3 scripts/apply_u2d_atomic_replacement.py
+          python3 scripts/apply_u2d_one_theorem_transplant.py
           python3 scripts/apply_prefix_one_residual_lift_closure.py
           python3 - <<'PY'
           from pathlib import Path
