@@ -74,20 +74,22 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
           lake env lean GSTGraphV2PerfectPowerBlockProbe.lean
 
-      - name: Apply atomic residual-only production replacement
+      - name: Apply exact U2D production replacement
         shell: bash
         run: python3 scripts/apply_u2d_atomic_replacement.py
 
-      - name: Reject unresolved production closure
+      - name: Verify exact U2D replacement landed
         shell: bash
         run: |
+          set -euo pipefail
           if grep -nE '^[[:space:]]*gst_end[[:space:]]*$' ErdosTernary2.lean; then
-            echo 'The literal residual placeholder is still active in production.'
+            echo 'The literal residual placeholder survived the U2D replacement.'
             exit 1
           fi
-          grep -n 'have hBadResidual : GSTOmegaInfiniteBadTrace s k m := by' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+          grep -n 'theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean
 
-      - name: Compile production monolith after atomic replacement
+      - name: Compile production monolith after U2D replacement
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -132,3 +134,10 @@ jobs:
               raise SystemExit('U2D exact replacement source audit failed')
           print('U2D exact replacement source audit: clean')
           PY
+
+      - name: Run official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/comparator.sh | tee u2d_final_comparator.log
+          grep -F 'Your solution is okay!' u2d_final_comparator.log
