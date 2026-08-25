@@ -57,8 +57,10 @@ theorem gst_trap_width_peel_quotientS
       D + 4*Z = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by
     calc
       D + 4*Z = W + 4^N*C := hEq
-      _ = (D + 4*(W/4)) + 4^N*C := by rw [hW]
-      _ = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by rw [hpow]
+      _ = (D + 4*(W/4)) + 4^N*C := by
+        exact congrArg (fun x : Nat => x + 4^N*C) hW
+      _ = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by
+        exact congrArg (fun x : Nat => (D + 4*(W/4)) + x*C) hpow
   have hfactored :
       D + 4*Z = D + 4*(W/4 + 4^(N-1)*C) := by
     calc
