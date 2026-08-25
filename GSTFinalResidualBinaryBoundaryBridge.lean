@@ -106,9 +106,11 @@ theorem prefixed_first_big1_transfer_le_three
     intro r hr
     interval_cases r <;> norm_num at * <;> omega
   constructor
-  · rw [prefixed_binary_column_digit_exact T b q N (hsmall N hN)]
+  · change GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q) N = 1
+    rw [prefixed_binary_column_digit_exact T b q N (hsmall N hN)]
     exact hfirst.1
   · intro j hj
+    change GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q) j ≠ 1
     rw [prefixed_binary_column_digit_exact T b q j (hsmall j (by omega))]
     exact hfirst.2 j hj
 
