@@ -3,6 +3,7 @@ import GSTU2DSharpCrossingBlock
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PhysicalSignedKernelTelescopeScratch
+import GSTCanonicalFirstGateControl
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -226,13 +227,8 @@ theorem residual_level_one_origin_one_ontological
         (graph_cell_exact E t (b+p)).1,
         by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+p)).2⟩)
 
-  /- Exact physical coordinate weld.  The level-one residual strip has width
-     three x4 columns, hence six literal x2 columns on the same arithmetic
-     sheet.  No spacetime umbrella or surrogate theorem is required. -/
   have hBinaryWidth : 2 * 3^1 = 6 := by decide
 
-  /- A Happy x4 child cell is precisely a common BIG2 chord two binary
-     columns apart: physical columns 0 and 2. -/
   have hChildOutputTwo :
       outDigit
         (GSTGraphV2InfiniteControl.graph E 0 (b+q)).seven.carry
@@ -258,8 +254,6 @@ theorem residual_level_one_origin_one_ontological
         GSTCanonicalSevenAxisBridge.vertex, GSTCanonicalSevenAxisBridge.digit3]
         using hGraphOneDigitTwo
 
-  /- The allegedly all-bad x4 right edge is exactly exclusion of the matching
-     common-BIG2 chord at binary columns 6 and 8, at every remaining row. -/
   have hPhysicalRightNoChord : ∀ j,
       ¬ (GSTPhysicalKernel.binaryColumnDigit E (b+j) 6 = 2 ∧
          GSTPhysicalKernel.binaryColumnDigit E (b+j) 8 = 2) := by
