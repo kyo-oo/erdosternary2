@@ -60,8 +60,10 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
     exact v3_maximal n hnpos
   have hm0 : m ≠ 0 := by
     intro hmzero
-    subst m
-    rw [Nat.mul_zero] at hnshape
+    have hnzero : n = 0 := by
+      calc
+        n = 3^r * m := hnshape
+        _ = 0 := by rw [hmzero, Nat.mul_zero]
     omega
   have hm : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hm0
 
