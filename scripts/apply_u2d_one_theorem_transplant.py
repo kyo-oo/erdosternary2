@@ -14,6 +14,7 @@ CORE_IMPORT = 'import GSTNavigationCore\n'
 STALE_UNUSED_IMPORTS = (
     'import GSTPrefixOnePhaseIncidenceControl\n',
     'import GSTPrefixOneSpacetimeIncidenceControl\n',
+    'import CanonicalOriginCutIntersectionScratch\n',
 )
 
 # These six declarations are now owned by GSTNavigationCore so standalone
@@ -87,12 +88,11 @@ for required_import in (IMPORT, CORE_IMPORT):
     if required_import not in s:
         s = s.replace(anchor, anchor + required_import, 1)
 
-# These two incidence modules were experimental side branches.  The production
-# monolith does not reference their API, while PhaseIncidence reaches the old
-# GSTHandwrittenPrefixOneLivePackage whose statements depend back on symbols
-# declared inside this monolith.  Keeping those imports therefore creates an
-# impossible circular module boundary.  The exact U2D collision replacement
-# does not use either incidence layer, so remove only these two stale imports.
+# These imports are detached/experimental packages whose declarations are
+# either unused by the live U2D seam or already copied into this monolith.
+# Keeping them in the transient production splice only expands the build into
+# stale side packages and can create circular/duplicate declaration boundaries.
+# Remove exactly these known redundant imports; do not edit their mathematics.
 removed_stale_imports = 0
 for stale_import in STALE_UNUSED_IMPORTS:
     count = s.count(stale_import)
