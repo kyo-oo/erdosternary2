@@ -90,13 +90,14 @@ jobs:
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
 
-      - name: Apply normalized monolith surgery and residual-lift closure
+      - name: Apply normalized monolith surgery and residual Omega closure
         shell: bash
         run: |
           python3 scripts/apply_u2d_one_theorem_transplant.py
+          python3 scripts/reactivate_residual_omega_block.py
           python3 scripts/apply_prefix_one_residual_lift_closure.py
 
-      - name: Verify direct residual-lift closure landed
+      - name: Verify active residual-lift closure landed
         shell: bash
         run: |
           set -euo pipefail
@@ -116,8 +117,12 @@ jobs:
             echo 'Legacy h_creation_for_4pow survived.'
             exit 1
           fi
-          grep -n 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
-          grep -n 'gst_residual_navigation_lift' ErdosTernary2.lean
+          if grep -n 'QUARANTINED LEGACY RESIDUAL OMEGA' ErdosTernary2.lean; then
+            echo 'Residual Omega theorem is still quarantined.'
+            exit 1
+          fi
+          grep -n '^theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=' ErdosTernary2.lean
+          grep -n '^theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
           grep -n 'gstNavigationWitness_of_mul_three_pow_atomic' ErdosTernary2.lean
           test "$(grep -Ec '^theorem gst_prefix_one_navigation_lift([[:space:]]|:)' ErdosTernary2.lean)" -eq 1
 
@@ -186,11 +191,24 @@ jobs:
           print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
           PY
 
-      - name: Compile production monolith after direct residual closure
+      - name: Compile production monolith after active residual closure
         shell: bash
         run: |
+          set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake build GSTTactic ErdosTernary2
+          cat > ResidualOmegaAxiomAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms gst_residual_omega_termination
+          #print axioms gst_residual_navigation_lift
+          #print axioms gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_prefix_one_navigation_lift
+          EOF
+          lake env lean ResidualOmegaAxiomAudit.lean 2>&1 | tee residual_omega_axioms.log
+          if grep -F 'sorryAx' residual_omega_axioms.log; then
+            echo 'Residual Omega closure still depends on sorryAx.'
+            exit 1
+          fi
 
       - name: Audit replacement sources
         shell: bash
