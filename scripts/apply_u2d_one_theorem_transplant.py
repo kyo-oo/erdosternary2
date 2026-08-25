@@ -16,6 +16,20 @@ STALE_UNUSED_IMPORTS = (
     'import GSTPrefixOneSpacetimeIncidenceControl\n',
 )
 
+# After direct attached-module imports are removed, these seven packets are
+# still supplied transitively by the surviving production imports.  The live
+# compiler proved they are the remaining duplicate-declaration owners.  Keep
+# the imported compiled copies and remove only their redundant inline packets.
+TRANSITIVE_ATTACHED_DUPLICATES = (
+    'OriginTransducerScratch',
+    'PurePowerCarrierScratch',
+    'CanonicalPrefixScratch',
+    'InformationDescentScratch',
+    'CanonicalOriginModulusScratch',
+    'InformationQuotientScratch',
+    'HorizontalTrapWidthDescentScratch',
+)
+
 # These six declarations are now owned by GSTNavigationCore so standalone
 # U2D modules and the monolith share the same concrete Navigation objects.
 # Their immediately attached doc-comments are removed with them; leaving a
@@ -70,6 +84,15 @@ def extract_green_helpers() -> str:
             raise SystemExit(f'missing required green helper: {name}')
     if 'theorem gst_prefix_one_navigation_lift' in helpers:
         raise SystemExit('helper extraction crossed the public-lift boundary')
+
+    # The recovered theorem is unchanged; the current monolith's decomposition
+    # leaves one extra idempotent modulus in this local goal.  Normalize only
+    # that expression so the already-green proof elaborates in this context.
+    old = '      exact Nat.mod_eq_of_lt hbiggt\n'
+    new = '      simpa [Nat.mod_mod] using (Nat.mod_eq_of_lt hbiggt)\n'
+    if helpers.count(old) != 1:
+        raise SystemExit(f'expected one U2D modulus-normalization socket, found {helpers.count(old)}')
+    helpers = helpers.replace(old, new, 1)
     return helpers
 
 
@@ -92,6 +115,21 @@ def remove_decl_with_immediate_doc(source: str, declaration: str) -> str:
             f'core declaration does not have one immediate doc-comment: {declaration.splitlines()[0]!r}'
         )
     return source[:doc_start] + source[decl_end:]
+
+
+def remove_attached_packet(source: str, module: str) -> str:
+    begin = f'-- BEGIN ATTACHED {module}.lean\n'
+    end_marker = f'-- END ATTACHED {module}.lean'
+    if source.count(begin) != 1 or source.count(end_marker) != 1:
+        raise SystemExit(
+            f'expected exactly one attached packet for {module}: '
+            f'begin={source.count(begin)} end={source.count(end_marker)}'
+        )
+    start = source.index(begin)
+    end = source.index(end_marker, start) + len(end_marker)
+    if end < len(source) and source[end] == '\n':
+        end += 1
+    return source[:start] + source[end:]
 
 
 s = MONOLITH.read_text(encoding='utf-8')
@@ -122,8 +160,8 @@ for stale_import in STALE_UNUSED_IMPORTS:
 
 # The production monolith contains literal BEGIN/END ATTACHED copies of many
 # historical scratch modules. Importing the same module as well declares every
-# copied theorem twice.  Remove only imports whose exact module name has a
-# literal attached packet in this same source.  No theorem text is altered.
+# copied theorem twice. Remove only direct imports whose exact module name has
+# a literal attached packet in this same source. No theorem text is altered.
 attached_modules = sorted(set(re.findall(
     r'(?m)^-- BEGIN ATTACHED ([A-Za-z_][A-Za-z0-9_]*)\.lean\s*$', s
 )))
@@ -136,6 +174,14 @@ for module in attached_modules:
         s = s.replace(import_line, '')
         removed_attached_imports += count
         removed_attached_modules.append(module)
+
+# Seven attached packets are nevertheless imported through the surviving
+# production dependency graph. Keep those compiled imports and delete only the
+# duplicate inline copies, exactly between their BEGIN/END packet markers.
+removed_transitive_packets = 0
+for module in TRANSITIVE_ATTACHED_DUPLICATES:
+    s = remove_attached_packet(s, module)
+    removed_transitive_packets += 1
 
 # Remove exactly one source copy of each declaration now supplied by the core,
 # together with the immediately preceding declaration doc-comment.
@@ -152,10 +198,22 @@ if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
 packet_marker_re = re.compile(r'(?m)^-- (?:BEGIN|END) ATTACHED [^\n]+$')
 packet_markers_before = packet_marker_re.findall(s)
 
-start = s.index(TARGET)
-end = s.find(TARGET_END, start)
+target_start = s.index(TARGET)
+end = s.find(TARGET_END, target_start)
 if end < 0:
     raise SystemExit('production theorem end marker not found')
+
+# Preserve the public target's existing doc-comment with the target itself.
+# Helpers must be inserted before that comment; otherwise Lean sees two
+# consecutive declaration doc-comments and reports `expected lemma`.
+prefix = s[:target_start]
+target_doc_start = prefix.rfind('/--')
+if target_doc_start < 0:
+    raise SystemExit('target theorem doc-comment not found')
+target_doc_end = prefix.find('-/', target_doc_start)
+if target_doc_end < 0 or prefix[target_doc_end + 2:].strip():
+    raise SystemExit('target theorem does not have one immediate doc-comment')
+target_doc = s[target_doc_start:target_start]
 
 helpers = extract_green_helpers()
 
@@ -168,7 +226,7 @@ target_replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
   exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
 '''
 
-s2 = s[:start] + helpers + target_replacement + s[end:]
+s2 = s[:target_doc_start] + helpers + target_doc + target_replacement + s[end:]
 
 if s2.count(TARGET) != 1:
     raise SystemExit('post-surgery target theorem multiplicity check failed')
@@ -178,13 +236,16 @@ public_lift_count = len(re.findall(r'(?m)^theorem gst_prefix_one_navigation_lift
 if public_lift_count != 1:
     raise SystemExit(f'public prefix-one theorem multiplicity changed: {public_lift_count}')
 if packet_marker_re.findall(s2) != packet_markers_before:
-    raise SystemExit('historical attached-packet structure changed')
+    raise SystemExit('surviving historical attached-packet structure changed')
 for stale_import in STALE_UNUSED_IMPORTS:
     if stale_import in s2:
         raise SystemExit(f'stale circular import survived: {stale_import.strip()}')
 for module in attached_modules:
     if f'import {module}\n' in s2:
-        raise SystemExit(f'attached duplicate import survived: {module}')
+        raise SystemExit(f'attached duplicate direct import survived: {module}')
+for module in TRANSITIVE_ATTACHED_DUPLICATES:
+    if f'-- BEGIN ATTACHED {module}.lean' in s2 or f'-- END ATTACHED {module}.lean' in s2:
+        raise SystemExit(f'transitively imported duplicate packet survived: {module}')
 for declaration in CORE_DECLARATIONS:
     if declaration in s2:
         raise SystemExit(f'extracted core declaration survived: {declaration.splitlines()[0]}')
@@ -221,7 +282,9 @@ print('ATOMIC_PUBLIC_LIFT_MULTIPLICITY=1')
 print(f'ATOMIC_STALE_CIRCULAR_IMPORTS_REMOVED={removed_stale_imports}')
 print(f'ATOMIC_ATTACHED_DUPLICATE_IMPORTS_REMOVED={removed_attached_imports}')
 print(f'ATOMIC_ATTACHED_DUPLICATE_MODULES_REMOVED={len(removed_attached_modules)}')
+print(f'ATOMIC_TRANSITIVE_ATTACHED_PACKETS_REMOVED={removed_transitive_packets}')
 print(f'ATOMIC_NAVIGATION_CORE_DECLARATIONS_REMOVED={removed_core_declarations}')
+print('ATOMIC_U2D_MOD_NORMALIZATION=1')
 print('ATOMIC_SURGERY=U2D_HELPERS_PLUS_ONE_THEOREM_BODY_PLUS_MECHANICAL_SOURCE_DEDUP')
 for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in line:
