@@ -1,4 +1,4 @@
-import ErdosPreOmega
+import GSTHandwrittenChildFirstBig1
 import GSTGraphV2InfiniteControlScratch
 import GSTGraphV2InfiniteBigNDichotomyScratch
 import GSTGraphV2PhysicalSignedKernelTelescopeScratch
