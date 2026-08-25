@@ -24,7 +24,7 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Compile perfect-power collision stack
+      - name: Compile boundary-rigidity dependency stack
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -49,9 +49,19 @@ jobs:
             GSTGraphV2HandwrittenExponentialCascade \
             GSTGraphV2HandwrittenExponentialLTE \
             GSTGraphV2HandwrittenAnchoredCocycle \
-            GSTGraphV2PerfectPowerBlockCollision; do
+            GSTFinalPurePowerResidueTransplant; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
+      - name: Compile canonical boundary rigidity mathematics
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTCanonicalBoundaryRigidity.olean GSTCanonicalBoundaryRigidity.lean
+      - name: Compile perfect-power collision theorem
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockCollision.olean GSTGraphV2PerfectPowerBlockCollision.lean
       - name: Apply the one-line production surgery
         shell: bash
         run: |
@@ -75,6 +85,7 @@ jobs:
           import re
           paths = [
               Path('ErdosTernary2.lean'),
+              Path('GSTCanonicalBoundaryRigidity.lean'),
               Path('GSTGraphV2PerfectPowerBlockCollision.lean'),
               Path('GSTGraphV2PerfectPowerBlockProbe.lean'),
               Path('GSTGraphV2PerfectPowerAncestry.lean'),
