@@ -107,6 +107,71 @@ jobs:
           grep -n 'exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad' ErdosTernary2.lean
           test "$(grep -Ec '^theorem gst_prefix_one_navigation_lift([[:space:]]|:)' ErdosTernary2.lean)" -eq 1
 
+      - name: Materialize complete monolith local import closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          ROOT = Path('ErdosTernary2.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              result = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = import_re.match(code)
+                  if not m:
+                      continue
+                  result.extend(m.group(1).split())
+              return result
+
+          order = []
+          permanent = set()
+          temporary = set()
+
+          def visit(module: str):
+              if module == 'ErdosTernary2' or module in permanent:
+                  return
+              path = local_path(module)
+              if not path.exists():
+                  return
+              if module in temporary:
+                  raise SystemExit(f'local import cycle detected at {module}')
+              temporary.add(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              temporary.remove(module)
+              permanent.add(module)
+              order.append((module, path))
+
+          for module in imports_of(ROOT):
+              visit(module)
+
+          print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
+          BUILD.mkdir(parents=True, exist_ok=True)
+          for module, path in order:
+              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              if out.exists():
+                  print(f'=== already materialized {module} ===')
+                  continue
+              print(f'=== compiling local import {module} ===')
+              subprocess.run(
+                  ['lake', 'env', 'lean', '-o', str(out), str(path)],
+                  check=True,
+              )
+          print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
+          PY
+
       - name: Compile production monolith after strict U2D transplant
         shell: bash
         run: |
