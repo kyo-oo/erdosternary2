@@ -72,7 +72,7 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
-          lake env lean GSTGraphV2PerfectPowerBlockProbe.lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockProbe.olean GSTGraphV2PerfectPowerBlockProbe.lean
 
       - name: Compile exact Graph V2 production-law dependency spine
         shell: bash
