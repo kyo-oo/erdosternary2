@@ -99,13 +99,22 @@ theorem residual_level_one_origin_one_collision
         (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r) 1 := by
       rw [← hEdecomp] at hFirstFull0
       exact hFirstFull0
-    have hPath := physical_binary_path E (b+q0)
     have hD0 : GSTPhysicalKernel.binaryColumnDigit E (b+q0) 0 = 2 := by
-      exact GSTInfiniteV2.gst_before_first_big1_all_big2S
-        (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
-        (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
-        hPath (by intro h; rw [h] at hFirstFull; exact hFirstFull.2 0 (by decide) rfl)
-        1 (by decide) hFirstFull 0 (by decide)
+      rw [hEdecomp]
+      calc
+        GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q0) 0 =
+            GSTPhysicalKernel.binaryColumnDigit T q0 0 :=
+          GSTFinalResidualBinaryBoundaryBridge.prefixed_binary_column_digit_exact
+            T b q0 0 (by
+              have h27 : 27 ≤ 3^b := by
+                rw [show (27 : Nat) = 3^3 by decide]
+                exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
+              norm_num
+              omega)
+        _ = 2 := by
+          simpa [GSTPhysicalKernel.binaryColumnDigit, GSTInfiniteV2.gstDigitS]
+            using hNull.1
+    have hPath := physical_binary_path E (b+q0)
     have hBoundary := GSTInfiniteV2.gst_first_big1_boundary_is_destroyS
       (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
       (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
@@ -128,13 +137,22 @@ theorem residual_level_one_origin_one_collision
         (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r) 3 := by
       rw [← hEdecomp] at hFirstFull0
       exact hFirstFull0
-    have hPath := physical_binary_path E (b+q0)
     have hD0 : GSTPhysicalKernel.binaryColumnDigit E (b+q0) 0 = 2 := by
-      exact GSTInfiniteV2.gst_before_first_big1_all_big2S
-        (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
-        (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
-        hPath (by intro h; rw [h] at hFirstFull; exact hFirstFull.2 0 (by decide) rfl)
-        3 (by decide) hFirstFull 0 (by decide)
+      rw [hEdecomp]
+      calc
+        GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q0) 0 =
+            GSTPhysicalKernel.binaryColumnDigit T q0 0 :=
+          GSTFinalResidualBinaryBoundaryBridge.prefixed_binary_column_digit_exact
+            T b q0 0 (by
+              have h27 : 27 ≤ 3^b := by
+                rw [show (27 : Nat) = 3^3 by decide]
+                exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
+              norm_num
+              omega)
+        _ = 2 := by
+          simpa [GSTPhysicalKernel.binaryColumnDigit, GSTInfiniteV2.gstDigitS]
+            using hPlus.1
+    have hPath := physical_binary_path E (b+q0)
     have hSurvive0 := GSTInfiniteV2.gst_before_first_big1_edges_surviveS
       (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
       (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
