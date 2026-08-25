@@ -31,7 +31,7 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Compile exact bridge dependency closure
+      - name: Compile exact production bridge dependency closure
         shell: bash
         run: |
           set -euo pipefail
@@ -39,7 +39,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          target = 'GSTFinalResidualEarliestGateBridge'
+          target = 'GSTFinalResidualBinaryBoundaryBridge'
           order, done, active = [], set(), []
           def source_for(mod):
               p = Path(*mod.split('.')).with_suffix('.lean')
@@ -67,4 +67,4 @@ jobs:
             echo "=== BRIDGE DEP: $mod ==="
             lake env lean -o "$out" "$src"
           done < /tmp/bridge-order.txt
-          lake env lean GSTFinalResidualEarliestGateBridge.lean
+          lake env lean GSTFinalResidualBinaryBoundaryBridge.lean
