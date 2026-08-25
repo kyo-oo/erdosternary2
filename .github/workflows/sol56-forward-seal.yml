@@ -26,16 +26,16 @@ jobs:
           echo "SOURCE_HEAD=$(git rev-parse HEAD)"
           echo "SOURCE_LINES=$(wc -l < ErdosTernary2.lean)"
           python3 scripts/apply_u2d_atomic_replacement.py
+          python3 scripts/apply_prefix_one_residual_lift_closure.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
-          # Forward-only import surgery.  The monolith already contains the
+          # Forward-only import surgery. The monolith already contains the
           # attached scratch/controller declarations inline; importing those
           # standalone copies again causes Lean's "already been declared"
-          # errors.  Neutralize only the import edges, preserving every line
-          # and every theorem body in the 17K monolith.
+          # errors. Neutralize only the import edges, preserving every theorem.
           exact_drop = {
               'GSTPrefixOnePhaseIncidenceControl',
               'GSTPrefixOneSpacetimeIncidenceControl',
@@ -65,18 +65,24 @@ jobs:
           if lines < 17000:
               raise SystemExit(f'refusing unexpected short monolith: {lines}')
           required = [
-              'theorem gst_h_creation_full_power_navigation_atomic',
-              'theorem gst_full_power_navigation_descends_atomic',
-              'theorem gst_prefix_one_u2d_atomic_collision_inline',
+              'theorem gst_prefix_one_information_bad_descends_inline',
               'theorem gst_prefix_one_navigation_lift',
               'theorem erdos_ternary_2_universal',
           ]
           for marker in required:
               if marker not in s:
                   raise SystemExit(f'missing required theorem marker: {marker}')
+          forbidden_live = [
+              'theorem gst_h_creation_full_power_navigation_atomic',
+              'theorem gst_full_power_navigation_descends_atomic',
+              'theorem gst_prefix_one_u2d_atomic_collision_inline',
+          ]
+          for marker in forbidden_live:
+              if marker in s:
+                  raise SystemExit(f'obsolete live theorem survived residual closure: {marker}')
           if 'trace_state\n  contradiction' in s:
               raise SystemExit('old red trace_state/contradiction seam survived atomic replacement')
-          print('FORWARD_ATOMIC_TRANSFORM_VERIFIED=1')
+          print('FORWARD_DIRECT_RESIDUAL_TRANSFORM_VERIFIED=1')
           PY
 
       - name: Install exact Lean RC2 and Mathlib
@@ -171,9 +177,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > SOL56SealAudit.lean <<'EOF'
           import ErdosTernary2
-          #print axioms gst_h_creation_full_power_navigation_atomic
-          #print axioms gst_full_power_navigation_descends_atomic
-          #print axioms gst_prefix_one_u2d_atomic_collision_inline
+          #print axioms gst_prefix_one_information_bad_descends_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms erdos_ternary_2_universal
           EOF
