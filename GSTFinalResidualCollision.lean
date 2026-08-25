@@ -10,6 +10,8 @@ open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenOmegaUBlock
 open GSTGraphV2ProductionLaws
+open GSTInfiniteV2
+open GSTGraphV2HandwrittenExponentialLTE
 
 namespace GSTFinalResidualCollision
 
