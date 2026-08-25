@@ -69,9 +69,52 @@ theorem level_one_right_bad_iff_no_binary_6_8
          GSTPhysicalKernel.binaryColumnDigit E p 8 = 2) := by
   simpa using not_congr (graph_happy_iff_binary_big2_chord E 3 p)
 
+/-- Before the low forced ternary prefix can contribute a binary carry, binary
+columns of the full energy and of the exposed tail have exactly the same
+information digit. -/
+theorem prefixed_binary_column_digit_exact
+    (T b q r : Nat)
+    (hsmall : 2^r < 3^b) :
+    GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q) r =
+      GSTPhysicalKernel.binaryColumnDigit T q r := by
+  unfold GSTPhysicalKernel.binaryColumnDigit
+  rw [Nat.pow_add]
+  have hshape :
+      2^r * (1 + 3^b*T) = 2^r + 3^b * (2^r*T) := by ring
+  rw [hshape, ← Nat.div_div_eq_div_mul]
+  have hbpos : 0 < 3^b := Nat.pow_pos (by decide)
+  rw [Nat.add_mul_div_left _ _ hbpos, Nat.div_eq_of_lt hsmall,
+    Nat.zero_add]
+
+/-- The only first-BIG1 locations produced by a seed-zero Happy gate (1 or 3)
+therefore survive unchanged when the exposed tail is put back under any forced
+prefix of ternary depth at least three. -/
+theorem prefixed_first_big1_transfer_le_three
+    (T b q N : Nat)
+    (hb : 3 ≤ b) (hN : N ≤ 3)
+    (hfirst : GSTFirstBig1AtS
+      (fun r => GSTPhysicalKernel.binaryColumnDigit T q r) N) :
+    GSTFirstBig1AtS
+      (fun r => GSTPhysicalKernel.binaryColumnDigit (1 + 3^b*T) (b+q) r) N := by
+  have h27 : 27 ≤ 3^b := by
+    rw [show (27 : Nat) = 3^3 by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
+  have hsmall : ∀ r, r ≤ 3 → 2^r < 3^b := by
+    intro r hr
+    interval_cases r <;> norm_num at * <;> omega
+  constructor
+  · rw [prefixed_binary_column_digit_exact T b q N (hsmall N hN)]
+    exact hfirst.1
+  · intro j hj
+    rw [prefixed_binary_column_digit_exact T b q j (hsmall j (by omega))]
+    exact hfirst.2 j hj
+
 #check binary_column_even_is_graph_digit
 #check graph_happy_iff_binary_big2_chord
 #check level_one_right_bad_iff_no_binary_6_8
+#check prefixed_binary_column_digit_exact
+#check prefixed_first_big1_transfer_le_three
 #print axioms graph_happy_iff_binary_big2_chord
+#print axioms prefixed_first_big1_transfer_le_three
 
 end GSTFinalResidualBinaryBoundaryBridge
