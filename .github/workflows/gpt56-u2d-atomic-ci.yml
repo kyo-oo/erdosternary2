@@ -67,13 +67,12 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedPowerRectangle.olean GSTGraphV2UnifiedPowerRectangle.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2UnifiedVerticalTelescope.olean GSTGraphV2UnifiedVerticalTelescope.lean
 
-      - name: Compile perfect-power block surgery
+      - name: Compile green perfect-power support stack
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerAncestry.olean GSTGraphV2PerfectPowerAncestry.lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockProbe.olean GSTGraphV2PerfectPowerBlockProbe.lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2PerfectPowerBlockCollision.olean GSTGraphV2PerfectPowerBlockCollision.lean
 
       - name: Compile exact Graph V2 production-law dependency spine
         shell: bash
@@ -91,14 +90,13 @@ jobs:
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
 
-      - name: Apply normalized monolith surgery and residual Omega closure
+      - name: Apply atomic infinite-Graph-V2 monolith surgery
         shell: bash
         run: |
-          python3 scripts/apply_u2d_one_theorem_transplant.py
-          python3 scripts/reactivate_residual_omega_block.py
-          python3 scripts/apply_prefix_one_residual_lift_closure.py
+          set -euo pipefail
+          python3 scripts/apply_u2d_atomic_replacement.py
 
-      - name: Verify active residual-lift closure landed
+      - name: Verify atomic collision closure landed
         shell: bash
         run: |
           set -euo pipefail
@@ -106,21 +104,10 @@ jobs:
             echo 'The literal residual placeholder survived the transplant.'
             exit 1
           fi
-          if grep -n 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean; then
-            echo 'Unfinished collision helper survived the direct residual proof.'
-            exit 1
-          fi
-          if grep -n 'GSTGraphV2PerfectPowerBlockCollision' ErdosTernary2.lean; then
-            echo 'Unfinished perfect-power collision dependency survived.'
-            exit 1
-          fi
-          if grep -n 'QUARANTINED LEGACY RESIDUAL OMEGA' ErdosTernary2.lean; then
-            echo 'Residual Omega theorem is still quarantined.'
-            exit 1
-          fi
-          grep -n '^theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=' ErdosTernary2.lean
-          grep -n '^theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean
-          grep -n 'gstNavigationWitness_of_mul_three_pow_atomic' ErdosTernary2.lean
+          grep -n '^theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+          grep -n '^theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift :=' ErdosTernary2.lean
+          grep -n '^theorem gst_h_creation_full_power_navigation_atomic' ErdosTernary2.lean
+          grep -n '^theorem gst_full_power_navigation_descends_atomic' ErdosTernary2.lean
           test "$(grep -Ec '^theorem gst_prefix_one_navigation_lift([[:space:]]|:)' ErdosTernary2.lean)" -eq 1
 
       - name: Materialize complete monolith local import closure
@@ -188,22 +175,22 @@ jobs:
           print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
           PY
 
-      - name: Compile production monolith after active residual closure
+      - name: Compile production monolith after atomic closure
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake build GSTTactic ErdosTernary2
-          cat > ResidualOmegaAxiomAudit.lean <<'EOF'
+          cat > AtomicU2DAxiomAudit.lean <<'EOF'
           import ErdosTernary2
-          #print axioms gst_residual_omega_termination
-          #print axioms gst_residual_navigation_lift
-          #print axioms gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_h_creation_full_power_navigation_atomic
+          #print axioms gst_full_power_navigation_descends_atomic
+          #print axioms gst_prefix_one_u2d_atomic_collision_inline
           #print axioms gst_prefix_one_navigation_lift
           EOF
-          lake env lean ResidualOmegaAxiomAudit.lean 2>&1 | tee residual_omega_axioms.log
-          if grep -F 'sorryAx' residual_omega_axioms.log; then
-            echo 'Residual Omega closure still depends on sorryAx.'
+          lake env lean AtomicU2DAxiomAudit.lean 2>&1 | tee atomic_u2d_axioms.log
+          if grep -F 'sorryAx' atomic_u2d_axioms.log; then
+            echo 'Atomic U2D closure still depends on sorryAx.'
             exit 1
           fi
 
@@ -249,8 +236,8 @@ jobs:
                       bad.append(f'{p}:{i}:{line}')
           if bad:
               print('\n'.join(bad))
-              raise SystemExit('Direct residual-lift replacement source audit failed')
-          print('Direct residual-lift replacement source audit: clean')
+              raise SystemExit('Atomic U2D replacement source audit failed')
+          print('Atomic U2D replacement source audit: clean')
           PY
 
       - name: Run official comparator
