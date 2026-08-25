@@ -1,4 +1,4 @@
-name: SOL56 Earliest Gate Bridge
+name: SOL56 Production Residual Collision
 
 on:
   push:
@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: sol56-earliest-gate-bridge-${{ github.ref }}
+  group: sol56-production-residual-collision-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  bridge:
+  collision:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -31,7 +31,7 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Compile exact production bridge dependency closure
+      - name: Compile single production collision dependency closure
         shell: bash
         run: |
           set -euo pipefail
@@ -39,7 +39,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          target = 'GSTFinalResidualBinaryBoundaryBridge'
+          target = 'GSTFinalResidualCollision'
           order, done, active = [], set(), []
           def source_for(mod):
               p = Path(*mod.split('.')).with_suffix('.lean')
@@ -56,15 +56,15 @@ jobs:
               for dep in imports_of(mod): visit(dep)
               active.pop(); done.add(mod); order.append(mod)
           for dep in imports_of(target): visit(dep)
-          Path('/tmp/bridge-order.txt').write_text('\n'.join(order) + '\n')
-          print('BRIDGE_IMPORT_COUNT=' + str(len(order)))
+          Path('/tmp/collision-order.txt').write_text('\n'.join(order) + '\n')
+          print('COLLISION_IMPORT_COUNT=' + str(len(order)))
           PY
           while IFS= read -r mod; do
             [ -z "$mod" ] && continue
             src="${mod//.//}.lean"
             out=".lake/build/lib/lean/${mod//.//}.olean"
             mkdir -p "$(dirname "$out")"
-            echo "=== BRIDGE DEP: $mod ==="
+            echo "=== COLLISION DEP: $mod ==="
             lake env lean -o "$out" "$src"
-          done < /tmp/bridge-order.txt
-          lake env lean GSTFinalResidualBinaryBoundaryBridge.lean
+          done < /tmp/collision-order.txt
+          lake env lean GSTFinalResidualCollision.lean
