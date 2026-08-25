@@ -31,6 +31,7 @@ theorem residual_level_one_origin_one_tail_mod_three
     simpa [E, A, P, GSTGraphV2Production.residualFrame,
       GSTGraphV2Production.residualEnergy,
       GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.originTail,
       Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstep0
 
   have hDgt1 : 1 < D := by
@@ -88,7 +89,7 @@ theorem residual_level_one_origin_one_tail_mod_three
   rw [hEmod, hEmodD] at hsplit
   have hmul : D * 1 = D * (E / D % 3) := by
     simpa using Nat.add_left_cancel hsplit
-  have hone : 1 = E / D % 3 := Nat.mul_left_cancel hmul
+  have hone : 1 = E / D % 3 := Nat.mul_left_cancel hDpos hmul
   simpa [E, D] using hone.symm
 
 /-- Focused all-Nat hard-family compositor probe.
