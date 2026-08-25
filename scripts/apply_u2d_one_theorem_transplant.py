@@ -16,17 +16,16 @@ STALE_UNUSED_IMPORTS = (
     'import GSTPrefixOneSpacetimeIncidenceControl\n',
 )
 
-# After direct attached-module imports are removed, these seven packets are
-# still supplied transitively by the surviving production imports.  The live
-# compiler proved they are the remaining duplicate-declaration owners.  Keep
-# the imported compiled copies and remove only their redundant inline packets.
+# After direct attached-module imports are removed, these six packets are
+# still supplied transitively by the surviving production imports. The live
+# compiler proved they are duplicate-declaration owners. Keep the imported
+# compiled copies and remove only their redundant inline packets.
 TRANSITIVE_ATTACHED_DUPLICATES = (
     'OriginTransducerScratch',
     'PurePowerCarrierScratch',
     'CanonicalPrefixScratch',
     'InformationDescentScratch',
     'CanonicalOriginModulusScratch',
-    'InformationQuotientScratch',
     'HorizontalTrapWidthDescentScratch',
 )
 
@@ -86,7 +85,7 @@ def extract_green_helpers() -> str:
         raise SystemExit('helper extraction crossed the public-lift boundary')
 
     # The recovered theorem is unchanged; the current monolith's decomposition
-    # leaves one extra idempotent modulus in this local goal.  Normalize only
+    # leaves one extra idempotent modulus in this local goal. Normalize only
     # that expression so the already-green proof elaborates in this context.
     old = '      exact Nat.mod_eq_of_lt hbiggt\n'
     new = '      simpa [Nat.mod_mod] using (Nat.mod_eq_of_lt hbiggt)\n'
@@ -175,7 +174,7 @@ for module in attached_modules:
         removed_attached_imports += count
         removed_attached_modules.append(module)
 
-# Seven attached packets are nevertheless imported through the surviving
+# Six attached packets are nevertheless imported through the surviving
 # production dependency graph. Keep those compiled imports and delete only the
 # duplicate inline copies, exactly between their BEGIN/END packet markers.
 removed_transitive_packets = 0
