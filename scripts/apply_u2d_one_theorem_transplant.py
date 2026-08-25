@@ -10,6 +10,10 @@ TARGET = 'theorem gst_prefix_one_information_bad_descends_inline\n'
 TARGET_END = '\n/-- Corrected information-wave closure:'
 PUBLIC_MARKER = '/-- Public prefix-one lift consumes only the exact Graph-V2 event collision. -/'
 IMPORT = 'import GSTGraphV2InfiniteControl\n'
+STALE_UNUSED_IMPORTS = (
+    'import GSTPrefixOnePhaseIncidenceControl\n',
+    'import GSTPrefixOneSpacetimeIncidenceControl\n',
+)
 
 
 def extract_green_helpers() -> str:
@@ -52,6 +56,22 @@ if IMPORT not in s:
         raise SystemExit('import anchor not found')
     s = s.replace(anchor, anchor + IMPORT, 1)
 
+# These two incidence modules were experimental side branches.  The production
+# monolith does not reference their API, while PhaseIncidence reaches the old
+# GSTHandwrittenPrefixOneLivePackage whose statements depend back on symbols
+# declared inside this monolith.  Keeping those imports therefore creates an
+# impossible circular module boundary.  The exact U2D collision replacement
+# does not use either incidence layer, so remove only these two stale imports.
+removed_stale_imports = 0
+for stale_import in STALE_UNUSED_IMPORTS:
+    count = s.count(stale_import)
+    if count != 1:
+        raise SystemExit(
+            f'expected exactly one stale incidence import {stale_import.strip()!r}, found {count}'
+        )
+    s = s.replace(stale_import, '', 1)
+    removed_stale_imports += 1
+
 if s.count(TARGET) != 1:
     raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
 if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
@@ -87,6 +107,9 @@ if public_lift_count != 1:
     raise SystemExit(f'public prefix-one theorem multiplicity changed: {public_lift_count}')
 if packet_marker_re.findall(s2) != packet_markers_before:
     raise SystemExit('historical attached-packet structure changed')
+for stale_import in STALE_UNUSED_IMPORTS:
+    if stale_import in s2:
+        raise SystemExit(f'stale circular import survived: {stale_import.strip()}')
 
 new_target = s2.index(TARGET)
 new_end = s2.find(TARGET_END, new_target)
@@ -115,6 +138,7 @@ print(f'ATOMIC_OUTPUT_BYTES={len(written.encode("utf-8"))}')
 print('ATOMIC_GREEN_HELPERS=3')
 print('ATOMIC_TARGET_SIGNATURE_PRESERVED=1')
 print('ATOMIC_PUBLIC_LIFT_MULTIPLICITY=1')
+print(f'ATOMIC_STALE_CIRCULAR_IMPORTS_REMOVED={removed_stale_imports}')
 print('ATOMIC_SURGERY=U2D_HELPERS_PLUS_ONE_THEOREM_BODY')
 for i, line in enumerate(written.splitlines(), 1):
     if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in line:
