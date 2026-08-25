@@ -15,6 +15,20 @@ open GSTGraphV2HandwrittenExponentialLTE
 
 namespace GSTFinalResidualCollision
 
+/-- The literal binary columns of one arithmetic row form the infinite bridge
+path consumed by the already-green BIG-N theorems. -/
+theorem physical_binary_path (R p : Nat) :
+    GSTInfiniteBridgePathS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry R p r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit R p r) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro r
+    exact GSTPhysicalKernel.binaryColumnCarry_lt_two R p r
+  · intro r
+    exact GSTPhysicalKernel.binaryColumnDigit_lt_three R p r
+  · intro r
+    exact GSTPhysicalKernel.microOutput_eq_next_binaryColumnDigit R p r
+
 /-- Production compositor for the sole unbounded residual family.
 
 The proof surface is deliberately narrow: all geometry, controller transport,
@@ -85,6 +99,17 @@ theorem residual_level_one_origin_one_collision
         (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r) 1 := by
       rw [← hEdecomp] at hFirstFull0
       exact hFirstFull0
+    have hPath := physical_binary_path E (b+q0)
+    have hD0 : GSTPhysicalKernel.binaryColumnDigit E (b+q0) 0 = 2 := by
+      exact GSTInfiniteV2.gst_before_first_big1_all_big2S
+        (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+        (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+        hPath (by intro h; rw [h] at hFirstFull; exact hFirstFull.2 0 (by decide) rfl)
+        1 (by decide) hFirstFull 0 (by decide)
+    have hBoundary := GSTInfiniteV2.gst_first_big1_boundary_is_destroyS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+      hPath (by omega) 1 (by decide) hFirstFull
     have hNoRightChord :
         ¬ (GSTPhysicalKernel.binaryColumnDigit E (b+q0) 6 = 2 ∧
            GSTPhysicalKernel.binaryColumnDigit E (b+q0) 8 = 2) :=
@@ -103,6 +128,25 @@ theorem residual_level_one_origin_one_collision
         (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r) 3 := by
       rw [← hEdecomp] at hFirstFull0
       exact hFirstFull0
+    have hPath := physical_binary_path E (b+q0)
+    have hD0 : GSTPhysicalKernel.binaryColumnDigit E (b+q0) 0 = 2 := by
+      exact GSTInfiniteV2.gst_before_first_big1_all_big2S
+        (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+        (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+        hPath (by intro h; rw [h] at hFirstFull; exact hFirstFull.2 0 (by decide) rfl)
+        3 (by decide) hFirstFull 0 (by decide)
+    have hSurvive0 := GSTInfiniteV2.gst_before_first_big1_edges_surviveS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+      hPath (by omega) 3 (by decide) hFirstFull 0 (by decide)
+    have hSurvive1 := GSTInfiniteV2.gst_before_first_big1_edges_surviveS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+      hPath (by omega) 3 (by decide) hFirstFull 1 (by decide)
+    have hBoundary := GSTInfiniteV2.gst_first_big1_boundary_is_destroyS
+      (fun r => GSTPhysicalKernel.binaryColumnCarry E (b+q0) r)
+      (fun r => GSTPhysicalKernel.binaryColumnDigit E (b+q0) r)
+      hPath (by omega) 3 (by decide) hFirstFull
     have hNoRightChord :
         ¬ (GSTPhysicalKernel.binaryColumnDigit E (b+q0) 6 = 2 ∧
            GSTPhysicalKernel.binaryColumnDigit E (b+q0) 8 = 2) :=
