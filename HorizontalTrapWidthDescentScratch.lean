@@ -53,11 +53,16 @@ theorem gst_trap_width_peel_quotientS
       4^N = 4^((N-1)+1) := by congr 1 <;> omega
       _ = 4^(N-1) * 4 := by rw [Nat.pow_succ]
       _ = 4 * 4^(N-1) := by ac_rfl
+  have hEq' :
+      D + 4*Z = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by
+    calc
+      D + 4*Z = W + 4^N*C := hEq
+      _ = (D + 4*(W/4)) + 4^N*C := by rw [hW]
+      _ = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by rw [hpow]
   have hfactored :
       D + 4*Z = D + 4*(W/4 + 4^(N-1)*C) := by
     calc
-      D + 4*Z = W + 4^N*C := hEq
-      _ = (D + 4*(W/4)) + (4 * 4^(N-1))*C := by rw [hW, hpow]
+      D + 4*Z = (D + 4*(W/4)) + (4 * 4^(N-1))*C := hEq'
       _ = D + 4*(W/4 + 4^(N-1)*C) := by ring
   have hmul : 4*Z = 4*(W/4 + 4^(N-1)*C) :=
     Nat.add_left_cancel hfactored
