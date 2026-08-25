@@ -1,5 +1,5 @@
 # Atomic Surgery CI Probe
 
-Temporary branch-only marker to trigger Lean CI while preserving the canonical main branch unchanged.
-
-Fresh exact-head transplant verification: 2026-08-24 11:21 IST.
+FINAL EXECUTION RUN — exact seam-only monolith transplant.
+Target: Lean 4.33.0-rc2 green build, zero proof escapes, comparator literal `Your solution is okay!`.
+Triggered: 2026-08-25 02:07 IST.

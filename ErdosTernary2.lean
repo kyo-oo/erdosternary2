@@ -32,6 +32,296 @@ import GSTTactic
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+import GSTPrefixOnePhaseIncidenceControl
+import GSTPrefixOneSpacetimeIncidenceControl
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+import NavigationResidueCutScratch
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+import CanonicalOriginCutIntersectionScratch
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import InformationDescentScratch
+import InformationGeometryScratch
+import InformationStateScratch
+import InformationBadTraceScratch
+import OriginTransducerScratch
+import InformationRegenerationScratch
+import InformationIterationScratch
+import InformationQuotientScratch
+import InformationLocalizationScratch
+import InformationFluxScratch
+import InformationForcingScratch
+import CarryWordScratch
+import InformationCarryWordBridgeScratch
+import PurePowerCarrierScratch
+import CanonicalPrefixScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
+import PurePowerBadAxisScratch
+import BadLanguageMagnitudeScratch
+import PurePowerTailReductionScratch
+import HorizontalTrapWidthDescentScratch
+import StripConservationScratch
+import GSTGraphV2Scratch
+import GSTGraphV2FluxScratch
+import GSTGraphV2BlockScratch
+import GSTExponentLiftScratch
+import PurePowerResidueGraphScratch
+import GSTResidueSpacetimeScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+import PurePowerResidueGraphScratch
+import InformationQuotientScratch
+import InformationIterationScratch
+import HorizontalTrapWidthDescentScratch
+import PhaseCycleInformationScratch
+import CanonicalCausalityScratch
+import CanonicalOriginModulusScratch
+import PrefixOneOriginPhaseRecursionScratch
 
 open scoped BigOperators
 /-
@@ -16747,68 +17037,96 @@ theorem gst_prefix_one_information_bad_descends_inline
   apply gst_complete_bad_of_no_navigation
   intro hchild
 
-  have hnoParent :
-      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
-    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic s n hs hn hBad
+  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY
+  let T : Nat := gstNavigationConstant (s+1) n
+  let A : Nat := 4^(3^s)
+  let z : Nat := gstCanonicalPrefixOffsetS s
+  let H : Nat := z + A*T
 
-  let r := v3 n
-  let m := n / 3^r
-  have hnpos : 0 < n := by omega
-  have hdvd : 3^r ∣ n := by
-    dsimp [r]
-    exact pow_v3_dvd n hnpos
-  have hmod : n % 3^r = 0 := Nat.mod_eq_zero_of_dvd hdvd
-  have hnfac : n = 3^r * m := by
-    dsimp [m]
-    have h := Nat.div_add_mod n (3^r)
-    rw [hmod, Nat.add_zero] at h
-    exact h.symm
-  have hmne : m ≠ 0 := by
-    intro hmz
-    have hnzero : n = 0 := by simpa [hmz] using hnfac
-    omega
-  have hm : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hmne
-  have hm3 : m % 3 ≠ 0 := by
-    dsimp [m, r]
-    exact v3_maximal n hnpos
+  have hchildT : GSTNavigationWitness T := by
+    simpa [T] using hchild
 
-  have hscale :
-      gstNavigationConstant (s+1) n =
-        3^r * gstNavigationConstant (s+1+r) m := by
-    rw [hnfac]
-    exact gst_navigation_constant_mul3_pow_atomic (s+1) r m (by omega)
-  rw [hscale] at hchild
-  have hchildCore :
-      GSTNavigationWitness (gstNavigationConstant (s+1+r) m) :=
-    gstNavigationWitness_of_mul_three_pow_atomic r
-      (gstNavigationConstant (s+1+r) m) hchild
+  have hparent : GSTSeededBadTraceS 1 H := by
+    intro j
+    have hj := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j
+    simpa [H, T, A, z, gstPrefixOneUPotentialTailS,
+      gstCanonicalPrefixOffsetS] using hj
 
-  let k := r + 1
-  have hk : 1 ≤ k := by dsimp [k]; omega
-  have hparentArg : 1 + 3*n = 1 + 3^k*m := by
-    dsimp [k]
-    rw [hnfac, Nat.pow_succ]
-    ring
+  have hchildGate : ∃ q, GSTSeededHappyS 0 T q := by
+    obtain ⟨q, hd, hspace⟩ := hchildT
+    have hmod : gstCarry T q % 3 = 0 :=
+      gstGoodSpace_carry_mod3_zero T q hspace
+    have hlt : gstCarry T q < 4 := by
+      simpa [gstCarry, gstAffineMulCarryS] using
+        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
+    have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
+      omega
+    refine ⟨q, ?_⟩
+    constructor
+    · simpa [T, gstDigitS, gstDigit] using hd
+    · simpa [T, gstAffineMulCarryS, gstCarry] using hcarry
 
-  by_cases hclosed : GSTOriginClosed s k (m % 3)
-  · have hparentCore :
-        GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) :=
-      gst_navigation_constant_origin_closed_witness
-        s k m (m % 3) hs hm hm3 rfl hclosed
-    apply hnoParent
-    rw [hparentArg]
-    exact hparentCore
+  have hApos : 0 < A := by
+    dsimp [A]
+    positivity
 
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary : GSTResidualBoundary s k (m % 3) :=
-    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
+  have hAunit :
+      A = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
+    dsimp [A]
+    simpa using (gst_navigation_decomposition s 1 hs)
 
-  -- TRUE RED SEAM. Everything used by BIG-N Step 6 is now physically in the
-  -- monolith: hchildCore, hBad, hboundary, retained-origin recursion,
-  -- right-chord, physical rectangle, signed flux, and finite i=N horizon.
-  gst_end
+  have hunitPrefix :
+      gstNavigationConstant s 1 = 1 + 3*z := by
+    simpa [z] using gst_navigation_constant_unit_prefixS s hs
+
+  have hz1 : 1 + 4*z < A := by
+    have hD9 : 9 ≤ 3^(s+1) := by
+      rw [show (9:Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    rw [hAunit, hunitPrefix]
+    nlinarith
+
+  have htrap : GSTCanonicalRightChordTrapS A z T :=
+    gst_canonical_right_chord_trapS A z T hApos hz1 hparent hchildGate
+
+  obtain ⟨q, hgate, hparentSuffix, hchildSuffix, hC,
+    hlocal, hclass3, hclass2, hshared, hW⟩ := htrap
+
+  let D : Nat := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
+  let Z : Nat := gstAffineMulCarryS A z T (q+1)
+  let W : Nat := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
+  let C : Nat := gstAffineMulCarryS 4 0 T (q+1)
+  let Y : Nat := T / 3^(q+1)
+
+  have hparentSuffix' : GSTSeededBadTraceS D (Z + A*Y) := by
+    simpa [D, Z, Y] using hparentSuffix
+  have hchildSuffix' : GSTSeededBadTraceS C Y := by
+    simpa [C, Y] using hchildSuffix
+  have hC' : C = 2 ∨ C = 3 := by
+    simpa [C] using hC
+  have hshared' : D + 4*Z = W + A*C := by
+    simpa [D, Z, W, C] using hshared
+  have hW' : W < A := by
+    simpa [W] using hW
+
+  have hDlt : D < 4 := by
+    dsimp [D]
+    exact gst_affine_carry_lt_multiplierS 4 1 (z + A*T) (q+1)
+      (by decide) (by decide)
+
+  obtain ⟨a, b, e, Wmid, hDb, hCe, ha, hb, he, hWmid,
+      hmid, hlow⟩ :=
+    gst_shared_x4_binary_factor_last_gate_high_bitS
+      A D Z W C hApos hDlt hC' hW' hshared'
+
+  have hfuture0 : T / 3^T = 0 := by
+    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
+
+  -- Exact RED frontier.  This line is intentionally the only remaining
+  -- mathematical consumer to replace after the compiler exposes its context.
+  trace_state
+  contradiction
+  -- END SOL56 FINAL ATOMIC SEAM SURGERY
 
 /-- Corrected information-wave closure: once parent badness descends to the
     shared child information, the certified child Happy Gate is an immediate

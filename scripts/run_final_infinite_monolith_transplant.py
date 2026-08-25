@@ -2,16 +2,27 @@
 from pathlib import Path
 import re
 
-p = Path('ErdosTernary2.lean')
-s = p.read_text(encoding='utf-8')
+MONOLITH = Path('ErdosTernary2.lean')
+MIN_MONOLITH_BYTES = 300_000
+TARGET = 'theorem gst_prefix_one_information_bad_descends_inline\n'
+TARGET_END = '\n/-- Corrected information-wave closure:'
 
-start = s.find('theorem gst_prefix_one_information_bad_descends_inline\n')
-if start < 0:
-    raise SystemExit('target theorem start not found')
-end_marker = '\n/-- Corrected information-wave closure:'
-end = s.find(end_marker, start)
+s = MONOLITH.read_text(encoding='utf-8')
+original_bytes = len(s.encode('utf-8'))
+if original_bytes < MIN_MONOLITH_BYTES:
+    raise SystemExit(
+        f'refusing seam surgery into truncated ErdosTernary2.lean: {original_bytes} bytes'
+    )
+if s.count(TARGET) != 1:
+    raise SystemExit(f'expected exactly one production theorem start, found {s.count(TARGET)}')
+
+packet_marker_re = re.compile(r'(?m)^-- (?:BEGIN|END) ATTACHED [^\n]+$')
+packet_markers_before = packet_marker_re.findall(s)
+
+start = s.index(TARGET)
+end = s.find(TARGET_END, start)
 if end < 0:
-    raise SystemExit('target theorem end marker not found')
+    raise SystemExit('production theorem end marker not found')
 
 replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
@@ -20,8 +31,7 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
   apply gst_complete_bad_of_no_navigation
   intro hchild
 
-  -- Direct Aug-23 whole-theorem transplant.  This deliberately replaces the
-  -- later residual classifier/probe split rather than extending it.
+  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY
   let T : Nat := gstNavigationConstant (s+1) n
   let A : Nat := 4^(3^s)
   let z : Nat := gstCanonicalPrefixOffsetS s
@@ -103,25 +113,51 @@ replacement = r'''theorem gst_prefix_one_information_bad_descends_inline
     gst_shared_x4_binary_factor_last_gate_high_bitS
       A D Z W C hApos hDlt hC' hW' hshared'
 
-  have hfuture0 : T / 3^T = 0 := by
-    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
-
-  -- Single remaining post-transplant seam.  Keep the exact recovered context
-  -- intact so the compiler exposes only the final consumer mismatch.
+  -- Exact all-Nat RED frontier: no finite-support/future-zero hypothesis.
   trace_state
   contradiction
+  -- END SOL56 FINAL ATOMIC SEAM SURGERY
 '''
 
 s2 = s[:start] + replacement + s[end:]
-p.write_text(s2, encoding='utf-8')
 
-lines = s2.splitlines()
-print(f'WHOLE_THEOREM_TRANSPLANT lines={len(lines)}')
-for i, line in enumerate(lines, 1):
-    if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
-        print(f'WHOLE_THEOREM_TRANSPLANT target_start={i}')
-    if 'Single remaining post-transplant seam.' in line:
-        print(f'WHOLE_THEOREM_TRANSPLANT red_frontier={i}')
+if s2[:start] != s[:start]:
+    raise SystemExit('prefix outside target theorem changed')
+new_end = s2.find(TARGET_END, start)
+if new_end < 0 or s2[new_end:] != s[end:]:
+    raise SystemExit('suffix outside target theorem changed')
+if s2.count(TARGET) != 1:
+    raise SystemExit('post-surgery theorem multiplicity check failed')
 if re.search(r'(?m)^\s*gst_end\s*$', s2):
-    raise SystemExit('gst_end survived whole-theorem transplant')
-print('installed recovered Aug23 whole-theorem transplant')
+    raise SystemExit('gst_end survived final theorem surgery')
+if packet_marker_re.findall(s2) != packet_markers_before:
+    raise SystemExit('historical attached-packet structure changed; refusing non-atomic surgery')
+
+region = s2[start:new_end]
+for forbidden in (
+    'h_creation_for_4pow',
+    'gst_residual_navigation_lift',
+    'canonical_perfect_power_block_collision',
+    'let r := v3 n',
+    'have hboundary : GSTResidualBoundary',
+    'have hResidualBad : GSTOmegaInfiniteBadTrace s k m',
+    'gst_prefix_one_bigN_future_zero_inline',
+):
+    if forbidden in region:
+        raise SystemExit(f'forbidden legacy path survived target theorem: {forbidden}')
+
+MONOLITH.write_text(s2, encoding='utf-8')
+written = MONOLITH.read_text(encoding='utf-8')
+if written != s2:
+    raise SystemExit('post-write monolith integrity check failed')
+
+print(f'ATOMIC_INPUT_BYTES={original_bytes}')
+print(f'ATOMIC_OUTPUT_BYTES={len(written.encode("utf-8"))}')
+print(f'ATOMIC_CHANGED_REGION_BYTES={len(replacement.encode("utf-8"))}')
+print(f'ATOMIC_BASELINE_PACKET_MARKERS={len(packet_markers_before)}')
+for i, line in enumerate(written.splitlines(), 1):
+    if 'theorem gst_prefix_one_information_bad_descends_inline' in line:
+        print(f'ATOMIC_TARGET_START={i}')
+    if 'Exact all-Nat RED frontier' in line:
+        print(f'ATOMIC_RED_FRONTIER={i}')
+print('ATOMIC_SURGERY=ONE_THEOREM_ONLY')
