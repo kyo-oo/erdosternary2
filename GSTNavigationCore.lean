@@ -87,7 +87,6 @@ theorem gst_navigation_core_mod3_allS
       have hzero := gst_canonical_origin_zeroS
         gstNavigationConstant gst_navigation_core_origin_energyS s hs
       rw [hzero]
-      decide
   | succ b ih =>
       have hadd := gst_canonical_origin_addS
         gstNavigationConstant gst_navigation_core_origin_energyS s b 1 hs
@@ -97,7 +96,7 @@ theorem gst_navigation_core_mod3_allS
       have hunit : gstNavigationConstant s 1 % 3 = 1 := by
         rw [gst_navigation_core_unit_eq_lteCoeffS s hs]
         exact GSTGraphV2HandwrittenExponentialLTE.lteCoeff_mod3_one s
-      rw [Nat.succ_eq_add_one, hadd, Nat.add_mod, Nat.mul_mod, ih, hA, hunit]
+      rw [hadd, Nat.add_mod, Nat.mul_mod, ih, hA, hunit]
       simp [Nat.add_mod]
 
 /-- Build a Navigation witness from a literal digit-two / carry-zero gate. -/
