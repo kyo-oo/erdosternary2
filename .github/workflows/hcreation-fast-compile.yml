@@ -16,6 +16,26 @@ jobs:
         with:
           build: false
 
+      - name: Inspect exact mul4 lift contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          needle = 'theorem mul4_lift_gst_duality'
+          i = s.find(needle)
+          print(f'MUL4_LIFT_OFFSET={i}')
+          if i < 0:
+              print('MUL4_LIFT_NOT_PRESENT=1')
+          else:
+              line = s.count('\n', 0, i) + 1
+              print(f'MUL4_LIFT_LINE={line}')
+              print('=== MUL4_LIFT_CONTEXT_BEGIN ===')
+              print('\n'.join(s[i:i+10000].splitlines()[:180]))
+              print('=== MUL4_LIFT_CONTEXT_END ===')
+          PY
+
       # Judge the committed transformed monolith; normalization below is runner-only.
       - name: Neutralize only inlined duplicate import edges
         shell: bash
