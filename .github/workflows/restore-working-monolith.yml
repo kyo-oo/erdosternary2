@@ -1,0 +1,59 @@
+name: Restore Working U2D Monolith
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-execution-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Rebuild exact working U2D monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "BEFORE_LINES=$(wc -l < ErdosTernary2.lean)"
+          python3 scripts/apply_u2d_atomic_replacement.py
+          echo "AFTER_LINES=$(wc -l < ErdosTernary2.lean)"
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          checks = {
+              'h_creation_for_4pow': s.count('theorem h_creation_for_4pow'),
+              'gst_h_creation_full_power_navigation_atomic': s.count('theorem gst_h_creation_full_power_navigation_atomic'),
+              'gst_prefix_one_u2d_atomic_collision_inline': s.count('theorem gst_prefix_one_u2d_atomic_collision_inline'),
+              'gst_prefix_one_information_bad_descends_inline': s.count('theorem gst_prefix_one_information_bad_descends_inline'),
+              'gst_prefix_one_navigation_lift': s.count('theorem gst_prefix_one_navigation_lift'),
+          }
+          for k,v in checks.items():
+              print(f'{k}={v}')
+              if v != 1:
+                  raise SystemExit(f'bad multiplicity for {k}: {v}')
+          hc = s.index('theorem h_creation_for_4pow')
+          helper = s.index('theorem gst_h_creation_full_power_navigation_atomic')
+          if not hc < helper:
+              raise SystemExit('h_creation_for_4pow is not before atomic helper')
+          print('WORKING_MONOLITH_STRUCTURE_OK=1')
+          PY
+      - name: Commit restored monolith only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ErdosTernary2.lean
+          if git diff --cached --quiet; then
+            echo 'NO_MONOLITH_DIFF=1'
+            exit 0
+          fi
+          git commit -m 'Restore working U2D monolith with live h_creation_for_4pow'
+          git push origin HEAD:sol/gpt56-universal-four-power-execution-20260827
