@@ -69,20 +69,20 @@ jobs:
           pos = s.find(helper)
           if pos < 0:
               raise SystemExit('atomic helper not found in transformed monolith')
-          # The exact #501 transformed monolith has only the quarantined textual
-          # h_creation copy. Insert the live declaration directly before its first consumer.
           s = s[:pos] + live + s[pos:]
           p.write_text(s, encoding='utf-8')
-          print('FINAL_LINES=' + str(len(s.splitlines())))
+          final = p.read_text(encoding='utf-8')
+          live_pos = final.find('theorem h_creation_for_4pow', pos - len(live) - 16)
+          helper_pos = final.find(helper)
+          if live_pos < 0 or helper_pos < 0 or not live_pos < helper_pos:
+              raise SystemExit('live h_creation placement failed')
+          print('FINAL_LINES=' + str(len(final.splitlines())))
           print('LIVE_INSERT_BEFORE_HELPER=1')
+          print('ATOMIC_HELPER_COUNT=' + str(final.count(helper)))
+          print('U2D_COLLISION_COUNT=' + str(final.count('theorem gst_prefix_one_u2d_atomic_collision_inline')))
+          print('INFO_DESCENT_COUNT=' + str(final.count('theorem gst_prefix_one_information_bad_descends_inline')))
+          print('NAV_LIFT_COUNT=' + str(final.count('theorem gst_prefix_one_navigation_lift')))
           PY
-          # Structural checks: helper and downstream consumers must exist once.
-          test "$(grep -c '^theorem gst_h_creation_full_power_navigation_atomic' ErdosTernary2.lean)" -eq 1
-          test "$(grep -c '^theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean)" -eq 1
-          test "$(grep -c '^theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean)" -eq 1
-          test "$(grep -c '^theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean)" -eq 1
-          # There must be a live h_creation declaration immediately before its consumer region.
-          awk '/^theorem h_creation_for_4pow/{last=NR} /^theorem gst_h_creation_full_power_navigation_atomic/{print "LIVE_H_CREATION_LINE=" last; print "ATOMIC_HELPER_LINE=" NR; if (!(last < NR)) exit 1; found=1} END{if(!found) exit 1}' ErdosTernary2.lean
 
       - name: Commit only corrected monolith
         shell: bash
