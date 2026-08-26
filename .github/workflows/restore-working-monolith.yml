@@ -1,9 +1,6 @@
 name: Restore Working U2D Monolith
 
 on:
-  push:
-    branches:
-      - sol/gpt56-universal-four-power-execution-20260827
   workflow_dispatch:
 
 permissions:
