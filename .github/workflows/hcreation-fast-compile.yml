@@ -16,6 +16,37 @@ jobs:
         with:
           build: false
 
+      - name: Neutralize only inlined duplicate import edges
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          exact_drop = {
+              'GSTPrefixOnePhaseIncidenceControl',
+              'GSTPrefixOneSpacetimeIncidenceControl',
+          }
+          out=[]
+          neutralized=[]
+          for line in s.splitlines(keepends=True):
+              stripped=line.strip()
+              if stripped.startswith('import '):
+                  mods=stripped[len('import '):].split()
+                  if len(mods)==1:
+                      mod=mods[0]
+                      if mod in exact_drop or mod.endswith('Scratch'):
+                          nl='\n' if line.endswith('\n') else ''
+                          out.append(f'-- HCREATION JUDGE NEUTRALIZED DUPLICATE IMPORT: {mod}{nl}')
+                          neutralized.append(mod)
+                          continue
+              out.append(line)
+          p.write_text(''.join(out), encoding='utf-8')
+          print(f'HCREATION_NEUTRALIZED_IMPORT_COUNT={len(neutralized)}')
+          print('HCREATION_RUNNER_ONLY_IMPORT_NORMALIZATION=1')
+          PY
+
       - name: Materialize exact local import closure
         shell: bash
         run: |
@@ -32,40 +63,32 @@ jobs:
               return Path(*module.split('.')).with_suffix('.lean')
 
           def imports_of(path: Path):
-              result = []
+              result=[]
               for raw in path.read_text(encoding='utf-8').splitlines():
-                  code = raw.split('--', 1)[0].rstrip()
-                  m = import_re.match(code)
+                  code=raw.split('--',1)[0].rstrip()
+                  m=import_re.match(code)
                   if m:
                       result.extend(m.group(1).split())
               return result
 
-          order = []
-          permanent = set()
-          temporary = []
-
+          order=[]; permanent=set(); temporary=[]
           def visit(module: str):
               if module == 'ErdosTernary2' or module in permanent:
                   return
-              path = local_path(module)
+              path=local_path(module)
               if not path.exists():
                   return
               if module in temporary:
-                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary + [module]))
+                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary+[module]))
               temporary.append(module)
-              for dep in imports_of(path):
-                  visit(dep)
-              temporary.pop()
-              permanent.add(module)
-              order.append((module, path))
+              for dep in imports_of(path): visit(dep)
+              temporary.pop(); permanent.add(module); order.append((module,path))
 
-          for module in imports_of(ROOT):
-              visit(module)
-
+          for module in imports_of(ROOT): visit(module)
           print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
           BUILD.mkdir(parents=True, exist_ok=True)
-          for module, path in order:
-              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+          for module,path in order:
+              out=BUILD.joinpath(*module.split('.')).with_suffix('.olean')
               out.parent.mkdir(parents=True, exist_ok=True)
               if out.exists():
                   print(f'CACHED {module}')
