@@ -1,4 +1,3 @@
-import GSTGraphV2PerfectPowerBlockCollision
 import GSTGraphV2HandwrittenAnchoredCocycle
 import GSTFinalPurePowerResidueTransplant
 
@@ -11,7 +10,6 @@ open GSTCanonicalSevenAxisBridge
 open GSTGraphV2InfiniteControl
 open GSTGraphV2PerfectPowerAncestry
 open GSTGraphV2PerfectPowerBlock
-open GSTGraphV2PerfectPowerBlockCollision
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
 open GSTGraphV2HandwrittenAnchoredCocycle
@@ -47,10 +45,9 @@ theorem power_width_three_u_derivative_positive
       (4^K) 0 3 (3+q) hChild hRight
 
 /-- A Happy gate three horizontal x4 steps later cannot disappear at every
-vertical coordinate above the fixed cut `3`.  The proof is deliberately
-power-specific: it now carries both the exact width-three pure-power
-conservation law and the exact U derivative, rather than relying on the old
-uncoupled phase inequalities. -/
+vertical coordinate above the fixed cut `3`.  This is deliberately
+power-specific: the exact width-three pure-power conservation law is carried
+alongside the exact U derivative. -/
 theorem power_three_step_collision
     (K q : Nat)
     (hChild : HappyCell
@@ -90,15 +87,11 @@ theorem power_three_step_collision
     exact hiff.mpr (by simpa [E, N] using h)
 
   have hU := unified_equationIII_vertical_telescope E N b (q+1)
-  have hPureRight := blockDensity_prefix_nonpositive_of_bad E N b (q+1)
-    (fun j hj => by simpa [E, N, b, Nat.add_assoc] using hRightBad j)
-  have hPureExact := blockDensity_column_exact E N b (q+1)
-
   have hWidth3 := power_width_three_exact_conservation K q
   have hUPositive := power_width_three_u_derivative_positive K q hChild
     (hRightBad q)
 
-  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU ⊢
   trace_state
   omega
 
