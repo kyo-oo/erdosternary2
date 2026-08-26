@@ -4,38 +4,56 @@ from pathlib import Path
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
-repls = [
-    (
-        "theorem gst_h_creation_full_power_navigation_atomic\n    (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :\n    GSTNavigationWitness (4^k) := by\n  obtain ⟨p, hp1, hd, hcase⟩ := h_creation_for_4pow k hk5 hk7",
-        "theorem gst_h_creation_full_power_navigation_atomic\n    (k : Nat) (hk7 : 7 ≤ k) :\n    GSTNavigationWitness (4^k) := by\n  obtain ⟨p, hp1, hd, hcase⟩ := hCreationCheck_univ k hk7",
-    ),
-    (
-        "gst_h_creation_full_power_navigation_atomic K (by omega) (by omega)",
-        "gst_h_creation_full_power_navigation_atomic K (by omega)",
-    ),
-    (
-        "#print axioms h_creation_for_4pow\n",
-        "",
-    ),
-]
+creation_marker = 'theorem h_creation_for_4pow'
+next_marker = '\ntheorem mul4_lift_gst_duality'
+helper_marker = 'theorem gst_h_creation_full_power_navigation_atomic'
+helper_next = 'theorem gst_full_power_navigation_descends_atomic'
 
-for old, new in repls:
-    count = s.count(old)
-    if count != 1:
-        raise SystemExit(f'expected exactly one live-certificate patch site, found {count}: {old[:80]!r}')
-    s = s.replace(old, new, 1)
+helper_start = s.index(helper_marker)
+helper_end = s.index(helper_next, helper_start)
+helper = s[helper_start:helper_end]
 
-# The dead historical name may remain in comments/source archaeology, but must
-# not occur in the installed helper body or in a live #print.
-helper_start = s.index('theorem gst_h_creation_full_power_navigation_atomic')
-helper_end = s.index('theorem gst_full_power_navigation_descends_atomic', helper_start)
-if 'h_creation_for_4pow' in s[helper_start:helper_end]:
-    raise SystemExit('dead creation certificate survived installed helper body')
-if '#print axioms h_creation_for_4pow' in s:
-    raise SystemExit('dead creation certificate survived live axiom print')
-if 'hCreationCheck_univ k hk7' not in s[helper_start:helper_end]:
-    raise SystemExit('live hCreationCheck_univ certificate not installed')
+# Keep the already-proved universal adapter contract exactly as restored by the
+# historical U2D generator.  The previous bounded hCreationCheck shortcut is
+# intentionally forbidden here because the collision exponent K is unbounded.
+required_call = 'h_creation_for_4pow k hk5 hk7'
+if required_call not in helper:
+    raise SystemExit('universal h_creation_for_4pow adapter call is not intact')
+if 'hCreationCheck_univ k hk7' in helper:
+    raise SystemExit('bounded hCreationCheck shortcut survived in U2D helper')
+
+# Production retains the complete general theorem inside the quarantined legacy
+# block.  Lift that exact theorem text out of quarantine and place one live copy
+# immediately before the U2D helper.  Do not rewrite its proof.
+qstart = s.index(creation_marker)
+qend = s.index(next_marker, qstart)
+if qstart >= helper_start:
+    raise SystemExit('expected quarantined h_creation theorem before U2D helper')
+creation_decl = s[qstart:qend].rstrip() + '\n\n'
+if not creation_decl.startswith(creation_marker):
+    raise SystemExit('h_creation extraction boundary changed')
+if creation_decl.count(creation_marker) != 1:
+    raise SystemExit('h_creation extraction multiplicity changed')
+
+# Guard against accidental double activation if this patcher is invoked twice.
+live_stamp = '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED\n'
+if live_stamp in s:
+    print('FULL_H_CREATION_ALREADY_REACTIVATED=1')
+    p.write_text(s, encoding='utf-8')
+    raise SystemExit(0)
+
+s = s[:helper_start] + live_stamp + creation_decl + s[helper_start:]
+
+# Exactly one live copy sits after the explicit stamp; the original textual copy
+# remains quarantined for archaeology.
+live_start = s.index(live_stamp) + len(live_stamp)
+live_helper = s.index(helper_marker, live_start)
+live_slice = s[live_start:live_helper]
+if live_slice.count(creation_marker) != 1:
+    raise SystemExit('expected exactly one reactivated live h_creation theorem')
+if required_call not in s[live_helper:s.index(helper_next, live_helper)]:
+    raise SystemExit('U2D helper no longer consumes general h_creation theorem')
 
 p.write_text(s, encoding='utf-8')
-print('LIVE_HCREATIONCHECK_REUSED=1')
-print('DEAD_H_CREATION_LIVE_REFERENCES=0')
+print('FULL_H_CREATION_REACTIVATED=1')
+print('UNBOUNDED_U2D_CREATION_ADAPTER_PRESERVED=1')
