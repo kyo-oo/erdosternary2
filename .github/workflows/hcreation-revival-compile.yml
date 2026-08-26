@@ -21,8 +21,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/patch_live_hcreationcheck.py
-          grep -n "SOL56 LIVE GENERAL H_CREATION REACTIVATED" ErdosTernary2.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          marker = 'theorem h_creation_for_4pow'
+          next_marker = '\ntheorem mul4_lift_gst_duality'
+          stamp = '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED FROM CLEAN BASE'
+          if stamp in s:
+              print('H_CREATION_ALREADY_LIVE=1')
+          else:
+              qstart = s.index(marker)
+              qend = s.index(next_marker, qstart)
+              decl = s[qstart:qend].rstrip()
+              if not decl.startswith(marker):
+                  raise SystemExit('bad h_creation extraction start')
+              if decl.count(marker) != 1:
+                  raise SystemExit('bad h_creation extraction multiplicity')
+              s = s.rstrip() + '\n\n' + stamp + '\n' + decl + '\n'
+              p.write_text(s, encoding='utf-8')
+              print('H_CREATION_REACTIVATED=1')
+          PY
+          grep -n "SOL56 LIVE GENERAL H_CREATION REACTIVATED FROM CLEAN BASE" ErdosTernary2.lean
           grep -n "theorem h_creation_for_4pow" ErdosTernary2.lean | tail -2
 
       - name: Persist revived theorem
