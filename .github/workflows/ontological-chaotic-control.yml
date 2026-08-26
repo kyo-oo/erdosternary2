@@ -6,6 +6,7 @@ on:
       - sol/gpt56-universal-four-power-execution-20260827
     paths:
       - 'GSTGraphV2OntologicalChaoticControl.lean'
+      - 'GSTGraphV2OntologicalChaoticRectangle.lean'
       - 'GSTGraphV2OntologicalChaoticControlTest.lean'
       - '.github/workflows/ontological-chaotic-control.yml'
   workflow_dispatch:
@@ -82,12 +83,22 @@ jobs:
         run: |
           cat > OntologicalChaoticControlAudit.lean <<'EOF'
           import GSTGraphV2OntologicalChaoticControl
+          import GSTGraphV2OntologicalChaoticRectangle
           #print axioms GSTGraphV2OntologicalChaoticControl.ambient_witness_iff_infinite_chaotic_control
           #print axioms GSTGraphV2OntologicalChaoticControl.historical_creation_iff_ambient_infinite_navigation
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.ambient_witness_forces_rectangle83_positive
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.rectangle83_positive_contains_ambient_witness
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.ambient_witness_generates_positive_rectangle_family
           EOF
           lake env lean OntologicalChaoticControlAudit.lean | tee ontological-chaotic-control-axioms.log
           if grep -Fq 'sorryAx' ontological-chaotic-control-axioms.log; then
             echo 'ONTOLOGICAL_CHAOTIC_CONTROL_SORRYAX=1'
+            exit 1
+          fi
+          if grep -REn '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)|native_decide' \
+              GSTGraphV2OntologicalChaoticControl.lean \
+              GSTGraphV2OntologicalChaoticRectangle.lean; then
+            echo 'ONTOLOGICAL_CHAOTIC_CONTROL_FORBIDDEN_SOURCE_TOKEN=1'
             exit 1
           fi
           echo 'ONTOLOGICAL_CHAOTIC_CONTROL_GREEN=1'
