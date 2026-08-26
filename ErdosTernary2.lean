@@ -17616,3 +17616,329 @@ theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
     have ha : 5 ≤ n/2 := by omega
     exact has_two_imp_not_no_two (4^(n/2))
       (erdos_ternary_2_even_universal (n/2) ha)
+
+theorem gst_h_creation_full_power_navigation_atomic
+    (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
+    GSTNavigationWitness (4^k) := by
+  obtain ⟨p, hp1, hd, hcase⟩ := h_creation_for_4pow k hk5 hk7
+  have hClt : gstCarry (4^k) p < 4 := gstCarry_lt_four _ _ hp1
+  rcases hcase with hmod0 | hmod1
+  · have hCmod : gstCarry (4^k) p % 3 = 0 := by
+      simpa [gstCarry] using hmod0
+    have hC : gstCarry (4^k) p = 0 ∨ gstCarry (4^k) p = 3 := by
+      omega
+    rcases hC with h0 | h3
+    · exact gstNavigationWitness_of_digit_carry_zero (4^k) p hd h0
+    · exact gstNavigationWitness_of_digit_carry_three (4^k) p hd h3
+  · have hCmod : gstCarry (4^k) p % 3 = 1 := by
+      simpa [gstCarry] using hmod1.1
+    have hC : gstCarry (4^k) p = 1 := by omega
+    have hnext := gstCarry_forward_exact (4^k) p hp1
+    rw [hC, hd] at hnext
+    norm_num [gstStepCarry] at hnext
+    have hdnext : gstDigit (4^k) (p+1) = 2 := by
+      simpa [gstDigit] using hmod1.2
+    exact gstNavigationWitness_of_digit_carry_three (4^k) (p+1) hdnext hnext
+
+/-- Inverse of the forced `s+1` prefix shift. -/
+theorem gst_full_power_navigation_descends_atomic
+    (s b : Nat) (hs : 1 ≤ s) (hb : 1 ≤ b) (hb3 : b % 3 ≠ 0)
+    (hfull : GSTNavigationWitness (4^(3^s * b))) :
+    GSTNavigationWitness (gstNavigationConstant s b) := by
+  obtain ⟨p, hd, hspace⟩ := hfull
+  have hpge : s + 1 ≤ p := by
+    by_contra hnot
+    have hplt : p < s + 1 := by omega
+    have hdecomp := gst_navigation_decomposition s b hs
+    have hbiggt : 1 < 3^(s+1) := by
+      have h9 : 9 ≤ 3^(s+1) := by
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+          (show 2 ≤ s+1 by omega))
+      omega
+    have hRmodBig : 4^(3^s * b) % 3^(s+1) = 1 := by
+      rw [hdecomp, Nat.add_mod]
+      have hmul :
+          (3^(s+1) * gstNavigationConstant s b) % 3^(s+1) = 0 :=
+        Nat.mod_eq_zero_of_dvd ⟨gstNavigationConstant s b, rfl⟩
+      rw [hmul, Nat.add_zero]
+      simp [Nat.mod_eq_of_lt hbiggt]
+    have hdvd : 3^(p+1) ∣ 3^(s+1) :=
+      Nat.pow_dvd_pow 3 (by omega)
+    have hsmallgt : 1 < 3^(p+1) := by
+      have h3 : 3 ≤ 3^(p+1) := by
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+          (show 1 ≤ p+1 by omega))
+      omega
+    have hm := Nat.mod_mod_of_dvd (4^(3^s * b)) hdvd
+    rw [hRmodBig, Nat.mod_eq_of_lt hsmallgt] at hm
+    have hRmodSmall : 4^(3^s * b) % 3^(p+1) = 1 := hm.symm
+    have hdi := digit_identity (4^(3^s * b)) p
+    rw [hRmodSmall] at hdi
+    change 4^(3^s * b) / 3^p % 3 = 2 at hd
+    by_cases hp0 : p = 0
+    · subst p
+      norm_num at hdi hd
+      omega
+    · have hp1 : 1 ≤ p := by omega
+      have h3p : 3 ≤ 3^p := by
+        simpa using (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat)) hp1)
+      have hdiv0 : 1 / 3^p = 0 := Nat.div_eq_of_lt (by omega)
+      rw [hdiv0] at hdi
+      norm_num at hdi
+      omega
+  let j := p - (s+1)
+  have hpEq : p = s + 1 + j := by
+    dsimp [j]
+    omega
+  refine ⟨j, ?_⟩
+  apply (gst_navigation_position_universal s b j hs hb hb3).1
+  rw [← hpEq]
+  exact ⟨hd, hspace⟩
+
+-- SOL56 U2D ATOMIC PREFIX-ONE CLOSURE
+/-- Atomic GST Graph V2 event collision. -/
+theorem gst_prefix_one_u2d_atomic_collision_inline
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (_hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  let E : Nat := 4^(3^(s+1) * n)
+  let N : Nat := 3^s
+  let B : Nat := 3^(s+2)
+  let P1 : Nat := 1 + 3^(s+1)
+  let H : Nat := gstPrefixOneUPotentialTailS s n
+  have hc3 : c s % 3 = 1 := c_mod3 s hs
+  have hcshape : c s = 1 + 3 * (c s / 3) := by
+    have hcdiv := Nat.mod_add_div (c s) 3
+    rw [hc3] at hcdiv
+    omega
+  have hA : 4^(3^s) = 1 + 3^(s+1) * c s := lte_identity s hs
+  have hE1raw := gst_canonical_phase1_energy_shape_surgeryS
+    gstNavigationConstant gst_navigation_constant_origin_energyS
+    s n (c s) (c s / 3) hs hA hcshape
+  have hE1 : 4^N * E = P1 + B*H := by
+    dsimp [N, E, P1, B, H, gstPrefixOneUPotentialTailS]
+    rw [show 3^(s+2) = 3 * 3^(s+1) by
+      rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]; ac_rfl]
+    simpa [Nat.mul_assoc] using hE1raw
+  let X : Nat := 3^(s+1)
+  have hX9 : 9 ≤ X := by
+    dsimp [X]
+    have hpow : 3^2 ≤ 3^(s+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    norm_num at hpow ⊢
+    exact hpow
+  have hBshape : B = 3 * X := by
+    dsimp [B, X]
+    rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+    ac_rfl
+  have hP1shape : P1 = 1 + X := by rfl
+  have hP1 : P1 < B := by rw [hBshape, hP1shape]; omega
+  have hP1lo : B ≤ 4 * P1 := by rw [hBshape, hP1shape]; omega
+  have hP1hi : 4 * P1 < 2 * B := by rw [hBshape, hP1shape]; omega
+  have hBpos : 0 < B := by omega
+  have hseed1lo : 1 ≤ (4 * P1) / B :=
+    (Nat.le_div_iff_mul_le hBpos).2 (by simpa using hP1lo)
+  have hseed1hi : (4 * P1) / B < 2 :=
+    (Nat.div_lt_iff_lt_mul hBpos).2 (by simpa using hP1hi)
+  have hseed1 : (4 * P1) / B = 1 := by omega
+  have hseeded := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad
+  have hRightBad : ∀ j,
+      ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.digit := by
+    intro j hHappy
+    have hTail :=
+      (GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
+        E N (s+2) P1 H j hE1 hP1).1 hHappy
+    rw [hseed1] at hTail
+    have hbadj := hseeded j
+    apply hbadj
+    simpa [GSTBadPairS, GSTCanonicalSevenAxisBridge.digit3,
+      GSTGraphV2InfiniteControl.seededCarry,
+      gstAffineMulCarryS, gstDigitS] using hTail
+  let K : Nat := 3^s * (1 + 3*n)
+  have h3pow : 3 ≤ 3^s := by
+    have h := Nat.pow_le_pow_of_le (by decide : 1 < 3) hs
+    norm_num at h ⊢
+    exact h
+  have harg4 : 4 ≤ 1 + 3*n := by omega
+  have hK12 : 12 ≤ K := by dsimp [K]; nlinarith
+  have hfull : GSTNavigationWitness (4^K) :=
+    gst_h_creation_full_power_navigation_atomic K (by omega) (by omega)
+  have hb3 : (1 + 3*n) % 3 ≠ 0 := by simp [Nat.add_mod, Nat.mul_mod]
+  have hParent :
+      GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_full_power_navigation_descends_atomic
+      s (1 + 3*n) hs (by omega) hb3 (by simpa [K] using hfull)
+  obtain ⟨r, hdr, hspaceR⟩ := hParent
+  have hrpos : 1 ≤ r := by
+    by_contra hnot
+    have hr0 : r = 0 := by omega
+    subst r
+    have hmodParent : gstNavigationConstant s (1 + 3*n) % 3 = 1 := by
+      have hm := gstNavigationConstant_mod3 s (1 + 3*n) hs (by omega) hb3
+      simpa [Nat.add_mod, Nat.mul_mod] using hm
+    simp [gstDigit, hmodParent] at hdr
+  have hCmodR : gstCarry (gstNavigationConstant s (1 + 3*n)) r % 3 = 0 :=
+    gstGoodSpace_carry_mod3_zero _ _ hspaceR
+  have hCltR : gstCarry (gstNavigationConstant s (1 + 3*n)) r < 4 :=
+    gstCarry_lt_four _ r hrpos
+  have hCR :
+      gstCarry (gstNavigationConstant s (1 + 3*n)) r = 0 ∨
+      gstCarry (gstNavigationConstant s (1 + 3*n)) r = 3 := by
+    omega
+  let j : Nat := r - 1
+  have hrEq : r = 1 + j := by dsimp [j]; omega
+  rw [hrEq] at hdr hCR
+  have hstate := gst_prefix_one_product_state s n j hs
+  have hdH : gstDigit H j = 2 := by
+    dsimp [H, gstPrefixOneUPotentialTailS]
+    exact hstate.1.symm.trans hdr
+  have hCH :
+      gstAffineMulCarry 4 1 H j = 0 ∨
+      gstAffineMulCarry 4 1 H j = 3 := by
+    dsimp [H, gstPrefixOneUPotentialTailS]
+    rcases hCR with h0 | h3
+    · exact Or.inl (hstate.2.symm.trans h0)
+    · exact Or.inr (hstate.2.symm.trans h3)
+  have hRight :
+      GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.digit := by
+    apply (GSTGraphV2InfiniteControl.graph_prefix_slice_happy_iff
+      E N (s+2) P1 H j hE1 hP1).2
+    rw [hseed1]
+    constructor
+    · simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit] using hdH
+    · simpa [GSTGraphV2InfiniteControl.seededCarry, gstAffineMulCarry] using hCH
+  exact hRightBad j hRight
+
+/-- Mechanical target splice. -/
+theorem gst_prefix_one_information_bad_descends_inline
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
+  apply gst_complete_bad_of_no_navigation
+  intro hchild
+  exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
+
+/-- Public prefix-one lift consumes only the exact Graph-V2 event collision. -/
+theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hnoParent
+  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
+    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
+  exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
+
+#print axioms hCreationCheck_univ
+#print axioms h_creation_for_4pow
+#print axioms gst_h_creation_full_power_navigation_atomic
+#print axioms gst_full_power_navigation_descends_atomic
+#print axioms gst_prefix_one_u2d_atomic_collision_inline
+#print axioms gst_prefix_one_information_bad_descends_inline
+#print axioms gst_prefix_one_navigation_lift
+
+/-- The two consecutive power waves overlap at a Happy Gate.  The left branch
+    gives a digit two in `4^a`; the right branch gives a digit two shared by
+    `4^(a-1)` and `4^a`. -/
+def GSTPowerTwoWave (a : Nat) : Prop :=
+  hasTernaryTwo (4^a) = true ∨
+    GSTNavigationWitness (4^(a-1))
+
+/-- The exact product-language obstruction for two consecutive multiplication
+    waves.  It retains both carry coordinates and forbids a Happy Gate in each
+    wave at every ternary position. -/
+def GSTTwoWaveBadTrace (R : Nat) : Prop :=
+  ∀ j,
+    GSTBadPair (gstCarry R j) (gstDigit R j) ∧
+    GSTBadPair (gstCarry (4*R) j) (gstDigit (4*R) j)
+
+/-- Failure of both Navigation alternatives is exactly a complete two-wave
+    bad trace. -/
+theorem gst_twoWave_badTrace_of_no_navigation
+    (R : Nat) (hR : ¬ GSTNavigationWitness R)
+    (h4R : ¬ GSTNavigationWitness (4*R)) :
+    GSTTwoWaveBadTrace R := by
+  intro j
+  exact ⟨gstBadTrace_of_no_navigation_witness R hR j,
+    gstBadTrace_of_no_navigation_witness (4*R) h4R j⟩
+
+/-- Exact adjacent-power identity used to instantiate the two-wave automaton. -/
+theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
+    4 * 4^(a-1) = 4^a := by
+  have hae : a = (a-1)+1 := by omega
+  calc
+    4 * 4^(a-1) = 4^(a-1) * 4 := by ac_rfl
+    _ = 4^((a-1)+1) := (Nat.pow_succ 4 (a-1)).symm
+    _ = 4^a := by rw [← hae]
+
+/-- ONE remaining universal equation: beyond the certified modular base, two
+    adjacent power waves cannot both remain forever in ALT-minus/bad space.
+    This is strictly weaker than `GSTResidualNavigationLift` and is exactly
+    what the final digit theorem consumes. -/
+theorem gst_power_two_wave_large
+    (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
+  unfold GSTPowerTwoWave
+  by_cases h2 : a % 3 = 2
+  · exact Or.inl (even_case_a_mod3_2 a h2)
+  by_cases h0 : a % 3 = 0
+  · have hnav : GSTNavigationWitness (4^a) :=
+      gst_navigation_witness_four_pow_div_three_of_prefix_one
+        gst_prefix_one_navigation_lift a ha h0
+    obtain ⟨p, hd, _hspace⟩ := hnav
+    exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+  · have h1 : a % 3 = 1 := by
+      have hlt : a % 3 < 3 := Nat.mod_lt _ (by decide)
+      omega
+    have ham1 : 500 < a - 1 := by omega
+    have hamod : (a - 1) % 3 = 0 := by omega
+    exact Or.inr
+      (gst_navigation_witness_four_pow_div_three_of_prefix_one
+        gst_prefix_one_navigation_lift (a - 1) ham1 hamod)
+
+/-- The weaker two-wave theorem closes the even exponent directly. -/
+theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
+    hasTernaryTwo (4^a) = true := by
+  by_cases ha500 : a ≤ 500
+  · exact modular_check_base a ha ha500
+  · have htwo : GSTPowerTwoWave a :=
+      gst_power_two_wave_large a (by omega)
+    rcases htwo with hcurrent | hprevious
+    · exact hcurrent
+    · obtain ⟨p, hd, hspace⟩ := hprevious
+      have hp : 1 ≤ p := by
+        cases p with
+        | zero =>
+            simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
+            have hmod : 4^(a-1) % 3 = 1 := by
+              rw [Nat.pow_mod]
+              simp
+            omega
+        | succ p => omega
+      have hCmod : gstCarry (4^(a-1)) p % 3 = 0 :=
+        gstGoodSpace_carry_mod3_zero (4^(a-1)) p hspace
+      have hClt : gstCarry (4^(a-1)) p < 4 :=
+        gstCarry_lt_four (4^(a-1)) p hp
+      have hgood : gstCarry (4^(a-1)) p = 0 ∨
+          gstCarry (4^(a-1)) p = 3 := by omega
+      have hlift := gst_pure_lift_or_forced_cascade
+        (4^(a-1)) p hp hd hgood
+      have hd4 : gstDigit (4 * 4^(a-1)) p = 2 := by
+        rcases hlift with h | h
+        · exact h.1
+        · exact h.1
+      rw [gst_four_pow_adjacent a (by omega)] at hd4
+      exact hasTernaryTwo_of_digit (4^a) p hd4
+
+theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false := by
+  by_cases hodd : n % 2 = 1
+  · exact erdos_ternary_2_odd_universal n hn hodd
+  · have heven : n % 2 = 0 := by omega
+    have h4eq : 2^n = 4^(n/2) := by
+      have hn_eq : n = 2 * (n/2) := by omega
+      rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+    rw [h4eq]
+    have ha : 5 ≤ n/2 := by omega
+    exact has_two_imp_not_no_two (4^(n/2))
+      (erdos_ternary_2_even_universal (n/2) ha)
