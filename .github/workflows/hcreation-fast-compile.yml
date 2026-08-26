@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          lake env lean ErdosTernary2.lean 2>&1 | tee hcreation-fast-lean.log
+          lake build GSTTactic ErdosTernary2 2>&1 | tee hcreation-fast-lean.log
           code=${PIPESTATUS[0]}
           echo "LEAN_EXIT=${code}"
           exit "$code"
