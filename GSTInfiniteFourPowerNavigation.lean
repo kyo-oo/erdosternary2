@@ -1,4 +1,5 @@
-import GSTGraphV2HandwrittenAnchoredCocycle
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTGraphV2UnifiedVerticalTelescope
 import GSTFinalPurePowerResidueTransplant
 
 set_option maxRecDepth 1000000
@@ -7,12 +8,13 @@ set_option maxHeartbeats 10000000
 namespace GSTInfiniteFourPowerNavigation
 
 open GSTCanonicalSevenAxisBridge
+open GST2DMixedEmergence
+open GSTGraphV2CoupledUFlux
 open GSTGraphV2InfiniteControl
 open GSTGraphV2PerfectPowerAncestry
 open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
-open GSTGraphV2HandwrittenAnchoredCocycle
 open GSTFinalPurePowerResidueTransplant
 
 /-- Exact width-three pure-power conservation at the production cut. -/
@@ -26,6 +28,28 @@ theorem power_width_three_exact_conservation (K q : Nat) :
     Nat.add_assoc, Nat.pow_add] at h ⊢
   exact h
 
+/-- On a physical Happy cell the exact handwritten-U jump is strictly negative. -/
+theorem gst_u_jump_negative_of_happy_local
+    (C d : Nat) (h : HappyCell C d) :
+    gstUJumpExact C d < 0 := by
+  rcases h with ⟨rfl, h0 | h3⟩
+  · subst C
+    norm_num [gstUJumpExact, jumpWith, gstUChargeExact, gstStepCarryExact]
+  · subst C
+    norm_num [gstUJumpExact, jumpWith, gstUChargeExact, gstStepCarryExact]
+
+/-- Every non-Happy physical cell has nonnegative exact handwritten-U jump. -/
+theorem gst_u_jump_nonnegative_of_not_happy_local
+    (C d : Nat) (hC : C < 4) (hd : d < 3)
+    (hbad : ¬ HappyCell C d) :
+    0 ≤ gstUJumpExact C d := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with rfl | rfl | rfl | rfl <;>
+    rcases hdc with rfl | rfl | rfl <;>
+    simp [HappyCell] at hbad <;>
+    norm_num [gstUJumpExact, jumpWith, gstUChargeExact, gstStepCarryExact]
+
 /-- A disappearing child Happy gate creates a strictly positive exact U defect. -/
 theorem power_width_three_u_derivative_positive
     (K q : Nat)
@@ -35,11 +59,23 @@ theorem power_width_three_u_derivative_positive
     (hRight : ¬ HappyCell
       (graph (4^K) 3 (3+q)).seven.carry
       (graph (4^K) 3 (3+q)).seven.digit) :
-    0 < 3 * graphUPotential (4^K) 0 3 ((3+q)+1) -
-      graphUPotential (4^K) 0 3 (3+q) := by
-  simpa [Nat.add_assoc] using
-    graph_u_derivative_positive_of_child_happy_right_bad
-      (4^K) 0 3 (3+q) hChild hRight
+    0 <
+      3 * potentialWith gstUChargeExact (4^3)
+          (unifiedState (4^K) 3 ((3+q)+1)).core -
+        potentialWith gstUChargeExact (4^3)
+          (unifiedState (4^K) 3 (3+q)).core := by
+  have hEq := unified_equationIII_graph_closed (4^K) 3 (3+q)
+  have hChildNeg := gst_u_jump_negative_of_happy_local
+    (graph (4^K) 0 (3+q)).seven.carry
+    (graph (4^K) 0 (3+q)).seven.digit hChild
+  have hRightNonneg := gst_u_jump_nonnegative_of_not_happy_local
+    (graph (4^K) 3 (3+q)).seven.carry
+    (graph (4^K) 3 (3+q)).seven.digit
+    (graph_carry_lt_four (4^K) 3 (3+q))
+    (graph_digit_lt_three (4^K) 3 (3+q)) hRight
+  rw [← hEq]
+  norm_num
+  nlinarith
 
 /-- Power-specific three-step collision.  This is the only induction seam. -/
 theorem power_three_step_collision
