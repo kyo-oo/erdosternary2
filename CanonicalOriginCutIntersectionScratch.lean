@@ -1,5 +1,6 @@
 import PrefixOneOriginPhaseRecursionScratch
 import InformationDescentScratch
+import GSTNavigationCore
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -8,8 +9,7 @@ set_option maxHeartbeats 10000000
 prefix/residue stack. -/
 theorem gst_navigation_constant_origin_energyS :
     GSTCanonicalOriginEnergyS gstNavigationConstant := by
-  intro t n ht
-  exact gst_navigation_decomposition t n ht
+  exact gst_navigation_core_origin_energyS
 
 /-- The canonical suffix term is divisible by the physical cut modulus, so the
 carry at cut k depends only on the finite origin prefix a. -/
@@ -53,20 +53,7 @@ positive level, including divisible-by-three and zero tails. -/
 theorem gst_navigation_constant_mod3_allS
     (s m : Nat) (hs : 1 ≤ s) :
     gstNavigationConstant s m % 3 = m % 3 := by
-  by_cases hm0 : m = 0
-  · subst m
-    have hQ0 := gst_canonical_origin_zeroS
-      gstNavigationConstant gst_navigation_constant_origin_energyS s hs
-    rw [hQ0]
-    decide
-  by_cases hm3 : m % 3 = 0
-  · have hmshape : m = 3 * (m / 3) := by
-      have h := Nat.mod_add_div m 3
-      rw [hm3] at h
-      omega
-    rw [hmshape, gst_navigation_constant_mul3 s (m/3) hs]
-    simp
-  · exact gstNavigationConstant_mod3 s m hs (by omega) hm3
+  exact gst_navigation_core_mod3_allS s m hs
 
 /-- The physical digit exposed at cut k is the finite-prefix digit shifted by
 the next origin trit m%3. -/
@@ -116,11 +103,11 @@ theorem gst_canonical_origin_cut_witnessS
       gstDigitS (gstNavigationConstant s (a + 3^k*m)) k = 2 := by
     rw [hd, hdigit]
   rcases hfullCarry with h0 | h3
-  · exact gstNavigationWitness_of_digit_carry_zero
+  · exact gst_navigation_core_witness_of_digit_carry_zeroS
       (gstNavigationConstant s (a + 3^k*m)) k
       (by simpa [gstDigitS, gstDigit] using hfullDigit)
       (by simpa [gstCarryS, gstCarry] using h0)
-  · exact gstNavigationWitness_of_digit_carry_three
+  · exact gst_navigation_core_witness_of_digit_carry_threeS
       (gstNavigationConstant s (a + 3^k*m)) k
       (by simpa [gstDigitS, gstDigit] using hfullDigit)
       (by simpa [gstCarryS, gstCarry] using h3)
@@ -208,7 +195,6 @@ theorem gst_level_one_prefix_one_cut_carryS
       28 / 3^k := by
   unfold gstCarryS
   rw [gst_level_one_prefix_one_cut_residueS k m hk]
-  norm_num
 
 /-- In the hard origin-one family the first exposed parent digit at the cut is
 one; the child origin trit is retained exactly rather than discarded. -/
@@ -220,4 +206,3 @@ theorem gst_level_one_prefix_one_cut_digit_oneS
   rw [Nat.mul_mod]
   have hQ := gst_navigation_constant_mod3_allS (1+k) m (by omega)
   rw [hQ, hm1]
-  norm_num

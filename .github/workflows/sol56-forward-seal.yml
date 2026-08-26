@@ -1,0 +1,198 @@
+name: SOL56 Forward 17K Seal
+
+on:
+  push:
+    branches:
+      - sol/gpt56-final-u2d-transplant-20260825
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: sol56-forward-17k-seal-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  seal:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Apply direct prefix-one proof once
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "SOURCE_HEAD=$(git rev-parse HEAD)"
+          echo "SOURCE_LINES=$(wc -l < ErdosTernary2.lean)"
+          python3 scripts/apply_u2d_atomic_replacement.py
+          python3 scripts/patch_live_hcreationcheck.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+
+          # The monolith already contains these scratch declarations inline.
+          # Neutralize only duplicate import edges; never delete the inline
+          # packets themselves.
+          exact_drop = {
+              'GSTPrefixOnePhaseIncidenceControl',
+              'GSTPrefixOneSpacetimeIncidenceControl',
+              'GSTGraphV2InfiniteControllerBridge',
+          }
+          out = []
+          neutralized = []
+          for line in s.splitlines(keepends=True):
+              stripped = line.strip()
+              if stripped.startswith('import '):
+                  mods = stripped[len('import '):].split()
+                  if len(mods) == 1:
+                      mod = mods[0]
+                      if mod in exact_drop or mod.endswith('Scratch'):
+                          nl = '\n' if line.endswith('\n') else ''
+                          out.append(f'-- SOL56 FORWARD NEUTRALIZED DUPLICATE IMPORT: {mod}{nl}')
+                          neutralized.append(mod)
+                          continue
+              out.append(line)
+          s = ''.join(out)
+          p.write_text(s, encoding='utf-8')
+          print(f'FORWARD_NEUTRALIZED_IMPORT_COUNT={len(neutralized)}')
+          print('FORWARD_NEUTRALIZED_IMPORTS=' + ','.join(neutralized))
+          print(f'TRANSFORMED_LINES={len(s.splitlines())}')
+
+          required = [
+              'theorem gst_h_creation_full_power_navigation_atomic',
+              'theorem gst_full_power_navigation_descends_atomic',
+              'theorem gst_prefix_one_u2d_atomic_collision_inline',
+              'theorem gst_prefix_one_information_bad_descends_inline',
+              'theorem gst_prefix_one_navigation_lift',
+              'theorem erdos_ternary_2_universal',
+          ]
+          for marker in required:
+              if marker not in s:
+                  raise SystemExit(f'missing required theorem marker: {marker}')
+          if 'trace_state\n  contradiction' in s:
+              raise SystemExit('old red trace_state/contradiction seam survived U2D replacement')
+          if 'gst_residual_navigation_lift' in s[s.index('theorem gst_prefix_one_u2d_atomic_collision_inline'):s.index('theorem gst_prefix_one_navigation_lift')]:
+              raise SystemExit('quarantined residual navigation lift survived U2D replacement')
+          helper = s[s.index('theorem gst_h_creation_full_power_navigation_atomic'):s.index('theorem gst_full_power_navigation_descends_atomic')]
+          if 'h_creation_for_4pow k hk5 hk7' not in helper:
+              raise SystemExit('universal h_creation_for_4pow certificate not installed in helper')
+          if '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED' not in s:
+              raise SystemExit('general h_creation theorem was not reactivated')
+          print('FORWARD_U2D_ATOMIC_TRANSFORM_VERIFIED=1')
+          PY
+
+      - name: Install exact Lean RC2 and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Materialize exact transformed local import closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          ROOT = Path('ErdosTernary2.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              result = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = import_re.match(code)
+                  if m:
+                      result.extend(m.group(1).split())
+              return result
+
+          order = []
+          permanent = set()
+          temporary = []
+
+          def visit(module: str):
+              if module == 'ErdosTernary2' or module in permanent:
+                  return
+              path = local_path(module)
+              if not path.exists():
+                  return
+              if module in temporary:
+                  cycle = ' -> '.join(temporary + [module])
+                  raise SystemExit(f'LOCAL_IMPORT_CYCLE={cycle}')
+              temporary.append(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              temporary.pop()
+              permanent.add(module)
+              order.append((module, path))
+
+          for module in imports_of(ROOT):
+              visit(module)
+
+          print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
+          BUILD.mkdir(parents=True, exist_ok=True)
+          for module, path in order:
+              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              if out.exists():
+                  print(f'=== already materialized {module} ===')
+                  continue
+              print(f'=== compiling local import {module} ===', flush=True)
+              subprocess.run(
+                  ['lake', 'env', 'lean', '-o', str(out), str(path)],
+                  check=True,
+              )
+          print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
+          PY
+
+      - name: Compile full current monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          echo "MONOLITH_LINES=$(wc -l < ErdosTernary2.lean)"
+          lake build ErdosTernary2
+          echo 'MONOLITH_BUILD_GREEN=1'
+
+      - name: Kernel axiom audit of sealed theorem chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > SOL56SealAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms h_creation_for_4pow
+          #print axioms gst_h_creation_full_power_navigation_atomic
+          #print axioms gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_prefix_one_navigation_lift
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean SOL56SealAudit.lean | tee sol56-seal-axioms.log
+          if grep -Fq 'sorryAx' sol56-seal-axioms.log; then
+            echo 'forbidden sorryAx reached sealed theorem chain'
+            exit 1
+          fi
+          echo 'SEALED_AXIOM_AUDIT_GREEN=1'
+
+      - name: Run repository comparator unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee sol56-forward-comparator.log
+          grep -F 'Your solution is okay!' sol56-forward-comparator.log
+          echo 'FORWARD_LITERAL_COMPARATOR_GREEN=1'

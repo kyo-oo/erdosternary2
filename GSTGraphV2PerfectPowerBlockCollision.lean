@@ -164,11 +164,10 @@ theorem canonical_perfect_power_block_collision
     (fun j hj => by simpa [E, N, b, Nat.add_assoc] using hRightBad j)
   have hPureExact := blockDensity_column_exact E N b (q+1)
 
-  -- The remaining arithmetic is the perfect-power ancestry boundary:
-  -- the absolute left sheet starts at `1`, while the alleged all-bad right
-  -- sheet begins exactly at horizontal exponent `M+N`.
-  -- All other terms are now exact kernel equalities/inequalities.
+  -- Diagnostic compiler state: the theorem was historically left at one
+  -- arithmetic boundary.  Expose that exact state before changing any math.
   dsimp [E, N, b, M] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  trace_state
   omega
 
 #check blockDensity_physical_table

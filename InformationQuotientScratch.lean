@@ -38,11 +38,9 @@ theorem gst_shared_information_childCarry_is_quotientS
         A * gstCarryS T q +
           gstAffineMulCarryS A (1 + 4*z) (4*T) q := by
     omega
-  rw [hdecomp]
-  exact (Nat.mul_add_div A (gstCarryS T q)
-    (gstAffineMulCarryS A (1 + 4*z) (4*T) q)).trans (by
-      rw [Nat.div_eq_of_lt ha1]
-      simp [hA])
+  rw [hdecomp, Nat.add_comm]
+  rw [Nat.add_mul_div_left _ _ hA, Nat.div_eq_of_lt ha1]
+  simp
 
 /-- The complementary affine carry is literally the base-A remainder of the
     same shared information state. -/
