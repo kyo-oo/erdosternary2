@@ -1,0 +1,37 @@
+name: H Creation Fast Compile
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-execution-20260827
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Lean with cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+      - name: Compile live h_creation monolith
+        shell: bash
+        run: |
+          set -o pipefail
+          lake env lean ErdosTernary2.lean 2>&1 | tee hcreation-fast-lean.log
+          code=${PIPESTATUS[0]}
+          echo "LEAN_EXIT=${code}"
+          exit "$code"
+      - name: Axiom audit
+        if: success()
+        shell: bash
+        run: |
+          cat > HCreationAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms h_creation_for_4pow
+          EOF
+          lake env lean HCreationAudit.lean | tee hcreation-fast-axioms.log
+          if grep -Fq 'sorryAx' hcreation-fast-axioms.log; then
+            exit 1
+          fi
