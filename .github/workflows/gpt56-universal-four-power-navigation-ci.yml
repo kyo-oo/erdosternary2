@@ -48,8 +48,7 @@ jobs:
             GSTGraphV2HandwrittenExponentialCascade \
             GSTGraphV2HandwrittenExponentialLTE \
             GSTGraphV2HandwrittenAnchoredCocycle \
-            GSTFinalPurePowerResidueTransplant \
-            GSTGraphV2PerfectPowerBlockCollision; do
+            GSTFinalPurePowerResidueTransplant; do
               lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
           done
       - name: Compile universal theorem
