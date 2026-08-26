@@ -4,9 +4,6 @@ from pathlib import Path
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
-# Keep the monolith package, but drop the two stale top-level imports that were
-# already verified unused by the production body and create standalone import
-# closure/cycle failures under RC2.
 for stale in (
     'import GSTHandwrittenPhaseIncidence\n',
     'import GSTSpacetimeV2\n',
@@ -23,6 +20,7 @@ if imp not in s:
 start_marker = '/-- Literal BIG-N finite-support horizon for the canonical child information. -/'
 end_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
 installed_marker = '-- SOL56 U2D ATOMIC PREFIX-ONE CLOSURE'
+creation_marker = 'theorem h_creation_for_4pow'
 
 if start_marker not in s:
     if installed_marker in s and 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
@@ -32,13 +30,26 @@ if start_marker not in s:
     raise SystemExit('old prefix-one start marker not found')
 if end_marker not in s:
     raise SystemExit('prefix-one end marker not found')
+if creation_marker not in s:
+    raise SystemExit('existing production h_creation_for_4pow declaration not found')
 
 start = s.index(start_marker)
 end = s.index(end_marker, start)
+creation_start = s.index(creation_marker)
+if not (start < creation_start < end):
+    raise SystemExit('h_creation_for_4pow is not inside the replacement interval')
+try:
+    creation_end = s.index('\n/--', creation_start)
+except ValueError as exc:
+    raise SystemExit('could not locate end of h_creation_for_4pow declaration') from exc
+if creation_end > end:
+    raise SystemExit('h_creation_for_4pow extraction crossed replacement boundary')
+creation_decl = s[creation_start:creation_end].rstrip() + '\n\n'
+if creation_decl.count(creation_marker) != 1:
+    raise SystemExit('production h_creation_for_4pow extraction multiplicity changed')
 
-replacement = r'''/-- Kernel adapter for the already-proved universal creation certificate.
-The carry-one branch is advanced by one exact GST carry edge, exactly as in the
-independent pre-prefix-one kernel probe. -/
+replacement = creation_decl + r'''/-- Kernel adapter for the already-proved universal creation certificate.
+The carry-one branch is advanced by one exact GST carry edge. -/
 theorem gst_h_creation_full_power_navigation_atomic
     (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     GSTNavigationWitness (4^k) := by
@@ -62,9 +73,7 @@ theorem gst_h_creation_full_power_navigation_atomic
       simpa [gstDigit] using hmod1.2
     exact gstNavigationWitness_of_digit_carry_three (4^k) (p+1) hdnext hnext
 
-/-- Inverse of the forced `s+1` prefix shift.  A full perfect-power
-Navigation witness cannot occur below the exact prefix `1 mod 3^(s+1)`, hence
-it descends through the already-proved universal Navigation-position iff. -/
+/-- Inverse of the forced `s+1` prefix shift. -/
 theorem gst_full_power_navigation_descends_atomic
     (s b : Nat) (hs : 1 ≤ s) (hb : 1 ≤ b) (hb3 : b % 3 ≠ 0)
     (hfull : GSTNavigationWitness (4^(3^s * b))) :
@@ -85,7 +94,7 @@ theorem gst_full_power_navigation_descends_atomic
           (3^(s+1) * gstNavigationConstant s b) % 3^(s+1) = 0 :=
         Nat.mod_eq_zero_of_dvd ⟨gstNavigationConstant s b, rfl⟩
       rw [hmul, Nat.add_zero]
-      exact Nat.mod_eq_of_lt hbiggt
+      simp [Nat.mod_eq_of_lt hbiggt]
     have hdvd : 3^(p+1) ∣ 3^(s+1) :=
       Nat.pow_dvd_pow 3 (by omega)
     have hsmallgt : 1 < 3^(p+1) := by
@@ -120,11 +129,7 @@ theorem gst_full_power_navigation_descends_atomic
   exact ⟨hd, hspace⟩
 
 -- SOL56 U2D ATOMIC PREFIX-ONE CLOSURE
-/-- Atomic GST Graph V2 event collision.  The exact canonical right slice is
-proved bad from the Omega failure trace.  The independent universal creation
-certificate produces a real Navigation event of the same parent perfect power;
-the universal position iff projects it to that exact seed-one Graph-V2 slice,
-where it contradicts the bad trace. -/
+/-- Atomic GST Graph V2 event collision. -/
 theorem gst_prefix_one_u2d_atomic_collision_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (_hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
@@ -134,7 +139,6 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
   let B : Nat := 3^(s+2)
   let P1 : Nat := 1 + 3^(s+1)
   let H : Nat := gstPrefixOneUPotentialTailS s n
-
   have hc3 : c s % 3 = 1 := c_mod3 s hs
   have hcshape : c s = 1 + 3 * (c s / 3) := by
     have hcdiv := Nat.mod_add_div (c s) 3
@@ -149,7 +153,6 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     rw [show 3^(s+2) = 3 * 3^(s+1) by
       rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]; ac_rfl]
     simpa [Nat.mul_assoc] using hE1raw
-
   let X : Nat := 3^(s+1)
   have hX9 : 9 ≤ X := by
     dsimp [X]
@@ -162,22 +165,15 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
     ac_rfl
   have hP1shape : P1 = 1 + X := by rfl
-  have hP1 : P1 < B := by
-    rw [hBshape, hP1shape]
-    omega
-  have hP1lo : B ≤ 4 * P1 := by
-    rw [hBshape, hP1shape]
-    omega
-  have hP1hi : 4 * P1 < 2 * B := by
-    rw [hBshape, hP1shape]
-    omega
+  have hP1 : P1 < B := by rw [hBshape, hP1shape]; omega
+  have hP1lo : B ≤ 4 * P1 := by rw [hBshape, hP1shape]; omega
+  have hP1hi : 4 * P1 < 2 * B := by rw [hBshape, hP1shape]; omega
   have hBpos : 0 < B := by omega
   have hseed1lo : 1 ≤ (4 * P1) / B :=
     (Nat.le_div_iff_mul_le hBpos).2 (by simpa using hP1lo)
   have hseed1hi : (4 * P1) / B < 2 :=
     (Nat.div_lt_iff_lt_mul hBpos).2 (by simpa using hP1hi)
   have hseed1 : (4 * P1) / B = 1 := by omega
-
   have hseeded := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad
   have hRightBad : ∀ j,
       ¬ GSTU2DEventTransport.HappyCell
@@ -193,38 +189,30 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     simpa [GSTBadPairS, GSTCanonicalSevenAxisBridge.digit3,
       GSTGraphV2InfiniteControl.seededCarry,
       gstAffineMulCarryS, gstDigitS] using hTail
-
   let K : Nat := 3^s * (1 + 3*n)
   have h3pow : 3 ≤ 3^s := by
     have h := Nat.pow_le_pow_of_le (by decide : 1 < 3) hs
     norm_num at h ⊢
     exact h
   have harg4 : 4 ≤ 1 + 3*n := by omega
-  have hK12 : 12 ≤ K := by
-    dsimp [K]
-    nlinarith
+  have hK12 : 12 ≤ K := by dsimp [K]; nlinarith
   have hfull : GSTNavigationWitness (4^K) :=
     gst_h_creation_full_power_navigation_atomic K (by omega) (by omega)
-  have hb3 : (1 + 3*n) % 3 ≠ 0 := by
-    simp [Nat.add_mod, Nat.mul_mod]
+  have hb3 : (1 + 3*n) % 3 ≠ 0 := by simp [Nat.add_mod, Nat.mul_mod]
   have hParent :
       GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
     gst_full_power_navigation_descends_atomic
       s (1 + 3*n) hs (by omega) hb3 (by simpa [K] using hfull)
-
   obtain ⟨r, hdr, hspaceR⟩ := hParent
   have hrpos : 1 ≤ r := by
     by_contra hnot
     have hr0 : r = 0 := by omega
     subst r
-    have hmodParent :
-        gstNavigationConstant s (1 + 3*n) % 3 = 1 := by
-      have hm := gstNavigationConstant_mod3
-        s (1 + 3*n) hs (by omega) hb3
+    have hmodParent : gstNavigationConstant s (1 + 3*n) % 3 = 1 := by
+      have hm := gstNavigationConstant_mod3 s (1 + 3*n) hs (by omega) hb3
       simpa [Nat.add_mod, Nat.mul_mod] using hm
     simp [gstDigit, hmodParent] at hdr
-  have hCmodR :
-      gstCarry (gstNavigationConstant s (1 + 3*n)) r % 3 = 0 :=
+  have hCmodR : gstCarry (gstNavigationConstant s (1 + 3*n)) r % 3 = 0 :=
     gstGoodSpace_carry_mod3_zero _ _ hspaceR
   have hCltR : gstCarry (gstNavigationConstant s (1 + 3*n)) r < 4 :=
     gstCarry_lt_four _ r hrpos
@@ -232,11 +220,8 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
       gstCarry (gstNavigationConstant s (1 + 3*n)) r = 0 ∨
       gstCarry (gstNavigationConstant s (1 + 3*n)) r = 3 := by
     omega
-
   let j : Nat := r - 1
-  have hrEq : r = 1 + j := by
-    dsimp [j]
-    omega
+  have hrEq : r = 1 + j := by dsimp [j]; omega
   rw [hrEq] at hdr hCR
   have hstate := gst_prefix_one_product_state s n j hs
   have hdH : gstDigit H j = 2 := by
@@ -249,7 +234,6 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     rcases hCR with h0 | h3
     · exact Or.inl (hstate.2.symm.trans h0)
     · exact Or.inr (hstate.2.symm.trans h3)
-
   have hRight :
       GSTU2DEventTransport.HappyCell
         (GSTGraphV2InfiniteControl.graph E N (s+2+j)).seven.carry
@@ -259,21 +243,17 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
     rw [hseed1]
     constructor
     · simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit] using hdH
-    · simpa [GSTGraphV2InfiniteControl.seededCarry,
-        gstAffineMulCarry] using hCH
-
+    · simpa [GSTGraphV2InfiniteControl.seededCarry, gstAffineMulCarry] using hCH
   exact hRightBad j hRight
 
-/-- Mechanical target splice: the already-proved atomic collision is exactly
-what excludes every child Navigation witness under the parent Omega bad trace. -/
+/-- Mechanical target splice. -/
 theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
     GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
   apply gst_complete_bad_of_no_navigation
   intro hchild
-  exact gst_prefix_one_u2d_atomic_collision_inline
-    s n hs hn hchild hBad
+  exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
 
 /-- Public prefix-one lift consumes only the exact Graph-V2 event collision. -/
 theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
@@ -294,16 +274,14 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
 '''
 
 s = s[:start] + replacement + s[end:]
-
-# RC2 mechanical scar already established by the forward compiler frontier.
 old_ring = 'convert hshared using 1 <;> ring'
 ring_count = s.count(old_ring)
 if ring_count != 1:
     raise SystemExit(f'expected exactly one localized ring scar, found {ring_count}')
 s = s.replace(old_ring, 'convert hshared using 1 <;> ring_nf', 1)
 
-# Hard guards for the exact mechanical transplant.
 for required in (
+    'theorem h_creation_for_4pow',
     'theorem gst_h_creation_full_power_navigation_atomic',
     'theorem gst_full_power_navigation_descends_atomic',
     'theorem gst_prefix_one_u2d_atomic_collision_inline',
@@ -311,12 +289,15 @@ for required in (
 ):
     if s.count(required) != 1:
         raise SystemExit(f'expected exactly one installed declaration: {required}')
-if 'gst_residual_navigation_lift' in s[start:s.index(end_marker, start) if end_marker in s[start:] else len(s)]:
+helper_start = s.index('theorem gst_prefix_one_u2d_atomic_collision_inline')
+helper_end = s.index('theorem gst_prefix_one_navigation_lift', helper_start)
+if 'gst_residual_navigation_lift' in s[helper_start:helper_end]:
     raise SystemExit('quarantined residual navigation lift survived U2D replacement block')
 if 'trace_state\n  contradiction' in s:
     raise SystemExit('old RED seam survived U2D replacement')
 
 p.write_text(s, encoding='utf-8')
+print('PRODUCTION_H_CREATION_PRESERVED=1')
 print('U2D_ATOMIC_COLLISION_RESTORED=1')
 print('PREFIX_ONE_INFORMATION_WRAPPER_INSTALLED=1')
 print('LIVE_RESIDUAL_NAVIGATION_LIFT_DEPENDENCY=0')
