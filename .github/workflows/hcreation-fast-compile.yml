@@ -15,14 +15,75 @@ jobs:
         uses: leanprover/lean-action@v1
         with:
           build: false
+
+      - name: Materialize exact local import closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          ROOT = Path('ErdosTernary2.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              result = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = import_re.match(code)
+                  if m:
+                      result.extend(m.group(1).split())
+              return result
+
+          order = []
+          permanent = set()
+          temporary = []
+
+          def visit(module: str):
+              if module == 'ErdosTernary2' or module in permanent:
+                  return
+              path = local_path(module)
+              if not path.exists():
+                  return
+              if module in temporary:
+                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary + [module]))
+              temporary.append(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              temporary.pop()
+              permanent.add(module)
+              order.append((module, path))
+
+          for module in imports_of(ROOT):
+              visit(module)
+
+          print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
+          BUILD.mkdir(parents=True, exist_ok=True)
+          for module, path in order:
+              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              if out.exists():
+                  print(f'CACHED {module}')
+                  continue
+              print(f'COMPILE {module}', flush=True)
+              subprocess.run(['lake','env','lean','-o',str(out),str(path)], check=True)
+          print('LOCAL_IMPORT_CLOSURE_GREEN=1')
+          PY
+
       - name: Compile live h_creation monolith
         shell: bash
         run: |
           set -o pipefail
-          lake build GSTTactic ErdosTernary2 2>&1 | tee hcreation-fast-lean.log
+          lake env lean -o .lake/build/lib/lean/ErdosTernary2.olean ErdosTernary2.lean 2>&1 | tee hcreation-fast-lean.log
           code=${PIPESTATUS[0]}
           echo "LEAN_EXIT=${code}"
           exit "$code"
+
       - name: Axiom audit
         if: success()
         shell: bash
@@ -33,5 +94,7 @@ jobs:
           EOF
           lake env lean HCreationAudit.lean | tee hcreation-fast-axioms.log
           if grep -Fq 'sorryAx' hcreation-fast-axioms.log; then
+            echo 'H_CREATION_SORRYAX=1'
             exit 1
           fi
+          echo 'H_CREATION_AXIOM_AUDIT_GREEN=1'
