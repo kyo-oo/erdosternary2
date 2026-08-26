@@ -36,17 +36,24 @@ if creation_marker not in s:
 start = s.index(start_marker)
 end = s.index(end_marker, start)
 creation_start = s.index(creation_marker)
-if not (start < creation_start < end):
-    raise SystemExit('h_creation_for_4pow is not inside the replacement interval')
-try:
-    creation_end = s.index('\n/--', creation_start)
-except ValueError as exc:
-    raise SystemExit('could not locate end of h_creation_for_4pow declaration') from exc
-if creation_end > end:
-    raise SystemExit('h_creation_for_4pow extraction crossed replacement boundary')
-creation_decl = s[creation_start:creation_end].rstrip() + '\n\n'
-if creation_decl.count(creation_marker) != 1:
-    raise SystemExit('production h_creation_for_4pow extraction multiplicity changed')
+creation_decl = ''
+creation_position = 'before'
+if creation_start >= start:
+    try:
+        creation_end = s.index('\n/--', creation_start)
+    except ValueError as exc:
+        raise SystemExit('could not locate end of h_creation_for_4pow declaration') from exc
+    creation_decl = s[creation_start:creation_end].rstrip() + '\n\n'
+    if creation_decl.count(creation_marker) != 1:
+        raise SystemExit('production h_creation_for_4pow extraction multiplicity changed')
+    if creation_start < end:
+        creation_position = 'inside'
+        # The normal seam replacement removes the original copy.
+    else:
+        creation_position = 'after'
+        # Move the existing declaration before the new helper so Lean sees it
+        # first, and remove its later original to preserve exact multiplicity.
+        s = s[:creation_start] + s[creation_end:]
 
 replacement = creation_decl + r'''/-- Kernel adapter for the already-proved universal creation certificate.
 The carry-one branch is advanced by one exact GST carry edge. -/
@@ -297,6 +304,7 @@ if 'trace_state\n  contradiction' in s:
     raise SystemExit('old RED seam survived U2D replacement')
 
 p.write_text(s, encoding='utf-8')
+print(f'PRODUCTION_H_CREATION_POSITION={creation_position}')
 print('PRODUCTION_H_CREATION_PRESERVED=1')
 print('U2D_ATOMIC_COLLISION_RESTORED=1')
 print('PREFIX_ONE_INFORMATION_WRAPPER_INSTALLED=1')
