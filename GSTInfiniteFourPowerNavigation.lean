@@ -56,12 +56,17 @@ theorem gst_navigation_tail_carry_shiftS
   have hshape :
       4^(3^s * b) =
         (1 + D * (Q % J)) + (D * J) * (Q / J) := by
-    rw [hdecomp, hQsplit]
-    ring
+    calc
+      4^(3^s * b) = 1 + D * Q := hdecomp
+      _ = (1 + D * (Q % J)) + (D * J) * (Q / J) := by
+        conv_lhs => rw [hQsplit]
+        ring
   have hRlt : Q % J < J := Nat.mod_lt _ hJpos
   have hlow : 1 + D * (Q % J) < D * J := by
-    have hDone : 1 ≤ D := Nat.one_le_of_lt hDpos
-    omega
+    calc
+      1 + D * (Q % J) < D + D * (Q % J) := by omega
+      _ = D * ((Q % J) + 1) := by ring
+      _ ≤ D * J := Nat.mul_le_mul_left D (Nat.succ_le_of_lt hRlt)
   have hmod :
       4^(3^s * b) % (D * J) = 1 + D * (Q % J) := by
     rw [hshape]
@@ -75,7 +80,6 @@ theorem gst_navigation_tail_carry_shiftS
   have hnum : 4 * (1 + D * (Q % J)) = 4 + D * (4 * (Q % J)) := by ring
   rw [hnum, Nat.add_mul_div_left _ _ hDpos,
     Nat.div_eq_of_lt h4ltD, Nat.zero_add]
-  rfl
 
 /-- Decode the Navigation space tag back into the two physical Happy carries. -/
 theorem gst_navigation_witness_physicalS
@@ -122,10 +126,8 @@ theorem gst_four_power_creation_of_navigation_witnessS
     dsimp [p]
     rw [hCShift]
     rcases hC with h0 | h3
-    · rw [h0]
-      norm_num
-    · rw [h3]
-      norm_num
+    · simp [h0]
+    · simp [h3]
 
 /-- First major universal branch: if the reduced exponent begins with ternary
 trit two, the Navigation tail is already Happy at position zero. -/
@@ -136,7 +138,7 @@ theorem gst_four_power_creation_scaled_unit_twoS
   have hd : gstDigit (gstNavigationConstant s b) 0 = 2 := by
     simpa [gstDigit] using hmod.trans hb2
   have hC : gstCarry (gstNavigationConstant s b) 0 = 0 := by
-    simp [gstCarry]
+    simp [gstCarry, Nat.mod_one]
   have hnav : GSTNavigationWitness (gstNavigationConstant s b) :=
     gst_navigation_core_witness_of_digit_carry_zeroS _ 0 hd hC
   exact gst_four_power_creation_of_navigation_witnessS s b hs hnav
