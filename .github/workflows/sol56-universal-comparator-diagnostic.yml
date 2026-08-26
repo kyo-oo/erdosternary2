@@ -1,3 +1,4 @@
+# retrigger after workflow registration
 name: Sol56 Universal Comparator Diagnostic
 
 on:
