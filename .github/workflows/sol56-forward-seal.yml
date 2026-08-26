@@ -26,6 +26,7 @@ jobs:
           echo "SOURCE_HEAD=$(git rev-parse HEAD)"
           echo "SOURCE_LINES=$(wc -l < ErdosTernary2.lean)"
           python3 scripts/apply_u2d_atomic_replacement.py
+          python3 scripts/patch_live_hcreationcheck.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('ErdosTernary2.lean')
@@ -74,6 +75,11 @@ jobs:
               raise SystemExit('old red trace_state/contradiction seam survived U2D replacement')
           if 'gst_residual_navigation_lift' in s[s.index('theorem gst_prefix_one_u2d_atomic_collision_inline'):s.index('theorem gst_prefix_one_navigation_lift')]:
               raise SystemExit('quarantined residual navigation lift survived U2D replacement')
+          helper = s[s.index('theorem gst_h_creation_full_power_navigation_atomic'):s.index('theorem gst_full_power_navigation_descends_atomic')]
+          if 'hCreationCheck_univ k hk7' not in helper:
+              raise SystemExit('live hCreationCheck_univ certificate not installed in helper')
+          if '#print axioms h_creation_for_4pow' in s:
+              raise SystemExit('dead h_creation_for_4pow axiom print survived')
           print('FORWARD_U2D_ATOMIC_TRANSFORM_VERIFIED=1')
           PY
 
