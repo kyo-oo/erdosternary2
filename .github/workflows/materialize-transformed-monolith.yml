@@ -1,0 +1,34 @@
+name: Materialize Transformed Monolith
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-navigation-20260826
+    paths:
+      - '.github/workflows/materialize-transformed-monolith.yml'
+      - 'ErdosTernary2.lean'
+      - 'scripts/apply_u2d_atomic_replacement.py'
+  workflow_dispatch:
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-universal-four-power-navigation-20260826
+      - name: Apply exact production splice
+        run: python3 scripts/apply_u2d_atomic_replacement.py
+      - name: Record exact transformed monolith facts
+        run: |
+          wc -l ErdosTernary2.lean
+          grep -n "theorem h_creation_for_4pow\|gst_h_creation_full_power_navigation_atomic\|gst_prefix_one_u2d_atomic_collision_inline\|gst_prefix_one_information_bad_descends_inline" ErdosTernary2.lean || true
+          sha256sum ErdosTernary2.lean
+      - name: Upload exact transformed monolith
+        uses: actions/upload-artifact@v4
+        with:
+          name: transformed-erdos-monolith
+          path: ErdosTernary2.lean
+          if-no-files-found: error
