@@ -74,6 +74,7 @@ jobs:
             GSTGraphV2PerfectPowerAncestry \
             GSTGraphV2PerfectPowerBlockProbe \
             GSTGraphV2PerfectPowerBlockCollision \
+            GSTInfiniteFourPowerNavigation \
             GSTGraphV2HandwrittenOmegaUBlock \
             GSTGraphV2HandwrittenExponentialCascade \
             GSTGraphV2NonEuclidean \
