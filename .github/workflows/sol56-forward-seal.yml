@@ -76,10 +76,10 @@ jobs:
           if 'gst_residual_navigation_lift' in s[s.index('theorem gst_prefix_one_u2d_atomic_collision_inline'):s.index('theorem gst_prefix_one_navigation_lift')]:
               raise SystemExit('quarantined residual navigation lift survived U2D replacement')
           helper = s[s.index('theorem gst_h_creation_full_power_navigation_atomic'):s.index('theorem gst_full_power_navigation_descends_atomic')]
-          if 'hCreationCheck_univ k hk7' not in helper:
-              raise SystemExit('live hCreationCheck_univ certificate not installed in helper')
-          if '#print axioms h_creation_for_4pow' in s:
-              raise SystemExit('dead h_creation_for_4pow axiom print survived')
+          if 'h_creation_for_4pow k hk5 hk7' not in helper:
+              raise SystemExit('universal h_creation_for_4pow certificate not installed in helper')
+          if '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED' not in s:
+              raise SystemExit('general h_creation theorem was not reactivated')
           print('FORWARD_U2D_ATOMIC_TRANSFORM_VERIFIED=1')
           PY
 
@@ -175,6 +175,8 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > SOL56SealAudit.lean <<'EOF'
           import ErdosTernary2
+          #print axioms h_creation_for_4pow
+          #print axioms gst_h_creation_full_power_navigation_atomic
           #print axioms gst_prefix_one_information_bad_descends_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms erdos_ternary_2_universal
