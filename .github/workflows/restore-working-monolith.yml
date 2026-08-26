@@ -17,43 +17,93 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Rebuild exact working U2D monolith
+
+      - name: Extract live historical h_creation theorem
         shell: bash
         run: |
           set -euo pipefail
-          echo "BEFORE_LINES=$(wc -l < ErdosTernary2.lean)"
-          python3 scripts/apply_u2d_atomic_replacement.py
-          echo "AFTER_LINES=$(wc -l < ErdosTernary2.lean)"
           python3 - <<'PY'
           from pathlib import Path
-          s = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
-          checks = {
-              'h_creation_for_4pow': s.count('theorem h_creation_for_4pow'),
-              'gst_h_creation_full_power_navigation_atomic': s.count('theorem gst_h_creation_full_power_navigation_atomic'),
-              'gst_prefix_one_u2d_atomic_collision_inline': s.count('theorem gst_prefix_one_u2d_atomic_collision_inline'),
-              'gst_prefix_one_information_bad_descends_inline': s.count('theorem gst_prefix_one_information_bad_descends_inline'),
-              'gst_prefix_one_navigation_lift': s.count('theorem gst_prefix_one_navigation_lift'),
-          }
-          for k,v in checks.items():
-              print(f'{k}={v}')
-              if v != 1:
-                  raise SystemExit(f'bad multiplicity for {k}: {v}')
-          hc = s.index('theorem h_creation_for_4pow')
-          helper = s.index('theorem gst_h_creation_full_power_navigation_atomic')
-          if not hc < helper:
-              raise SystemExit('h_creation_for_4pow is not before atomic helper')
-          print('WORKING_MONOLITH_STRUCTURE_OK=1')
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          needle = 'theorem h_creation_for_4pow'
+          start = s.rfind(needle)
+          if start < 0:
+              raise SystemExit('live h_creation_for_4pow not found')
+          live = s[start:]
+          if not live.startswith(needle):
+              raise SystemExit('bad live theorem extraction')
+          Path('/tmp/h_creation_for_4pow.lean').write_text(live, encoding='utf-8')
+          print('LIVE_H_CREATION_LINES=' + str(len(live.splitlines())))
+          print('LIVE_H_CREATION_BYTES=' + str(len(live.encode('utf-8'))))
           PY
-      - name: Commit restored monolith only
+
+      - name: Recreate exact 17336-line U2D working monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=3f6b5a132b152d8fb9681b8ddd011c4f106140be
+          git cat-file -e "${BASE}^{commit}"
+          git show "${BASE}:ErdosTernary2.lean" > ErdosTernary2.lean
+          echo "RAW_BASE_LINES=$(wc -l < ErdosTernary2.lean)"
+          python3 scripts/apply_u2d_atomic_replacement.py
+          transformed_lines=$(wc -l < ErdosTernary2.lean)
+          echo "TRANSFORMED_LINES=${transformed_lines}"
+          if [ "${transformed_lines}" -ne 17336 ]; then
+            echo "Expected exact working transformed monolith to have 17336 lines"
+            exit 1
+          fi
+          grep -n -F 'theorem gst_h_creation_full_power_navigation_atomic' ErdosTernary2.lean
+          grep -n -F 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+
+      - name: Paste live h_creation into working monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          live = Path('/tmp/h_creation_for_4pow.lean').read_text(encoding='utf-8').rstrip() + '\n\n'
+          helper = 'theorem gst_h_creation_full_power_navigation_atomic'
+          pos = s.find(helper)
+          if pos < 0:
+              raise SystemExit('atomic helper not found in transformed monolith')
+          # The exact #501 transformed monolith has only the quarantined textual
+          # h_creation copy. Insert the live declaration directly before its first consumer.
+          s = s[:pos] + live + s[pos:]
+          p.write_text(s, encoding='utf-8')
+          print('FINAL_LINES=' + str(len(s.splitlines())))
+          print('LIVE_INSERT_BEFORE_HELPER=1')
+          PY
+          # Structural checks: helper and downstream consumers must exist once.
+          test "$(grep -c '^theorem gst_h_creation_full_power_navigation_atomic' ErdosTernary2.lean)" -eq 1
+          test "$(grep -c '^theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean)" -eq 1
+          test "$(grep -c '^theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean)" -eq 1
+          test "$(grep -c '^theorem gst_prefix_one_navigation_lift' ErdosTernary2.lean)" -eq 1
+          # There must be a live h_creation declaration immediately before its consumer region.
+          awk '/^theorem h_creation_for_4pow/{last=NR} /^theorem gst_h_creation_full_power_navigation_atomic/{print "LIVE_H_CREATION_LINE=" last; print "ATOMIC_HELPER_LINE=" NR; if (!(last < NR)) exit 1; found=1} END{if(!found) exit 1}' ErdosTernary2.lean
+
+      - name: Commit only corrected monolith
         shell: bash
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add ErdosTernary2.lean
-          if git diff --cached --quiet; then
-            echo 'NO_MONOLITH_DIFF=1'
-            exit 0
-          fi
-          git commit -m 'Restore working U2D monolith with live h_creation_for_4pow'
+          git commit -m 'Restore transformed U2D monolith and paste h_creation_for_4pow'
           git push origin HEAD:sol/gpt56-universal-four-power-execution-20260827
+
+      - name: Setup Lean with cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+
+      - name: Compile exact corrected monolith
+        shell: bash
+        run: |
+          set -o pipefail
+          lake build ErdosTernary2 2>&1 | tee restored-monolith-build.log
+          code=${PIPESTATUS[0]}
+          echo "LEAN_EXIT=${code}"
+          exit "${code}"
