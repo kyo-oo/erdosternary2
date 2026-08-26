@@ -101,14 +101,16 @@ theorem axes_witness_iff_happy (R H p : Nat) :
     WitnessAt (axes R H p) ↔ HappyCell (carry4 R p) (digit3 R p) := by
   change
     (digit3 R p = 2 ∧
-      (spaceOfCarry (carry4 R p) = .null ∨
-       spaceOfCarry (carry4 R p) = .gstPlus)) ↔
+      (GSTGraphV2NonEuclidean.spaceOfCarry (carry4 R p) =
+          GSTGraphV2NonEuclidean.Space.null ∨
+       GSTGraphV2NonEuclidean.spaceOfCarry (carry4 R p) =
+          GSTGraphV2NonEuclidean.Space.gstPlus)) ↔
       (digit3 R p = 2 ∧ (carry4 R p = 0 ∨ carry4 R p = 3))
   by_cases h0 : carry4 R p = 0
-  · simp [spaceOfCarry, h0]
+  · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0]
   · by_cases h3 : carry4 R p = 3
-    · simp [spaceOfCarry, h0, h3]
-    · simp [spaceOfCarry, h0, h3]
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3]
+    · simp [GSTGraphV2NonEuclidean.spaceOfCarry, h0, h3]
 
 /-- Physical carry is always one of the four ontological y-axis states. -/
 theorem carry4_lt_four_exact (R p : Nat) : carry4 R p < 4 := by
@@ -147,10 +149,8 @@ theorem historical_creation_iff_exists_happy (R : Nat) :
   · rintro ⟨p, hp, ⟨hd, hgood⟩⟩
     refine ⟨p, hp, hd, Or.inl ?_⟩
     rcases hgood with h0 | h3
-    · rw [h0]
-      decide
-    · rw [h3]
-      decide
+    · simp [h0]
+    · simp [h3]
 
 /-- Fully ontological replacement API.  A historical creation certificate is
 exactly existence of a positive-position seven-axis witness carrying its full
