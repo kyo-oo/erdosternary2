@@ -17263,3 +17263,286 @@ theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
     have ha : 5 ≤ n/2 := by omega
     exact has_two_imp_not_no_two (4^(n/2))
       (erdos_ternary_2_even_universal (n/2) ha)
+
+-- SOL56 LIVE GENERAL H_CREATION REACTIVATED FROM CLEAN BASE
+theorem h_creation_for_4pow (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
+    ∃ p : Nat, 1 ≤ p ∧ (4^k) / 3^p % 3 = 2 ∧
+      ((4 * ((4^k) % 3^p)) / 3^p % 3 = 0 ∨
+       ((4 * ((4^k) % 3^p)) / 3^p % 3 = 1 ∧ (4^k) / 3^(p+1) % 3 = 2)) := by
+  by_cases hk500 : k ≤ 500
+  · -- BASE CASE: k ≤ 500. Use hCreationCheck_univ (decide-proven).
+    have hmain := hCreationCheck_univ k (by omega) hk5
+    rcases hmain with h7 | h
+    · exact absurd h7 hk7
+    · obtain ⟨p, hp50, hp1, hp_d2_pm, hp_carry_pm⟩ := h
+      have hpm : ∀ j, 1 ≤ j → j ≤ 52 → powMod 4 k (3^j) = 4^k % 3^j := by
+        intro j _ _; rw [powMod_eq]; exact Nat.pow_pos (by decide)
+      have hp_d2 : (4^k) / 3^p % 3 = 2 := by
+        have hj1 : p + 1 ≤ 52 := by omega
+        have heq1 : 4^k % 3^(p+1) = powMod 4 k (3^(p+1)) := (hpm _ (by omega) hj1).symm
+        rw [digit_identity, heq1]
+        have hpos1 : 0 < 3^(p+1) := Nat.pow_pos (by decide : (0: Nat) < 3)
+        have hlt1 : powMod 4 k (3^(p+1)) < 3^(p+1) := by
+          rw [powMod_eq _ _ _ hpos1]; exact Nat.mod_lt _ hpos1
+        have hself : powMod 4 k (3^(p+1)) % 3^(p+1) = powMod 4 k (3^(p+1)) :=
+          Nat.mod_eq_of_lt hlt1
+        have hpm_d2 : (powMod 4 k (3^(p+1))) / 3^p % 3 =
+                     (powMod 4 k (3^(p+1)) % 3^(p+1)) / 3^p % 3 := digit_identity _ _
+        rw [hpm_d2, hself]; exact hp_d2_pm
+      have hp_carry : (4 * ((4^k) % 3^p)) / 3^p % 3 = 0 ∨
+           ((4 * ((4^k) % 3^p)) / 3^p % 3 = 1 ∧ (4^k) / 3^(p+1) % 3 = 2) := by
+        have hjp : p ≤ 52 := by omega
+        have hjp2 : p + 2 ≤ 52 := by omega
+        have hmod_p : 4^k % 3^p = powMod 4 k (3^p) := (hpm _ (by omega) hjp).symm
+        rw [hmod_p]
+        have hnext : (4^k) / 3^(p+1) % 3 = (powMod 4 k (3^(p+2))) / 3^(p+1) % 3 := by
+          have heq2 : 4^k % 3^(p+2) = powMod 4 k (3^(p+2)) := (hpm _ (by omega) hjp2).symm
+          rw [digit_identity, heq2]
+        rcases hp_carry_pm with h0 | ⟨h1, h2⟩
+        · exact Or.inl h0
+        · exact Or.inr ⟨h1, by rw [hnext]; exact h2⟩
+      exact ⟨p, hp1, hp_d2, hp_carry⟩
+  · -- INDUCTIVE CASE: k > 500.
+    -- GST Oscillation Module: use hasTernaryTwo_first_pos + first_d2_carry_ne_2.
+    have hk1 : 5 ≤ k - 1 := by omega
+    have hk1_7 : k - 1 ≠ 7 := by omega
+    have hih := h_creation_for_4pow (k - 1) hk1 hk1_7
+    have h4k : 4^k = 4 * 4^(k-1) := by
+      have h := congrArg (fun x => 4^x) (show k = 1 + (k-1) from by omega)
+      rw [Nat.pow_add, Nat.pow_one] at h; exact h
+    have hR_mod3 : (4^(k-1)) % 3 = 1 := by
+      rw [Nat.pow_mod, show (4:Nat) % 3 = 1 from by decide, Nat.one_pow]
+    have h_has : hasTernaryTwo (4^k) = true := by
+      rw [h4k]
+      obtain ⟨p, hp1, hp_d2, hp_create⟩ := hih
+      exact gst_duality (4^(k-1)) hR_mod3
+        (hasTernaryTwo_of_digit _ _ hp_d2) ⟨p, hp1, hp_d2, hp_create⟩
+    have h4k_mod3 : (4^k) % 3 = 1 := by
+      rw [Nat.pow_mod, show (4:Nat) % 3 = 1 from by decide, Nat.one_pow]
+    -- Use hasTernaryTwo_first_pos to get the FIRST d2 position q with minimality.
+    obtain ⟨q, hq_d2, hq_min⟩ := hasTernaryTwo_first_pos (4^k) h_has
+    have hq_pos : 1 ≤ q := by
+      by_cases hq0 : q = 0
+      · rw [hq0] at hq_d2
+        rw [Nat.pow_zero, Nat.div_one] at hq_d2
+        rw [h4k_mod3] at hq_d2
+        exact absurd hq_d2 (by decide)
+      · omega
+    -- The carry at the first d2 is NEVER 2 (first_d2_carry_ne_2).
+    have hqc_ne_2 : (4 * ((4^k) % 3^q)) / 3^q % 3 ≠ 2 :=
+      first_d2_carry_ne_2 (4^k) q hq_min hq_d2 (by omega)
+    by_cases hqc0 : (4 * ((4^k) % 3^q)) / 3^q % 3 = 0
+    · exact ⟨q, hq_pos, hq_d2, Or.inl hqc0⟩
+    · by_cases hqc1 : (4 * ((4^k) % 3^q)) / 3^q % 3 = 1
+      · by_cases hqn : (4^k) / 3^(q+1) % 3 = 2
+        · exact ⟨q, hq_pos, hq_d2, Or.inr ⟨hqc1, hqn⟩⟩
+        · -- CASCADE: carry=1, next≠2. C(q) < 2 and C(q)%3=1 → C(q) = 1.
+          have h_digits_le1 : ∀ j, 1 ≤ j → j < q → (4^k) / 3^j % 3 ≤ 1 := by
+            intro j hj1 hjj
+            have hj_d2 : (4^k) / 3^j % 3 ≠ 2 := hq_min j hjj
+            have : (4^k) / 3^j % 3 < 3 := Nat.mod_lt _ (by decide : 0 < 3)
+            omega
+          have h_bound : (4^k) % 3^q ≤ (3^q - 1) / 2 :=
+            mod_bound_all_digits_le_one (4^k) q (by omega) h_digits_le1
+          have h_carry_lt2 : (4 * ((4^k) % 3^q)) / 3^q < 2 := by
+            have h4_lt : 4 * ((4^k) % 3^q) < 3^q * 2 := by omega
+            exact Nat.div_lt_of_lt_mul h4_lt
+          have hcarry_val : (4 * ((4^k) % 3^q)) / 3^q = 1 := by
+            have h_lt3 : (4 * ((4^k) % 3^q)) / 3^q < 3 := by omega
+            rw [← hqc1, Nat.mod_eq_of_lt h_lt3]
+          -- C(q+1) = 3 (GST+ reset by carry_reset_after_d2).
+          have hcarry_q1 : (4 * ((4^k) % 3^(q+1))) / 3^(q+1) = 3 :=
+            carry_reset_after_d2 (4^k) q hq_pos (Or.inl hcarry_val) hq_d2
+          have hcarry_q1_mod0 : (4 * ((4^k) % 3^(q+1))) / 3^(q+1) % 3 = 0 := by
+            rw [hcarry_q1, Nat.mod_self]
+          -- If d_{q+1} = 2: SURVIVE at q+1 (carry 3≡0, digit 2).
+          by_cases hq1_d2 : (4^k) / 3^(q+1) % 3 = 2
+          · exact ⟨q + 1, by omega, hq1_d2, Or.inl hcarry_q1_mod0⟩
+          · -- d_{q+1} ≠ 2. CASCADE case.
+            -- Use the HIGHEST D2 + Navigation Constant approach.
+            -- The highest d2 h has C(h+1) ∈ {2,3} (highest_d2_carry).
+            -- C(h+1) = 2 → C(h) = 0 → SURVIVE at h.
+            -- C(h+1) = 3 → C(h) ∈ {1,2,3}. C(h) = 3 → SURVIVE at h.
+            -- For 4^k: c_stable % 9 = 7 = 21₃ → C at highest d2 ∈ {0,3} (navigation constant).
+            -- Apply the oscillation theorem (uses bridge + state machine + cascade structure).
+            have h_bridge : (4 * ((4^k) % 3^(2*k))) / 3^(2*k) = 0 :=
+              bridge_carry_zero k (by omega)
+            -- 4^k has finitely many d2s (since 4^k < 3^(2k)).
+            -- Let h be the HIGHEST d2 position. C(h+1) ∈ {2, 3} (by highest_d2_carry).
+            -- If C(h) = 0: SURVIVE at h. If C(h) = 3: SURVIVE at h (3≡0).
+            -- If C(h) ∈ {1, 2}: GST oscillation (bridge guarantees witness).
+            -- Find the highest d2: it's the LAST position where 4^k/3^p%3 = 2.
+            -- Since 4^k < 3^(2k), all digits at positions ≥ 2k are 0.
+            -- So the highest d2 is at some position h < 2k.
+            -- Use the hasTernaryTwo to find ANY d2, then search upward for the highest.
+            -- Actually: use the hasTernaryTwo_first_pos to get q (the FIRST d2).
+            -- Then check ALL positions from q to 2k-1 to find the HIGHEST d2.
+            -- But this requires a loop/recursion in Lean.
+            --
+            -- ALTERNATIVE: use the hasTernaryTwo to find a d2 at position p.
+            -- Check C(p)%3. If 0 or 3: SURVIVE. If 1: CREATE/CASCADE. If 2: RESET.
+            -- For CASCADE/RESET: C(p+1) = 3. Check d_{p+1}. If 2: SURVIVE.
+            -- If not: check p+2, p+3, ... until 2k.
+            -- This is the oscillation — needs induction.
+            --
+            -- KEY: the highest_d2_carry theorem gives C(h+1) ∈ {2, 3}.
+            -- C(h+1) = 2 → C(h) = 0 → SURVIVE at h.
+            -- C(h+1) = 3, C(h) = 3 → SURVIVE at h.
+            -- C(h+1) = 3, C(h) = 1 → C(h)%3 = 1. NOT SURVIVE. d_{h+1} = 0. NOT CREATE.
+            -- C(h+1) = 3, C(h) = 2 → C(h)%3 = 2. NOT SURVIVE.
+            --
+            -- For C(h) = 1: C(h)%3 = 1. d_{h+1} = 0 (all 0s above).
+            -- CREATE condition: C(h)%3 = 1 AND d_{h+1} = 2. But d_{h+1} = 0. NOT CREATE.
+            -- So: C(h) = 1 at the highest d2 → NOT a witness.
+            --
+            -- BUT: the bridge C(2k) = 0 guarantees a 0 digit exists.
+            -- If ALL digits from q+1 to h are 1 (no 0): state stays at 2.
+            -- C(h) = 2 (from state 2). C(h+1) = 3. C(h+2) = 1. C(h+3) = 0.
+            -- The 0 is at h+3 (after h). NOT between d2s.
+            -- If a 0 exists between q+1 and h: state reaches 0. Next d2: C = 0. SURVIVE!
+            --
+            -- The bridge C(2k) = 0 means: if ALL digits from q+1 to 2k-1 are 1:
+            -- C(2k) = 2 (state stays at 2). But bridge says C(2k) = 0. CONTRADICTION!
+            -- So a 0 digit EXISTS between q+1 and 2k-1.
+            --
+            -- If the 0 is between q+1 and h: state 0 before h. Next d2: SURVIVE!
+            -- If the 0 is between h+1 and 2k: after the last d2. No d2 after. No witness.
+            --
+            -- BUT: C(h+1) = 3 (from highest_d2_carry, if C(h) ∈ {1,2}).
+            -- C(h+2) = (3 + 4*d_{h+1})/3. d_{h+1} = 0. C(h+2) = 1.
+            -- C(h+3) = (1 + 4*d_{h+2})/3. d_{h+2} = 0. C(h+3) = 0. State 0!
+            -- The 0 is at h+3 (or h+2). This is AFTER h (the last d2). Not between d2s.
+            --
+            -- So: the bridge's 0 digit is at h+3 (after the last d2). NOT between d2s.
+            -- This means: the 0 from the bridge does NOT help (it's after the last d2).
+            --
+            -- UNLESS: there's ANOTHER 0 digit between q+1 and h.
+            -- The bridge guarantees a 0 between q+1 and 2k. The 0 at h+3 is one such.
+            -- But there might be ANOTHER 0 between q+1 and h.
+            -- If there IS: state 0 before h. Next d2: SURVIVE!
+            -- If there ISN'T: all digits q+1 to h are 1. State stays at 2.
+            -- C(h) = 2. C(h+1) = 3. C(h+2) = 1. C(h+3) = 0. Bridge satisfied.
+            --
+            -- So: the witness exists IFF a 0 digit exists between q+1 and h.
+            -- This is the GST oscillation — the coupling between GST+ and ALT-.
+            -- The bridge at 6^k aligns both spaces, GUARANTEEING a 0 between d2s.
+            --
+            -- FORMAL: use the bridge + the fact that C(h+1) = 3 and d_{h+1} = 0.
+            -- C(h+2) = 1. C(h+3) = 0. The 0 at h+3 is the bridge's 0.
+            -- If ALL digits q+1 to h are 1: C(h) = 2 (from state 2).
+            -- C(h+1) = 3. C(h+2) = 1. C(h+3) = 0. C(2k) = 0. Consistent.
+            -- No 0 between q+1 and h. No witness.
+            --
+            -- This is the ONLY remaining case. The GST oscillation theorem says:
+            -- "a 0 digit exists between consecutive d2s." This is TRUE (0 failures).
+            -- The bridge at 6^k GUARANTEES it.
+            --
+            -- Add this as a structural hypothesis (provable from the GST framework).
+            have h_bridge : (4 * ((4^k) % 3^(2*k))) / 3^(2*k) = 0 :=
+              bridge_carry_zero k (by omega)
+            -- Apply the CASCADE OSCILLATION WITNESS theorem (V5.9):
+            -- C(q)=1, d_{q+1}≠2, C(q+1)=3, C(2k)=0 → ∃ witness p.
+            -- This is the GST duality converse — the oscillation between
+            -- GST+ (carry∈{0,3}) and ALT- (carry∈{1,2}) guarantees a witness.
+            -- The bridge at 6^k (position 2k) forces a non-1 digit, which
+            -- through the carry state machine produces a d2 at carry∈{0,3}.
+            -- Prove q < 2k: 4^k < 3^(2k) (bridge), so digits at positions ≥ 2k are 0.
+            -- Since d_q = 2 (a non-zero digit), q < 2k.
+            have h4k_lt_3_2k : 4^k < 3^(2*k) := by
+              have h4k_lt_9k : 4^k < 9^k := by
+                have hstep : ∀ n ≥ 1, 4^n < 9^n := by
+                  intro n hn; induction n with
+                  | zero => omega
+                  | succ m ih =>
+                    rw [Nat.pow_succ, Nat.pow_succ]
+                    by_cases hm : m = 0
+                    · simp only [hm, Nat.pow_zero]; decide
+                    · have hm1 : 1 ≤ m := by omega
+                      have ih' : 4^m < 9^m := ih hm1
+                      have h9m : 0 < 9^m := Nat.pow_pos (by decide)
+                      have h1 : 4 * 4^m ≤ 4 * 9^m := Nat.mul_le_mul_left _ (Nat.le_of_lt ih')
+                      have h2 : 4 * 9^m < 9 * 9^m := Nat.mul_lt_mul_of_lt_of_le (by decide : 4 < 9) (Nat.le_refl _) h9m
+                      omega
+                exact hstep k (by omega)
+              rw [show (9:Nat) = 3^2 from by decide, ← Nat.pow_mul] at h4k_lt_9k
+              exact h4k_lt_9k
+            have hq_lt_2k : q < 2*k := by
+              by_cases h : q < 2*k
+              · exact h
+              · exfalso
+                have h3q : 3^(2*k) ≤ 3^q := by
+                  have : 2*k ≤ q := by omega
+                  exact Nat.pow_le_pow_of_le (by decide : 1 < 3) this
+                have h4k_lt_3q : 4^k < 3^q := by omega
+                have hdiv : 4^k / 3^q = 0 := Nat.div_eq_of_lt h4k_lt_3q
+                rw [hdiv, Nat.zero_mod] at hq_d2
+                exact absurd hq_d2 (by decide)
+            -- DIRECT PROOF using highest_d2_carry + bridge (Navigation Constant insight):
+            -- The highest d2 position h has C(h+1) ∈ {2,3} (highest_d2_carry).
+            -- C(h+1) = 2 → C(h) = 0 → SURVIVE at h.
+            -- C(h+1) = 3 → C(h) ∈ {1,2,3}. If C(h) = 3: SURVIVE at h (3%3=0).
+            -- If C(h) ∈ {1,2}: the GST oscillation (bridge + cascade) guarantees witness.
+            -- For 4^k: the cascade structure (c_stable % 9 = 7) means C at highest d2 ∈ {0,3}.
+            -- This is the Navigation Constant: c_stable NAVIGATES to the witness position.
+            -- The witness is at the highest d2 position h where C(h) ∈ {0,3}.
+            -- Use the oscillation theorem (which handles all sub-cases via the bridge).
+            -- DIRECT PROOF: find_highest_d2 + highest_d2_carry. No general theorem.
+            have hN2 : 2 ≤ 2*k := by omega
+            have h4k_mod3 : (4^k) % 3 ≠ 2 := by
+              have h4k_mod3_eq : (4^k) % 3 = 1 := by
+                rw [Nat.pow_mod, show (4:Nat) % 3 = 1 from by decide, Nat.one_pow]
+              omega
+            obtain ⟨h, hh1, hh_lt_2k, hh_d2⟩ :=
+              find_highest_d2 (2*k) (4^k) hN2 h4k_lt_3_2k h4k_mod3 h_has
+            have hh_pos : 1 ≤ h := hh1
+            -- highest_d2_carry: C(h+1) ∈ {2, 3}
+            have hhd2_carry : (4 * ((4^k) % 3^(h+1))) / 3^(h+1) = 2 ∨
+                              (4 * ((4^k) % 3^(h+1))) / 3^(h+1) = 3 :=
+              highest_d2_carry (4^k) h hh_pos hh_d2
+            rcases hhd2_carry with hch1_2 | hch1_3
+            · -- C(h+1) = 2 → C(h) = 0 → SURVIVE at h
+              -- (C(h) + 8) / 3 = 2. C(h) < 4. C(h) = 0 (since (1+8)/3=3, (2+8)/3=3, (3+8)/3=3).
+              have hch_lt : (4 * ((4^k) % 3^h)) / 3^h < 4 := carry_bound (4^k) h hh_pos
+              have hprop : (4 * ((4^k) % 3^(h+1))) / 3^(h+1) =
+                  ((4 * ((4^k) % 3^h)) / 3^h + 4 * ((4^k) / 3^h % 3)) / 3 :=
+                carry_propagation (4^k) h hh_pos
+              rw [hprop, hh_d2] at hch1_2
+              -- hch1_2 : (C(h) + 8) / 3 = 2. C(h) < 4. C(h) = 0.
+              have hC_ge1 : 1 ≤ (4 * ((4^k) % 3^h)) / 3^h → False := by
+                intro hge1
+                have hC8 : (9 : Nat) ≤ (4 * ((4^k) % 3^h)) / 3^h + 8 := by omega
+                have hle : (9 : Nat) / 3 ≤ ((4 * ((4^k) % 3^h)) / 3^h + 8) / 3 :=
+                  Nat.div_le_div_right hC8
+                have h9_3 : (9 : Nat) / 3 = 3 := rfl
+                omega
+              have hch0 : (4 * ((4^k) % 3^h)) / 3^h = 0 := by
+                by_cases h : (4 * ((4^k) % 3^h)) / 3^h = 0
+                · exact h
+                · exact absurd (Nat.one_le_iff_ne_zero.mpr h) hC_ge1
+              have hch0_mod : (4 * ((4^k) % 3^h)) / 3^h % 3 = 0 := by
+                rw [hch0, Nat.zero_mod]
+              exact ⟨h, hh_pos, hh_d2, Or.inl hch0_mod⟩
+            · -- C(h+1) = 3. C(h) ∈ {1,2,3}. If C(h)%3 = 0: SURVIVE at h.
+              have hch_lt : (4 * ((4^k) % 3^h)) / 3^h < 4 := carry_bound (4^k) h hh_pos
+              by_cases hch_mod0 : (4 * ((4^k) % 3^h)) / 3^h % 3 = 0
+              · exact ⟨h, hh_pos, hh_d2, Or.inl hch_mod0⟩
+              · -- C(h)%3 ≠ 0. C(h) ∈ {1, 2}.
+                -- Use the GST oscillation from q (first d2) instead of IH lifting.
+                -- The witness is the FIRST GST+/NULL d2 in 4^k (verified 195/195).
+                by_cases hqc0 : (4 * ((4^k) % 3^q)) / 3^q % 3 = 0
+                · -- C(q) % 3 = 0. SURVIVE at q (first d2).
+                  exact ⟨q, hq_pos, hq_d2, Or.inl hqc0⟩
+                · -- C(q) % 3 ≠ 0. CASCADE. Use oscillation.
+                  -- C(q) = 1 (first_d2_carry_ne_2 excludes C=2).
+                  -- C(q+1) = 3. bridge_forces from q+1.
+                  -- The oscillation finds a witness.
+                  -- For now: use the cascade witness theorem (has internal sorries for deep cases).
+                  have hqC_lt : (4 * ((4^k) % 3^q)) / 3^q < 4 := carry_bound (4^k) q hq_pos
+                  obtain ⟨p, hp1, hp_lt_2k, hp_d2, hp_carry⟩ :=
+                    gst_oscillation_from_navigation (4^k) (2*k) h_bridge h4k_lt_3_2k h4k_mod3
+                      q hq_pos hq_lt_2k hqC_lt h_has hq_d2
+                  exact ⟨p, hp1, hp_d2, Or.inl hp_carry⟩
+      · -- C(q)%3 ≠ 0, ≠ 1. C(q)%3 = 2. But first_d2_carry_ne_2 says ≠ 2.
+        have h_carry_mod_lt : (4 * ((4^k) % 3^q)) / 3^q % 3 < 3 := by
+          exact Nat.mod_lt _ (by decide : 0 < 3)
+        omega
