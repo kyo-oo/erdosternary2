@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - sol/gpt56-four-power-navigation-exact501-20260826
+  pull_request:
+    branches:
+      - sol/sol56-final-residual-production-green-20260824
   workflow_dispatch:
 
 jobs:
