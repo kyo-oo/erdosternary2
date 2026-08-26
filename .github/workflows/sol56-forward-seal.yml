@@ -60,6 +60,9 @@ jobs:
           print(f'TRANSFORMED_LINES={len(s.splitlines())}')
 
           required = [
+              'theorem gst_h_creation_full_power_navigation_atomic',
+              'theorem gst_full_power_navigation_descends_atomic',
+              'theorem gst_prefix_one_u2d_atomic_collision_inline',
               'theorem gst_prefix_one_information_bad_descends_inline',
               'theorem gst_prefix_one_navigation_lift',
               'theorem erdos_ternary_2_universal',
@@ -67,17 +70,11 @@ jobs:
           for marker in required:
               if marker not in s:
                   raise SystemExit(f'missing required theorem marker: {marker}')
-          forbidden_live = [
-              'theorem gst_h_creation_full_power_navigation_atomic',
-              'theorem gst_full_power_navigation_descends_atomic',
-              'theorem gst_prefix_one_u2d_atomic_collision_inline',
-          ]
-          for marker in forbidden_live:
-              if marker in s:
-                  raise SystemExit(f'obsolete live theorem survived direct replacement: {marker}')
           if 'trace_state\n  contradiction' in s:
-              raise SystemExit('old red trace_state/contradiction seam survived direct replacement')
-          print('FORWARD_DIRECT_RESIDUAL_TRANSFORM_VERIFIED=1')
+              raise SystemExit('old red trace_state/contradiction seam survived U2D replacement')
+          if 'gst_residual_navigation_lift' in s[s.index('theorem gst_prefix_one_u2d_atomic_collision_inline'):s.index('theorem gst_prefix_one_navigation_lift')]:
+              raise SystemExit('quarantined residual navigation lift survived U2D replacement')
+          print('FORWARD_U2D_ATOMIC_TRANSFORM_VERIFIED=1')
           PY
 
       - name: Install exact Lean RC2 and Mathlib
