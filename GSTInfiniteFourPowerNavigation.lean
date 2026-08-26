@@ -1,4 +1,6 @@
 import GSTGraphV2PerfectPowerBlockCollision
+import GSTGraphV2HandwrittenAnchoredCocycle
+import GSTFinalPurePowerResidueTransplant
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -12,10 +14,43 @@ open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2PerfectPowerBlockCollision
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
+open GSTGraphV2HandwrittenAnchoredCocycle
+open GSTFinalPurePowerResidueTransplant
+
+/-- Exact width-three pure-power conservation at the production cut.  This is
+not a generic x64 preservation postulate: both boundary digits are literal
+perfect-power Graph-V2 cells and the live macro carry remains explicit. -/
+theorem power_width_three_exact_conservation (K q : Nat) :
+    64 * (graph (4^K) 0 (3+q)).seven.digit +
+        wideCarry 64 (4^K) (3+q) =
+      (graph (4^K) 3 (3+q)).seven.digit +
+        3 * wideCarry 64 (4^K) ((3+q)+1) := by
+  have h := exactPowerRectangle_conservation 1 2 K q
+  norm_num [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
+    Nat.add_assoc, Nat.pow_add] at h ⊢
+  exact h
+
+/-- At the very row carrying the child Happy gate, right-boundary badness makes
+the exact width-three U derivative strictly positive. -/
+theorem power_width_three_u_derivative_positive
+    (K q : Nat)
+    (hChild : HappyCell
+      (graph (4^K) 0 (3+q)).seven.carry
+      (graph (4^K) 0 (3+q)).seven.digit)
+    (hRight : ¬ HappyCell
+      (graph (4^K) 3 (3+q)).seven.carry
+      (graph (4^K) 3 (3+q)).seven.digit) :
+    0 < 3 * graphUPotential (4^K) 0 3 ((3+q)+1) -
+      graphUPotential (4^K) 0 3 (3+q) := by
+  simpa [Nat.add_assoc] using
+    graph_u_derivative_positive_of_child_happy_right_bad
+      (4^K) 0 3 (3+q) hChild hRight
 
 /-- A Happy gate three horizontal x4 steps later cannot disappear at every
-vertical coordinate above the fixed cut `3`.  This is the universal width-3
-perfect-power collision, independent of the prefix-one branch. -/
+vertical coordinate above the fixed cut `3`.  The proof is deliberately
+power-specific: it now carries both the exact width-three pure-power
+conservation law and the exact U derivative, rather than relying on the old
+uncoupled phase inequalities. -/
 theorem power_three_step_collision
     (K q : Nat)
     (hChild : HappyCell
@@ -59,7 +94,12 @@ theorem power_three_step_collision
     (fun j hj => by simpa [E, N, b, Nat.add_assoc] using hRightBad j)
   have hPureExact := blockDensity_column_exact E N b (q+1)
 
+  have hWidth3 := power_width_three_exact_conservation K q
+  have hUPositive := power_width_three_u_derivative_positive K q hChild
+    (hRightBad q)
+
   dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  trace_state
   omega
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at
@@ -138,9 +178,10 @@ theorem gst_four_power_navigation_universal
       norm_num
     · exact (hk7 rfl).elim
 
+#print axioms power_width_three_exact_conservation
+#print axioms power_width_three_u_derivative_positive
 #print axioms power_three_step_collision
 #print axioms four_power_happy_ge_three
 #print axioms gst_four_power_navigation_universal
 
--- diagnostic push marker
 end GSTInfiniteFourPowerNavigation
