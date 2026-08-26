@@ -19,19 +19,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Apply exact current U2D production splice
+      - name: Prepare exact current PR monolith
         shell: bash
         run: |
           set -euo pipefail
           echo "SOURCE_HEAD=$(git rev-parse HEAD)"
-          python3 scripts/apply_u2d_atomic_replacement.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
-          # The monolith contains these scratch packets inline.  Keep the inline
-          # declarations and neutralize only duplicate import edges.
+          # Judge the PR-head theorem source itself.  The monolith already
+          # contains the scratch declarations inline; neutralize only duplicate
+          # import edges so standalone stale packets cannot hijack the build.
           exact_drop = {
               'GSTPrefixOnePhaseIncidenceControl',
               'GSTPrefixOneSpacetimeIncidenceControl',
@@ -55,9 +55,6 @@ jobs:
           p.write_text(s, encoding='utf-8')
 
           required = [
-              'theorem gst_h_creation_full_power_navigation_atomic',
-              'theorem gst_full_power_navigation_descends_atomic',
-              'theorem gst_prefix_one_u2d_atomic_collision_inline',
               'theorem gst_prefix_one_information_bad_descends_inline',
               'theorem gst_prefix_one_navigation_lift',
               'theorem erdos_ternary_2_universal',
@@ -65,13 +62,15 @@ jobs:
           for marker in required:
               if marker not in s:
                   raise SystemExit(f'missing required theorem marker: {marker}')
-          if 'trace_state\n  contradiction' in s:
-              raise SystemExit('old red residual seam survived U2D replacement')
+          if 'theorem gst_h_creation_full_power_navigation_atomic' in s:
+              raise SystemExit('obsolete injected full-power adapter reached exact-source comparator')
+          if 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
+              raise SystemExit('obsolete injected U2D collision reached exact-source comparator')
           if '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED' in s:
               raise SystemExit('forbidden quarantined h_creation reactivation reached comparator artifact')
           print(f'FINAL_NEUTRALIZED_IMPORT_COUNT={len(neutralized)}')
-          print(f'FINAL_TRANSFORMED_LINES={len(s.splitlines())}')
-          print('FINAL_U2D_ARTIFACT_VERIFIED=1')
+          print(f'FINAL_SOURCE_LINES={len(s.splitlines())}')
+          print('FINAL_EXACT_PR_ARTIFACT_VERIFIED=1')
           PY
 
       - name: Materialize clean judge modules and exact package
@@ -107,7 +106,7 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Materialize exact transformed local import closure
+      - name: Materialize exact PR local import closure
         shell: bash
         run: |
           set -euo pipefail
@@ -167,7 +166,7 @@ jobs:
           print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
           PY
 
-      - name: Compile exact transformed monolith and judge modules
+      - name: Compile exact PR monolith and judge modules
         shell: bash
         run: |
           set -euo pipefail
@@ -182,9 +181,6 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > FinalComparatorAudit.lean <<'EOF'
           import ErdosTernary2
-          #print axioms gst_h_creation_full_power_navigation_atomic
-          #print axioms gst_full_power_navigation_descends_atomic
-          #print axioms gst_prefix_one_u2d_atomic_collision_inline
           #print axioms gst_prefix_one_information_bad_descends_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms erdos_ternary_2_universal
