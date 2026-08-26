@@ -16,6 +16,7 @@ jobs:
         with:
           build: false
 
+      # Judge the committed transformed monolith; normalization below is runner-only.
       - name: Neutralize only inlined duplicate import edges
         shell: bash
         run: |
