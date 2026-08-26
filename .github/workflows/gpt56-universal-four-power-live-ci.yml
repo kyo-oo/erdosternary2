@@ -1,0 +1,74 @@
+name: GPT56 Universal Four Power Live
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-live-20260827
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Compile exact local import closure and universal theorem
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          python3 - <<'PY' > /tmp/gst_order.txt
+          from pathlib import Path
+          target = 'GSTInfiniteFourPowerNavigation'
+          seen, active, order = set(), set(), []
+          def visit(name):
+              if name in seen: return
+              if name in active: raise SystemExit(f'import cycle at {name}')
+              p = Path(name + '.lean')
+              if not p.exists(): return
+              active.add(name)
+              for raw in p.read_text(encoding='utf-8').splitlines():
+                  s = raw.strip()
+                  if not s.startswith('import '): continue
+                  for imp in s[len('import '):].split():
+                      if Path(imp + '.lean').exists(): visit(imp)
+              active.remove(name)
+              seen.add(name)
+              order.append(name)
+          visit(target)
+          print('\n'.join(order))
+          PY
+          echo 'LOCAL_IMPORT_ORDER:'
+          cat /tmp/gst_order.txt
+          while read -r f; do
+            echo "=== COMPILE $f ==="
+            lake env lean -o ".lake/build/lib/lean/$f.olean" "$f.lean"
+          done < /tmp/gst_order.txt
+      - name: Audit universal theorem source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('GSTInfiniteFourPowerNavigation.lean')
+          bad=[]
+          for i,line in enumerate(p.read_text(encoding='utf-8').splitlines(),1):
+              if line.lstrip().startswith('--'): continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                  bad.append(f'{p}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('universal source audit failed')
+          print('universal source audit: clean')
+          PY
