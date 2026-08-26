@@ -53,8 +53,8 @@ theorem reverseDensity83_nonpositive_of_all_bad
       omega
 
 /-- If every cell of an N×K ontological rectangle is non-Happy, then the full
-8-horizontal × 3-vertical weighted density is nonpositive.  Positive density
-therefore cannot be manufactured by ALT-/NULL/GST+ bad cells. -/
+8-horizontal × 3-vertical weighted density is nonpositive. Positive density
+therefore cannot be manufactured by ALT-minus / NULL / GST-plus bad cells. -/
 theorem weightedRectanglePrefix83_nonpositive_of_all_bad
     (C d : Nat → Nat → Nat) (N : Nat) : ∀ K : Nat,
     (∀ j p, j < N → p < K → C j p < 4) →
