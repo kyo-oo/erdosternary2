@@ -1,0 +1,84 @@
+name: H Creation Revival Compile
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-execution-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  revive-and-compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Reactivate exact historical h_creation_for_4pow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/patch_live_hcreationcheck.py
+          grep -n "SOL56 LIVE GENERAL H_CREATION REACTIVATED" ErdosTernary2.lean
+          grep -n "theorem h_creation_for_4pow" ErdosTernary2.lean | tail -2
+
+      - name: Persist revived theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- ErdosTernary2.lean; then
+            echo "H_CREATION_ALREADY_PERSISTED=1"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ErdosTernary2.lean
+            git commit -m "Reactivate exact h_creation_for_4pow on clean base"
+            git push origin HEAD:sol/gpt56-universal-four-power-execution-20260827
+            echo "H_CREATION_PERSISTED=1"
+          fi
+
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile exact revived monolith
+        shell: bash
+        run: |
+          set -o pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean ErdosTernary2.lean 2>&1 | tee hcreation-revival-lean.log
+          code=${PIPESTATUS[0]}
+          echo "LEAN_EXIT=${code}"
+          exit "$code"
+
+      - name: Axiom audit if compile is green
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > HCreationAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms h_creation_for_4pow
+          EOF
+          lake env lean HCreationAudit.lean | tee hcreation-axioms.log
+          if grep -Fq 'sorryAx' hcreation-axioms.log; then
+            echo 'H_CREATION_SORRYAX=1'
+            exit 1
+          fi
+          echo 'H_CREATION_AXIOM_AUDIT_GREEN=1'
