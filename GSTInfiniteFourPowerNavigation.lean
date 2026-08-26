@@ -142,4 +142,5 @@ theorem gst_four_power_navigation_universal
 #print axioms four_power_happy_ge_three
 #print axioms gst_four_power_navigation_universal
 
+-- diagnostic push marker
 end GSTInfiniteFourPowerNavigation
