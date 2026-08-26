@@ -7,9 +7,9 @@ set_option maxHeartbeats 20000000
 def GSTFourPowerCreationCertificate (k p : Nat) : Prop :=
   1 ≤ p ∧
   (4^k) / 3^p % 3 = 2 ∧
-    (((4 * ((4^k) % 3^p)) / 3^p % 3 = 0) ∨
-     (((4 * ((4^k) % 3^p)) / 3^p % 3 = 1 ∧
-       (4^k) / 3^(p+1) % 3 = 2))
+    ((4 * ((4^k) % 3^p)) / 3^p % 3 = 0 ∨
+      ((4 * ((4^k) % 3^p)) / 3^p % 3 = 1 ∧
+        (4^k) / 3^(p+1) % 3 = 2))
 
 /-- Removing the forced `s+1` ternary prefix shifts every tail digit exactly. -/
 theorem gst_navigation_tail_digit_shiftS
