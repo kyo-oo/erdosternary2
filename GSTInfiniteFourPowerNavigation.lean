@@ -16,6 +16,7 @@ open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
 open GSTFinalPurePowerResidueTransplant
+open GSTU2DEventTransport
 
 /-- Exact width-three pure-power conservation at the production cut. -/
 theorem power_width_three_exact_conservation (K q : Nat) :
@@ -26,7 +27,7 @@ theorem power_width_three_exact_conservation (K q : Nat) :
   have h := exactPowerRectangle_conservation 1 2 K q
   norm_num [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
     Nat.add_assoc, Nat.pow_add] at h ⊢
-  exact h
+  simpa [Nat.mul_comm] using h
 
 /-- On a physical Happy cell the exact handwritten-U jump is strictly negative. -/
 theorem gst_u_jump_negative_of_happy_local
