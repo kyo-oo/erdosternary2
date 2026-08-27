@@ -1,0 +1,51 @@
+name: GPT56 Monolith Surgery Apply
+on:
+  push:
+    branches: [sol/gpt56-canonical-tail-escape-20260827]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Remove dead stale import edges
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ErdosTernary2.lean')
+          s=p.read_text(encoding='utf-8')
+          marker='-- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed'
+          if marker in s:
+              print('SURGERY_ALREADY_APPLIED=1')
+          else:
+              for imp in ['import GSTPrefixOnePhaseIncidenceControl\n','import GSTPrefixOneSpacetimeIncidenceControl\n']:
+                  count=s.count(imp)
+                  print(f'REMOVE_{imp.strip().split()[-1]}={count}')
+                  if count != 1:
+                      raise SystemExit(f'unexpected import multiplicity: {imp!r} count={count}')
+                  s=s.replace(imp,'',1)
+              anchor='import GSTFinalPurePowerResidueTransplant\n'
+              i=s.find(anchor)
+              if i < 0: raise SystemExit('anchor not found')
+              i += len(anchor)
+              s=s[:i]+marker+'\n'+s[i:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit surgical import cut
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- ErdosTernary2.lean; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean
+          git commit -m 'surgically cut dead prefix-one incidence import chain'
+          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
