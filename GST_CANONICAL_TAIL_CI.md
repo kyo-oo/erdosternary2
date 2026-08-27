@@ -1,13 +1,13 @@
 # GST Canonical Tail Projection CI
 
-Commit: 340d55edb46e1b6e5ed089662f1fe25cef5f1e58
+Commit: 0b93d97fd9309ebfe46a9eb2319a49bebdc376df
 
-GSTInfiniteFourPowerNavigation.lean exit: 1
+GSTCanonicalTailSymbolProbe.lean exit: 1
 
 ```text
-GSTInfiniteFourPowerNavigation.lean:1:0: error: unknown module prefix 'GSTGraphV2PerfectPowerBlockProbe'
+GSTCanonicalTailSymbolProbe.lean:1:0: error: unknown module prefix 'GSTNavigationCore'
 
-No directory 'GSTGraphV2PerfectPowerBlockProbe' or file 'GSTGraphV2PerfectPowerBlockProbe.olean' in the search path entries:
+No directory 'GSTNavigationCore' or file 'GSTNavigationCore.olean' in the search path entries:
 /home/runner/work/erdosternary2/erdosternary2/.lake/packages/Cli/.lake/build/lib/lean
 /home/runner/work/erdosternary2/erdosternary2/.lake/packages/batteries/.lake/build/lib/lean
 /home/runner/work/erdosternary2/erdosternary2/.lake/packages/Qq/.lake/build/lib/lean
