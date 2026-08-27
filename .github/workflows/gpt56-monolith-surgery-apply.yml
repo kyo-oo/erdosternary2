@@ -14,32 +14,43 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Remove dead stale import edges
+      - name: Remove only inlined Scratch import edges
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           p=Path('ErdosTernary2.lean')
-          s=p.read_text(encoding='utf-8')
-          marker='-- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed'
-          if marker in s:
-              print('SURGERY_ALREADY_APPLIED=1')
+          lines=p.read_text(encoding='utf-8').splitlines(keepends=True)
+          marker='-- SOL56 CANONICAL TAIL SURGERY: direct *Scratch imports neutralized because their declarations are inlined\n'
+          if any(marker.strip() == x.strip() for x in lines):
+              print('SCRATCH_IMPORT_SURGERY_ALREADY_APPLIED=1')
           else:
-              for imp in ['import GSTPrefixOnePhaseIncidenceControl\n','import GSTPrefixOneSpacetimeIncidenceControl\n']:
-                  count=s.count(imp)
-                  print(f'REMOVE_{imp.strip().split()[-1]}={count}')
-                  if count != 1:
-                      raise SystemExit(f'unexpected import multiplicity: {imp!r} count={count}')
-                  s=s.replace(imp,'',1)
-              anchor='import GSTFinalPurePowerResidueTransplant\n'
-              i=s.find(anchor)
-              if i < 0: raise SystemExit('anchor not found')
-              i += len(anchor)
-              s=s[:i]+marker+'\n'+s[i:]
-              p.write_text(s,encoding='utf-8')
+              out=[]; removed=[]
+              inserted=False
+              for line in lines:
+                  stripped=line.strip()
+                  if stripped.startswith('import '):
+                      mods=stripped[len('import '):].split()
+                      if len(mods)==1 and mods[0].endswith('Scratch'):
+                          removed.append(mods[0])
+                          continue
+                  out.append(line)
+                  if not inserted and stripped == '-- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed':
+                      out.append(marker); inserted=True
+              if not removed:
+                  raise SystemExit('no direct Scratch imports found to remove')
+              if not inserted:
+                  # fallback immediately after first import block
+                  idx=0
+                  while idx < len(out) and not out[idx].strip().startswith('import '): idx += 1
+                  while idx < len(out) and (out[idx].strip().startswith('import ') or not out[idx].strip()): idx += 1
+                  out.insert(idx,marker)
+              p.write_text(''.join(out),encoding='utf-8')
+              print('REMOVED_SCRATCH_IMPORT_COUNT=',len(removed))
+              print('REMOVED_SCRATCH_IMPORTS=',','.join(removed))
           PY
-      - name: Commit surgical import cut
+      - name: Commit surgical import normalization
         shell: bash
         run: |
           set -euo pipefail
@@ -47,5 +58,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ErdosTernary2.lean
-          git commit -m 'surgically cut dead prefix-one incidence import chain'
+          git commit -m 'neutralize only inlined Scratch import edges'
           git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
