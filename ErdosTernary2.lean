@@ -37,8 +37,7 @@ import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
-import GSTPrefixOnePhaseIncidenceControl
-import GSTPrefixOneSpacetimeIncidenceControl
+-- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
