@@ -1,0 +1,62 @@
+name: GST Canonical Tail Projection CI
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-projection-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean toolchain
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Compile and capture diagnostics
+        id: leancheck
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          set +e
+          lake env lean GSTInfiniteFourPowerNavigation.lean > /tmp/lean.out 2>&1
+          code=$?
+          set -e
+          {
+            echo '# GST Canonical Tail Projection CI'
+            echo
+            echo "Commit: $GITHUB_SHA"
+            echo
+            echo "GSTInfiniteFourPowerNavigation.lean exit: $code"
+            echo
+            echo '```text'
+            cat /tmp/lean.out
+            echo '```'
+          } > GST_CANONICAL_TAIL_CI.md
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+      - name: Commit diagnostic report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add GST_CANONICAL_TAIL_CI.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'ci: capture Lean diagnostics [skip ci]'
+            git push
+          fi
+      - name: Enforce compiler success
+        if: steps.leancheck.outputs.exit_code != '0'
+        run: exit 1
