@@ -1,0 +1,144 @@
+name: GPT56 Fix Import Closure And Compare
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gpt56-fix-import-closure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fix-and-compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Register exact local import closure with Lake
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('ErdosTernary2.lean')
+          if not root.exists():
+              raise SystemExit('ErdosTernary2.lean missing')
+
+          imp_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def imports_of(path: Path):
+              out = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = imp_re.match(code)
+                  if m:
+                      out.extend(m.group(1).split())
+              return out
+
+          seen = set()
+          visiting = []
+          order = []
+
+          def visit(mod: str):
+              if mod in seen or mod in {'ErdosTernary2', 'GSTTactic'}:
+                  return
+              path = Path(*mod.split('.')).with_suffix('.lean')
+              if not path.exists():
+                  return
+              if mod in visiting:
+                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(visiting + [mod]))
+              visiting.append(mod)
+              for dep in imports_of(path):
+                  visit(dep)
+              visiting.pop()
+              seen.add(mod)
+              order.append(mod)
+
+          for mod in imports_of(root):
+              visit(mod)
+
+          roots = sorted(seen)
+          if 'GSTGraphV2ProductionLaws' not in roots:
+              raise SystemExit('expected GSTGraphV2ProductionLaws in local closure')
+          if 'GSTPrefixOneOntologicalEscape' not in roots:
+              raise SystemExit('expected GSTPrefixOneOntologicalEscape in local closure')
+
+          lines = [
+              'name = "ErdosTernary2"',
+              'version = "0.1.0"',
+              'defaultTargets = ["erdosternary2"]',
+              '',
+              '[[require]]',
+              'name = "mathlib"',
+              'scope = "leanprover-community"',
+              'rev = "v4.33.0-rc2"',
+              '',
+              '[[lean_lib]]',
+              'name = "GSTTactic"',
+              '',
+              '[[lean_lib]]',
+              'name = "ErdosTernary2"',
+              '',
+              '[[lean_lib]]',
+              'name = "GSTLocalClosure"',
+              'roots = [',
+          ]
+          lines += [f'  "{m}",' for m in roots]
+          lines += [
+              ']',
+              '',
+              '[[lean_exe]]',
+              'name = "erdosternary2"',
+              'root = "Main"',
+              '',
+          ]
+          Path('lakefile.toml').write_text('\n'.join(lines), encoding='utf-8')
+          print(f'LOCAL_CLOSURE_ROOT_COUNT={len(roots)}')
+          print('LOCAL_CLOSURE_REGISTERED=1')
+          PY
+
+      - name: Commit Lake closure repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- lakefile.toml; then
+            echo 'LAKEFILE_ALREADY_NORMALIZED=1'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lakefile.toml
+          git commit -m 'register exact monolith local import closure'
+          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
+          echo 'LAKEFILE_REPAIR_PUSHED=1'
+
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Run exact repository V5 comparator after fixation
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee v5-comparator-after-fix.log
