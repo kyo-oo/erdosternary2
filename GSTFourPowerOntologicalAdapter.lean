@@ -1,5 +1,4 @@
 import GSTCanonicalCarryDynamics
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -16,11 +15,16 @@ def CreationCertificate (R : Nat) : Prop :=
      ((4 * (R % 3^p)) / 3^p % 3 = 1 ∧
       R / 3^(p+1) % 3 = 2))
 
-/-- Navigation-Creation Equivalence, forward direction used by FP-NAV.
-The second CREATE branch advances one exact x4 carry edge from carry one to carry three. -/
+/-- Exact standalone proposition formerly intended to be supplied by
+`h_creation_for_4pow`.  It is a dependency, not an axiom. -/
+def FourPowerCreationMaster : Prop :=
+  ∀ K : Nat, 5 ≤ K → K ≠ 7 → CreationCertificate (4^K)
+
+/-- Navigation-Creation conversion.  The carry-one branch advances one exact
+x4/base-3 carry edge and becomes a carry-three Happy gate. -/
 theorem creation_certificate_to_navigation
     (R : Nat) (hCreate : CreationCertificate R) : Navigation R := by
-  obtain ⟨p, hp, hdRaw, hcase⟩ := hCreate
+  obtain ⟨p, _hp, hdRaw, hcase⟩ := hCreate
   have hd : digit3 R p = 2 := by
     simpa [digit3] using hdRaw
   have hClt : carry4 R p < 4 := carry4_lt_four R p
@@ -43,19 +47,12 @@ theorem creation_certificate_to_navigation
       simpa [digit3] using hone.2
     exact ⟨p+1, hdnext, Or.inr hCnext⟩
 
-/-- The existing independent universal four-power certificate is exactly a
-`CreationCertificate` in the new standalone language. -/
-theorem four_power_creation_certificate
-    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-    CreationCertificate (4^K) := by
-  simpa [CreationCertificate] using
-    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal K hK5 hK7)
-
-/-- FP-NAV: the independent four-power theorem gives physical Graph-V2 Navigation. -/
-theorem gst_four_power_ontological_navigation_master
+/-- FP-NAV, with the exact historical creation theorem exposed as its one
+mathematical input. -/
+theorem gst_four_power_ontological_navigation_of_master
+    (hMaster : FourPowerCreationMaster)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     Navigation (4^K) :=
-  creation_certificate_to_navigation (4^K)
-    (four_power_creation_certificate K hK5 hK7)
+  creation_certificate_to_navigation (4^K) (hMaster K hK5 hK7)
 
 end GSTFourPowerOntologicalAdapter
