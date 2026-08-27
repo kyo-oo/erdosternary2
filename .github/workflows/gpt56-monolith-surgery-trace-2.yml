@@ -4,46 +4,43 @@ on:
     branches: [sol/gpt56-canonical-tail-escape-20260827]
   workflow_dispatch:
 
-# compile trigger after stale import surgery
 jobs:
   trace2:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Trace reverse import path
+      - name: Classify direct local import edges
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          deps={}
-          for p in Path('.').glob('*.lean'):
-              mods=[]
-              for line in p.read_text(encoding='utf-8').splitlines():
-                  code=line.split('--',1)[0].strip()
-                  if code.startswith('import '): mods += code[7:].split()
-              deps[p.stem]=mods
-          target='GSTHandwrittenPrefixOneLivePackage'
-          root='ErdosTernary2'
-          paths=[]
-          def dfs(cur,path):
-              if cur==target:
-                  paths.append(path[:]); return
-              if cur in path[:-1]: return
-              for d in deps.get(cur,[]):
-                  if d in deps: dfs(d,path+[d])
-          dfs(root,[root])
-          print('=== ROOT TO STALE IMPORT PATHS ===')
-          for p in paths: print(' -> '.join(p))
-          print('=== MONOLITH DIRECT IMPORTS INVOLVED ===')
-          print(sorted({p[1] for p in paths if len(p)>1}))
-          print('=== SYMBOL USES FROM PATH MODULES IN MONOLITH ===')
-          text=Path('ErdosTernary2.lean').read_text(encoding='utf-8')
-          for mod in sorted({x for p in paths for x in p[1:]}):
-              fp=Path(mod+'.lean')
-              if not fp.exists(): continue
-              names=re.findall(r'^(?:theorem|def|lemma|inductive|structure)\s+([A-Za-z0-9_\.]+)',fp.read_text(encoding='utf-8'),re.M)
-              used=[n for n in names if re.search(r'\b'+re.escape(n)+r'\b',text)]
-              if used: print(mod, used[:50])
+          root=Path('ErdosTernary2.lean')
+          text=root.read_text(encoding='utf-8')
+          decl_re=re.compile(r'^\s*(?:theorem|lemma|def|abbrev|inductive|structure|class)\s+([A-Za-z0-9_\.]+)',re.M)
+          root_decls=set(decl_re.findall(text))
+          imports=[]
+          for raw in text.splitlines():
+              code=raw.split('--',1)[0].strip()
+              if code.startswith('import '): imports += code[7:].split()
+          seen=[]
+          for m in imports:
+              if m not in seen: seen.append(m)
+          print('DIRECT_LOCAL_IMPORTS=',len([m for m in seen if Path(m+'.lean').exists()]))
+          print('=== CLASSIFICATION ===')
+          for m in seen:
+              p=Path(*m.split('.')).with_suffix('.lean')
+              if not p.exists(): continue
+              src=p.read_text(encoding='utf-8')
+              decls=set(decl_re.findall(src))
+              overlap=sorted(decls & root_decls)
+              external=[]
+              for n in sorted(decls-root_decls):
+                  if re.search(r'(?<![A-Za-z0-9_])'+re.escape(n)+r'(?![A-Za-z0-9_])',text):
+                      external.append(n)
+              tag='PURE_INLINE_DUP' if overlap and not external else ('MIXED' if overlap else 'EXTERNAL')
+              print(f'{tag}\t{m}\toverlap={len(overlap)}\texternal={len(external)}')
+              if overlap: print('  overlap:', ','.join(overlap[:18]))
+              if external: print('  external:', ','.join(external[:18]))
           PY
