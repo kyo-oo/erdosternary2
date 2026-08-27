@@ -5,6 +5,7 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
+      - GSTInfiniteFourPowerNavigation.lean
       - .github/workflows/gpt56-four-power-source-audit.yml
   workflow_dispatch:
 
