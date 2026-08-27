@@ -1,0 +1,106 @@
+name: Restore Working U2D Monolith
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Extract live historical h_creation theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          needle = 'theorem h_creation_for_4pow'
+          start = s.rfind(needle)
+          if start < 0:
+              raise SystemExit('live h_creation_for_4pow not found')
+          live = s[start:]
+          if not live.startswith(needle):
+              raise SystemExit('bad live theorem extraction')
+          Path('/tmp/h_creation_for_4pow.lean').write_text(live, encoding='utf-8')
+          print('LIVE_H_CREATION_LINES=' + str(len(live.splitlines())))
+          print('LIVE_H_CREATION_BYTES=' + str(len(live.encode('utf-8'))))
+          PY
+
+      - name: Recreate exact 17336-line U2D working monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=3f6b5a132b152d8fb9681b8ddd011c4f106140be
+          git cat-file -e "${BASE}^{commit}"
+          git show "${BASE}:ErdosTernary2.lean" > ErdosTernary2.lean
+          echo "RAW_BASE_LINES=$(wc -l < ErdosTernary2.lean)"
+          python3 scripts/apply_u2d_atomic_replacement.py
+          transformed_lines=$(wc -l < ErdosTernary2.lean)
+          echo "TRANSFORMED_LINES=${transformed_lines}"
+          if [ "${transformed_lines}" -ne 17336 ]; then
+            echo "Expected exact working transformed monolith to have 17336 lines"
+            exit 1
+          fi
+          grep -n -F 'theorem gst_h_creation_full_power_navigation_atomic' ErdosTernary2.lean
+          grep -n -F 'theorem gst_prefix_one_u2d_atomic_collision_inline' ErdosTernary2.lean
+
+      - name: Paste live h_creation into working monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          live = Path('/tmp/h_creation_for_4pow.lean').read_text(encoding='utf-8').rstrip() + '\n\n'
+          helper = 'theorem gst_h_creation_full_power_navigation_atomic'
+          pos = s.find(helper)
+          if pos < 0:
+              raise SystemExit('atomic helper not found in transformed monolith')
+          s = s[:pos] + live + s[pos:]
+          p.write_text(s, encoding='utf-8')
+          final = p.read_text(encoding='utf-8')
+          live_pos = final.find('theorem h_creation_for_4pow', pos - len(live) - 16)
+          helper_pos = final.find(helper)
+          if live_pos < 0 or helper_pos < 0 or not live_pos < helper_pos:
+              raise SystemExit('live h_creation placement failed')
+          print('FINAL_LINES=' + str(len(final.splitlines())))
+          print('LIVE_INSERT_BEFORE_HELPER=1')
+          print('ATOMIC_HELPER_COUNT=' + str(final.count(helper)))
+          print('U2D_COLLISION_COUNT=' + str(final.count('theorem gst_prefix_one_u2d_atomic_collision_inline')))
+          print('INFO_DESCENT_COUNT=' + str(final.count('theorem gst_prefix_one_information_bad_descends_inline')))
+          print('NAV_LIFT_COUNT=' + str(final.count('theorem gst_prefix_one_navigation_lift')))
+          PY
+
+      - name: Commit only corrected monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ErdosTernary2.lean
+          git commit -m 'Restore transformed U2D monolith and paste h_creation_for_4pow'
+          git push origin HEAD:sol/gpt56-universal-four-power-execution-20260827
+
+      - name: Setup Lean with cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+
+      - name: Compile exact corrected monolith
+        shell: bash
+        run: |
+          set -o pipefail
+          lake build ErdosTernary2 2>&1 | tee restored-monolith-build.log
+          code=${PIPESTATUS[0]}
+          echo "LEAN_EXIT=${code}"
+          exit "${code}"

@@ -1,0 +1,104 @@
+name: Ontological Chaotic Control
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-execution-20260827
+    paths:
+      - 'GSTGraphV2OntologicalChaoticControl.lean'
+      - 'GSTGraphV2OntologicalChaoticRectangle.lean'
+      - 'GSTGraphV2OntologicalChaoticControlTest.lean'
+      - '.github/workflows/ontological-chaotic-control.yml'
+  workflow_dispatch:
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+
+      - name: Materialize local import closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          ROOT = Path('GSTGraphV2OntologicalChaoticControlTest.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              out=[]
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code=raw.split('--',1)[0].rstrip()
+                  m=import_re.match(code)
+                  if m:
+                      out.extend(m.group(1).split())
+              return out
+
+          order=[]; done=set(); stack=[]
+          def visit(module: str):
+              if module in done:
+                  return
+              path=local_path(module)
+              if not path.exists():
+                  return
+              if module in stack:
+                  raise SystemExit('LOCAL_IMPORT_CYCLE='+' -> '.join(stack+[module]))
+              stack.append(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              stack.pop()
+              done.add(module); order.append((module,path))
+
+          for mod in imports_of(ROOT):
+              visit(mod)
+
+          BUILD.mkdir(parents=True, exist_ok=True)
+          for module,path in order:
+              out=BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              print('COMPILE', module, flush=True)
+              subprocess.run(['lake','env','lean','-o',str(out),str(path)],check=True)
+          PY
+
+      - name: Compile RED-GREEN test
+        shell: bash
+        run: |
+          set -o pipefail
+          lake env lean GSTGraphV2OntologicalChaoticControlTest.lean 2>&1 | tee ontological-chaotic-control.log
+
+      - name: Axiom audit
+        if: success()
+        shell: bash
+        run: |
+          cat > OntologicalChaoticControlAudit.lean <<'EOF'
+          import GSTGraphV2OntologicalChaoticControl
+          import GSTGraphV2OntologicalChaoticRectangle
+          #print axioms GSTGraphV2OntologicalChaoticControl.ambient_witness_iff_infinite_chaotic_control
+          #print axioms GSTGraphV2OntologicalChaoticControl.historical_creation_iff_ambient_infinite_navigation
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.ambient_witness_forces_rectangle83_positive
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.rectangle83_positive_contains_ambient_witness
+          #print axioms GSTGraphV2OntologicalChaoticRectangle.ambient_witness_generates_positive_rectangle_family
+          EOF
+          lake env lean OntologicalChaoticControlAudit.lean | tee ontological-chaotic-control-axioms.log
+          if grep -Fq 'sorryAx' ontological-chaotic-control-axioms.log; then
+            echo 'ONTOLOGICAL_CHAOTIC_CONTROL_SORRYAX=1'
+            exit 1
+          fi
+          if grep -REn '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)|native_decide' \
+              GSTGraphV2OntologicalChaoticControl.lean \
+              GSTGraphV2OntologicalChaoticRectangle.lean; then
+            echo 'ONTOLOGICAL_CHAOTIC_CONTROL_FORBIDDEN_SOURCE_TOKEN=1'
+            exit 1
+          fi
+          echo 'ONTOLOGICAL_CHAOTIC_CONTROL_GREEN=1'

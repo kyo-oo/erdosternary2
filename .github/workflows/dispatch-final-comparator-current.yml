@@ -1,0 +1,21 @@
+name: Dispatch Final Comparator Current Branch
+
+on:
+  push:
+    branches:
+      - sol/gpt56-universal-four-power-execution-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch unchanged final comparator on this ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+        run: gh workflow run final-comparator.yml --repo "${{ github.repository }}" --ref "$REF_NAME"
