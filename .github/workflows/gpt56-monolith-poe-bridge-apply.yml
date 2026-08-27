@@ -4,6 +4,7 @@ on:
     branches: [sol/gpt56-canonical-tail-escape-20260827]
 permissions:
   contents: write
+# canonical-tail bridge splice trigger
 jobs:
   apply-poe-bridge:
     if: github.actor != 'github-actions[bot]'
