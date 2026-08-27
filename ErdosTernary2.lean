@@ -32,6 +32,7 @@ import GSTTactic
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
+import GSTPrefixOneOntologicalEscape
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -16924,6 +16925,40 @@ theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline
        gstCarry (gstNavigationConstant (s+1) n) data.childGateIndex = 3) := by
     simpa only [gstOmega] using data.childGate
   exact hAt hGate
+
+-- SOL56 CANONICAL TAIL POE COMPATIBILITY BRIDGE
+/-- Convert the standalone exact Happy-gate language into the monolith wrapper. -/
+theorem gst_navigation_witness_of_standalone_navigation
+    (R : Nat) (h : GSTCanonicalTailStateIso.Navigation R) :
+    GSTNavigationWitness R := by
+  obtain ⟨j, hHappy⟩ := h
+  refine ⟨j, ?_, ?_⟩
+  · simpa [GSTCanonicalTailStateIso.HappyCell,
+      GSTCanonicalTailStateIso.digit3, gstDigit] using hHappy.1
+  · rcases hHappy.2 with h0 | h3
+    · exact Or.inr (gstSpaceAt_of_carry_zero R j (by
+        simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h0))
+    · exact Or.inl (gstSpaceAt_of_carry_three R j (by
+        simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h3))
+
+/-- Monolith-facing POE.  No child premise occurs; the one upstream input is
+exactly the independent four-power creation master isolated by the new DAG. -/
+theorem gst_prefix_one_ontological_escape_of_master_inline
+    (hMaster : GSTFourPowerOntologicalAdapter.FourPowerCreationMaster)
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
+    GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) := by
+  have h := GSTPrefixOneOntologicalEscape.gst_prefix_one_ontological_escape_of_master
+    hMaster s n hs hn
+  apply gst_navigation_witness_of_standalone_navigation
+  simpa [GSTPerfectPowerTailNavigation.canonicalTail, gstNavigationConstant] using h
+
+/-- Compatibility version of the old lift.  The child witness is deliberately
+unused because POE proves the parent unconditionally from the master. -/
+theorem gst_prefix_one_navigation_lift_of_master_inline
+    (hMaster : GSTFourPowerOntologicalAdapter.FourPowerCreationMaster) :
+    GSTPrefixOneNavigationLift := by
+  intro s n hs hn _hchild
+  exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
 -- Public prefix-one theorem: parent failure supplies the exact bad trace, and
 -- the corrected information-wave theorem contradicts the certified child gate.
