@@ -19,7 +19,7 @@ def SeedOneWitness (X : Nat) : Prop :=
 /-- Exact digit stripping through the forced leading ternary digit one. -/
 theorem prefixed_one_digit_shift (X j : Nat) :
     digit3 (1 + 3*X) (j+1) = digit3 X j := by
-  simpa [Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
+  simpa [Nat.add_comm, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
     (prefix_slice_digit_exact 1 1 X j (by decide : 1 < 3^1))
 
 /-- Exact residue identity behind the seed-one carry shift. -/
