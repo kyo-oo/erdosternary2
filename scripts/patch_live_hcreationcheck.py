@@ -34,19 +34,15 @@ if creation_decl.count(proof_anchor) < 1:
     raise SystemExit('h_creation proof anchor changed')
 head, body = creation_decl.split(proof_anchor, 1)
 recursive_old = '    have hih := h_creation_for_4pow (k - 1) hk1 hk1_7\n'
-recursive_new = '      have hih := ih (k - 1) (by omega) hk1 hk1_7\n'
+recursive_new = '    have hih := ih (k - 1) (by omega) hk1 hk1_7\n'
 if recursive_old not in body:
     raise SystemExit('h_creation recursive call shape changed')
 
 # Put the k-dependent side conditions inside the strong-recursion motive.
-# Using `refine Nat.strongRecOn` directly avoids the tactic-generated
-# self-implication motive seen with `induction ... using ...`.
-body = ''.join(('  ' + line) if line.strip() else line for line in body.splitlines(keepends=True))
-body = body.replace(
-    recursive_old,
-    recursive_new,
-    1,
-)
+# The original proof body is already indented at the tactic-block level; do
+# NOT add another indentation layer after `intro`, or Lean parses its first
+# `by_cases ... : ...` as continuation syntax for the `intro` tactic.
+body = body.replace(recursive_old, recursive_new, 1)
 creation_decl = (
     head + proof_anchor +
     '  revert hk5 hk7\n'
@@ -64,6 +60,10 @@ if 'induction k using Nat.strongRecOn' in creation_decl:
     raise SystemExit('stale tactic induction wrapper survived')
 if 'refine Nat.strongRecOn k ?_' not in creation_decl:
     raise SystemExit('direct strong recursion wrapper missing')
+if '\n    by_cases hk500' in creation_decl:
+    raise SystemExit('h_creation body is still over-indented')
+if '\n  by_cases hk500 : k ≤ 500' not in creation_decl:
+    raise SystemExit('h_creation body alignment changed unexpectedly')
 
 live_stamp = '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED\n'
 if live_stamp in s:
@@ -100,5 +100,6 @@ if 'rw [hC, hdDigit] at hnext' not in s[live_helper:s.index(helper_next, live_he
 p.write_text(s, encoding='utf-8')
 print('FULL_H_CREATION_REACTIVATED=1')
 print('STRONG_RECURSION_DIRECT_RC2_REPAIR=1')
+print('H_CREATION_BODY_ALIGNMENT_RC2_REPAIR=1')
 print('GSTDIGIT_RC2_REPAIR=1')
 print('UNBOUNDED_U2D_CREATION_ADAPTER_PRESERVED=1')
