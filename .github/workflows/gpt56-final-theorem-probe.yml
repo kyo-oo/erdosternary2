@@ -1,3 +1,4 @@
+# Final theorem runner-only probe; monolith is patched only inside CI.
 name: GPT56 Final Theorem Probe
 
 on:
@@ -7,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  probe:
+  final-theorem-probe:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
