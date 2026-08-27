@@ -4,6 +4,7 @@ on:
     branches: [sol/gpt56-canonical-tail-escape-20260827]
   workflow_dispatch:
 
+# compile trigger after stale import surgery
 jobs:
   trace2:
     runs-on: ubuntu-24.04
@@ -40,7 +41,6 @@ jobs:
           print('=== SYMBOL USES FROM PATH MODULES IN MONOLITH ===')
           text=Path('ErdosTernary2.lean').read_text(encoding='utf-8')
           for mod in sorted({x for p in paths for x in p[1:]}):
-              # rough theorem/def names declared in module, then count exact occurrences in monolith
               fp=Path(mod+'.lean')
               if not fp.exists(): continue
               names=re.findall(r'^(?:theorem|def|lemma|inductive|structure)\s+([A-Za-z0-9_\.]+)',fp.read_text(encoding='utf-8'),re.M)
