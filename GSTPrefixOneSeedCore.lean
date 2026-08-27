@@ -1,6 +1,6 @@
 import GSTPrefixOneOntologicalEscape
 import GSTSeedOneShift
-import GSTGraphV2HandwrittenExponentialLTE
+import GSTCanonicalTailLTE
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -12,7 +12,7 @@ open GSTPerfectPowerTailNavigation
 open GSTFourPowerOntologicalAdapter
 open GSTPrefixOneOntologicalEscape
 open GSTSeedOneShift
-open GSTGraphV2HandwrittenExponentialLTE
+open GSTCanonicalTailLTE
 
 /-- The unit canonical tail `c_s = Q_s(1)`. -/
 def unitTail (s : Nat) : Nat := canonicalTail s 1
