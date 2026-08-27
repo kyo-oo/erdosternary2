@@ -23,7 +23,25 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Build canonical tail workspace dependency closure
+      - name: Reject sorry and admit in replacement modules
+        shell: bash
+        run: |
+          files=(
+            GSTCanonicalTailStateIso.lean
+            GSTCanonicalCarryDynamics.lean
+            GSTPerfectPowerTailNavigation.lean
+            GSTFourPowerOntologicalAdapter.lean
+            GSTPrefixOneOntologicalEscape.lean
+            GSTSeedOneShift.lean
+            GSTPrefixOneSeedCore.lean
+            GSTPrefixOneLegacyCorollaries.lean
+            GSTCanonicalTailEscapeAudit.lean
+          )
+          if grep -nE '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' "${files[@]}"; then
+            echo "Forbidden placeholder found in replacement theorem stack"
+            exit 1
+          fi
+      - name: Build canonical tail theorem stack
         id: compile
         continue-on-error: true
         shell: bash
@@ -31,6 +49,14 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           set -o pipefail
           lake build GSTCanonicalTailWorkspace 2>&1 | tee lean-diagnostic.log
+      - name: Reject hidden sorryAx
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          if grep -q 'sorryAx' lean-diagnostic.log; then
+            echo "Hidden sorryAx detected"
+            exit 1
+          fi
       - name: Upload Lean diagnostic
         if: always()
         uses: actions/upload-artifact@v4
