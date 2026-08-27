@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
   workflow_dispatch:
 
+# Explicit comparator rerun marker: 2026-08-27
 jobs:
   comparator:
     runs-on: ubuntu-24.04
