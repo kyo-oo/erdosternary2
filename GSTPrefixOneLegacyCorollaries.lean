@@ -7,6 +7,7 @@ namespace GSTPrefixOneLegacyCorollaries
 
 open GSTCanonicalTailStateIso
 open GSTPerfectPowerTailNavigation
+open GSTFourPowerOntologicalAdapter
 open GSTPrefixOneOntologicalEscape
 open GSTSeedOneShift
 open GSTPrefixOneSeedCore
@@ -27,11 +28,12 @@ def GSTPrefixOneNavigationLift : Prop :=
     Navigation (canonicalTail (s+1) n) →
     Navigation (canonicalTail s (1 + 3*n))
 
-/-- The old prefix-one Navigation lift is now a direct corollary of POE.
-The child witness is intentionally unused because the conclusion is unconditional. -/
-theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
+/-- The old prefix-one Navigation lift follows immediately from POE once the
+independent four-power creation master is supplied.  The child is unused. -/
+theorem gst_prefix_one_navigation_lift_of_master
+    (hMaster : FourPowerCreationMaster) : GSTPrefixOneNavigationLift := by
   intro s n hs hn _hchild
-  exact gst_prefix_one_ontological_escape s n hs hn
+  exact gst_prefix_one_ontological_escape_of_master hMaster s n hs hn
 
 /-- Standalone old seed-core contract. -/
 def GSTPrefixOneSeedCore : Prop :=
@@ -41,44 +43,51 @@ def GSTPrefixOneSeedCore : Prop :=
     SeedOneWitness
       (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n)
 
-/-- The old seed core is immediate from the unconditional strengthened seed theorem. -/
-theorem gst_prefix_one_seed_core : GSTPrefixOneSeedCore := by
+/-- The old seed core follows from the stronger child-free seed theorem. -/
+theorem gst_prefix_one_seed_core_of_master
+    (hMaster : FourPowerCreationMaster) : GSTPrefixOneSeedCore := by
   intro s n hs hn _hchild
-  exact gst_prefix_one_seed_one_parent_unconditional s n hs hn
+  exact gst_prefix_one_seed_one_parent_of_master hMaster s n hs hn
 
-/-- A seed-one parent bad trace is impossible, unconditionally. -/
-theorem gst_prefix_one_seed_one_bad_impossible
+/-- A seed-one parent bad trace is impossible once FP-NAV is supplied. -/
+theorem gst_prefix_one_seed_one_bad_impossible_of_master
+    (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
     ¬ SeedOneBadTrace
       (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n) := by
   intro hBad
-  obtain ⟨j, hGate⟩ := gst_prefix_one_seed_one_parent_unconditional s n hs hn
+  obtain ⟨j, hGate⟩ := gst_prefix_one_seed_one_parent_of_master hMaster s n hs hn
   exact hBad j hGate
 
-/-- Replacement for the old atomic collision: parent badness already contradicts POE;
-the child witness is no longer part of the mechanism. -/
-theorem gst_prefix_one_atomic_collision
+/-- Replacement for the old atomic collision: parent badness contradicts POE
+directly; the child witness is not part of the mechanism. -/
+theorem gst_prefix_one_atomic_collision_of_master
+    (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (_hchild : Navigation (canonicalTail (s+1) n))
     (hBad : SeedOneBadTrace
       (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n)) : False := by
-  exact (gst_prefix_one_seed_one_bad_impossible s n hs hn) hBad
+  exact (gst_prefix_one_seed_one_bad_impossible_of_master hMaster s n hs hn) hBad
 
 /-- Replacement for old bad-reflection/information-descent implications.
-Since the parent bad premise is itself impossible, any child bad conclusion follows. -/
-theorem gst_prefix_one_information_bad_descends
+The parent bad premise is impossible, so child badness follows ex falso. -/
+theorem gst_prefix_one_information_bad_descends_of_master
+    (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hBad : SeedOneBadTrace
       (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n)) :
     CompleteBadTrace (canonicalTail (s+1) n) := by
-  exact False.elim ((gst_prefix_one_seed_one_bad_impossible s n hs hn) hBad)
+  exact False.elim
+    ((gst_prefix_one_seed_one_bad_impossible_of_master hMaster s n hs hn) hBad)
 
-/-- Ordinary parent badness is also impossible directly from POE. -/
-theorem gst_prefix_one_parent_complete_bad_impossible
+/-- Ordinary parent badness is impossible directly from POE. -/
+theorem gst_prefix_one_parent_complete_bad_impossible_of_master
+    (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
     ¬ CompleteBadTrace (canonicalTail s (1 + 3*n)) := by
   intro hBad
-  obtain ⟨p, hHappy⟩ := gst_prefix_one_ontological_escape s n hs hn
+  obtain ⟨p, hHappy⟩ :=
+    gst_prefix_one_ontological_escape_of_master hMaster s n hs hn
   exact hBad p hHappy
 
 end GSTPrefixOneLegacyCorollaries
