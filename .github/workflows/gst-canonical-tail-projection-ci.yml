@@ -32,7 +32,7 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           set +e
-          lake env lean GSTInfiniteFourPowerNavigation.lean > /tmp/lean.out 2>&1
+          lake env lean GSTCanonicalTailSymbolProbe.lean > /tmp/lean.out 2>&1
           code=$?
           set -e
           {
@@ -40,7 +40,7 @@ jobs:
             echo
             echo "Commit: $GITHUB_SHA"
             echo
-            echo "GSTInfiniteFourPowerNavigation.lean exit: $code"
+            echo "GSTCanonicalTailSymbolProbe.lean exit: $code"
             echo
             echo '```text'
             cat /tmp/lean.out
