@@ -1,0 +1,23 @@
+name: GPT56 Monolith Surgery Trace 2
+on:
+  push:
+    branches: [sol/gpt56-canonical-tail-escape-20260827]
+  workflow_dispatch:
+
+jobs:
+  trace2:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Trace stale import edge and active navigation sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== IMPORTERS OF STALE PACKAGE ==='
+          grep -RIn --include='*.lean' 'import GSTHandwrittenPrefixOneLivePackage' . || true
+          echo '=== USES OF STALE PACKAGE THEOREMS ==='
+          grep -RIn --include='*.lean' -E 'gpt56_prefix_one_live_(handwritten_package|destroy_boundary)' . || true
+          echo '=== FULL POWER NAVIGATION SOURCES IN MONOLITH ==='
+          grep -nE 'theorem .*four.*power.*navigation|theorem .*navigation.*four.*pow|GSTNavigationWitness \(4\^|h_creation_for_4pow' ErdosTernary2.lean || true
+          echo '=== DIRECT IMPORTS NEW REPLACEMENT MODULES ==='
+          grep -nE '^import GST(CanonicalTail|PerfectPowerTail|FourPowerOntological|PrefixOneOntological|SeedOne|PrefixOneSeed)' ErdosTernary2.lean || true
