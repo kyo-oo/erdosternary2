@@ -4,7 +4,7 @@ on:
     branches: [sol/gpt56-canonical-tail-escape-20260827]
   workflow_dispatch:
 
-# trigger active guarded POE bridge surgery
+# dispatch repaired guarded POE bridge surgery
 jobs:
   trace2:
     runs-on: ubuntu-24.04
