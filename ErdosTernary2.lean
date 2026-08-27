@@ -38,40 +38,11 @@ import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
 -- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed
+-- SOL56 CANONICAL TAIL SURGERY: direct *Scratch imports neutralized because their declarations are inlined
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -81,36 +52,6 @@ import GSTFinalPurePowerResidueTransplant
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -120,36 +61,6 @@ import GSTFinalPurePowerResidueTransplant
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -159,116 +70,6 @@ import GSTFinalPurePowerResidueTransplant
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
-import NavigationResidueCutScratch
-
--- Full canonical pure-power/information transplant.  These are the contiguous
--- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
--- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
-import CanonicalOriginCutIntersectionScratch
-
--- Full canonical pure-power/information transplant.  These are the contiguous
--- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
--- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -278,49 +79,29 @@ import GSTFinalPurePowerResidueTransplant
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import InformationDescentScratch
-import InformationGeometryScratch
-import InformationStateScratch
-import InformationBadTraceScratch
-import OriginTransducerScratch
-import InformationRegenerationScratch
-import InformationIterationScratch
-import InformationQuotientScratch
-import InformationLocalizationScratch
-import InformationFluxScratch
-import InformationForcingScratch
-import CarryWordScratch
-import InformationCarryWordBridgeScratch
-import PurePowerCarrierScratch
-import CanonicalPrefixScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
-import PurePowerBadAxisScratch
-import BadLanguageMagnitudeScratch
-import PurePowerTailReductionScratch
-import HorizontalTrapWidthDescentScratch
-import StripConservationScratch
-import GSTGraphV2Scratch
-import GSTGraphV2FluxScratch
-import GSTGraphV2BlockScratch
-import GSTExponentLiftScratch
-import PurePowerResidueGraphScratch
-import GSTResidueSpacetimeScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
-import PurePowerResidueGraphScratch
-import InformationQuotientScratch
-import InformationIterationScratch
-import HorizontalTrapWidthDescentScratch
-import PhaseCycleInformationScratch
-import CanonicalCausalityScratch
-import CanonicalOriginModulusScratch
-import PrefixOneOriginPhaseRecursionScratch
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
 
 open scoped BigOperators
 /-
