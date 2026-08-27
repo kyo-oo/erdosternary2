@@ -41,7 +41,8 @@ roots = [
   "GSTPrefixOneOntologicalEscape",
   "GSTSeedOneShift",
   "GSTPrefixOneSeedCore",
-  "GSTPrefixOneLegacyCorollaries"
+  "GSTPrefixOneLegacyCorollaries",
+  "GSTCanonicalTailEscapeAudit"
 ]
 
 [[lean_exe]]
