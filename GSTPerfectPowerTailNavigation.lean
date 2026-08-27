@@ -1,5 +1,5 @@
 import GSTCanonicalTailStateIso
-import GSTGraphV2HandwrittenExponentialLTE
+import GSTCanonicalTailLTE
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -7,7 +7,7 @@ set_option maxHeartbeats 10000000
 namespace GSTPerfectPowerTailNavigation
 
 open GSTCanonicalTailStateIso
-open GSTGraphV2HandwrittenExponentialLTE
+open GSTCanonicalTailLTE
 
 /-- The canonical GST quotient below the forced `s+1` ternary prefix. -/
 def canonicalTail (s b : Nat) : Nat :=
