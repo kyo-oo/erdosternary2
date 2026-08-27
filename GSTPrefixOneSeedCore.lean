@@ -9,6 +9,7 @@ namespace GSTPrefixOneSeedCore
 
 open GSTCanonicalTailStateIso
 open GSTPerfectPowerTailNavigation
+open GSTFourPowerOntologicalAdapter
 open GSTPrefixOneOntologicalEscape
 open GSTSeedOneShift
 open GSTGraphV2HandwrittenExponentialLTE
@@ -107,12 +108,14 @@ theorem prefix_one_tail_shape
   rw [canonical_prefix_recurrence s n, unitTail_prefix_one s]
   ring
 
-/-- Unconditional strengthened seed core: no child witness is required. -/
-theorem gst_prefix_one_seed_one_parent_unconditional
+/-- Strengthened seed core: no child witness is required once the independent
+four-power creation master is supplied. -/
+theorem gst_prefix_one_seed_one_parent_of_master
+    (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
     SeedOneWitness
       (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n) := by
-  have hNav := gst_prefix_one_ontological_escape s n hs hn
+  have hNav := gst_prefix_one_ontological_escape_of_master hMaster s n hs hn
   rw [prefix_one_tail_shape s n] at hNav
   exact (navigation_prefixed_one_iff_seed_one
     (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n)).1 hNav
