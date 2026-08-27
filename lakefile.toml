@@ -33,7 +33,6 @@ roots = [
   "GSTGraphV2HandwrittenExponentialCascade",
   "GSTGraphV2HandwrittenExponentialLTE",
   "GSTFinalPurePowerResidueTransplant",
-  "GSTInfiniteFourPowerNavigation",
   "GSTCanonicalTailStateIso",
   "GSTCanonicalCarryDynamics",
   "GSTPerfectPowerTailNavigation",
