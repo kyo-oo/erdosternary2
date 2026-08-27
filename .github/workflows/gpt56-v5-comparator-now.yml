@@ -24,26 +24,14 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-      - name: Kernel-probe reactivated residual finale
+      - name: Kernel-probe exact infinite-ledger finale
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTactic GSTLocalClosure
-          python3 - <<'PY'
-          from pathlib import Path
-          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
-          start = '/- QUARANTINED LEGACY RESIDUAL OMEGA START\n'
-          end = 'QUARANTINED LEGACY RESIDUAL OMEGA END -/'
-          if start not in src or end not in src:
-              raise SystemExit('residual quarantine markers not found')
-          prefix, rest = src.split(start, 1)
-          body, _tail = rest.split(end, 1)
-          probe = prefix + '-- SOL56 FINALE RESIDUAL PROBE START\n' + body + '\n-- SOL56 FINALE RESIDUAL PROBE END\n'
-          Path('FinaleResidualProbe.lean').write_text(probe, encoding='utf-8')
-          PY
-          lake env lean FinaleResidualProbe.lean 2>&1 | tee finale-residual-probe.log
-          echo 'FINALE_RESIDUAL_PROBE_GREEN=1'
+          lake build GSTInfiniteCoupledLedger GSTGraphV2InfiniteControllerBridge GSTFinalResidualEarliestGateBridge
+          lake env lean GSTFinalResidualInfiniteLedgerProbe.lean 2>&1 | tee final-ledger-probe.log
+          echo 'FINAL_LEDGER_PROBE_GREEN=1'
       - name: Run exact repository V5 comparator
         shell: bash
         run: |
