@@ -66,6 +66,7 @@ jobs:
           lake env lean GSTFinalResidualInfiniteLedgerProbe.lean 2>&1 | tee final-ledger-probe.log
           echo 'FINAL_LEDGER_PROBE_GREEN=1'
       - name: Run exact repository V5 comparator
+        if: ${{ always() }}
         shell: bash
         run: |
           set -euo pipefail
