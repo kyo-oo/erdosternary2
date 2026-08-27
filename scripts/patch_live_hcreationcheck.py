@@ -38,15 +38,19 @@ recursive_new = '    have hih := ih (k - 1) (by omega) hk1 hk1_7\n'
 if recursive_old not in body:
     raise SystemExit('h_creation recursive call shape changed')
 
-# Put the k-dependent side conditions inside the strong-recursion motive.
-# The original proof body is already indented at the tactic-block level; do
-# NOT add another indentation layer after `intro`, or Lean parses its first
-# `by_cases ... : ...` as continuation syntax for the `intro` tactic.
+# Pin the strong-recursion motive explicitly.  Without the motive annotation,
+# Lean may infer a constant proposition at the outer exponent k; then the
+# recursive hypothesis elaborates as P -> P and `rcases hih` sees a function
+# instead of the existential theorem for the smaller exponent.
 body = body.replace(recursive_old, recursive_new, 1)
 creation_decl = (
     head + proof_anchor +
     '  revert hk5 hk7\n'
-    '  refine Nat.strongRecOn k ?_\n'
+    '  refine Nat.strongRecOn (motive := fun k =>\n'
+    '    5 ≤ k → k ≠ 7 →\n'
+    '      ∃ p, 1 ≤ p ∧ p < 2 * k ∧\n'
+    '        4 ^ k / 3 ^ p % 3 = 2 ∧\n'
+    '        4 * (4 ^ k % 3 ^ p) / 3 ^ p % 3 = 0) k ?_\n'
     '  intro k ih hk5 hk7\n' +
     body
 )
@@ -58,8 +62,8 @@ if 'revert hk5 hk7' not in creation_decl:
     raise SystemExit('dependent side hypotheses were not reverted')
 if 'induction k using Nat.strongRecOn' in creation_decl:
     raise SystemExit('stale tactic induction wrapper survived')
-if 'refine Nat.strongRecOn k ?_' not in creation_decl:
-    raise SystemExit('direct strong recursion wrapper missing')
+if 'Nat.strongRecOn (motive := fun k =>' not in creation_decl:
+    raise SystemExit('explicit indexed strong-recursion motive missing')
 if '\n    by_cases hk500' in creation_decl:
     raise SystemExit('h_creation body is still over-indented')
 if '\n  by_cases hk500 : k ≤ 500' not in creation_decl:
@@ -99,7 +103,7 @@ if 'rw [hC, hdDigit] at hnext' not in s[live_helper:s.index(helper_next, live_he
 
 p.write_text(s, encoding='utf-8')
 print('FULL_H_CREATION_REACTIVATED=1')
-print('STRONG_RECURSION_DIRECT_RC2_REPAIR=1')
+print('STRONG_RECURSION_EXPLICIT_MOTIVE_RC2_REPAIR=1')
 print('H_CREATION_BODY_ALIGNMENT_RC2_REPAIR=1')
 print('GSTDIGIT_RC2_REPAIR=1')
 print('UNBOUNDED_U2D_CREATION_ADAPTER_PRESERVED=1')
