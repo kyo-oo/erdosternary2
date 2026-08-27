@@ -7,115 +7,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  final-theorem-probe:
+  probe:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Inject final theorem candidate in runner only
+      - name: Inventory exact surgery targets
         shell: bash
         run: |
           set -euo pipefail
+          echo '=== TARGET COUNTS ==='
+          for needle in \
+            'theorem h_creation_for_4pow' \
+            'theorem gst_full_power_navigation_descends_atomic' \
+            'theorem gst_h_creation_full_power_navigation_atomic' \
+            'theorem gst_prefix_one_information_bad_descends_inline' \
+            'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline' \
+            'theorem gst_prefix_one_navigation_lift'; do
+            printf '%s -> ' "$needle"
+            grep -Fc "$needle" ErdosTernary2.lean || true
+          done
+          echo '=== TARGET LINES ==='
+          grep -nE 'theorem (h_creation_for_4pow|gst_full_power_navigation_descends_atomic|gst_h_creation_full_power_navigation_atomic|gst_prefix_one_information_bad_descends_inline|gst_prefix_one_child_gate_contradicts_parent_bad_inline|gst_prefix_one_navigation_lift)' ErdosTernary2.lean || true
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('ErdosTernary2.lean')
-          s = p.read_text(encoding='utf-8')
-          start = s.index('theorem gst_prefix_one_information_bad_descends_inline')
-          end = s.index('/-- Corrected information-wave closure:', start)
-          replacement = r'''theorem gst_final_residual_omega_termination : GSTResidualOmegaTermination := by
-  intro s k m hs hk hm hm3 hnot hchild
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary := gst_origin_not_closed_boundary
-    s k (m % 3) hs hk hrange hnot
-  rcases hboundary with hlevel1 | hlevel3 | hstable
-  · rcases hlevel1 with ⟨hs1, hcase⟩
-    subst s
-    intro hbad
-    obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness 1 k m hchild
-    have hbadChild := hbad j
-    have horigin := gst_omega_origin_exact 1 k m j (by decide)
-    have hstep := gst_omega_universal_equation 1 k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      1 k m (by decide) hk hm
-    have hseeded : GSTSeededAffineBadTrace
-        ((4 * (c 1 % 3^k)) / 3^k)
-        (c 1 / 3^k + 4^(3^1) * gstNavigationConstant (1+k) m) :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hbad
-    have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
-    have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
-      gst_omega_infiniteBadTrace_blocks 1 k m hbad
-    have hboundary1 : GSTResidualBoundary 1 k (m % 3) :=
-      Or.inl ⟨rfl, hcase⟩
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    gst_omega
-  · rcases hlevel3 with ⟨hs3, hk7, hnot21, hnot41, hnot62⟩
-    subst s
-    intro hbad
-    obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness 3 k m hchild
-    have hbadChild := hbad j
-    have horigin := gst_omega_origin_exact 3 k m j (by decide)
-    have hstep := gst_omega_universal_equation 3 k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      3 k m (by decide) hk hm
-    have hseeded :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine 3 k m).1 hbad
-    have heecho := gst_omega_affine_tail_block_echo 3 k m (by decide)
-    have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
-      gst_omega_infiniteBadTrace_blocks 3 k m hbad
-    have hboundary3 : GSTResidualBoundary 3 k (m % 3) :=
-      Or.inr (Or.inl ⟨rfl, hk7, hnot21, hnot41, hnot62⟩)
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    gst_omega
-  · rcases hstable with ⟨hs2, hs3ne, hk4, hnot21⟩
-    intro hbad
-    obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchild
-    have hbadChild := hbad j
-    have horigin := gst_omega_origin_exact s k m j (by omega)
-    have hstep := gst_omega_universal_equation s k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      s k m (by omega) hk hm
-    have hseeded :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hbad
-    have heecho := gst_omega_affine_tail_block_echo s k m (by omega)
-    have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-      gst_omega_infiniteBadTrace_blocks s k m hbad
-    have hboundaryStable : GSTResidualBoundary s k (m % 3) :=
-      Or.inr (Or.inr ⟨hs2, hs3ne, hk4, hnot21⟩)
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    gst_omega
-
-/-- The new residual termination theorem feeds the existing well-founded
-canonical-origin constructor and makes parent Omega-badness impossible. -/
-theorem gst_prefix_one_information_bad_descends_inline
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
-    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
-  have hresidual : GSTResidualNavigationLift :=
-    gst_residual_navigation_lift_of_omega_termination
-      gst_final_residual_omega_termination
-  have hparent : GSTNavigationWitness
-      (gstNavigationConstant s (1 + 3*n)) :=
-    gst_navigation_witness_all_of_residual hresidual
-      s (1 + 3*n) hs (by omega) (by omega) (Or.inr (by omega))
-  have hnoParent :=
-    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic
-      s n hs hn hBad
-  exact False.elim (hnoParent hparent)
-
-'''
-          p.write_text(s[:start] + replacement + s[end:], encoding='utf-8')
+          s=Path('ErdosTernary2.lean').read_text()
+          needles=[
+            'theorem h_creation_for_4pow',
+            'theorem gst_full_power_navigation_descends_atomic',
+            'theorem gst_h_creation_full_power_navigation_atomic',
+            'theorem gst_prefix_one_information_bad_descends_inline',
+            'theorem gst_prefix_one_navigation_lift',
+          ]
+          lines=s.splitlines()
+          for needle in needles:
+            hits=[i for i,x in enumerate(lines) if needle in x]
+            for i in hits:
+              lo=max(0,i-25); hi=min(len(lines),i+220)
+              print(f'=== CONTEXT {needle} LINE {i+1} ===')
+              for n in range(lo,hi):
+                print(f'{n+1:06d}: {lines[n]}')
           PY
-      - name: Install exact Lean RC2
+      - name: Install exact Lean toolchain
         shell: bash
         run: |
-          set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Resolve Mathlib
+      - name: Resolve dependencies
         shell: bash
         run: |
           set -euo pipefail
@@ -123,16 +60,51 @@ theorem gst_prefix_one_information_bad_descends_inline
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Run exact V5 comparator on candidate
+      - name: Materialize local import closure and compile monolith
+        id: compile
+        continue-on-error: true
         shell: bash
         run: |
-          set -euo pipefail
+          set -o pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/comparator.sh 2>&1 | tee final-theorem-probe.log
-      - name: Upload final theorem probe log
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          ROOT=Path('ErdosTernary2.lean')
+          BUILD=Path('.lake/build/lib/lean')
+          import_re=re.compile(r'^\s*import\s+(.+?)\s*$')
+          def local_path(module): return Path(*module.split('.')).with_suffix('.lean')
+          def imports_of(path):
+            out=[]
+            for raw in path.read_text(encoding='utf-8').splitlines():
+              code=raw.split('--',1)[0].rstrip()
+              m=import_re.match(code)
+              if m: out.extend(m.group(1).split())
+            return out
+          order=[]; done=set(); stack=[]
+          def visit(module):
+            if module=='ErdosTernary2' or module in done: return
+            path=local_path(module)
+            if not path.exists(): return
+            if module in stack: raise SystemExit('LOCAL_IMPORT_CYCLE='+' -> '.join(stack+[module]))
+            stack.append(module)
+            for dep in imports_of(path): visit(dep)
+            stack.pop(); done.add(module); order.append((module,path))
+          for m in imports_of(ROOT): visit(m)
+          print('LOCAL_IMPORT_CLOSURE_COUNT=',len(order))
+          BUILD.mkdir(parents=True,exist_ok=True)
+          for module,path in order:
+            out=BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+            out.parent.mkdir(parents=True,exist_ok=True)
+            if out.exists(): continue
+            print('COMPILE_DEP',module,flush=True)
+            subprocess.run(['lake','env','lean','-o',str(out),str(path)],check=True)
+          PY
+          lake env lean ErdosTernary2.lean 2>&1 | tee monolith-baseline.log
+      - name: Upload probe log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: final-theorem-probe
-          path: final-theorem-probe.log
+          name: monolith-surgery-probe
+          path: monolith-baseline.log
           if-no-files-found: warn
