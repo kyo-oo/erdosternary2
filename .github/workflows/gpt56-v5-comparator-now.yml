@@ -29,7 +29,39 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTInfiniteCoupledLedger GSTGraphV2InfiniteControllerBridge GSTFinalResidualEarliestGateBridge
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          ROOT=Path('GSTFinalResidualInfiniteLedgerProbe.lean')
+          BUILD=Path('.lake/build/lib/lean')
+          imp=re.compile(r'^\s*import\s+(.+?)\s*$')
+          def path_of(m): return Path(*m.split('.')).with_suffix('.lean')
+          def imports_of(p):
+              out=[]
+              for raw in p.read_text(encoding='utf-8').splitlines():
+                  code=raw.split('--',1)[0].rstrip()
+                  q=imp.match(code)
+                  if q: out.extend(q.group(1).split())
+              return out
+          order=[]; done=set(); stack=[]
+          def visit(m):
+              if m in done: return
+              p=path_of(m)
+              if not p.exists(): return
+              if m in stack: raise SystemExit('LOCAL_IMPORT_CYCLE='+' -> '.join(stack+[m]))
+              stack.append(m)
+              for d in imports_of(p): visit(d)
+              stack.pop(); done.add(m); order.append((m,p))
+          for m in imports_of(ROOT): visit(m)
+          print('LEDGER_IMPORT_CLOSURE_COUNT=',len(order))
+          BUILD.mkdir(parents=True,exist_ok=True)
+          for m,p in order:
+              out=BUILD.joinpath(*m.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True,exist_ok=True)
+              if out.exists(): continue
+              print('COMPILE_DEP',m,flush=True)
+              subprocess.run(['lake','env','lean','-o',str(out),str(p)],check=True)
+          PY
           lake env lean GSTFinalResidualInfiniteLedgerProbe.lean 2>&1 | tee final-ledger-probe.log
           echo 'FINAL_LEDGER_PROBE_GREEN=1'
       - name: Run exact repository V5 comparator
