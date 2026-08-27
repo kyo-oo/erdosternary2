@@ -81,7 +81,6 @@ theorem canonical_prefix_recurrence
   have hProduct :
       4^(3^s * (1 + 3*n)) = A * 4^(3^(s+1) * n) := by
     rw [hExp, Nat.pow_add]
-    rfl
   have hShape :
       4^(3^s * (1 + 3*n)) =
         1 + M * (c + 3*A*T) := by
