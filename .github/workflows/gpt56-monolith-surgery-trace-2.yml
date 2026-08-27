@@ -9,17 +9,41 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Trace stale import chain and seam consumers
+      - name: Trace reverse import path
         shell: bash
         run: |
           set -euo pipefail
-          echo '=== IMPORTERS OF STALE PACKAGE ==='
-          grep -RIn --include='*.lean' 'import GSTHandwrittenPrefixOneLivePackage' . || true
-          echo '=== IMPORTERS OF BIG N FACTORS ==='
-          grep -RIn --include='*.lean' 'import GSTHandwrittenBigNThreeWorldFactors' . || true
-          echo '=== USES OF BIG N FACTOR THEOREMS ==='
-          grep -RIn --include='*.lean' -E 'gpt56_(prefix_one_live_|three_world|bigN_three|bigN_).*' ErdosTernary2.lean GSTHandwrittenBigNThreeWorldFactors.lean 2>/dev/null || true
-          echo '=== FULL POWER NAVIGATION SOURCES IN MONOLITH ==='
-          grep -nE 'theorem .*four.*power.*navigation|theorem .*navigation.*four.*pow|GSTNavigationWitness \(4\^|h_creation_for_4pow' ErdosTernary2.lean || true
-          echo '=== POE SEAM SUPPORT ==='
-          grep -nE 'GSTOmegaInfiniteBadTrace|omega_bad.*parent|no_parent_navigation|gst_prefix_one_navigation_lift' ErdosTernary2.lean | tail -80 || true
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          deps={}
+          for p in Path('.').glob('*.lean'):
+              mods=[]
+              for line in p.read_text(encoding='utf-8').splitlines():
+                  code=line.split('--',1)[0].strip()
+                  if code.startswith('import '): mods += code[7:].split()
+              deps[p.stem]=mods
+          target='GSTHandwrittenPrefixOneLivePackage'
+          root='ErdosTernary2'
+          paths=[]
+          def dfs(cur,path):
+              if cur==target:
+                  paths.append(path[:]); return
+              if cur in path[:-1]: return
+              for d in deps.get(cur,[]):
+                  if d in deps: dfs(d,path+[d])
+          dfs(root,[root])
+          print('=== ROOT TO STALE IMPORT PATHS ===')
+          for p in paths: print(' -> '.join(p))
+          print('=== MONOLITH DIRECT IMPORTS INVOLVED ===')
+          print(sorted({p[1] for p in paths if len(p)>1}))
+          print('=== SYMBOL USES FROM PATH MODULES IN MONOLITH ===')
+          text=Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          for mod in sorted({x for p in paths for x in p[1:]}):
+              # rough theorem/def names declared in module, then count exact occurrences in monolith
+              fp=Path(mod+'.lean')
+              if not fp.exists(): continue
+              names=re.findall(r'^(?:theorem|def|lemma|inductive|structure)\s+([A-Za-z0-9_\.]+)',fp.read_text(encoding='utf-8'),re.M)
+              used=[n for n in names if re.search(r'\b'+re.escape(n)+r'\b',text)]
+              if used: print(mod, used[:50])
+          PY
