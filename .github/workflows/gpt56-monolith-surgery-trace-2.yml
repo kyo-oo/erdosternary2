@@ -9,15 +9,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Trace stale import edge and active navigation sources
+      - name: Trace stale import chain and seam consumers
         shell: bash
         run: |
           set -euo pipefail
           echo '=== IMPORTERS OF STALE PACKAGE ==='
           grep -RIn --include='*.lean' 'import GSTHandwrittenPrefixOneLivePackage' . || true
-          echo '=== USES OF STALE PACKAGE THEOREMS ==='
-          grep -RIn --include='*.lean' -E 'gpt56_prefix_one_live_(handwritten_package|destroy_boundary)' . || true
+          echo '=== IMPORTERS OF BIG N FACTORS ==='
+          grep -RIn --include='*.lean' 'import GSTHandwrittenBigNThreeWorldFactors' . || true
+          echo '=== USES OF BIG N FACTOR THEOREMS ==='
+          grep -RIn --include='*.lean' -E 'gpt56_(prefix_one_live_|three_world|bigN_three|bigN_).*' ErdosTernary2.lean GSTHandwrittenBigNThreeWorldFactors.lean 2>/dev/null || true
           echo '=== FULL POWER NAVIGATION SOURCES IN MONOLITH ==='
           grep -nE 'theorem .*four.*power.*navigation|theorem .*navigation.*four.*pow|GSTNavigationWitness \(4\^|h_creation_for_4pow' ErdosTernary2.lean || true
-          echo '=== DIRECT IMPORTS NEW REPLACEMENT MODULES ==='
-          grep -nE '^import GST(CanonicalTail|PerfectPowerTail|FourPowerOntological|PrefixOneOntological|SeedOne|PrefixOneSeed)' ErdosTernary2.lean || true
+          echo '=== POE SEAM SUPPORT ==='
+          grep -nE 'GSTOmegaInfiniteBadTrace|omega_bad.*parent|no_parent_navigation|gst_prefix_one_navigation_lift' ErdosTernary2.lean | tail -80 || true
