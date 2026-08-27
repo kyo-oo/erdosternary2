@@ -29,6 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic GSTLocalClosure
           python3 - <<'PY'
           from pathlib import Path
           src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
