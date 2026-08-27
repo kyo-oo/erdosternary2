@@ -38,33 +38,32 @@ recursive_new = '      have hih := ih (k - 1) (by omega) hk1 hk1_7\n'
 if recursive_old not in body:
     raise SystemExit('h_creation recursive call shape changed')
 
-# Make the strong-induction motive explicit.  The side hypotheses depend on k,
-# so revert them before induction and re-introduce them inside the strongRecOn
-# case.  The induction hypothesis then has the exact useful shape
-#   ∀ m < k, 5 ≤ m → m ≠ 7 → creation m
-# instead of the degenerate P → P shape produced by the previous tactic form.
+# Put the k-dependent side conditions inside the strong-recursion motive.
+# Using `refine Nat.strongRecOn` directly avoids the tactic-generated
+# self-implication motive seen with `induction ... using ...`.
 body = ''.join(('  ' + line) if line.strip() else line for line in body.splitlines(keepends=True))
 body = body.replace(
-    '      have hih := h_creation_for_4pow (k - 1) hk1 hk1_7\n',
+    recursive_old,
     recursive_new,
     1,
 )
 creation_decl = (
     head + proof_anchor +
     '  revert hk5 hk7\n'
-    '  induction k using Nat.strongRecOn with\n'
-    '  | ind k ih =>\n'
-    '    intro hk5 hk7\n' +
+    '  refine Nat.strongRecOn k ?_\n'
+    '  intro k ih hk5 hk7\n' +
     body
 )
 if 'have hih := h_creation_for_4pow (k - 1)' in creation_decl:
-    raise SystemExit('direct self-call survived strong-induction repair')
+    raise SystemExit('direct self-call survived strong-recursion repair')
 if 'have hih := ih (k - 1) (by omega) hk1 hk1_7' not in creation_decl:
-    raise SystemExit('strong-induction recursive call was not installed')
+    raise SystemExit('strong-recursion recursive call was not installed')
 if 'revert hk5 hk7' not in creation_decl:
     raise SystemExit('dependent side hypotheses were not reverted')
-if 'Nat.strongRecOn generalizing' in creation_decl:
-    raise SystemExit('stale explicit generalizing clause survived')
+if 'induction k using Nat.strongRecOn' in creation_decl:
+    raise SystemExit('stale tactic induction wrapper survived')
+if 'refine Nat.strongRecOn k ?_' not in creation_decl:
+    raise SystemExit('direct strong recursion wrapper missing')
 
 live_stamp = '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED\n'
 if live_stamp in s:
@@ -100,6 +99,6 @@ if 'rw [hC, hdDigit] at hnext' not in s[live_helper:s.index(helper_next, live_he
 
 p.write_text(s, encoding='utf-8')
 print('FULL_H_CREATION_REACTIVATED=1')
-print('STRONG_INDUCTION_REVERT_RC2_REPAIR=1')
+print('STRONG_RECURSION_DIRECT_RC2_REPAIR=1')
 print('GSTDIGIT_RC2_REPAIR=1')
 print('UNBOUNDED_U2D_CREATION_ADAPTER_PRESERVED=1')
