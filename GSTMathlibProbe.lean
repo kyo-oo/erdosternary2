@@ -1,0 +1,20 @@
+import Mathlib
+
+#check Nat.mod_add_div
+#check Nat.div_add_mod
+#check Nat.add_mul_mod_self_left
+#check Nat.add_mul_mod_self_right
+#check Nat.mul_add_mod_self_left
+#check Nat.mul_add_mod_self_right
+#check Nat.add_mul_div_left
+#check Nat.add_mul_div_right
+#check Nat.mul_add_div
+#check Nat.mul_add_div_left
+#check Nat.div_add
+#check Nat.add_div
+#check Nat.div_eq_of_lt
+#check Nat.mod_eq_of_lt
+#check Nat.div_mul_eq_div_div
+#check Nat.div_div_eq_div_mul
+#check Nat.mul_mod
+#check Nat.add_mod
