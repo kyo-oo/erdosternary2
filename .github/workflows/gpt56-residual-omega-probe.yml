@@ -1,0 +1,69 @@
+name: GPT56 Residual Omega Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+      - name: Build isolated residual omega prefix probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          marker = '/- QUARANTINED LEGACY RESIDUAL OMEGA START'
+          if marker not in src:
+              raise SystemExit('quarantine marker missing')
+          prefix = src.split(marker, 1)[0]
+          candidate = r'''
+
+/-- RED probe: first residual Omega termination world, outside quarantine. -/
+theorem gst_omega_termination_s1_probe
+    (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
+    (hboundary : GSTResidualBoundary 1 k (m % 3))
+    (hchild : GSTNavigationWitness (gstNavigationConstant (1+k) m)) :
+    ¬ GSTOmegaInfiniteBadTrace 1 k m := by
+  intro hbad
+  obtain ⟨j, hj⟩ :=
+    gst_omega_childZeroSet_nonempty_of_navigation_witness 1 k m hchild
+  have hbadChild := hbad j
+  have horigin := gst_omega_origin_exact 1 k m j (by decide)
+  have hstep := gst_omega_universal_equation 1 k m j
+  have hdescent := gst_residual_origin_descent_certificate
+    1 k m (by decide) hk hm
+  have hseeded : GSTSeededAffineBadTrace
+      ((4 * (c 1 % 3^k)) / 3^k)
+      (c 1 / 3^k + 4^(3^1) * gstNavigationConstant (1+k) m) :=
+    (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hbad
+  have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
+  have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
+    gst_omega_infiniteBadTrace_blocks 1 k m hbad
+  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+  trace_state
+  gst_omega
+'''
+          Path('ResidualOmegaProbe.lean').write_text(prefix + candidate, encoding='utf-8')
+          PY
+          lake env lean ResidualOmegaProbe.lean 2>&1 | tee residual-omega-probe.log
+          echo 'RESIDUAL_OMEGA_PROBE_GREEN=1'
