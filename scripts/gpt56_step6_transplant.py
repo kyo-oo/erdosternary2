@@ -13,15 +13,15 @@ if imp not in text:
         raise SystemExit("import anchor not found")
     text = text.replace(anchor, anchor + imp, 1)
 
-# 2) Replace only the known RED theorem.  Everything before/after remains byte-for-byte.
+# 2) Replace only the known RED theorem. Everything before/after remains byte-for-byte.
 start_marker = "/-- Exact remaining information-descent seam."
 end_marker = "/-- Corrected information-wave closure:"
 start = text.index(start_marker)
 end = text.index(end_marker, start)
 
-replacement = r'''/-- Exact information-descent closure.  Parent Ω-badness is converted to the
+replacement = r'''/-- Exact information-descent closure. Parent Ω-badness is converted to the
     canonical seed-one bad right edge, while the supplied child Navigation
-    witness supplies a genuine Happy gate of the canonical child tail.  The
+    witness supplies a genuine Happy gate of the canonical child tail. The
     certified standalone U2D perfect-power collision closes the sheet. -/
 theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
@@ -127,4 +127,5 @@ if '"GSTPrefixOneU2DCollisionProof"' not in lake:
     lake = lake.replace(anchor, anchor + '  "GSTPrefixOneU2DCollisionProof",\n', 1)
 LAKE.write_text(lake, encoding="utf-8")
 
+# Atomic rerun marker: the workflow compiles monolith + closure before committing.
 print("STEP6_TRANSPLANT_OK")
