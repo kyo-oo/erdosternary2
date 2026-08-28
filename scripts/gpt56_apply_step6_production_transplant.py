@@ -5,7 +5,6 @@ s = p.read_text(encoding="utf-8")
 
 import_anchor = "import GSTFinalPurePowerResidueTransplant\n"
 needed_imports = [
-    "import GSTFinalPrefixOneStep6Infinite\n",
     "import GSTPrefixOneU2DCollisionProof\n",
 ]
 if any(x not in s for x in needed_imports):
