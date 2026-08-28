@@ -39,7 +39,9 @@ theorem infinite_base_carry_zero
       Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
     calc
       (1 + 3^b * T) % 3^b = (1 % 3^b + (3^b * T) % 3^b) % 3^b := Nat.add_mod _ _ _
-      _ = 1 := by rw [hmul, Nat.add_zero, Nat.mod_eq_of_lt hb]
+      _ = (1 % 3^b) % 3^b := by rw [hmul, Nat.add_zero]
+      _ = 1 % 3^b := Nat.mod_mod_of_dvd _ (dvd_refl (3^b))
+      _ = 1 := Nat.mod_eq_of_lt hb
   have hc : carry4 E b = 0 := by
     unfold carry4
     rw [hmod]
