@@ -34,11 +34,12 @@ theorem infinite_base_carry_zero
       exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b, infB]; omega)
     omega
   have hmod : E % 3^b = 1 := by
-    rw [hE, Nat.add_mod]
+    rw [hE]
     have hmul : (3^b * T) % 3^b = 0 :=
       Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
-    rw [hmul, Nat.add_zero]
-    exact Nat.mod_eq_of_lt hb
+    calc
+      (1 + 3^b * T) % 3^b = (1 % 3^b + (3^b * T) % 3^b) % 3^b := Nat.add_mod _ _ _
+      _ = 1 := by rw [hmul, Nat.add_zero, Nat.mod_eq_of_lt hb]
   have hc : carry4 E b = 0 := by
     unfold carry4
     rw [hmod]
@@ -96,6 +97,7 @@ theorem canonical_past_future_synchronized_all_depth
 #check canonical_infinite_ledger
 #check canonical_controller_graph_all_depth
 #check canonical_past_future_synchronized_all_depth
+#print axioms infinite_base_carry_zero
 #print axioms canonical_infinite_bad_control
 #print axioms canonical_infinite_ledger
 #print axioms canonical_controller_graph_all_depth
