@@ -61,13 +61,13 @@ jobs:
       - name: Commit production transplant only after GREEN
         run: |
           set -euo pipefail
-          if git diff --quiet -- ErdosTernary2.lean; then
-            echo 'production transplant already committed'
+          if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
+            echo 'production transplant and collision roots already committed'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean
+          git add ErdosTernary2.lean lakefile.toml
           git commit -m 'proof: transplant certified Step6 closure into production'
           git push
           echo STEP6_PRODUCTION_TRANSPLANT_COMMITTED=1
