@@ -6,7 +6,8 @@ set_option maxHeartbeats 10000000
 
 namespace GSTPrefixOneU2DCollisionProof
 
-open GSTCanonicalTailStateIso
+open GSTCanonicalSevenAxisBridge
+open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenExponentialLTE
 
