@@ -143,9 +143,6 @@ theorem canonical_controller_boundary_identification
         (((3^K : Nat) : Int)) *
           reverseControllerCarryCode (fun t => step6C s n t K)
             (residualWidth s) := by
-  have _hController := canonical_infinite_bad_control s n hs (by
-    intro j
-    simpa [Nat.add_assoc] using hRightBad j)
   exact weighted_cross_mixed_controller_exact
     (step6C s n) (step6D s n) (residualWidth s) K
     (canonical_step6_cells s n K)
