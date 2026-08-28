@@ -130,7 +130,7 @@ theorem canonical_controller_boundary_identification
         rw [show (9 : Nat) = 3^2 by decide]
         exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
       omega
-  have hmod : E % 3^b = 1 := by
+    have hmod : E % 3^b = 1 := by
       rw [hE]
       have hmul : (3^b * T) % 3^b = 0 :=
         Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
