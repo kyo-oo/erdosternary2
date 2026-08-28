@@ -1,6 +1,7 @@
-import GSTFinalResidualConnector
 import GSTU2DSharpCrossingBlock
 import GSTGraphV2InfiniteControllerBridge
+import GSTPerfectPowerTailNavigation
+import GSTGraphV2HandwrittenOmegaUBlock
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -14,7 +15,7 @@ open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenOmegaUBlock
 open GSTGraphV2InfiniteControllerBridge
 open GSTU2DExactCrossingCharge
-open GSTFinalResidualConnector
+open GSTPerfectPowerTailNavigation
 
 private def collisionC (s n : Nat) : Nat → Nat → Nat :=
   fun t p => (graph (residualEnergy s 1 n) t (s + 2 + p)).seven.carry
@@ -22,11 +23,54 @@ private def collisionC (s n : Nat) : Nat → Nat → Nat :=
 private def collisionD (s n : Nat) : Nat → Nat → Nat :=
   fun t p => (graph (residualEnergy s 1 n) t (s + 2 + p)).seven.digit
 
+/-- The monolith's `gstNavigationConstant (s+1) n` is exactly this standalone
+canonical tail.  This is the mathematical child object of the final splice. -/
+def directChild (s n : Nat) : Nat := canonicalTail (s+1) n
+
 theorem residualWidth_pos_of_s_pos
     (s : Nat) (hs : 1 ≤ s) : 1 ≤ residualWidth s := by
   unfold residualWidth
-  exact Nat.one_le_pow _ _ (by decide)
+  positivity
 
+/-- A supplied child Navigation witness is a literal physical Happy cell on
+row `s+2+q` of the left edge of the canonical residual rectangle. -/
+theorem child_navigation_to_left_happy
+    (s n : Nat) (hs : 1 ≤ s)
+    (hchild : GSTCanonicalTailStateIso.Navigation (directChild s n)) :
+    ∃ q,
+      HappyCell
+        (graph (residualEnergy s 1 n) 0 (s+2+q)).seven.carry
+        (graph (residualEnergy s 1 n) 0 (s+2+q)).seven.digit := by
+  obtain ⟨q, hHappyTail⟩ := hchild
+  let E := residualEnergy s 1 n
+  let T := directChild s n
+  have hE : E = 1 + 3^(s+2) * T := by
+    have h := canonical_tail_decomposition (s+1) n
+    simpa [E, T, directChild, residualEnergy, Nat.add_assoc] using h
+  have hone : 1 < 3^(s+2) := by
+    have h9 : 9 ≤ 3^(s+2) := by
+      rw [show (9 : Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hiff := graph_prefix_slice_happy_iff
+    E 0 (s+2) 1 T q
+    (by simpa using hE)
+    hone
+  refine ⟨q, hiff.2 ?_⟩
+  have hfour : 4 < 3^(s+2) := by
+    have h27 : 27 ≤ 3^(s+2) := by
+      rw [show (27 : Nat) = 3^3 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hseed : (4 * 1) / 3^(s+2) = 0 := Nat.div_eq_of_lt hfour
+  rcases hHappyTail with ⟨hd, hc⟩
+  refine ⟨?_, ?_⟩
+  · simpa [T, directChild, GSTCanonicalTailStateIso.digit3,
+      GSTCanonicalSevenAxisBridge.digit3] using hd
+  · simpa [T, directChild, seededCarry, GSTCanonicalTailStateIso.carry4,
+      GSTCanonicalSevenAxisBridge.carry4, hseed] using hc
+
+/-- The residual child power has true zero carry at the production cut. -/
 theorem residual_base_carry_zero
     (s n : Nat) (hs : 1 ≤ s) :
     (graph (residualEnergy s 1 n) 0 (s+2)).seven.carry = 0 := by
@@ -46,6 +90,7 @@ theorem residual_base_carry_zero
     omega
   simpa [E, b, graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hc
 
+/-- Exact U2D crossing telescope on the canonical finite rectangle. -/
 theorem collision_rectangle_exact
     (s n K : Nat) :
     Finset.sum (Finset.range K) (fun p =>
@@ -71,6 +116,9 @@ theorem collision_rectangle_exact
       simpa [collisionC, Nat.add_assoc] using
         (graph_cell_exact (residualEnergy s 1 n) t (s+2+p)).2⟩
 
+/-- Step 6 of the final derivation.  Unlike a merely finite right-prefix sign
+claim, this hypothesis is the complete all-depth right bad language and is
+immediately packaged as the exact Infinite Controller. -/
 theorem canonical_right_bad_forces_weighted_cross_nonpositive
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hRightBad : ∀ j,
@@ -109,17 +157,17 @@ theorem canonical_right_bad_forces_weighted_cross_nonpositive
   trace_state
   omega
 
-theorem canonical_perfect_power_block_collision
+/-- Direct formal statement of the mathematical collision: child Navigation
+plus an all-depth bad canonical right boundary is impossible. -/
+theorem canonical_perfect_power_block_collision_direct
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  obtain ⟨q, hChild⟩ :=
-    residual_child_witness_to_left_happy s 1 n hs (by decide) hchild
-  have hRightBad : ∀ j,
+    (hchild : GSTCanonicalTailStateIso.Navigation (directChild s n))
+    (hRightBad : ∀ j,
       ¬ HappyCell
         (graph (residualEnergy s 1 n) (residualWidth s) (s+2+j)).seven.carry
-        (graph (residualEnergy s 1 n) (residualWidth s) (s+2+j)).seven.digit :=
-    residual_bad_trace_to_right_bad s 1 n hs (by decide) hBad
+        (graph (residualEnergy s 1 n) (residualWidth s) (s+2+j)).seven.digit) :
+    False := by
+  obtain ⟨q, hChild⟩ := child_navigation_to_left_happy s n hs hchild
   have hPositive :
       0 < weightedCrossPrefix (collisionC s n) (collisionD s n)
         (residualWidth s) (q+1) := by
@@ -133,23 +181,29 @@ theorem canonical_perfect_power_block_collision
       exact (graph_cell_exact (residualEnergy s 1 n) t (s+2+p)).1
     · simpa [collisionC, collisionD, Nat.add_assoc] using hChild
   have hNonpositive :=
-    canonical_right_bad_forces_weighted_cross_nonpositive s n q hs hn hRightBad
+    canonical_right_bad_forces_weighted_cross_nonpositive
+      s n q hs hn hRightBad
   omega
 
-theorem gst_prefix_one_information_bad_descends_u2d
+/-- Equivalent no-Navigation form used by the eventual monolith splice. -/
+theorem canonical_right_bad_forces_no_child_navigation
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
-    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
-  apply gst_complete_bad_of_no_navigation
+    (hRightBad : ∀ j,
+      ¬ HappyCell
+        (graph (residualEnergy s 1 n) (residualWidth s) (s+2+j)).seven.carry
+        (graph (residualEnergy s 1 n) (residualWidth s) (s+2+j)).seven.digit) :
+    ¬ GSTCanonicalTailStateIso.Navigation (directChild s n) := by
   intro hchild
-  exact canonical_perfect_power_block_collision s n hs hn hchild hBad
+  exact canonical_perfect_power_block_collision_direct
+    s n hs hn hchild hRightBad
 
+#check child_navigation_to_left_happy
 #check residual_base_carry_zero
 #check collision_rectangle_exact
 #check canonical_right_bad_forces_weighted_cross_nonpositive
-#check canonical_perfect_power_block_collision
-#check gst_prefix_one_information_bad_descends_u2d
-#print axioms canonical_perfect_power_block_collision
-#print axioms gst_prefix_one_information_bad_descends_u2d
+#check canonical_perfect_power_block_collision_direct
+#check canonical_right_bad_forces_no_child_navigation
+#print axioms canonical_perfect_power_block_collision_direct
+#print axioms canonical_right_bad_forces_no_child_navigation
 
 end GSTFinalPrefixOneDirectU2DCollision
