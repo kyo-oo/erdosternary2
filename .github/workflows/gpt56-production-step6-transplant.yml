@@ -1,5 +1,6 @@
 name: GPT56 Production Step6 Transplant
 
+# SOL56: certified Step6 production surgery trigger 2026-08-28
 on:
   push:
     branches:
