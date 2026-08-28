@@ -90,10 +90,16 @@ jobs:
           import GSTPrefixOneU2DCollisionProof
           #print axioms GSTPrefixOneU2DCollisionProof.child_energy_decomposition
           #print axioms GSTPrefixOneU2DCollisionProof.child_tail_happy_to_graph
+          #print axioms GSTPrefixOneU2DCollisionProof.child_base_carry_zero
+          #print axioms GSTPrefixOneU2DCollisionProof.seeded_one_bad_to_graph_right_bad
           EOF
           lake env lean GPT56PrefixOneU2DAudit.lean 2>&1 | tee prefix-one-u2d-axioms.log
           if grep -Fq 'sorryAx' prefix-one-u2d-axioms.log; then
             echo 'FORBIDDEN_SORRYAX_IN_PREFIX_ONE_U2D=1'
+            exit 1
+          fi
+          if grep -En '(^|[^[:alpha:]_])(sorry|admit)([^[:alpha:]_]|$)' GSTPrefixOneU2DCollisionProof.lean; then
+            echo 'FORBIDDEN_PLACEHOLDER_IN_PREFIX_ONE_U2D=1'
             exit 1
           fi
           echo 'PREFIX_ONE_U2D_AXIOM_AUDIT_GREEN=1'
