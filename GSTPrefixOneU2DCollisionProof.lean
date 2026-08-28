@@ -55,7 +55,45 @@ theorem child_tail_happy_to_graph
   · have hseed : (4 * 1) / 3^(s+2) = 0 := Nat.div_eq_of_lt (by simpa using h4)
     simpa [hseed, seededCarry, carry4] using hc
 
+/-- The child production slice begins with the true zero x4 carry. -/
+theorem child_base_carry_zero
+    (s n : Nat) (hs : 1 ≤ s) :
+    (graph (childEnergy s n) 0 (s+2)).seven.carry = 0 := by
+  have hmod : childEnergy s n % 3^(s+2) = 1 := by
+    dsimp [childEnergy]
+    simpa [Nat.add_assoc] using
+      (pow4_scaled_mod_next (s+1) n)
+  have hpow : 3^3 ≤ 3^(s+2) := by
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  have h4 : 4 < 3^(s+2) := by
+    norm_num at hpow ⊢
+    omega
+  simp [graph, cell, GSTCanonicalSevenAxisBridge.vertex, carry4, hmod,
+    Nat.div_eq_of_lt h4]
+
+/-- Abstract parent adapter.  Whenever a low prefix generates seed one at the
+    production cut, complete seed-one badness of the exposed tail is exactly
+    complete physical badness of that Graph-V2 right edge. -/
+theorem seeded_one_bad_to_graph_right_bad
+    (E t b P tail : Nat)
+    (hE : 4^t * E = P + 3^b * tail)
+    (hP : P < 3^b)
+    (hseed : (4 * P) / 3^b = 1)
+    (hBad : ∀ q,
+      ¬ HappyCell (seededCarry 1 tail q) (digit3 tail q)) :
+    ∀ q,
+      ¬ HappyCell
+        (graph E t (b+q)).seven.carry
+        (graph E t (b+q)).seven.digit := by
+  intro q hGraph
+  have hiff := graph_prefix_slice_happy_iff E t b P tail q hE hP
+  have hTail := hiff.mp hGraph
+  apply hBad q
+  simpa [HappyCell, hseed] using hTail
+
 #print axioms child_energy_decomposition
 #print axioms child_tail_happy_to_graph
+#print axioms child_base_carry_zero
+#print axioms seeded_one_bad_to_graph_right_bad
 
 end GSTPrefixOneU2DCollisionProof
