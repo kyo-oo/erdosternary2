@@ -134,7 +134,8 @@ theorem canonical_controller_boundary_identification
       rw [hE, Nat.add_mod]
       have hmul : (3^b * T) % 3^b = 0 :=
         Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
-      rw [hmul, Nat.add_zero, Nat.mod_eq_of_lt hb]
+      rw [hmul, Nat.add_zero]
+      exact Nat.mod_eq_of_lt hb
     have hc : carry4 E b = 0 := by
       unfold carry4
       rw [hmod]
