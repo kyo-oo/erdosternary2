@@ -28,10 +28,9 @@ jobs:
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
+          s = s.replace('import GSTFinalPrefixOneStep6Infinite\n', '')
           anchor = 'import GSTFinalPurePowerResidueTransplant\n'
           insertion = ''
-          if 'import GSTFinalPrefixOneStep6Infinite\n' not in s:
-              insertion += 'import GSTFinalPrefixOneStep6Infinite\n'
           if 'import GSTPrefixOneU2DCollisionProof\n' not in s:
               insertion += 'import GSTPrefixOneU2DCollisionProof\n'
           if insertion:
