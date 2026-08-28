@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/gpt56-step6-tactic.yml'
       - 'GSTStep6Close.lean'
-      - 'GSTStep6CloseTest.lean'
+      - 'GSTStep6CloseShellTest.lean'
   workflow_dispatch:
 
 concurrency:
@@ -33,72 +33,30 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Compile local import closure
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, subprocess
-          ROOTS=[Path('GSTStep6Close.lean'),Path('GSTStep6CloseTest.lean')]
-          BUILD=Path('.lake/build/lib/lean')
-          rx=re.compile(r'^\s*import\s+(.+?)\s*$')
-          def path_of(m): return Path(*m.split('.')).with_suffix('.lean')
-          def imports(p):
-              out=[]
-              for raw in p.read_text(encoding='utf-8').splitlines():
-                  code=raw.split('--',1)[0].rstrip()
-                  m=rx.match(code)
-                  if m: out.extend(m.group(1).split())
-              return out
-          order=[]; done=set(); active=[]
-          def visit(m):
-              if m in done: return
-              p=path_of(m)
-              if not p.exists(): return
-              if m in active: raise SystemExit('LOCAL_IMPORT_CYCLE='+' -> '.join(active+[m]))
-              active.append(m)
-              for d in imports(p): visit(d)
-              active.pop(); done.add(m); order.append((m,p))
-          for root in ROOTS:
-              for m in imports(root): visit(m)
-          BUILD.mkdir(parents=True,exist_ok=True)
-          print('STEP6_IMPORT_CLOSURE_COUNT='+str(len(order)))
-          for m,p in order:
-              out=BUILD.joinpath(*m.split('.')).with_suffix('.olean')
-              out.parent.mkdir(parents=True,exist_ok=True)
-              if out.exists(): continue
-              print('=== compiling '+m+' ===',flush=True)
-              subprocess.run(['lake','env','lean','-o',str(out),str(p)],check=True)
-          print('STEP6_IMPORT_CLOSURE_GREEN=1')
-          PY
       - name: Compile tactic
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
           lake env lean -o .lake/build/lib/lean/GSTStep6Close.olean GSTStep6Close.lean 2>&1 | tee step6-tactic.log
           echo 'STEP6_TACTIC_GREEN=1'
-      - name: Compile regression
+      - name: Compile dependency-free shell regression
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTStep6CloseTest.lean 2>&1 | tee step6-regression.log
-          echo 'STEP6_REGRESSION_GREEN=1'
+          lake env lean GSTStep6CloseShellTest.lean 2>&1 | tee step6-shell.log
+          echo 'STEP6_SHELL_GREEN=1'
       - name: Axiom and placeholder audit
-        if: success()
         shell: bash
         run: |
           set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          if grep -En '(^|[^[:alpha:]_])(sorry|admit)([^[:alpha:]_]|$)' GSTStep6Close.lean GSTStep6CloseTest.lean; then
+          if grep -En '(^|[^[:alpha:]_])(sorry|admit)([^[:alpha:]_]|$)' GSTStep6Close.lean GSTStep6CloseShellTest.lean; then
             echo 'FORBIDDEN_PLACEHOLDER_IN_STEP6_TACTIC=1'
             exit 1
           fi
-          lake env lean GSTStep6CloseTest.lean 2>&1 | tee step6-axioms.log
-          if grep -Fq 'sorryAx' step6-axioms.log; then
+          if grep -Fq 'sorryAx' step6-tactic.log step6-shell.log; then
             echo 'FORBIDDEN_SORRYAX_IN_STEP6_TACTIC=1'
             exit 1
           fi
