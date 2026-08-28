@@ -1,6 +1,7 @@
 import GSTGraphV2InfiniteControllerBridge
 import GSTPerfectPowerTailNavigation
 import GSTGraphV2HandwrittenOmegaUBlock
+import GSTU2DSharpCrossingBlock
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -184,10 +185,17 @@ theorem reverse_cross_mixed_controller_exact
       have houtN := hout N (by omega)
       have hnextN := hnext N (by omega)
       rw [reverseCrossCode, reverseMixedCode, reverseInfoCode,
-        reverseControllerCarryCode, reverseControllerCarryCode, ih', hlocal,
-        houtN, hnextN, Nat.pow_succ]
-      push_cast
-      ring
+        reverseControllerCarryCode, reverseControllerCarryCode]
+      calc
+        2 * (4 * reverseCrossCode C d N + crossDensity (C N) (d N)) -
+            3 * (4 * reverseMixedCode C d N + mixedDensity (C N) (d N)) =
+          4 * (2 * reverseCrossCode C d N - 3 * reverseMixedCode C d N) +
+            (2 * crossDensity (C N) (d N) - 3 * mixedDensity (C N) (d N)) := by
+              ring
+        _ = _ := by
+          rw [ih', hlocal, houtN, hnextN, Nat.pow_succ]
+          push_cast
+          ring
 
 /-- Base-three weighted mixed prefix, aligned exactly with
 `weightedCrossPrefix`. -/
@@ -239,10 +247,23 @@ theorem weighted_cross_mixed_controller_exact
         (fun t ht => (hcell t K ht (by omega)).2.1)
         (fun t ht => (hcell t K ht (by omega)).2.2.1)
         (fun t ht => (hcell t K ht (by omega)).2.2.2)
-      rw [weightedCrossPrefix, weightedMixedPrefix, Finset.sum_range_succ,
-        ih', hrow, Nat.pow_succ]
-      push_cast
-      ring
+      rw [weightedCrossPrefix, weightedMixedPrefix, Finset.sum_range_succ]
+      calc
+        2 * (weightedCrossPrefix C d N K +
+              (((3^K : Nat) : Int)) *
+                reverseCrossCode (fun t => C t K) (fun t => d t K) N) -
+            3 * (weightedMixedPrefix C d N K +
+              (((3^K : Nat) : Int)) *
+                reverseMixedCode (fun t => C t K) (fun t => d t K) N) =
+          (2 * weightedCrossPrefix C d N K - 3 * weightedMixedPrefix C d N K) +
+            (((3^K : Nat) : Int)) *
+              (2 * reverseCrossCode (fun t => C t K) (fun t => d t K) N -
+                3 * reverseMixedCode (fun t => C t K) (fun t => d t K) N) := by
+              ring
+        _ = _ := by
+          rw [ih', hrow, Nat.pow_succ]
+          push_cast
+          ring
 
 #check infinite_base_carry_zero
 #check canonical_infinite_bad_control
