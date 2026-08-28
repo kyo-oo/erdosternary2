@@ -15,6 +15,7 @@ open GSTGraphV2InfiniteControl
 open GSTGraphV2InfiniteControllerBridge
 open GSTU2DExactCrossingCharge
 open GSTPerfectPowerTailNavigation
+open GSTGraphV2HandwrittenOmegaUBlock
 
 private def step6C (s n : Nat) : Nat → Nat → Nat :=
   fun t p => (graph (residualEnergy s 1 n) t (s + 2 + p)).seven.carry
