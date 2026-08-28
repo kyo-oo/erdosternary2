@@ -68,7 +68,8 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTFinalPrefixOneStep6Boundary.lean 2>&1 | tee step6.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTFinalPrefixOneStep6Boundary.olean GSTFinalPrefixOneStep6Boundary.lean 2>&1 | tee step6.log
           echo STEP6_PROOF_GREEN=1
       - name: Axiom audit
         shell: bash
