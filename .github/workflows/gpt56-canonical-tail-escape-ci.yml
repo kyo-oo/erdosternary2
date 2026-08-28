@@ -25,20 +25,33 @@ jobs:
           from pathlib import Path
           import textwrap
 
+          # Register the already-certified standalone donor modules in the local Lean library.
+          lp = Path('lakefile.toml')
+          lt = lp.read_text(encoding='utf-8')
+          root_anchor = '  "GSTGraphV2Production",\n'
+          roots = [
+              'GSTGraphV2PerfectPowerBlockCollision',
+              'GSTPrefixOneU2DCollisionProof',
+          ]
+          for mod in roots:
+              entry = f'  "{mod}",\n'
+              if entry not in lt:
+                  pos = lt.find(root_anchor)
+                  if pos < 0:
+                      raise SystemExit('GSTLocalClosure root anchor not found')
+                  lt = lt[:pos] + entry + lt[pos:]
+          lp.write_text(lt, encoding='utf-8')
+
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
-
           s = s.replace('import GSTFinalPrefixOneStep6Infinite\n', '')
           anchor = 'import GSTFinalPurePowerResidueTransplant\n'
-          insertion = ''
           if 'import GSTPrefixOneU2DCollisionProof\n' not in s:
-              insertion += 'import GSTPrefixOneU2DCollisionProof\n'
-          if insertion:
               pos = s.find(anchor)
               if pos < 0:
                   raise SystemExit('production import anchor not found')
               pos += len(anchor)
-              s = s[:pos] + insertion + s[pos:]
+              s = s[:pos] + 'import GSTPrefixOneU2DCollisionProof\n' + s[pos:]
 
           begin = '  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY\n'
           end = '  -- END SOL56 FINAL ATOMIC SEAM SURGERY\n'
@@ -139,6 +152,7 @@ jobs:
           if out.count('-- SOL56 STEP6 CERTIFIED PRODUCTION TRANSPLANT') != 1:
               raise SystemExit('transplant marker count mismatch')
           print('STEP6_PRODUCTION_TRANSPLANT_APPLIED=1')
+          print('STEP6_COLLISION_DONOR_REGISTERED=1')
           PY
           git diff --check
 
@@ -188,13 +202,13 @@ jobs:
         run: |
           set -euo pipefail
           rm -f ProductionStep6Audit.lean production-step6-lean.log production-step6-axioms.log
-          if git diff --quiet -- ErdosTernary2.lean; then
+          if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
             echo 'production transplant already committed'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean
+          git add ErdosTernary2.lean lakefile.toml
           git commit -m 'proof: transplant certified Step6 closure into production'
           git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
           echo 'STEP6_PRODUCTION_TRANSPLANT_COMMITTED=1'
