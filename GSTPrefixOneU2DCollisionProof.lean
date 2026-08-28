@@ -91,9 +91,89 @@ theorem seeded_one_bad_to_graph_right_bad
   apply hBad q
   simpa [HappyCell, hseed] using hTail
 
+/-- The low prefix of the canonical phase-one/right boundary. -/
+def rightPrefix (s : Nat) : Nat := 1 + 3^(s+1)
+
+/-- The exact seed-one information tail exposed on the phase-one/right edge. -/
+def rightTail (s n z : Nat) : Nat :=
+  z + 4^(3^s) * childTail s n
+
+/-- Exact canonical phase-one decomposition.  The hypotheses are precisely the
+    frozen LTE/unit-prefix identities used by the monolith, so no coefficient
+    identification theorem or surrogate tail is required. -/
+theorem right_energy_decomposition
+    (s n c z : Nat)
+    (hLTE : 4^(3^s) = 1 + 3^(s+1) * c)
+    (hc : c = 1 + 3*z) :
+    4^(3^s) * childEnergy s n =
+      rightPrefix s + 3^(s+2) * rightTail s n z := by
+  rw [child_energy_decomposition, hLTE, hc]
+  unfold rightPrefix rightTail
+  rw [show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
+  ring
+
+/-- The canonical right prefix lies strictly below its production cut. -/
+theorem rightPrefix_lt_cut
+    (s : Nat) (hs : 1 ≤ s) :
+    rightPrefix s < 3^(s+2) := by
+  unfold rightPrefix
+  rw [show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
+  have hpos : 0 < 3^(s+1) := Nat.pow_pos (by decide)
+  omega
+
+/-- Four times the canonical right prefix generates exactly incoming seed one
+    at the production cut. -/
+theorem rightPrefix_seed_one
+    (s : Nat) (hs : 1 ≤ s) :
+    (4 * rightPrefix s) / 3^(s+2) = 1 := by
+  have h9 : 9 ≤ 3^(s+1) := by
+    rw [show (9:Nat) = 3^2 by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  have hden : 0 < 3^(s+2) := Nat.pow_pos (by decide)
+  have hlo : 3^(s+2) ≤ 4 * rightPrefix s := by
+    unfold rightPrefix
+    rw [show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
+    omega
+  have hhi : 4 * rightPrefix s < 2 * 3^(s+2) := by
+    unfold rightPrefix
+    rw [show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
+    omega
+  have hlo' : 1 ≤ (4 * rightPrefix s) / 3^(s+2) := by
+    exact (Nat.le_div_iff_mul_le hden).2 (by simpa using hlo)
+  have hhi' : (4 * rightPrefix s) / 3^(s+2) < 2 := by
+    exact (Nat.div_lt_iff_lt_mul hden).2 (by simpa using hhi)
+  omega
+
+/-- Canonical specialization of the abstract right-edge adapter.  A complete
+    seed-one bad language of the actual phase-one tail is exactly an all-depth
+    bad physical right boundary of the same finite-width perfect-power sheet. -/
+theorem canonical_right_bad_to_graph_right_bad
+    (s n c z : Nat) (hs : 1 ≤ s)
+    (hLTE : 4^(3^s) = 1 + 3^(s+1) * c)
+    (hc : c = 1 + 3*z)
+    (hBad : ∀ q,
+      ¬ HappyCell
+        (seededCarry 1 (rightTail s n z) q)
+        (digit3 (rightTail s n z) q)) :
+    ∀ q,
+      ¬ HappyCell
+        (graph (childEnergy s n) (3^s) (s+2+q)).seven.carry
+        (graph (childEnergy s n) (3^s) (s+2+q)).seven.digit := by
+  apply seeded_one_bad_to_graph_right_bad
+    (childEnergy s n) (3^s) (s+2)
+    (rightPrefix s) (rightTail s n z)
+  · exact right_energy_decomposition s n c z hLTE hc
+  · exact rightPrefix_lt_cut s hs
+  · exact rightPrefix_seed_one s hs
+  · exact hBad
+
 #print axioms child_energy_decomposition
 #print axioms child_tail_happy_to_graph
 #print axioms child_base_carry_zero
 #print axioms seeded_one_bad_to_graph_right_bad
+#print axioms right_energy_decomposition
+#print axioms rightPrefix_lt_cut
+#print axioms rightPrefix_seed_one
+#print axioms canonical_right_bad_to_graph_right_bad
 
 end GSTPrefixOneU2DCollisionProof
