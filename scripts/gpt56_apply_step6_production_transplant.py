@@ -1,6 +1,7 @@
 from pathlib import Path
 
 p = Path("ErdosTernary2.lean")
+lakefile = Path("lakefile.toml")
 s = p.read_text(encoding="utf-8")
 
 import_anchor = "import GSTFinalPurePowerResidueTransplant\n"
@@ -105,9 +106,28 @@ replacement = r'''  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY
 s = s[:i] + replacement + s[j:]
 p.write_text(s, encoding="utf-8")
 
+# Keep the imported certified Step6 modules in the same local Lake closure as
+# the monolith.  This must happen in the same checkout as the import surgery;
+# otherwise Lean sees the import before the corresponding .olean is built.
+lake = lakefile.read_text(encoding="utf-8")
+if '"GSTGraphV2PerfectPowerBlockCollision"' not in lake:
+    anchor = '  "GSTGraphV2PerfectPowerBlockProbe",\n'
+    if anchor not in lake:
+        raise SystemExit("lake perfect-power anchor not found")
+    lake = lake.replace(anchor, anchor + '  "GSTGraphV2PerfectPowerBlockCollision",\n', 1)
+if '"GSTPrefixOneU2DCollisionProof"' not in lake:
+    anchor = '  "GSTPrefixOneOntologicalEscape",\n'
+    if anchor not in lake:
+        raise SystemExit("lake prefix-one anchor not found")
+    lake = lake.replace(anchor, anchor + '  "GSTPrefixOneU2DCollisionProof",\n', 1)
+lakefile.write_text(lake, encoding="utf-8")
+
 out = p.read_text(encoding="utf-8")
 if "trace_state\n  contradiction" in out:
     raise SystemExit("old RED frontier survived transplant")
 if out.count("-- SOL56 STEP6 CERTIFIED PRODUCTION TRANSPLANT") != 1:
     raise SystemExit("transplant marker multiplicity is not exactly one")
+if '"GSTGraphV2PerfectPowerBlockCollision"' not in lake or '"GSTPrefixOneU2DCollisionProof"' not in lake:
+    raise SystemExit("certified Step6 Lake roots missing after transplant")
 print("STEP6_PRODUCTION_TRANSPLANT_APPLIED=1")
+print("STEP6_PRODUCTION_ROOTS_REGISTERED=1")
