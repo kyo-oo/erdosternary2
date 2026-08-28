@@ -30,7 +30,8 @@ def directChild (s n : Nat) : Nat := canonicalTail (s+1) n
 theorem residualWidth_pos_of_s_pos
     (s : Nat) (hs : 1 ≤ s) : 1 ≤ residualWidth s := by
   unfold residualWidth
-  positivity
+  have hpos : 0 < 3^s := Nat.pow_pos (by decide)
+  omega
 
 /-- A supplied child Navigation witness is a literal physical Happy cell on
 row `s+2+q` of the left edge of the canonical residual rectangle. -/
@@ -76,10 +77,20 @@ theorem residual_base_carry_zero
     (graph (residualEnergy s 1 n) 0 (s+2)).seven.carry = 0 := by
   let E := residualEnergy s 1 n
   let b := s + 2
+  let T := canonicalTail (s+1) n
+  have hE : E = 1 + 3^b * T := by
+    have h := canonical_tail_decomposition (s+1) n
+    simpa [E, b, T, residualEnergy, Nat.add_assoc] using h
+  have hb : 1 < 3^b := by
+    have h9 : 9 ≤ 3^b := by
+      rw [show (9 : Nat) = 3^2 by decide]
+      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by dsimp [b]; omega)
+    omega
   have hmod : E % 3^b = 1 := by
-    have h := pow4_scaled_mod_next (s+1) n
-    simpa [E, b, residualEnergy, Nat.add_assoc, Nat.add_comm,
-      Nat.add_left_comm] using h
+    rw [hE, Nat.add_mod]
+    have hmul : (3^b * T) % 3^b = 0 :=
+      Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
+    rw [hmul, Nat.add_zero, Nat.mod_eq_of_lt hb]
   have hc : carry4 E b = 0 := by
     unfold carry4
     rw [hmod]
@@ -113,7 +124,7 @@ theorem collision_rectangle_exact
     graph_digit_lt_three (residualEnergy s 1 n) t (s+2+p),
     (graph_cell_exact (residualEnergy s 1 n) t (s+2+p)).1,
     by
-      simpa [collisionC, Nat.add_assoc] using
+      simpa [collisionC, collisionD, Nat.add_assoc] using
         (graph_cell_exact (residualEnergy s 1 n) t (s+2+p)).2⟩
 
 /-- Step 6 of the final derivation.  Unlike a merely finite right-prefix sign
