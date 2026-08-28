@@ -8,7 +8,9 @@ set_option maxHeartbeats 20000000
 namespace GSTFinalPrefixOneStep6Infinite
 
 open GSTCanonicalSevenAxisBridge
+open GST2DMixedEmergence
 open GSTU2DEventTransport
+open GSTU2DExactCrossingCharge
 open GSTGraphV2InfiniteControl
 open GSTGraphV2InfiniteControllerBridge
 open GSTGraphV2HandwrittenOmegaUBlock
@@ -94,15 +96,32 @@ theorem canonical_past_future_synchronized_all_depth
   intro K
   exact (canonical_infinite_ledger s n).pastSynchronized K
 
+/-- The exact Step-6 linear combination of crossing and mixed charge has no
+microscopic SURVIVE source.  This is the algebraic atom used before coupling
+the rectangle to the all-depth controller ledger. -/
+theorem cross_mixed_survive_cancel
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    2 * crossDensity C d - 3 * mixedDensity C d =
+      2 *
+        (digitPotential (outDigit C d) - 4 * digitPotential d +
+          carryPotentialX C - 3 * carryPotentialX (nextCarry C d)) -
+      3 *
+        (infoPotential (outDigit C d) - infoPotential d +
+          7 * carryPotential C - 21 * carryPotential (nextCarry C d)) := by
+  rw [crossDensity, mixed_cell_emergence C d hC hd]
+  ring
+
 #check infinite_base_carry_zero
 #check canonical_infinite_bad_control
 #check canonical_infinite_ledger
 #check canonical_controller_graph_all_depth
 #check canonical_past_future_synchronized_all_depth
+#check cross_mixed_survive_cancel
 #print axioms infinite_base_carry_zero
 #print axioms canonical_infinite_bad_control
 #print axioms canonical_infinite_ledger
 #print axioms canonical_controller_graph_all_depth
 #print axioms canonical_past_future_synchronized_all_depth
+#print axioms cross_mixed_survive_cancel
 
 end GSTFinalPrefixOneStep6Infinite
