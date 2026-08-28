@@ -189,6 +189,61 @@ theorem reverse_cross_mixed_controller_exact
       push_cast
       ring
 
+/-- Base-three weighted mixed prefix, aligned exactly with
+`weightedCrossPrefix`. -/
+def weightedMixedPrefix
+    (C d : Nat → Nat → Nat) (N : Nat) : Nat → Int
+  | 0 => 0
+  | K+1 =>
+      weightedMixedPrefix C d N K +
+        (((3^K : Nat) : Int)) *
+          reverseMixedCode (fun t => C t K) (fun t => d t K) N
+
+/-- Full finite rectangle telescope of the all-depth Step-6 cancelled charge.
+The vertical controller derivative cancels exactly under the physical `3^p`
+weights.  No terminal row, support horizon, or SURVIVE source is used. -/
+theorem weighted_cross_mixed_controller_exact
+    (C d : Nat → Nat → Nat) (N : Nat) : ∀ K : Nat,
+    (∀ t p, t < N → p < K →
+      C t p < 4 ∧ d t p < 3 ∧
+      outDigit (C t p) (d t p) = d (t+1) p ∧
+      nextCarry (C t p) (d t p) = C t (p+1)) →
+    2 * weightedCrossPrefix C d N K -
+        3 * weightedMixedPrefix C d N K =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          (controllerDigitPotential (d N p) -
+            (((4^N : Nat) : Int)) * controllerDigitPotential (d 0 p) -
+            9 * reverseInfoCode (fun t => d t p) N)) +
+      reverseControllerCarryCode (fun t => C t 0) N -
+        (((3^K : Nat) : Int)) *
+          reverseControllerCarryCode (fun t => C t K) N := by
+  intro K
+  induction K with
+  | zero =>
+      intro hcell
+      simp [weightedCrossPrefix, weightedMixedPrefix,
+        reverseControllerCarryCode]
+  | succ K ih =>
+      intro hcell
+      have hprefix : ∀ t p, t < N → p < K →
+          C t p < 4 ∧ d t p < 3 ∧
+          outDigit (C t p) (d t p) = d (t+1) p ∧
+          nextCarry (C t p) (d t p) = C t (p+1) := by
+        intro t p ht hp
+        exact hcell t p ht (by omega)
+      have ih' := ih hprefix
+      have hrow := reverse_cross_mixed_controller_exact
+        (fun t => C t K) (fun t => C t (K+1)) (fun t => d t K) N
+        (fun t ht => (hcell t K ht (by omega)).1)
+        (fun t ht => (hcell t K ht (by omega)).2.1)
+        (fun t ht => (hcell t K ht (by omega)).2.2.1)
+        (fun t ht => (hcell t K ht (by omega)).2.2.2)
+      rw [weightedCrossPrefix, weightedMixedPrefix, Finset.sum_range_succ,
+        ih', hrow, Nat.pow_succ]
+      push_cast
+      ring
+
 #check infinite_base_carry_zero
 #check canonical_infinite_bad_control
 #check canonical_infinite_ledger
@@ -197,6 +252,7 @@ theorem reverse_cross_mixed_controller_exact
 #check cross_mixed_survive_cancel
 #check cross_mixed_controller_divergence
 #check reverse_cross_mixed_controller_exact
+#check weighted_cross_mixed_controller_exact
 #print axioms infinite_base_carry_zero
 #print axioms canonical_infinite_bad_control
 #print axioms canonical_infinite_ledger
@@ -205,5 +261,6 @@ theorem reverse_cross_mixed_controller_exact
 #print axioms cross_mixed_survive_cancel
 #print axioms cross_mixed_controller_divergence
 #print axioms reverse_cross_mixed_controller_exact
+#print axioms weighted_cross_mixed_controller_exact
 
 end GSTFinalPrefixOneStep6Infinite
