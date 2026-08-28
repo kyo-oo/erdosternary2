@@ -97,8 +97,7 @@ theorem canonical_past_future_synchronized_all_depth
   exact (canonical_infinite_ledger s n).pastSynchronized K
 
 /-- The exact Step-6 linear combination of crossing and mixed charge has no
-microscopic SURVIVE source.  This is the algebraic atom used before coupling
-the rectangle to the all-depth controller ledger. -/
+microscopic SURVIVE source. -/
 theorem cross_mixed_survive_cancel
     (C d : Nat) (hC : C < 4) (hd : d < 3) :
     2 * crossDensity C d - 3 * mixedDensity C d =
@@ -111,17 +110,100 @@ theorem cross_mixed_survive_cancel
   rw [crossDensity, mixed_cell_emergence C d hC hd]
   ring
 
+/-- Horizontal potential left after the exact `2·cross - 3·mixed` source
+cancellation. -/
+def controllerDigitPotential (d : Nat) : Int :=
+  2 * digitPotential d - 3 * infoPotential d
+
+/-- Vertical carry potential left after the same cancellation. -/
+def controllerCarryPotential (C : Nat) : Int :=
+  2 * carryPotentialX C - 21 * carryPotential C
+
+/-- The cancelled local charge is a genuine two-direction controller
+divergence plus one retained BIG1 packet.  The packet is explicit rather than
+silently discarded. -/
+theorem cross_mixed_controller_divergence
+    (C d : Nat) (hC : C < 4) (hd : d < 3) :
+    2 * crossDensity C d - 3 * mixedDensity C d =
+      controllerDigitPotential (outDigit C d) -
+        4 * controllerDigitPotential d +
+      controllerCarryPotential C -
+        3 * controllerCarryPotential (nextCarry C d) -
+      9 * infoPotential d := by
+  rw [cross_mixed_survive_cancel C d hC hd]
+  unfold controllerDigitPotential controllerCarryPotential
+  ring
+
+/-- Reverse-base-four mixed charge, in the same physical orientation as
+`reverseCrossCode`. -/
+def reverseMixedCode (C d : Nat → Nat) : Nat → Int
+  | 0 => 0
+  | N+1 => 4 * reverseMixedCode C d N + mixedDensity (C N) (d N)
+
+/-- Reverse-base-four retained BIG1 packet. -/
+def reverseInfoCode (d : Nat → Nat) : Nat → Int
+  | 0 => 0
+  | N+1 => 4 * reverseInfoCode d N + infoPotential (d N)
+
+/-- Reverse-base-four controller carry potential. -/
+def reverseControllerCarryCode (C : Nat → Nat) : Nat → Int
+  | 0 => 0
+  | N+1 =>
+      4 * reverseControllerCarryCode C N + controllerCarryPotential (C N)
+
+/-- Exact row telescope of the source-cancelled Step-6 charge.  No SURVIVE
+term remains: only endpoint information, the vertical controller derivative,
+and the explicitly retained BIG1 packet survive. -/
+theorem reverse_cross_mixed_controller_exact
+    (C Cnext d : Nat → Nat) : ∀ N : Nat,
+    (∀ t, t < N → C t < 4) →
+    (∀ t, t < N → d t < 3) →
+    (∀ t, t < N → outDigit (C t) (d t) = d (t+1)) →
+    (∀ t, t < N → nextCarry (C t) (d t) = Cnext t) →
+    2 * reverseCrossCode C d N - 3 * reverseMixedCode C d N =
+      controllerDigitPotential (d N) -
+        (((4^N : Nat) : Int)) * controllerDigitPotential (d 0) +
+      reverseControllerCarryCode C N -
+        3 * reverseControllerCarryCode Cnext N -
+      9 * reverseInfoCode d N := by
+  intro N
+  induction N with
+  | zero =>
+      intro hC hd hout hnext
+      simp [reverseCrossCode, reverseMixedCode, reverseInfoCode,
+        reverseControllerCarryCode]
+  | succ N ih =>
+      intro hC hd hout hnext
+      have ih' := ih
+        (fun t ht => hC t (by omega))
+        (fun t ht => hd t (by omega))
+        (fun t ht => hout t (by omega))
+        (fun t ht => hnext t (by omega))
+      have hlocal := cross_mixed_controller_divergence
+        (C N) (d N) (hC N (by omega)) (hd N (by omega))
+      have houtN := hout N (by omega)
+      have hnextN := hnext N (by omega)
+      rw [reverseCrossCode, reverseMixedCode, reverseInfoCode,
+        reverseControllerCarryCode, reverseControllerCarryCode, ih', hlocal,
+        houtN, hnextN, Nat.pow_succ]
+      push_cast
+      ring
+
 #check infinite_base_carry_zero
 #check canonical_infinite_bad_control
 #check canonical_infinite_ledger
 #check canonical_controller_graph_all_depth
 #check canonical_past_future_synchronized_all_depth
 #check cross_mixed_survive_cancel
+#check cross_mixed_controller_divergence
+#check reverse_cross_mixed_controller_exact
 #print axioms infinite_base_carry_zero
 #print axioms canonical_infinite_bad_control
 #print axioms canonical_infinite_ledger
 #print axioms canonical_controller_graph_all_depth
 #print axioms canonical_past_future_synchronized_all_depth
 #print axioms cross_mixed_survive_cancel
+#print axioms cross_mixed_controller_divergence
+#print axioms reverse_cross_mixed_controller_exact
 
 end GSTFinalPrefixOneStep6Infinite
