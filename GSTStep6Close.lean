@@ -8,7 +8,9 @@ open Lean Meta Elab Tactic
 namespace GSTStep6Close
 
 private def headConst? (e : Expr) : MetaM (Option Name) := do
-  let e ← whnf e
+  -- Preserve the proposition's semantic wrapper.  Reducing first unfolds
+  -- transparent packet definitions (including the production wrappers) and
+  -- loses the declaration name that the tactic is meant to recognize.
   pure e.getAppFn.constName?
 
 private def nameEndsWith (n : Name) (suffix : String) : Bool :=
