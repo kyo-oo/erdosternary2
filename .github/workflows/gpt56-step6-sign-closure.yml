@@ -1,0 +1,52 @@
+name: GPT56 Step6 Sign Closure
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - 'GPT56Step6SignClosure.lean'
+      - '.github/workflows/gpt56-step6-sign-closure.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gpt56-step6-sign-closure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Install exact Lean RC2 and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile isolated sign closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GPT56Step6SignClosure.lean 2>&1 | tee step6-sign.log
+          echo 'STEP6_SIGN_CLOSURE_GREEN=1'
+
+      - name: Axiom audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          if grep -Fq 'sorryAx' step6-sign.log; then
+            echo 'FORBIDDEN_SORRYAX_IN_STEP6_SIGN=1'
+            exit 1
+          fi
+          echo 'STEP6_SIGN_AXIOM_AUDIT_GREEN=1'
