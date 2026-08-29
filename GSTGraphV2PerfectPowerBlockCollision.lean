@@ -164,8 +164,7 @@ theorem canonical_perfect_power_block_collision
     (fun j hj => by simpa [E, N, b, Nat.add_assoc] using hRightBad j)
   have hPureExact := blockDensity_column_exact E N b (q+1)
 
-  -- Diagnostic compiler state: the theorem was historically left at one
-  -- arithmetic boundary.  Expose that exact state before changing any math.
+  -- Diagnostic compiler state: expose the exact remaining arithmetic seam.
   dsimp [E, N, b, M] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
   trace_state
   omega
