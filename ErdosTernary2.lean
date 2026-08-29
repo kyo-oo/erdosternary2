@@ -30,6 +30,7 @@
 
 import GSTTactic
 import GSTStep6Close
+import GSTPrefixOneU2DCollisionProof
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
@@ -7399,11 +7400,13 @@ theorem gst_omega_seededAffine_block_echo
           3^(s+1) * c s * gstNavigationConstant (s+k) m) := by
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
-/-!
-  Certified residual Ω closure reused by the Step6 collision kernel.
+/-
+  Legacy residual overproof.  The final digit theorem does not require a pure
+  Navigation witness at every exponent; the two-wave theorem below is strictly
+  weaker and sufficient.  This block remains as proof archaeology only.
 -/
 
--- CERTIFIED RESIDUAL OMEGA CLOSURE START
+/- QUARANTINED LEGACY RESIDUAL OMEGA START
 /-- First-level residual Ω∞ termination.  The proof consumes the exact seeded
     orbit, a finite child gate, the terminal natural cone, and the complete
     residual boundary classification. -/
@@ -7515,7 +7518,7 @@ theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
 theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
--- CERTIFIED RESIDUAL OMEGA CLOSURE END
+QUARANTINED LEGACY RESIDUAL OMEGA END -/
 
 
 /-
@@ -16830,57 +16833,85 @@ theorem gst_prefix_one_bigN_future_zero_inline
     kernel-green information-wave identities above. -/
 theorem gst_step6_collision_kernel
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (_hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  have hb : 1 ≤ 1 + 3*n := by omega
-  have hb3 : (1 + 3*n) % 3 ≠ 0 := by omega
-  have hdomain : 2 ≤ s ∨ 1 < 1 + 3*n := Or.inr (by omega)
-  have hParent : GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
-    gst_navigation_witness_all_of_residual
-      (gst_residual_navigation_lift_of_omega_termination
-        gst_residual_omega_termination)
-      s (1 + 3*n) hs hb hb3 hdomain
-  rcases hParent with ⟨j, hd, hspace⟩
-  cases j with
-  | zero =>
-      have hmod := gstNavigationConstant_mod3 s (1 + 3*n) hs hb hb3
-      have hbmod : (1 + 3*n) % 3 = 1 := by omega
-      simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
-      rw [hmod, hbmod] at hd
+  let T : Nat := gstNavigationConstant (s+1) n
+  let A : Nat := 4^(3^s)
+  let z : Nat := gstCanonicalPrefixOffsetS s
+  let H : Nat := z + A*T
+
+  have hchildT : GSTNavigationWitness T := by
+    simpa [T] using hchild
+
+  have hparent : GSTSeededBadTraceS 1 H := by
+    intro j
+    have hj := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j
+    simpa [H, T, A, z, gstPrefixOneUPotentialTailS,
+      gstCanonicalPrefixOffsetS] using hj
+
+  have hchildGate : ∃ q, GSTSeededHappyS 0 T q := by
+    obtain ⟨q, hd, hspace⟩ := hchildT
+    have hmod : gstCarry T q % 3 = 0 :=
+      gstGoodSpace_carry_mod3_zero T q hspace
+    have hlt : gstCarry T q < 4 := by
+      simpa [gstCarry, gstAffineMulCarryS] using
+        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
+    have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
       omega
-  | succ j =>
-      have hprojection := gst_omega_parent_projection s 1 n j hs
-      have hCmod :
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) % 3 = 0 :=
-        gstGoodSpace_carry_mod3_zero _ _ hspace
-      have hClt :
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) < 4 :=
-        gstCarry_lt_four _ _ (by omega)
-      have hC :
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 0 ∨
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 3 := by
-        omega
-      have hd' :
-          gstDigit (gstNavigationConstant s (1 + 3*n)) (1+j) = 2 := by
-        simpa [Nat.add_comm] using hd
-      have hC' :
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 0 ∨
-          gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 3 := by
-        simpa [Nat.add_comm] using hC
-      have hgate :
-          (gstOmega s 1 n j).parentDigit = 2 ∧
-          ((gstOmega s 1 n j).parentCarry = 0 ∨
-           (gstOmega s 1 n j).parentCarry = 3) := by
-        constructor
-        · rw [← hprojection.1]
-          simpa [Nat.pow_one] using hd'
-        · rw [← hprojection.2]
-          simpa [Nat.pow_one] using hC'
-      have hzero : GSTOmegaGatePolynomial (gstOmega s 1 n j) = 0 :=
-        (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2 hgate
-      have hne := hBad j
-      change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0 at hne
-      exact hne hzero
+    refine ⟨q, ?_⟩
+    constructor
+    · simpa [T, gstDigitS, gstDigit] using hd
+    · simpa [T, gstAffineMulCarryS, gstCarry] using hcarry
+
+  have hunitPrefix :
+      gstNavigationConstant s 1 = 1 + 3*z := by
+    simpa [z] using gst_navigation_constant_unit_prefixS s hs
+
+  obtain ⟨q, hq⟩ := hchildGate
+
+  have hT :
+      T = GSTPrefixOneU2DCollisionProof.childTail s n := by
+    simp [T, gstNavigationConstant,
+      GSTPrefixOneU2DCollisionProof.childTail,
+      GSTPrefixOneU2DCollisionProof.childEnergy, Nat.add_assoc]
+
+  have hH :
+      H = GSTPrefixOneU2DCollisionProof.rightTail s n z := by
+    simp [H, A, GSTPrefixOneU2DCollisionProof.rightTail, hT]
+
+  have hChildCanonical :
+      GSTU2DEventTransport.HappyCell
+        (GSTCanonicalSevenAxisBridge.carry4
+          (GSTPrefixOneU2DCollisionProof.childTail s n) q)
+        (GSTCanonicalSevenAxisBridge.digit3
+          (GSTPrefixOneU2DCollisionProof.childTail s n) q) := by
+    rw [← hT]
+    simpa [GSTU2DEventTransport.HappyCell, GSTSeededHappyS,
+      GSTCanonicalSevenAxisBridge.carry4,
+      GSTCanonicalSevenAxisBridge.digit3,
+      gstAffineMulCarryS, gstDigitS] using hq
+
+  have hBadCanonical : ∀ j,
+      ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.seededCarry 1
+          (GSTPrefixOneU2DCollisionProof.rightTail s n z) j)
+        (GSTCanonicalSevenAxisBridge.digit3
+          (GSTPrefixOneU2DCollisionProof.rightTail s n z) j) := by
+    intro j
+    have hj := hparent j
+    rw [← hH]
+    simpa [GSTU2DEventTransport.HappyCell, GSTBadPairS,
+      GSTGraphV2InfiniteControl.seededCarry,
+      GSTCanonicalSevenAxisBridge.digit3,
+      gstAffineMulCarryS, gstDigitS] using hj
+
+  have hLTE :
+      4^(3^s) = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
+    simpa using (gst_navigation_decomposition s 1 hs)
+
+  exact GSTPrefixOneU2DCollisionProof.canonical_prefix_one_u2d_collision
+    s n (gstNavigationConstant s 1) z q hs hn
+    hLTE hunitPrefix hChildCanonical hBadCanonical
 
 theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
