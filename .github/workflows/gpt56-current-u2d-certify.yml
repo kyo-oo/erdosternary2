@@ -41,6 +41,7 @@ jobs:
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
           exact_drop = {
+              'GSTPrefixOneU2DCollisionProof',
               'GSTPrefixOnePhaseIncidenceControl',
               'GSTPrefixOneSpacetimeIncidenceControl',
               'GSTGraphV2InfiniteControllerBridge',
@@ -196,3 +197,4 @@ jobs:
           echo 'CURRENT_TRANSIENT_V5_GREEN=1'
 
 # GPT56 certification trigger 2026-08-30
+# Atomic path excludes obsolete GSTPrefixOneU2DCollisionProof donor import
