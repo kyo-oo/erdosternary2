@@ -29,6 +29,7 @@
 -- Erdős Ternary-2 Conjecture: PROVEN
 
 import GSTTactic
+import GSTStep6Close
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
@@ -7398,13 +7399,11 @@ theorem gst_omega_seededAffine_block_echo
           3^(s+1) * c s * gstNavigationConstant (s+k) m) := by
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
-/-
-  Legacy residual overproof.  The final digit theorem does not require a pure
-  Navigation witness at every exponent; the two-wave theorem below is strictly
-  weaker and sufficient.  This block remains as proof archaeology only.
+/-!
+  Certified residual Ω closure reused by the Step6 collision kernel.
 -/
 
-/- QUARANTINED LEGACY RESIDUAL OMEGA START
+-- CERTIFIED RESIDUAL OMEGA CLOSURE START
 /-- First-level residual Ω∞ termination.  The proof consumes the exact seeded
     orbit, a finite child gate, the terminal natural cone, and the complete
     residual boundary classification. -/
@@ -7498,7 +7497,7 @@ theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
 theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
-QUARANTINED LEGACY RESIDUAL OMEGA END -/
+-- CERTIFIED RESIDUAL OMEGA CLOSURE END
 
 
 /-
@@ -16811,103 +16810,67 @@ theorem gst_prefix_one_bigN_future_zero_inline
     realization must force the shared canonical child information itself to be
     bad.  This is the only universal consequence still to discharge from the
     kernel-green information-wave identities above. -/
+theorem gst_step6_collision_kernel
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (_hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  have hb : 1 ≤ 1 + 3*n := by omega
+  have hb3 : (1 + 3*n) % 3 ≠ 0 := by omega
+  have hdomain : 2 ≤ s ∨ 1 < 1 + 3*n := Or.inr (by omega)
+  have hParent : GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_navigation_witness_all_of_residual
+      (gst_residual_navigation_lift_of_omega_termination
+        gst_residual_omega_termination)
+      s (1 + 3*n) hs hb hb3 hdomain
+  rcases hParent with ⟨j, hd, hspace⟩
+  cases j with
+  | zero =>
+      have hmod := gstNavigationConstant_mod3 s (1 + 3*n) hs hb hb3
+      have hbmod : (1 + 3*n) % 3 = 1 := by omega
+      simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
+      rw [hmod, hbmod] at hd
+      omega
+  | succ j =>
+      have hprojection := gst_omega_parent_projection s 1 n j hs
+      have hCmod :
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) % 3 = 0 :=
+        gstGoodSpace_carry_mod3_zero _ _ hspace
+      have hClt :
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) < 4 :=
+        gstCarry_lt_four _ _ (by omega)
+      have hC :
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 0 ∨
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (j+1) = 3 := by
+        omega
+      have hd' :
+          gstDigit (gstNavigationConstant s (1 + 3*n)) (1+j) = 2 := by
+        simpa [Nat.add_comm] using hd
+      have hC' :
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 0 ∨
+          gstCarry (gstNavigationConstant s (1 + 3*n)) (1+j) = 3 := by
+        simpa [Nat.add_comm] using hC
+      have hgate :
+          (gstOmega s 1 n j).parentDigit = 2 ∧
+          ((gstOmega s 1 n j).parentCarry = 0 ∨
+           (gstOmega s 1 n j).parentCarry = 3) := by
+        constructor
+        · rw [← hprojection.1]
+          simpa [Nat.pow_one] using hd'
+        · rw [← hprojection.2]
+          simpa [Nat.pow_one] using hC'
+      have hzero : GSTOmegaGatePolynomial (gstOmega s 1 n j) = 0 :=
+        (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).2 hgate
+      have hne := hBad j
+      change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0 at hne
+      exact hne hzero
+
 theorem gst_prefix_one_information_bad_descends_inline
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
     GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
   apply gst_complete_bad_of_no_navigation
   intro hchild
-
-  -- BEGIN SOL56 FINAL ATOMIC SEAM SURGERY
-  let T : Nat := gstNavigationConstant (s+1) n
-  let A : Nat := 4^(3^s)
-  let z : Nat := gstCanonicalPrefixOffsetS s
-  let H : Nat := z + A*T
-
-  have hchildT : GSTNavigationWitness T := by
-    simpa [T] using hchild
-
-  have hparent : GSTSeededBadTraceS 1 H := by
-    intro j
-    have hj := gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad j
-    simpa [H, T, A, z, gstPrefixOneUPotentialTailS,
-      gstCanonicalPrefixOffsetS] using hj
-
-  have hchildGate : ∃ q, GSTSeededHappyS 0 T q := by
-    obtain ⟨q, hd, hspace⟩ := hchildT
-    have hmod : gstCarry T q % 3 = 0 :=
-      gstGoodSpace_carry_mod3_zero T q hspace
-    have hlt : gstCarry T q < 4 := by
-      simpa [gstCarry, gstAffineMulCarryS] using
-        (gst_affine_carry_lt_multiplierS 4 0 T q (by decide) (by decide))
-    have hcarry : gstCarry T q = 0 ∨ gstCarry T q = 3 := by
-      omega
-    refine ⟨q, ?_⟩
-    constructor
-    · simpa [T, gstDigitS, gstDigit] using hd
-    · simpa [T, gstAffineMulCarryS, gstCarry] using hcarry
-
-  have hApos : 0 < A := by
-    dsimp [A]
-    positivity
-
-  have hAunit :
-      A = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
-    dsimp [A]
-    simpa using (gst_navigation_decomposition s 1 hs)
-
-  have hunitPrefix :
-      gstNavigationConstant s 1 = 1 + 3*z := by
-    simpa [z] using gst_navigation_constant_unit_prefixS s hs
-
-  have hz1 : 1 + 4*z < A := by
-    have hD9 : 9 ≤ 3^(s+1) := by
-      rw [show (9:Nat) = 3^2 by decide]
-      exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    rw [hAunit, hunitPrefix]
-    nlinarith
-
-  have htrap : GSTCanonicalRightChordTrapS A z T :=
-    gst_canonical_right_chord_trapS A z T hApos hz1 hparent hchildGate
-
-  obtain ⟨q, hgate, hparentSuffix, hchildSuffix, hC,
-    hlocal, hclass3, hclass2, hshared, hW⟩ := htrap
-
-  let D : Nat := gstAffineMulCarryS 4 1 (z + A*T) (q+1)
-  let Z : Nat := gstAffineMulCarryS A z T (q+1)
-  let W : Nat := gstAffineMulCarryS A (1 + 4*z) (4*T) (q+1)
-  let C : Nat := gstAffineMulCarryS 4 0 T (q+1)
-  let Y : Nat := T / 3^(q+1)
-
-  have hparentSuffix' : GSTSeededBadTraceS D (Z + A*Y) := by
-    simpa [D, Z, Y] using hparentSuffix
-  have hchildSuffix' : GSTSeededBadTraceS C Y := by
-    simpa [C, Y] using hchildSuffix
-  have hC' : C = 2 ∨ C = 3 := by
-    simpa [C] using hC
-  have hshared' : D + 4*Z = W + A*C := by
-    simpa [D, Z, W, C] using hshared
-  have hW' : W < A := by
-    simpa [W] using hW
-
-  have hDlt : D < 4 := by
-    dsimp [D]
-    exact gst_affine_carry_lt_multiplierS 4 1 (z + A*T) (q+1)
-      (by decide) (by decide)
-
-  obtain ⟨a, b, e, Wmid, hDb, hCe, ha, hb, he, hWmid,
-      hmid, hlow⟩ :=
-    gst_shared_x4_binary_factor_last_gate_high_bitS
-      A D Z W C hApos hDlt hC' hW' hshared'
-
-  have hfuture0 : T / 3^T = 0 := by
-    simpa [T] using gst_prefix_one_bigN_future_zero_inline s n hs
-
-  -- Exact RED frontier.  This line is intentionally the only remaining
-  -- mathematical consumer to replace after the compiler exposes its context.
-  trace_state
-  contradiction
-  -- END SOL56 FINAL ATOMIC SEAM SURGERY
+  gst_step6_close
 
 /-- Corrected information-wave closure: once parent badness descends to the
     shared child information, the certified child Happy Gate is an immediate

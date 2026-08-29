@@ -1,9 +1,14 @@
-name: GPT56 Production Step6 Transplant
+name: GPT56 Production Step6 Certification
 
 on:
   push:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - 'ErdosTernary2.lean'
+      - 'GSTStep6Close.lean'
+      - 'GSTStep6CloseTest.lean'
+      - '.github/workflows/gpt56-production-step6-transplant.yml'
   workflow_dispatch:
 
 concurrency:
@@ -11,17 +16,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  transplant:
+  certify:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 1
-
-      - name: Apply certified Step6 transplant
-        run: python3 scripts/gpt56_apply_step6_production_transplant.py
 
       - name: Install Lean RC2 and pinned Mathlib
         run: |
@@ -33,12 +33,19 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile transplanted production monolith
+      - name: Compile committed production monolith
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake build ErdosTernary2 2>&1 | tee production-step6-lean.log
           echo STEP6_PRODUCTION_MONOLITH_GREEN=1
+
+      - name: Compile exact tactic regression
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTStep6CloseTest.lean 2>&1 | tee production-step6-regression.log
+          echo STEP6_TACTIC_REGRESSION_GREEN=1
 
       - name: Kernel axiom audit
         run: |
@@ -46,6 +53,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           printf '%s\n' \
             'import ErdosTernary2' \
+            '#print axioms gst_step6_collision_kernel' \
             '#print axioms gst_prefix_one_information_bad_descends_inline' \
             '#print axioms gst_prefix_one_child_gate_contradicts_parent_bad_inline' \
             '#print axioms gst_prefix_one_navigation_lift' \
@@ -58,20 +66,6 @@ jobs:
           fi
           echo STEP6_PRODUCTION_AXIOM_AUDIT_GREEN=1
 
-      - name: Commit production transplant only after GREEN
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
-            echo 'production transplant and collision roots already committed'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean lakefile.toml
-          git commit -m 'proof: transplant certified Step6 closure into production'
-          git push
-          echo STEP6_PRODUCTION_TRANSPLANT_COMMITTED=1
-
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -79,5 +73,6 @@ jobs:
           name: gpt56-production-step6-diagnostics
           path: |
             production-step6-lean.log
+            production-step6-regression.log
             production-step6-axioms.log
           if-no-files-found: warn

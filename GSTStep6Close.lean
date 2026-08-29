@@ -44,9 +44,10 @@ proof dependency.  Semantic packets are discovered by the head constant of
 their types, not by fragile local hypothesis names.
 
 The closing pipeline is deliberately conservative: direct contradiction and
-Presburger closure are tried first.  The certified semantic collision lemma is
-installed by the importing proof layer; until then the tactic fails with an
-explicit frontier message rather than hiding the gap behind broad search.
+Presburger closure are tried first, then the importing proof layer's certified
+`gst_step6_collision_kernel` theorem is applied.  The theorem name is resolved
+at tactic invocation time, so this metaprogramming kernel remains independent
+of the production monolith and cannot introduce an import cycle.
 -/
 elab "gst_step6_close" : tactic => do
   let goal ← getMainGoal
@@ -58,7 +59,8 @@ elab "gst_step6_close" : tactic => do
     first
       | contradiction
       | omega
-      | fail "gst_step6_close: semantic packets found; certified Step-6 collision reducer not yet applicable"))
+      | (apply gst_step6_collision_kernel <;> assumption)
+      | fail "gst_step6_close: semantic packets found; certified gst_step6_collision_kernel was not applicable"))
 
 /-- Diagnostic form used while developing the semantic reducer.  It verifies
 that the tactic can locate both production packets without attempting closure. -/

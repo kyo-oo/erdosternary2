@@ -1,4 +1,4 @@
-import GSTStep6Close
+import ErdosTernary2
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -12,7 +12,7 @@ production logical seam: child Navigation against complete prefix-one parent
 badness. -/
 theorem gst_step6_close_regression
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hchild : GSTNavigationWitness (gpt56PhaseT s n))
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
     (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
   gst_step6_close
 
