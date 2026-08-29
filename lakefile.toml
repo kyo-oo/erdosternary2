@@ -46,6 +46,7 @@ roots = [
   "GSTInfiniteGateTransport",
   "GSTPerfectPowerTailNavigation",
   "GSTPrefixOneOntologicalEscape",
+  "GSTStep6Close",
   "GSTU2DAtomicBridge",
   "GSTU2DCanonicalPhaseDensity",
   "GSTU2DEventTransport",
