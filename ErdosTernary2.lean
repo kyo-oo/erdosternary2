@@ -7431,7 +7431,8 @@ theorem gst_omega_termination_s1
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
     GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega | aesop
+    <;> first | contradiction | omega
+      | aesop (config := { maxRuleApplications := 10000 })
 
 /-- Level-three residual Ω∞ termination, after the certified cut states have
     been removed from the boundary. -/
@@ -7457,7 +7458,8 @@ theorem gst_omega_termination_s3
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
     GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega | aesop
+    <;> first | contradiction | omega
+      | aesop (config := { maxRuleApplications := 10000 })
 
 /-- Stable residual Ω∞ termination for `2 ≤ s`, `s ≠ 3`, and the remaining
     young cuts. -/
@@ -7484,7 +7486,8 @@ theorem gst_omega_termination_stable
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
     GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> first | contradiction | omega | aesop
+    <;> first | contradiction | omega
+      | aesop (config := { maxRuleApplications := 10000 })
 
 /-- The three exact residual graph worlds exhaust the origin boundary. -/
 theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
