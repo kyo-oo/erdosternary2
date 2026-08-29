@@ -11,9 +11,6 @@ rev = "v4.33.0-rc2"
 name = "GSTTactic"
 
 [[lean_lib]]
-name = "GSTStep6Close"
-
-[[lean_lib]]
 name = "ErdosTernary2"
 
 [[lean_lib]]
