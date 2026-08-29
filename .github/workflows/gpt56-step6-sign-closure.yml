@@ -32,12 +32,51 @@ jobs:
           lake update
           lake exe cache get
 
+      - name: Materialize Step6 dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          ROOT=Path('GPT56Step6SignClosure.lean')
+          BUILD=Path('.lake/build/lib/lean')
+          rx=re.compile(r'^\s*import\s+(.+?)\s*$')
+          def path(m): return Path(*m.split('.')).with_suffix('.lean')
+          def imports(p):
+              out=[]
+              for raw in p.read_text().splitlines():
+                  m=rx.match(raw.split('--',1)[0].rstrip())
+                  if m: out.extend(m.group(1).split())
+              return out
+          done=set(); stack=[]; order=[]
+          def visit(m):
+              if m in done: return
+              p=path(m)
+              if not p.exists(): return
+              if m in stack: raise SystemExit('cycle: '+' -> '.join(stack+[m]))
+              stack.append(m)
+              for d in imports(p): visit(d)
+              stack.pop(); done.add(m); order.append((m,p))
+          for m in imports(ROOT): visit(m)
+          BUILD.mkdir(parents=True,exist_ok=True)
+          print('STEP6_SIGN_IMPORT_COUNT='+str(len(order)))
+          for m,p in order:
+              o=BUILD.joinpath(*m.split('.')).with_suffix('.olean')
+              o.parent.mkdir(parents=True,exist_ok=True)
+              if o.exists(): continue
+              subprocess.run(['lake','env','lean','-o',str(o),str(p)],check=True)
+          print('STEP6_SIGN_IMPORTS_GREEN=1')
+          PY
+
       - name: Compile isolated sign closure
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GPT56Step6SignClosure.lean 2>&1 | tee step6-sign.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GPT56Step6SignClosure.olean GPT56Step6SignClosure.lean 2>&1 | tee step6-sign.log
           echo 'STEP6_SIGN_CLOSURE_GREEN=1'
 
       - name: Axiom audit
