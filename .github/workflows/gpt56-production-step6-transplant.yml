@@ -8,6 +8,7 @@ on:
       - 'ErdosTernary2.lean'
       - 'GSTStep6Close.lean'
       - 'GSTStep6CloseTest.lean'
+      - 'lakefile.toml'
       - '.github/workflows/gpt56-production-step6-transplant.yml'
   workflow_dispatch:
 
