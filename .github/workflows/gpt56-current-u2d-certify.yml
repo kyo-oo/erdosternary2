@@ -194,3 +194,5 @@ jobs:
           grep -F '=== COMPARATOR RESULT: PASS ===' gpt56-current-v5.log
           grep -F 'Your solution is okay!' gpt56-current-v5.log
           echo 'CURRENT_TRANSIENT_V5_GREEN=1'
+
+# GPT56 certification trigger 2026-08-30
