@@ -94,8 +94,8 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > GPT56DirectU2DAudit.lean <<'EOF'
           import GSTFinalPrefixOneDirectU2DCollision
-          #print axioms GSTFinalPrefixOneDirectU2DCollision.canonical_perfect_power_block_collision
-          #print axioms GSTFinalPrefixOneDirectU2DCollision.gst_prefix_one_information_bad_descends_u2d
+          #print axioms GSTFinalPrefixOneDirectU2DCollision.canonical_perfect_power_block_collision_direct
+          #print axioms GSTFinalPrefixOneDirectU2DCollision.canonical_right_bad_forces_no_child_navigation
           EOF
           lake env lean GPT56DirectU2DAudit.lean 2>&1 | tee direct-u2d-axioms.log
           if grep -Fq 'sorryAx' direct-u2d-axioms.log; then
