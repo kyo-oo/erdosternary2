@@ -222,6 +222,52 @@ theorem canonical_child_residue_packet_nonzero
   apply hNatural
   simp [GSTV2.naturalCarry, hzero]
 
+
+/-- Exact zero-phase iteration: every ternary power dividing the canonical
+origin divides its canonical tail at the same depth. -/
+theorem canonicalTail_pow_dvd_of_origin_pow_dvd
+    (r n K : Nat) (hdiv : 3^K ∣ n) :
+    3^K ∣ canonicalTail r n := by
+  induction K generalizing r n with
+  | zero => simp
+  | succ K ih =>
+      obtain ⟨m, rfl⟩ := hdiv
+      have hshape :
+          3^(K+1) * m = 3 * (3^K * m) := by
+        rw [Nat.pow_succ]
+        ring
+      rw [hshape, canonicalTail_zero_strip]
+      have hinner : 3^K ∣ canonicalTail (r+1) (3^K * m) :=
+        ih (r+1) (3^K * m) ⟨m, rfl⟩
+      obtain ⟨z, hz⟩ := hinner
+      refine ⟨z, ?_⟩
+      rw [hz, Nat.pow_succ]
+      ring
+
+/-- Nonzero canonical-tail residue therefore certifies nonzero origin support
+below the same cutoff. -/
+theorem canonical_origin_prefix_nonzero_of_tail_prefix_nonzero
+    (r n K : Nat)
+    (htail : canonicalTail r n % 3^K ≠ 0) :
+    n % 3^K ≠ 0 := by
+  intro hzero
+  have horigin : 3^K ∣ n := Nat.dvd_of_mod_eq_zero hzero
+  have htailDiv :=
+    canonicalTail_pow_dvd_of_origin_pow_dvd r n K horigin
+  exact htail (Nat.mod_eq_zero_of_dvd htailDiv)
+
+/-- The combined controller and canonical renormalizer reach the actual
+origin: the origin has nonzero ternary support below the child-gate cutoff. -/
+theorem canonical_origin_packet_nonzero
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hChild : SeedHappy 0 0 (canonicalChildTail s n) q)
+    (hRightBad : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j) :
+    n % 3^(q+1) ≠ 0 := by
+  apply canonical_origin_prefix_nonzero_of_tail_prefix_nonzero (s+1)
+  simpa [canonicalChildTail] using
+    canonical_child_residue_packet_nonzero s n q hs hChild hRightBad
+
 private theorem index_le_three_pow (r : Nat) :
     r ≤ 3^r := by
   induction r with
@@ -249,6 +295,8 @@ theorem nat_no_unbounded_ternary_support
 #check canonical_base_carry_zero
 #check canonical_latent_gate_packet
 #check canonical_child_residue_packet_nonzero
+#check canonicalTail_pow_dvd_of_origin_pow_dvd
+#check canonical_origin_packet_nonzero
 #check canonical_parent_energy_decomposition
 #check nat_no_unbounded_ternary_support
 #print axioms canonical_parent_energy_decomposition
