@@ -103,9 +103,11 @@ theorem canonical_left_seed_adapter
     exact lt_trans (by decide : 1 < 4) (canonical_cut_gt_four s hs)
   have h := graph_prefix_slice_happy_iff
     (4^(3^(s+1) * n)) 0 (s+2) 1 (canonicalChildTail s n) q hE hP
-  simpa [SeedHappy, GSTGraphV2SeededPrefix.seededCarry,
-    seededResidue, seededDigit,
-    GSTGraphV2InfiniteControl.seededCarry,
+  have hseed : (4 * 1) / 3^(s+2) = 0 :=
+    Nat.div_eq_of_lt (canonical_cut_gt_four s hs)
+  rw [hseed] at h
+  rw [seedHappy_zero_iff]
+  simpa [HappyCell, GSTGraphV2InfiniteControl.seededCarry,
     GSTCanonicalSevenAxisBridge.carry4,
     GSTCanonicalSevenAxisBridge.digit3] using h
 
