@@ -74,7 +74,8 @@ theorem seeded_weighted_u_jump_exact
         24 * ((X % 3^K : Nat) : Int) := by
   induction K with
   | zero =>
-      simp [GSTV2.affineCarry]
+      have hx : X % 1 = 0 := Nat.mod_one X
+      simp [GSTV2.affineCarry, hx, gstUChargeExact]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hnext :
@@ -137,8 +138,9 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
               rw [GSTV2.digit_prefix_value, hdigit]
     rw [hnext, hprefix, Nat.pow_succ]
     norm_num [gstUChargeExact]
-    have hr : (0 : Int) ≤ ((X % 3^q : Nat) : Int) := by positivity
-    have ha : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
+    have hr : (0 : Int) ≤ (X : Int) % (3 : Int)^q := by
+      exact Int.emod_nonneg _ (by positivity)
+    have ha : (0 : Int) < (3 : Int)^q := by positivity
     norm_num only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_pow]
     nlinarith
   · have hnextNat := GSTV2.naturalCarry_forward X q
