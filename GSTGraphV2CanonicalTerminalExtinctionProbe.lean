@@ -104,6 +104,78 @@ theorem seeded_weighted_u_jump_exact
       push_cast
       ring
 
+/-- A seed-zero Happy gate makes the entire base-three weighted U prefix
+strictly negative.  This is a finite signed certificate, not merely the
+single-cell negativity at the gate. -/
+theorem seeded_zero_weighted_u_prefix_negative_of_happy
+    (X q : Nat)
+    (hHappy : GSTV2.Happy
+      (GSTV2.naturalCarry X q) (GSTV2.digit X q)) :
+    Finset.sum (Finset.range (q+1)) (fun j =>
+      (((3^j : Nat) : Int)) *
+        gstUJumpExact
+          (GSTV2.affineCarry 0 X j)
+          (GSTV2.digit X j)) < 0 := by
+  rw [seeded_weighted_u_jump_exact 0 X (q+1)]
+  rcases hHappy with ⟨hdigit, hcarry | hcarry⟩
+  · have hnextNat := GSTV2.naturalCarry_forward X q
+    rw [hcarry, hdigit] at hnextNat
+    norm_num [GSTV2.cellNextCarry, GSTV2.cellMass] at hnextNat
+    have hnext : GSTV2.affineCarry 0 X (q+1) = 2 := by
+      simpa [GSTV2.affineCarry, GSTV2.naturalCarry] using hnextNat
+    have hprefix :
+        X % 3^(q+1) = X % 3^q + 3^q * 2 := by
+      calc
+        X % 3^(q+1) =
+            Finset.sum (Finset.range (q+1))
+              (fun j => 3^j * GSTV2.digit X j) := by
+                symm
+                exact GSTV2.digit_prefix_value X (q+1)
+        _ = Finset.sum (Finset.range q)
+              (fun j => 3^j * GSTV2.digit X j) +
+            3^q * GSTV2.digit X q := by
+              rw [Finset.sum_range_succ]
+        _ = X % 3^q + 3^q * 2 := by
+              rw [GSTV2.digit_prefix_value, hdigit]
+    rw [hnext, hprefix, Nat.pow_succ]
+    norm_num [gstUChargeExact]
+    push_cast
+    have hp : (0 : Int) ≤ ((X % 3^q : Nat) : Int) := by positivity
+    nlinarith
+  · have hnextNat := GSTV2.naturalCarry_forward X q
+    rw [hcarry, hdigit] at hnextNat
+    norm_num [GSTV2.cellNextCarry, GSTV2.cellMass] at hnextNat
+    have hnext : GSTV2.affineCarry 0 X (q+1) = 3 := by
+      simpa [GSTV2.affineCarry, GSTV2.naturalCarry] using hnextNat
+    have hprefix :
+        X % 3^(q+1) = X % 3^q + 3^q * 2 := by
+      calc
+        X % 3^(q+1) =
+            Finset.sum (Finset.range (q+1))
+              (fun j => 3^j * GSTV2.digit X j) := by
+                symm
+                exact GSTV2.digit_prefix_value X (q+1)
+        _ = Finset.sum (Finset.range q)
+              (fun j => 3^j * GSTV2.digit X j) +
+            3^q * GSTV2.digit X q := by
+              rw [Finset.sum_range_succ]
+        _ = X % 3^q + 3^q * 2 := by
+              rw [GSTV2.digit_prefix_value, hdigit]
+    have hden : 0 < 3^q := by positivity
+    have hdiv : (4 * (X % 3^q)) / 3^q = 3 := by
+      simpa [GSTV2.naturalCarry] using hcarry
+    have hquot : 3 ≤ (4 * (X % 3^q)) / 3^q := by omega
+    have hlower : 3 * 3^q ≤ 4 * (X % 3^q) :=
+      (Nat.le_div_iff_mul_le hden).mp hquot
+    have hlowerInt :
+        (3 : Int) * (((3^q : Nat) : Int)) ≤
+          4 * ((X % 3^q : Nat) : Int) := by
+      exact_mod_cast hlower
+    rw [hnext, hprefix, Nat.pow_succ]
+    norm_num [gstUChargeExact]
+    push_cast
+    nlinarith
+
 /-- If every carry in a finite horizontal observation vanishes, the retained
 reverse-base-four carry word is exactly zero. -/
 theorem carryWord_eq_zero_of_window_neutral
@@ -164,6 +236,7 @@ theorem unit_graph_cell_neutral_of_pow_lt
 #check physical_bad_forces_nonnegative_u_jump
 #check canonical_width_u_derivative_positive
 #check seeded_weighted_u_jump_exact
+#check seeded_zero_weighted_u_prefix_negative_of_happy
 #check carryWord_eq_zero_of_window_neutral
 #check graph_u_potential_vacuum_baseline_of_window_neutral
 #check unit_graph_cell_neutral_of_pow_lt
@@ -171,6 +244,7 @@ theorem unit_graph_cell_neutral_of_pow_lt
 #print axioms physical_bad_forces_nonnegative_u_jump
 #print axioms canonical_width_u_derivative_positive
 #print axioms seeded_weighted_u_jump_exact
+#print axioms seeded_zero_weighted_u_prefix_negative_of_happy
 #print axioms carryWord_eq_zero_of_window_neutral
 #print axioms graph_u_potential_vacuum_baseline_of_window_neutral
 #print axioms unit_graph_cell_neutral_of_pow_lt
