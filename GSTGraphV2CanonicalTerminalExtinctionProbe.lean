@@ -1,5 +1,5 @@
 import GSTGraphV2HandwrittenAnchoredCocycle
-import GSTInfiniteCollision
+import GSTInfiniteBadTransport
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
