@@ -178,6 +178,92 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
     norm_num only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_pow]
     nlinarith
 
+/-- A seed-one affine carry is always one of the four physical GST carries. -/
+theorem affineCarry_one_lt_four
+    (X j : Nat) :
+    GSTV2.affineCarry 1 X j < 4 := by
+  have hpow : 0 < 3^j := by positivity
+  have hrem : X % 3^j < 3^j := Nat.mod_lt _ hpow
+  unfold GSTV2.affineCarry
+  exact (Nat.div_lt_iff_lt_mul hpow).2 (by omega)
+
+/-- An all-bad seed-one parent has a nonnegative exact weighted U prefix. -/
+theorem seeded_one_bad_weighted_u_prefix_nonnegative
+    (X K : Nat)
+    (hBad : GSTV2.SeededBadTrace 1 X) :
+    0 ≤ Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        gstUJumpExact
+          (GSTV2.affineCarry 1 X j)
+          (GSTV2.digit X j)) := by
+  apply Finset.sum_nonneg
+  intro j hj
+  have hCarry : GSTV2.affineCarry 1 X j < 4 :=
+    affineCarry_one_lt_four X j
+  have hDigit : GSTV2.digit X j < 3 := by
+    unfold GSTV2.digit
+    exact Nat.mod_lt _ (by decide)
+  have hCellBad : ¬ HappyCell
+      (GSTV2.affineCarry 1 X j)
+      (GSTV2.digit X j) := by
+    simpa [GSTV2.Happy, HappyCell] using hBad j
+  have hJump : 0 ≤ gstUJumpExact
+      (GSTV2.affineCarry 1 X j)
+      (GSTV2.digit X j) :=
+    gst_u_jump_nonnegative_of_not_happy _ _ hCarry hDigit hCellBad
+  exact mul_nonneg (by positivity) hJump
+
+/-- Exact signed coupled-prefix certificate.  A seed-zero child Happy gate and
+an all-bad seed-one parent force the full base-three weighted parent-minus-child
+U gap to be strictly positive through that gate. -/
+theorem seeded_coupled_weighted_u_gap_positive
+    (A child parent q : Nat)
+    (hA : 0 < A)
+    (hChild : GSTV2.Happy
+      (GSTV2.naturalCarry child q) (GSTV2.digit child q))
+    (hParentBad : GSTV2.SeededBadTrace 1 parent) :
+    0 < Finset.sum (Finset.range (q+1)) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (gstUJumpExact
+            (GSTV2.affineCarry 1 parent j)
+            (GSTV2.digit parent j) -
+          (A : Int) *
+            gstUJumpExact
+              (GSTV2.affineCarry 0 child j)
+              (GSTV2.digit child j))) := by
+  have hParent :=
+    seeded_one_bad_weighted_u_prefix_nonnegative parent (q+1) hParentBad
+  have hChildSum :=
+    seeded_zero_weighted_u_prefix_negative_of_happy child q hChild
+  have hSplit :
+      Finset.sum (Finset.range (q+1)) (fun j =>
+        (((3^j : Nat) : Int)) *
+          (gstUJumpExact
+              (GSTV2.affineCarry 1 parent j)
+              (GSTV2.digit parent j) -
+            (A : Int) *
+              gstUJumpExact
+                (GSTV2.affineCarry 0 child j)
+                (GSTV2.digit child j))) =
+        Finset.sum (Finset.range (q+1)) (fun j =>
+          (((3^j : Nat) : Int)) *
+            gstUJumpExact
+              (GSTV2.affineCarry 1 parent j)
+              (GSTV2.digit parent j)) -
+        (A : Int) *
+          Finset.sum (Finset.range (q+1)) (fun j =>
+            (((3^j : Nat) : Int)) *
+              gstUJumpExact
+                (GSTV2.affineCarry 0 child j)
+                (GSTV2.digit child j)) := by
+    rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro j hj
+    ring
+  rw [hSplit]
+  have hAInt : (0 : Int) < (A : Int) := by exact_mod_cast hA
+  nlinarith
+
 /-- If every carry in a finite horizontal observation vanishes, the retained
 reverse-base-four carry word is exactly zero. -/
 theorem carryWord_eq_zero_of_window_neutral
@@ -237,6 +323,9 @@ theorem unit_graph_cell_neutral_of_pow_lt
 #check canonical_width_u_derivative_positive
 #check seeded_weighted_u_jump_exact
 #check seeded_zero_weighted_u_prefix_negative_of_happy
+#check affineCarry_one_lt_four
+#check seeded_one_bad_weighted_u_prefix_nonnegative
+#check seeded_coupled_weighted_u_gap_positive
 #check carryWord_eq_zero_of_window_neutral
 #check graph_u_potential_vacuum_baseline_of_window_neutral
 #check unit_graph_cell_neutral_of_pow_lt
@@ -245,6 +334,9 @@ theorem unit_graph_cell_neutral_of_pow_lt
 #print axioms canonical_width_u_derivative_positive
 #print axioms seeded_weighted_u_jump_exact
 #print axioms seeded_zero_weighted_u_prefix_negative_of_happy
+#print axioms affineCarry_one_lt_four
+#print axioms seeded_one_bad_weighted_u_prefix_nonnegative
+#print axioms seeded_coupled_weighted_u_gap_positive
 #print axioms carryWord_eq_zero_of_window_neutral
 #print axioms graph_u_potential_vacuum_baseline_of_window_neutral
 #print axioms unit_graph_cell_neutral_of_pow_lt
