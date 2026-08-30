@@ -33,7 +33,6 @@ theorem canonical_right_energy_cut_decomposition (s n : Nat) :
     4^(canonicalWidth s) * canonicalEnergy s n =
       (1 + 3^(s+1)) + 3^(s+2) *
         (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n) := by
-  let X := prefixOffset s + 4^(3^s) * canonicalTail (s+1) n
   have hExp :
       3^s + 3^(s+1) * n = 3^s * (1 + 3*n) := by
     rw [Nat.pow_succ]
@@ -45,7 +44,6 @@ theorem canonical_right_energy_cut_decomposition (s n : Nat) :
   have hTail := canonical_tail_decomposition s (1 + 3*n)
   have hShape := prefix_one_tail_shape s n
   rw [hPow, hTail, hShape]
-  dsimp [X]
   rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
   ring
 
@@ -73,13 +71,13 @@ theorem canonical_right_low_prefix_seed_one
   have hM : 3^(s+2) = 3*u := by
     dsimp [u]
     rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+    ring
   have hrem : 4 + u < 3*u := by omega
   rw [hM]
   have hshape : 4 * (1 + u) = (4 + u) + (3*u) * 1 := by ring
   rw [hshape]
   have hMpos : 0 < 3*u := by positivity
   rw [Nat.add_mul_div_left _ _ hMpos, Nat.div_eq_of_lt hrem]
-  norm_num
 
 /-- Left child carry at the canonical production cut is exactly zero. -/
 theorem canonical_graph_childCarry_cut_zero
@@ -88,13 +86,15 @@ theorem canonical_graph_childCarry_cut_zero
   have hE := canonicalEnergy_cut_decomposition s n
   have hb : 2 ≤ s+2 := by omega
   have hbounds := one_prefix_bounds (s+2) hb
-  change GSTCanonicalSevenAxisBridge.carry4 (canonicalEnergy s n) (s+2) = 0
-  rw [hE]
-  unfold GSTCanonicalSevenAxisBridge.carry4
-  have hmod :
-      (1 + 3^(s+2) * canonicalTail (s+1) n) % 3^(s+2) = 1 := by
-    simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hbounds.1]
-  rw [hmod, Nat.div_eq_of_lt hbounds.2]
+  have hc :
+      GSTCanonicalSevenAxisBridge.carry4 (canonicalEnergy s n) (s+2) = 0 := by
+    rw [hE]
+    unfold GSTCanonicalSevenAxisBridge.carry4
+    have hmod :
+        (1 + 3^(s+2) * canonicalTail (s+1) n) % 3^(s+2) = 1 := by
+      simp [Nat.add_mod, Nat.mod_eq_of_lt hbounds.1]
+    rw [hmod, Nat.div_eq_of_lt hbounds.2]
+  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hc
 
 /-- The controller child tail is literally the next-scale canonical tail. -/
 theorem canonical_graph_childTail_cut_exact
@@ -118,7 +118,8 @@ theorem canonical_graph_right_descent_cut_exact
   change
     (4^(canonicalWidth s) * canonicalEnergy s n) / 3^(s+2) = X
   rw [hShape]
-  have hq := prefix_slice_quotient_exact (s+2) P X 0 hP
+  have hq := GSTCanonicalTailStateIso.prefix_slice_quotient_exact
+    (s+2) P X 0 hP
   simpa [P, X] using hq
 
 /-- The parent seed at the production cut is exactly one. -/
@@ -132,13 +133,15 @@ theorem canonical_graph_parentSeed_cut_one
     simpa [P] using canonical_right_low_prefix_lt_cut s
   have hseed : (4 * P) / 3^(s+2) = 1 := by
     simpa [P] using canonical_right_low_prefix_seed_one s hs
-  change GSTCanonicalSevenAxisBridge.carry4
-      (4^(canonicalWidth s) * canonicalEnergy s n) (s+2) = 1
-  rw [hShape]
-  unfold GSTCanonicalSevenAxisBridge.carry4
-  have hmod : (P + 3^(s+2) * X) % 3^(s+2) = P := by
-    simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hP]
-  rw [hmod, hseed]
+  have hc :
+      GSTCanonicalSevenAxisBridge.carry4
+        (4^(canonicalWidth s) * canonicalEnergy s n) (s+2) = 1 := by
+    rw [hShape]
+    unfold GSTCanonicalSevenAxisBridge.carry4
+    have hmod : (P + 3^(s+2) * X) % 3^(s+2) = P := by
+      simp [Nat.add_mod, Nat.mod_eq_of_lt hP]
+    rw [hmod, hseed]
+  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hc
 
 /-- The horizontal carry word at the production cut is exactly the canonical
 prefix offset `z_s`. -/
@@ -159,8 +162,17 @@ theorem canonical_graph_parentOffset_cut_exact
     rw [← graphCoupledState_childTail_eq_left_descent E N (s+2)]
     dsimp [E, N, T]
     exact canonical_graph_childTail_cut_exact s n
-  rw [hRight, hLeft] at hDesc
-  omega
+  have hEq :
+      z + 4^N * T =
+        (graphCoupledState E N (s+2)).parentOffset + 4^N * T := by
+    calc
+      z + 4^N * T = (graph E N (s+2)).seven.descent := hRight.symm
+      _ = (graphCoupledState E N (s+2)).parentOffset +
+            4^N * (graph E 0 (s+2)).seven.descent := hDesc
+      _ = (graphCoupledState E N (s+2)).parentOffset + 4^N * T := by rw [hLeft]
+  have hz : z = (graphCoupledState E N (s+2)).parentOffset :=
+    Nat.add_right_cancel hEq
+  exact hz.symm
 
 /-- The fifth controller coordinate is the canonical affine remainder
 `1 + 4 z_s`. -/
