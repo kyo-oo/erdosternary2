@@ -86,7 +86,9 @@ theorem seedHappy_zero_iff
       HappyCell
         (GSTCanonicalSevenAxisBridge.carry4 x q)
         (GSTCanonicalSevenAxisBridge.digit3 x q) := by
-  rfl
+  simp [SeedHappy, seededCarry, seededResidue, seededDigit,
+    GSTCanonicalSevenAxisBridge.carry4,
+    GSTCanonicalSevenAxisBridge.digit3]
 
 /-- The lossless prefix `(D,k)=(1,1)` is exactly the existing seed-one
 controller carry. -/
@@ -95,6 +97,7 @@ theorem seededCarry_one_one
     seededCarry 1 1 x q =
       GSTGraphV2InfiniteControl.seededCarry 1 x q := by
   unfold seededCarry seededResidue GSTGraphV2InfiniteControl.seededCarry
+  simp only [Nat.pow_one]
   have hshape :
       4 * (1 + 3 * (x % 3^q)) =
         1 + 3 * (1 + 4 * (x % 3^q)) := by ring
@@ -116,6 +119,7 @@ theorem seedHappy_one_iff
         (GSTCanonicalSevenAxisBridge.digit3 x q) := by
   unfold SeedHappy seededDigit
   rw [seededCarry_one_one]
+  rfl
 
 #check seededResidue_strip
 #check seededCarry_strip
