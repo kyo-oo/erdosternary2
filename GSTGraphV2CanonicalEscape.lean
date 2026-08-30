@@ -169,6 +169,54 @@ theorem canonical_latent_gate_packet
     exact hRightBad j ((canonical_right_seed_adapter s n j hs).mp hGraph)
   · exact (canonical_left_seed_adapter s n q hs).mpr hChild
 
+
+/-- The live controller packet has an exact arithmetic consequence: the child
+canonical tail retains a nonzero residue through the row immediately after
+the supplied Happy gate. -/
+theorem canonical_child_residue_packet_nonzero
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hChild : SeedHappy 0 0 (canonicalChildTail s n) q)
+    (hRightBad : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j) :
+    canonicalChildTail s n % 3^(q+1) ≠ 0 := by
+  let E : Nat := 4^(3^(s+1) * n)
+  let N : Nat := 3^s
+  let b : Nat := s+2
+  let st := graphCoupledState E N b
+  have hRightGraph : ∀ j,
+      ¬ HappyCell
+        (graph E N (b+j)).seven.carry
+        (graph E N (b+j)).seven.digit := by
+    intro j hGraph
+    apply hRightBad j
+    apply (canonical_right_seed_adapter s n j hs).mp
+    simpa [E, N, b, Nat.add_assoc] using hGraph
+  have hControl : GSTV2.InfiniteBadCoupledControl (4^N) st := by
+    dsimp [st]
+    apply graph_infinite_bad_control
+    · simpa [E, b] using canonical_base_carry_zero s n hs
+    · exact hRightGraph
+  have hLatent := canonical_latent_gate_packet s n q hs hChild hRightBad
+  have hTail :
+      E / 3^b = canonicalChildTail s n := by
+    have hden : 0 < 3^b := by positivity
+    have hsmall : 1 < 3^b := by
+      dsimp [b]
+      exact lt_trans (by decide : 1 < 4) (canonical_cut_gt_four s hs)
+    rw [show E = 1 + 3^b * canonicalChildTail s n by
+      simpa [E, b] using canonical_child_energy_decomposition s n]
+    rw [Nat.add_mul_div_left _ _ hden]
+    rw [Nat.div_eq_of_lt hsmall, Nat.zero_add]
+  have hExact := hControl.childCarryExact (q+1)
+  have hNatural :
+      GSTV2.naturalCarry (canonicalChildTail s n) (q+1) ≠ 0 := by
+    rw [← hTail]
+    rw [← hExact]
+    simpa [E, N, b, st] using hLatent.nextCarryNonzero
+  intro hzero
+  apply hNatural
+  simp [GSTV2.naturalCarry, hzero]
+
 private theorem index_le_three_pow (r : Nat) :
     r ≤ 3^r := by
   induction r with
@@ -195,6 +243,7 @@ theorem nat_no_unbounded_ternary_support
 #check canonical_right_seed_adapter
 #check canonical_base_carry_zero
 #check canonical_latent_gate_packet
+#check canonical_child_residue_packet_nonzero
 #check canonical_parent_energy_decomposition
 #check nat_no_unbounded_ternary_support
 #print axioms canonical_parent_energy_decomposition
