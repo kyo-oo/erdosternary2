@@ -1,4 +1,3 @@
-import GSTGraphV2CanonicalEscape
 import GSTGraphV2HandwrittenAnchoredCocycle
 
 set_option maxRecDepth 1000000
@@ -8,11 +7,10 @@ namespace GSTGraphV2CanonicalTerminalExtinctionProbe
 
 open GSTCanonicalSevenAxisBridge
 open GSTU2DEventTransport
-open GSTPerfectPowerTailNavigation
-open GSTPrefixOneSeedCore
-open GSTGraphV2CanonicalEscape
+open GSTGraphV2InfiniteControl
 open GSTGraphV2CanonicalDescentOntology
 open GSTGraphV2HandwrittenAnchoredCocycle
+open GSTGraphV2CoupledUFlux
 
 /-- A concrete bridge from a physical Happy Graph-V2 cell to the strict
 negative U-jump used by the handwritten vertical conservation law. -/
@@ -43,7 +41,7 @@ theorem physical_bad_forces_nonnegative_u_jump
 
 /-- The exact one-row U derivative across a canonical width is strictly
 positive whenever the left endpoint is Happy and the right endpoint is bad.
-This is the kernel-level inequality the final collision proof must telescope. -/
+No width-three transport and no collision theorem is imported here. -/
 theorem canonical_width_u_derivative_positive
     (s n p : Nat)
     (hLeft : HappyCell
