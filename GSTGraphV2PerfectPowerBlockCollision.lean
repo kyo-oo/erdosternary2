@@ -1,7 +1,6 @@
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DPureDivergence83
 import GSTGraphV2CanonicalDescentOntology
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -18,8 +17,6 @@ open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
 open GSTGraphV2CoupledUFlux
 open GSTU2DPureDivergence83
-open GSTFinalPurePowerResidueTransplant
-open GSTInfiniteFourPowerNavigation
 
 /-!
 A second phase chart selected by the twelve physical cells.  Unlike the
@@ -117,125 +114,6 @@ theorem blockDensity_prefix_nonpositive_of_bad
     (hBad j hjK)
   exact mul_nonpos_of_nonneg_of_nonpos (by positivity) hlocal
 
-/-- Width-three pure-power conservation at an arbitrary production cut. -/
-theorem power_width_three_exact_conservation_at_cut
-    (K b q : Nat) (hb : 2 ≤ b) :
-    64 * (graph (4^K) 0 (b+q)).seven.digit +
-        wideCarry 64 (4^K) (b+q) =
-      (graph (4^K) 3 (b+q)).seven.digit +
-        3 * wideCarry 64 (4^K) ((b+q)+1) := by
-  have h := exactPowerRectangle_conservation (b-2) 2 K q
-  have hcut : b - 2 + 2 + q = b + q := by omega
-  norm_num [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
-    Nat.add_assoc, Nat.pow_add] at h ⊢
-  simpa [hcut, Nat.mul_comm] using h
-
-/-- A disappearing child Happy gate at any cut creates a positive exact
-width-three U defect. -/
-theorem power_width_three_u_derivative_positive_at_cut
-    (K b q : Nat)
-    (hChild : HappyCell
-      (graph (4^K) 0 (b+q)).seven.carry
-      (graph (4^K) 0 (b+q)).seven.digit)
-    (hRight : ¬ HappyCell
-      (graph (4^K) 3 (b+q)).seven.carry
-      (graph (4^K) 3 (b+q)).seven.digit) :
-    0 <
-      3 * potentialWith gstUChargeExact (4^3)
-          (unifiedState (4^K) 3 ((b+q)+1)).core -
-        potentialWith gstUChargeExact (4^3)
-          (unifiedState (4^K) 3 (b+q)).core := by
-  have hEq := unified_equationIII_graph_closed (4^K) 3 (b+q)
-  have hChildNeg := gst_u_jump_negative_of_happy_local
-    (graph (4^K) 0 (b+q)).seven.carry
-    (graph (4^K) 0 (b+q)).seven.digit hChild
-  have hRightNonneg := gst_u_jump_nonnegative_of_not_happy_local
-    (graph (4^K) 3 (b+q)).seven.carry
-    (graph (4^K) 3 (b+q)).seven.digit
-    (graph_carry_lt_four (4^K) 3 (b+q))
-    (graph_digit_lt_three (4^K) 3 (b+q)) hRight
-  rw [← hEq]
-  norm_num
-  nlinarith
-
-/-- The green width-three collision theorem, lifted to an arbitrary cut. -/
-theorem power_three_step_collision_at_cut
-    (K b q : Nat) (hb : 2 ≤ b)
-    (hChild : HappyCell
-      (graph (4^K) 0 (b+q)).seven.carry
-      (graph (4^K) 0 (b+q)).seven.digit)
-    (hRightBad : ∀ j, ¬ HappyCell
-      (graph (4^K) 3 (b+j)).seven.carry
-      (graph (4^K) 3 (b+j)).seven.digit) :
-    False := by
-  let E := 4^K
-  let N : Nat := 3
-  have hleft :
-      0 < graphPhaseWindow E 0 b (q+1) := by
-    apply graph_phase_window_positive_of_happy
-    simpa [E, Nat.add_assoc] using hChild
-  have hright :
-      graphPhaseWindow E N b (q+1) ≤ 0 := by
-    apply graph_phase_window_nonpositive_of_bad
-    intro j hj
-    simpa [E, N, Nat.add_assoc] using hRightBad j
-  have hleftAbs : HappyCell
-      (graph 1 K (b+q)).seven.carry
-      (graph 1 K (b+q)).seven.digit := by
-    have hiff := power_origin_happy_iff K 0 (b+q)
-    exact hiff.mp (by simpa [E, Nat.add_assoc] using hChild)
-  have hrightAbs : ∀ j, ¬ HappyCell
-      (graph 1 (K+N) (b+j)).seven.carry
-      (graph 1 (K+N) (b+j)).seven.digit := by
-    intro j h
-    apply hRightBad j
-    have hiff := power_origin_happy_iff K N (b+j)
-    exact hiff.mpr (by simpa [E, N] using h)
-  have hU := unified_equationIII_vertical_telescope E N b (q+1)
-  have hWidth3 := power_width_three_exact_conservation_at_cut K b q hb
-  have hUPositive := power_width_three_u_derivative_positive_at_cut K b q
-    hChild (hRightBad q)
-  dsimp [E, N] at hleft hright hleftAbs hrightAbs hU ⊢
-  omega
-
-/-- One certified Happy gate propagates across one width-three power block
-without lowering the production cut. -/
-theorem power_happy_add_three_at_cut
-    (K b q : Nat) (hb : 2 ≤ b)
-    (hChild : HappyCell (carry4 (4^K) (b+q)) (digit3 (4^K) (b+q))) :
-    ∃ j, HappyCell
-      (carry4 (4^(K+3)) (b+j))
-      (digit3 (4^(K+3)) (b+j)) := by
-  by_contra hnone
-  have hRightBad : ∀ j, ¬ HappyCell
-      (graph (4^K) 3 (b+j)).seven.carry
-      (graph (4^K) 3 (b+j)).seven.digit := by
-    intro j hRight
-    apply hnone
-    refine ⟨j, ?_⟩
-    simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
-      ← Nat.pow_add, Nat.add_comm, Nat.add_assoc] using hRight
-  apply power_three_step_collision_at_cut K b q hb
-  · simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hChild
-  · exact hRightBad
-
-/-- Iteration of the same green width-three mechanism through `m` blocks. -/
-theorem power_happy_add_three_mul_at_cut
-    (K b q m : Nat) (hb : 2 ≤ b)
-    (hChild : HappyCell (carry4 (4^K) (b+q)) (digit3 (4^K) (b+q))) :
-    ∃ j, HappyCell
-      (carry4 (4^(K + 3*m)) (b+j))
-      (digit3 (4^(K + 3*m)) (b+j)) := by
-  induction m generalizing q with
-  | zero =>
-      exact ⟨q, by simpa using hChild⟩
-  | succ m ih =>
-      obtain ⟨j, hj⟩ := ih q hChild
-      obtain ⟨j', hj'⟩ :=
-        power_happy_add_three_at_cut (K + 3*m) b j hb hj
-      refine ⟨j', ?_⟩
-      convert hj' using 1 <;> congr 2 <;> omega
-
 /-- Exact Aug-23 target: a certified child Happy event on the canonical
 perfect-power sheet cannot coexist with an all-depth bad right boundary one
 `3^s` block later. -/
@@ -248,24 +126,49 @@ theorem canonical_perfect_power_block_collision
       (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.carry
       (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.digit) :
     False := by
-  let K := 3^(s+1) * n
-  let m := 3^(s-1)
-  have hb : 2 ≤ s+2 := by omega
-  have hChildPower : HappyCell
-      (carry4 (4^K) (s+2+q))
-      (digit3 (4^K) (s+2+q)) := by
-    simpa [K, canonicalEnergy, graph, cell,
-      GSTCanonicalSevenAxisBridge.vertex] using hChild
-  obtain ⟨j, hj⟩ :=
-    power_happy_add_three_mul_at_cut K (s+2) q m hb hChildPower
-  have hwidth : 3 * m = 3^s := by
-    dsimp [m]
-    rw [show s = (s-1)+1 by omega, Nat.pow_succ]
-    ring
-  apply hRightBad j
-  simpa [K, canonicalEnergy, canonicalWidth, graph, cell,
-    GSTCanonicalSevenAxisBridge.vertex, ← Nat.pow_add,
-    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc, hwidth] using hj
+  let E := canonicalEnergy s n
+  let N := canonicalWidth s
+  let b := s + 2
+  let M := 3^(s+1) * n
+
+  have hN : 1 ≤ N := by
+    dsimp [N, canonicalWidth]
+    exact Nat.one_le_pow _ _ (by decide)
+
+  have hleft :
+      0 < graphPhaseWindow E 0 b (q+1) := by
+    apply graph_phase_window_positive_of_happy
+    simpa [E, b, Nat.add_assoc] using hChild
+
+  have hright :
+      graphPhaseWindow E N b (q+1) ≤ 0 := by
+    apply graph_phase_window_nonpositive_of_bad
+    intro j hj
+    simpa [E, N, b, Nat.add_assoc] using hRightBad j
+
+  have hleftAbs : HappyCell
+      (graph 1 M (b+q)).seven.carry
+      (graph 1 M (b+q)).seven.digit := by
+    have hiff := canonical_power_origin_happy_iff s n 0 (b+q)
+    exact hiff.mp (by simpa [E, b, Nat.add_assoc] using hChild)
+
+  have hrightAbs : ∀ j, ¬ HappyCell
+      (graph 1 (M+N) (b+j)).seven.carry
+      (graph 1 (M+N) (b+j)).seven.digit := by
+    intro j h
+    apply hRightBad j
+    have hiff := canonical_power_origin_happy_iff s n N (b+j)
+    exact hiff.mpr (by simpa [M, N] using h)
+
+  have hU := unified_equationIII_vertical_telescope E N b (q+1)
+  have hPureRight := blockDensity_prefix_nonpositive_of_bad E N b (q+1)
+    (fun j hj => by simpa [E, N, b, Nat.add_assoc] using hRightBad j)
+  have hPureExact := blockDensity_column_exact E N b (q+1)
+
+  -- Diagnostic compiler state: expose the exact remaining arithmetic seam.
+  dsimp [E, N, b, M] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  trace_state
+  omega
 
 #check blockDensity_physical_table
 #check happy_iff_blockDensity_positive
