@@ -102,3 +102,5 @@ jobs:
             exit 1
           fi
           echo 'COLLISION_AXIOM_AUDIT_GREEN=1'
+
+# proof-state probe trigger: 2026-08-30
