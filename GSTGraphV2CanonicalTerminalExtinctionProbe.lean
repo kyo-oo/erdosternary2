@@ -76,7 +76,7 @@ theorem seeded_weighted_u_jump_exact
         24 * ((X % 3^K : Nat) : Int) := by
   induction K with
   | zero =>
-      simp [GSTV2.affineCarry]
+      norm_num [GSTV2.affineCarry]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hnext :
@@ -142,6 +142,7 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
     norm_num [gstUChargeExact]
     push_cast
     have hp : (0 : Int) ≤ ((X % 3^q : Nat) : Int) := by positivity
+    have hpowInt : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
     nlinarith
   · have hnextNat := GSTV2.naturalCarry_forward X q
     rw [hcarry, hdigit] at hnextNat
@@ -175,6 +176,7 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
     rw [hnext, hprefix, Nat.pow_succ]
     norm_num [gstUChargeExact]
     push_cast
+    have hpowInt : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
     nlinarith
 
 /-- If every carry in a finite horizontal observation vanishes, the retained
