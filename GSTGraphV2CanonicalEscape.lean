@@ -198,10 +198,17 @@ theorem canonicalTail_cut_quotient_exact
   have hRec :
       canonicalTail r n =
         canonicalTail r a +
-          d * 4^(a * 3^r) * canonicalTail (r+K) m := by
+          d * (4^(a * 3^r) * canonicalTail (r+K) m) := by
     rw [hn]
-    simpa [d] using canonicalTail_power_block_recurrence r a m K
+    simpa [d, Nat.mul_assoc] using
+      canonicalTail_power_block_recurrence r a m K
   rw [hRec]
+  change
+    (canonicalTail r a +
+      d * (4^(a * 3^r) * canonicalTail (r+K) m)) / d =
+      canonicalCutOffset r n K +
+        4^((n % 3^K) * 3^r) *
+          canonicalTail (r+K) (n / 3^K)
   rw [Nat.add_mul_div_left _ _ hpos]
   rfl
 
