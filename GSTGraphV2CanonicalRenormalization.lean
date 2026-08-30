@@ -79,6 +79,83 @@ theorem canonicalTail_block_recurrence
   simpa [Q, Qa, A, Qm, Nat.mul_comm, Nat.mul_left_comm,
     Nat.mul_assoc] using hResult
 
+
+/-- Exact arbitrary-cutoff canonical recurrence.  Removing `K` origin trits
+retains the complete low canonical prefix and identifies the live upper packet
+with the next canonical scale. -/
+theorem canonicalTail_power_block_recurrence
+    (r a m K : Nat) :
+    canonicalTail r (a + 3^K * m) =
+      canonicalTail r a +
+        3^K * 4^(a * 3^r) * canonicalTail (r+K) m := by
+  let P : Nat := 3^(r+1)
+  let A : Nat := 4^(3^r * a)
+  let Qa : Nat := canonicalTail r a
+  let Qm : Nat := canonicalTail (r+K) m
+  let Q : Nat := canonicalTail r (a + 3^K * m)
+  have hP : 0 < P := by
+    dsimp [P]
+    positivity
+  have hExp :
+      3^r * (a + 3^K * m) =
+        3^r * a + 3^(r+K) * m := by
+    rw [show 3^(r+K) = 3^r * 3^K by rw [pow_add]]
+    ring
+  have hProduct :
+      4^(3^r * (a + 3^K * m)) =
+        A * 4^(3^(r+K) * m) := by
+    rw [hExp, Nat.pow_add]
+  have hA :
+      A = 1 + P * Qa := by
+    dsimp [A, P, Qa]
+    simpa using canonical_tail_decomposition r a
+  have hScale :
+      3^((r+K)+1) = P * 3^K := by
+    dsimp [P]
+    rw [← Nat.pow_add]
+    congr 1
+    omega
+  have hM :
+      4^(3^(r+K) * m) =
+        1 + P * 3^K * Qm := by
+    have h := canonical_tail_decomposition (r+K) m
+    rw [hScale] at h
+    simpa [Qm, Nat.mul_assoc] using h
+  have hShape :
+      4^(3^r * (a + 3^K * m)) =
+        1 + P * (Qa + 3^K * A * Qm) := by
+    rw [hProduct, hM, hA]
+    ring
+  have hCanonical :
+      4^(3^r * (a + 3^K * m)) =
+        1 + P * Q := by
+    dsimp [P, Q]
+    exact canonical_tail_decomposition r (a + 3^K * m)
+  have hEq :
+      1 + P * Q =
+        1 + P * (Qa + 3^K * A * Qm) :=
+    hCanonical.symm.trans hShape
+  have hEqInt := congrArg (fun x : Nat => (x : Int)) hEq
+  push_cast at hEqInt
+  have hPInt : (0 : Int) < (P : Int) := by
+    exact_mod_cast hP
+  have hResultInt :
+      (Q : Int) = (Qa + 3^K * A * Qm : Nat) := by
+    push_cast
+    nlinarith
+  have hResult : Q = Qa + 3^K * A * Qm := by
+    exact_mod_cast hResultInt
+  simpa [Q, Qa, A, Qm, Nat.mul_comm, Nat.mul_left_comm,
+    Nat.mul_assoc] using hResult
+
+/-- Zero-prefix specialization of the arbitrary-cutoff recurrence. -/
+theorem canonicalTail_zero_power_strip
+    (r m K : Nat) :
+    canonicalTail r (3^K * m) =
+      3^K * canonicalTail (r+K) m := by
+  have h := canonicalTail_power_block_recurrence r 0 m K
+  simpa [canonicalTail] using h
+
 /-- The two-unit canonical tail is an exact square expansion. -/
 theorem canonicalTail_two_exact (r : Nat) :
     canonicalTail r 2 =
@@ -171,6 +248,8 @@ theorem canonicalTail_one_strip
   exact prefix_one_tail_shape r m
 
 #check canonicalTail_block_recurrence
+#check canonicalTail_power_block_recurrence
+#check canonicalTail_zero_power_strip
 #check canonicalTail_mod_three
 #check canonicalTail_three_adic_strip
 #check canonicalTail_zero_strip
