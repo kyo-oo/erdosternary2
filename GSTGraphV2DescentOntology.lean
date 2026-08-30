@@ -44,17 +44,23 @@ theorem graph_descent_horizontal_step_exact (E t p : Nat) :
   change (4^(t+1) * E) / 3^p =
     (4 * (R % 3^p)) / 3^p + 4 * (R / 3^p)
   have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hrem : R % 3^p < 3^p := Nat.mod_lt R hp
   have hpow : 4^(t+1) * E = 4 * R := by
     dsimp [R]
     rw [Nat.pow_succ]
     ring
   have hsplit : R = R % 3^p + 3^p * (R / 3^p) := by
     exact (Nat.mod_add_div R (3^p)).symm
-  rw [hpow, hsplit]
   have hshape :
       4 * (R % 3^p + 3^p * (R / 3^p)) =
         4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
-  rw [hshape, Nat.add_mul_div_left _ _ hp]
+  have hmod :
+      (R % 3^p + 3^p * (R / 3^p)) % 3^p = R % 3^p := by
+    simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hrem]
+  have hdiv :
+      (R % 3^p + 3^p * (R / 3^p)) / 3^p = R / 3^p := by
+    rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt hrem, Nat.zero_add]
+  rw [hpow, hsplit, hshape, Nat.add_mul_div_left _ _ hp, hmod, hdiv]
 
 /-- Width-`N` horizontal transport of the full quotient field.  `carryWord` is
 literally the affine defect left after multiplying the left descent by `4^N`. -/
@@ -89,7 +95,7 @@ theorem coupledInvariant_euclidean_decode
   · rw [hEq, Nat.add_mul_div_left _ _ hA,
       Nat.div_eq_of_lt hResidue, Nat.zero_add]
   · rw [hEq]
-    simp [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hResidue]
+    simp [Nat.add_mod, Nat.mod_eq_of_lt hResidue]
 
 /-- Equivalent sector bounds: carry `C` means the shared affine word lies in
 its `C`-th width-`A` sector. -/
