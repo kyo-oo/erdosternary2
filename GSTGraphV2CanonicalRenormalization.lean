@@ -154,7 +154,11 @@ theorem canonicalTail_zero_power_strip
     canonicalTail r (3^K * m) =
       3^K * canonicalTail (r+K) m := by
   have h := canonicalTail_power_block_recurrence r 0 m K
-  simpa [canonicalTail] using h
+  have hden : 1 < 3^(r+1) := by
+    rw [Nat.pow_succ]
+    have hp : 0 < 3^r := by positivity
+    nlinarith
+  simpa [canonicalTail, Nat.div_eq_of_lt hden] using h
 
 /-- The two-unit canonical tail is an exact square expansion. -/
 theorem canonicalTail_two_exact (r : Nat) :
