@@ -1,6 +1,6 @@
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DPureDivergence83
-import GSTGraphV2DescentOntology
+import GSTGraphV2CanonicalDescentOntology
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
