@@ -131,6 +131,44 @@ theorem canonical_right_seed_adapter
   rw [seedHappy_one_iff]
   simpa [HappyCell, hseed] using h
 
+
+/-- The canonical child begins the coupled controller with the true zero
+carry, derived from the exact low prefix rather than assumed. -/
+theorem canonical_base_carry_zero
+    (s n : Nat) (hs : 1 ≤ s) :
+    (graph (4^(3^(s+1) * n)) 0 (s+2)).seven.carry = 0 := by
+  have hE :
+      4^0 * 4^(3^(s+1) * n) =
+        1 + 3^(s+2) * canonicalChildTail s n := by
+    simpa using canonical_child_energy_decomposition s n
+  have hP : 1 < 3^(s+2) := by
+    exact lt_trans (by decide : 1 < 4) (canonical_cut_gt_four s hs)
+  have hslice := graph_prefix_slice_exact
+    (4^(3^(s+1) * n)) 0 (s+2) 1 (canonicalChildTail s n) 0 hE hP
+  have hseed : (4 * 1) / 3^(s+2) = 0 :=
+    Nat.div_eq_of_lt (canonical_cut_gt_four s hs)
+  rw [hseed] at hslice
+  simpa [GSTGraphV2InfiniteControl.seededCarry] using hslice.2
+
+/-- Existing all-depth bad control plus the exact canonical adapters produces
+the live latent gate packet.  This is the certified controller input to the
+remaining renormalized-escape step. -/
+theorem canonical_latent_gate_packet
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hChild : SeedHappy 0 0 (canonicalChildTail s n) q)
+    (hRightBad : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j) :
+    GSTV2.LatentGateTransfer
+      (4^(3^s))
+      (graphCoupledState
+        (4^(3^(s+1) * n)) (3^s) (s+2))
+      q := by
+  apply graph_child_happy_latent_transfer
+  · exact canonical_base_carry_zero s n hs
+  · intro j hGraph
+    exact hRightBad j ((canonical_right_seed_adapter s n j hs).mp hGraph)
+  · exact (canonical_left_seed_adapter s n q hs).mpr hChild
+
 private theorem index_le_three_pow (r : Nat) :
     r ≤ 3^r := by
   induction r with
@@ -155,6 +193,8 @@ theorem nat_no_unbounded_ternary_support
 #check canonical_child_energy_decomposition
 #check canonical_left_seed_adapter
 #check canonical_right_seed_adapter
+#check canonical_base_carry_zero
+#check canonical_latent_gate_packet
 #check canonical_parent_energy_decomposition
 #check nat_no_unbounded_ternary_support
 #print axioms canonical_parent_energy_decomposition
