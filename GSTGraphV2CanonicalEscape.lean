@@ -2,6 +2,7 @@ import GSTGraphV2CanonicalRenormalization
 import GSTGraphV2InfiniteControllerBridge
 import GSTFinalPrefixOneStep6Infinite
 import GSTGraphV2CanonicalDescentOntology
+import GSTGraphV2HandwrittenAnchoredCocycle
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -18,6 +19,8 @@ open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalDescentOntology
 open GSTGraphV2PerfectPowerBlock
+open GSTGraphV2HandwrittenExponentialCascade
+open GSTGraphV2HandwrittenAnchoredCocycle
 
 /-- The canonical child after removing its forced low prefix. -/
 def canonicalChildTail (s n : Nat) : Nat :=
@@ -234,6 +237,70 @@ theorem canonical_controller_childTail_cut_exact
     simpa [canonicalEnergy, canonicalWidth] using hInitial
   rw [hInitial']
   exact canonicalTail_cut_quotient_exact (s+1) n K
+
+/-- Arbitrary-origin-cut re-coordination of both physical endpoints onto
+one residual Graph-V2 sheet.  The consumed origin prefix remains as the exact
+horizontal phase rather than being projected away. -/
+theorem canonical_graph_u_cut_recoordinate_exact
+    (s n K x p : Nat) :
+    (graph (canonicalEnergy s n) x p).seven.carry =
+        (graph (uTailEnergy (s+1) n K)
+          (uPhaseShift (s+1) n K + x) p).seven.carry ∧
+    (graph (canonicalEnergy s n) x p).seven.digit =
+        (graph (uTailEnergy (s+1) n K)
+          (uPhaseShift (s+1) n K + x) p).seven.digit := by
+  have h := graph_u_block_observables_exact (s+1) n K x p
+  simpa [canonicalEnergy] using ⟨h.1, h.2.1⟩
+
+/-- Once the canonical origin suffix has terminated, the residual sheet is
+literally the unit-energy Graph-V2 sheet.  The child/right endpoints and the
+entire retained U potential are still connected by the exact horizontal
+cocycle; no terminal boundary term is discarded. -/
+theorem canonical_terminal_graph_u_packet
+    (s n K p : Nat) (hterm : n / 3^K = 0) :
+    let P := uPhaseShift (s+1) n K
+    let N := canonicalWidth s
+    (graph (canonicalEnergy s n) 0 p).seven.carry =
+        (graph 1 P p).seven.carry ∧
+    (graph (canonicalEnergy s n) 0 p).seven.digit =
+        (graph 1 P p).seven.digit ∧
+    (graph (canonicalEnergy s n) N p).seven.carry =
+        (graph 1 (P+N) p).seven.carry ∧
+    (graph (canonicalEnergy s n) N p).seven.digit =
+        (graph 1 (P+N) p).seven.digit ∧
+    graphUPotential 1 0 (P+N) p =
+      graphUPotential 1 P N p +
+        (((4^N : Nat) : Int)) * graphUPotential 1 0 P p := by
+  dsimp only
+  have hTail : uTailEnergy (s+1) n K = 1 := by
+    simp [uTailEnergy, uTailExponent, originSuffix, hterm]
+  have hChild := canonical_graph_u_cut_recoordinate_exact s n K 0 p
+  have hRight :=
+    canonical_graph_u_cut_recoordinate_exact s n K (canonicalWidth s) p
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · simpa [hTail] using hChild.1
+  · simpa [hTail] using hChild.2
+  · simpa [hTail, Nat.add_assoc] using hRight.1
+  · simpa [hTail, Nat.add_assoc] using hRight.2
+  · simpa using graph_u_potential_cocycle_exact
+      1 0 (uPhaseShift (s+1) n K) (canonicalWidth s) p
+
+/-- The origin of the terminal unit-energy sheet is physically neutral above
+the low two ternary places. -/
+theorem terminal_unit_origin_neutral
+    (p : Nat) (hp : 2 ≤ p) :
+    (graph 1 0 p).seven.carry = 0 ∧
+      (graph 1 0 p).seven.digit = 0 := by
+  have h9 : 9 ≤ 3^p := by
+    rw [show (9 : Nat) = 3^2 by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hp
+  have h4 : 4 < 3^p := by omega
+  have h1 : 1 < 3^p := by omega
+  constructor
+  · simp [graph, cell, GSTCanonicalSevenAxisBridge.vertex, carry4,
+      Nat.mod_eq_of_lt h1, Nat.div_eq_of_lt h4]
+  · simp [graph, cell, GSTCanonicalSevenAxisBridge.vertex, digit3,
+      Nat.div_eq_of_lt h1]
 
 /-- The live controller packet has an exact arithmetic consequence: the child
 canonical tail retains a nonzero residue through the row immediately after
