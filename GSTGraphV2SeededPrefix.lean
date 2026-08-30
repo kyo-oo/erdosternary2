@@ -78,10 +78,51 @@ theorem seedHappy_strip
   unfold SeedHappy
   rw [seededCarry_strip, seededDigit_strip]
 
+
+/-- Seed-zero lossless coordinates are the ordinary tail cell. -/
+theorem seedHappy_zero_iff
+    (x q : Nat) :
+    SeedHappy 0 0 x q ↔
+      HappyCell
+        (GSTCanonicalSevenAxisBridge.carry4 x q)
+        (GSTCanonicalSevenAxisBridge.digit3 x q) := by
+  rfl
+
+/-- The lossless prefix `(D,k)=(1,1)` is exactly the existing seed-one
+controller carry. -/
+theorem seededCarry_one_one
+    (x q : Nat) :
+    seededCarry 1 1 x q =
+      GSTGraphV2InfiniteControl.seededCarry 1 x q := by
+  unfold seededCarry seededResidue GSTGraphV2InfiniteControl.seededCarry
+  have hshape :
+      4 * (1 + 3 * (x % 3^q)) =
+        1 + 3 * (1 + 4 * (x % 3^q)) := by ring
+  rw [hshape]
+  rw [show 3^(1+q) = 3 * 3^q by
+    rw [pow_add]
+    norm_num]
+  rw [← Nat.div_div_eq_div_mul]
+  rw [Nat.add_mul_div_left _ _ (by decide : 0 < 3)]
+  simp
+
+/-- Seed-one lossless coordinates coincide with the existing all-depth
+controller predicate. -/
+theorem seedHappy_one_iff
+    (x q : Nat) :
+    SeedHappy 1 1 x q ↔
+      HappyCell
+        (GSTGraphV2InfiniteControl.seededCarry 1 x q)
+        (GSTCanonicalSevenAxisBridge.digit3 x q) := by
+  unfold SeedHappy seededDigit
+  rw [seededCarry_one_one]
+
 #check seededResidue_strip
 #check seededCarry_strip
 #check seededDigit_strip
 #check seedHappy_strip
+#check seedHappy_zero_iff
+#check seedHappy_one_iff
 #print axioms seedHappy_strip
 
 end GSTGraphV2SeededPrefix
