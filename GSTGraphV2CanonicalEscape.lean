@@ -148,7 +148,7 @@ theorem canonical_base_carry_zero
   have hseed : (4 * 1) / 3^(s+2) = 0 :=
     Nat.div_eq_of_lt (canonical_cut_gt_four s hs)
   rw [hseed] at hslice
-  simpa [GSTGraphV2InfiniteControl.seededCarry] using hslice.2
+  simpa [GSTGraphV2InfiniteControl.seededCarry, Nat.mod_one] using hslice.2
 
 /-- Existing all-depth bad control plus the exact canonical adapters produces
 the live latent gate packet.  This is the certified controller input to the
