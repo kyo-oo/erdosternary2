@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/gpt56-canonical-escape-kernel.yml'
       - 'GSTGraphV2CanonicalEscapeProbe.lean'
+      - 'GSTGraphV2CanonicalTerminalExtinctionProbe.lean'
       - 'GSTGraphV2SeededPrefix.lean'
       - 'GSTGraphV2CanonicalRenormalization.lean'
       - 'GSTGraphV2CanonicalEscape.lean'
@@ -44,7 +45,10 @@ jobs:
           from pathlib import Path
           import re, subprocess
 
-          root = Path("GSTGraphV2CanonicalEscapeProbe.lean")
+          roots = [
+              Path("GSTGraphV2CanonicalEscapeProbe.lean"),
+              Path("GSTGraphV2CanonicalTerminalExtinctionProbe.lean"),
+          ]
           build = Path(".lake/build/lib/lean")
           import_re = re.compile(r"^\s*import\s+(.+?)\s*$")
 
@@ -77,8 +81,9 @@ jobs:
               done.add(module)
               order.append((module, path))
 
-          for dependency in imports_of(root):
-              visit(dependency)
+          for root in roots:
+              for dependency in imports_of(root):
+                  visit(dependency)
 
           build.mkdir(parents=True, exist_ok=True)
           for module, path in order:
@@ -99,6 +104,13 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GSTGraphV2CanonicalEscapeProbe.lean 2>&1 |
             tee canonical-escape-kernel.log
+      - name: Compile terminal extinction probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTGraphV2CanonicalTerminalExtinctionProbe.lean 2>&1 |
+            tee canonical-terminal-extinction-kernel.log
       - name: Reject trust-expanding shortcuts
         if: always()
         shell: bash
@@ -108,6 +120,7 @@ jobs:
             GSTGraphV2SeededPrefix.lean
             GSTGraphV2CanonicalRenormalization.lean
             GSTGraphV2CanonicalEscape.lean
+            GSTGraphV2CanonicalTerminalExtinctionProbe.lean
             GSTGraphV2PerfectPowerBlockCollision.lean
           )
           existing=()
@@ -123,6 +136,11 @@ jobs:
           if [[ -f canonical-escape-kernel.log ]] &&
              grep -Fq 'sorryAx' canonical-escape-kernel.log; then
             echo FORBIDDEN_SORRYAX=1
+            exit 1
+          fi
+          if [[ -f canonical-terminal-extinction-kernel.log ]] &&
+             grep -Fq 'sorryAx' canonical-terminal-extinction-kernel.log; then
+            echo FORBIDDEN_TERMINAL_SORRYAX=1
             exit 1
           fi
           echo CANONICAL_ESCAPE_TRUST_AUDIT_GREEN=1
