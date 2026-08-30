@@ -208,11 +208,16 @@ theorem canonical_child_residue_packet_nonzero
     rw [Nat.add_mul_div_left _ _ hden]
     rw [Nat.div_eq_of_lt hsmall, Nat.zero_add]
   have hExact := hControl.childCarryExact (q+1)
+  have hNonOrbit :
+      (GSTV2.coupledOrbit (4^N) st (q+1)).childCarry ≠ 0 := by
+    simpa [E, N, b, st] using hLatent.nextCarryNonzero
+  have hNaturalState :
+      GSTV2.naturalCarry st.childTail (q+1) ≠ 0 := by
+    rw [← hExact]
+    exact hNonOrbit
   have hNatural :
       GSTV2.naturalCarry (canonicalChildTail s n) (q+1) ≠ 0 := by
-    rw [← hTail]
-    rw [← hExact]
-    simpa [E, N, b, st] using hLatent.nextCarryNonzero
+    simpa [st, graphCoupledState, hTail] using hNaturalState
   intro hzero
   apply hNatural
   simp [GSTV2.naturalCarry, hzero]
