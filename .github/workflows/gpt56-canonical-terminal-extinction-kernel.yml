@@ -7,7 +7,9 @@ on:
     paths:
       - '.github/workflows/gpt56-canonical-terminal-extinction-kernel.yml'
       - 'GSTGraphV2CanonicalTerminalExtinctionProbe.lean'
+      - 'GSTU2DCanonicalShiftedTerminalProbe.lean'
       - 'GSTGraphV2HandwrittenAnchoredCocycle.lean'
+      - 'GSTU2DPureDivergence83.lean'
   workflow_dispatch:
 
 concurrency:
@@ -41,7 +43,10 @@ jobs:
           from pathlib import Path
           import re, subprocess
 
-          root = Path("GSTGraphV2CanonicalTerminalExtinctionProbe.lean")
+          roots = [
+              Path("GSTGraphV2CanonicalTerminalExtinctionProbe.lean"),
+              Path("GSTU2DCanonicalShiftedTerminalProbe.lean"),
+          ]
           build = Path(".lake/build/lib/lean")
           import_re = re.compile(r"^\s*import\s+(.+?)\s*$")
 
@@ -73,8 +78,9 @@ jobs:
               done.add(module)
               order.append((module, path))
 
-          for dep in imports_of(root):
-              visit(dep)
+          for root in roots:
+              for dep in imports_of(root):
+                  visit(dep)
 
           build.mkdir(parents=True, exist_ok=True)
           for module, path in order:
@@ -85,20 +91,23 @@ jobs:
               print("COMPILE", module, flush=True)
               subprocess.run(["lake", "env", "lean", "-o", str(output), str(path)], check=True)
           PY
-      - name: Compile terminal extinction probe
+      - name: Compile terminal extinction probes
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTGraphV2CanonicalTerminalExtinctionProbe.lean 2>&1 |
-            tee canonical-terminal-extinction-kernel.log
+          {
+            lake env lean GSTGraphV2CanonicalTerminalExtinctionProbe.lean
+            lake env lean GSTU2DCanonicalShiftedTerminalProbe.lean
+          } 2>&1 | tee canonical-terminal-extinction-kernel.log
       - name: Trust audit
         if: always()
         shell: bash
         run: |
           set -euo pipefail
           if grep -nE '(^|[^A-Za-z0-9_])(sorry|admit|native_decide|unsafe)([^A-Za-z0-9_]|$)|^[[:space:]]*axiom[[:space:]]' \
-            GSTGraphV2CanonicalTerminalExtinctionProbe.lean; then
+            GSTGraphV2CanonicalTerminalExtinctionProbe.lean \
+            GSTU2DCanonicalShiftedTerminalProbe.lean; then
             echo FORBIDDEN_TRUST_EXPANSION=1
             exit 1
           fi
