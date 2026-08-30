@@ -186,9 +186,22 @@ theorem canonicalTail_cut_quotient_exact
       canonicalCutOffset r n K +
         4^((n % 3^K) * 3^r) *
           canonicalTail (r+K) (n / 3^K) := by
-  have hpos : 0 < 3^K := by positivity
-  rw [← Nat.mod_add_div n (3^K)]
-  rw [canonicalTail_power_block_recurrence]
+  let d : Nat := 3^K
+  let a : Nat := n % d
+  let m : Nat := n / d
+  have hpos : 0 < d := by
+    dsimp [d]
+    positivity
+  have hn : n = a + d * m := by
+    dsimp [a, m, d]
+    exact (Nat.mod_add_div n (3^K)).symm
+  have hRec :
+      canonicalTail r n =
+        canonicalTail r a +
+          d * 4^(a * 3^r) * canonicalTail (r+K) m := by
+    rw [hn]
+    simpa [d] using canonicalTail_power_block_recurrence r a m K
+  rw [hRec]
   rw [Nat.add_mul_div_left _ _ hpos]
   rfl
 
