@@ -60,9 +60,7 @@ theorem canonical_width_u_derivative_positive
     graph_u_derivative_positive_of_child_happy_right_bad
       1 (3^(s+1) * n) (3^s) p hLeft hRight
 
-/-- Exact base-three weighted sum of the standalone seeded U jumps.  This
-removes every uncontrolled intermediate row: the whole prefix is represented
-only by the terminal carry and the literal ternary prefix of `X`. -/
+/-- Exact base-three weighted sum of the standalone seeded U jumps. -/
 theorem seeded_weighted_u_jump_exact
     (D X K : Nat) :
     Finset.sum (Finset.range K) (fun j =>
@@ -76,7 +74,7 @@ theorem seeded_weighted_u_jump_exact
         24 * ((X % 3^K : Nat) : Int) := by
   induction K with
   | zero =>
-      norm_num [GSTV2.affineCarry]
+      simp [GSTV2.affineCarry]
   | succ K ih =>
       rw [Finset.sum_range_succ, ih]
       have hnext :
@@ -106,8 +104,7 @@ theorem seeded_weighted_u_jump_exact
       ring
 
 /-- A seed-zero Happy gate makes the entire base-three weighted U prefix
-strictly negative.  This is a finite signed certificate, not merely the
-single-cell negativity at the gate. -/
+strictly negative. -/
 theorem seeded_zero_weighted_u_prefix_negative_of_happy
     (X q : Nat)
     (hHappy : GSTV2.Happy
@@ -140,9 +137,9 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
               rw [GSTV2.digit_prefix_value, hdigit]
     rw [hnext, hprefix, Nat.pow_succ]
     norm_num [gstUChargeExact]
-    push_cast
-    have hp : (0 : Int) ≤ ((X % 3^q : Nat) : Int) := by positivity
-    have hpowInt : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
+    have hr : (0 : Int) ≤ ((X % 3^q : Nat) : Int) := by positivity
+    have ha : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
+    norm_num only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_pow]
     nlinarith
   · have hnextNat := GSTV2.naturalCarry_forward X q
     rw [hcarry, hdigit] at hnextNat
@@ -175,8 +172,8 @@ theorem seeded_zero_weighted_u_prefix_negative_of_happy
       exact_mod_cast hlower
     rw [hnext, hprefix, Nat.pow_succ]
     norm_num [gstUChargeExact]
-    push_cast
-    have hpowInt : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
+    have ha : (0 : Int) < (((3^q : Nat) : Int)) := by positivity
+    norm_num only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_pow]
     nlinarith
 
 /-- If every carry in a finite horizontal observation vanishes, the retained
@@ -197,9 +194,7 @@ theorem carryWord_eq_zero_of_window_neutral
       have hlast := h N (by omega)
       simpa using hlast
 
-/-- A finite horizontal U packet on a completely neutral row is not zero:
-the charge normalization leaves the exact vacuum baseline `5 - 4^N * 5`.
-Keeping this term is essential for a sound terminal telescope. -/
+/-- A finite horizontal U packet on a completely neutral row is not zero. -/
 theorem graph_u_potential_vacuum_baseline_of_window_neutral
     (E start N p : Nat)
     (hLeft : (graph E start p).seven.carry = 0)
@@ -215,7 +210,7 @@ theorem graph_u_potential_vacuum_baseline_of_window_neutral
   norm_num [gstUChargeExact]
 
 /-- Direct arithmetic neutralization of a unit-sheet cell above its finite
-x4 energy.  Both physical coordinates are zero, not merely non-Happy. -/
+x4 energy. -/
 theorem unit_graph_cell_neutral_of_pow_lt
     (t p : Nat) (hpow : 4^(t+1) < 3^p) :
     (graph 1 t p).seven.carry = 0 ∧
