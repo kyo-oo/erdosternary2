@@ -1,6 +1,7 @@
 import GSTGraphV2CanonicalRenormalization
 import GSTGraphV2InfiniteControllerBridge
 import GSTFinalPrefixOneStep6Infinite
+import GSTGraphV2CanonicalDescentOntology
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -15,6 +16,8 @@ open GSTGraphV2InfiniteControl
 open GSTGraphV2InfiniteControllerBridge
 open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalRenormalization
+open GSTGraphV2CanonicalDescentOntology
+open GSTGraphV2PerfectPowerBlock
 
 /-- The canonical child after removing its forced low prefix. -/
 def canonicalChildTail (s n : Nat) : Nat :=
@@ -170,6 +173,48 @@ theorem canonical_latent_gate_packet
   · exact (canonical_left_seed_adapter s n q hs).mpr hChild
 
 
+
+/-- The exact low canonical contribution retained after cutting `K` origin
+trits. -/
+def canonicalCutOffset (r n K : Nat) : Nat :=
+  canonicalTail r (n % 3^K) / 3^K
+
+/-- Arbitrary-cutoff quotient form of canonical renormalization. -/
+theorem canonicalTail_cut_quotient_exact
+    (r n K : Nat) :
+    canonicalTail r n / 3^K =
+      canonicalCutOffset r n K +
+        4^((n % 3^K) * 3^r) *
+          canonicalTail (r+K) (n / 3^K) := by
+  have hpos : 0 < 3^K := by positivity
+  rw [← Nat.mod_add_div n (3^K)]
+  rw [canonicalTail_power_block_recurrence]
+  rw [Nat.add_mul_div_left _ _ hpos]
+  rfl
+
+/-- Graph-V2 ontological identification of the controller's live child packet
+at every cutoff.  The finite low offset and renormalized canonical upper
+origin remain explicit. -/
+theorem canonical_controller_childTail_cut_exact
+    (s n K : Nat) :
+    let st := graphCoupledState
+      (4^(3^(s+1) * n)) (3^s) (s+2)
+    (GSTV2.coupledOrbit (4^(3^s)) st K).childTail =
+      canonicalCutOffset (s+1) n K +
+        4^((n % 3^K) * 3^(s+1)) *
+          canonicalTail (s+1+K) (n / 3^K) := by
+  dsimp only
+  rw [GSTV2.coupledOrbit_childTail_exact]
+  have hInitial :=
+    canonical_graph_childTail_cut_exact s n
+  have hInitial' :
+      (graphCoupledState
+        (4^(3^(s+1) * n)) (3^s) (s+2)).childTail =
+        canonicalTail (s+1) n := by
+    simpa [canonicalEnergy, canonicalWidth] using hInitial
+  rw [hInitial']
+  exact canonicalTail_cut_quotient_exact (s+1) n K
+
 /-- The live controller packet has an exact arithmetic consequence: the child
 canonical tail retains a nonzero residue through the row immediately after
 the supplied Happy gate. -/
@@ -294,6 +339,8 @@ theorem nat_no_unbounded_ternary_support
 #check canonical_right_seed_adapter
 #check canonical_base_carry_zero
 #check canonical_latent_gate_packet
+#check canonicalTail_cut_quotient_exact
+#check canonical_controller_childTail_cut_exact
 #check canonical_child_residue_packet_nonzero
 #check canonicalTail_pow_dvd_of_origin_pow_dvd
 #check canonical_origin_packet_nonzero
