@@ -8,7 +8,6 @@ namespace GSTGraphV2CanonicalTerminalExtinctionProbe
 open GSTCanonicalSevenAxisBridge
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
-open GSTGraphV2CanonicalDescentOntology
 open GSTGraphV2HandwrittenAnchoredCocycle
 open GSTGraphV2CoupledUFlux
 
