@@ -178,3 +178,5 @@ theorem canonical_perfect_power_block_collision
 #print axioms canonical_perfect_power_block_collision
 
 end GSTGraphV2PerfectPowerBlockCollision
+
+-- exact full-field ontology probe trigger: 2026-08-30-b
