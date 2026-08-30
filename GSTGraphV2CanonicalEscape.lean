@@ -52,6 +52,83 @@ theorem canonical_parent_energy_decomposition
   rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
   ring
 
+
+private theorem canonical_cut_gt_four
+    (s : Nat) (hs : 1 ≤ s) :
+    4 < 3^(s+2) := by
+  have h27 : 27 ≤ 3^(s+2) := by
+    rw [show (27 : Nat) = 3^3 by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  omega
+
+private theorem canonical_right_prefix_lt_cut
+    (s : Nat) (hs : 1 ≤ s) :
+    1 + 3^(s+1) < 3^(s+2) := by
+  rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+  have hp : 0 < 3^(s+1) := by positivity
+  omega
+
+private theorem canonical_right_prefix_seed_one
+    (s : Nat) (hs : 1 ≤ s) :
+    (4 * (1 + 3^(s+1))) / 3^(s+2) = 1 := by
+  have h9 : 9 ≤ 3^(s+1) := by
+    rw [show (9 : Nat) = 3^2 by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  have hden : 0 < 3^(s+2) := by positivity
+  have hlo : 3^(s+2) ≤ 4 * (1 + 3^(s+1)) := by
+    rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+    omega
+  have hhi : 4 * (1 + 3^(s+1)) < 2 * 3^(s+2) := by
+    rw [show s+2 = (s+1)+1 by omega, Nat.pow_succ]
+    omega
+  have hlo' : 1 ≤ (4 * (1 + 3^(s+1))) / 3^(s+2) := by
+    exact (Nat.le_div_iff_mul_le hden).2 (by simpa using hlo)
+  have hhi' : (4 * (1 + 3^(s+1))) / 3^(s+2) < 2 := by
+    exact (Nat.div_lt_iff_lt_mul hden).2 (by simpa using hhi)
+  omega
+
+/-- The physical canonical left boundary is exactly the lossless seed-zero
+child state. -/
+theorem canonical_left_seed_adapter
+    (s n q : Nat) (hs : 1 ≤ s) :
+    HappyCell
+        (graph (4^(3^(s+1) * n)) 0 (s+2+q)).seven.carry
+        (graph (4^(3^(s+1) * n)) 0 (s+2+q)).seven.digit ↔
+      SeedHappy 0 0 (canonicalChildTail s n) q := by
+  have hE :
+      4^0 * 4^(3^(s+1) * n) =
+        1 + 3^(s+2) * canonicalChildTail s n := by
+    simpa using canonical_child_energy_decomposition s n
+  have hP : 1 < 3^(s+2) := by
+    exact lt_trans (by decide : 1 < 4) (canonical_cut_gt_four s hs)
+  have h := graph_prefix_slice_happy_iff
+    (4^(3^(s+1) * n)) 0 (s+2) 1 (canonicalChildTail s n) q hE hP
+  simpa [SeedHappy, GSTGraphV2SeededPrefix.seededCarry,
+    seededResidue, seededDigit,
+    GSTGraphV2InfiniteControl.seededCarry,
+    GSTCanonicalSevenAxisBridge.carry4,
+    GSTCanonicalSevenAxisBridge.digit3] using h
+
+/-- The physical canonical right boundary is exactly the lossless seed-one
+parent state; the complete low prefix is retained. -/
+theorem canonical_right_seed_adapter
+    (s n q : Nat) (hs : 1 ≤ s) :
+    HappyCell
+        (graph (4^(3^(s+1) * n)) (3^s) (s+2+q)).seven.carry
+        (graph (4^(3^(s+1) * n)) (3^s) (s+2+q)).seven.digit ↔
+      SeedHappy 1 1 (canonicalParentTail s n) q := by
+  have hE :
+      4^(3^s) * 4^(3^(s+1) * n) =
+        (1 + 3^(s+1)) + 3^(s+2) * canonicalParentTail s n :=
+    canonical_parent_energy_decomposition s n
+  have h := graph_prefix_slice_happy_iff
+    (4^(3^(s+1) * n)) (3^s) (s+2)
+    (1 + 3^(s+1)) (canonicalParentTail s n) q hE
+    (canonical_right_prefix_lt_cut s hs)
+  have hseed := canonical_right_prefix_seed_one s hs
+  rw [seedHappy_one_iff]
+  simpa [HappyCell, hseed] using h
+
 private theorem index_le_three_pow (r : Nat) :
     r ≤ 3^r := by
   induction r with
@@ -74,6 +151,8 @@ theorem nat_no_unbounded_ternary_support
   simp [hdiv] at hnonzero
 
 #check canonical_child_energy_decomposition
+#check canonical_left_seed_adapter
+#check canonical_right_seed_adapter
 #check canonical_parent_energy_decomposition
 #check nat_no_unbounded_ternary_support
 #print axioms canonical_parent_energy_decomposition
