@@ -59,6 +59,51 @@ theorem canonical_width_u_derivative_positive
     graph_u_derivative_positive_of_child_happy_right_bad
       1 (3^(s+1) * n) (3^s) p hLeft hRight
 
+/-- Exact base-three weighted sum of the standalone seeded U jumps.  This
+removes every uncontrolled intermediate row: the whole prefix is represented
+only by the terminal carry and the literal ternary prefix of `X`. -/
+theorem seeded_weighted_u_jump_exact
+    (D X K : Nat) :
+    Finset.sum (Finset.range K) (fun j =>
+      (((3^j : Nat) : Int)) *
+        gstUJumpExact
+          (GSTV2.affineCarry D X j)
+          (GSTV2.digit X j)) =
+      (((3^K : Nat) : Int)) *
+          gstUChargeExact (GSTV2.affineCarry D X K) -
+        gstUChargeExact D -
+        24 * ((X % 3^K : Nat) : Int) := by
+  induction K with
+  | zero =>
+      simp [GSTV2.affineCarry]
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih]
+      have hnext :
+          gstStepCarryExact
+              (GSTV2.affineCarry D X K) (GSTV2.digit X K) =
+            GSTV2.affineCarry D X (K+1) := by
+        simpa [gstStepCarryExact, GSTV2.cellNextCarry, GSTV2.cellMass] using
+          (GSTV2.affineCarry_forward D X K).symm
+      have hprefix :
+          X % 3^(K+1) =
+            X % 3^K + 3^K * GSTV2.digit X K := by
+        calc
+          X % 3^(K+1) =
+              Finset.sum (Finset.range (K+1))
+                (fun j => 3^j * GSTV2.digit X j) := by
+                  symm
+                  exact GSTV2.digit_prefix_value X (K+1)
+          _ = Finset.sum (Finset.range K)
+                (fun j => 3^j * GSTV2.digit X j) +
+              3^K * GSTV2.digit X K := by
+                rw [Finset.sum_range_succ]
+          _ = X % 3^K + 3^K * GSTV2.digit X K := by
+                rw [GSTV2.digit_prefix_value]
+      unfold gstUJumpExact jumpWith
+      rw [hnext, hprefix, Nat.pow_succ]
+      push_cast
+      ring
+
 /-- If every carry in a finite horizontal observation vanishes, the retained
 reverse-base-four carry word is exactly zero. -/
 theorem carryWord_eq_zero_of_window_neutral
@@ -118,12 +163,14 @@ theorem unit_graph_cell_neutral_of_pow_lt
 #check physical_happy_forces_negative_u_jump
 #check physical_bad_forces_nonnegative_u_jump
 #check canonical_width_u_derivative_positive
+#check seeded_weighted_u_jump_exact
 #check carryWord_eq_zero_of_window_neutral
 #check graph_u_potential_vacuum_baseline_of_window_neutral
 #check unit_graph_cell_neutral_of_pow_lt
 #print axioms physical_happy_forces_negative_u_jump
 #print axioms physical_bad_forces_nonnegative_u_jump
 #print axioms canonical_width_u_derivative_positive
+#print axioms seeded_weighted_u_jump_exact
 #print axioms carryWord_eq_zero_of_window_neutral
 #print axioms graph_u_potential_vacuum_baseline_of_window_neutral
 #print axioms unit_graph_cell_neutral_of_pow_lt
