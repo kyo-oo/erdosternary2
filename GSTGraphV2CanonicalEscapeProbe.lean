@@ -1,0 +1,10 @@
+import GSTGraphV2SeededPrefix
+import GSTGraphV2CanonicalRenormalization
+import GSTGraphV2CanonicalEscape
+
+#check GSTGraphV2SeededPrefix.seedHappy_strip
+#check GSTGraphV2CanonicalRenormalization.canonicalTail_three_adic_strip
+#check GSTGraphV2CanonicalEscape.canonical_escape_beyond
+#check GSTGraphV2CanonicalEscape.canonical_seed_transport
+
+#print axioms GSTGraphV2CanonicalEscape.canonical_seed_transport
