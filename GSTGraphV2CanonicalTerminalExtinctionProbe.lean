@@ -77,16 +77,17 @@ theorem carryWord_eq_zero_of_window_neutral
       have hlast := h N (by omega)
       simpa using hlast
 
-/-- A finite horizontal U packet is literally extinct when both endpoints and
-all interior carries on that row are neutral.  This closes the top boundary
-without a support axiom. -/
-theorem graph_u_potential_zero_of_window_neutral
+/-- A finite horizontal U packet on a completely neutral row is not zero:
+the charge normalization leaves the exact vacuum baseline `5 - 4^N * 5`.
+Keeping this term is essential for a sound terminal telescope. -/
+theorem graph_u_potential_vacuum_baseline_of_window_neutral
     (E start N p : Nat)
     (hLeft : (graph E start p).seven.carry = 0)
     (hRight : (graph E (start+N) p).seven.carry = 0)
     (hWindow : ∀ j, j < N →
       (graph E (start+j) p).seven.carry = 0) :
-    graphUPotential E start N p = 0 := by
+    graphUPotential E start N p =
+      5 - (((4^N : Nat) : Int)) * 5 := by
   have hWord : carryWord E p start N = 0 :=
     carryWord_eq_zero_of_window_neutral E p start N hWindow
   unfold graphUPotential
@@ -113,19 +114,18 @@ theorem unit_graph_cell_neutral_of_pow_lt
     rw [hshape, Nat.div_eq_of_lt hpow]
   · simp only [graph, cell, GSTCanonicalSevenAxisBridge.vertex, digit3]
     rw [Nat.mul_one, Nat.div_eq_of_lt ht]
-    simp
 
 #check physical_happy_forces_negative_u_jump
 #check physical_bad_forces_nonnegative_u_jump
 #check canonical_width_u_derivative_positive
 #check carryWord_eq_zero_of_window_neutral
-#check graph_u_potential_zero_of_window_neutral
+#check graph_u_potential_vacuum_baseline_of_window_neutral
 #check unit_graph_cell_neutral_of_pow_lt
 #print axioms physical_happy_forces_negative_u_jump
 #print axioms physical_bad_forces_nonnegative_u_jump
 #print axioms canonical_width_u_derivative_positive
 #print axioms carryWord_eq_zero_of_window_neutral
-#print axioms graph_u_potential_zero_of_window_neutral
+#print axioms graph_u_potential_vacuum_baseline_of_window_neutral
 #print axioms unit_graph_cell_neutral_of_pow_lt
 
 end GSTGraphV2CanonicalTerminalExtinctionProbe
