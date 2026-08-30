@@ -37,7 +37,6 @@ theorem canonicalTail_block_recurrence
       4^(3^r * (a + 3*m)) =
         A * 4^(3^(r+1) * m) := by
     rw [hExp, Nat.pow_add]
-    rfl
   have hA :
       A = 1 + P * Qa := by
     dsimp [A, P, Qa]
@@ -125,7 +124,11 @@ theorem canonicalTail_mod_three
     canonicalTail r a % 3 = a := by
   have haCases : a = 0 ∨ a = 1 ∨ a = 2 := by omega
   rcases haCases with rfl | rfl | rfl
-  · simp [canonicalTail]
+  · have hden : 1 < 3^(r+1) := by
+      rw [Nat.pow_succ]
+      have hp : 0 < 3^r := by positivity
+      nlinarith
+    simp [canonicalTail, Nat.div_eq_of_lt hden]
   · simpa [unitTail] using unitTail_mod3_one r
   · rw [canonicalTail_two_exact]
     rw [show canonicalTail r 1 = unitTail r by rfl]
@@ -152,7 +155,11 @@ theorem canonicalTail_zero_strip
     canonicalTail r (3*m) =
       3 * canonicalTail (r+1) m := by
   have h := canonicalTail_three_adic_strip r 0 m (by decide)
-  simpa [phaseOffset, canonicalTail] using h
+  have hden : 1 < 3^(r+1) := by
+    rw [Nat.pow_succ]
+    have hp : 0 < 3^r := by positivity
+    nlinarith
+  simpa [phaseOffset, canonicalTail, Nat.div_eq_of_lt hden] using h
 
 /-- Prefix-one specialization, definitionally aligned with the existing core. -/
 theorem canonicalTail_one_strip
