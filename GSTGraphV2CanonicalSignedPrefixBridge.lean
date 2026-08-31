@@ -43,7 +43,49 @@ theorem canonical_seeded_u_gap_positive
       GSTGraphV2InfiniteControl.seededCarry,
       GSTV2.affineCarry, GSTV2.digit, digit3] using hHappy
 
+/-- The same signed certificate on the literal physical canonical block. -/
+theorem canonical_graph_u_gap_positive
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hChild : SeedHappy 0 0 (canonicalChildTail s n) q)
+    (hRightBad : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j) :
+    0 < Finset.sum (Finset.range (q+1)) (fun j =>
+      (((3^j : Nat) : Int)) *
+        (gstUJumpExact
+            (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.carry
+            (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.digit -
+          (((4^(canonicalWidth s) : Nat) : Int)) *
+            gstUJumpExact
+              (graph (canonicalEnergy s n) 0 (s+2+j)).seven.carry
+              (graph (canonicalEnergy s n) 0 (s+2+j)).seven.digit)) := by
+  have hGap :=
+    canonical_seeded_u_gap_positive s n q hChild hRightBad
+  simpa [canonicalEnergy, canonicalWidth,
+    canonical_left_u_jump_adapter s n _ hs,
+    canonical_right_u_jump_adapter s n _ hs] using hGap
+
+/-- Exact positive vertical U-potential growth across the canonical block. -/
+theorem canonical_graph_u_potential_growth_positive
+    (s n q : Nat) (hs : 1 ≤ s)
+    (hChild : SeedHappy 0 0 (canonicalChildTail s n) q)
+    (hRightBad : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j) :
+    0 <
+      (((3^(q+1) : Nat) : Int)) *
+          graphUPotential
+            (canonicalEnergy s n) 0 (canonicalWidth s) (s+2+(q+1)) -
+        graphUPotential
+          (canonicalEnergy s n) 0 (canonicalWidth s) (s+2) := by
+  rw [← graph_u_equationIII_shifted_telescope
+    (canonicalEnergy s n) 0 (canonicalWidth s) (s+2) (q+1)]
+  simpa [Nat.add_assoc] using
+    canonical_graph_u_gap_positive s n q hs hChild hRightBad
+
 #check canonical_seeded_u_gap_positive
+#check canonical_graph_u_gap_positive
+#check canonical_graph_u_potential_growth_positive
 #print axioms canonical_seeded_u_gap_positive
+#print axioms canonical_graph_u_gap_positive
+#print axioms canonical_graph_u_potential_growth_positive
 
 end GSTGraphV2CanonicalSignedPrefixBridge
