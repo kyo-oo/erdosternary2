@@ -11,6 +11,7 @@ open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalPhaseSteering
 open GSTV2
+open GSTU2DEventTransport
 
 /-- Multiplying the sheet energy by an x4 power is literally a horizontal
 translation of every physical Graph-V2 observable.  The coordinate labels
@@ -33,6 +34,7 @@ theorem graph_energy_shift_physical
     ring
   simp only [graph, cell, GSTCanonicalSevenAxisBridge.vertex]
   rw [henergy]
+  simp
 
 /-- Consequently Happy/event-eight is invariant under the same literal sheet
 translation. -/
@@ -60,7 +62,6 @@ theorem canonicalEnergy_three_adic_translate
     rw [Nat.pow_succ]
     ring
   rw [hexp, pow_add]
-  ring
 
 /-- Full physical Graph-V2 translation law for the canonical three-adic
 renormalization.  This is the ontological form of the one-trit recurrence. -/
