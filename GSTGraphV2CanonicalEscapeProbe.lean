@@ -1,6 +1,7 @@
 import GSTGraphV2CanonicalInfiniteCycle
 import GSTGraphV2CanonicalDescentOntology
 import GSTGraphV2CanonicalRenormalization
+import GSTGraphV2CanonicalPhaseSteering
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -15,14 +16,14 @@ open GSTGraphV2CanonicalEscape
 open GSTGraphV2CanonicalInfiniteCycle
 open GSTGraphV2CanonicalDescentOntology
 open GSTGraphV2CanonicalRenormalization
+open GSTGraphV2CanonicalPhaseSteering
 open GSTGraphV2InfiniteControllerBridge
 open GSTV2
 
 /-- RED probe for the exact remaining canonical escape implication. Every
 available live Graph-V2 packet is exposed at an arbitrary origin cutoff K.
-This version also instantiates the exact canonical child-tail re-coordination
-at K, so the next compiler residual distinguishes a missing arithmetic step
-from a genuinely missing post-cut gate/regeneration law. -/
+The probe now also carries the exact canonical phase-steering laws at the
+production cut, so the next residual sees the true three-phase wave sector. -/
 theorem canonical_bad_parent_forces_unbounded_origin_support_probe
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hChild : HappyCell
@@ -52,6 +53,14 @@ theorem canonical_bad_parent_forces_unbounded_origin_support_probe
 
   have hCut :=
     canonical_graphCoupledState_cut_packet s n hs
+
+  have hPhaseDigit := canonical_right_digit_cut_phase s n hs
+  have hPhaseZero := fun h0 : n % 3 = 0 =>
+    canonical_right_phase_zero_next_seed s n hs h0
+  have hPhaseOne := fun h1 : n % 3 = 1 =>
+    canonical_right_phase_one_next_seed s n hs h1
+  have hPhaseTwo := fun h2 : n % 3 = 2 =>
+    canonical_right_phase_two_next_seed s n hs h2
 
   have hControl :
       InfiniteBadCoupledControl (4^N) initial := by
@@ -99,9 +108,6 @@ theorem canonical_bad_parent_forces_unbounded_origin_support_probe
       (s+1) (n % 3^K) (n / 3^K) K
   rw [← hSplit] at hRenormalized
 
-  /- The exact equality Codex had not yet placed in the diagnostic context:
-     the live child word at orbit K is the finite canonical cut offset plus
-     the re-scaled canonical tail of the unconsumed origin suffix. -/
   have hCanonicalChildTailK :=
     canonical_controller_childTail_cut_exact s n K
 
