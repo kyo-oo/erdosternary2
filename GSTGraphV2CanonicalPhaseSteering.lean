@@ -45,8 +45,8 @@ theorem lteCoeff_mod9_seven_of_one_le : ∀ s : Nat, 1 ≤ s →
           norm_num
           ring
         exact dvd_mul_of_dvd_left h9 _
-      rw [Nat.add_mod, Nat.add_mod, ih', hterm1, hterm2]
-      norm_num
+      simp only [Nat.add_mod]
+      simp [ih', hterm1, hterm2]
 
 /-- The canonical horizontal prefix offset is rigidly two modulo three. -/
 theorem prefixOffset_mod3_two
