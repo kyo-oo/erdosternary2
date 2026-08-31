@@ -25,23 +25,23 @@ theorem lteCoeff_mod9_seven_of_one_le : ∀ s : Nat, 1 ≤ s →
   | zero =>
       norm_num [lteCoeff]
   | succ r ih =>
-      have ih' : lteCoeff (1 + r) % 9 = 7 := ih (by omega)
+      have ih' : lteCoeff (Nat.add 1 r) % 9 = 7 := ih (by omega)
       simp only [lteCoeff]
       have hterm1 :
-          (3 ^ ((1 + r) + 1) * lteCoeff (1 + r) ^ 2) % 9 = 0 := by
+          (3 ^ (Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 2) % 9 = 0 := by
         apply Nat.mod_eq_zero_of_dvd
-        have h9 : 9 ∣ 3 ^ ((1 + r) + 1) := by
+        have h9 : 9 ∣ 3 ^ (Nat.add 1 r + 1) := by
           use 3^r
-          rw [show (1 + r) + 1 = r + 2 by omega, pow_add]
+          rw [show Nat.add 1 r + 1 = r + 2 by omega, pow_add]
           norm_num
           ring
         exact dvd_mul_of_dvd_left h9 _
       have hterm2 :
-          (3 ^ (2 * (1 + r) + 1) * lteCoeff (1 + r) ^ 3) % 9 = 0 := by
+          (3 ^ (2 * Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 3) % 9 = 0 := by
         apply Nat.mod_eq_zero_of_dvd
-        have h9 : 9 ∣ 3 ^ (2 * (1 + r) + 1) := by
+        have h9 : 9 ∣ 3 ^ (2 * Nat.add 1 r + 1) := by
           use 3^(2*r+1)
-          rw [show 2*(1+r)+1 = (2*r+1)+2 by omega, pow_add]
+          rw [show 2 * Nat.add 1 r + 1 = (2*r+1)+2 by omega, pow_add]
           norm_num
           ring
         exact dvd_mul_of_dvd_left h9 _
