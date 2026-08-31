@@ -62,6 +62,7 @@ theorem canonicalTail_mod9_linear
         exact lteCoeff_mod9_seven_of_one_le r hr
       rw [Nat.add_mod, Nat.mul_mod, hpow, hc, ih]
       rw [Nat.mul_succ, Nat.add_mod]
+      omega
 
 /-- From scale two onward the LTE coefficient is rigid modulo twenty-seven. -/
 theorem lteCoeff_mod27_sixteen_of_two_le : ∀ r : Nat, 2 ≤ r →
@@ -110,7 +111,7 @@ theorem prefixOffset_mod9_five
       (16 + 27 * (unitTail s / 27)) / 3 =
         5 + 9 * (unitTail s / 27) := by omega
   rw [hdiv]
-  simp
+  omega
 
 /-- The complete seed-one canonical parent tail has an explicit mod-nine
 phase. -/
@@ -140,7 +141,7 @@ theorem canonical_parent_mod9_three_happy
   have hx3 : X % 3 = 2 := by omega
   have hxd : (X / 3) % 3 = 2 := by omega
   unfold SeedHappy seededCarry seededResidue seededDigit
-  change HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
+  change GSTU2DEventTransport.HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
   norm_num [HappyCell]
 
@@ -158,7 +159,7 @@ theorem canonical_parent_mod9_four_happy
   have hx3 : X % 3 = 0 := by omega
   have hxd : (X / 3) % 3 = 2 := by omega
   unfold SeedHappy seededCarry seededResidue seededDigit
-  change HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
+  change GSTU2DEventTransport.HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
   norm_num [HappyCell]
 
