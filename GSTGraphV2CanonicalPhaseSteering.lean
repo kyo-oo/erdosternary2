@@ -25,35 +25,23 @@ theorem lteCoeff_mod9_seven_of_one_le : ∀ s : Nat, 1 ≤ s →
   | zero =>
       norm_num [lteCoeff]
   | succ r ih =>
-      have ih' : lteCoeff (Nat.add 1 r) % 9 = 7 := ih (by omega)
-      simp only [lteCoeff]
+      rw [show 1 + (r + 1) = (1 + r) + 1 by omega, lteCoeff]
+      have hpow1 : 9 ∣ 3 ^ ((1 + r) + 1) := by
+        use 3^r
+        rw [show (1 + r) + 1 = 2 + r by omega, pow_add]
+        norm_num
+      have hpow2 : 9 ∣ 3 ^ (2 * (1 + r) + 1) := by
+        use 3^(2*r+1)
+        rw [show 2 * (1 + r) + 1 = 2 + (2*r+1) by omega, pow_add]
+        norm_num
       have hterm1 :
-          (3 ^ (Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 2) % 9 = 0 := by
-        apply Nat.mod_eq_zero_of_dvd
-        have h9 : 9 ∣ 3 ^ (Nat.add 1 r + 1) := by
-          use 3^r
-          rw [show Nat.add 1 r + 1 = r + 2 by omega, pow_add]
-          norm_num
-          ring
-        exact dvd_mul_of_dvd_left h9 _
+          (3 ^ ((1 + r) + 1) * lteCoeff (1 + r) ^ 2) % 9 = 0 :=
+        Nat.mod_eq_zero_of_dvd (dvd_mul_of_dvd_left hpow1 _)
       have hterm2 :
-          (3 ^ (2 * Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 3) % 9 = 0 := by
-        apply Nat.mod_eq_zero_of_dvd
-        have h9 : 9 ∣ 3 ^ (2 * Nat.add 1 r + 1) := by
-          use 3^(2*r+1)
-          rw [show 2 * Nat.add 1 r + 1 = (2*r+1)+2 by omega, pow_add]
-          norm_num
-          ring
-        exact dvd_mul_of_dvd_left h9 _
-      rw [Nat.add_mod]
-      rw [hterm2, Nat.add_zero]
-      have hlt :
-          (lteCoeff (Nat.add 1 r) +
-              3 ^ (Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 2) % 9 < 9 :=
-        Nat.mod_lt _ (by norm_num)
-      rw [Nat.mod_eq_of_lt hlt]
-      rw [Nat.add_mod]
-      rw [hterm1, ih']
+          (3 ^ (2 * (1 + r) + 1) * lteCoeff (1 + r) ^ 3) % 9 = 0 :=
+        Nat.mod_eq_zero_of_dvd (dvd_mul_of_dvd_left hpow2 _)
+      rw [Nat.add_mod, hterm2, Nat.add_zero,
+        Nat.add_mod, hterm1, ih]
       norm_num
 
 /-- The canonical horizontal prefix offset is rigidly two modulo three. -/
