@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTGraphV2CanonicalPhaseWaveProbe.lean'
+      - 'GSTGraphV2CanonicalNWave.lean'
       - 'GSTGraphV2CanonicalTransparentBridgeProbe.lean'
       - 'GSTGraphV2CanonicalPhaseSteering.lean'
       - 'GSTGraphV2CanonicalRenormalization.lean'
@@ -31,7 +32,7 @@ jobs:
           from pathlib import Path
           import re, subprocess
           roots = [
-              Path("GSTGraphV2CanonicalPhaseWaveProbe.lean"),
+              Path("GSTGraphV2CanonicalNWave.lean"),
           ]
           build = Path(".lake/build/lib/lean")
           rx = re.compile(r"^\s*import\s+(.+?)\s*$")
@@ -66,6 +67,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTGraphV2CanonicalPhaseWaveProbe.lean 2>&1 | tee canonical-phase-wave.log
-          cp canonical-phase-wave.log canonical-proof-kernel.log
+          lake env lean GSTGraphV2CanonicalNWave.lean 2>&1 | tee canonical-n-wave.log
+          cp canonical-n-wave.log canonical-proof-kernel.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' canonical-proof-kernel.log
