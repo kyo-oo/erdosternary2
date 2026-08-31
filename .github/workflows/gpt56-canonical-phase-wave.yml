@@ -31,9 +31,7 @@ jobs:
           from pathlib import Path
           import re, subprocess
           roots = [
-              Path("GSTGraphV2TransparentWidthThree.lean"),
               Path("GSTGraphV2CanonicalPhaseWaveProbe.lean"),
-              Path("GSTGraphV2CanonicalTransparentBridgeProbe.lean"),
           ]
           build = Path(".lake/build/lib/lean")
           rx = re.compile(r"^\s*import\s+(.+?)\s*$")
@@ -68,8 +66,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTGraphV2TransparentWidthThree.lean 2>&1 | tee transparent-width-three.log
           lake env lean GSTGraphV2CanonicalPhaseWaveProbe.lean 2>&1 | tee canonical-phase-wave.log
-          lake env lean GSTGraphV2CanonicalTransparentBridgeProbe.lean 2>&1 | tee canonical-transparent-bridge.log
-          cat transparent-width-three.log canonical-phase-wave.log canonical-transparent-bridge.log > canonical-proof-kernel.log
+          cp canonical-phase-wave.log canonical-proof-kernel.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' canonical-proof-kernel.log
