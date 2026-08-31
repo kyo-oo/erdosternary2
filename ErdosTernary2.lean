@@ -16827,14 +16827,30 @@ theorem gst_prefix_one_bigN_future_zero_inline
   `GSTOmegaInfiniteBadTrace`.  The only remaining mathematical transport is to
   force a parent SURVIVE occurrence from the canonical child gate.
 -/
-/-- Exact remaining information-descent seam.  The parent seeded bad
-    realization must force the shared canonical child information itself to be
-    bad.  This is the only universal consequence still to discharge from the
-    kernel-green information-wave identities above. -/
-theorem gst_step6_collision_kernel
+/-- Certified Step-6 terminal packet.  This is the exact consequence of the
+green information-wave machinery; it does not turn the shifted packet into a
+contradiction. -/
+theorem gst_step6_terminal_packet_kernel
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hchild : GSTNavigationWitness (gstNavigationConstant (s+1) n))
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
+    ∃ q,
+      GSTU2DEventTransport.HappyCell
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1))
+            (s+2+q)).seven.carry
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1))
+            (s+2+q)).seven.digit ∧
+        ∀ j, ¬ GSTU2DEventTransport.HappyCell
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) +
+              GSTGraphV2PerfectPowerBlock.canonicalWidth s)
+            (s+2+j)).seven.carry
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) +
+              GSTGraphV2PerfectPowerBlock.canonicalWidth s)
+            (s+2+j)).seven.digit := by
   let T : Nat := gstNavigationConstant (s+1) n
   let A : Nat := 4^(3^s)
   let z : Nat := gstCanonicalPrefixOffsetS s
@@ -16909,7 +16925,8 @@ theorem gst_step6_collision_kernel
       4^(3^s) = 1 + 3^(s+1) * gstNavigationConstant s 1 := by
     simpa using (gst_navigation_decomposition s 1 hs)
 
-  exact GSTPrefixOneU2DCollisionProof.canonical_prefix_one_u2d_collision
+  refine ⟨q, ?_⟩
+  exact GSTPrefixOneU2DCollisionProof.canonical_prefix_one_u2d_terminal_packet
     s n (gstNavigationConstant s 1) z q hs hn
     hLTE hunitPrefix hChildCanonical hBadCanonical
 
