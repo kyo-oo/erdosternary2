@@ -25,7 +25,8 @@ open GSTV2
 /-- RED probe for the exact remaining canonical escape implication. Every
 available live Graph-V2 packet is exposed at an arbitrary origin cutoff K.
 The probe now also carries exact phase steering and canonical sheet-translation
-laws, so the residual is tested inside the actual renormalized spacetime. -/
+laws, so the residual is tested inside the actual renormalized spacetime.
+This checkpoint intentionally remains RED until the regeneration seam closes. -/
 theorem canonical_bad_parent_forces_unbounded_origin_support_probe
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hChild : HappyCell
