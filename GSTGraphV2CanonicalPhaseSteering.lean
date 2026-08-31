@@ -7,9 +7,11 @@ set_option maxHeartbeats 10000000
 namespace GSTGraphV2CanonicalPhaseSteering
 
 open GSTCanonicalTailLTE
+open GSTPerfectPowerTailNavigation
 open GSTPrefixOneSeedCore
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalDescentOntology
+open GSTGraphV2InfiniteControl
 open GSTGraphV2InfiniteControllerBridge
 open GSTGraphV2PerfectPowerBlock
 open GSTV2
@@ -23,23 +25,28 @@ theorem lteCoeff_mod9_seven_of_one_le : ∀ s : Nat, 1 ≤ s →
   | zero =>
       norm_num [lteCoeff]
   | succ r ih =>
+      have ih' : lteCoeff (1 + r) % 9 = 7 := ih (by omega)
       simp only [lteCoeff]
-      have hpow1 : 3^((r + 1) + 1) % 9 = 0 := by
-        rw [show (r + 1) + 1 = r + 2 by omega]
-        have h : 9 ∣ 3^(r+2) := by
+      have hterm1 :
+          (3 ^ ((1 + r) + 1) * lteCoeff (1 + r) ^ 2) % 9 = 0 := by
+        apply Nat.mod_eq_zero_of_dvd
+        have h9 : 9 ∣ 3 ^ ((1 + r) + 1) := by
           use 3^r
-          rw [show r + 2 = r + 2 by rfl, pow_add]
+          rw [show (1 + r) + 1 = r + 2 by omega, pow_add]
           norm_num
           ring
-        exact Nat.mod_eq_zero_of_dvd h
-      have hpow2 : 3^(2*(r+1)+1) % 9 = 0 := by
-        have h : 9 ∣ 3^(2*(r+1)+1) := by
+        exact dvd_mul_of_dvd_left h9 _
+      have hterm2 :
+          (3 ^ (2 * (1 + r) + 1) * lteCoeff (1 + r) ^ 3) % 9 = 0 := by
+        apply Nat.mod_eq_zero_of_dvd
+        have h9 : 9 ∣ 3 ^ (2 * (1 + r) + 1) := by
           use 3^(2*r+1)
-          rw [show 2*(r+1)+1 = (2*r+1)+2 by omega, pow_add]
+          rw [show 2*(1+r)+1 = (2*r+1)+2 by omega, pow_add]
           norm_num
           ring
-        exact Nat.mod_eq_zero_of_dvd h
-      simp [Nat.add_mod, Nat.mul_mod, hpow1, hpow2, ih]
+        exact dvd_mul_of_dvd_left h9 _
+      rw [Nat.add_mod, Nat.add_mod, ih', hterm1, hterm2]
+      norm_num
 
 /-- The canonical horizontal prefix offset is rigidly two modulo three. -/
 theorem prefixOffset_mod3_two
