@@ -52,8 +52,7 @@ theorem coupledOrbit_cycle_all_turns
       calc
         coupledOrbit A initial (a + (m + 1) * L) =
             coupledOrbit A initial ((a + m * L) + L) := by
-              congr 2
-              omega
+              simp [Nat.succ_mul, Nat.add_assoc]
         _ = coupledOrbit A (coupledOrbit A initial (a + m * L)) L :=
               coupledOrbit_add_exact A initial (a + m * L) L
         _ = coupledOrbit A (coupledOrbit A initial a) L := by rw [ih]
@@ -124,12 +123,14 @@ theorem canonical_graph_state_cycle_all_turns
       coupledOrbit (4^(canonicalWidth s)) (canonicalController s n) a =
         coupledOrbit (4^(canonicalWidth s))
           (canonicalController s n) (a + L) := by
+    simp only [canonicalController]
     rw [graphCoupledOrbit_exact, graphCoupledOrbit_exact]
-    simpa [canonicalController, Nat.add_assoc] using hcycle
+    simpa [Nat.add_assoc] using hcycle
   have hturn :=
     canonical_controller_cycle_all_turns s n a L hcycleOrbit m
+  simp only [canonicalController] at hturn
   rw [graphCoupledOrbit_exact, graphCoupledOrbit_exact] at hturn
-  simpa [canonicalController, Nat.add_assoc] using hturn
+  simpa [Nat.add_assoc] using hturn
 
 /-- Observable form of the same theorem.  Both endpoint cells and the retained
 horizontal U potential repeat on the literal Graph-V2 sheet; the result is not
