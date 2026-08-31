@@ -109,9 +109,9 @@ theorem right_energy_decomposition
     (hc : c = 1 + 3*z) :
     4^(3^s) * childEnergy s n =
       rightPrefix s + 3^(s+2) * rightTail s n z := by
-  rw [child_energy_decomposition, hLTE, hc]
+  rw [child_energy_decomposition]
   unfold rightPrefix rightTail
-  rw [show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
+  rw [hLTE, hc, show s + 2 = (s+1)+1 by omega, Nat.pow_succ]
   ring
 
 /-- The canonical right prefix lies strictly below its production cut. -/
