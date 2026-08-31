@@ -101,9 +101,8 @@ theorem canonical_bad_parent_forces_unbounded_origin_support_probe
   have hBadSuffixK := hControl.parentBadSuffix K
   have hOrbitK := hOrbit K
 
-  dsimp [E, N, b, initial] at
-    hCut hControl hGate hLedgerK hInvariantK hBadSuffixK hOrbitK
-    hRenormalized
+  dsimp [E, N, b, initial] at hCut hControl hGate hLedgerK
+    hInvariantK hBadSuffixK hOrbitK hRenormalized
   trace_state
   omega
 
