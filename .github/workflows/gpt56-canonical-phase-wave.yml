@@ -6,8 +6,10 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTGraphV2CanonicalPhaseWaveProbe.lean'
+      - 'GSTGraphV2CanonicalTransparentBridgeProbe.lean'
       - 'GSTGraphV2CanonicalPhaseSteering.lean'
       - 'GSTGraphV2CanonicalRenormalization.lean'
+      - 'GSTGraphV2TransparentWidthThree.lean'
       - '.github/workflows/gpt56-canonical-phase-wave.yml'
   workflow_dispatch:
 
@@ -20,10 +22,12 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact canonical phase-wave probe
+      - name: Compile canonical phase-wave and transparent collision probes
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2CanonicalPhaseWaveProbe
+          lake build GSTGraphV2CanonicalPhaseWaveProbe GSTGraphV2CanonicalTransparentBridgeProbe
           lake env lean GSTGraphV2CanonicalPhaseWaveProbe.lean 2>&1 | tee canonical-phase-wave.log
-          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' canonical-phase-wave.log
+          lake env lean GSTGraphV2CanonicalTransparentBridgeProbe.lean 2>&1 | tee canonical-transparent-bridge.log
+          cat canonical-phase-wave.log canonical-transparent-bridge.log > canonical-proof-kernel.log
+          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' canonical-proof-kernel.log
