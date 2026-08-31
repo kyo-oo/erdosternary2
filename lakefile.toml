@@ -26,6 +26,7 @@ roots = [
   "GSTFourPowerOntologicalAdapter",
   "GSTGraphV2CanonicalDescentOntology",
   "GSTGraphV2CanonicalEscape",
+  "GSTGraphV2CanonicalInfiniteCycle",
   "GSTGraphV2CanonicalRenormalization",
   "GSTGraphV2CanonicalSignedPrefixBridge",
   "GSTGraphV2CanonicalTerminalExtinctionProbe",
