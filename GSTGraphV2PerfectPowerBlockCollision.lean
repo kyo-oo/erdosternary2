@@ -133,11 +133,10 @@ private theorem index_lt_three_pow_succ (n : Nat) :
       have hp : 0 < 3^(n+1) := by positivity
       omega
 
-/-- Production collision rewritten on the exact arbitrary-depth phase-wave
-packet.  The consumed origin is exhausted at `K=n+1`; the child Happy gate and
-the complete bad boundary are then transported to one literal shifted strip
-of the unit-energy graph. -/
-theorem canonical_perfect_power_block_collision
+/-- The strongest certified terminal consequence of the arbitrary-depth
+phase wave.  This theorem deliberately does not assert that the shifted
+Happy/bad packet is contradictory. -/
+theorem canonical_perfect_power_block_terminal_packet
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hChild : HappyCell
       (graph (canonicalEnergy s n) 0 (s+2+q)).seven.carry
@@ -145,7 +144,14 @@ theorem canonical_perfect_power_block_collision
     (hRightBad : ∀ j, ¬ HappyCell
       (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.carry
       (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.digit) :
-    False := by
+    HappyCell
+        (graph 1 (nWaveShift s n (n+1)) (s+2+q)).seven.carry
+        (graph 1 (nWaveShift s n (n+1)) (s+2+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph 1 (nWaveShift s n (n+1) + canonicalWidth s)
+          (s+2+j)).seven.carry
+        (graph 1 (nWaveShift s n (n+1) + canonicalWidth s)
+          (s+2+j)).seven.digit := by
   let K := n + 1
   have hterm : n / 3^K = 0 := by
     apply Nat.div_eq_of_lt
@@ -164,18 +170,14 @@ theorem canonical_perfect_power_block_collision
   have hTerminal :=
     (canonical_n_wave_terminal_strip_packet_iff
       s n K 0 (s+2) q hterm).mp hPacket
-  have hOriginNeutral :=
-    terminal_unit_origin_neutral (s+2) (by omega : 2 ≤ s+2)
-  dsimp at hTerminal
-  trace_state
-  omega
+  simpa [K, Nat.add_assoc] using hTerminal
 
 #check blockDensity_physical_table
 #check happy_iff_blockDensity_positive
 #check blockDensity_column_exact
-#check canonical_perfect_power_block_collision
+#check canonical_perfect_power_block_terminal_packet
 #print axioms blockDensity_column_exact
-#print axioms canonical_perfect_power_block_collision
+#print axioms canonical_perfect_power_block_terminal_packet
 
 end GSTGraphV2PerfectPowerBlockCollision
 
