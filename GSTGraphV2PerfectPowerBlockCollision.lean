@@ -2,6 +2,7 @@ import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DPureDivergence83
 import GSTGraphV2CanonicalDescentOntology
 import GSTGraphV2CanonicalSignedPrefixBridge
+import GSTGraphV2CanonicalInfiniteCycle
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -21,6 +22,9 @@ open GSTU2DPureDivergence83
 open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalEscape
 open GSTGraphV2CanonicalSignedPrefixBridge
+open GSTGraphV2CanonicalInfiniteCycle
+open GSTGraphV2InfiniteControllerBridge
+open GSTV2
 
 /-!
 A second phase chart selected by the twelve physical cells.  Unlike the
@@ -166,6 +170,32 @@ theorem canonical_perfect_power_block_collision
     canonical_graph_u_potential_growth_positive
       s n q hs hChildSeed hRightSeed
 
+  have hInfiniteControl :
+      InfiniteBadCoupledControl (4^N) (graphCoupledState E N b) := by
+    apply graph_infinite_bad_control
+    · simpa [E, b] using canonical_base_carry_zero s n hs
+    · intro j
+      simpa [E, N, b, Nat.add_assoc] using hRightBad j
+
+  have hLiveGate :
+      LatentGateTransfer (4^N) (graphCoupledState E N b) q := by
+    apply graph_child_happy_latent_transfer
+    · simpa [E, b] using canonical_base_carry_zero s n hs
+    · intro j
+      simpa [E, N, b, Nat.add_assoc] using hRightBad j
+    · simpa [E, b, Nat.add_assoc] using hChild
+
+  have hInfiniteLedger :
+      InfiniteCoupledLedger (4^N) (graphCoupledState E N b) := by
+    apply infinite_coupled_ledger
+    · positivity
+    · exact graphCoupledState_invariant E N b
+
+  have hGraphSpaceTime : ∀ K,
+      coupledOrbit (4^N) (graphCoupledState E N b) K =
+        graphCoupledState E N (b + K) := by
+    exact graphCoupledOrbit_exact E N b
+
   have hleftAbs : HappyCell
       (graph 1 M (b+q)).seven.carry
       (graph 1 M (b+q)).seven.digit := by
@@ -186,7 +216,7 @@ theorem canonical_perfect_power_block_collision
   have hPureExact := blockDensity_column_exact E N b (q+1)
 
   -- Diagnostic compiler state: expose the exact remaining arithmetic seam.
-  dsimp [E, N, b, M] at hleft hright hSignedGrowth hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  dsimp [E, N, b, M] at hleft hright hSignedGrowth hleftAbs hrightAbs hU hPureRight hPureExact hInfiniteControl hLiveGate hInfiniteLedger hGraphSpaceTime ⊢
   trace_state
   omega
 
