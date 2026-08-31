@@ -15,6 +15,7 @@ open GSTPerfectPowerTailNavigation
 open GSTPrefixOneSeedCore
 open GSTGraphV2InfiniteControl
 open GSTGraphV2InfiniteControllerBridge
+open GSTGraphV2CoupledUFlux
 open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalDescentOntology
@@ -137,6 +138,49 @@ theorem canonical_right_seed_adapter
   rw [seedHappy_one_iff]
   simpa [HappyCell, hseed] using h
 
+
+/-- Exact U-jump adapter for the physical canonical left boundary. -/
+theorem canonical_left_u_jump_adapter
+    (s n j : Nat) (hs : 1 ≤ s) :
+    gstUJumpExact
+        (graph (4^(3^(s+1) * n)) 0 (s+2+j)).seven.carry
+        (graph (4^(3^(s+1) * n)) 0 (s+2+j)).seven.digit =
+      gstUJumpExact
+        (GSTV2.affineCarry 0 (canonicalChildTail s n) j)
+        (GSTV2.digit (canonicalChildTail s n) j) := by
+  have hE :
+      4^0 * 4^(3^(s+1) * n) =
+        1 + 3^(s+2) * canonicalChildTail s n := by
+    simpa using canonical_child_energy_decomposition s n
+  have hP : 1 < 3^(s+2) :=
+    lt_trans (by decide : 1 < 4) (canonical_cut_gt_four s hs)
+  have hslice := graph_prefix_slice_exact
+    (4^(3^(s+1) * n)) 0 (s+2) 1 (canonicalChildTail s n) j hE hP
+  have hseed : (4 * 1) / 3^(s+2) = 0 :=
+    Nat.div_eq_of_lt (canonical_cut_gt_four s hs)
+  rw [hslice.1, hslice.2, hseed]
+  rfl
+
+/-- Exact U-jump adapter for the physical canonical right boundary. -/
+theorem canonical_right_u_jump_adapter
+    (s n j : Nat) (hs : 1 ≤ s) :
+    gstUJumpExact
+        (graph (4^(3^(s+1) * n)) (3^s) (s+2+j)).seven.carry
+        (graph (4^(3^(s+1) * n)) (3^s) (s+2+j)).seven.digit =
+      gstUJumpExact
+        (GSTV2.affineCarry 1 (canonicalParentTail s n) j)
+        (GSTV2.digit (canonicalParentTail s n) j) := by
+  have hE :
+      4^(3^s) * 4^(3^(s+1) * n) =
+        (1 + 3^(s+1)) + 3^(s+2) * canonicalParentTail s n :=
+    canonical_parent_energy_decomposition s n
+  have hslice := graph_prefix_slice_exact
+    (4^(3^(s+1) * n)) (3^s) (s+2)
+      (1 + 3^(s+1)) (canonicalParentTail s n) j hE
+      (canonical_right_prefix_lt_cut s hs)
+  have hseed := canonical_right_prefix_seed_one s hs
+  rw [hslice.1, hslice.2, hseed]
+  rfl
 
 /-- The canonical child begins the coupled controller with the true zero
 carry, derived from the exact low prefix rather than assumed. -/
@@ -424,6 +468,8 @@ theorem nat_no_unbounded_ternary_support
 #check canonical_child_energy_decomposition
 #check canonical_left_seed_adapter
 #check canonical_right_seed_adapter
+#check canonical_left_u_jump_adapter
+#check canonical_right_u_jump_adapter
 #check canonical_base_carry_zero
 #check canonical_latent_gate_packet
 #check canonicalTail_cut_quotient_exact
