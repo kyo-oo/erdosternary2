@@ -45,14 +45,15 @@ theorem lteCoeff_mod9_seven_of_one_le : ∀ s : Nat, 1 ≤ s →
           norm_num
           ring
         exact dvd_mul_of_dvd_left h9 _
-      have houter := Nat.add_mod
-        (lteCoeff (1 + r) +
-          3 ^ ((1 + r) + 1) * lteCoeff (1 + r) ^ 2)
-        (3 ^ (2 * (1 + r) + 1) * lteCoeff (1 + r) ^ 3) 9
-      have hinner := Nat.add_mod
-        (lteCoeff (1 + r))
-        (3 ^ ((1 + r) + 1) * lteCoeff (1 + r) ^ 2) 9
-      rw [houter, hterm2, hinner, hterm1, ih']
+      rw [Nat.add_mod]
+      rw [hterm2, Nat.add_zero]
+      have hlt :
+          (lteCoeff (Nat.add 1 r) +
+              3 ^ (Nat.add 1 r + 1) * lteCoeff (Nat.add 1 r) ^ 2) % 9 < 9 :=
+        Nat.mod_lt _ (by norm_num)
+      rw [Nat.mod_eq_of_lt hlt]
+      rw [Nat.add_mod]
+      rw [hterm1, ih']
       norm_num
 
 /-- The canonical horizontal prefix offset is rigidly two modulo three. -/
