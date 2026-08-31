@@ -169,11 +169,9 @@ theorem canonical_right_bad_to_graph_right_bad
   · exact rightPrefix_seed_one s hs
   · exact hBad
 
-/-- Final standalone collision.  The quotient child contributes one genuine
-Happy gate on the left boundary; the frozen LTE/unit-prefix identities expose
-the parent as a complete seed-one bad right boundary.  The already-proved
-perfect-power block collision then closes the finite canonical rectangle. -/
-theorem canonical_prefix_one_u2d_collision
+/-- Truthful prefix-one adapter into the certified terminal n-wave packet.
+No collision or contradiction is asserted. -/
+theorem canonical_prefix_one_u2d_terminal_packet
     (s n c z q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hLTE : 4^(3^s) = 1 + 3^(s+1) * c)
     (hc : c = 1 + 3*z)
@@ -184,11 +182,22 @@ theorem canonical_prefix_one_u2d_collision
       ¬ HappyCell
         (seededCarry 1 (rightTail s n z) j)
         (digit3 (rightTail s n z) j)) :
-    False := by
+    HappyCell
+        (graph 1
+          (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1)) (s+2+q)).seven.carry
+        (graph 1
+          (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1)) (s+2+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph 1
+          (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) + canonicalWidth s)
+          (s+2+j)).seven.carry
+        (graph 1
+          (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) + canonicalWidth s)
+          (s+2+j)).seven.digit := by
   have hChildGraph := child_tail_happy_to_graph s n q hs hChild
   have hRightGraph :=
     canonical_right_bad_to_graph_right_bad s n c z hs hLTE hc hBad
-  exact GSTGraphV2PerfectPowerBlockCollision.canonical_perfect_power_block_collision
+  exact GSTGraphV2PerfectPowerBlockCollision.canonical_perfect_power_block_terminal_packet
     s n q hs hn
     (by
       simpa [childEnergy, canonicalEnergy] using hChildGraph)
@@ -204,6 +213,6 @@ theorem canonical_prefix_one_u2d_collision
 #print axioms rightPrefix_lt_cut
 #print axioms rightPrefix_seed_one
 #print axioms canonical_right_bad_to_graph_right_bad
-#print axioms canonical_prefix_one_u2d_collision
+#print axioms canonical_prefix_one_u2d_terminal_packet
 
 end GSTPrefixOneU2DCollisionProof
