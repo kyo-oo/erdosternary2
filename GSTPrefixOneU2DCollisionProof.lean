@@ -1,6 +1,7 @@
 import GSTGraphV2InfiniteControl
 import GSTGraphV2HandwrittenExponentialLTE
-import GSTGraphV2PerfectPowerBlockCollision
+import GSTInfiniteFourPowerNavigation
+import GSTPrefixOneSeedCore
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -11,7 +12,11 @@ open GSTCanonicalSevenAxisBridge
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenExponentialLTE
-open GSTGraphV2PerfectPowerBlock
+open GSTPerfectPowerTailNavigation
+open GSTFourPowerOntologicalAdapter
+open GSTInfiniteFourPowerNavigation
+open GSTPrefixOneSeedCore
+open GSTSeedOneShift
 
 /-- Canonical child full power used by the prefix-one descent seam. -/
 def childEnergy (s n : Nat) : Nat := 4^(3^(s+1) * n)
@@ -169,10 +174,41 @@ theorem canonical_right_bad_to_graph_right_bad
   · exact rightPrefix_seed_one s hs
   · exact hBad
 
-/-- Final standalone collision.  The quotient child contributes one genuine
-Happy gate on the left boundary; the frozen LTE/unit-prefix identities expose
-the parent as a complete seed-one bad right boundary.  The already-proved
-perfect-power block collision then closes the finite canonical rectangle. -/
+/-- The current universal four-power theorem supplies the exact independent
+creation master expected by the prefix-one seed theorem.  This is a direct
+packaging of a kernel-checked theorem, not the quarantined recursive
+`h_creation_for_4pow` route. -/
+theorem universal_four_power_creation_master : FourPowerCreationMaster := by
+  intro K hK5 hK7
+  exact gst_four_power_navigation_universal K hK5 hK7
+
+/-- The frozen LTE coefficient is the canonical unit tail. -/
+theorem frozen_lte_coefficient_eq_unitTail
+    (s c : Nat)
+    (hLTE : 4^(3^s) = 1 + 3^(s+1) * c) :
+    c = unitTail s := by
+  have hCanonical :
+      4^(3^s) = 1 + 3^(s+1) * unitTail s := by
+    simpa [unitTail] using canonical_tail_decomposition s 1
+  have hpow : 0 < 3^(s+1) := Nat.pow_pos (by decide)
+  nlinarith
+
+/-- The monolith's frozen unit-prefix offset is therefore the canonical
+prefix offset used by the seed-one theorem. -/
+theorem frozen_prefix_offset_eq_prefixOffset
+    (s c z : Nat)
+    (hLTE : 4^(3^s) = 1 + 3^(s+1) * c)
+    (hc : c = 1 + 3*z) :
+    z = prefixOffset s := by
+  have hcUnit : c = unitTail s :=
+    frozen_lte_coefficient_eq_unitTail s c hLTE
+  have hPrefix := unitTail_prefix_one s
+  nlinarith
+
+/-- Exact replacement collision.  It preserves the frozen LTE and unit-prefix
+premises all the way to the canonical seed-one word, then applies the current
+universal four-power creation theorem.  The obsolete arbitrary-rectangle
+collision is not used. -/
 theorem canonical_prefix_one_u2d_collision
     (s n c z q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hLTE : 4^(3^s) = 1 + 3^(s+1) * c)
@@ -185,16 +221,21 @@ theorem canonical_prefix_one_u2d_collision
         (seededCarry 1 (rightTail s n z) j)
         (digit3 (rightTail s n z) j)) :
     False := by
-  have hChildGraph := child_tail_happy_to_graph s n q hs hChild
-  have hRightGraph :=
-    canonical_right_bad_to_graph_right_bad s n c z hs hLTE hc hBad
-  exact GSTGraphV2PerfectPowerBlockCollision.canonical_perfect_power_block_collision
-    s n q hs hn
-    (by
-      simpa [childEnergy, canonicalEnergy] using hChildGraph)
-    (by
-      intro j
-      simpa [childEnergy, canonicalEnergy, canonicalWidth] using hRightGraph j)
+  have hz : z = prefixOffset s :=
+    frozen_prefix_offset_eq_prefixOffset s c z hLTE hc
+  have hTail :
+      rightTail s n z =
+        prefixOffset s + 4^(3^s) * canonicalTail (s+1) n := by
+    simp [rightTail, childTail, childEnergy, canonicalTail, hz]
+  have hSeed : SeedOneWitness
+      (prefixOffset s + 4^(3^s) * canonicalTail (s+1) n) :=
+    gst_prefix_one_seed_one_parent_of_master
+      universal_four_power_creation_master s n hs hn
+  obtain ⟨j, hd, hcarry⟩ := hSeed
+  apply hBad j
+  rw [hTail]
+  exact ⟨hd, by
+    simpa [GSTGraphV2InfiniteControl.seededCarry, seedOneCarry] using hcarry⟩
 
 #print axioms child_energy_decomposition
 #print axioms child_tail_happy_to_graph
@@ -204,6 +245,10 @@ theorem canonical_prefix_one_u2d_collision
 #print axioms rightPrefix_lt_cut
 #print axioms rightPrefix_seed_one
 #print axioms canonical_right_bad_to_graph_right_bad
+#print axioms universal_four_power_creation_master
+#print axioms frozen_lte_coefficient_eq_unitTail
+#print axioms frozen_prefix_offset_eq_prefixOffset
 #print axioms canonical_prefix_one_u2d_collision
 
 end GSTPrefixOneU2DCollisionProof
+
