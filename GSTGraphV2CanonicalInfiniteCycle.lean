@@ -9,6 +9,9 @@ namespace GSTGraphV2CanonicalInfiniteCycle
 open GSTV2
 open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2CanonicalEscape
+open GSTGraphV2InfiniteControllerBridge
+open GSTGraphV2HandwrittenAnchoredCocycle
+open GSTGraphV2CoupledUFlux
 
 /-- The literal all-depth controller attached to the canonical perfect-power
 block.  No terminal height is selected. -/
@@ -100,11 +103,100 @@ theorem canonical_cycle_ledger_packet
         (canonicalEnergy s n) (canonicalWidth s) (s + 2))).pastSynchronized
           (a + m * L)
 
+
+/-- A repeated controller packet is literally a repeated rectangle on the
+canonical Graph-V2 spacetime sheet at every turn of the cycle. -/
+theorem canonical_graph_state_cycle_all_turns
+    (s n a L : Nat)
+    (hcycle :
+      graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + a) =
+        graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + (a + L))) :
+    ∀ m : Nat,
+      graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + (a + m * L)) =
+        graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + a) := by
+  intro m
+  have hcycleOrbit :
+      coupledOrbit (4^(canonicalWidth s)) (canonicalController s n) a =
+        coupledOrbit (4^(canonicalWidth s))
+          (canonicalController s n) (a + L) := by
+    rw [graphCoupledOrbit_exact, graphCoupledOrbit_exact]
+    simpa [canonicalController, Nat.add_assoc] using hcycle
+  have hturn :=
+    canonical_controller_cycle_all_turns s n a L hcycleOrbit m
+  rw [graphCoupledOrbit_exact, graphCoupledOrbit_exact] at hturn
+  simpa [canonicalController, Nat.add_assoc] using hturn
+
+/-- Observable form of the same theorem.  Both endpoint cells and the retained
+horizontal U potential repeat on the literal Graph-V2 sheet; the result is not
+a projected carry-only automaton. -/
+theorem canonical_graph_observables_cycle_all_turns
+    (s n a L : Nat)
+    (hcycle :
+      graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + a) =
+        graphCoupledState (canonicalEnergy s n) (canonicalWidth s)
+          (s + 2 + (a + L))) :
+    ∀ m : Nat,
+      let p := s + 2 + (a + m * L)
+      let p0 := s + 2 + a
+      (graph (canonicalEnergy s n) 0 p).seven.carry =
+          (graph (canonicalEnergy s n) 0 p0).seven.carry ∧
+      (graph (canonicalEnergy s n) 0 p).seven.digit =
+          (graph (canonicalEnergy s n) 0 p0).seven.digit ∧
+      (graph (canonicalEnergy s n) (canonicalWidth s) p).seven.carry =
+          (graph (canonicalEnergy s n) (canonicalWidth s) p0).seven.carry ∧
+      (graph (canonicalEnergy s n) (canonicalWidth s) p).seven.digit =
+          (graph (canonicalEnergy s n) (canonicalWidth s) p0).seven.digit ∧
+      graphUPotential (canonicalEnergy s n) 0 (canonicalWidth s) p =
+        graphUPotential (canonicalEnergy s n) 0 (canonicalWidth s) p0 := by
+  intro m
+  dsimp only
+  let E := canonicalEnergy s n
+  let N := canonicalWidth s
+  let p := s + 2 + (a + m * L)
+  let p0 := s + 2 + a
+  have hst :
+      graphCoupledState E N p = graphCoupledState E N p0 := by
+    dsimp [E, N, p, p0]
+    exact canonical_graph_state_cycle_all_turns s n a L hcycle m
+  have hLeftCarry :=
+    congrArg (fun st : CoupledState => st.childCarry) hst
+  have hRightCarry :=
+    congrArg (fun st : CoupledState => st.parentSeed) hst
+  have hLeftDigitState :=
+    congrArg (fun st : CoupledState => st.childTail % 3) hst
+  have hRightDigitState :=
+    congrArg (fun st : CoupledState =>
+      (st.parentOffset + 4^N * (st.childTail % 3)) % 3) hst
+  have hPotential :=
+    congrArg (fun st : CoupledState =>
+      gstUChargeExact st.parentSeed -
+        (((4^N : Nat) : Int)) * gstUChargeExact st.childCarry +
+        24 * (st.parentOffset : Int)) hst
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · simpa [graphCoupledState] using hLeftCarry
+  · rw [← graphCoupledState_childDigit_exact E N p,
+        ← graphCoupledState_childDigit_exact E N p0]
+    exact hLeftDigitState
+  · simpa [graphCoupledState] using hRightCarry
+  · rw [← graphCoupledState_parentDigit_exact E N p,
+        ← graphCoupledState_parentDigit_exact E N p0]
+    exact hRightDigitState
+  · simpa [graphUPotential, graphCoupledState] using hPotential
+
 #check coupledOrbit_add_exact
 #check coupledOrbit_cycle_all_turns
 #check canonical_controller_cycle_all_turns
 #check canonical_cycle_ledger_packet
+#check canonical_graph_state_cycle_all_turns
+#check canonical_graph_observables_cycle_all_turns
 #print axioms coupledOrbit_cycle_all_turns
 #print axioms canonical_cycle_ledger_packet
+#print axioms canonical_graph_state_cycle_all_turns
+#print axioms canonical_graph_observables_cycle_all_turns
 
 end GSTGraphV2CanonicalInfiniteCycle
