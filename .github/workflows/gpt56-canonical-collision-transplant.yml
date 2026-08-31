@@ -8,6 +8,7 @@ on:
       - '.github/workflows/gpt56-canonical-collision-transplant.yml'
       - 'GSTGraphV2PerfectPowerBlockCollision.lean'
       - 'GSTGraphV2CanonicalSignedPrefixBridge.lean'
+      - 'GSTGraphV2CanonicalInfiniteCycle.lean'
       - 'GSTGraphV2CanonicalEscape.lean'
       - 'GSTGraphV2CanonicalTerminalExtinctionProbe.lean'
       - 'GSTU2DCanonicalShiftedTerminalProbe.lean'
