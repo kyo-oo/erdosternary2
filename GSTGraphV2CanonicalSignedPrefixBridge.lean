@@ -11,6 +11,8 @@ open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalEscape
+open GSTGraphV2PerfectPowerBlock
+open GSTGraphV2HandwrittenAnchoredCocycle
 open GSTGraphV2CanonicalTerminalExtinctionProbe
 open GSTGraphV2CoupledUFlux
 
