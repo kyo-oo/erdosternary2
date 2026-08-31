@@ -2,6 +2,7 @@ import GSTGraphV2CanonicalInfiniteCycle
 import GSTGraphV2CanonicalDescentOntology
 import GSTGraphV2CanonicalRenormalization
 import GSTGraphV2CanonicalPhaseSteering
+import GSTGraphV2CanonicalSheetTranslation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -17,13 +18,14 @@ open GSTGraphV2CanonicalInfiniteCycle
 open GSTGraphV2CanonicalDescentOntology
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalPhaseSteering
+open GSTGraphV2CanonicalSheetTranslation
 open GSTGraphV2InfiniteControllerBridge
 open GSTV2
 
 /-- RED probe for the exact remaining canonical escape implication. Every
 available live Graph-V2 packet is exposed at an arbitrary origin cutoff K.
-The probe now also carries the exact canonical phase-steering laws at the
-production cut, so the next residual sees the true three-phase wave sector. -/
+The probe now also carries exact phase steering and canonical sheet-translation
+laws, so the residual is tested inside the actual renormalized spacetime. -/
 theorem canonical_bad_parent_forces_unbounded_origin_support_probe
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hChild : HappyCell
