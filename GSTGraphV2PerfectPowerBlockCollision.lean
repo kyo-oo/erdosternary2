@@ -3,6 +3,7 @@ import GSTU2DPureDivergence83
 import GSTGraphV2CanonicalDescentOntology
 import GSTGraphV2CanonicalSignedPrefixBridge
 import GSTGraphV2CanonicalInfiniteCycle
+import GSTGraphV2CanonicalNWave
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -23,6 +24,7 @@ open GSTGraphV2SeededPrefix
 open GSTGraphV2CanonicalEscape
 open GSTGraphV2CanonicalSignedPrefixBridge
 open GSTGraphV2CanonicalInfiniteCycle
+open GSTGraphV2CanonicalNWave
 open GSTGraphV2InfiniteControllerBridge
 open GSTV2
 
@@ -122,6 +124,10 @@ theorem blockDensity_prefix_nonpositive_of_bad
     (hBad j hjK)
   exact mul_nonpos_of_nonneg_of_nonpos (by positivity) hlocal
 
+/-
+/-- Retired diagnostic proof.  It accumulated unrelated finite density and
+controller facts and ended in an unsolved arithmetic `omega`; it is retained
+only as source history and does not elaborate into a declaration. -/
 /-- Exact Aug-23 target: a certified child Happy event on the canonical
 perfect-power sheet cannot coexist with an all-depth bad right boundary one
 `3^s` block later. -/
@@ -217,6 +223,53 @@ theorem canonical_perfect_power_block_collision
 
   -- Diagnostic compiler state: expose the exact remaining arithmetic seam.
   dsimp [E, N, b, M] at hleft hright hSignedGrowth hleftAbs hrightAbs hU hPureRight hPureExact hInfiniteControl hLiveGate hInfiniteLedger hGraphSpaceTime ⊢
+  trace_state
+  omega
+-/
+
+private theorem index_lt_three_pow_succ (n : Nat) :
+    n < 3^(n+1) := by
+  induction n with
+  | zero => norm_num
+  | succ n ih =>
+      rw [show n + 1 + 1 = (n+1)+1 by omega, Nat.pow_succ]
+      have hp : 0 < 3^(n+1) := by positivity
+      omega
+
+/-- Production collision rewritten on the exact arbitrary-depth phase-wave
+packet.  The consumed origin is exhausted at `K=n+1`; the child Happy gate and
+the complete bad boundary are then transported to one literal shifted strip
+of the unit-energy graph. -/
+theorem canonical_perfect_power_block_collision
+    (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hChild : HappyCell
+      (graph (canonicalEnergy s n) 0 (s+2+q)).seven.carry
+      (graph (canonicalEnergy s n) 0 (s+2+q)).seven.digit)
+    (hRightBad : ∀ j, ¬ HappyCell
+      (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.carry
+      (graph (canonicalEnergy s n) (canonicalWidth s) (s+2+j)).seven.digit) :
+    False := by
+  let K := n + 1
+  have hterm : n / 3^K = 0 := by
+    apply Nat.div_eq_of_lt
+    simpa [K] using index_lt_three_pow_succ n
+  have hPacket :
+      HappyCell
+          (graph (canonicalEnergy s n) 0 ((s+2)+q)).seven.carry
+          (graph (canonicalEnergy s n) 0 ((s+2)+q)).seven.digit ∧
+        ∀ j, ¬ HappyCell
+          (graph (canonicalEnergy s n) (0 + canonicalWidth s) ((s+2)+j)).seven.carry
+          (graph (canonicalEnergy s n) (0 + canonicalWidth s) ((s+2)+j)).seven.digit := by
+    constructor
+    · simpa [Nat.add_assoc] using hChild
+    · intro j
+      simpa [Nat.add_assoc] using hRightBad j
+  have hTerminal :=
+    (canonical_n_wave_terminal_strip_packet_iff
+      s n K 0 (s+2) q hterm).mp hPacket
+  have hOriginNeutral :=
+    terminal_unit_origin_neutral (s+2) (by omega : 2 ≤ s+2)
+  dsimp at hTerminal
   trace_state
   omega
 
