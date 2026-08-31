@@ -16,6 +16,9 @@ jobs:
           build: false
           test: false
       - name: Compile exact infinite-cycle layer
+        shell: bash
         run: |
+          set -euo pipefail
+          lake build GSTGraphV2CanonicalInfiniteCycle
           lake env lean GSTGraphV2CanonicalInfiniteCycle.lean 2>&1 | tee canonical-infinite-cycle.log
-          ! grep -E 'declaration uses .sorry.|unknown identifier|unsolved goals' canonical-infinite-cycle.log
+          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' canonical-infinite-cycle.log
