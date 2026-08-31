@@ -92,8 +92,10 @@ theorem lteCoeff_mod27_sixteen_of_two_le : ∀ r : Nat, 2 ≤ r →
           norm_num
           ring
         exact dvd_mul_of_dvd_left h27 _
-      simp only [Nat.add_mod]
-      rw [hterm2, Nat.add_zero, hterm1, ih]
+      rw [Nat.add_mod]
+      rw [hterm2, Nat.add_zero]
+      rw [Nat.add_mod]
+      rw [hterm1, ih]
       norm_num
 
 /-- Hence the affine prefix offset itself is rigidly five modulo nine. -/
