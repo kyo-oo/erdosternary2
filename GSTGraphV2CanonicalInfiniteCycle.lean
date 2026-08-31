@@ -7,6 +7,7 @@ set_option maxHeartbeats 20000000
 namespace GSTGraphV2CanonicalInfiniteCycle
 
 open GSTV2
+open GSTGraphV2InfiniteControl
 open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2CanonicalEscape
 open GSTGraphV2InfiniteControllerBridge
