@@ -18,8 +18,11 @@ open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2InfiniteControllerBridge
 open GSTV2
 
-/-- RED probe for the exact remaining canonical escape implication.  Every
-available live Graph-V2 packet is exposed at an arbitrary origin cutoff K. -/
+/-- RED probe for the exact remaining canonical escape implication. Every
+available live Graph-V2 packet is exposed at an arbitrary origin cutoff K.
+This version also instantiates the exact canonical child-tail re-coordination
+at K, so the next compiler residual distinguishes a missing arithmetic step
+from a genuinely missing post-cut gate/regeneration law. -/
 theorem canonical_bad_parent_forces_unbounded_origin_support_probe
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hChild : HappyCell
@@ -96,6 +99,13 @@ theorem canonical_bad_parent_forces_unbounded_origin_support_probe
       (s+1) (n % 3^K) (n / 3^K) K
   rw [← hSplit] at hRenormalized
 
+  /- The exact equality Codex had not yet placed in the diagnostic context:
+     the live child word at orbit K is the finite canonical cut offset plus
+     the re-scaled canonical tail of the unconsumed origin suffix. -/
+  have hCanonicalChildTailK :=
+    canonical_controller_childTail_cut_exact s n K
+
+  have hControllerChildTailK := hControl.coupled.childTailExact K
   have hLedgerK := hLedger.pastSynchronized K
   have hInvariantK := hControl.coupled.invariantAll K
   have hBadSuffixK := hControl.parentBadSuffix K
