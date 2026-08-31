@@ -1,6 +1,7 @@
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DPureDivergence83
 import GSTGraphV2CanonicalDescentOntology
+import GSTGraphV2CanonicalSignedPrefixBridge
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -17,6 +18,9 @@ open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
 open GSTGraphV2CoupledUFlux
 open GSTU2DPureDivergence83
+open GSTGraphV2SeededPrefix
+open GSTGraphV2CanonicalEscape
+open GSTGraphV2CanonicalSignedPrefixBridge
 
 /-!
 A second phase chart selected by the twelve physical cells.  Unlike the
@@ -146,6 +150,22 @@ theorem canonical_perfect_power_block_collision
     intro j hj
     simpa [E, N, b, Nat.add_assoc] using hRightBad j
 
+  have hChildSeed :
+      SeedHappy 0 0 (canonicalChildTail s n) q := by
+    apply (canonical_left_seed_adapter s n q hs).mp
+    simpa [E, canonicalEnergy, Nat.add_assoc] using hChild
+
+  have hRightSeed : ∀ j,
+      ¬ SeedHappy 1 1 (canonicalParentTail s n) j := by
+    intro j hSeed
+    apply hRightBad j
+    have hGraph := (canonical_right_seed_adapter s n j hs).mpr hSeed
+    simpa [E, N, b, canonicalEnergy, canonicalWidth, Nat.add_assoc] using hGraph
+
+  have hSignedGrowth :=
+    canonical_graph_u_potential_growth_positive
+      s n q hs hChildSeed hRightSeed
+
   have hleftAbs : HappyCell
       (graph 1 M (b+q)).seven.carry
       (graph 1 M (b+q)).seven.digit := by
@@ -166,7 +186,7 @@ theorem canonical_perfect_power_block_collision
   have hPureExact := blockDensity_column_exact E N b (q+1)
 
   -- Diagnostic compiler state: expose the exact remaining arithmetic seam.
-  dsimp [E, N, b, M] at hleft hright hleftAbs hrightAbs hU hPureRight hPureExact ⊢
+  dsimp [E, N, b, M] at hleft hright hSignedGrowth hleftAbs hrightAbs hU hPureRight hPureExact ⊢
   trace_state
   omega
 
