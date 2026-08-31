@@ -98,13 +98,36 @@ theorem canonical_n_wave_terminal_energy
     nWaveEnergy s n K = 1 := by
   simp [nWaveEnergy, uTailEnergy, uTailExponent, originSuffix, hK]
 
+/-- Once the finite origin has been exhausted, the complete collision packet
+is a literal shifted strip of the unit-energy graph.  Both the Happy gate and
+the all-depth bad boundary survive the specialization exactly. -/
+theorem canonical_n_wave_terminal_strip_packet_iff
+    (s n K x b q : Nat) (hK : n / 3^K = 0) :
+    (HappyCell
+        (graph (canonicalEnergy s n) x (b+q)).seven.carry
+        (graph (canonicalEnergy s n) x (b+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph (canonicalEnergy s n) (x + canonicalWidth s) (b+j)).seven.carry
+        (graph (canonicalEnergy s n) (x + canonicalWidth s) (b+j)).seven.digit) ↔
+    (HappyCell
+        (graph 1 (nWaveShift s n K + x) (b+q)).seven.carry
+        (graph 1 (nWaveShift s n K + x) (b+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph 1 (nWaveShift s n K + (x + canonicalWidth s)) (b+j)).seven.carry
+        (graph 1 (nWaveShift s n K + (x + canonicalWidth s)) (b+j)).seven.digit) := by
+  have h := canonical_n_wave_strip_packet_iff s n K x b q
+  rw [canonical_n_wave_terminal_energy s n K hK] at h
+  exact h
+
 #check canonical_n_wave_physical
 #check canonical_n_wave_happy_iff
 #check canonical_n_wave_bad_trace_iff
 #check canonical_n_wave_strip_packet_iff
 #check canonical_n_wave_terminal_energy
+#check canonical_n_wave_terminal_strip_packet_iff
 #print axioms canonical_n_wave_bad_trace_iff
 #print axioms canonical_n_wave_strip_packet_iff
+#print axioms canonical_n_wave_terminal_strip_packet_iff
 
 -- Kernel trigger after sheet-translation closure.
 end GSTGraphV2CanonicalNWave
