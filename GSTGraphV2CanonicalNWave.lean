@@ -72,4 +72,5 @@ theorem canonical_n_wave_terminal_energy
 #check canonical_n_wave_terminal_energy
 #print axioms canonical_n_wave_bad_trace_iff
 
+-- Kernel trigger after sheet-translation closure.
 end GSTGraphV2CanonicalNWave
