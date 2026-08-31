@@ -173,14 +173,14 @@ theorem canonical_perfect_power_block_collision
   have hInfiniteControl :
       InfiniteBadCoupledControl (4^N) (graphCoupledState E N b) := by
     apply graph_infinite_bad_control
-    · simpa [E, b] using canonical_base_carry_zero s n hs
+    · simpa [E, b, canonicalEnergy] using canonical_base_carry_zero s n hs
     · intro j
       simpa [E, N, b, Nat.add_assoc] using hRightBad j
 
   have hLiveGate :
       LatentGateTransfer (4^N) (graphCoupledState E N b) q := by
     apply graph_child_happy_latent_transfer
-    · simpa [E, b] using canonical_base_carry_zero s n hs
+    · simpa [E, b, canonicalEnergy] using canonical_base_carry_zero s n hs
     · intro j
       simpa [E, N, b, Nat.add_assoc] using hRightBad j
     · simpa [E, b, Nat.add_assoc] using hChild
