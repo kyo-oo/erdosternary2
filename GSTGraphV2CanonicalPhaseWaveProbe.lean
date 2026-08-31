@@ -10,7 +10,6 @@ open GSTPerfectPowerTailNavigation
 open GSTPrefixOneSeedCore
 open GSTGraphV2CanonicalRenormalization
 open GSTGraphV2CanonicalPhaseSteering
-open GSTGraphV2CanonicalEscape
 open GSTGraphV2SeededPrefix
 open GSTV2
 
@@ -62,7 +61,7 @@ theorem canonicalTail_mod9_linear
           unitTail_eq_lteCoeff]
         exact lteCoeff_mod9_seven_of_one_le r hr
       rw [Nat.add_mod, Nat.mul_mod, hpow, hc, ih]
-      simp [Nat.mul_succ, Nat.add_mod]
+      rw [Nat.mul_succ, Nat.add_mod]
 
 /-- From scale two onward the LTE coefficient is rigid modulo twenty-seven. -/
 theorem lteCoeff_mod27_sixteen_of_two_le : ∀ r : Nat, 2 ≤ r →
@@ -136,11 +135,12 @@ theorem canonical_parent_mod9_three_happy
   let X := prefixOffset s + 4^(3^s) * canonicalTail (s+1) n
   have hX : X % 9 = 8 := by
     dsimp [X]
-    rw [canonical_parent_tail_mod9 s n hs, hn]
-    norm_num
+    rw [canonical_parent_tail_mod9 s n hs]
+    omega
   have hx3 : X % 3 = 2 := by omega
   have hxd : (X / 3) % 3 = 2 := by omega
   unfold SeedHappy seededCarry seededResidue seededDigit
+  change HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
   norm_num [HappyCell]
 
@@ -153,11 +153,12 @@ theorem canonical_parent_mod9_four_happy
   let X := prefixOffset s + 4^(3^s) * canonicalTail (s+1) n
   have hX : X % 9 = 6 := by
     dsimp [X]
-    rw [canonical_parent_tail_mod9 s n hs, hn]
-    norm_num
+    rw [canonical_parent_tail_mod9 s n hs]
+    omega
   have hx3 : X % 3 = 0 := by omega
   have hxd : (X / 3) % 3 = 2 := by omega
   unfold SeedHappy seededCarry seededResidue seededDigit
+  change HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
   norm_num [HappyCell]
 
