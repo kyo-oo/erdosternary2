@@ -59,6 +59,38 @@ theorem canonical_n_wave_bad_trace_iff
   · exact h j ((canonical_n_wave_happy_iff s n K x (b+j)).mpr hj)
   · exact h j ((canonical_n_wave_happy_iff s n K x (b+j)).mp hj)
 
+/-- Exact transport of the complete collision packet through an arbitrary
+number of canonical phase-wave layers.  The accumulated horizontal phase is
+retained explicitly and the observed strip keeps its literal width; no false
+reset to horizontal origin zero is performed. -/
+theorem canonical_n_wave_strip_packet_iff
+    (s n K x b q : Nat) :
+    (HappyCell
+        (graph (canonicalEnergy s n) x (b+q)).seven.carry
+        (graph (canonicalEnergy s n) x (b+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph (canonicalEnergy s n) (x + canonicalWidth s) (b+j)).seven.carry
+        (graph (canonicalEnergy s n) (x + canonicalWidth s) (b+j)).seven.digit) ↔
+    (HappyCell
+        (graph (nWaveEnergy s n K) (nWaveShift s n K + x) (b+q)).seven.carry
+        (graph (nWaveEnergy s n K) (nWaveShift s n K + x) (b+q)).seven.digit ∧
+      ∀ j, ¬ HappyCell
+        (graph (nWaveEnergy s n K)
+          (nWaveShift s n K + (x + canonicalWidth s)) (b+j)).seven.carry
+        (graph (nWaveEnergy s n K)
+          (nWaveShift s n K + (x + canonicalWidth s)) (b+j)).seven.digit) := by
+  constructor
+  · rintro ⟨hChild, hRightBad⟩
+    exact ⟨
+      (canonical_n_wave_happy_iff s n K x (b+q)).mp hChild,
+      (canonical_n_wave_bad_trace_iff
+        s n K (x + canonicalWidth s) b).mp hRightBad⟩
+  · rintro ⟨hChild, hRightBad⟩
+    exact ⟨
+      (canonical_n_wave_happy_iff s n K x (b+q)).mpr hChild,
+      (canonical_n_wave_bad_trace_iff
+        s n K (x + canonicalWidth s) b).mpr hRightBad⟩
+
 /-- At a cutoff exhausting the origin, the arbitrary n-wave is literally a
 translated unit-energy Graph-V2 sheet. -/
 theorem canonical_n_wave_terminal_energy
@@ -69,8 +101,10 @@ theorem canonical_n_wave_terminal_energy
 #check canonical_n_wave_physical
 #check canonical_n_wave_happy_iff
 #check canonical_n_wave_bad_trace_iff
+#check canonical_n_wave_strip_packet_iff
 #check canonical_n_wave_terminal_energy
 #print axioms canonical_n_wave_bad_trace_iff
+#print axioms canonical_n_wave_strip_packet_iff
 
 -- Kernel trigger after sheet-translation closure.
 end GSTGraphV2CanonicalNWave
