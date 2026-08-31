@@ -93,7 +93,8 @@ theorem lteCoeff_mod27_sixteen_of_two_le : ∀ r : Nat, 2 ≤ r →
           ring
         exact dvd_mul_of_dvd_left h27 _
       simp only [Nat.add_mod]
-      simp [ih, hterm1, hterm2]
+      rw [hterm2, Nat.add_zero, hterm1, ih]
+      norm_num
 
 /-- Hence the affine prefix offset itself is rigidly five modulo nine. -/
 theorem prefixOffset_mod9_five
@@ -143,7 +144,7 @@ theorem canonical_parent_mod9_three_happy
   unfold SeedHappy seededCarry seededResidue seededDigit
   change GSTU2DEventTransport.HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
-  norm_num [HappyCell]
+  norm_num [GSTU2DEventTransport.HappyCell]
 
 /-- The observed NULL phase: origin residue four modulo nine forces the other
 Happy chord one row above the canonical cut. -/
@@ -161,7 +162,7 @@ theorem canonical_parent_mod9_four_happy
   unfold SeedHappy seededCarry seededResidue seededDigit
   change GSTU2DEventTransport.HappyCell (4 * (1 + 3 * (X % 3)) / 9) ((X / 3) % 3)
   rw [hx3, hxd]
-  norm_num [HappyCell]
+  norm_num [GSTU2DEventTransport.HappyCell]
 
 /-- All-depth parent badness therefore excludes both second-layer Happy wave
 phases. -/
