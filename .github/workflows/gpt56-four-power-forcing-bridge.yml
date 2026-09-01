@@ -20,5 +20,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
         with:
-          build: true
+          build: false
           test: false
+      - name: Compile exact Graph-V2 forcing bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build GSTGraphV2FourPowerForcingBridge
+          lake env lean GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee four-power-forcing-bridge.log
+          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' four-power-forcing-bridge.log
