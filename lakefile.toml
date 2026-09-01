@@ -56,7 +56,6 @@ roots = [
   "GSTInfiniteCoupledLedger",
   "GSTInfiniteFourPowerNavigation",
   "GSTInfiniteGateTransport",
-  "GSTInfiniteFourPowerNavigation",
   "GSTPerfectPowerTailNavigation",
   "GSTPrefixOneOntologicalEscape",
   "GSTPrefixOneSeedCore",
