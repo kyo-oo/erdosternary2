@@ -23,7 +23,7 @@ if s.count(marker) != 1:
 kernel = r'''
 /-- Active finite-origin residual collision kernel.
 
-This is the mathematical body formerly missing behind `gst_step6_close`.
+This is the mathematical body of the former Step-6 placeholder.
 For every residual generalized-cascade state, a certified child Navigation
 witness and a completely bad parent Omega orbit are inconsistent.  The proof
 uses only the exact nine-coordinate Omega recurrence, its conserved origin,
@@ -213,7 +213,7 @@ new = '''theorem gst_prefix_one_information_bad_descends_inline
   exact gst_step6_collision_kernel s n hs hn hchild hBad
 '''
 if old not in s:
-    raise SystemExit("live gst_step6_close consumer not found")
+    raise SystemExit("live Step-6 placeholder consumer not found")
 s = s.replace(old, new, 1)
 
 for forbidden in (
