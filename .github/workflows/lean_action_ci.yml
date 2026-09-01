@@ -7,36 +7,42 @@ permissions:
   contents: write
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Apply production surgery
         run: python3 .surgery/apply.py
-      - name: Setup Lean
-        uses: leanprover/lean-action@v1
-        with:
-          build: false
+      - name: Install exact Lean RC2
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Resolve dependencies
         run: |
           set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
           lake update
           lake exe cache get
       - name: Hard build
         run: |
           set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
           lake build 2>&1 | tee hard-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' hard-build.log
       - name: Exact V5 comparator
         run: |
           set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
           bash scripts/comparator.sh 2>&1 | tee comparator.log
           grep -Fq 'Your solution is okay!' comparator.log
           grep -Fq '=== COMPARATOR RESULT: PASS ===' comparator.log
       - name: Kernel axiom audit
         run: |
           set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
           #print axioms gst_four_power_creation_master_inline
