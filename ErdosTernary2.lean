@@ -29,13 +29,11 @@
 -- Erdős Ternary-2 Conjecture: PROVEN
 
 import GSTTactic
-import GSTStep6Close
 import GSTPrefixOneU2DCollisionProof
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import GSTPrefixOneOntologicalEscape
-import GSTInfiniteFourPowerNavigation
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -47,65 +45,30 @@ import GSTFinalPurePowerResidueTransplant
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Full canonical pure-power/information transplant.  These are the contiguous
 -- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
 -- detached probes.
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 open scoped BigOperators
 /-
@@ -16970,8 +16933,8 @@ four-power creation master required by the ontological prefix-one adapter. -/
 theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
-  exact GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-    K hK5 hK7
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (h_creation_for_4pow K hK5 hK7)
 
 /-- Public prefix-one theorem.  This route is entirely positive: the green
 width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
@@ -17022,11 +16985,13 @@ theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
 theorem gst_power_two_wave_large
     (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
   unfold GSTPowerTwoWave
-  obtain ⟨p, _hp, hd, _hcert⟩ :=
-    GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-      a (by omega) (by omega)
-  exact Or.inl
-    (hasTernaryTwo_of_digit (4^a) p (by simpa [gstDigit] using hd))
+  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
+    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
+      gst_four_power_creation_master_inline a (by omega) (by omega)
+  have hnav : GSTNavigationWitness (4^a) :=
+    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
+  obtain ⟨p, hd, _hspace⟩ := hnav
+  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
 
 /-- The weaker two-wave theorem closes the even exponent directly. -/
 theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
