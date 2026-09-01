@@ -1,0 +1,24 @@
+name: GPT56 Four Power Forcing Bridge
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - GSTGraphV2FourPowerForcingBridge.lean
+      - GSTFourPowerOntologicalAdapter.lean
+      - GSTGraphV2InfiniteControl.lean
+      - lakefile.toml
+      - lake-manifest.json
+      - .github/workflows/gpt56-four-power-forcing-bridge.yml
+  workflow_dispatch:
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          test: false

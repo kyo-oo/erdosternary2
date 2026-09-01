@@ -37,6 +37,7 @@ roots = [
   "GSTGraphV2CoupledUFlux",
   "GSTGraphV2CoupledUPhysicalBridge",
   "GSTGraphV2DescentOntology",
+  "GSTGraphV2FourPowerForcingBridge",
   "GSTGraphV2HandwrittenAnchoredCocycle",
   "GSTGraphV2HandwrittenExponentialCascade",
   "GSTGraphV2HandwrittenExponentialLTE",
