@@ -15,6 +15,7 @@ on:
       - GSTInfiniteFourPowerNavigation.lean
       - GSTGraphV2PerfectPowerBlockProbe.lean
       - GSTGraphV2UnifiedVerticalTelescope.lean
+      - GSTGraphV2FourPowerForcingBridge.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -27,7 +28,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact relocation probe outside production roots
+      - name: Compile exact relocation and forcing proof outside production roots
         shell: bash
         run: |
           set -euo pipefail
@@ -38,6 +39,7 @@ jobs:
             GSTFinalPurePowerResidueTransplant \
             GSTGraphV2PerfectPowerBlockProbe \
             GSTGraphV2UnifiedVerticalTelescope \
+            GSTGraphV2FourPowerForcingBridge \
             2>&1 | tee relocation-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
