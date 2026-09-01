@@ -45,3 +45,4 @@ jobs:
           PY
           lake env lean ResidualOmegaProbe.lean 2>&1 | tee residual-omega-probe.log
           echo 'RESIDUAL_OMEGA_PROBE_GREEN=1'
+          # trigger: 2026-09-01 current monolith
