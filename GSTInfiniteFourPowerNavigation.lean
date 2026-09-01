@@ -122,7 +122,9 @@ theorem power_three_step_collision
   have hUPositive := power_width_three_u_derivative_positive K q hChild
     (hRightBad q)
 
-  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU ⊢
+  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 ⊢
+  dsimp [potentialWith, unifiedState] at hUPositive
+  trace_state
   omega
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
@@ -152,7 +154,8 @@ theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
             rw [← Nat.pow_add]
             congr 1
             omega
-          simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex, hpow] using hright
+          rw [← hpow]
+          simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hright
         exact power_three_step_collision (k-3) q hChild hRightBad
       · have hkCases : k = 8 ∨ k = 9 ∨ k = 10 := by omega
         rcases hkCases with rfl | rfl | rfl
@@ -175,9 +178,10 @@ theorem happy_to_creation_certificate
   constructor
   · simpa [digit3] using hd
   · left
+    change carry4 R p % 3 = 0
     rcases hC with h0 | h3
-    · simpa [carry4, h0]
-    · simpa [carry4, h3]
+    · simp [h0]
+    · simp [h3]
 
 /-- Universal replacement for the broken recursive `h_creation_for_4pow`. -/
 theorem gst_four_power_navigation_universal
