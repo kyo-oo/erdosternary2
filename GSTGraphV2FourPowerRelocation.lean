@@ -1,6 +1,7 @@
 import GSTGraphV2NonlocalCascade
 import GSTGraphV2CanonicalEscape
 import GSTGraphV2CanonicalInfiniteCycle
+import GSTGraphV2CanonicalTerminalExtinctionProbe
 import GSTFinalPurePowerResidueTransplant
 
 set_option maxRecDepth 1000000
@@ -156,6 +157,53 @@ theorem four_power_exponent_trit_lift
     (GSTGraphV2HandwrittenExponentialLTE.pow4_three_power_lte_exact p)
     (GSTGraphV2HandwrittenExponentialLTE.lteCoeff_mod3_one p)
 
+/-- A deliberately loose but fully symbolic support cutoff.  It depends only
+on `K`; no computational cutoff is baked into the universal argument. -/
+def fourPowerSupportCutoff (K : Nat) : Nat := 4^(K+2) + 1
+
+private theorem index_le_three_pow_local (r : Nat) :
+    r ≤ 3^r := by
+  induction r with
+  | zero => simp
+  | succ r ih =>
+      rw [Nat.pow_succ]
+      have hp : 0 < 3^r := by positivity
+      omega
+
+/-- The cutoff is high enough to dominate the entire `4^(K+1)` physical cell,
+including the extra factor four used by the carry observable. -/
+theorem four_power_support_cutoff_pow_lt
+    (K : Nat) :
+    4^((K+1)+1) < 3^(fourPowerSupportCutoff K) := by
+  have hlt : 4^((K+1)+1) < fourPowerSupportCutoff K := by
+    simp [fourPowerSupportCutoff, show (K+1)+1 = K+2 by omega]
+  have hle : fourPowerSupportCutoff K ≤ 3^(fourPowerSupportCutoff K) :=
+    index_le_three_pow_local (fourPowerSupportCutoff K)
+  omega
+
+/-- Exact pure-power digit extinction at the symbolic cutoff. -/
+theorem four_power_digit_zero_at_support_cutoff
+    (K : Nat) :
+    GSTCanonicalTailStateIso.digit3
+      (4^(K+1)) (fourPowerSupportCutoff K) = 0 := by
+  have hpow := four_power_support_cutoff_pow_lt K
+  have hmono : 4^(K+1) ≤ 4^((K+1)+1) := by
+    rw [Nat.pow_succ]
+    omega
+  have ht : 4^(K+1) < 3^(fourPowerSupportCutoff K) :=
+    lt_of_le_of_lt hmono hpow
+  simp [GSTCanonicalTailStateIso.digit3, Nat.div_eq_of_lt ht]
+
+/-- Exact physical Graph-V2 neutralization at the same symbolic cutoff. -/
+theorem four_power_graph_neutral_at_support_cutoff
+    (K : Nat) :
+    (graph 1 (K+1) (fourPowerSupportCutoff K)).seven.carry = 0 ∧
+      (graph 1 (K+1) (fourPowerSupportCutoff K)).seven.digit = 0 := by
+  exact
+    GSTGraphV2CanonicalTerminalExtinctionProbe.unit_graph_cell_neutral_of_pow_lt
+      (K+1) (fourPowerSupportCutoff K)
+      (four_power_support_cutoff_pow_lt K)
+
 /-- Exact vertical future packet beginning one row above a latent x4 cascade.
 Nothing is projected away: carry and digit stay on the physical Graph-V2
 sheet, carries remain physical, digits remain ternary, and the vertical
@@ -210,6 +258,10 @@ theorem future_bad_of_no_relocated_happy
 #check four_power_digit_overlap_base_6
 #check four_power_digit_overlap_base_8
 #check four_power_exponent_trit_lift
+#check fourPowerSupportCutoff
+#check four_power_support_cutoff_pow_lt
+#check four_power_digit_zero_at_support_cutoff
+#check four_power_graph_neutral_at_support_cutoff
 #check latent_vertical_future_packet
 #check future_bad_of_no_relocated_happy
 #print axioms graph_happy_iff_consecutive_digit_two
@@ -219,6 +271,9 @@ theorem future_bad_of_no_relocated_happy
 #print axioms four_power_digit_overlap_base_6
 #print axioms four_power_digit_overlap_base_8
 #print axioms four_power_exponent_trit_lift
+#print axioms four_power_support_cutoff_pow_lt
+#print axioms four_power_digit_zero_at_support_cutoff
+#print axioms four_power_graph_neutral_at_support_cutoff
 #print axioms latent_vertical_future_packet
 #print axioms future_bad_of_no_relocated_happy
 
