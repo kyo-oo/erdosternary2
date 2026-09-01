@@ -1,0 +1,220 @@
+name: GPT56 Step6 Kernel Repair
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - scripts/apply_step6_kernel_repair.py
+      - .github/workflows/gpt56-step6-kernel-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gpt56-step6-kernel-repair
+  cancel-in-progress: true
+
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Write explicit Step6 kernel into monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/apply_step6_kernel_repair.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('  "GSTStep6Close",\n', '')
+          p.write_text(s, encoding='utf-8')
+          PY
+          if grep -R --include='*.lean' -n '^import GSTStep6Close$' .; then
+            echo 'GSTStep6Close still imported after production surgery'
+            exit 1
+          fi
+          rm -f GSTStep6Close.lean
+          grep -F 'theorem gst_step6_collision_kernel' ErdosTernary2.lean
+          ! grep -F 'gst_step6_close' ErdosTernary2.lean
+          ! grep -F 'QUARANTINED LEGACY RESIDUAL OMEGA' ErdosTernary2.lean
+          git diff --check
+          echo 'STEP6_EXPLICIT_KERNEL_WRITTEN=1'
+
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+
+      - name: Compile local closure and repaired monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          set -o pipefail
+          lake build GSTTactic GSTLocalClosure 2>&1 | tee step6-local-closure.log
+          lake build ErdosTernary2 2>&1 | tee step6-monolith.log
+          echo 'STEP6_REPAIRED_MONOLITH_GREEN=1'
+
+      - name: Kernel axiom audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > Step6KernelAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms gst_finite_origin_residual_omega_collision_kernel
+          #print axioms gst_finite_origin_residual_navigation_lift
+          #print axioms gst_step6_collision_kernel
+          #print axioms gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_prefix_one_child_gate_contradicts_parent_bad_inline
+          #print axioms gst_prefix_one_navigation_lift
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean Step6KernelAudit.lean 2>&1 | tee step6-axioms.log
+          if grep -Fq 'sorryAx' step6-axioms.log; then
+            echo 'forbidden sorryAx reached repaired theorem chain'
+            exit 1
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          forbidden = [
+              r'\bgst_step6_close\b',
+              r'\bimport GSTStep6Close\b',
+              r'QUARANTINED LEGACY RESIDUAL OMEGA',
+          ]
+          for pat in forbidden:
+              if re.search(pat, text):
+                  raise SystemExit(f'forbidden obsolete Step6 artifact survived: {pat}')
+          print('STEP6_OBSOLETE_CODE_AUDIT_GREEN=1')
+          PY
+          echo 'STEP6_KERNEL_AXIOM_AUDIT_GREEN=1'
+
+      - name: Materialize exact V5 judge package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['Challenge.lean', 'Solution.lean']:
+              src = Path('ker07-snapshot') / name
+              text = src.read_text(encoding='utf-8')
+              i = text.find('import ')
+              if i < 0:
+                  raise SystemExit(f'no import marker in {src}')
+              Path(name).write_text(text[i:], encoding='utf-8')
+          raw = Path('modules/0009_comparator_config.json').read_text(encoding='utf-8')
+          j = raw.find('{')
+          if j < 0:
+              raise SystemExit('comparator config payload not found')
+          Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
+          print('V5_JUDGE_PACKAGE_MATERIALIZED=1')
+          PY
+
+      - name: Compile V5 judge modules against repaired monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean Challenge.lean 2>&1 | tee step6-challenge.log
+          lake env lean Solution.lean 2>&1 | tee step6-solution.log
+          echo 'V5_JUDGE_MODULES_GREEN=1'
+
+      - name: Build pinned lean4export
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .tools
+          git clone https://github.com/leanprover/lean4export.git .tools/lean4export
+          cd .tools/lean4export
+          git checkout 9fb131bb100eb32ccf6836f14e4f8328d13b6792
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build lean4export
+
+      - name: Build pinned official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git .tools/comparator
+          cd .tools/comparator
+          git checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8').replace(
+              'rev = "master"',
+              'rev = "9fb131bb100eb32ccf6836f14e4f8328d13b6792"')
+          p.write_text(s, encoding='utf-8')
+          PY
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build comparator
+
+      - name: Run exact V5 official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          ROOT="$PWD"
+          CMP_ROOT="$ROOT/.tools/comparator"
+          EXPORT_ROOT="$ROOT/.tools/lean4export"
+          COMPARATOR_LANDRUN="$CMP_ROOT/scripts/fake-landrun.sh" \
+          COMPARATOR_LEAN4EXPORT="$EXPORT_ROOT/.lake/build/bin/lean4export" \
+          lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee step6-comparator.log
+          grep -F 'Your solution is okay!' step6-comparator.log
+          echo 'V5_OFFICIAL_COMPARATOR_GREEN=1'
+
+      - name: Commit repaired production monolith only after comparator GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f Step6KernelAudit.lean Challenge.lean Solution.lean comparator_config.json
+          rm -f step6-*.log
+          rm -rf .tools
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean lakefile.toml
+          git add -u GSTStep6Close.lean
+          if git diff --cached --quiet; then
+            echo 'repaired production state already committed'
+            exit 0
+          fi
+          git commit -m 'proof: replace Step6 placeholder with explicit finite-origin kernel'
+          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
+          echo 'STEP6_REPAIR_COMMITTED_AFTER_V5_GREEN=1'
+
+      - name: Upload repair diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt56-step6-kernel-repair-diagnostics
+          path: |
+            step6-local-closure.log
+            step6-monolith.log
+            step6-axioms.log
+            step6-challenge.log
+            step6-solution.log
+            step6-comparator.log
+          if-no-files-found: warn
