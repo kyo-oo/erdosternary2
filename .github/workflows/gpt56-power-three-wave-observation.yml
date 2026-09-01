@@ -32,7 +32,10 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTGraphV2PowerThreeWaveObservation 2>&1 | tee observation.log
+          lake build GSTGraphV2PerfectPowerBlockProbe \
+            GSTGraphV2UnifiedVerticalTelescope \
+            GSTFinalPurePowerResidueTransplant
+          lake env lean GSTGraphV2PowerThreeWaveObservation.lean 2>&1 | tee observation.log
           ! grep -Fq 'sorryAx' observation.log
           ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTGraphV2PowerThreeWaveObservation.lean
           echo GRAPH_V2_POWER_THREE_WAVE_OBSERVATION_GREEN=1
