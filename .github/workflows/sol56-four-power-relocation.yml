@@ -9,6 +9,8 @@ on:
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
+      - GSTFinalPurePowerResidueTransplant.lean
+      - GSTGraphV2HandwrittenExponentialLTE.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -25,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle 2>&1 | tee relocation-deps.log
+          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle GSTFinalPurePowerResidueTransplant 2>&1 | tee relocation-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
