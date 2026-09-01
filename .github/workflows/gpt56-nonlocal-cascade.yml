@@ -23,7 +23,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTFourPowerOntologicalAdapter GSTGraphV2CanonicalNWave
-          lake env lean GSTGraphV2FourPowerForcingBridge.lean
+          lake build GSTGraphV2InfiniteControl
           lake env lean GSTGraphV2NonlocalCascade.lean 2>&1 | tee nonlocal-cascade.log
           ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' nonlocal-cascade.log
