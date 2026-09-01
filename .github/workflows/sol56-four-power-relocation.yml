@@ -1,0 +1,31 @@
+name: SOL56 Four-Power Relocation
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - GSTGraphV2FourPowerRelocation.lean
+      - GSTGraphV2NonlocalCascade.lean
+      - GSTGraphV2CanonicalEscape.lean
+      - GSTGraphV2CanonicalInfiniteCycle.lean
+      - .github/workflows/sol56-four-power-relocation.yml
+  workflow_dispatch:
+
+jobs:
+  relocation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Compile exact relocation probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle
+          lake env lean GSTGraphV2NonlocalCascade.lean
+          lake env lean GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals' relocation.log
