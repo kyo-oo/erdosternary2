@@ -77,11 +77,47 @@ theorem power_three_wave_observation
       have hdc : (graph (4^K) 3 (3+q)).seven.digit = 0 ∨
           (graph (4^K) 3 (3+q)).seven.digit = 1 ∨
           (graph (4^K) 3 (3+q)).seven.digit = 2 := by omega
-      rcases hCc with rfl | rfl | rfl | rfl <;>
-        rcases hdc with rfl | rfl | rfl <;>
-        simp [HappyCell] at hbad <;>
-        norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
-          gstStepCarryExact]
+      rcases hCc with hC0 | hC1 | hC2 | hC3
+      · rcases hdc with hd0 | hd1 | hd2
+        · rw [hC0, hd0]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC0, hd1]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · exfalso
+          apply hbad
+          exact ⟨hd2, Or.inl hC0⟩
+      · rcases hdc with hd0 | hd1 | hd2
+        · rw [hC1, hd0]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC1, hd1]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC1, hd2]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+      · rcases hdc with hd0 | hd1 | hd2
+        · rw [hC2, hd0]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC2, hd1]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC2, hd2]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+      · rcases hdc with hd0 | hd1 | hd2
+        · rw [hC3, hd0]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · rw [hC3, hd1]
+          norm_num [gstUJumpExact, jumpWith, gstUChargeExact,
+            gstStepCarryExact]
+        · exfalso
+          apply hbad
+          exact ⟨hd2, Or.inr hC3⟩
     rw [← hEq]
     norm_num
     nlinarith
