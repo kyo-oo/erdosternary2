@@ -35,6 +35,7 @@ import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import GSTPrefixOneOntologicalEscape
+import GSTInfiniteFourPowerNavigation
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -16930,31 +16931,6 @@ theorem gst_step6_terminal_packet_kernel
     s n (gstNavigationConstant s 1) z q hs hn
     hLTE hunitPrefix hChildCanonical hBadCanonical
 
-theorem gst_prefix_one_information_bad_descends_inline
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) :
-    GSTCompleteBadTrace (gstNavigationConstant (s+1) n) := by
-  apply gst_complete_bad_of_no_navigation
-  intro hchild
-  gst_step6_close
-
-/-- Corrected information-wave closure: once parent badness descends to the
-    shared child information, the certified child Happy Gate is an immediate
-    contradiction. -/
-theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
-    (data : GSTPrefixOneOmegaData s n)
-    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
-  have hChildBad : GSTCompleteBadTrace (gstNavigationConstant (s+1) n) :=
-    gst_prefix_one_information_bad_descends_inline s n hs hn hBad
-  have hAt := hChildBad data.childGateIndex
-  have hGate :
-      gstDigit (gstNavigationConstant (s+1) n) data.childGateIndex = 2 ∧
-      (gstCarry (gstNavigationConstant (s+1) n) data.childGateIndex = 0 ∨
-       gstCarry (gstNavigationConstant (s+1) n) data.childGateIndex = 3) := by
-    simpa only [gstOmega] using data.childGate
-  exact hAt hGate
-
 -- SOL56 CANONICAL TAIL POE COMPATIBILITY BRIDGE
 /-- Convert the standalone exact Happy-gate language into the monolith wrapper. -/
 theorem gst_navigation_witness_of_standalone_navigation
@@ -16989,18 +16965,20 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
   intro s n hs hn _hchild
   exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
--- Public prefix-one theorem: parent failure supplies the exact bad trace, and
--- the corrected information-wave theorem contradicts the certified child gate.
+/-- The independently kernel-checked width-three wave supplies the exact
+four-power creation master required by the ontological prefix-one adapter. -/
+theorem gst_four_power_creation_master_inline :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  exact GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+    K hK5 hK7
+
+/-- Public prefix-one theorem.  This route is entirely positive: the green
+width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
 theorem gst_prefix_one_navigation_lift :
     GSTPrefixOneNavigationLift := by
-  intro s n hs hn hchild
-  by_contra hnoParent
-  have hBad : GSTOmegaInfiniteBadTrace s 1 n :=
-    gst_prefix_one_omega_bad_of_no_parent_navigation_inline s n hs hnoParent
-  let data : GSTPrefixOneOmegaData s n :=
-    gst_prefix_one_omegaData s n hs hchild
-  exact gst_prefix_one_child_gate_contradicts_parent_bad_inline
-    s n hs hn data hBad
+  exact gst_prefix_one_navigation_lift_of_master_inline
+    gst_four_power_creation_master_inline
 
 
 /-- The two consecutive power waves overlap at a Happy Gate.  The left branch
@@ -17044,22 +17022,11 @@ theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
 theorem gst_power_two_wave_large
     (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
   unfold GSTPowerTwoWave
-  by_cases h2 : a % 3 = 2
-  · exact Or.inl (even_case_a_mod3_2 a h2)
-  by_cases h0 : a % 3 = 0
-  · have hnav : GSTNavigationWitness (4^a) :=
-      gst_navigation_witness_four_pow_div_three_of_prefix_one
-        gst_prefix_one_navigation_lift a ha h0
-    obtain ⟨p, hd, _hspace⟩ := hnav
-    exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
-  · have h1 : a % 3 = 1 := by
-      have hlt : a % 3 < 3 := Nat.mod_lt _ (by decide)
-      omega
-    have ham1 : 500 < a - 1 := by omega
-    have hamod : (a - 1) % 3 = 0 := by omega
-    exact Or.inr
-      (gst_navigation_witness_four_pow_div_three_of_prefix_one
-        gst_prefix_one_navigation_lift (a - 1) ham1 hamod)
+  obtain ⟨p, _hp, hd, _hcert⟩ :=
+    GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+      a (by omega) (by omega)
+  exact Or.inl
+    (hasTernaryTwo_of_digit (4^a) p (by simpa [gstDigit] using hd))
 
 /-- The weaker two-wave theorem closes the even exponent directly. -/
 theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
