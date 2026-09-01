@@ -16,6 +16,7 @@ on:
       - GSTGraphV2PerfectPowerBlockProbe.lean
       - GSTGraphV2UnifiedVerticalTelescope.lean
       - GSTGraphV2FourPowerForcingBridge.lean
+      - GSTInfiniteFourPowerNavigation.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -145,5 +146,44 @@ jobs:
 
           lake env lean Task3LatentShapeDiagnostic.lean 2>&1 | tee task3-diagnostic.log
 
+          # Compile the independent power-specific existence theorem into the same
+          # environment, then test the exact Task 3.3 propagation signature only in
+          # a generated scratch file.  Production is untouched until this is green.
+          lake env lean \
+            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
+            GSTInfiniteFourPowerNavigation.lean 2>&1 | tee navigation-audit.log
+
+          cat > Task33GlobalRelocationCandidate.lean <<'LEAN'
+          import GSTGraphV2FourPowerRelocation
+          import GSTInfiniteFourPowerNavigation
+
+          namespace GSTGraphV2Task33GlobalCandidate
+
+          open GSTU2DEventTransport
+          open GSTGraphV2InfiniteControl
+
+          theorem global_arbitrary_q_candidate :
+              GSTGraphV2FourPowerRelocation.FourPowerHappyPropagation := by
+            intro K p hK hp hSource
+            obtain ⟨q, hq3, hqHappy⟩ :=
+              GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
+                (K+1) (by omega)
+            refine ⟨q, by omega, ?_⟩
+            simpa [GSTGraphV2InfiniteControl.graph,
+              GSTGraphV2InfiniteControl.cell,
+              GSTCanonicalSevenAxisBridge.vertex] using hqHappy
+
+          #check global_arbitrary_q_candidate
+          #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
+          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
+          #print axioms global_arbitrary_q_candidate
+
+          end GSTGraphV2Task33GlobalCandidate
+          LEAN
+
+          lake env lean Task33GlobalRelocationCandidate.lean \
+            2>&1 | tee task33-global-candidate.log
+
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log task3-diagnostic.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log \
+            task3-diagnostic.log navigation-audit.log task33-global-candidate.log
