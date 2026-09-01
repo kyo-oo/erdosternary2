@@ -35,44 +35,28 @@ jobs:
           echo "HEAD=$(git rev-parse HEAD)"
           python3 - <<'PY'
           from pathlib import Path
-          targets = [
-            'def GSTPrefixOneNavigationLift',
-            'theorem gst_prefix_one_navigation_lift',
-            'theorem gst_prefix_one_information_bad_descends_inline',
-            'theorem gst_prefix_one_child_gate_contradicts_parent_bad_inline',
-            'theorem gst_step6_terminal_packet_kernel',
-            'def GSTOmegaInfiniteBadTrace',
-            'theorem gst_prefix_one_omega_bad_of_no_parent_navigation_inline',
-            'def GSTPrefixOneOmegaData',
+          keys = [
+            'GSTPrefixOneSeedCore', 'GSTPrefixOneBadReflection',
+            'GSTSeedOneAffineWitness', 'gst_two_two_forces_happy_gate',
+            'gst_prefix_one_seed', 'gst_prefix_one_wave',
+            'canonical_parent_bad', 'canonical_n_wave', 'terminal_packet',
+            'phase_one', 'phase_zero', 'phase_two', 'SeedHappy 1 1',
           ]
-          p=Path('ErdosTernary2.lean')
-          lines=p.read_text(encoding='utf-8').splitlines()
-          for target in targets:
-            print('\n===== TARGET',target,'=====')
-            hits=[i for i,l in enumerate(lines) if target in l]
-            print('HITS', [i+1 for i in hits])
-            for i in hits:
-              lo=max(0,i-25); hi=min(len(lines),i+70)
-              for j in range(lo,hi): print(f'{j+1:06d}: {lines[j]}')
+          files = list(Path('.').glob('*.lean'))
+          for key in keys:
+            print('\n===== KEY', key, '=====')
+            count=0
+            for p in files:
+              try: lines=p.read_text(encoding='utf-8').splitlines()
+              except Exception: continue
+              for i,line in enumerate(lines):
+                if key in line:
+                  count += 1
+                  lo=max(0,i-4); hi=min(len(lines),i+9)
+                  print(f'--- {p}:{i+1} ---')
+                  for j in range(lo,hi): print(f'{j+1:06d}: {lines[j]}')
+            print('MATCH_COUNT=',count)
           PY
-          echo "===== RELEVANT THEOREM INVENTORY ====="
-          rg -n "^(def|theorem) .*([Nn][Ww]ave|[Ww]ave|[Pp]hase|[Nn]avigation|[Cc]reation|[Bb]ad|[Cc]ycle|[Rr]ecoord|[Tt]ranslat|[Ss]trip|[Oo]ntolog|[Cc]arry)" \
-            GSTGraphV2CanonicalNWave.lean \
-            GSTGraphV2CanonicalPhaseWaveProbe.lean \
-            GSTGraphV2CanonicalPhaseSteering.lean \
-            GSTGraphV2CanonicalSheetTranslation.lean \
-            GSTGraphV2CanonicalInfiniteCycle.lean \
-            GSTGraphV2CanonicalEscape.lean \
-            GSTFourPowerOntologicalAdapter.lean \
-            GSTPrefixOneOntologicalEscape.lean \
-            GSTPerfectPowerTailNavigation.lean \
-            GSTCanonicalCarryDynamics.lean \
-            GSTGraphV2PerfectPowerBlockCollision.lean \
-            GSTPrefixOneU2DCollisionProof.lean || true
-          echo "===== MASTER / CREATION REFERENCES ====="
-          rg -n "FourPowerCreationMaster|CreationCertificate|creation_certificate|h_creation_for_4pow|gst_four_power|ontological_escape_of_master" --glob '*.lean' || true
-          echo "===== TERMINAL / SHIFT REFERENCES ====="
-          rg -n "nWaveShift|terminal_strip_packet|terminal_packet|unit.*neutral|shift.*Happy|shifted.*Happy" --glob '*.lean' || true
       - name: Compile optional proof probe
         if: hashFiles('GSTWaveFinalProbe.lean') != ''
         shell: bash
@@ -80,4 +64,4 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GSTWaveFinalProbe.lean 2>&1 | tee wave-final-probe.log
-# trigger-2
+# trigger-3
