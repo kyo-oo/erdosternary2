@@ -20,29 +20,38 @@ jobs:
           ref: sol/gpt56-canonical-tail-escape-20260827
           fetch-depth: 0
 
-      - name: Restore exact RC2 environment
+      - name: Register independent four-power module and restore RC2
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          root = '  "GSTInfiniteFourPowerNavigation",\n'
+          if root not in s:
+              anchor = '  "GSTV2InfiniteCore",\n]'
+              if anchor not in s:
+                  raise SystemExit('GSTLocalClosure root anchor not found')
+              s = s.replace(anchor, '  "GSTV2InfiniteCore",\n' + root + ']', 1)
+          p.write_text(s, encoding='utf-8')
           Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
-          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n''', encoding='utf-8')
           Path('lake-manifest.json').unlink(missing_ok=True)
           PY
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
+          git diff --check
 
-      - name: Audit independent four-power theorem
+      - name: Compile and axiom-audit independent four-power theorem
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTInfiniteFourPowerNavigation
+          lake build GSTLocalClosure
           cat > SOL56FourPowerAudit.lean <<'EOF'
           import GSTInfiniteFourPowerNavigation
-          #print axioms GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
           #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
+          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
+          #print axioms GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
           EOF
           lake env lean SOL56FourPowerAudit.lean 2>&1 | tee /tmp/fourpower-axioms.log
           if grep -E 'sorryAx|unsafe' /tmp/fourpower-axioms.log; then
@@ -50,7 +59,7 @@ jobs:
             exit 1
           fi
 
-      - name: Apply exact production surgery in runner
+      - name: Apply Codex information-wave production surgery
         shell: bash
         run: |
           python3 - <<'PY'
@@ -66,12 +75,12 @@ jobs:
 
           start = s.index('theorem gst_prefix_one_information_bad_descends_inline')
           mid = s.index('-- SOL56 CANONICAL TAIL POE COMPATIBILITY BRIDGE', start)
-          s = s[:start] + '''-- SOL56 INFORMATION-WAVE CORRECTION:\n-- The former gst_prefix_one_information_bad_descends_inline and\n-- gst_prefix_one_child_gate_contradicts_parent_bad_inline declarations were\n-- removed. A live NWave packet is not a terminal contradiction.\n\n''' + s[mid:]
+          s = s[:start] + '''-- SOL56 INFORMATION-WAVE CORRECTION:\n-- The obsolete child-bad reflection declarations were removed.\n-- A live NWave packet is conserved/re-encoded, not a terminal contradiction.\n\n''' + s[mid:]
 
           start = s.index('theorem gst_prefix_one_navigation_lift :')
           end_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
           end = s.index(end_marker, start)
-          s = s[:start] + '''-- SOL56 INFORMATION-WAVE CORRECTION:\n-- gst_prefix_one_navigation_lift removed from the production dependency path.\n-- The final four-power proof below is independent and kernel-audited.\n\n''' + s[end:]
+          s = s[:start] + '''-- SOL56 INFORMATION-WAVE CORRECTION:\n-- The obsolete unconditional prefix-one lift is no longer on the production path.\n-- Large four powers are closed directly by the independent width-three theorem.\n\n''' + s[end:]
 
           start = s.index('theorem gst_power_two_wave_large')
           end = s.index('/-- The weaker two-wave theorem closes the even exponent directly. -/', start)
@@ -80,12 +89,12 @@ jobs:
           p.write_text(s, encoding='utf-8')
           PY
 
-          echo 'Occurrences after surgery:'
+          echo 'Obsolete production consumers after surgery:'
           grep -n 'gst_step6_close\|gst_prefix_one_information_bad_descends_inline\|gst_prefix_one_child_gate_contradicts_parent_bad_inline\|gst_prefix_one_navigation_lift' ErdosTernary2.lean || true
           git diff --check
-          git diff -- ErdosTernary2.lean | sed -n '1,260p'
+          git diff -- lakefile.toml ErdosTernary2.lean | sed -n '1,320p'
 
-      - name: Run exact V5 comparator on surgically patched production
+      - name: Run exact V5 comparator on patched production
         shell: bash
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
@@ -93,16 +102,31 @@ jobs:
           grep -F 'Your solution is okay!' /tmp/v5-after-surgery.log
           grep -F '=== COMPARATOR RESULT: PASS ===' /tmp/v5-after-surgery.log
 
-      - name: Commit the comparator-green surgery
+      - name: Final theorem axiom audit
         shell: bash
         run: |
-          rm -f SOL56FourPowerAudit.lean
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > SOL56FinalAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms erdos_ternary_2_even_universal
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean SOL56FinalAudit.lean 2>&1 | tee /tmp/final-axioms.log
+          if grep -E 'sorryAx|unsafe' /tmp/final-axioms.log; then
+            echo 'Forbidden dependency in final theorem' >&2
+            exit 1
+          fi
+
+      - name: Commit only comparator-green audited production
+        shell: bash
+        run: |
+          rm -f SOL56FourPowerAudit.lean SOL56FinalAudit.lean
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean
+          git add lakefile.toml ErdosTernary2.lean
           if git diff --cached --quiet; then
             echo 'No production diff to commit'
             exit 0
           fi
-          git commit -m 'Replace obsolete Step-6 consumer with audited four-power closure'
+          git commit -m 'Replace obsolete Step-6 path with audited four-power closure'
           git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
