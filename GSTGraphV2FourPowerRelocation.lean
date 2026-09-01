@@ -64,9 +64,9 @@ theorem graph_happy_iff_consecutive_digit_two
     rcases hcases with h0 | h1 | h2 | h3
     · exact Or.inl h0
     · rw [h1, hd] at hout
-      norm_num [outDigit, cellMass] at hout
+      norm_num [outDigit] at hout
     · rw [h2, hd] at hout
-      norm_num [outDigit, cellMass] at hout
+      norm_num [outDigit] at hout
     · exact Or.inr h3
 
 /-- Arithmetic form of the same physical law on a pure four-power sheet.
