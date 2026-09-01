@@ -6,6 +6,7 @@ set_option maxHeartbeats 10000000
 namespace GSTGraphV2NonlocalCascade
 
 open GSTCanonicalSevenAxisBridge
+open GST2DMixedEmergence
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 
