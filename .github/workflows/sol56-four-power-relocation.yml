@@ -9,6 +9,7 @@ on:
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
+      - GSTGraphV2CanonicalNWave.lean
       - GSTGraphV2CanonicalTerminalExtinctionProbe.lean
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
@@ -34,6 +35,7 @@ jobs:
           lake build \
             GSTGraphV2CanonicalEscape \
             GSTGraphV2CanonicalInfiniteCycle \
+            GSTGraphV2CanonicalNWave \
             GSTGraphV2CanonicalTerminalExtinctionProbe \
             GSTFinalPurePowerResidueTransplant \
             GSTGraphV2PerfectPowerBlockProbe \
