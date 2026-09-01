@@ -12,6 +12,9 @@ on:
       - GSTGraphV2CanonicalTerminalExtinctionProbe.lean
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
+      - GSTInfiniteFourPowerNavigation.lean
+      - GSTGraphV2PerfectPowerBlockProbe.lean
+      - GSTGraphV2UnifiedVerticalTelescope.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -28,7 +31,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle GSTGraphV2CanonicalTerminalExtinctionProbe GSTFinalPurePowerResidueTransplant 2>&1 | tee relocation-deps.log
+          lake build \
+            GSTGraphV2CanonicalEscape \
+            GSTGraphV2CanonicalInfiniteCycle \
+            GSTGraphV2CanonicalTerminalExtinctionProbe \
+            GSTFinalPurePowerResidueTransplant \
+            GSTGraphV2PerfectPowerBlockProbe \
+            GSTGraphV2UnifiedVerticalTelescope \
+            2>&1 | tee relocation-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
@@ -38,3 +48,21 @@ jobs:
             GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             relocation-deps.log nonlocal-cascade.log relocation.log
+
+      - name: Audit historical three-step collision only
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
+            GSTInfiniteFourPowerNavigation.lean 2>&1 | tee historical-three-step.log
+          cat > HistoricalThreeStepAudit.lean <<'EOF'
+          import GSTInfiniteFourPowerNavigation
+          #print axioms GSTInfiniteFourPowerNavigation.power_width_three_exact_conservation
+          #print axioms GSTInfiniteFourPowerNavigation.power_width_three_u_derivative_positive
+          #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
+          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
+          EOF
+          lake env lean HistoricalThreeStepAudit.lean 2>&1 | tee historical-three-step-axioms.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            historical-three-step.log historical-three-step-axioms.log
