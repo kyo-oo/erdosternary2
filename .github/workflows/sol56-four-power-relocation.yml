@@ -28,7 +28,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact relocation and forcing proof outside production roots
+      - name: Compile exact relocation proof and Task 3 diagnostic
         shell: bash
         run: |
           set -euo pipefail
@@ -51,5 +51,102 @@ jobs:
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
             GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
+
+          cat > Task3LatentShapeDiagnostic.lean <<'LEAN'
+          import GSTGraphV2FourPowerRelocation
+
+          namespace GSTGraphV2Task3Diagnostic
+
+          open GSTU2DEventTransport
+          open GSTGraphV2InfiniteControl
+
+          theorem source_happy_k10_p11 :
+              HappyCell
+                (graph 1 10 11).seven.carry
+                (graph 1 10 11).seven.digit := by
+            norm_num [GSTGraphV2InfiniteControl.graph,
+              GSTGraphV2InfiniteControl.cell,
+              GSTCanonicalSevenAxisBridge.vertex,
+              GSTCanonicalSevenAxisBridge.carry4,
+              GSTCanonicalSevenAxisBridge.digit3,
+              GSTU2DEventTransport.HappyCell]
+
+          theorem same_row_step_is_latent_k10_p11 :
+              (graph 1 11 11).seven.digit = 2 ∧
+                ((graph 1 11 11).seven.carry = 1 ∨
+                 (graph 1 11 11).seven.carry = 2) ∧
+                (graph 1 11 12).seven.carry = 3 := by
+            norm_num [GSTGraphV2InfiniteControl.graph,
+              GSTGraphV2InfiniteControl.cell,
+              GSTCanonicalSevenAxisBridge.vertex,
+              GSTCanonicalSevenAxisBridge.carry4,
+              GSTCanonicalSevenAxisBridge.digit3]
+
+          theorem next_sheet_has_lower_happy_q10 :
+              HappyCell
+                (graph 1 11 10).seven.carry
+                (graph 1 11 10).seven.digit := by
+            norm_num [GSTGraphV2InfiniteControl.graph,
+              GSTGraphV2InfiniteControl.cell,
+              GSTCanonicalSevenAxisBridge.vertex,
+              GSTCanonicalSevenAxisBridge.carry4,
+              GSTCanonicalSevenAxisBridge.digit3,
+              GSTU2DEventTransport.HappyCell]
+
+          theorem next_sheet_no_happy_at_or_above_12 :
+              ∀ q : Nat, 12 ≤ q →
+                ¬ HappyCell
+                  (graph 1 11 q).seven.carry
+                  (graph 1 11 q).seven.digit := by
+            intro q hq hHappy
+            by_cases hq14 : 14 ≤ q
+            · have hbase : 4^11 < 3^14 := by norm_num
+              have hmono : 3^14 ≤ 3^q :=
+                Nat.pow_le_pow_right (by norm_num) hq14
+              have hpow : 4^11 < 3^q := lt_of_lt_of_le hbase hmono
+              have hd0 : (graph 1 11 q).seven.digit = 0 := by
+                simp [GSTGraphV2InfiniteControl.graph,
+                  GSTGraphV2InfiniteControl.cell,
+                  GSTCanonicalSevenAxisBridge.vertex,
+                  GSTCanonicalSevenAxisBridge.digit3,
+                  Nat.div_eq_of_lt hpow]
+              have hd2 := hHappy.1
+              rw [hd0] at hd2
+              omega
+            · have hcases : q = 12 ∨ q = 13 := by omega
+              rcases hcases with rfl | rfl
+              · norm_num [GSTGraphV2InfiniteControl.graph,
+                  GSTGraphV2InfiniteControl.cell,
+                  GSTCanonicalSevenAxisBridge.vertex,
+                  GSTCanonicalSevenAxisBridge.carry4,
+                  GSTCanonicalSevenAxisBridge.digit3,
+                  GSTU2DEventTransport.HappyCell] at hHappy
+              · norm_num [GSTGraphV2InfiniteControl.graph,
+                  GSTGraphV2InfiniteControl.cell,
+                  GSTCanonicalSevenAxisBridge.vertex,
+                  GSTCanonicalSevenAxisBridge.carry4,
+                  GSTCanonicalSevenAxisBridge.digit3,
+                  GSTU2DEventTransport.HappyCell] at hHappy
+
+          theorem latent_future_k10_p11_is_all_bad :
+              ∀ r : Nat,
+                ¬ HappyCell
+                  (graph 1 11 (11+1+r)).seven.carry
+                  (graph 1 11 (11+1+r)).seven.digit := by
+            intro r
+            apply next_sheet_no_happy_at_or_above_12
+            omega
+
+          #print axioms source_happy_k10_p11
+          #print axioms same_row_step_is_latent_k10_p11
+          #print axioms next_sheet_has_lower_happy_q10
+          #print axioms next_sheet_no_happy_at_or_above_12
+          #print axioms latent_future_k10_p11_is_all_bad
+
+          end GSTGraphV2Task3Diagnostic
+          LEAN
+
+          lake env lean Task3LatentShapeDiagnostic.lean 2>&1 | tee task3-diagnostic.log
+
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log task3-diagnostic.log
