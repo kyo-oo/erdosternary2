@@ -93,7 +93,7 @@ jobs:
           #print axioms GSTPrefixOneU2DCollisionProof.child_base_carry_zero
           #print axioms GSTPrefixOneU2DCollisionProof.seeded_one_bad_to_graph_right_bad
           #print axioms GSTPrefixOneU2DCollisionProof.canonical_right_bad_to_graph_right_bad
-          #print axioms GSTPrefixOneU2DCollisionProof.canonical_prefix_one_u2d_collision
+          #print axioms GSTPrefixOneU2DCollisionProof.canonical_prefix_one_u2d_terminal_packet
           EOF
           lake env lean GPT56PrefixOneU2DAudit.lean 2>&1 | tee prefix-one-u2d-axioms.log
           if grep -Fq 'sorryAx' prefix-one-u2d-axioms.log; then
