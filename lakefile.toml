@@ -46,7 +46,6 @@ roots = [
   "GSTGraphV2PerfectPowerAncestry",
   "GSTGraphV2PerfectPowerBlockCollision",
   "GSTGraphV2PerfectPowerBlockProbe",
-  "GSTGraphV2PowerThreeWaveObservation",
   "GSTGraphV2Production",
   "GSTGraphV2ProductionLaws",
   "GSTGraphV2SeededPrefix",
