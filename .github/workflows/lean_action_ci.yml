@@ -1,159 +1,42 @@
 name: Lean Action CI
-
 on:
   push:
     branches: ['**']
   workflow_dispatch:
-
 permissions:
   contents: write
-
-concurrency:
-  group: lean-production-surgery
-  cancel-in-progress: false
-
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - name: Install exact Lean RC2
-        shell: bash
+      - name: Apply production surgery
+        run: python3 .surgery/apply.py
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+      - name: Resolve dependencies
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-
-      - name: Resolve pinned Mathlib
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          rm -f lake-manifest.json
           lake update
           lake exe cache get
-
-      - name: Confirm old seam is genuinely red when still present
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -Eq 'GSTInfiniteFourPowerNavigation|GSTStep6Close' ErdosTernary2.lean; then
-            set +e
-            bash scripts/comparator.sh > pre-surgery.log 2>&1
-            rc=$?
-            set -e
-            tail -80 pre-surgery.log || true
-            test "$rc" -ne 0
-            echo EXPECTED_RED_CONFIRMED=1
-          else
-            echo COMMITTED_STATE_ALREADY_SURGERIED=1
-          fi
-
-      - name: Apply direct creation-chain transplant to production
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          p = Path('ErdosTernary2.lean')
-          s = p.read_text(encoding='utf-8')
-
-          s = s.replace('import GSTStep6Close\n', '')
-          s = s.replace('import GSTInfiniteFourPowerNavigation\n', '')
-
-          # Deduplicate exact imports left by repeated surgery churn.
-          seen = set()
-          lines = []
-          for line in s.splitlines(keepends=True):
-              stripped = line.strip()
-              if stripped.startswith('import '):
-                  module = stripped[len('import '):].strip()
-                  if module in seen:
-                      continue
-                  seen.add(module)
-              lines.append(line)
-          s = ''.join(lines)
-
-          old_master = '''theorem gst_four_power_creation_master_inline :
-    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
-  intro K hK5 hK7
-  exact GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-    K hK5 hK7
-'''
-          new_master = '''theorem gst_four_power_creation_master_inline :
-    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
-  intro K hK5 hK7
-  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
-'''
-          if old_master in s:
-              s = s.replace(old_master, new_master, 1)
-          elif new_master not in s:
-              raise SystemExit('MASTER_SEAM_NOT_FOUND')
-
-          marker = 'theorem gst_power_two_wave_large\n'
-          end_marker = '\n/-- The weaker two-wave theorem closes the even exponent directly. -/'
-          replacement = '''theorem gst_power_two_wave_large
-    (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
-  unfold GSTPowerTwoWave
-  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
-    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
-      gst_four_power_creation_master_inline a (by omega) (by omega)
-  have hnav : GSTNavigationWitness (4^a) :=
-    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
-  obtain ⟨p, hd, _hspace⟩ := hnav
-  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
-'''
-          if marker in s:
-              start = s.index(marker)
-              end = s.index(end_marker, start)
-              if s[start:end] != replacement:
-                  s = s[:start] + replacement + s[end:]
-          elif replacement not in s:
-              raise SystemExit('POWER_TWO_WAVE_SEAM_NOT_FOUND')
-
-          p.write_text(s, encoding='utf-8')
-
-          lake = Path('lakefile.toml')
-          t = lake.read_text(encoding='utf-8')
-          t = t.replace('  "GSTInfiniteFourPowerNavigation",\n', '')
-          t = t.replace('  "GSTStep6Close",\n', '')
-          lake.write_text(t, encoding='utf-8')
-          PY
-
-          ! grep -nE 'GSTStep6Close|GSTInfiniteFourPowerNavigation|gst_step6_close|information_bad_descends' ErdosTernary2.lean
-          ! grep -nE 'GSTStep6Close|GSTInfiniteFourPowerNavigation' lakefile.toml
-          echo OBSOLETE_ROUTE_EXCISED=1
-
       - name: Hard build
-        shell: bash
         run: |
           set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
           lake build 2>&1 | tee hard-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' hard-build.log
-          echo HARD_BUILD_PASS=1
-
       - name: Exact V5 comparator
-        shell: bash
         run: |
           set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
           bash scripts/comparator.sh 2>&1 | tee comparator.log
           grep -Fq 'Your solution is okay!' comparator.log
           grep -Fq '=== COMPARATOR RESULT: PASS ===' comparator.log
-          echo V5_COMPARATOR_PASS=1
-
       - name: Kernel axiom audit
-        shell: bash
         run: |
           set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
           #print axioms gst_four_power_creation_master_inline
@@ -164,14 +47,10 @@ jobs:
           lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
           rm -f MultiNukeAxiomAudit.lean
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|error:' axiom-audit.log
-          echo AXIOM_AUDIT_PASS=1
-
-      - name: Commit verified surgery back to branch
+      - name: Commit verified production files
         if: github.ref == 'refs/heads/sol/gpt56-canonical-tail-escape-20260827'
-        shell: bash
         run: |
           set -euo pipefail
-          rm -f pre-surgery.log hard-build.log comparator.log axiom-audit.log
           if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
             echo VERIFIED_COMMITTED_STATE=1
             exit 0
@@ -182,15 +61,3 @@ jobs:
           git commit -m 'Multi-nuke obsolete navigation route and wire clean creation chain'
           git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
           echo VERIFIED_SURGERY_PUSHED=1
-
-      - name: Upload verification logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lean-production-surgery-${{ github.run_id }}
-          path: |
-            pre-surgery.log
-            hard-build.log
-            comparator.log
-            axiom-audit.log
-          if-no-files-found: ignore
