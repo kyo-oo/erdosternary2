@@ -9,6 +9,7 @@ on:
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
+      - lakefile.toml
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -25,7 +26,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle
-          lake env lean GSTGraphV2NonlocalCascade.lean
+          lake build GSTGraphV2FourPowerRelocation 2>&1 | tee relocation-build.log
           lake env lean GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals' relocation.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals' relocation-build.log relocation.log
