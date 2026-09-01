@@ -103,6 +103,36 @@ The principal certified modules are:
 These theorems certify persistence through changing representation. They do
 not certify extinction and they do not certify a contradiction.
 
+## Existing green one-step form-change theorem
+
+Sol's latest inventory identified the monolith theorem that most directly
+formalizes the intended behavior:
+
+```lean
+gst_pure_lift_or_forced_cascade
+  (R p : Nat) (hp : 1 <= p)
+  (hd : gstDigit R p = 2)
+  (hgood : gstCarry R p = 0 \/ gstCarry R p = 3) :
+  (gstDigit (4 * R) p = 2 /\
+    (gstCarry (4 * R) p = 0 \/ gstCarry (4 * R) p = 3)) \/
+  (gstDigit (4 * R) p = 2 /\
+    (gstCarry (4 * R) p = 1 \/ gstCarry (4 * R) p = 2) /\
+    gstCarry (4 * R) (p + 1) = 3)
+```
+
+This theorem is the correct local physical direction:
+
+- digit-two information survives multiplication by four;
+- it may remain immediately in a Happy carry sector `0/3`; or
+- it may be re-encoded in ALT carry sector `1/2` and force carry `3` on the
+  next forward edge.
+
+The second branch is not failure, extinction, or descent. It is a certified
+change of representation followed by a forced cascade. Future production
+surgery should compose this theorem with the exact all-depth controller,
+ledger, phase, and n-wave theorems. It must not replace the second branch by
+a contradiction.
+
 ## Meaning of the terminal n-wave packet
 
 After choosing a cutoff `K` with `n / 3^K = 0`, the residual energy becomes
@@ -192,4 +222,3 @@ Your solution is okay!
 
 The proof must contain no `sorry`, `admit`, custom axiom, circular theorem,
 `unsafe` escape, or decision shortcut that bypasses kernel proof.
-
