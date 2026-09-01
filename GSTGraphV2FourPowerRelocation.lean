@@ -24,6 +24,54 @@ def FourPowerHappyPropagation : Prop :=
       HappyCell (graph 1 (K+1) q).seven.carry
         (graph 1 (K+1) q).seven.digit
 
+/-- Exact vertical future packet beginning one row above a latent x4 cascade.
+Nothing is projected away: carry and digit stay on the physical Graph-V2
+sheet, carries remain physical, digits remain ternary, and the vertical
+recurrence is the literal cell law at every future row. -/
+theorem latent_vertical_future_packet
+    (K p : Nat)
+    (hNext : (graph 1 (K+1) (p+1)).seven.carry = 3) :
+    let C : Nat → Nat := fun r =>
+      (graph 1 (K+1) (p+1+r)).seven.carry
+    let d : Nat → Nat := fun r =>
+      (graph 1 (K+1) (p+1+r)).seven.digit
+    C 0 = 3 ∧
+      (∀ r, C r < 4) ∧
+      (∀ r, d r < 3) ∧
+      (∀ r,
+        GST2DMixedEmergence.nextCarry (C r) (d r) = C (r+1)) := by
+  dsimp
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · simpa using hNext
+  · intro r
+    exact graph_carry_lt_four 1 (K+1) (p+1+r)
+  · intro r
+    exact graph_digit_lt_three 1 (K+1) (p+1+r)
+  · intro r
+    simpa [Nat.add_assoc] using
+      (graph_cell_exact 1 (K+1) (p+1+r)).2
+
+/-- If no relocated Happy witness exists anywhere above row zero, then every
+row in the vertical future of a latent packet is physically bad.  This is an
+internal contradiction-language adapter only; it does not assume the desired
+propagation theorem as a parameter. -/
+theorem future_bad_of_no_relocated_happy
+    (K p : Nat)
+    (hNoRelocated : ¬ ∃ q : Nat, 1 ≤ q ∧
+      HappyCell (graph 1 (K+1) q).seven.carry
+        (graph 1 (K+1) q).seven.digit) :
+    ∀ r : Nat,
+      ¬ HappyCell
+        (graph 1 (K+1) (p+1+r)).seven.carry
+        (graph 1 (K+1) (p+1+r)).seven.digit := by
+  intro r hHappy
+  apply hNoRelocated
+  exact ⟨p+1+r, by omega, hHappy⟩
+
 #check FourPowerHappyPropagation
+#check latent_vertical_future_packet
+#check future_bad_of_no_relocated_happy
+#print axioms latent_vertical_future_packet
+#print axioms future_bad_of_no_relocated_happy
 
 end GSTGraphV2FourPowerRelocation
