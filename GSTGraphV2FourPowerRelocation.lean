@@ -1,6 +1,7 @@
 import GSTGraphV2NonlocalCascade
 import GSTGraphV2CanonicalEscape
 import GSTGraphV2CanonicalInfiniteCycle
+import GSTFinalPurePowerResidueTransplant
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -90,6 +91,71 @@ theorem four_power_happy_iff_consecutive_digit_two
     GSTCanonicalTailStateIso.digit3] using
       (graph_happy_iff_consecutive_digit_two 1 K p)
 
+/-- The original universal four-power target, isolated from the monolith. -/
+def FourPowerCanonicalHappyTarget : Prop :=
+  ∀ K : Nat, 5 ≤ K → K ≠ 7 →
+    ∃ p : Nat, 1 ≤ p ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p)
+
+/-- Pure arithmetic form of the exact same target. -/
+def FourPowerDigitOverlap : Prop :=
+  ∀ K : Nat, 5 ≤ K → K ≠ 7 →
+    ∃ p : Nat, 1 ≤ p ∧
+      GSTCanonicalTailStateIso.digit3 (4^K) p = 2 ∧
+      GSTCanonicalTailStateIso.digit3 (4^(K+1)) p = 2
+
+/-- No weakening is hidden in the digit-overlap reformulation. -/
+theorem four_power_canonical_target_iff_digit_overlap :
+    FourPowerCanonicalHappyTarget ↔ FourPowerDigitOverlap := by
+  constructor
+  · intro h K hK5 hK7
+    rcases h K hK5 hK7 with ⟨p, hp, hHappy⟩
+    exact ⟨p, hp, (four_power_happy_iff_consecutive_digit_two K p).mp hHappy⟩
+  · intro h K hK5 hK7
+    rcases h K hK5 hK7 with ⟨p, hp, hOverlap⟩
+    exact ⟨p, hp, (four_power_happy_iff_consecutive_digit_two K p).mpr hOverlap⟩
+
+/-- Exact base witness at K=5. -/
+theorem four_power_digit_overlap_base_5 :
+    ∃ p : Nat, 1 ≤ p ∧
+      GSTCanonicalTailStateIso.digit3 (4^5) p = 2 ∧
+      GSTCanonicalTailStateIso.digit3 (4^(5+1)) p = 2 := by
+  refine ⟨2, by norm_num, ?_, ?_⟩
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+
+/-- Exact base witness at K=6. -/
+theorem four_power_digit_overlap_base_6 :
+    ∃ p : Nat, 1 ≤ p ∧
+      GSTCanonicalTailStateIso.digit3 (4^6) p = 2 ∧
+      GSTCanonicalTailStateIso.digit3 (4^(6+1)) p = 2 := by
+  refine ⟨2, by norm_num, ?_, ?_⟩
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+
+/-- Exact induction base witness at K=8. -/
+theorem four_power_digit_overlap_base_8 :
+    ∃ p : Nat, 1 ≤ p ∧
+      GSTCanonicalTailStateIso.digit3 (4^8) p = 2 ∧
+      GSTCanonicalTailStateIso.digit3 (4^(8+1)) p = 2 := by
+  refine ⟨4, by norm_num, ?_, ?_⟩
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+  · norm_num [GSTCanonicalTailStateIso.digit3]
+
+/-- LTE-specialized exponent-trit transport with no free coefficient
+hypothesis.  This is the exact arithmetic bridge used for the power-specific
+part of the latent-future analysis. -/
+theorem four_power_exponent_trit_lift
+    (p m a : Nat) (ha : a < 3) :
+    GSTCanonicalSevenAxisBridge.digit3 (4^(m + a*3^p)) (p+1) =
+      (GSTCanonicalSevenAxisBridge.digit3 (4^m) (p+1) + a) % 3 := by
+  exact GSTFinalPurePowerResidueTransplant.pow4_exponent_trit_lift_digit
+    p m (GSTGraphV2HandwrittenExponentialLTE.lteCoeff p) a ha
+    (GSTGraphV2HandwrittenExponentialLTE.pow4_three_power_lte_exact p)
+    (GSTGraphV2HandwrittenExponentialLTE.lteCoeff_mod3_one p)
+
 /-- Exact vertical future packet beginning one row above a latent x4 cascade.
 Nothing is projected away: carry and digit stay on the physical Graph-V2
 sheet, carries remain physical, digits remain ternary, and the vertical
@@ -135,12 +201,24 @@ theorem future_bad_of_no_relocated_happy
   exact ⟨p+1+r, by omega, hHappy⟩
 
 #check FourPowerHappyPropagation
+#check FourPowerCanonicalHappyTarget
+#check FourPowerDigitOverlap
 #check graph_happy_iff_consecutive_digit_two
 #check four_power_happy_iff_consecutive_digit_two
+#check four_power_canonical_target_iff_digit_overlap
+#check four_power_digit_overlap_base_5
+#check four_power_digit_overlap_base_6
+#check four_power_digit_overlap_base_8
+#check four_power_exponent_trit_lift
 #check latent_vertical_future_packet
 #check future_bad_of_no_relocated_happy
 #print axioms graph_happy_iff_consecutive_digit_two
 #print axioms four_power_happy_iff_consecutive_digit_two
+#print axioms four_power_canonical_target_iff_digit_overlap
+#print axioms four_power_digit_overlap_base_5
+#print axioms four_power_digit_overlap_base_6
+#print axioms four_power_digit_overlap_base_8
+#print axioms four_power_exponent_trit_lift
 #print axioms latent_vertical_future_packet
 #print axioms future_bad_of_no_relocated_happy
 
