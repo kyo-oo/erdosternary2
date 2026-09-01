@@ -1,4 +1,4 @@
-import GSTGraphV2FourPowerForcingBridge
+import GSTGraphV2InfiniteControl
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
