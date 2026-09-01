@@ -11,17 +11,34 @@ permissions:
 
 concurrency:
   group: gpt56-fix-import-closure-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   fix-and-compare:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
-      - name: Register exact local import closure with Lake
+      - name: Permanently excise obsolete four-power route
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .surgery/apply.py
+          if grep -q 'GSTInfiniteFourPowerNavigation' ErdosTernary2.lean; then
+            echo 'RED_NAVIGATION_IMPORT_SURVIVED=1'
+            exit 1
+          fi
+          if grep -q 'gst_four_power_navigation_universal' ErdosTernary2.lean; then
+            echo 'RED_NAVIGATION_THEOREM_SURVIVED=1'
+            exit 1
+          fi
+          grep -q 'h_creation_for_4pow K hK5 hK7' ErdosTernary2.lean
+          echo 'GREEN_PRODUCTION_ROUTE_WIRED=1'
+
+      - name: Register exact transformed local import closure with Lake
         shell: bash
         run: |
           set -euo pipefail
@@ -67,6 +84,8 @@ jobs:
               visit(mod)
 
           roots = sorted(seen)
+          if 'GSTInfiniteFourPowerNavigation' in roots:
+              raise SystemExit('obsolete GSTInfiniteFourPowerNavigation still reachable from production monolith')
           if 'GSTGraphV2ProductionLaws' not in roots:
               raise SystemExit('expected GSTGraphV2ProductionLaws in local closure')
           if 'GSTPrefixOneOntologicalEscape' not in roots:
@@ -106,20 +125,20 @@ jobs:
           print('LOCAL_CLOSURE_REGISTERED=1')
           PY
 
-      - name: Commit Lake closure repair
+      - name: Commit permanent production replacement
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- lakefile.toml; then
-            echo 'LAKEFILE_ALREADY_NORMALIZED=1'
+          if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
+            echo 'PRODUCTION_ALREADY_NORMALIZED=1'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add lakefile.toml
-          git commit -m 'register exact monolith local import closure'
+          git add ErdosTernary2.lean lakefile.toml
+          git commit -m 'replace obsolete navigation route with green production closure'
           git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
-          echo 'LAKEFILE_REPAIR_PUSHED=1'
+          echo 'PERMANENT_PRODUCTION_REPLACEMENT_PUSHED=1'
 
       - name: Install exact Lean RC2
         shell: bash
@@ -136,7 +155,7 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Run exact repository V5 comparator after fixation
+      - name: Run exact repository V5 comparator after permanent replacement
         shell: bash
         run: |
           set -euo pipefail
