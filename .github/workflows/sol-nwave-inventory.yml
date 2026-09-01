@@ -22,6 +22,11 @@ jobs:
           set -euo pipefail
           echo '=== PUBLIC LIFT / STALE STEP6 ==='
           grep -n -A90 -B25 'theorem gst_prefix_one_information_bad_descends_inline' ErdosTernary2.lean || true
+          echo '=== PHYSICAL X4 LIFT / CASCADE ==='
+          grep -n -A120 -B40 'gst_pure_lift_or_forced_cascade' ErdosTernary2.lean || true
+          grep -n -A80 -B30 'theorem even_case_a_mod3_2' ErdosTernary2.lean || true
+          echo '=== POWER TWO WAVE CONSUMER ==='
+          grep -n -A120 -B30 'theorem gst_power_two_wave_large' ErdosTernary2.lean || true
           echo '=== RESIDUAL / SMALL SHIFT ==='
           grep -n -A140 -B30 'def GSTSmallShiftNavigationLift' ErdosTernary2.lean || true
           grep -n -A140 -B30 'def GSTResidualNavigationLift' ErdosTernary2.lean || true
