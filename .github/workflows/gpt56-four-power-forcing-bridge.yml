@@ -8,6 +8,7 @@ on:
       - GSTGraphV2FourPowerForcingBridge.lean
       - GSTFourPowerOntologicalAdapter.lean
       - GSTGraphV2InfiniteControl.lean
+      - GSTGraphV2CanonicalNWave.lean
       - lakefile.toml
       - lake-manifest.json
       - .github/workflows/gpt56-four-power-forcing-bridge.yml
@@ -26,6 +27,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTFourPowerOntologicalAdapter GSTGraphV2InfiniteControl
+          lake build GSTFourPowerOntologicalAdapter GSTGraphV2CanonicalNWave
           lake env lean GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee four-power-forcing-bridge.log
           ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' four-power-forcing-bridge.log
