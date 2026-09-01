@@ -105,11 +105,9 @@ jobs:
                 Nat.pow_le_pow_right (by norm_num) hq14
               have hpow : 4^11 < 3^q := lt_of_lt_of_le hbase hmono
               have hd0 : (graph 1 11 q).seven.digit = 0 := by
-                simp [GSTGraphV2InfiniteControl.graph,
-                  GSTGraphV2InfiniteControl.cell,
-                  GSTCanonicalSevenAxisBridge.vertex,
-                  GSTCanonicalSevenAxisBridge.digit3,
-                  Nat.div_eq_of_lt hpow]
+                change (4^11 / 3^q) % 3 = 0
+                rw [Nat.div_eq_of_lt hpow]
+                norm_num
               have hd2 := hHappy.1
               rw [hd0] at hd2
               omega
