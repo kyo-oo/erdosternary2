@@ -9,7 +9,6 @@ on:
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
-      - lakefile.toml
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -22,10 +21,17 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact relocation probe
+      - name: Compile exact relocation probe outside production roots
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2FourPowerRelocation 2>&1 | tee relocation-build.log
-          lake env lean GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals' relocation-build.log relocation.log
+          lake build GSTGraphV2CanonicalEscape GSTGraphV2CanonicalInfiniteCycle 2>&1 | tee relocation-deps.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
+            GSTGraphV2NonlocalCascade.lean 2>&1 | tee nonlocal-cascade.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
+            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            relocation-deps.log nonlocal-cascade.log relocation.log
