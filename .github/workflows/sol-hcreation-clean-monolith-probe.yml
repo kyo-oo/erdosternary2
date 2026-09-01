@@ -1,0 +1,96 @@
+name: SOL56 Clean Monolith Creation Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - '.github/workflows/sol-hcreation-clean-monolith-probe.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+      - name: Excise obsolete modules and wire direct creation proof locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('import GSTStep6Close\n', '')
+          s = s.replace('import GSTInfiniteFourPowerNavigation\n', '')
+
+          old_master = '''theorem gst_four_power_creation_master_inline :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  exact GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+    K hK5 hK7
+'''
+          new_master = '''theorem gst_four_power_creation_master_inline :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (h_creation_for_4pow K hK5 hK7)
+'''
+          if old_master not in s:
+              raise SystemExit('MASTER_MARKER_NOT_FOUND')
+          s = s.replace(old_master, new_master, 1)
+
+          start = s.index('theorem gst_power_two_wave_large\n')
+          end = s.index('\n/-- The weaker two-wave theorem closes the even exponent directly. -/', start)
+          replacement = '''theorem gst_power_two_wave_large
+    (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
+  unfold GSTPowerTwoWave
+  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
+    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
+      gst_four_power_creation_master_inline a (by omega) (by omega)
+  have hnav : GSTNavigationWitness (4^a) :=
+    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
+  obtain ⟨p, hd, _hspace⟩ := hnav
+  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+'''
+          s = s[:start] + replacement + s[end:]
+          p.write_text(s, encoding='utf-8')
+
+          lake = Path('lakefile.toml')
+          t = lake.read_text(encoding='utf-8')
+          t = t.replace('  "GSTInfiniteFourPowerNavigation",\n', '')
+          t = t.replace('  "GSTStep6Close",\n', '')
+          lake.write_text(t, encoding='utf-8')
+          PY
+          ! grep -nE 'GSTStep6Close|GSTInfiniteFourPowerNavigation|gst_step6_close|information_bad_descends' ErdosTernary2.lean
+          ! grep -nE 'GSTStep6Close|GSTInfiniteFourPowerNavigation' lakefile.toml
+      - name: Build cleaned production graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build 2>&1 | tee clean-monolith-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' clean-monolith-build.log
+      - name: Exact comparator on cleaned graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee clean-monolith-comparator.log
+          grep -Fq 'Your solution is okay!' clean-monolith-comparator.log
+          grep -Fq '=== COMPARATOR RESULT: PASS ===' clean-monolith-comparator.log
+          echo CLEAN_MONOLITH_LITERAL_PASS=1
