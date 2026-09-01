@@ -7,7 +7,6 @@ set_option maxHeartbeats 20000000
 
 namespace GSTGraphV2FourPowerRelocation
 
-open GSTCanonicalTailStateIso
 open GST2DMixedEmergence
 open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
