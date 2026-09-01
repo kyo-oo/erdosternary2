@@ -13,10 +13,7 @@ on:
       - GSTGraphV2CanonicalTerminalExtinctionProbe.lean
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
-      - GSTGraphV2PerfectPowerBlockProbe.lean
-      - GSTGraphV2UnifiedVerticalTelescope.lean
       - GSTGraphV2FourPowerForcingBridge.lean
-      - GSTInfiniteFourPowerNavigation.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -29,7 +26,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact relocation proof and Task 3 diagnostic
+      - name: Compile relocation baseline and residue obstruction probe
         shell: bash
         run: |
           set -euo pipefail
@@ -39,8 +36,6 @@ jobs:
             GSTGraphV2CanonicalNWave \
             GSTGraphV2CanonicalTerminalExtinctionProbe \
             GSTFinalPurePowerResidueTransplant \
-            GSTGraphV2PerfectPowerBlockProbe \
-            GSTGraphV2UnifiedVerticalTelescope \
             2>&1 | tee relocation-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
@@ -53,137 +48,117 @@ jobs:
             -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
             GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
 
-          cat > Task3LatentShapeDiagnostic.lean <<'LEAN'
+          cat > Task33ResidueObstruction.lean <<'LEAN'
           import GSTGraphV2FourPowerRelocation
 
-          namespace GSTGraphV2Task3Diagnostic
+          set_option maxRecDepth 1000000
+          set_option maxHeartbeats 20000000
 
+          namespace GSTGraphV2Task33ResidueObstruction
+
+          open GSTCanonicalSevenAxisBridge
           open GSTU2DEventTransport
           open GSTGraphV2InfiniteControl
+          open GSTGraphV2HandwrittenExponentialLTE
 
-          theorem source_happy_k10_p11 :
-              HappyCell
-                (graph 1 10 11).seven.carry
-                (graph 1 10 11).seven.digit := by
-            norm_num [GSTGraphV2InfiniteControl.graph,
-              GSTGraphV2InfiniteControl.cell,
-              GSTCanonicalSevenAxisBridge.vertex,
-              GSTCanonicalSevenAxisBridge.carry4,
-              GSTCanonicalSevenAxisBridge.digit3,
-              GSTU2DEventTransport.HappyCell]
+          /-- A ternary digit depends only on the residue through its next cut. -/
+          theorem digit3_eq_of_mod_next
+              (R S p : Nat)
+              (hmod : R % 3^(p+1) = S % 3^(p+1)) :
+              digit3 R p = digit3 S p := by
+            unfold digit3
+            have hpow : 3^(p+1) = 3^p * 3 := by
+              rw [Nat.pow_succ]
+            have hfull : R % (3^p * 3) = S % (3^p * 3) := by
+              simpa [hpow] using hmod
+            have hR : R % (3^p * 3) =
+                R % 3^p + 3^p * (R / 3^p % 3) := by
+              rw [Nat.mod_mul]
+            have hS : S % (3^p * 3) =
+                S % 3^p + 3^p * (S / 3^p % 3) := by
+              rw [Nat.mod_mul]
+            have hdvd : 3^p ∣ 3^(p+1) := Nat.pow_dvd_pow 3 (by omega)
+            have hRlow := Nat.mod_mod_of_dvd R hdvd
+            have hSlow := Nat.mod_mod_of_dvd S hdvd
+            have hlow : R % 3^p = S % 3^p := by
+              calc
+                R % 3^p = (R % 3^(p+1)) % 3^p := hRlow.symm
+                _ = (S % 3^(p+1)) % 3^p := by rw [hmod]
+                _ = S % 3^p := hSlow
+            rw [hR, hS, hlow] at hfull
+            have hmul : 3^p * (R / 3^p % 3) =
+                3^p * (S / 3^p % 3) := by omega
+            exact Nat.eq_of_mul_eq_mul_left (by positivity : 0 < 3^p) hmul
 
-          theorem same_row_step_is_latent_k10_p11 :
-              (graph 1 11 11).seven.digit = 2 ∧
-                ((graph 1 11 11).seven.carry = 1 ∨
-                 (graph 1 11 11).seven.carry = 2) ∧
-                (graph 1 11 12).seven.carry = 3 := by
-            norm_num [GSTGraphV2InfiniteControl.graph,
-              GSTGraphV2InfiniteControl.cell,
-              GSTCanonicalSevenAxisBridge.vertex,
-              GSTCanonicalSevenAxisBridge.carry4,
-              GSTCanonicalSevenAxisBridge.digit3]
+          /-- Exact exponent periodicity at a fixed ternary digit. -/
+          theorem pow4_digit_period
+              (p K u : Nat) :
+              digit3 (4^(K + 3^p*u)) p = digit3 (4^K) p := by
+            apply digit3_eq_of_mod_next
+            rw [Nat.pow_add, Nat.mul_mod]
+            rw [pow4_scaled_mod_next p u]
+            simp
 
-          theorem next_sheet_has_lower_happy_q10 :
-              HappyCell
-                (graph 1 11 10).seven.carry
-                (graph 1 11 10).seven.digit := by
-            norm_num [GSTGraphV2InfiniteControl.graph,
-              GSTGraphV2InfiniteControl.cell,
-              GSTCanonicalSevenAxisBridge.vertex,
-              GSTCanonicalSevenAxisBridge.carry4,
-              GSTCanonicalSevenAxisBridge.digit3,
-              GSTU2DEventTransport.HappyCell]
+          theorem row_two_overlap_of_mod9_five_or_six
+              (L : Nat) (hres : L % 9 = 5 ∨ L % 9 = 6) :
+              digit3 (4^L) 2 = 2 ∧ digit3 (4^(L+1)) 2 = 2 := by
+            rcases hres with h5 | h6
+            · have hs := Nat.mod_add_div L 9
+              rw [h5] at hs
+              have hshape : L = 5 + 9 * (L / 9) := by
+                simpa [Nat.add_comm, Nat.mul_comm] using hs.symm
+              have hshape1 : L+1 = 6 + 9 * (L / 9) := by omega
+              constructor
+              · rw [hshape]
+                simpa using (pow4_digit_period 2 5 (L/9))
+              · rw [hshape1]
+                simpa using (pow4_digit_period 2 6 (L/9))
+            · have hs := Nat.mod_add_div L 9
+              rw [h6] at hs
+              have hshape : L = 6 + 9 * (L / 9) := by
+                simpa [Nat.add_comm, Nat.mul_comm] using hs.symm
+              have hshape1 : L+1 = 7 + 9 * (L / 9) := by omega
+              constructor
+              · rw [hshape]
+                simpa using (pow4_digit_period 2 6 (L/9))
+              · rw [hshape1]
+                simpa using (pow4_digit_period 2 7 (L/9))
 
-          theorem next_sheet_no_happy_at_or_above_12 :
-              ∀ q : Nat, 12 ≤ q →
-                ¬ HappyCell
-                  (graph 1 11 q).seven.carry
-                  (graph 1 11 q).seven.digit := by
-            intro q hq hHappy
-            by_cases hq14 : 14 ≤ q
-            · have hbase : 4^11 < 3^14 := by norm_num
-              have hmono : 3^14 ≤ 3^q :=
-                Nat.pow_le_pow_right (by norm_num) hq14
-              have hpow : 4^11 < 3^q := lt_of_lt_of_le hbase hmono
-              have hd0 : (graph 1 11 q).seven.digit = 0 := by
-                change (4^11 / 3^q) % 3 = 0
-                rw [Nat.div_eq_of_lt hpow]
-              have hd2 := hHappy.1
-              rw [hd0] at hd2
-              omega
-            · have hcases : q = 12 ∨ q = 13 := by omega
-              rcases hcases with rfl | rfl
-              · norm_num [GSTGraphV2InfiniteControl.graph,
-                  GSTGraphV2InfiniteControl.cell,
-                  GSTCanonicalSevenAxisBridge.vertex,
-                  GSTCanonicalSevenAxisBridge.carry4,
-                  GSTCanonicalSevenAxisBridge.digit3,
-                  GSTU2DEventTransport.HappyCell] at hHappy
-              · norm_num [GSTGraphV2InfiniteControl.graph,
-                  GSTGraphV2InfiniteControl.cell,
-                  GSTCanonicalSevenAxisBridge.vertex,
-                  GSTCanonicalSevenAxisBridge.carry4,
-                  GSTCanonicalSevenAxisBridge.digit3,
-                  GSTU2DEventTransport.HappyCell] at hHappy
+          theorem no_relocated_happy_forbids_mod9_five_six
+              (K : Nat)
+              (hNo : ¬ ∃ q : Nat, 1 ≤ q ∧
+                HappyCell (graph 1 (K+1) q).seven.carry
+                  (graph 1 (K+1) q).seven.digit) :
+              (K+1) % 9 ≠ 5 ∧ (K+1) % 9 ≠ 6 := by
+            constructor
+            · intro h5
+              apply hNo
+              refine ⟨2, by norm_num, ?_⟩
+              have hov := row_two_overlap_of_mod9_five_or_six (K+1) (Or.inl h5)
+              exact (GSTGraphV2FourPowerRelocation.graph_happy_iff_consecutive_digit_two
+                1 (K+1) 2).2 (by
+                  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hov)
+            · intro h6
+              apply hNo
+              refine ⟨2, by norm_num, ?_⟩
+              have hov := row_two_overlap_of_mod9_five_or_six (K+1) (Or.inr h6)
+              exact (GSTGraphV2FourPowerRelocation.graph_happy_iff_consecutive_digit_two
+                1 (K+1) 2).2 (by
+                  simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hov)
 
-          theorem latent_future_k10_p11_is_all_bad :
-              ∀ r : Nat,
-                ¬ HappyCell
-                  (graph 1 11 (11+1+r)).seven.carry
-                  (graph 1 11 (11+1+r)).seven.digit := by
-            intro r
-            apply next_sheet_no_happy_at_or_above_12
-            omega
+          #check digit3_eq_of_mod_next
+          #check pow4_digit_period
+          #check row_two_overlap_of_mod9_five_or_six
+          #check no_relocated_happy_forbids_mod9_five_six
+          #print axioms digit3_eq_of_mod_next
+          #print axioms pow4_digit_period
+          #print axioms row_two_overlap_of_mod9_five_or_six
+          #print axioms no_relocated_happy_forbids_mod9_five_six
 
-          #print axioms source_happy_k10_p11
-          #print axioms same_row_step_is_latent_k10_p11
-          #print axioms next_sheet_has_lower_happy_q10
-          #print axioms next_sheet_no_happy_at_or_above_12
-          #print axioms latent_future_k10_p11_is_all_bad
-
-          end GSTGraphV2Task3Diagnostic
+          end GSTGraphV2Task33ResidueObstruction
           LEAN
 
-          lake env lean Task3LatentShapeDiagnostic.lean 2>&1 | tee task3-diagnostic.log
-
-          # Compile the independent power-specific existence theorem into the same
-          # environment, then test the exact Task 3.3 propagation signature only in
-          # a generated scratch file.  Production is untouched until this is green.
-          lake env lean \
-            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
-            GSTInfiniteFourPowerNavigation.lean 2>&1 | tee navigation-audit.log
-
-          cat > Task33GlobalRelocationCandidate.lean <<'LEAN'
-          import GSTGraphV2FourPowerRelocation
-          import GSTInfiniteFourPowerNavigation
-
-          namespace GSTGraphV2Task33GlobalCandidate
-
-          open GSTU2DEventTransport
-          open GSTGraphV2InfiniteControl
-
-          theorem global_arbitrary_q_candidate :
-              GSTGraphV2FourPowerRelocation.FourPowerHappyPropagation := by
-            intro K p hK hp hSource
-            obtain ⟨q, hq3, hqHappy⟩ :=
-              GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-                (K+1) (by omega)
-            refine ⟨q, by omega, ?_⟩
-            simpa [GSTGraphV2InfiniteControl.graph,
-              GSTGraphV2InfiniteControl.cell,
-              GSTCanonicalSevenAxisBridge.vertex] using hqHappy
-
-          #check global_arbitrary_q_candidate
-          #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
-          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-          #print axioms global_arbitrary_q_candidate
-
-          end GSTGraphV2Task33GlobalCandidate
-          LEAN
-
-          lake env lean Task33GlobalRelocationCandidate.lean \
-            2>&1 | tee task33-global-candidate.log
+          lake env lean Task33ResidueObstruction.lean 2>&1 | tee task33-residue.log
 
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log \
-            task3-diagnostic.log navigation-audit.log task33-global-candidate.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log task33-residue.log
