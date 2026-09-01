@@ -107,7 +107,6 @@ jobs:
               have hd0 : (graph 1 11 q).seven.digit = 0 := by
                 change (4^11 / 3^q) % 3 = 0
                 rw [Nat.div_eq_of_lt hpow]
-                norm_num
               have hd2 := hHappy.1
               rw [hd0] at hd2
               omega
