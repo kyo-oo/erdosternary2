@@ -11,6 +11,7 @@ open GSTFourPowerOntologicalAdapter
 open GSTGraphV2InfiniteControl
 open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2CanonicalNWave
+open GSTGraphV2HandwrittenExponentialCascade
 
 /-- Literal Graph-V2 form of the remaining four-power forcing law.  This is
 the exact theorem that must replace the quarantined recursive creation block:
