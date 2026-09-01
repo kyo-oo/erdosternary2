@@ -26,6 +26,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTGraphV2FourPowerForcingBridge
+          lake build GSTFourPowerOntologicalAdapter GSTGraphV2InfiniteControl
           lake env lean GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee four-power-forcing-bridge.log
           ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' four-power-forcing-bridge.log
