@@ -27,10 +27,10 @@ retained as a horizontal phase.  This is the non-lossy form needed for
 iteration; no invalid reset of the phase to column zero is performed. -/
 theorem one_trit_phase_regeneration_happy_iff
     (s n x p : Nat) :
-    HappyCell
+    GSTU2DEventTransport.HappyCell
         (graph (canonicalEnergy s n) x p).seven.carry
         (graph (canonicalEnergy s n) x p).seven.digit ↔
-      HappyCell
+      GSTU2DEventTransport.HappyCell
         (graph (canonicalEnergy (s+1) (n/3))
           (3^(s+1) * (n%3) + x) p).seven.carry
         (graph (canonicalEnergy (s+1) (n/3))
