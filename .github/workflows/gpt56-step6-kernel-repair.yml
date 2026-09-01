@@ -34,13 +34,14 @@ jobs:
           p = Path('lakefile.toml')
           s = p.read_text(encoding='utf-8')
           s = s.replace('  "GSTStep6Close",\n', '')
+          s = s.replace('  "GSTStep6CloseShellTest",\n', '')
           p.write_text(s, encoding='utf-8')
           PY
+          rm -f GSTStep6Close.lean GSTStep6CloseShellTest.lean
           if grep -R --include='*.lean' -n '^import GSTStep6Close$' .; then
             echo 'GSTStep6Close still imported after production surgery'
             exit 1
           fi
-          rm -f GSTStep6Close.lean
           grep -F 'theorem gst_step6_collision_kernel' ErdosTernary2.lean
           ! grep -F 'gst_step6_close' ErdosTernary2.lean
           ! grep -F 'QUARANTINED LEGACY RESIDUAL OMEGA' ErdosTernary2.lean
@@ -196,7 +197,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add ErdosTernary2.lean lakefile.toml
-          git add -u GSTStep6Close.lean
+          git add -u GSTStep6Close.lean GSTStep6CloseShellTest.lean
           if git diff --cached --quiet; then
             echo 'repaired production state already committed'
             exit 0
