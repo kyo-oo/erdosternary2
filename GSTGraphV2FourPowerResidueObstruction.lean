@@ -88,6 +88,40 @@ theorem row_two_overlap_of_mod9_five_or_six
           pow4_digit_period 2 7 (L/9)
         _ = 2 := by norm_num [digit3]
 
+/-- Exact row-two residue classification.  This is the converse missing from
+the first fresh residue probe: a shared row-two digit `2` occurs *only* in
+exponent classes five and six modulo nine. -/
+theorem row_two_overlap_iff_mod9_five_or_six
+    (L : Nat) :
+    (digit3 (4^L) 2 = 2 ∧ digit3 (4^(L+1)) 2 = 2) ↔
+      (L % 9 = 5 ∨ L % 9 = 6) := by
+  constructor
+  · intro hov
+    let r := L % 9
+    have hr : r < 9 := by
+      dsimp [r]
+      exact Nat.mod_lt _ (by norm_num)
+    have hs := Nat.mod_add_div L 9
+    have hshape : L = r + 9 * (L / 9) := by
+      dsimp [r]
+      omega
+    have hshape1 : L + 1 = (r + 1) + 9 * (L / 9) := by
+      omega
+    have h0 : digit3 (4^r) 2 = 2 := by
+      have h := hov.1
+      rw [hshape] at h
+      rw [pow4_digit_period 2 r (L / 9)] at h
+      exact h
+    have h1 : digit3 (4^(r+1)) 2 = 2 := by
+      have h := hov.2
+      rw [hshape1] at h
+      rw [pow4_digit_period 2 (r+1) (L / 9)] at h
+      exact h
+    have hres : r = 5 ∨ r = 6 := by
+      interval_cases r <;> norm_num [digit3] at h0 h1 ⊢
+    simpa [r] using hres
+  · exact row_two_overlap_of_mod9_five_or_six L
+
 /-- Therefore global absence of a relocated Happy cell on sheet `K+1`
 forbids the exponent residues five and six modulo nine. -/
 theorem no_relocated_happy_forbids_mod9_five_six
@@ -115,10 +149,12 @@ theorem no_relocated_happy_forbids_mod9_five_six
 #check digit3_eq_of_mod_next
 #check pow4_digit_period
 #check row_two_overlap_of_mod9_five_or_six
+#check row_two_overlap_iff_mod9_five_or_six
 #check no_relocated_happy_forbids_mod9_five_six
 #print axioms digit3_eq_of_mod_next
 #print axioms pow4_digit_period
 #print axioms row_two_overlap_of_mod9_five_or_six
+#print axioms row_two_overlap_iff_mod9_five_or_six
 #print axioms no_relocated_happy_forbids_mod9_five_six
 
 end GSTGraphV2FourPowerResidueObstruction
