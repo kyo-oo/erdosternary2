@@ -46,6 +46,32 @@ theorem scaleOrbit_mod_three (m : Nat) : ∀ q : Nat,
       rw [Nat.add_mod, Nat.mul_mod, pow4_mod3_one, lteCoeff_mod3_one, ih]
       simp [Nat.succ_eq_add_one, Nat.add_mod]
 
+/-- Exact cross-scale conjugacy.  Consuming one ternary exponent digit and
+    increasing the renormalization depth commute literally. -/
+theorem scaleOrbit_three_mul (m q : Nat) :
+    scaleOrbit m (3*q) = 3 * scaleOrbit (m+1) q := by
+  have hexp : 3^m * (3*q) = 3^(m+1) * q := by
+    rw [Nat.pow_succ]
+    ring
+  have hEq :
+      1 + 3^(m+1) * scaleOrbit m (3*q) =
+        1 + 3^((m+1)+1) * scaleOrbit (m+1) q := by
+    calc
+      1 + 3^(m+1) * scaleOrbit m (3*q)
+          = 4^(3^m * (3*q)) := (scaleOrbit_exact m (3*q)).symm
+      _ = 4^(3^(m+1) * q) := by rw [hexp]
+      _ = 1 + 3^((m+1)+1) * scaleOrbit (m+1) q :=
+        scaleOrbit_exact (m+1) q
+  have hmul :
+      3^(m+1) * scaleOrbit m (3*q) =
+        3^((m+1)+1) * scaleOrbit (m+1) q := by
+    exact Nat.add_left_cancel hEq
+  have hmul' :
+      3^(m+1) * scaleOrbit m (3*q) =
+        3^(m+1) * (3 * scaleOrbit (m+1) q) := by
+    simpa [Nat.pow_succ, Nat.mul_assoc] using hmul
+  exact Nat.eq_of_mul_eq_mul_left (by positivity : 0 < 3^(m+1)) hmul'
+
 /-- At scale zero the normalized orbit is the familiar recurrence
     `Y(0)=0`, `Y(q+1)=4Y(q)+1`. -/
 theorem scaleOrbit_zero_succ (q : Nat) :
@@ -71,9 +97,11 @@ theorem coarse_power_factorization (m q : Nat) :
 
 #check scaleOrbit_exact
 #check scaleOrbit_mod_three
+#check scaleOrbit_three_mul
 #check scaleOrbit_zero_succ
 #check scaleOrbit_one_succ
 #print axioms scaleOrbit_exact
 #print axioms scaleOrbit_mod_three
+#print axioms scaleOrbit_three_mul
 
 end GSTFourPowerMultiscaleRenormalization
