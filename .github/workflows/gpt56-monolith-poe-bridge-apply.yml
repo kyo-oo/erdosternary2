@@ -60,6 +60,15 @@ jobs:
             GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-existence.log
 
+      - name: Compile canonical tail state prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTCanonicalTailStateIso.olean \
+            GSTCanonicalTailStateIso.lean 2>&1 | tee canonical-tail-state.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' canonical-tail-state.log
+
       - name: Compile direct physical Happy bridge
         shell: bash
         run: |
