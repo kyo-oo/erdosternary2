@@ -26,20 +26,8 @@ theorem directCarry4_lt_four (R p : Nat) : directCarry4 R p < 4 := by
   unfold directCarry4
   have hM : 0 < (3^p : Nat) := by positivity
   have hr : R % 3^p < 3^p := Nat.mod_lt _ hM
-  have hnum : 4 * (R % 3^p) < 3^p * 4 := by
-    have h := Nat.mul_lt_mul_left (by decide : 0 < 4) hr
-    simpa [Nat.mul_comm] using h
-  by_contra hnot
-  have hge : 4 ≤ (4 * (R % 3^p)) / 3^p := by omega
-  have hmul : 4 * (3^p) ≤ ((4 * (R % 3^p)) / 3^p) * (3^p) := by
-    have h := Nat.mul_le_mul_right (3^p : Nat) hge
-    simpa [Nat.mul_comm] using h
-  have hcontra : 3^p * 4 ≤ 4 * (R % 3^p) := by
-    calc
-      3^p * 4 = 4 * 3^p := by ac_rfl
-      _ ≤ ((4 * (R % 3^p)) / 3^p) * 3^p := hmul
-      _ ≤ 4 * (R % 3^p) := Nat.div_mul_le_self _ _
-  exact (Nat.not_lt_of_ge hcontra) hnum
+  apply (Nat.div_lt_iff_lt_mul hM).2
+  nlinarith
 
 /-- Exact ternary carry recurrence for multiplication by four. -/
 theorem directCarry4_forward_exact_all (R p : Nat) :
