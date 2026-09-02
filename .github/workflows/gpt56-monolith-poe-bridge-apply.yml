@@ -31,6 +31,13 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-residue.log
 
+      - name: Compile exact exponent period
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerExactExponentPeriod.olean GSTFourPowerExactExponentPeriod.lean 2>&1 | tee exact-period.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' exact-period.log
+
       - name: Compile exact mod-27 residue classifier
         shell: bash
         run: |
