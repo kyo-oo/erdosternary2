@@ -5,9 +5,14 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
+      - GSTFourPowerDirectResidue.lean
+      - GSTFourPowerDirectResidue27.lean
+      - GSTFourPowerDirectAdditionCarry.lean
+      - GSTFourPowerDirectNo22.lean
+      - GSTFourPowerExponentTritObstruction.lean
       - GSTFourPowerDirectExistence.lean
-      - GSTGraphV2FourPowerResidueObstruction.lean
-      - GSTGraphV2FourPowerRelocation.lean
+      - GSTCanonicalTailStateIso.lean
+      - GSTFourPowerDirectHappyBridge.lean
       - .github/workflows/sol56-four-power-direct-existence.yml
   workflow_dispatch:
 
@@ -17,30 +22,57 @@ concurrency:
 
 jobs:
   direct-existence-kernel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
         with:
           build: false
           test: false
-      - name: Compile direct arithmetic dependency closure
+
+      - name: Compile fresh direct arithmetic dependency closure
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .lake/build/lib/lean
-          lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
-            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee direct-relocation-dep.log
-          lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
-            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee direct-residue-dep.log
+          for module in \
+            GSTFourPowerDirectResidue \
+            GSTFourPowerDirectResidue27 \
+            GSTFourPowerDirectAdditionCarry \
+            GSTFourPowerDirectNo22 \
+            GSTFourPowerExponentTritObstruction; do
+            lake env lean \
+              -o ".lake/build/lib/lean/${module}.olean" \
+              "${module}.lean" 2>&1 | tee "${module}.log"
+          done
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            direct-relocation-dep.log direct-residue-dep.log
+            GSTFourPowerDirectResidue.log \
+            GSTFourPowerDirectResidue27.log \
+            GSTFourPowerDirectAdditionCarry.log \
+            GSTFourPowerDirectNo22.log \
+            GSTFourPowerExponentTritObstruction.log
+
       - name: Compile and axiom-audit direct existence module
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectExistence.olean \
+            GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             direct-existence.log
+          grep -F '#print axioms' GSTFourPowerDirectExistence.lean >/dev/null
+
+      - name: Compile physical Happy endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTCanonicalTailStateIso.olean \
+            GSTCanonicalTailStateIso.lean 2>&1 | tee canonical-tail-state.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectHappyBridge.olean \
+            GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            canonical-tail-state.log direct-happy.log
+          grep -F '#print axioms' GSTFourPowerDirectHappyBridge.lean >/dev/null
