@@ -6,6 +6,10 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - '.github/workflows/sol-hcreation-clean-monolith-probe.yml'
+      - 'GSTFourPowerAffinePeelClassifier.lean'
+      - 'GSTFourPowerAffineClassifierBridge.lean'
+      - 'GSTFourPowerAffineChannelAutomaton.lean'
+      - 'GSTFourPowerAffineExponentPeel.lean'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          curl -sSf https://raw.githubusercontent.com/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Resolve pinned Mathlib
         shell: bash
@@ -26,6 +30,25 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
+      - name: Kernel-check affine peel classifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake build GSTFourPowerDirectExistence GSTCanonicalTailStateIso
+          for module in \
+            GSTFourPowerAffineOrbit \
+            GSTFourPowerAffineExponentPeel \
+            GSTFourPowerAffineBadState \
+            GSTFourPowerAffineChannelAutomaton \
+            GSTFourPowerAffineClassifierBridge \
+            GSTFourPowerAffinePeelClassifier
+          do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+          echo AFFINE_PEEL_CLASSIFIER_KERNEL_GREEN=1
       - name: Excise obsolete modules and wire direct creation proof locally
         shell: bash
         run: |
