@@ -5,7 +5,7 @@ set_option maxHeartbeats 20000000
 
 namespace GSTFourPowerAffineExponentPeel
 
-open GSTCanonicalTailStateIso
+open GSTFourPowerDirectResidue
 open GSTFourPowerAffineOrbit
 
 /-- Tail polynomial when the next ternary exponent trit is `0`. -/
@@ -40,7 +40,6 @@ theorem affineOrbit_three_mul_add_one (q : Nat) :
   rw [show 3*q + 1 = (3*q) + 1 by omega, affineOrbit_succ,
     affineOrbit_three_mul]
   simp [peel0, peel1]
-  ring
 
 /-- Exact exponent-trit peel for the `2` branch. -/
 theorem affineOrbit_three_mul_add_two (q : Nat) :
@@ -48,7 +47,6 @@ theorem affineOrbit_three_mul_add_two (q : Nat) :
   rw [show 3*q + 2 = (3*q + 1) + 1 by omega, affineOrbit_succ,
     affineOrbit_three_mul_add_one]
   simp [peel1, peel2]
-  ring
 
 /-- After consuming exponent trit `0`, all higher affine-orbit digits are the
     digits of the exact polynomial tail `peel0`. -/
@@ -56,9 +54,10 @@ theorem digit_peel_zero (q j : Nat) :
     digit3 (affineOrbit (3*q)) (j+1) =
       digit3 (peel0 (affineOrbit q)) j := by
   rw [affineOrbit_three_mul]
-  simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
-    (GSTCanonicalTailStateIso.prefix_slice_digit_exact
-      1 0 (peel0 (affineOrbit q)) j (by norm_num : 0 < 3^1))
+  have h := GSTCanonicalTailStateIso.prefix_slice_digit_exact
+    1 0 (peel0 (affineOrbit q)) j (by norm_num : 0 < 3^1)
+  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
+    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
 
 /-- After consuming exponent trit `1`, all higher affine-orbit digits are the
     digits of the exact polynomial tail `peel1`. -/
@@ -66,9 +65,10 @@ theorem digit_peel_one (q j : Nat) :
     digit3 (affineOrbit (3*q + 1)) (j+1) =
       digit3 (peel1 (affineOrbit q)) j := by
   rw [affineOrbit_three_mul_add_one]
-  simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
-    (GSTCanonicalTailStateIso.prefix_slice_digit_exact
-      1 1 (peel1 (affineOrbit q)) j (by norm_num : 1 < 3^1))
+  have h := GSTCanonicalTailStateIso.prefix_slice_digit_exact
+    1 1 (peel1 (affineOrbit q)) j (by norm_num : 1 < 3^1)
+  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
+    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
 
 /-- After consuming exponent trit `2`, all higher affine-orbit digits are the
     digits of the exact polynomial tail `peel2`. -/
@@ -76,29 +76,48 @@ theorem digit_peel_two (q j : Nat) :
     digit3 (affineOrbit (3*q + 2)) (j+1) =
       digit3 (peel2 (affineOrbit q)) j := by
   rw [affineOrbit_three_mul_add_two]
-  simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
-    (GSTCanonicalTailStateIso.prefix_slice_digit_exact
-      1 2 (peel2 (affineOrbit q)) j (by norm_num : 2 < 3^1))
+  have h := GSTCanonicalTailStateIso.prefix_slice_digit_exact
+    1 2 (peel2 (affineOrbit q)) j (by norm_num : 2 < 3^1)
+  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
+    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
 
 /-- The least ternary digit of the affine orbit literally records exponent
     trit `0`. -/
 theorem affineOrbit_low_trit_zero (q : Nat) :
     digit3 (affineOrbit (3*q)) 0 = 0 := by
   rw [affineOrbit_three_mul]
-  simp [digit3]
+  simp [GSTFourPowerDirectResidue.digit3]
 
 /-- The least ternary digit of the affine orbit literally records exponent
     trit `1`. -/
 theorem affineOrbit_low_trit_one (q : Nat) :
     digit3 (affineOrbit (3*q+1)) 0 = 1 := by
   rw [affineOrbit_three_mul_add_one]
-  simp [digit3]
+  simp [GSTFourPowerDirectResidue.digit3]
 
 /-- The least ternary digit of the affine orbit literally records exponent
     trit `2`. -/
 theorem affineOrbit_low_trit_two (q : Nat) :
     digit3 (affineOrbit (3*q+2)) 0 = 2 := by
   rw [affineOrbit_three_mul_add_two]
-  simp [digit3]
+  simp [GSTFourPowerDirectResidue.digit3]
+
+/-- The three tail polynomials form two consecutive affine steps after the
+    common cubic core. -/
+theorem peel1_eq_four_peel0 (x : Nat) : peel1 x = 4 * peel0 x := by
+  simp [peel0, peel1]
+  ring
+
+/-- The `2` tail is the next affine iterate after the `1` tail. -/
+theorem peel2_eq_four_peel1_add_one (x : Nat) :
+    peel2 x = 4 * peel1 x + 1 := by
+  simp [peel1, peel2]
+  ring
+
+/-- Closing identity needed by the `r = 2` exponent branch. -/
+theorem peel0_affine_succ (x : Nat) :
+    peel0 (4*x + 1) = 4 * peel2 x + 3 := by
+  simp [peel0, peel2]
+  ring
 
 end GSTFourPowerAffineExponentPeel
