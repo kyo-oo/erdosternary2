@@ -48,40 +48,6 @@ theorem fresh_source_row_below_support_cutoff
   simp [fourPowerSupportCutoff]
   omega
 
-/-- Any supplied positive source Happy row can be normalized to the least
-positive Happy row on the same exact four-power sheet.  The normalization
-retains a real physical witness and additionally exposes an exact bad prefix;
-no future-only property is asserted. -/
-theorem fresh_least_positive_source_happy
-    (K p : Nat)
-    (hp : 1 ≤ p)
-    (hSource :
-      HappyCell
-        (graph 1 K p).seven.carry
-        (graph 1 K p).seven.digit) :
-    ∃ p0 : Nat,
-      1 ≤ p0 ∧
-      HappyCell
-        (graph 1 K p0).seven.carry
-        (graph 1 K p0).seven.digit ∧
-      (∀ j : Nat, 1 ≤ j → j < p0 →
-        ¬ HappyCell
-          (graph 1 K j).seven.carry
-          (graph 1 K j).seven.digit) := by
-  let P : Nat → Prop := fun q =>
-    1 ≤ q ∧
-      HappyCell
-        (graph 1 K q).seven.carry
-        (graph 1 K q).seven.digit
-  have hExists : ∃ q : Nat, P q := by
-    exact ⟨p, hp, hSource⟩
-  let p0 := Nat.find hExists
-  have hSpec : P p0 := Nat.find_spec hExists
-  refine ⟨p0, hSpec.1, hSpec.2, ?_⟩
-  intro j hj hjlt hHappy
-  have hNotP : ¬ P j := Nat.find_min' hExists hjlt
-  exact hNotP ⟨hj, hHappy⟩
-
 /-- Fresh Task 3.3 starting lemma.
 
 This theorem uses only the current production relocation laws.  It does not
@@ -326,8 +292,6 @@ theorem fresh_failed_edge_power_obstruction_packet
 
 #check fresh_source_row_below_support_cutoff
 #print axioms fresh_source_row_below_support_cutoff
-#check fresh_least_positive_source_happy
-#print axioms fresh_least_positive_source_happy
 #check fresh_failed_edge_forces_latent_seed
 #print axioms fresh_failed_edge_forces_latent_seed
 #check fresh_nonzero_predecessor_of_zero_carry
