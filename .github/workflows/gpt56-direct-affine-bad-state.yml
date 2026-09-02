@@ -18,6 +18,7 @@ on:
       - 'GSTFourPowerAffineChannelAutomaton.lean'
       - 'GSTFourPowerAffineClassifierBridge.lean'
       - 'GSTFourPowerAffinePeelClassifier.lean'
+      - 'GSTFourPowerAffinePrefixIsometry.lean'
       - '.github/workflows/gpt56-direct-affine-bad-state.yml'
   workflow_dispatch:
 
@@ -81,5 +82,10 @@ jobs:
           set -euo pipefail
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffinePeelClassifier.olean GSTFourPowerAffinePeelClassifier.lean 2>&1 | tee affine-peel-classifier.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-peel-classifier.log
+      - name: Compile affine prefix isometry
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffinePrefixIsometry.olean GSTFourPowerAffinePrefixIsometry.lean 2>&1 | tee affine-prefix-isometry.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-prefix-isometry.log
       - name: Direct affine audit marker
         run: echo DIRECT_AFFINE_CLASSIFIER_STACK_GREEN=1
