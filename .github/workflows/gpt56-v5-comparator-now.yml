@@ -12,32 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Apply exact atomic production transplant
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/apply_u2d_atomic_replacement.py
-          python3 - <<'PY'
-          from pathlib import Path
-          s = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
-          required = [
-              'theorem h_creation_for_4pow',
-              'theorem gst_h_creation_full_power_navigation_atomic',
-              'theorem gst_full_power_navigation_descends_atomic',
-              'theorem gst_prefix_one_u2d_atomic_collision_inline',
-              'theorem gst_prefix_one_information_bad_descends_inline',
-              'theorem gst_prefix_one_navigation_lift',
-              'theorem erdos_ternary_2_universal',
-          ]
-          for marker in required:
-              if marker not in s:
-                  raise SystemExit(f'missing production theorem marker: {marker}')
-          if 'trace_state\n  contradiction' in s:
-              raise SystemExit('old red residual seam survived atomic transplant')
-          print('V5_ATOMIC_TRANSPLANT_VERIFIED=1')
-          PY
-          git diff --check
-
       - name: Install exact Lean RC2
         shell: bash
         run: |
@@ -53,40 +27,12 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Run exact repository V5 comparator on transplanted production proof
-        id: run_comparator
-        shell: bash
-        run: |
-          set +e
-          export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/comparator.sh 2>&1 | tee v5-comparator.log
-          status=${PIPESTATUS[0]}
-          echo "$status" > v5-comparator.status
-          echo "COMPARATOR_EXIT_STATUS=$status"
-          if [ "$status" -ne 0 ]; then
-            echo '=== EXACT COMPARATOR FAILURE TAIL ==='
-            tail -120 v5-comparator.log
-          fi
-          exit 0
-
-      - name: Upload exact comparator diagnostic
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: v5-production-transplant-comparator-diagnostic
-          path: |
-            v5-comparator.log
-            v5-comparator.status
-            ErdosTernary2.lean
-          if-no-files-found: error
-          retention-days: 3
-
-      - name: Enforce literal comparator result
+      - name: Run exact repository V5 comparator on committed production proof
         shell: bash
         run: |
           set -euo pipefail
-          status="$(cat v5-comparator.status)"
-          test "$status" = 0
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee v5-comparator.log
           grep -Fq 'Your solution is okay!' v5-comparator.log
           grep -Fq '=== COMPARATOR RESULT: PASS ===' v5-comparator.log
           echo V5_LITERAL_PASS_CONFIRMED=1
