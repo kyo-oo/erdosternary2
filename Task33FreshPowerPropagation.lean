@@ -76,7 +76,60 @@ theorem fresh_failed_edge_forces_latent_seed
 
   exact ⟨hdNext, hMiddle, hNextCarry⟩
 
+/-- Exact failed-edge obstruction packet for the fresh Task 3.3 proof.
+
+Nothing here weakens or localizes the target existential.  Under the literal
+negation of the required relocated witness, every positive row of the
+`4^(K+1)` sheet is bad.  The supplied source Happy row forces the exact latent
+seed at `p`, its whole vertical future is bad, and the same physical sheet is
+exactly neutral at the symbolic four-power support cutoff.
+
+The remaining Task 3.3 mathematics is therefore a power-specific
+incompatibility theorem for this finite-support packet. -/
+theorem fresh_failed_edge_power_obstruction_packet
+    (K p : Nat)
+    (hp : 1 ≤ p)
+    (hSource :
+      HappyCell
+        (graph 1 K p).seven.carry
+        (graph 1 K p).seven.digit)
+    (hNoRelocated : ¬ ∃ q : Nat, 1 ≤ q ∧
+      HappyCell
+        (graph 1 (K+1) q).seven.carry
+        (graph 1 (K+1) q).seven.digit) :
+    let B := fourPowerSupportCutoff K
+    (graph 1 (K+1) p).seven.digit = 2 ∧
+      ((graph 1 (K+1) p).seven.carry = 1 ∨
+       (graph 1 (K+1) p).seven.carry = 2) ∧
+      (graph 1 (K+1) (p+1)).seven.carry = 3 ∧
+      (∀ q : Nat, 1 ≤ q →
+        ¬ HappyCell
+          (graph 1 (K+1) q).seven.carry
+          (graph 1 (K+1) q).seven.digit) ∧
+      (∀ r : Nat,
+        ¬ HappyCell
+          (graph 1 (K+1) (p+1+r)).seven.carry
+          (graph 1 (K+1) (p+1+r)).seven.digit) ∧
+      (graph 1 (K+1) B).seven.carry = 0 ∧
+      (graph 1 (K+1) B).seven.digit = 0 := by
+  dsimp
+  have hSeed :=
+    fresh_failed_edge_forces_latent_seed K p hp hSource hNoRelocated
+  have hAllBad : ∀ q : Nat, 1 ≤ q →
+      ¬ HappyCell
+        (graph 1 (K+1) q).seven.carry
+        (graph 1 (K+1) q).seven.digit := by
+    intro q hq hHappy
+    exact hNoRelocated ⟨q, hq, hHappy⟩
+  have hFutureBad :=
+    future_bad_of_no_relocated_happy K p hNoRelocated
+  have hNeutral := four_power_graph_neutral_at_support_cutoff K
+  exact ⟨hSeed.1, hSeed.2.1, hSeed.2.2,
+    hAllBad, hFutureBad, hNeutral.1, hNeutral.2⟩
+
 #check fresh_failed_edge_forces_latent_seed
 #print axioms fresh_failed_edge_forces_latent_seed
+#check fresh_failed_edge_power_obstruction_packet
+#print axioms fresh_failed_edge_power_obstruction_packet
 
 end Task33FreshPowerPropagation
