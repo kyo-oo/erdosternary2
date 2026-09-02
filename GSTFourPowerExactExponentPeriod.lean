@@ -53,10 +53,9 @@ theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
           ring
         have hzero : digit3 (4^(3^p*u)) (p+1) = 0 := by
           apply Eq.trans (digit3_eq_of_mod_next (4^(3^p*u)) 1 (p+1) ?_) ?_
-          · simpa using hhigh
+          · simpa [Nat.mod_eq_of_lt (three_pow_succ_gt_one (p+1))] using hhigh
           · unfold digit3
             rw [Nat.div_eq_of_lt (three_pow_succ_gt_one p)]
-            simp
         have hperiod :
             digit3 (4^(3^p*u)) (p+1) = digit3 (4^(a*3^p)) (p+1) := by
           rw [hexp]
@@ -67,8 +66,9 @@ theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
           norm_num [Nat.div_eq_of_lt (three_pow_succ_gt_one p)]
         have ha0 : a = 0 := by
           rw [hperiod] at hzero
+          rw [hbase] at hlift
           have hlift' : digit3 (4^(a*3^p)) (p+1) = a := by
-            simpa [hbase, Nat.mod_eq_of_lt ha] using hlift
+            simpa [Nat.mod_eq_of_lt ha] using hlift
           rw [hlift'] at hzero
           exact hzero
         have hu3 : 3 ∣ u := by
