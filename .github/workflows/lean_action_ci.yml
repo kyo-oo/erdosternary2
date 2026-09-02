@@ -24,18 +24,22 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Kernel-check direct affine bad-state
+      - name: Kernel-check direct affine channel automaton
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p .lake/build/lib/lean
           lake build GSTFourPowerDirectExistence GSTCanonicalTailStateIso
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOrbit.olean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineExponentPeel.olean GSTFourPowerAffineExponentPeel.lean 2>&1 | tee affine-peel.log
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineBadState.olean GSTFourPowerAffineBadState.lean 2>&1 | tee affine-bad-state.log
-          cat affine-orbit.log affine-peel.log affine-bad-state.log > affine-all.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-all.log
-          echo DIRECT_AFFINE_BAD_STATE_KERNEL_GREEN=1
+          for module in \
+            GSTFourPowerAffineOrbit \
+            GSTFourPowerAffineExponentPeel \
+            GSTFourPowerAffineBadState \
+            GSTFourPowerAffineChannelAutomaton
+          do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+          echo DIRECT_AFFINE_CHANNEL_AUTOMATON_KERNEL_GREEN=1
       - name: Apply production surgery
         run: python3 .surgery/apply.py
       - name: Hard build
