@@ -42,6 +42,15 @@ jobs:
             GSTFourPowerDirectResidue27.lean 2>&1 | tee direct-residue27.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-residue27.log
 
+      - name: Compile exact mod-81 residue classifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectResidue81.olean \
+            GSTFourPowerDirectResidue81.lean 2>&1 | tee direct-residue81.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-residue81.log
+
       - name: Compile direct binary carry automaton
         shell: bash
         run: |
