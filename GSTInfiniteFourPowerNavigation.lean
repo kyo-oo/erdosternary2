@@ -124,8 +124,7 @@ theorem power_three_step_collision
 
   dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 ⊢
   dsimp [potentialWith, unifiedState] at hUPositive
-  trace_state
-  omega
+  nlinarith [hleft, hright, hU, hWidth3, hUPositive]
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
 theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
