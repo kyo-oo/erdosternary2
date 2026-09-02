@@ -5,8 +5,8 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
+      - GSTFourPowerDirectResidue.lean
       - GSTFourPowerDirectExistence.lean
-      - GSTGraphV2FourPowerResidueObstruction.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
   workflow_dispatch:
 
@@ -23,33 +23,16 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile direct arithmetic dependency closure
+      - name: Compile and axiom-audit pure residue arithmetic
         shell: bash
         run: |
           set -euo pipefail
-          lake build \
-            GSTGraphV2CanonicalEscape \
-            GSTGraphV2CanonicalInfiniteCycle \
-            GSTGraphV2CanonicalNWave \
-            GSTGraphV2CanonicalTerminalExtinctionProbe \
-            GSTFinalPurePowerResidueTransplant \
-            2>&1 | tee direct-deps.log
-          mkdir -p .lake/build/lib/lean
           lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2FourPowerForcingBridge.olean \
-            GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee direct-forcing-dep.log
-          lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
-            GSTGraphV2NonlocalCascade.lean 2>&1 | tee direct-nonlocal-dep.log
-          lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
-            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee direct-relocation-dep.log
-          lake env lean \
-            -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
-            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee direct-residue-dep.log
+            -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean \
+            GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            direct-deps.log direct-forcing-dep.log direct-nonlocal-dep.log direct-relocation-dep.log direct-residue-dep.log
-      - name: Compile and axiom-audit direct existence module
+            direct-residue.log
+      - name: Compile and axiom-audit direct existence spine
         shell: bash
         run: |
           set -euo pipefail
