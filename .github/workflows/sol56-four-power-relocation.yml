@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - GSTGraphV2FourPowerRelocation.lean
+      - GSTGraphV2FourPowerResidueObstruction.lean
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
@@ -14,7 +15,6 @@ on:
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
       - GSTGraphV2FourPowerForcingBridge.lean
-      - Task33ResidueObstruction.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -27,7 +27,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile relocation baseline and residue obstruction probe
+      - name: Compile relocation production layer
         shell: bash
         run: |
           set -euo pipefail
@@ -48,6 +48,8 @@ jobs:
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
             GSTGraphV2FourPowerRelocation.lean 2>&1 | tee relocation.log
-          lake env lean Task33ResidueObstruction.lean 2>&1 | tee task33-residue.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
+            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee residue-obstruction.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log task33-residue.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log
