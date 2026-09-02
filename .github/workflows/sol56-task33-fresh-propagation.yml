@@ -19,6 +19,13 @@ jobs:
         with:
           build: false
           test: false
+      - name: Compile current production relocation module
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean GSTGraphV2FourPowerRelocation.lean 2>&1 | tee task33-production.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-production.log
       - name: Compile and axiom-audit fresh Task 3.3 module
         shell: bash
         run: |
