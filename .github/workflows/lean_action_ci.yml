@@ -35,7 +35,8 @@ jobs:
             GSTFourPowerAffineExponentPeel \
             GSTFourPowerAffineBadState \
             GSTFourPowerAffineChannelAutomaton \
-            GSTFourPowerAffineClassifierBridge
+            GSTFourPowerAffineClassifierBridge \
+            GSTFourPowerAffinePeelClassifier
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
