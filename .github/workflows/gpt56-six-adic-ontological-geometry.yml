@@ -32,6 +32,12 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
+      - name: Build GST dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTLocalClosure
       - name: Compile and audit six-adic ontological geometry
         shell: bash
         run: |
@@ -40,9 +46,9 @@ jobs:
           mkdir -p .lake/build/lib/lean
           lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclidean.olean GSTGraphV2NonEuclidean.lean 2>&1 | tee non-euclidean-core.log
           lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclideanLaws.olean GSTGraphV2NonEuclideanLaws.lean 2>&1 | tee non-euclidean-laws.log
-          lake env lean GSTGraphV2SixAdicOntologicalGeometry.lean 2>&1 | tee six-adic-core.log
-          lake env lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean 2>&1 | tee six-adic-laws.log
-          lake env lean GSTGraphV2SixAdicSynchronizedShadows.lean 2>&1 | tee six-adic-shadows.log
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2SixAdicOntologicalGeometry.olean GSTGraphV2SixAdicOntologicalGeometry.lean 2>&1 | tee six-adic-core.log
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2SixAdicOntologicalGeometryLaws.olean GSTGraphV2SixAdicOntologicalGeometryLaws.lean 2>&1 | tee six-adic-laws.log
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2SixAdicSynchronizedShadows.olean GSTGraphV2SixAdicSynchronizedShadows.lean 2>&1 | tee six-adic-shadows.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometryTest.lean 2>&1 | tee six-adic-test.log
           cat non-euclidean-core.log non-euclidean-laws.log six-adic-core.log six-adic-laws.log six-adic-shadows.log six-adic-test.log > six-adic-all.log
           ! grep -Fq 'sorryAx' six-adic-all.log
