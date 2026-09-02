@@ -14,6 +14,7 @@ on:
       - 'GSTFourPowerAffineOrbit.lean'
       - 'GSTFourPowerAffineExponentPeel.lean'
       - 'GSTFourPowerAffineBadState.lean'
+      - 'GSTFourPowerAffineChannelAutomaton.lean'
       - '.github/workflows/gpt56-direct-affine-bad-state.yml'
   workflow_dispatch:
 
@@ -46,22 +47,17 @@ jobs:
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
-      - name: Compile affine orbit
+      - name: Compile affine direct spine
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOrbit.olean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-orbit.log
-      - name: Compile affine exponent peel
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineExponentPeel.olean GSTFourPowerAffineExponentPeel.lean 2>&1 | tee affine-peel.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-peel.log
-      - name: Compile exact bad-state transducer
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineBadState.olean GSTFourPowerAffineBadState.lean 2>&1 | tee affine-bad-state.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-bad-state.log
-          echo 'DIRECT_AFFINE_BAD_STATE_GREEN=1'
+          for module in \
+            GSTFourPowerAffineOrbit \
+            GSTFourPowerAffineExponentPeel \
+            GSTFourPowerAffineBadState \
+            GSTFourPowerAffineChannelAutomaton
+          do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+          echo 'DIRECT_AFFINE_CHANNEL_AUTOMATON_GREEN=1'
