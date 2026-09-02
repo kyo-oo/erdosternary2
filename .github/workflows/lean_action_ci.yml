@@ -24,7 +24,7 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Kernel-check direct affine channel automaton
+      - name: Kernel-check direct affine classifier
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
@@ -34,12 +34,13 @@ jobs:
             GSTFourPowerAffineOrbit \
             GSTFourPowerAffineExponentPeel \
             GSTFourPowerAffineBadState \
-            GSTFourPowerAffineChannelAutomaton
+            GSTFourPowerAffineChannelAutomaton \
+            GSTFourPowerAffineClassifierBridge
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
-          echo DIRECT_AFFINE_CHANNEL_AUTOMATON_KERNEL_GREEN=1
+          echo DIRECT_AFFINE_CLASSIFIER_KERNEL_GREEN=1
       - name: Apply production surgery
         run: python3 .surgery/apply.py
       - name: Hard build
