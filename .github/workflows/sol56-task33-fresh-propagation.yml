@@ -6,7 +6,9 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - Task33FreshPowerPropagation.lean
+      - Task33FreshDirectRelocation.lean
       - GSTGraphV2FourPowerRelocation.lean
+      - GSTGraphV2FourPowerResidueObstruction.lean
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2FourPowerForcingBridge.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
@@ -46,11 +48,18 @@ jobs:
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
             GSTGraphV2FourPowerRelocation.lean 2>&1 | tee task33-fresh-relocation.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
+            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee task33-fresh-residue.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            task33-fresh-deps.log task33-fresh-forcing-dep.log task33-fresh-nonlocal-dep.log task33-fresh-relocation.log
-      - name: Compile and axiom-audit fresh Task 3.3 module
+            task33-fresh-deps.log task33-fresh-forcing-dep.log task33-fresh-nonlocal-dep.log task33-fresh-relocation.log task33-fresh-residue.log
+      - name: Compile and axiom-audit fresh Task 3.3 modules
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean Task33FreshPowerPropagation.lean 2>&1 | tee task33-fresh.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-fresh.log
+          lake env lean \
+            -o .lake/build/lib/lean/Task33FreshPowerPropagation.olean \
+            Task33FreshPowerPropagation.lean 2>&1 | tee task33-fresh.log
+          lake env lean Task33FreshDirectRelocation.lean 2>&1 | tee task33-fresh-direct.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            task33-fresh.log task33-fresh-direct.log
