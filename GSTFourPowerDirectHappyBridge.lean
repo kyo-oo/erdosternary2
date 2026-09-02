@@ -51,9 +51,30 @@ theorem directExistence_to_physical_happy_forcing
   intro K hK h7
   exact commonTwo_to_physical_happy_row K (hDirect K hK h7)
 
+/-- Fresh-production relocation reduction.  In the actual Task-3 induction
+range `K ≥ 8`, a relocated physical Happy row on the `4^(K+1)` sheet follows
+straight from direct arithmetic existence at exponent `K+1`.  The source row
+and even the source Happy hypothesis are therefore logically unnecessary once
+`FourPowerDirectExistence` is available.  This removes the need to propagate a
+latent packet or transport a witness through any navigation machinery. -/
+theorem directExistence_forces_relocated_physical_happy
+    (hDirect : FourPowerDirectExistence) :
+    ∀ K p : Nat, 8 ≤ K → 1 ≤ p →
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p) →
+      ∃ q : Nat, 1 ≤ q ∧
+        GSTCanonicalTailStateIso.HappyCell
+          (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+          (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  intro K p hK hp hSource
+  exact directExistence_to_physical_happy_forcing hDirect (K+1) (by omega) (by omega)
+
 #check commonTwo_to_physical_happy_row
 #check directExistence_to_physical_happy_forcing
+#check directExistence_forces_relocated_physical_happy
 #print axioms commonTwo_to_physical_happy_row
 #print axioms directExistence_to_physical_happy_forcing
+#print axioms directExistence_forces_relocated_physical_happy
 
 end GSTFourPowerDirectHappyBridge
