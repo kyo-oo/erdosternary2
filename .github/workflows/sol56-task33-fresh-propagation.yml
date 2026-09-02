@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - GSTFourPowerDirectResidue.lean
+      - GSTFourPowerExponentTritObstruction.lean
       - GSTFourPowerDirectExistence.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
   workflow_dispatch:
@@ -23,6 +24,9 @@ jobs:
         with:
           build: false
           test: false
+      - name: Prepare direct arithmetic output directory
+        shell: bash
+        run: mkdir -p .lake/build/lib/lean
       - name: Compile and axiom-audit pure residue arithmetic
         shell: bash
         run: |
@@ -32,6 +36,15 @@ jobs:
             GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             direct-residue.log
+      - name: Compile and axiom-audit exponent-trit obstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerExponentTritObstruction.olean \
+            GSTFourPowerExponentTritObstruction.lean 2>&1 | tee direct-trit.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            direct-trit.log
       - name: Compile and axiom-audit direct existence spine
         shell: bash
         run: |
