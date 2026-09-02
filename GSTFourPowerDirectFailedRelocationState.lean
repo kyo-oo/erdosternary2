@@ -72,12 +72,19 @@ theorem failed_relocation_forces_equal_non_two_row
     digit3_lt_three (4^(K+1)) (p+1)
   have hformula := digit3_four_mul (4^(K+1)) (p+1)
   rw [hcarry] at hformula
-  have heq : digit3 (4^(K+1)) (p+1) = digit3 (4^(K+2)) (p+1) := by
-    have ht : digit3 (4^(K+2)) (p+1) = digit3 (4^(K+1)) (p+1) := by
-      simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc,
-        Nat.add_mod, Nat.mod_eq_of_lt hdlt] using hformula
-    exact ht.symm
-  exact ⟨hcarry, heq, by omega⟩
+  have hmod : digit3 (4^(K+1)) (p+1) % 3 =
+      digit3 (4^(K+1)) (p+1) := Nat.mod_eq_of_lt hdlt
+  have hmulEq :
+      digit3 (4 * (4^(K+1))) (p+1) = digit3 (4^(K+1)) (p+1) := by
+    calc
+      digit3 (4 * (4^(K+1))) (p+1)
+          = (digit3 (4^(K+1)) (p+1) + 3) % 3 := hformula
+      _ = digit3 (4^(K+1)) (p+1) % 3 := by
+            simp [Nat.add_mod]
+      _ = digit3 (4^(K+1)) (p+1) := hmod
+  have ht : digit3 (4^(K+2)) (p+1) = digit3 (4^(K+1)) (p+1) := by
+    simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hmulEq
+  exact ⟨hcarry, ht.symm, by omega⟩
 
 /-- Bundled existential form starting from the actual source `CommonTwo`
 witness.  Any hypothetical failure of relocation therefore produces a real
