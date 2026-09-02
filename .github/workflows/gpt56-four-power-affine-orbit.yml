@@ -38,7 +38,7 @@ jobs:
           mkdir -p .lake/build/lib/lean
           lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
           lake env lean -o .lake/build/lib/lean/GSTCanonicalTailStateIso.olean GSTCanonicalTailStateIso.lean 2>&1 | tee tail-state.log
-          lake env lean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOrbit.olean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
           lake env lean GSTFourPowerAffineExponentPeel.lean 2>&1 | tee affine-peel.log
           cat direct-residue.log tail-state.log affine-orbit.log affine-peel.log > affine-all.log
           ! grep -Fq 'sorryAx' affine-all.log
