@@ -15,8 +15,6 @@ on:
       - GSTGraphV2CanonicalNWave.lean
       - GSTGraphV2CanonicalTerminalExtinctionProbe.lean
       - GSTFinalPurePowerResidueTransplant.lean
-      - GSTFinalResidualConnector.lean
-      - GSTFinalResidualCollision.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
@@ -44,8 +42,6 @@ jobs:
             GSTGraphV2CanonicalNWave \
             GSTGraphV2CanonicalTerminalExtinctionProbe \
             GSTFinalPurePowerResidueTransplant \
-            GSTFinalResidualConnector \
-            GSTFinalResidualCollision \
             2>&1 | tee relocation-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
