@@ -46,6 +46,20 @@ theorem pow4_three_power_lte_exact : ∀ r : Nat,
           rw [h3, h1, h2]
           ring
 
+/-- The exact LTE quotient is always one modulo three. -/
+theorem lteCoeff_mod3_one : ∀ r : Nat, lteCoeff r % 3 = 1
+  | 0 => by decide
+  | r+1 => by
+      have ih := lteCoeff_mod3_one r
+      simp only [lteCoeff]
+      have hpow1 : 3^(r+1) % 3 = 0 := by
+        rw [Nat.pow_succ]
+        simp
+      have hpow2 : 3^(2*r+1) % 3 = 0 := by
+        rw [Nat.pow_succ]
+        simp
+      simp [Nat.add_mod, Nat.mul_mod, hpow1, hpow2, ih]
+
 /-- Any multiple of the scale exponent is one modulo the next ternary cut. -/
 theorem pow4_scaled_mod_next (r u : Nat) :
     4^(3^r * u) % 3^(r+1) = 1 := by
@@ -96,6 +110,68 @@ theorem pow4_digit_period
   rw [Nat.pow_add, Nat.mul_mod]
   rw [pow4_scaled_mod_next p u]
   simp
+
+/-- Every power of four is one modulo three. -/
+theorem pow4_mod3_one (m : Nat) : 4^m % 3 = 1 := by
+  rw [Nat.pow_mod]
+  norm_num
+
+/-- Adding one exponent trit at scale `3^p` shifts row `p+1` by one modulo 3. -/
+theorem pow4_exponent_lift_one_digit
+    (p m c : Nat)
+    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
+    (hc : c % 3 = 1) :
+    digit3 (4^(m + 3^p)) (p+1) =
+      (digit3 (4^m) (p+1) + 1) % 3 := by
+  let L := 3^(p+1)
+  have hL : 0 < L := by
+    dsimp [L]
+    exact Nat.pow_pos (by decide)
+  have hpow : 4^(m + 3^p) = 4^m * (1 + L*c) := by
+    rw [Nat.pow_add, hA]
+  have hshape : 4^m * (1 + L*c) = 4^m + L * (4^m*c) := by ring
+  unfold digit3
+  rw [show 3^(p+1) = L by rfl, hpow, hshape]
+  rw [Nat.add_mul_div_left _ _ hL]
+  rw [Nat.add_mod, Nat.mul_mod, pow4_mod3_one, hc]
+
+/-- Adding exponent trit two shifts row `p+1` by two modulo 3. -/
+theorem pow4_exponent_lift_two_digit
+    (p m c : Nat)
+    (hA : 4^(3^p) = 1 + 3^(p+1)*c)
+    (hc : c % 3 = 1) :
+    digit3 (4^(m + 2*3^p)) (p+1) =
+      (digit3 (4^m) (p+1) + 2) % 3 := by
+  have h1 := pow4_exponent_lift_one_digit p m c hA hc
+  have h2 := pow4_exponent_lift_one_digit p (m + 3^p) c hA hc
+  have hexp : m + 2*3^p = (m + 3^p) + 3^p := by omega
+  rw [hexp]
+  rw [h2, h1]
+  have hd : digit3 (4^m) (p+1) < 3 := by
+    unfold digit3
+    exact Nat.mod_lt _ (by decide)
+  omega
+
+/-- Canonical ternary-exponent digit lift. -/
+theorem pow4_exponent_trit_lift_digit
+    (p m a : Nat)
+    (ha : a < 3) :
+    digit3 (4^(m + a*3^p)) (p+1) =
+      (digit3 (4^m) (p+1) + a) % 3 := by
+  have hA := pow4_three_power_lte_exact p
+  have hc := lteCoeff_mod3_one p
+  have haCases : a = 0 ∨ a = 1 ∨ a = 2 := by omega
+  rcases haCases with h0 | h1 | h2
+  · subst a
+    simp only [Nat.zero_mul, Nat.add_zero]
+    have hd : digit3 (4^m) (p+1) < 3 := by
+      unfold digit3
+      exact Nat.mod_lt _ (by decide)
+    omega
+  · subst a
+    simpa using pow4_exponent_lift_one_digit p m (lteCoeff p) hA hc
+  · subst a
+    simpa using pow4_exponent_lift_two_digit p m (lteCoeff p) hA hc
 
 /-- Exponent residues five and six modulo nine have a shared row-two digit 2. -/
 theorem row_two_overlap_of_mod9_five_or_six
@@ -189,16 +265,20 @@ theorem no_common_two_forbids_mod9_five_six
 
 #check digit3
 #check pow4_three_power_lte_exact
+#check lteCoeff_mod3_one
 #check pow4_scaled_mod_next
 #check digit3_eq_of_mod_next
 #check pow4_digit_period
+#check pow4_exponent_trit_lift_digit
 #check row_two_overlap_of_mod9_five_or_six
 #check row_two_overlap_iff_mod9_five_or_six
 #check no_common_two_forbids_mod9_five_six
 #print axioms pow4_three_power_lte_exact
+#print axioms lteCoeff_mod3_one
 #print axioms pow4_scaled_mod_next
 #print axioms digit3_eq_of_mod_next
 #print axioms pow4_digit_period
+#print axioms pow4_exponent_trit_lift_digit
 #print axioms row_two_overlap_of_mod9_five_or_six
 #print axioms row_two_overlap_iff_mod9_five_or_six
 #print axioms no_common_two_forbids_mod9_five_six
