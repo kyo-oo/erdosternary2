@@ -45,7 +45,6 @@ theorem fresh_source_row_below_support_cutoff
   have hstrict : 4^K < 4^(K+2) := by
     rw [Nat.pow_add]
     norm_num
-    positivity
   simp [fourPowerSupportCutoff]
   omega
 
@@ -115,6 +114,20 @@ theorem fresh_failed_edge_forces_latent_seed
 
   exact ⟨hdNext, hMiddle, hNextCarry⟩
 
+/-- A physical nonzero carry can fall to zero in one vertical step only through
+input digit zero and carry 1 or 2.  This is the exact local arithmetic of
+`nextCarry C d = (C + 4*d)/3`; in particular this boundary is not itself a
+Happy cell. -/
+theorem fresh_nonzero_predecessor_of_zero_carry
+    (C d : Nat)
+    (hC : C < 4)
+    (hd : d < 3)
+    (hCne : C ≠ 0)
+    (hzero : nextCarry C d = 0) :
+    d = 0 ∧ (C = 1 ∨ C = 2) := by
+  simp only [nextCarry] at hzero
+  omega
+
 /-- Under literal failure of relocation, the forced carry-three seed must hit
 carry zero at a first finite row before the symbolic support cutoff.  This is
 a finite witness extracted from the actual `4^(K+1)` sheet, not an arbitrary
@@ -166,10 +179,10 @@ theorem fresh_failed_edge_has_first_zero_carry
     omega
   have hrNonzero : (graph 1 (K+1) r).seven.carry ≠ 0 := by
     intro hr0
-    have hsmall : n0 - 1 < n0 := by omega
-    have hminimal := Nat.find_min' hzero hsmall
-    dsimp [r] at hr0
-    exact hminimal hr0
+    have hminimal : n0 ≤ n0 - 1 := by
+      apply Nat.find_min'
+      simpa [r] using hr0
+    omega
   have hrLower : p + 1 ≤ r := by
     dsimp [r, s]
     omega
@@ -183,6 +196,48 @@ theorem fresh_failed_edge_has_first_zero_carry
   refine ⟨r, hrLower, hrUpper, hrNonzero, ?_⟩
   rw [hrnext]
   exact hn0zero
+
+/-- The first nonzero-to-zero boundary forced by a failed relocation is exactly
+a `(carry,digit) = (1,0)` or `(2,0)` cell on the actual next four-power sheet.
+This is deliberately weaker than claiming the boundary is Happy; it records
+the true local arithmetic and is the finite endpoint for the global
+power-specific contradiction. -/
+theorem fresh_failed_edge_first_zero_boundary_classified
+    (K p : Nat)
+    (hp : 1 ≤ p)
+    (hSource :
+      HappyCell
+        (graph 1 K p).seven.carry
+        (graph 1 K p).seven.digit)
+    (hNoRelocated : ¬ ∃ q : Nat, 1 ≤ q ∧
+      HappyCell
+        (graph 1 (K+1) q).seven.carry
+        (graph 1 (K+1) q).seven.digit) :
+    let B := fourPowerSupportCutoff K
+    ∃ r : Nat,
+      p + 1 ≤ r ∧ r < B ∧
+      (graph 1 (K+1) r).seven.digit = 0 ∧
+      ((graph 1 (K+1) r).seven.carry = 1 ∨
+       (graph 1 (K+1) r).seven.carry = 2) ∧
+      (graph 1 (K+1) (r+1)).seven.carry = 0 := by
+  dsimp
+  obtain ⟨r, hrLower, hrUpper, hrNe, hrNextZero⟩ :=
+    fresh_failed_edge_has_first_zero_carry K p hp hSource hNoRelocated
+  have hCLt : (graph 1 (K+1) r).seven.carry < 4 :=
+    graph_carry_lt_four 1 (K+1) r
+  have hdLt : (graph 1 (K+1) r).seven.digit < 3 :=
+    graph_digit_lt_three 1 (K+1) r
+  have hRec := (graph_cell_exact 1 (K+1) r).2
+  have hNext :
+      nextCarry (graph 1 (K+1) r).seven.carry
+        (graph 1 (K+1) r).seven.digit = 0 := by
+    rw [hRec]
+    simpa [Nat.add_assoc] using hrNextZero
+  have hClass := fresh_nonzero_predecessor_of_zero_carry
+    (graph 1 (K+1) r).seven.carry
+    (graph 1 (K+1) r).seven.digit
+    hCLt hdLt hrNe hNext
+  exact ⟨r, hrLower, hrUpper, hClass.1, hClass.2, hrNextZero⟩
 
 /-- Exact failed-edge obstruction packet for the fresh Task 3.3 proof.
 
@@ -239,8 +294,12 @@ theorem fresh_failed_edge_power_obstruction_packet
 #print axioms fresh_source_row_below_support_cutoff
 #check fresh_failed_edge_forces_latent_seed
 #print axioms fresh_failed_edge_forces_latent_seed
+#check fresh_nonzero_predecessor_of_zero_carry
+#print axioms fresh_nonzero_predecessor_of_zero_carry
 #check fresh_failed_edge_has_first_zero_carry
 #print axioms fresh_failed_edge_has_first_zero_carry
+#check fresh_failed_edge_first_zero_boundary_classified
+#print axioms fresh_failed_edge_first_zero_boundary_classified
 #check fresh_failed_edge_power_obstruction_packet
 #print axioms fresh_failed_edge_power_obstruction_packet
 
