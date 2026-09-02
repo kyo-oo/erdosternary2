@@ -1,11 +1,12 @@
 import GSTFourPowerDirectResidue
+import GSTCanonicalTailStateIso
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
 namespace GSTFourPowerAffineOrbit
 
-open GSTCanonicalTailStateIso
+open GSTFourPowerDirectResidue
 
 /-- Affine orbit attached to the four-power exponent: A_0 = 0 and A_{K+1} = 4 A_K + 1. -/
 def affineOrbit : Nat → Nat
@@ -24,16 +25,17 @@ theorem four_pow_eq_one_plus_three_affineOrbit (K : Nat) :
   | zero => simp [affineOrbit]
   | succ K ih =>
       rw [pow_succ, ih]
-      simp [affineOrbit]
+      simp only [affineOrbit]
       ring
 
 /-- Removing the consumed low trit `1` exposes the affine orbit digit-for-digit. -/
 theorem four_pow_digit_affine_shift (K q : Nat) :
     digit3 (4^K) (q + 1) = digit3 (affineOrbit K) q := by
   rw [four_pow_eq_one_plus_three_affineOrbit]
-  simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
-    (GSTCanonicalTailStateIso.prefix_slice_digit_exact
-      1 1 (affineOrbit K) q (by norm_num : 1 < 3^1))
+  have h := GSTCanonicalTailStateIso.prefix_slice_digit_exact
+    1 1 (affineOrbit K) q (by norm_num : 1 < 3^1)
+  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
+    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
 
 /-- The direct common-two problem rewritten on the affine orbit, with no inherited Happy witness. -/
 def AffineCommonTwo (K : Nat) : Prop :=
@@ -53,12 +55,10 @@ theorem power_common_two_iff_affine (K : Nat) :
     | zero => omega
     | succ q =>
         refine ⟨q, ?_, ?_⟩
-        · simpa [Nat.succ_eq_add_one] using
-            (show digit3 (4^K) (q+1) = 2 from hK) |>.trans_left
-              (four_pow_digit_affine_shift K q)
-        · simpa [Nat.succ_eq_add_one] using
-            (show digit3 (4^(K+1)) (q+1) = 2 from hK1) |>.trans_left
-              (four_pow_digit_affine_shift (K+1) q)
+        · rw [← four_pow_digit_affine_shift K q]
+          simpa [Nat.succ_eq_add_one] using hK
+        · rw [← four_pow_digit_affine_shift (K+1) q]
+          simpa [Nat.succ_eq_add_one] using hK1
   · rintro ⟨q, hK, hK1⟩
     refine ⟨q+1, by omega, ?_, ?_⟩
     · rw [four_pow_digit_affine_shift K q]
