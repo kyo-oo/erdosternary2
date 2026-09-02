@@ -1,5 +1,6 @@
 import GSTFourPowerDirectResidue
 import GSTFourPowerDirectResidue27
+import GSTFourPowerDirectResidue81
 import GSTFourPowerExponentTritObstruction
 
 set_option maxRecDepth 1000000
@@ -9,6 +10,7 @@ namespace GSTFourPowerDirectExistence
 
 open GSTFourPowerDirectResidue
 open GSTFourPowerDirectResidue27
+open GSTFourPowerDirectResidue81
 open GSTFourPowerExponentTritObstruction
 
 /-- Pure arithmetic common-digit predicate for two consecutive powers of four.
@@ -71,6 +73,19 @@ theorem noCommonTwo_excludes_mod27_row_three
     K % 27 ≠ 14 ∧ K % 27 ≠ 18 ∧ K % 27 ≠ 19 ∧ K % 27 ≠ 25 := by
   exact no_common_two_forbids_mod27_classes K hNo
 
+/-- Row four contributes fourteen exact common-two classes modulo 81. -/
+theorem commonTwo_of_mod81_row_four
+    (K : Nat) (hres : RowFourClass (K % 81)) :
+    CommonTwo K := by
+  refine ⟨4, by norm_num, ?_⟩
+  exact row_four_overlap_of_mod81_classes K hres
+
+/-- Hence a hypothetical counterexample avoids every exact row-four class. -/
+theorem noCommonTwo_excludes_mod81_row_four
+    (K : Nat) (hNo : ¬ CommonTwo K) :
+    ¬ RowFourClass (K % 81) := by
+  exact no_common_two_forbids_mod81_classes K hNo
+
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
 the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
@@ -115,6 +130,8 @@ theorem directExistence_implies_source_two
 #check noCommonTwo_excludes_mod9_five_six
 #check commonTwo_of_mod27_row_three
 #check noCommonTwo_excludes_mod27_row_three
+#check commonTwo_of_mod81_row_four
+#check noCommonTwo_excludes_mod81_row_four
 #check noCommonTwo_exponent_trit_law
 #check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
@@ -124,6 +141,8 @@ theorem directExistence_implies_source_two
 #print axioms noCommonTwo_excludes_mod9_five_six
 #print axioms commonTwo_of_mod27_row_three
 #print axioms noCommonTwo_excludes_mod27_row_three
+#print axioms commonTwo_of_mod81_row_four
+#print axioms noCommonTwo_excludes_mod81_row_four
 #print axioms noCommonTwo_exponent_trit_law
 #print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
