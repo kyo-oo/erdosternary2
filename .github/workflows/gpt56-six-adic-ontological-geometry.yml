@@ -5,6 +5,8 @@ on:
     branches:
       - sol/gpt56-affine-sixadic-20260903
     paths:
+      - GSTGraphV2NonEuclidean.lean
+      - GSTGraphV2NonEuclideanLaws.lean
       - GSTGraphV2SixAdicOntologicalGeometry.lean
       - GSTGraphV2SixAdicOntologicalGeometryLaws.lean
       - GSTGraphV2SixAdicSynchronizedShadows.lean
@@ -35,11 +37,14 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclidean.olean GSTGraphV2NonEuclidean.lean 2>&1 | tee non-euclidean-core.log
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2NonEuclideanLaws.olean GSTGraphV2NonEuclideanLaws.lean 2>&1 | tee non-euclidean-laws.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometry.lean 2>&1 | tee six-adic-core.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean 2>&1 | tee six-adic-laws.log
           lake env lean GSTGraphV2SixAdicSynchronizedShadows.lean 2>&1 | tee six-adic-shadows.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometryTest.lean 2>&1 | tee six-adic-test.log
-          cat six-adic-core.log six-adic-laws.log six-adic-shadows.log six-adic-test.log > six-adic-all.log
+          cat non-euclidean-core.log non-euclidean-laws.log six-adic-core.log six-adic-laws.log six-adic-shadows.log six-adic-test.log > six-adic-all.log
           ! grep -Fq 'sorryAx' six-adic-all.log
           ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTGraphV2SixAdicOntologicalGeometry.lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean GSTGraphV2SixAdicSynchronizedShadows.lean GSTGraphV2SixAdicOntologicalGeometryTest.lean
           echo GST_GRAPH_V2_SIX_ADIC_ONTOLOGICAL_GEOMETRY_GREEN=1
