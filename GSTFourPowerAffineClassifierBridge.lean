@@ -15,12 +15,10 @@ open GSTFourPowerAffineChannelAutomaton
 theorem affineOrbit_mod_three (K : Nat) :
     affineOrbit K % 3 = K % 3 := by
   induction K with
-  | zero => simp [affineOrbit]
+  | zero => rfl
   | succ K ih =>
       rw [affineOrbit_succ]
-      simp only [Nat.add_mod, Nat.mul_mod]
-      norm_num
-      simpa [Nat.succ_eq_add_one, Nat.add_mod] using congrArg (fun n => (n + 1) % 3) ih
+      omega
 
 /-- Exact identification of the direct common-two target with channel `1` on
     the affine orbit. -/
