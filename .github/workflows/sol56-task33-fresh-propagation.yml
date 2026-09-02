@@ -7,25 +7,47 @@ on:
     paths:
       - Task33FreshPowerPropagation.lean
       - GSTGraphV2FourPowerRelocation.lean
+      - GSTGraphV2NonlocalCascade.lean
+      - GSTGraphV2FourPowerForcingBridge.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
   workflow_dispatch:
+
+concurrency:
+  group: sol56-task33-fresh-propagation
+  cancel-in-progress: true
 
 jobs:
   fresh-task33-kernel:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
         with:
           build: false
           test: false
-      - name: Compile current production relocation module
+      - name: Compile current production dependency closure
         shell: bash
         run: |
           set -euo pipefail
+          lake build \
+            GSTGraphV2CanonicalEscape \
+            GSTGraphV2CanonicalInfiniteCycle \
+            GSTGraphV2CanonicalNWave \
+            GSTGraphV2CanonicalTerminalExtinctionProbe \
+            GSTFinalPurePowerResidueTransplant \
+            2>&1 | tee task33-fresh-deps.log
           mkdir -p .lake/build/lib/lean
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean GSTGraphV2FourPowerRelocation.lean 2>&1 | tee task33-production.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-production.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerForcingBridge.olean \
+            GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee task33-fresh-forcing-dep.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
+            GSTGraphV2NonlocalCascade.lean 2>&1 | tee task33-fresh-nonlocal-dep.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
+            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee task33-fresh-relocation.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            task33-fresh-deps.log task33-fresh-forcing-dep.log task33-fresh-nonlocal-dep.log task33-fresh-relocation.log
       - name: Compile and axiom-audit fresh Task 3.3 module
         shell: bash
         run: |
