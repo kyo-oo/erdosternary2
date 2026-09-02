@@ -104,3 +104,16 @@ jobs:
             -o .lake/build/lib/lean/GSTFourPowerDirectHappyBridge.olean \
             GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-happy.log
+
+      - name: Kernel and axiom audit exact Task 3.3 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > SOL56Task33Audit.lean <<'EOF'
+          import GSTFourPowerDirectHappyBridge
+          #check GSTFourPowerDirectHappyBridge.four_power_happy_propagates
+          #print axioms GSTFourPowerDirectHappyBridge.four_power_happy_propagates
+          EOF
+          lake env lean SOL56Task33Audit.lean 2>&1 | tee task33-axioms.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown constant|unsolved goals|error:' task33-axioms.log
+          echo 'TASK33_EXACT_THEOREM_AXIOM_AUDIT_GREEN=1'
