@@ -21,6 +21,10 @@ on:
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
+concurrency:
+  group: sol56-four-power-relocation
+  cancel-in-progress: true
+
 jobs:
   relocation:
     runs-on: ubuntu-latest
