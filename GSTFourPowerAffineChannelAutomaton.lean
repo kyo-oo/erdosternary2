@@ -36,31 +36,45 @@ theorem split_three (x : Nat) :
     x = lowDigit x + 3 * tail3 x := by
   simpa [lowDigit, tail3] using (Nat.mod_add_div x 3).symm
 
-/-- Exact one-trit decomposition of the affine target. -/
+/-- Exact one-trit decomposition of the affine target.  This proof deliberately
+    rewrites only the outer source `x`; it does not rewrite the `lowDigit x`
+    occurrences that define the finite channel state. -/
 theorem split_channel (c x : Nat) :
     4*x + c =
       channelOut c (lowDigit x) +
         3 * (4 * tail3 x + channelNext c (lowDigit x)) := by
-  rw [split_three x]
-  unfold channelOut channelNext
+  have hx : x = lowDigit x + 3 * tail3 x := split_three x
   have hz := (Nat.mod_add_div (4 * lowDigit x + c) 3).symm
-  omega
+  unfold channelOut channelNext at hz ⊢
+  calc
+    4*x + c = 4 * (lowDigit x + 3 * tail3 x) + c := by rw [hx]
+    _ = (4 * lowDigit x + c) + 12 * tail3 x := by ring
+    _ = ((4 * lowDigit x + c) % 3) +
+          3 * ((4 * lowDigit x + c) / 3) + 12 * tail3 x := by
+          omega
+    _ = ((4 * lowDigit x + c) % 3) +
+          3 * (4 * tail3 x + (4 * lowDigit x + c) / 3) := by ring
 
 /-- Removing one ternary digit from the source shifts every higher digit
     literally onto the quotient. -/
 theorem digit3_succ_tail (x j : Nat) :
     digit3 x (j+1) = digit3 (tail3 x) j := by
-  rw [split_three x]
   have h := GSTCanonicalTailStateIso.prefix_slice_digit_exact
     1 (lowDigit x) (tail3 x) j (by simpa using lowDigit_lt_three x)
-  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
-    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
+  calc
+    digit3 x (j+1) =
+        digit3 (lowDigit x + 3 * tail3 x) (1+j) := by
+          have hx := split_three x
+          rw [← hx]
+          congr 1 <;> omega
+    _ = digit3 (tail3 x) j := by
+      simpa [GSTCanonicalTailStateIso.digit3,
+        GSTFourPowerDirectResidue.digit3] using h
 
 /-- Removing one ternary digit from `4x+c` exposes the next finite channel. -/
 theorem digit3_succ_channel (c x j : Nat) :
     digit3 (4*x+c) (j+1) =
       digit3 (4 * tail3 x + channelNext c (lowDigit x)) j := by
-  rw [split_channel c x]
   have hout : channelOut c (lowDigit x) < 3 := by
     unfold channelOut
     exact Nat.mod_lt _ (by decide)
@@ -68,20 +82,28 @@ theorem digit3_succ_channel (c x j : Nat) :
     1 (channelOut c (lowDigit x))
       (4 * tail3 x + channelNext c (lowDigit x)) j
       (by simpa using hout)
-  simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
-    Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
+  calc
+    digit3 (4*x+c) (j+1) =
+        digit3
+          (channelOut c (lowDigit x) +
+            3 * (4 * tail3 x + channelNext c (lowDigit x)))
+          (1+j) := by
+            have hx := split_channel c x
+            rw [← hx]
+            congr 1 <;> omega
+    _ = digit3 (4 * tail3 x + channelNext c (lowDigit x)) j := by
+      simpa [GSTCanonicalTailStateIso.digit3,
+        GSTFourPowerDirectResidue.digit3] using h
 
 @[simp] theorem digit3_zero_source (x : Nat) :
     digit3 x 0 = lowDigit x := by
   simp [GSTFourPowerDirectResidue.digit3, lowDigit]
 
+/-- The discarded target trit is exactly the finite channel output. -/
 @[simp] theorem digit3_zero_channel (c x : Nat) :
     digit3 (4*x+c) 0 = channelOut c (lowDigit x) := by
-  rw [split_channel c x]
-  have hout : channelOut c (lowDigit x) < 3 := by
-    unfold channelOut
-    exact Nat.mod_lt _ (by decide)
-  simp [GSTFourPowerDirectResidue.digit3, Nat.mod_eq_of_lt hout]
+  simp [GSTFourPowerDirectResidue.digit3, channelOut, lowDigit,
+    Nat.add_mod, Nat.mul_mod]
 
 /-- Master affine-channel recursion. Every common-two witness is either the
     discarded low digit itself, or a witness in the unique next channel. -/
@@ -101,16 +123,22 @@ theorem pairCommonTwo_channel_iff (c x : Nat) :
     | succ j =>
         right
         refine ⟨j, ?_, ?_⟩
-        · simpa [digit3_succ_tail] using hx
-        · simpa [digit3_succ_channel] using hy
+        · rw [← digit3_succ_tail x j]
+          exact hx
+        · rw [← digit3_succ_channel c x j]
+          exact hy
   · intro h
     rcases h with hlow | htail
     · rcases hlow with ⟨hx, hy⟩
-      refine ⟨0, ?_, ?_⟩ <;> simpa using ‹_›
+      refine ⟨0, ?_, ?_⟩
+      · simpa using hx
+      · simpa using hy
     · rcases htail with ⟨j, hx, hy⟩
       refine ⟨j+1, ?_, ?_⟩
-      · simpa [digit3_succ_tail] using hx
-      · simpa [digit3_succ_channel] using hy
+      · rw [digit3_succ_tail x j]
+        exact hx
+      · rw [digit3_succ_channel c x j]
+        exact hy
 
 /-- Complement form of the master recursion. -/
 theorem badChannel_iff (c x : Nat) :
