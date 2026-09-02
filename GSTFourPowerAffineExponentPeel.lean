@@ -30,7 +30,6 @@ theorem affineOrbit_three_mul (q : Nat) :
         rw [show 3*q = q*3 by omega, pow_mul]
       _ = (1 + 3*x)^3 := by
         rw [four_pow_eq_one_plus_three_affineOrbit q]
-        rfl
   dsimp [peel0, x] at h ⊢
   nlinarith [h]
 
