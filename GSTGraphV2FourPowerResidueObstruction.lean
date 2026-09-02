@@ -88,9 +88,8 @@ theorem row_two_overlap_of_mod9_five_or_six
           pow4_digit_period 2 7 (L/9)
         _ = 2 := by norm_num [digit3]
 
-/-- Exact row-two residue classification.  This is the converse missing from
-the first fresh residue probe: a shared row-two digit `2` occurs *only* in
-exponent classes five and six modulo nine. -/
+/-- Exact row-two residue classification.  A shared row-two digit `2` occurs
+exactly in exponent classes five and six modulo nine. -/
 theorem row_two_overlap_iff_mod9_five_or_six
     (L : Nat) :
     (digit3 (4^L) 2 = 2 ∧ digit3 (4^(L+1)) 2 = 2) ↔
@@ -110,15 +109,19 @@ theorem row_two_overlap_iff_mod9_five_or_six
     have h0 : digit3 (4^r) 2 = 2 := by
       have h := hov.1
       rw [hshape] at h
-      rw [pow4_digit_period 2 r (L / 9)] at h
+      have hperiod := pow4_digit_period 2 r (L / 9)
+      norm_num at hperiod
+      rw [hperiod] at h
       exact h
     have h1 : digit3 (4^(r+1)) 2 = 2 := by
       have h := hov.2
       rw [hshape1] at h
-      rw [pow4_digit_period 2 (r+1) (L / 9)] at h
+      have hperiod := pow4_digit_period 2 (r+1) (L / 9)
+      norm_num at hperiod
+      rw [hperiod] at h
       exact h
     have hres : r = 5 ∨ r = 6 := by
-      interval_cases r <;> norm_num [digit3] at h0 h1 ⊢
+      interval_cases r <;> norm_num [digit3] at *
     simpa [r] using hres
   · exact row_two_overlap_of_mod9_five_or_six L
 
