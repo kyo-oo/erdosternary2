@@ -1,0 +1,33 @@
+name: SOL56 Task33 Fresh Propagation
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - Task33FreshPowerPropagation.lean
+      - GSTGraphV2FourPowerRelocation.lean
+      - .github/workflows/sol56-task33-fresh-propagation.yml
+  workflow_dispatch:
+
+jobs:
+  fresh-task33-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Compile current production dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build GSTGraphV2FourPowerRelocation 2>&1 | tee task33-fresh-deps.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-fresh-deps.log
+      - name: Compile and axiom-audit fresh Task 3.3 module
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean Task33FreshPowerPropagation.lean 2>&1 | tee task33-fresh.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-fresh.log
