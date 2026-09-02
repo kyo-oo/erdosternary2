@@ -42,6 +42,15 @@ jobs:
             GSTFourPowerDirectAdditionCarry.lean 2>&1 | tee direct-addition-carry.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-addition-carry.log
 
+      - name: Compile direct no-common 22 obstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectNo22.olean \
+            GSTFourPowerDirectNo22.lean 2>&1 | tee direct-no22.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-no22.log
+
       - name: Compile exponent-trit obstruction
         shell: bash
         run: |
