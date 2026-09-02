@@ -1,4 +1,5 @@
 import GSTFourPowerDirectResidue
+import GSTFourPowerExponentTritObstruction
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -6,6 +7,7 @@ set_option maxHeartbeats 20000000
 namespace GSTFourPowerDirectExistence
 
 open GSTFourPowerDirectResidue
+open GSTFourPowerExponentTritObstruction
 
 /-- Pure arithmetic common-digit predicate for two consecutive powers of four.
 This is the primary object of the corrected proof architecture: it contains no
@@ -51,6 +53,33 @@ theorem noCommonTwo_excludes_mod9_five_six
     K % 9 ≠ 5 ∧ K % 9 ≠ 6 := by
   exact no_common_two_forbids_mod9_five_six K hNo
 
+/-- Every hypothetical direct counterexample obeys the parametric exponent-trit
+obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
+the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
+
+This is the recursive direct proof law: it constrains the ternary expansion of
+`K` itself and contains no source-witness transport. -/
+theorem noCommonTwo_exponent_trit_law
+    (K p : Nat) (hNo : ¬ CommonTwo K)
+    (heq :
+      digit3 (4^(exponentPrefix K p)) (p+1) =
+      digit3 (4^((exponentPrefix K p)+1)) (p+1)) :
+    exponentTrit K p ≠
+      2 - digit3 (4^(exponentPrefix K p)) (p+1) := by
+  exact no_common_two_exponent_trit_obstruction K p hNo heq
+
+/-- Bundled form: a hypothetical counterexample carries the trit obstruction
+uniformly at every ternary scale. -/
+theorem noCommonTwo_all_exponent_trit_laws
+    (K : Nat) (hNo : ¬ CommonTwo K) :
+    ∀ p : Nat,
+      digit3 (4^(exponentPrefix K p)) (p+1) =
+        digit3 (4^((exponentPrefix K p)+1)) (p+1) →
+      exponentTrit K p ≠
+        2 - digit3 (4^(exponentPrefix K p)) (p+1) := by
+  intro p heq
+  exact noCommonTwo_exponent_trit_law K p hNo heq
+
 /-- The direct universal target implies the corresponding source-digit-two
 existence statement immediately. This records the genuine arithmetic strength
 of the remaining boundary. -/
@@ -66,11 +95,15 @@ theorem directExistence_implies_source_two
 #check commonTwo_has_target_two
 #check commonTwo_of_mod9_five_or_six
 #check noCommonTwo_excludes_mod9_five_six
+#check noCommonTwo_exponent_trit_law
+#check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
 #print axioms commonTwo_has_source_two
 #print axioms commonTwo_has_target_two
 #print axioms commonTwo_of_mod9_five_or_six
 #print axioms noCommonTwo_excludes_mod9_five_six
+#print axioms noCommonTwo_exponent_trit_law
+#print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
 
 end GSTFourPowerDirectExistence
