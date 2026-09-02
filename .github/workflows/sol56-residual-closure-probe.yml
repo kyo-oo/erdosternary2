@@ -5,9 +5,10 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
-      - GSTFinalResidualConnector.lean
       - GSTFinalResidualCollision.lean
+      - GSTFinalResidualChildConnector.lean
       - Task33ResidualCollisionBridge.lean
+      - GSTNavigationCore.lean
       - GSTGraphV2ProductionLaws.lean
       - GSTGraphV2Production.lean
       - GSTGraphV2HandwrittenOmegaUBlock.lean
@@ -27,23 +28,23 @@ jobs:
         with:
           build: false
           test: false
-      - name: Locate exact residual constructors
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo '=== GSTNavigationWitness declarations/usages ==='
-          grep -R -n --include='*.lean' -E '(^|[^A-Za-z0-9_])(def|abbrev|structure|class|theorem|lemma)[[:space:]]+GSTNavigationWitness|GSTNavigationWitness[[:space:]]*:=' . | head -80 || true
-          echo '=== GSTOmegaInfiniteBadTrace declarations/usages ==='
-          grep -R -n --include='*.lean' -E '(^|[^A-Za-z0-9_])(def|abbrev|structure|class|theorem|lemma)[[:space:]]+GSTOmegaInfiniteBadTrace|GSTOmegaInfiniteBadTrace[[:space:]]*:=' . | head -80 || true
-          echo '=== Constructor/support theorem candidates ==='
-          grep -R -n --include='*.lean' -E 'OmegaInfiniteBadTrace|NavigationWitness' . | head -240 || true
-      - name: Compile and audit residual contradiction stack
+      - name: Compile finite residual collision first
         shell: bash
         run: |
           set -euo pipefail
           lake build GSTGraphV2ProductionLaws 2>&1 | tee residual-deps.log
           mkdir -p .lake/build/lib/lean
-          lake env lean -o .lake/build/lib/lean/GSTFinalResidualConnector.olean GSTFinalResidualConnector.lean 2>&1 | tee residual-connector.log
           lake env lean -o .lake/build/lib/lean/GSTFinalResidualCollision.olean GSTFinalResidualCollision.lean 2>&1 | tee residual-collision.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-deps.log residual-collision.log
+      - name: Compile standalone child connector
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFinalResidualChildConnector.olean GSTFinalResidualChildConnector.lean 2>&1 | tee residual-child-connector.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-child-connector.log
+      - name: Compile Omega-free hard residual branch
+        shell: bash
+        run: |
+          set -euo pipefail
           lake env lean Task33ResidualCollisionBridge.lean 2>&1 | tee residual-bridge.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-deps.log residual-connector.log residual-collision.log residual-bridge.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-bridge.log
