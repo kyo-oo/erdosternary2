@@ -15,6 +15,7 @@ on:
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
       - GSTGraphV2FourPowerForcingBridge.lean
+      - Task33CanonicalParentBridge.lean
       - .github/workflows/sol56-four-power-relocation.yml
   workflow_dispatch:
 
@@ -27,7 +28,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile relocation production layer
+      - name: Compile relocation production layer and canonical bridge probe
         shell: bash
         run: |
           set -euo pipefail
@@ -51,5 +52,6 @@ jobs:
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
             GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee residue-obstruction.log
+          lake env lean Task33CanonicalParentBridge.lean 2>&1 | tee canonical-parent-bridge.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log canonical-parent-bridge.log
