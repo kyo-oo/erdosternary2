@@ -1,0 +1,38 @@
+name: GPT56 Four-Power Affine Orbit
+
+on:
+  push:
+    branches:
+      - sol/gpt56-affine-sixadic-20260903
+    paths:
+      - GSTFourPowerAffineOrbit.lean
+      - .github/workflows/gpt56-four-power-affine-orbit.yml
+  workflow_dispatch:
+
+jobs:
+  affine-orbit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+      - name: Compile and audit affine orbit
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
+          ! grep -Fq 'sorryAx' affine-orbit.log
+          ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTFourPowerAffineOrbit.lean
+          echo GST_FOUR_POWER_AFFINE_ORBIT_GREEN=1
