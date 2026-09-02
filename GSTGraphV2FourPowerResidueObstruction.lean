@@ -125,6 +125,24 @@ theorem row_two_overlap_iff_mod9_five_or_six
     simpa [r] using hres
   · exact row_two_overlap_of_mod9_five_or_six L
 
+/-- Pure-arithmetic consequence of global common-two failure: a counterexample
+cannot lie in either exact row-two overlap class.  This is deliberately stated
+without any source Happy witness or relocation hypothesis. -/
+theorem no_common_two_forbids_mod9_five_six
+    (K : Nat)
+    (hNo : ¬ ∃ p : Nat, 1 ≤ p ∧
+      digit3 (4^K) p = 2 ∧ digit3 (4^(K+1)) p = 2) :
+    K % 9 ≠ 5 ∧ K % 9 ≠ 6 := by
+  constructor
+  · intro h5
+    apply hNo
+    refine ⟨2, by norm_num, ?_⟩
+    exact row_two_overlap_of_mod9_five_or_six K (Or.inl h5)
+  · intro h6
+    apply hNo
+    refine ⟨2, by norm_num, ?_⟩
+    exact row_two_overlap_of_mod9_five_or_six K (Or.inr h6)
+
 /-- Therefore global absence of a relocated Happy cell on sheet `K+1`
 forbids the exponent residues five and six modulo nine. -/
 theorem no_relocated_happy_forbids_mod9_five_six
@@ -153,11 +171,13 @@ theorem no_relocated_happy_forbids_mod9_five_six
 #check pow4_digit_period
 #check row_two_overlap_of_mod9_five_or_six
 #check row_two_overlap_iff_mod9_five_or_six
+#check no_common_two_forbids_mod9_five_six
 #check no_relocated_happy_forbids_mod9_five_six
 #print axioms digit3_eq_of_mod_next
 #print axioms pow4_digit_period
 #print axioms row_two_overlap_of_mod9_five_or_six
 #print axioms row_two_overlap_iff_mod9_five_or_six
+#print axioms no_common_two_forbids_mod9_five_six
 #print axioms no_relocated_happy_forbids_mod9_five_six
 
 end GSTGraphV2FourPowerResidueObstruction
