@@ -45,7 +45,7 @@ theorem split_channel (c x : Nat) :
         3 * (4 * tail3 x + channelNext c (lowDigit x)) := by
   have hx : x = lowDigit x + 3 * tail3 x := split_three x
   have hz := (Nat.mod_add_div (4 * lowDigit x + c) 3).symm
-  unfold channelOut channelNext at hz ⊢
+  unfold channelOut channelNext
   calc
     4*x + c = 4 * (lowDigit x + 3 * tail3 x) + c := by rw [hx]
     _ = (4 * lowDigit x + c) + 12 * tail3 x := by ring
@@ -118,8 +118,10 @@ theorem pairCommonTwo_channel_iff (c x : Nat) :
     | zero =>
         left
         constructor
-        · simpa using hx
-        · simpa using hy
+        · rw [digit3_zero_source] at hx
+          exact hx
+        · rw [digit3_zero_channel] at hy
+          exact hy
     | succ j =>
         right
         refine ⟨j, ?_, ?_⟩
@@ -131,8 +133,10 @@ theorem pairCommonTwo_channel_iff (c x : Nat) :
     rcases h with hlow | htail
     · rcases hlow with ⟨hx, hy⟩
       refine ⟨0, ?_, ?_⟩
-      · simpa using hx
-      · simpa using hy
+      · rw [digit3_zero_source]
+        exact hx
+      · rw [digit3_zero_channel]
+        exact hy
     · rcases htail with ⟨j, hx, hy⟩
       refine ⟨j+1, ?_, ?_⟩
       · rw [digit3_succ_tail x j]
