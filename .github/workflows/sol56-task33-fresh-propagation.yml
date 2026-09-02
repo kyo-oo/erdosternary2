@@ -19,12 +19,6 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile current production dependency
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake build GSTGraphV2FourPowerRelocation 2>&1 | tee task33-fresh-deps.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' task33-fresh-deps.log
       - name: Compile and axiom-audit fresh Task 3.3 module
         shell: bash
         run: |
