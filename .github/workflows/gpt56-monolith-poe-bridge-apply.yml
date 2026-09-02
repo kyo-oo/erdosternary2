@@ -78,6 +78,15 @@ jobs:
             GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-existence.log
 
+      - name: Compile direct failed-relocation state
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectFailedRelocationState.olean \
+            GSTFourPowerDirectFailedRelocationState.lean 2>&1 | tee direct-failed-relocation.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-failed-relocation.log
+
       - name: Compile canonical tail state prerequisite
         shell: bash
         run: |
