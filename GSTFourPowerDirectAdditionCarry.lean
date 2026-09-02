@@ -27,7 +27,7 @@ theorem directCarry4_lt_four (R p : Nat) : directCarry4 R p < 4 := by
   have hM : 0 < 3^p := Nat.pow_pos (by decide)
   have hr : R % 3^p < 3^p := Nat.mod_lt _ hM
   have hnum : 4 * (R % 3^p) < 3^p * 4 := by
-    have h := Nat.mul_lt_mul_left 4 hr
+    have h := Nat.mul_lt_mul_left (by decide : 0 < 4) hr
     simpa [Nat.mul_comm] using h
   by_contra hnot
   have hge : 4 ≤ (4 * (R % 3^p)) / 3^p := by omega
