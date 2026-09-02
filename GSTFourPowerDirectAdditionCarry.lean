@@ -29,7 +29,8 @@ theorem directCarry4_lt_four (R p : Nat) : directCarry4 R p < 4 := by
   have hnum : 4 * (R % 3^p) < 3^p * 4 := by
     have h := Nat.mul_lt_mul_left 4 hr
     simpa [Nat.mul_comm] using h
-  exact Nat.div_lt_of_lt_mul hnum
+  rw [Nat.div_lt_iff_lt_mul hM]
+  simpa [Nat.mul_comm] using hnum
 
 /-- Exact ternary carry recurrence for multiplication by four. -/
 theorem directCarry4_forward_exact_all (R p : Nat) :
@@ -83,14 +84,17 @@ theorem binaryCarry_lt_two
 /-- Exact quotient decomposition behind `4R = R + 3R`. -/
 theorem four_mul_div_decomposition (R p : Nat) :
     (4*R) / 3^p = directCarry4 R p + 4 * (R / 3^p) := by
+  unfold directCarry4
   have hM : 0 < 3^p := Nat.pow_pos (by decide)
   have hdiv : R = 3^p * (R / 3^p) + R % 3^p :=
     (Nat.div_add_mod R (3^p)).symm
-  rw [hdiv, Nat.mul_add]
+  have hmul :
+      4 * R = 4 * (3^p * (R / 3^p) + R % 3^p) :=
+    congrArg (fun x : Nat => 4 * x) hdiv
+  rw [hmul, Nat.mul_add]
   rw [show 4 * (3^p * (R / 3^p)) + 4 * (R % 3^p) =
       4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) by ac_rfl]
   rw [Nat.add_mul_div_left _ _ hM]
-  rfl
 
 /-- The target ternary digit is source digit plus multiplication carry mod 3. -/
 theorem digit3_four_mul (R p : Nat) :
@@ -128,10 +132,11 @@ theorem common_two_row_iff_forbidden_edges
   have hbit := binaryCarry_lt_two R p hp
   constructor
   · intro h
+    have hformula := digit3_four_mul_binary R p hp
+    rw [h.1] at hformula
     have ht :
-        (2 + digit3 R (p-1) + binaryCarry R p) % 3 = 2 := by
-      rw [← h.1]
-      simpa only [digit3_four_mul_binary R p hp] using h.2
+        (2 + digit3 R (p-1) + binaryCarry R p) % 3 = 2 :=
+      hformula.symm.trans h.2
     exact ⟨h.1,
       (two_shift_eq_two_iff_forbidden_edges
         (digit3 R (p-1)) (binaryCarry R p) hprev hbit).1 ht⟩
@@ -153,7 +158,9 @@ theorem binaryCarry_forward_exact
     (R p : Nat) (hp : 1 ≤ p) :
     binaryCarry R (p+1) =
       (digit3 R p + digit3 R (p-1) + binaryCarry R p) / 3 := by
-  unfold binaryCarry
+  change directCarry4 R (p+1) - digit3 R (p+1-1) =
+    (digit3 R p + digit3 R (p-1) + binaryCarry R p) / 3
+  rw [show p+1-1 = p by omega]
   rw [directCarry4_forward_exact_all]
   rw [directCarry4_eq_prev_digit_add_binary R p hp]
   exact binary_step_arithmetic
