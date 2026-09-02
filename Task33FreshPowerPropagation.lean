@@ -10,6 +10,45 @@ open GSTU2DEventTransport
 open GSTGraphV2InfiniteControl
 open GSTGraphV2FourPowerRelocation
 
+private theorem fresh_index_le_three_pow (r : Nat) : r ≤ 3^r := by
+  induction r with
+  | zero => simp
+  | succ r ih =>
+      rw [Nat.pow_succ]
+      have hp : 0 < 3^r := by positivity
+      omega
+
+/-- A supplied physical Happy row cannot lie beyond the symbolic support
+cutoff.  This is derived from the literal nonzero ternary digit of `4^K`, not
+from any fixed computational bound. -/
+theorem fresh_source_row_below_support_cutoff
+    (K p : Nat)
+    (hSource :
+      HappyCell
+        (graph 1 K p).seven.carry
+        (graph 1 K p).seven.digit) :
+    p + 1 < fourPowerSupportCutoff K := by
+  have hDigitGraph :=
+    (graph_happy_iff_consecutive_digit_two 1 K p).mp hSource
+  have hDigit : GSTCanonicalSevenAxisBridge.digit3 (4^K) p = 2 := by
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex] using hDigitGraph.1
+  have hpow : 3^p ≤ 4^K := by
+    by_contra hnot
+    have hlt : 4^K < 3^p := Nat.lt_of_not_ge hnot
+    have hz : GSTCanonicalSevenAxisBridge.digit3 (4^K) p = 0 := by
+      simp [GSTCanonicalSevenAxisBridge.digit3, Nat.div_eq_of_lt hlt]
+    omega
+  have hpindex : p ≤ 3^p := fresh_index_le_three_pow p
+  have hpK : p ≤ 4^K := le_trans hpindex hpow
+  have hstrict : 4^K < 4^(K+2) := by
+    rw [Nat.pow_add]
+    norm_num
+    positivity
+  simp [fourPowerSupportCutoff]
+  omega
+
 /-- Fresh Task 3.3 starting lemma.
 
 This theorem uses only the current production relocation laws.  It does not
@@ -76,6 +115,75 @@ theorem fresh_failed_edge_forces_latent_seed
 
   exact ⟨hdNext, hMiddle, hNextCarry⟩
 
+/-- Under literal failure of relocation, the forced carry-three seed must hit
+carry zero at a first finite row before the symbolic support cutoff.  This is
+a finite witness extracted from the actual `4^(K+1)` sheet, not an arbitrary
+terminating word assumption. -/
+theorem fresh_failed_edge_has_first_zero_carry
+    (K p : Nat)
+    (hp : 1 ≤ p)
+    (hSource :
+      HappyCell
+        (graph 1 K p).seven.carry
+        (graph 1 K p).seven.digit)
+    (hNoRelocated : ¬ ∃ q : Nat, 1 ≤ q ∧
+      HappyCell
+        (graph 1 (K+1) q).seven.carry
+        (graph 1 (K+1) q).seven.digit) :
+    let B := fourPowerSupportCutoff K
+    ∃ r : Nat,
+      p + 1 ≤ r ∧ r < B ∧
+      (graph 1 (K+1) r).seven.carry ≠ 0 ∧
+      (graph 1 (K+1) (r+1)).seven.carry = 0 := by
+  dsimp
+  let s := p + 1
+  let B := fourPowerSupportCutoff K
+  have hsB : s < B := by
+    simpa [s, B] using fresh_source_row_below_support_cutoff K p hSource
+  have hSeed : (graph 1 (K+1) s).seven.carry = 3 := by
+    simpa [s] using
+      (fresh_failed_edge_forces_latent_seed K p hp hSource hNoRelocated).2.2
+  have hTerminal : (graph 1 (K+1) B).seven.carry = 0 := by
+    simpa [B] using (four_power_graph_neutral_at_support_cutoff K).1
+  have hsle : s ≤ B := Nat.le_of_lt hsB
+  have hzero : ∃ n : Nat, (graph 1 (K+1) (s+n)).seven.carry = 0 := by
+    refine ⟨B-s, ?_⟩
+    rw [Nat.add_sub_of_le hsle]
+    exact hTerminal
+  let n0 := Nat.find hzero
+  have hn0zero : (graph 1 (K+1) (s+n0)).seven.carry = 0 :=
+    Nat.find_spec hzero
+  have hn0pos : 0 < n0 := by
+    by_contra hnot
+    have hn0 : n0 = 0 := Nat.eq_zero_of_not_pos hnot
+    rw [hn0] at hn0zero
+    simp only [Nat.add_zero] at hn0zero
+    rw [hSeed] at hn0zero
+    omega
+  let r := s + (n0-1)
+  have hrnext : r + 1 = s + n0 := by
+    dsimp [r]
+    omega
+  have hrNonzero : (graph 1 (K+1) r).seven.carry ≠ 0 := by
+    intro hr0
+    have hsmall : n0 - 1 < n0 := by omega
+    have hminimal := Nat.find_min' hzero hsmall
+    dsimp [r] at hr0
+    exact hminimal hr0
+  have hrLower : p + 1 ≤ r := by
+    dsimp [r, s]
+    omega
+  have hn0le : n0 ≤ B-s := by
+    apply Nat.find_min'
+    rw [Nat.add_sub_of_le hsle]
+    exact hTerminal
+  have hrUpper : r < B := by
+    dsimp [r]
+    omega
+  refine ⟨r, hrLower, hrUpper, hrNonzero, ?_⟩
+  rw [hrnext]
+  exact hn0zero
+
 /-- Exact failed-edge obstruction packet for the fresh Task 3.3 proof.
 
 Nothing here weakens or localizes the target existential.  Under the literal
@@ -127,8 +235,12 @@ theorem fresh_failed_edge_power_obstruction_packet
   exact ⟨hSeed.1, hSeed.2.1, hSeed.2.2,
     hAllBad, hFutureBad, hNeutral.1, hNeutral.2⟩
 
+#check fresh_source_row_below_support_cutoff
+#print axioms fresh_source_row_below_support_cutoff
 #check fresh_failed_edge_forces_latent_seed
 #print axioms fresh_failed_edge_forces_latent_seed
+#check fresh_failed_edge_has_first_zero_carry
+#print axioms fresh_failed_edge_has_first_zero_carry
 #check fresh_failed_edge_power_obstruction_packet
 #print axioms fresh_failed_edge_power_obstruction_packet
 
