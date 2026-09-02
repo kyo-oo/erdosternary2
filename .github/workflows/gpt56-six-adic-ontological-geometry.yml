@@ -3,10 +3,11 @@ name: GPT56 GST Six-Adic Ontological Geometry
 on:
   push:
     branches:
-      - sol/gpt56-canonical-tail-escape-20260827
+      - sol/gpt56-affine-sixadic-20260903
     paths:
       - GSTGraphV2SixAdicOntologicalGeometry.lean
       - GSTGraphV2SixAdicOntologicalGeometryLaws.lean
+      - GSTGraphV2SixAdicSynchronizedShadows.lean
       - GSTGraphV2SixAdicOntologicalGeometryTest.lean
       - .github/workflows/gpt56-six-adic-ontological-geometry.yml
   workflow_dispatch:
@@ -36,8 +37,9 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GSTGraphV2SixAdicOntologicalGeometry.lean 2>&1 | tee six-adic-core.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean 2>&1 | tee six-adic-laws.log
+          lake env lean GSTGraphV2SixAdicSynchronizedShadows.lean 2>&1 | tee six-adic-shadows.log
           lake env lean GSTGraphV2SixAdicOntologicalGeometryTest.lean 2>&1 | tee six-adic-test.log
-          cat six-adic-core.log six-adic-laws.log six-adic-test.log > six-adic-all.log
+          cat six-adic-core.log six-adic-laws.log six-adic-shadows.log six-adic-test.log > six-adic-all.log
           ! grep -Fq 'sorryAx' six-adic-all.log
-          ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTGraphV2SixAdicOntologicalGeometry.lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean GSTGraphV2SixAdicOntologicalGeometryTest.lean
+          ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTGraphV2SixAdicOntologicalGeometry.lean GSTGraphV2SixAdicOntologicalGeometryLaws.lean GSTGraphV2SixAdicSynchronizedShadows.lean GSTGraphV2SixAdicOntologicalGeometryTest.lean
           echo GST_GRAPH_V2_SIX_ADIC_ONTOLOGICAL_GEOMETRY_GREEN=1
