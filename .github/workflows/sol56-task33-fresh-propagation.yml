@@ -1,25 +1,21 @@
-name: SOL56 Task33 Fresh Propagation
+name: SOL56 Four-Power Direct Existence
 
 on:
   push:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
-      - Task33FreshPowerPropagation.lean
-      - Task33FreshDirectRelocation.lean
-      - GSTGraphV2FourPowerRelocation.lean
+      - GSTFourPowerDirectExistence.lean
       - GSTGraphV2FourPowerResidueObstruction.lean
-      - GSTGraphV2NonlocalCascade.lean
-      - GSTGraphV2FourPowerForcingBridge.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
   workflow_dispatch:
 
 concurrency:
-  group: sol56-task33-fresh-propagation
+  group: sol56-four-power-direct-existence
   cancel-in-progress: true
 
 jobs:
-  fresh-task33-kernel:
+  direct-existence-kernel:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -27,7 +23,7 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile current production dependency closure
+      - name: Compile direct arithmetic dependency closure
         shell: bash
         run: |
           set -euo pipefail
@@ -37,29 +33,26 @@ jobs:
             GSTGraphV2CanonicalNWave \
             GSTGraphV2CanonicalTerminalExtinctionProbe \
             GSTFinalPurePowerResidueTransplant \
-            2>&1 | tee task33-fresh-deps.log
+            2>&1 | tee direct-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerForcingBridge.olean \
-            GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee task33-fresh-forcing-dep.log
+            GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee direct-forcing-dep.log
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
-            GSTGraphV2NonlocalCascade.lean 2>&1 | tee task33-fresh-nonlocal-dep.log
+            GSTGraphV2NonlocalCascade.lean 2>&1 | tee direct-nonlocal-dep.log
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
-            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee task33-fresh-relocation.log
+            GSTGraphV2FourPowerRelocation.lean 2>&1 | tee direct-relocation-dep.log
           lake env lean \
             -o .lake/build/lib/lean/GSTGraphV2FourPowerResidueObstruction.olean \
-            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee task33-fresh-residue.log
+            GSTGraphV2FourPowerResidueObstruction.lean 2>&1 | tee direct-residue-dep.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            task33-fresh-deps.log task33-fresh-forcing-dep.log task33-fresh-nonlocal-dep.log task33-fresh-relocation.log task33-fresh-residue.log
-      - name: Compile and axiom-audit fresh Task 3.3 modules
+            direct-deps.log direct-forcing-dep.log direct-nonlocal-dep.log direct-relocation-dep.log direct-residue-dep.log
+      - name: Compile and axiom-audit direct existence module
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean \
-            -o .lake/build/lib/lean/Task33FreshPowerPropagation.olean \
-            Task33FreshPowerPropagation.lean 2>&1 | tee task33-fresh.log
-          lake env lean Task33FreshDirectRelocation.lean 2>&1 | tee task33-fresh-direct.log
+          lake env lean GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            task33-fresh.log task33-fresh-direct.log
+            direct-existence.log
