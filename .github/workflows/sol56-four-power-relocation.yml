@@ -16,6 +16,7 @@ on:
       - GSTFinalPurePowerResidueTransplant.lean
       - GSTGraphV2HandwrittenExponentialLTE.lean
       - GSTGraphV2FourPowerForcingBridge.lean
+      - GSTInfiniteFourPowerNavigation.lean
       - Task33ResidualCollisionBridge.lean
       - Task33FourPowerPropagationAttempt.lean
       - .github/workflows/sol56-four-power-relocation.yml
@@ -58,8 +59,11 @@ jobs:
             -o .lake/build/lib/lean/GSTGraphV2FourPowerCanonicalParentObstruction.olean \
             GSTGraphV2FourPowerCanonicalParentObstruction.lean 2>&1 | tee canonical-parent-obstruction.log
           lake env lean \
+            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
+            GSTInfiniteFourPowerNavigation.lean 2>&1 | tee infinite-four-power-navigation.log
+          lake env lean \
             Task33ResidualCollisionBridge.lean 2>&1 | tee task33-residual-collision.log
           lake env lean \
             Task33FourPowerPropagationAttempt.lean 2>&1 | tee task33-four-power-propagation-attempt.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log canonical-parent-obstruction.log task33-residual-collision.log task33-four-power-propagation-attempt.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log canonical-parent-obstruction.log infinite-four-power-navigation.log task33-residual-collision.log task33-four-power-propagation-attempt.log
