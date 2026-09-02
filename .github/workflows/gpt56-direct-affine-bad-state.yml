@@ -5,6 +5,12 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
+      - 'GSTFourPowerDirectResidue.lean'
+      - 'GSTFourPowerDirectResidue27.lean'
+      - 'GSTFourPowerDirectResidue81.lean'
+      - 'GSTFourPowerExponentTritObstruction.lean'
+      - 'GSTFourPowerDirectExistence.lean'
+      - 'GSTCanonicalTailStateIso.lean'
       - 'GSTFourPowerAffineOrbit.lean'
       - 'GSTFourPowerAffineExponentPeel.lean'
       - 'GSTFourPowerAffineBadState.lean'
@@ -25,6 +31,21 @@ jobs:
           test: false
       - name: Prepare output directory
         run: mkdir -p .lake/build/lib/lean
+      - name: Compile fresh arithmetic prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          for module in \
+            GSTCanonicalTailStateIso \
+            GSTFourPowerDirectResidue \
+            GSTFourPowerDirectResidue27 \
+            GSTFourPowerDirectResidue81 \
+            GSTFourPowerExponentTritObstruction \
+            GSTFourPowerDirectExistence
+          do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
       - name: Compile affine orbit
         shell: bash
         run: |
