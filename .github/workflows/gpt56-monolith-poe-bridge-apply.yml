@@ -90,12 +90,13 @@ jobs:
             GSTFourPowerAffineBadState \
             GSTFourPowerAffineChannelAutomaton \
             GSTFourPowerAffineClassifierBridge \
-            GSTFourPowerAffinePeelClassifier
+            GSTFourPowerAffinePeelClassifier \
+            GSTFourPowerAffineTwoTritClassifier
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
-          echo 'DIRECT_AFFINE_PEEL_CLASSIFIER_KERNEL_GREEN=1'
+          echo 'DIRECT_AFFINE_TWO_TRIT_CLASSIFIER_KERNEL_GREEN=1'
 
       - name: Compile direct failed-relocation state
         shell: bash
