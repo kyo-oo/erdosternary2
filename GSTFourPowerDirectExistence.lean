@@ -1,4 +1,5 @@
 import GSTFourPowerDirectResidue
+import GSTFourPowerDirectResidue27
 import GSTFourPowerExponentTritObstruction
 
 set_option maxRecDepth 1000000
@@ -7,6 +8,7 @@ set_option maxHeartbeats 20000000
 namespace GSTFourPowerDirectExistence
 
 open GSTFourPowerDirectResidue
+open GSTFourPowerDirectResidue27
 open GSTFourPowerExponentTritObstruction
 
 /-- Pure arithmetic common-digit predicate for two consecutive powers of four.
@@ -53,6 +55,22 @@ theorem noCommonTwo_excludes_mod9_five_six
     K % 9 ≠ 5 ∧ K % 9 ≠ 6 := by
   exact no_common_two_forbids_mod9_five_six K hNo
 
+/-- The exact row-three classifier supplies a direct common-two witness in four
+additional exponent classes modulo 27. -/
+theorem commonTwo_of_mod27_row_three
+    (K : Nat)
+    (hres : K % 27 = 14 ∨ K % 27 = 18 ∨ K % 27 = 19 ∨ K % 27 = 25) :
+    CommonTwo K := by
+  refine ⟨3, by norm_num, ?_⟩
+  exact row_three_overlap_of_mod27_classes K hres
+
+/-- Consequently, a hypothetical direct counterexample avoids every exact
+row-three overlap class modulo 27. -/
+theorem noCommonTwo_excludes_mod27_row_three
+    (K : Nat) (hNo : ¬ CommonTwo K) :
+    K % 27 ≠ 14 ∧ K % 27 ≠ 18 ∧ K % 27 ≠ 19 ∧ K % 27 ≠ 25 := by
+  exact no_common_two_forbids_mod27_classes K hNo
+
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
 the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
@@ -95,6 +113,8 @@ theorem directExistence_implies_source_two
 #check commonTwo_has_target_two
 #check commonTwo_of_mod9_five_or_six
 #check noCommonTwo_excludes_mod9_five_six
+#check commonTwo_of_mod27_row_three
+#check noCommonTwo_excludes_mod27_row_three
 #check noCommonTwo_exponent_trit_law
 #check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
@@ -102,6 +122,8 @@ theorem directExistence_implies_source_two
 #print axioms commonTwo_has_target_two
 #print axioms commonTwo_of_mod9_five_or_six
 #print axioms noCommonTwo_excludes_mod9_five_six
+#print axioms commonTwo_of_mod27_row_three
+#print axioms noCommonTwo_excludes_mod27_row_three
 #print axioms noCommonTwo_exponent_trit_law
 #print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
