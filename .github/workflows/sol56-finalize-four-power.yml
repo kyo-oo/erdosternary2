@@ -45,8 +45,6 @@ jobs:
             GSTGraphV2CanonicalNWave \
             GSTGraphV2CanonicalTerminalExtinctionProbe \
             GSTFinalPurePowerResidueTransplant \
-            GSTFinalResidualConnector \
-            GSTFinalResidualCollision \
             2>&1 | tee /tmp/sol56-deps.log
           mkdir -p .lake/build/lib/lean
           lake env lean \
