@@ -1,0 +1,46 @@
+name: GPT56 Direct Affine Bad-State Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - 'GSTFourPowerAffineOrbit.lean'
+      - 'GSTFourPowerAffineExponentPeel.lean'
+      - 'GSTFourPowerAffineBadState.lean'
+      - '.github/workflows/gpt56-direct-affine-bad-state.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  affine-bad-state-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Prepare output directory
+        run: mkdir -p .lake/build/lib/lean
+      - name: Compile affine orbit
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOrbit.olean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-orbit.log
+      - name: Compile affine exponent peel
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineExponentPeel.olean GSTFourPowerAffineExponentPeel.lean 2>&1 | tee affine-peel.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-peel.log
+      - name: Compile exact bad-state transducer
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineBadState.olean GSTFourPowerAffineBadState.lean 2>&1 | tee affine-bad-state.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-bad-state.log
+          echo 'DIRECT_AFFINE_BAD_STATE_GREEN=1'
