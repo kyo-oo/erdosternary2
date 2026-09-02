@@ -47,7 +47,8 @@ theorem split_channel (c x : Nat) :
   have hz := (Nat.mod_add_div (4 * lowDigit x + c) 3).symm
   unfold channelOut channelNext
   calc
-    4*x + c = 4 * (lowDigit x + 3 * tail3 x) + c := by rw [hx]
+    4*x + c = 4 * (lowDigit x + 3 * tail3 x) + c := by
+      exact congrArg (fun y : Nat => 4 * y + c) hx
     _ = (4 * lowDigit x + c) + 12 * tail3 x := by ring
     _ = ((4 * lowDigit x + c) % 3) +
           3 * ((4 * lowDigit x + c) / 3) + 12 * tail3 x := by
