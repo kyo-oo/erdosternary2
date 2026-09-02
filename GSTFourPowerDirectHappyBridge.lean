@@ -70,11 +70,31 @@ theorem directExistence_forces_relocated_physical_happy
   intro K p hK hp hSource
   exact directExistence_to_physical_happy_forcing hDirect (K+1) (by omega) (by omega)
 
+/-- Exact Task 3.3 fresh-production relocation theorem.  The source physical
+Happy row has the production signature, and the conclusion constructs a real
+physical Happy row `q ≥ 1` on the next four-power sheet.  Its proof is purely
+through direct consecutive-four-power arithmetic: no graph navigation,
+relocation surrogate, packet transport, or quarantined route is imported. -/
+theorem four_power_happy_propagates
+    (hDirect : FourPowerDirectExistence)
+    (K p : Nat) (hK : 8 ≤ K) (hp : 1 ≤ p)
+    (hHappy :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact directExistence_forces_relocated_physical_happy hDirect K p hK hp hHappy
+
 #check commonTwo_to_physical_happy_row
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
+#check four_power_happy_propagates
 #print axioms commonTwo_to_physical_happy_row
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
+#print axioms four_power_happy_propagates
 
 end GSTFourPowerDirectHappyBridge
