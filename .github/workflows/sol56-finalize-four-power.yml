@@ -1,0 +1,152 @@
+name: SOL56 Finalize Four-Power Proof
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - GSTGraphV2FourPowerRelocation.lean
+      - GSTGraphV2FourPowerRelocationClosure.lean
+      - GSTGraphV2FourPowerForcingBridge.lean
+      - GSTInfiniteFourPowerNavigation.lean
+      - GSTGraphV2NonlocalCascade.lean
+      - scripts/sol56_monolith_surgery.py
+      - .github/workflows/sol56-finalize-four-power.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sol56-finalize-four-power
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-canonical-tail-escape-20260827
+          fetch-depth: 0
+
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+
+      - name: Compile and audit standalone relocation/master
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build \
+            GSTGraphV2CanonicalEscape \
+            GSTGraphV2CanonicalInfiniteCycle \
+            GSTGraphV2CanonicalNWave \
+            GSTGraphV2CanonicalTerminalExtinctionProbe \
+            GSTFinalPurePowerResidueTransplant \
+            GSTFinalResidualConnector \
+            GSTFinalResidualCollision \
+            2>&1 | tee /tmp/sol56-deps.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerForcingBridge.olean \
+            GSTGraphV2FourPowerForcingBridge.lean \
+            2>&1 | tee /tmp/sol56-forcing-bridge.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2NonlocalCascade.olean \
+            GSTGraphV2NonlocalCascade.lean \
+            2>&1 | tee /tmp/sol56-nonlocal.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocation.olean \
+            GSTGraphV2FourPowerRelocation.lean \
+            2>&1 | tee /tmp/sol56-relocation.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
+            GSTInfiniteFourPowerNavigation.lean \
+            2>&1 | tee /tmp/sol56-navigation.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTGraphV2FourPowerRelocationClosure.olean \
+            GSTGraphV2FourPowerRelocationClosure.lean \
+            2>&1 | tee /tmp/sol56-closure.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            /tmp/sol56-deps.log \
+            /tmp/sol56-forcing-bridge.log \
+            /tmp/sol56-nonlocal.log \
+            /tmp/sol56-relocation.log \
+            /tmp/sol56-navigation.log \
+            /tmp/sol56-closure.log
+
+      - name: Apply guarded monolith surgery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/sol56_monolith_surgery.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          a = t.index('theorem gst_four_power_creation_master_inline')
+          b = t.index('theorem gst_prefix_one_navigation_lift', a)
+          w = t[a:b]
+          assert 'GSTGraphV2FourPowerRelocationClosure.four_power_creation_master' in w
+          assert 'h_creation_for_4pow' not in w
+          assert 'gst_oscillation_from_navigation' not in w
+          print(w)
+          PY
+
+      - name: Compile exact production monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/ErdosTernary2.olean \
+            ErdosTernary2.lean 2>&1 | tee /tmp/sol56-monolith.log
+          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            /tmp/sol56-monolith.log
+
+      - name: Audit production theorem chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > FinalFourPowerAudit.lean <<'EOF'
+          import ErdosTernary2
+
+          #print axioms gst_four_power_creation_master_inline
+          #print axioms gst_prefix_one_navigation_lift
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean FinalFourPowerAudit.lean 2>&1 | tee /tmp/sol56-final-axioms.log
+          ! grep -F 'sorryAx' /tmp/sol56-final-axioms.log
+          ! grep -E 'unknown identifier|unknown module prefix|unsolved goals|error:' /tmp/sol56-final-axioms.log
+          rm -f FinalFourPowerAudit.lean
+
+      - name: Commit certified monolith locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean
+          if ! git diff --cached --quiet; then
+            git commit -m 'Replace quarantined four-power creation theorem with Graph V2 proof'
+          fi
+          FINAL_SHA="$(git rev-parse HEAD)"
+          echo "FINAL_COMMIT_SHA=$FINAL_SHA"
+          echo "FINAL_COMMIT_SHA=$FINAL_SHA" >> "$GITHUB_ENV"
+          test -z "$(git status --porcelain)"
+
+      - name: Run unchanged official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/comparator.sh 2>&1 | tee /tmp/final-v5-comparator.log
+          grep -F 'Your solution is okay!' /tmp/final-v5-comparator.log
+          grep -F '=== COMPARATOR RESULT: PASS ===' /tmp/final-v5-comparator.log
+          echo "Certified final commit: $FINAL_COMMIT_SHA"
+
+      - name: Push only certified final commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
+          echo "PUSHED_FINAL_COMMIT=$FINAL_COMMIT_SHA"
