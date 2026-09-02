@@ -8,6 +8,7 @@ on:
       - GSTGraphV2FourPowerRelocation.lean
       - GSTGraphV2FourPowerResidueObstruction.lean
       - GSTGraphV2FourPowerCanonicalParentObstruction.lean
+      - GSTGraphV2FourPowerRelocationClosure.lean
       - GSTGraphV2NonlocalCascade.lean
       - GSTGraphV2CanonicalEscape.lean
       - GSTGraphV2CanonicalInfiniteCycle.lean
@@ -63,10 +64,12 @@ jobs:
             -o .lake/build/lib/lean/GSTGraphV2FourPowerCanonicalParentObstruction.olean \
             GSTGraphV2FourPowerCanonicalParentObstruction.lean 2>&1 | tee canonical-parent-obstruction.log
           lake env lean \
+            GSTGraphV2FourPowerRelocationClosure.lean 2>&1 | tee relocation-closure.log
+          lake env lean \
             Task33ResidualCollisionBridge.lean 2>&1 | tee task33-residual-collision.log
           lake env lean \
             Task33ClassifierProbe.lean 2>&1 | tee task33-classifier-probe.log
           lake env lean \
             Task33FourPowerPropagationAttempt.lean 2>&1 | tee task33-four-power-propagation-attempt.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log canonical-parent-obstruction.log task33-residual-collision.log task33-classifier-probe.log task33-four-power-propagation-attempt.log
+            relocation-deps.log forcing-bridge.log nonlocal-cascade.log relocation.log residue-obstruction.log canonical-parent-obstruction.log relocation-closure.log task33-residual-collision.log task33-classifier-probe.log task33-four-power-propagation-attempt.log
