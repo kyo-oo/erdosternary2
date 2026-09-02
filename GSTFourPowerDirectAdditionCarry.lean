@@ -35,7 +35,7 @@ theorem directCarry4_lt_four (R p : Nat) : directCarry4 R p < 4 := by
     calc
       3^p * 4 = 4 * 3^p := by ac_rfl
       _ ≤ ((4 * (R % 3^p)) / 3^p) * 3^p := by
-        exact Nat.mul_le_mul_right (3^p) hge
+        exact Nat.mul_le_mul_right hge (3^p)
       _ ≤ 4 * (R % 3^p) := Nat.div_mul_le_self _ _
   exact (Nat.not_lt_of_ge hcontra) hnum
 
