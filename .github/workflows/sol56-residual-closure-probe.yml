@@ -1,0 +1,49 @@
+name: SOL56 Residual Closure Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - GSTFinalResidualConnector.lean
+      - GSTFinalResidualCollision.lean
+      - Task33ResidualCollisionBridge.lean
+      - GSTGraphV2ProductionLaws.lean
+      - GSTGraphV2Production.lean
+      - GSTGraphV2HandwrittenOmegaUBlock.lean
+      - .github/workflows/sol56-residual-closure-probe.yml
+  workflow_dispatch:
+
+concurrency:
+  group: sol56-residual-closure-probe
+  cancel-in-progress: true
+
+jobs:
+  residual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Locate exact residual constructors
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== GSTNavigationWitness declarations/usages ==='
+          grep -R -n --include='*.lean' -E '(^|[^A-Za-z0-9_])(def|abbrev|structure|class|theorem|lemma)[[:space:]]+GSTNavigationWitness|GSTNavigationWitness[[:space:]]*:=' . | head -80 || true
+          echo '=== GSTOmegaInfiniteBadTrace declarations/usages ==='
+          grep -R -n --include='*.lean' -E '(^|[^A-Za-z0-9_])(def|abbrev|structure|class|theorem|lemma)[[:space:]]+GSTOmegaInfiniteBadTrace|GSTOmegaInfiniteBadTrace[[:space:]]*:=' . | head -80 || true
+          echo '=== Constructor/support theorem candidates ==='
+          grep -R -n --include='*.lean' -E 'OmegaInfiniteBadTrace|NavigationWitness' . | head -240 || true
+      - name: Compile and audit residual contradiction stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build GSTGraphV2ProductionLaws 2>&1 | tee residual-deps.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean -o .lake/build/lib/lean/GSTFinalResidualConnector.olean GSTFinalResidualConnector.lean 2>&1 | tee residual-connector.log
+          lake env lean -o .lake/build/lib/lean/GSTFinalResidualCollision.olean GSTFinalResidualCollision.lean 2>&1 | tee residual-collision.log
+          lake env lean Task33ResidualCollisionBridge.lean 2>&1 | tee residual-bridge.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-deps.log residual-connector.log residual-collision.log residual-bridge.log
