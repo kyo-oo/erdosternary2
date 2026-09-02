@@ -7,6 +7,11 @@ namespace GSTFourPowerExactExponentPeriod
 
 open GSTFourPowerDirectResidue
 
+private theorem three_pow_succ_gt_one (p : Nat) : 1 < 3^(p+1) := by
+  have h3 : 3^1 ≤ 3^(p+1) :=
+    Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  norm_num at h3 ⊢
+
 /-- The familiar exponent period `3^p` at modulus `3^(p+1)` is exact:
     no smaller 3-adic exponent precision can disappear. -/
 theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
@@ -31,11 +36,7 @@ theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
             4^n % 3^(p+1) = (4^n % 3^((p+1)+1)) % 3^(p+1) :=
               (Nat.mod_mod_of_dvd (4^n) hpowdvd).symm
             _ = 1 % 3^(p+1) := by rw [hhigh]
-            _ = 1 := by
-              apply Nat.mod_eq_of_lt
-              have h3 : 3 ≤ 3^(p+1) := by
-                simpa using Nat.pow_le_pow_right₀ (by norm_num : 0 < 3) (by omega : 1 ≤ p+1)
-              omega
+            _ = 1 := Nat.mod_eq_of_lt (three_pow_succ_gt_one p)
         have hdivp : 3^p ∣ n := (ih n).mp hlower
         obtain ⟨u, rfl⟩ := hdivp
         let a := u % 3
@@ -54,11 +55,7 @@ theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
           apply Eq.trans (digit3_eq_of_mod_next (4^(3^p*u)) 1 (p+1) ?_) ?_
           · simpa using hhigh
           · unfold digit3
-            have hden : 1 < 3^(p+1) := by
-              have h3 : 3 ≤ 3^(p+1) := by
-                simpa using Nat.pow_le_pow_right₀ (by norm_num : 0 < 3) (by omega : 1 ≤ p+1)
-              omega
-            rw [Nat.div_eq_of_lt hden]
+            rw [Nat.div_eq_of_lt (three_pow_succ_gt_one p)]
             simp
         have hperiod :
             digit3 (4^(3^p*u)) (p+1) = digit3 (4^(a*3^p)) (p+1) := by
@@ -67,11 +64,7 @@ theorem pow4_mod_one_iff_three_pow_dvd : ∀ p n : Nat,
         have hlift := pow4_exponent_trit_lift_digit p 0 a ha
         have hbase : digit3 (4^0) (p+1) = 0 := by
           unfold digit3
-          have hden : 1 < 3^(p+1) := by
-            have h3 : 3 ≤ 3^(p+1) := by
-              simpa using Nat.pow_le_pow_right₀ (by norm_num : 0 < 3) (by omega : 1 ≤ p+1)
-            omega
-          norm_num [Nat.div_eq_of_lt hden]
+          norm_num [Nat.div_eq_of_lt (three_pow_succ_gt_one p)]
         have ha0 : a = 0 := by
           rw [hperiod] at hzero
           have hlift' : digit3 (4^(a*3^p)) (p+1) = a := by
