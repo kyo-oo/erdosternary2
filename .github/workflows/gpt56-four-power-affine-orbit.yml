@@ -6,6 +6,7 @@ on:
       - sol/gpt56-affine-sixadic-20260903
     paths:
       - GSTFourPowerAffineOrbit.lean
+      - GSTFourPowerAffineExponentPeel.lean
       - .github/workflows/gpt56-four-power-affine-orbit.yml
   workflow_dispatch:
 
@@ -33,6 +34,8 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GSTFourPowerAffineOrbit.lean 2>&1 | tee affine-orbit.log
-          ! grep -Fq 'sorryAx' affine-orbit.log
-          ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTFourPowerAffineOrbit.lean
+          lake env lean GSTFourPowerAffineExponentPeel.lean 2>&1 | tee affine-peel.log
+          cat affine-orbit.log affine-peel.log > affine-all.log
+          ! grep -Fq 'sorryAx' affine-all.log
+          ! grep -Eq '(^|[^A-Za-z0-9_])(sorry|admit)([^A-Za-z0-9_]|$)' GSTFourPowerAffineOrbit.lean GSTFourPowerAffineExponentPeel.lean
           echo GST_FOUR_POWER_AFFINE_ORBIT_GREEN=1
