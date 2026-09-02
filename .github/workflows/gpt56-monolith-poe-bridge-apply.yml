@@ -20,15 +20,36 @@ jobs:
           build: false
           test: false
 
+      - name: Prepare direct arithmetic output directory
+        shell: bash
+        run: mkdir -p .lake/build/lib/lean
+
       - name: Compile pure direct residue arithmetic
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p .lake/build/lib/lean
           lake env lean \
             -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean \
             GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-residue.log
+
+      - name: Compile direct binary carry automaton
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectAdditionCarry.olean \
+            GSTFourPowerDirectAdditionCarry.lean 2>&1 | tee direct-addition-carry.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-addition-carry.log
+
+      - name: Compile exponent-trit obstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerExponentTritObstruction.olean \
+            GSTFourPowerExponentTritObstruction.lean 2>&1 | tee direct-trit.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-trit.log
 
       - name: Compile direct existence spine
         shell: bash
