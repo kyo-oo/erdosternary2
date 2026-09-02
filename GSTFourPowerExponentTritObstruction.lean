@@ -25,7 +25,7 @@ theorem exponent_prefix_trit_decomposition (K p : Nat) :
       (Nat.mod_add_div K (3^p)).symm
     _ = K % 3^p
         + 3^p * ((K / 3^p) % 3 + 3 * ((K / 3^p) / 3)) := by
-          rw [Nat.mod_add_div]
+          rw [Nat.mod_add_div (K / 3^p) 3]
     _ = K % 3^p
         + (K / 3^p % 3) * 3^p
         + 3^(p+1) * ((K / 3^p) / 3) := by
