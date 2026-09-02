@@ -55,5 +55,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectExistence.olean \
+            GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-existence.log
+
+      - name: Compile direct physical Happy bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectHappyBridge.olean \
+            GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-happy.log
