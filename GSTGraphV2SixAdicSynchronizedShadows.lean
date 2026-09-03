@@ -136,5 +136,87 @@ theorem six_iso_mul_four_pow_iff_skew_shadows
     dyadic_shadow_mul_four_pow_iff k t hkt x y,
     triadic_shadow_mul_four_pow_iff k t x y]
 
+/-- Every dyadic shadow at depth zero is automatic. -/
+theorem dyadic_shadow_zero (x y : Int) :
+    DyadicShadowAt 0 x y := by
+  refine ⟨x-y, ?_⟩
+  simp
+
+/-- Once `4^t` has supplied at least `k` dyadic factors, the dyadic shadow at
+    depth `k` is saturated and no residual condition on `x-y` remains. -/
+theorem dyadic_shadow_mul_four_pow_of_saturated
+    (k t : Nat) (hkt : k ≤ 2*t) (x y : Int) :
+    DyadicShadowAt k ((4 : Int)^t*x) ((4 : Int)^t*y) := by
+  have h4 : (4 : Int)^t = (2 : Int)^(2*t) := by
+    calc
+      (4 : Int)^t = ((2 : Int)^2)^t := by norm_num
+      _ = (2 : Int)^(2*t) := by rw [pow_mul]
+  rcases (pow_dvd_pow (2 : Int) hkt) with ⟨r, hr⟩
+  refine ⟨r*(x-y), ?_⟩
+  calc
+    (4 : Int)^t*x - (4 : Int)^t*y = (2 : Int)^(2*t)*(x-y) := by
+      rw [h4]
+      ring
+    _ = ((2 : Int)^k*r)*(x-y) := by rw [hr]
+    _ = (2 : Int)^k*(r*(x-y)) := by ring
+
+/-- Exact dyadic skew law for the physical `x4` chart, including the saturated
+    branch.  The exponent `k-2*t` is Lean's truncated natural subtraction. -/
+theorem dyadic_shadow_mul_four_pow_iff_truncated
+    (k t : Nat) (x y : Int) :
+    DyadicShadowAt k ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      DyadicShadowAt (k-2*t) x y := by
+  by_cases hkt : 2*t ≤ k
+  · exact dyadic_shadow_mul_four_pow_iff k t hkt x y
+  · have hle : k ≤ 2*t := Nat.le_of_not_ge hkt
+    have hsub : k-2*t = 0 := Nat.sub_eq_zero_of_le hle
+    constructor
+    · intro _
+      rw [hsub]
+      exact dyadic_shadow_zero x y
+    · intro _
+      exact dyadic_shadow_mul_four_pow_of_saturated k t hle x y
+
+/-- Exact six-adic information retained by the physical `x4` chart at every
+    exponent: full triadic depth and dyadic depth shifted by truncated `2t`. -/
+theorem six_iso_mul_four_pow_iff_truncated_skew_shadows
+    (k t : Nat) (x y : Int) :
+    SixAdicIsoAt k ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      DyadicShadowAt (k-2*t) x y ∧ TriadicShadowAt k x y := by
+  rw [six_iso_iff_synchronized_shadows,
+    dyadic_shadow_mul_four_pow_iff_truncated k t x y,
+    triadic_shadow_mul_four_pow_iff k t x y]
+
+/-- Divisibility-form boxed law:
+    `6^k ∣ 4^t*(x-y)` iff the triadic depth `3^k` divides `x-y` and the
+    residual dyadic depth `2^(k-2*t)` divides `x-y`. -/
+theorem six_pow_dvd_four_pow_mul_sub_iff_truncated
+    (k t : Nat) (x y : Int) :
+    (6 : Int)^k ∣ (4 : Int)^t*(x-y) ↔
+      (3 : Int)^k ∣ x-y ∧ (2 : Int)^(k-2*t) ∣ x-y := by
+  constructor
+  · rintro ⟨q, hq⟩
+    have hsix : SixAdicIsoAt k ((4 : Int)^t*x) ((4 : Int)^t*y) := by
+      refine ⟨q, ?_⟩
+      calc
+        (4 : Int)^t*x - (4 : Int)^t*y = (4 : Int)^t*(x-y) := by ring
+        _ = (6 : Int)^k*q := hq
+    have hsh := (six_iso_mul_four_pow_iff_truncated_skew_shadows k t x y).mp hsix
+    rcases hsh with ⟨h2, h3⟩
+    rcases h2 with ⟨q2, hq2⟩
+    rcases h3 with ⟨q3, hq3⟩
+    exact ⟨⟨q3, hq3⟩, ⟨q2, hq2⟩⟩
+  · rintro ⟨h3raw, h2raw⟩
+    rcases h3raw with ⟨q3, hq3⟩
+    rcases h2raw with ⟨q2, hq2⟩
+    have hsh : DyadicShadowAt (k-2*t) x y ∧ TriadicShadowAt k x y :=
+      ⟨⟨q2, hq2⟩, ⟨q3, hq3⟩⟩
+    have hsix := (six_iso_mul_four_pow_iff_truncated_skew_shadows k t x y).mpr hsh
+    rcases hsix with ⟨q, hq⟩
+    refine ⟨q, ?_⟩
+    calc
+      (4 : Int)^t*(x-y) = (4 : Int)^t*x - (4 : Int)^t*y := by ring
+      _ = (6 : Int)^k*q := hq
+
 
 end GSTGraphV2SixAdicSynchronizedShadows
