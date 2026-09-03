@@ -16928,10 +16928,8 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
   intro s n hs hn _hchild
   exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
-/-- The independently kernel-checked w/-
-The former terminal closure beginning here was removed from the production
-monolith. It depended on the quarantined legacy declaration
-`h_creation_for_4pow`, while the attempted replacement module is explicitly
-kept outside the production import closure. All preceding kernel-checked
-infrastructure remains available for a future proved closure.
--/
+-- The independently kernel-checked terminal closure beginning here was removed from the production
+-- monolith. It depended on the quarantined legacy declaration
+-- `h_creation_for_4pow`, while the attempted replacement module is explicitly
+-- kept outside the production import closure. All preceding kernel-checked
+-- infrastructure remains available for a future proved closure.
