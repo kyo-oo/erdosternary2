@@ -34,7 +34,6 @@ import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import GSTPrefixOneOntologicalEscape
-import GSTInfiniteFourPowerNavigation
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
