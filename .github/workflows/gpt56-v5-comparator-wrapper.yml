@@ -1,0 +1,93 @@
+name: GPT56 V5 Comparator Now Wrapper
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  comparator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-canonical-tail-escape-20260827
+          fetch-depth: 1
+
+      - name: Restore local h_creation_for_4pow route
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ErdosTernary2.lean')
+          text = path.read_text(encoding='utf-8')
+          old = "\n".join([
+              "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using",
+              "    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal",
+              "      K hK5 hK7)",
+          ])
+          new = "\n".join([
+              "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using",
+              "    (h_creation_for_4pow K hK5 hK7)",
+          ])
+          if old not in text:
+              if new in text:
+                  print('H_CREATION_ROUTE_ALREADY_RESTORED=1')
+                  raise SystemExit(0)
+              raise SystemExit('TARGET_STALE_NAVIGATION_CALL_NOT_FOUND')
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'UNEXPECTED_STALE_NAVIGATION_CALL_COUNT={count}')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          print('H_CREATION_ROUTE_RESTORED=1')
+          PY
+          if git diff --quiet -- ErdosTernary2.lean; then
+            echo 'NO_MONOLITH_COMMIT_NEEDED=1'
+          else
+            git diff -- ErdosTernary2.lean
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add ErdosTernary2.lean
+            git commit -m 'Restore local four-power creation master route'
+            git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
+          fi
+
+      - name: Verify clean tree before comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .surgery/clean_sorry_check_hits.py
+          git diff -- . ':!/.lake'
+          git diff --check
+          git diff --quiet -- . ':!/.lake'
+          echo 'V5_WRAPPER_TREE_CLEAN=1'
+
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Run exact repository V5 comparator on committed production proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          bash scripts/comparator.sh | tee v5-comparator.log
+          grep -Fq 'Your solution is okay!' v5-comparator.log
+          grep -Fq '=== COMPARATOR RESULT: PASS ===' v5-comparator.log
+          echo V5_LITERAL_PASS_CONFIRMED=1
