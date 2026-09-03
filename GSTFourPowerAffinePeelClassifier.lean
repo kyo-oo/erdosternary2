@@ -45,17 +45,19 @@ theorem noCommonTwo_three_mul_iff (q : Nat) :
 theorem noCommonTwo_three_mul_add_one_iff (q : Nat) :
     (¬ CommonTwo (3*q+1)) ↔
       BadChannel 1 (peel1 (affineOrbit q)) := by
+  have hmod : (3*q+1) % 3 = 1 := by omega
   rw [noCommonTwo_low_trit_branch]
   rw [tail3_affineOrbit_three_mul_add_one]
-  omega
+  simp [hmod]
 
 /-- Exact first exponent-trit classifier, branch `2`. -/
 theorem noCommonTwo_three_mul_add_two_iff (q : Nat) :
     (¬ CommonTwo (3*q+2)) ↔
       BadChannel 3 (peel2 (affineOrbit q)) := by
+  have hmod : (3*q+2) % 3 = 2 := by omega
   rw [noCommonTwo_low_trit_branch]
   rw [tail3_affineOrbit_three_mul_add_two]
-  omega
+  simp [hmod]
 
 /-- The low ternary digit of the `0` peel is inherited from its input. -/
 theorem peel0_mod_three (x : Nat) : peel0 x % 3 = x % 3 := by
