@@ -10,6 +10,8 @@ on:
       - 'GSTFourPowerDirectResidue81.lean'
       - 'GSTFourPowerExponentTritObstruction.lean'
       - 'GSTFourPowerDirectExistence.lean'
+      - 'GSTFourPowerDirectAdditionCarry.lean'
+      - 'GSTFourPowerDirectHappyBridge.lean'
       - 'GSTFourPowerExactExponentPeriod.lean'
       - 'GSTCanonicalTailStateIso.lean'
       - 'GSTFourPowerAffineOrbit.lean'
@@ -19,6 +21,7 @@ on:
       - 'GSTFourPowerAffineClassifierBridge.lean'
       - 'GSTFourPowerAffinePeelClassifier.lean'
       - 'GSTFourPowerAffinePrefixIsometry.lean'
+      - 'GSTFourPowerAffineHappyConstruction.lean'
       - '.github/workflows/gpt56-direct-affine-bad-state.yml'
   workflow_dispatch:
 
@@ -47,11 +50,17 @@ jobs:
             GSTFourPowerDirectResidue81 \
             GSTFourPowerExponentTritObstruction \
             GSTFourPowerDirectExistence \
+            GSTFourPowerDirectAdditionCarry \
             GSTFourPowerExactExponentPeriod
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
+      - name: Compile direct physical Happy bridge
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectHappyBridge.olean GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy-bridge.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-happy-bridge.log
       - name: Compile affine orbit
         run: |
           set -euo pipefail
@@ -87,5 +96,10 @@ jobs:
           set -euo pipefail
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffinePrefixIsometry.olean GSTFourPowerAffinePrefixIsometry.lean 2>&1 | tee affine-prefix-isometry.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-prefix-isometry.log
+      - name: Compile affine physical Happy construction
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineHappyConstruction.olean GSTFourPowerAffineHappyConstruction.lean 2>&1 | tee affine-happy-construction.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-happy-construction.log
       - name: Direct affine audit marker
-        run: echo DIRECT_AFFINE_CLASSIFIER_STACK_GREEN=1
+        run: echo DIRECT_AFFINE_PHYSICAL_HAPPY_STACK_GREEN=1
