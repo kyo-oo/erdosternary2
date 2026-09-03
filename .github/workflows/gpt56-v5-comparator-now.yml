@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   comparator:
@@ -18,38 +18,6 @@ jobs:
           ref: sol/gpt56-canonical-tail-escape-20260827
           fetch-depth: 1
 
-      - name: Restore local h_creation_for_4pow route
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('ErdosTernary2.lean')
-          text = path.read_text(encoding='utf-8')
-          old = "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using\n    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal\n      K hK5 hK7)"
-          new = "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using\n    (h_creation_for_4pow K hK5 hK7)"
-          if old not in text:
-              if new in text:
-                  print('H_CREATION_ROUTE_ALREADY_RESTORED=1')
-                  raise SystemExit(0)
-              raise SystemExit('TARGET_STALE_NAVIGATION_CALL_NOT_FOUND')
-          count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'UNEXPECTED_STALE_NAVIGATION_CALL_COUNT={count}')
-          path.write_text(text.replace(old, new), encoding='utf-8')
-          print('H_CREATION_ROUTE_RESTORED=1')
-          PY
-          if git diff --quiet -- ErdosTernary2.lean; then
-            echo 'NO_MONOLITH_COMMIT_NEEDED=1'
-          else
-            git diff -- ErdosTernary2.lean
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add ErdosTernary2.lean
-            git commit -m 'Restore local four-power creation master route'
-            git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
-          fi
-
       - name: Verify committed tree hygiene
         shell: bash
         run: |
@@ -59,7 +27,7 @@ jobs:
           git diff --check
           if ! git diff --quiet -- . ':!/.lake'; then
             echo "V5_HYGIENE_DIRTY_TREE=1"
-            echo "The comparator must test committed source, not mutate or restore stale files."
+            echo "The comparator must test committed source without mutation."
             exit 1
           fi
           echo "V5_COMMITTED_TREE_CLEAN=1"
