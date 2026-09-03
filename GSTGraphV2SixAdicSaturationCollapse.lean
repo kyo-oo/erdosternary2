@@ -73,11 +73,12 @@ theorem consecutive_four_powers_six_iso_one
     (t : Nat) (ht : 1 ≤ t) :
     SixAdicIsoAt 1 ((4 : Int)^(t+1)) ((4 : Int)^t) := by
   have hkt : 1 ≤ 2*t := by omega
-  rw [pow_succ]
-  conv_rhs => rw [show (4 : Int)^t = (4 : Int)^t * 1 by ring]
-  apply (six_iso_mul_four_pow_iff_triadic_of_saturated 1 t hkt 4 1).2
-  refine ⟨1, ?_⟩
-  norm_num
+  have htri : TriadicShadowAt 1 (4 : Int) 1 := by
+    refine ⟨1, ?_⟩
+    norm_num
+  have hsix : SixAdicIsoAt 1 ((4 : Int)^t * 4) ((4 : Int)^t * 1) :=
+    (six_iso_mul_four_pow_iff_triadic_of_saturated 1 t hkt 4 1).2 htri
+  simpa [pow_succ] using hsix
 
 /-- The same consecutive four-power pair never reaches six-adic depth two.
     Thus the saturated six-adic contact has exact depth one; any deeper
@@ -87,13 +88,14 @@ theorem consecutive_four_powers_not_six_iso_two
     (t : Nat) (ht : 1 ≤ t) :
     ¬ SixAdicIsoAt 2 ((4 : Int)^(t+1)) ((4 : Int)^t) := by
   have hkt : 2 ≤ 2*t := by omega
-  rw [pow_succ]
-  conv_rhs => rw [show (4 : Int)^t = (4 : Int)^t * 1 by ring]
   intro hsix
+  have hsix' : SixAdicIsoAt 2 ((4 : Int)^t * 4) ((4 : Int)^t * 1) := by
+    simpa [pow_succ] using hsix
   have htri : TriadicShadowAt 2 (4 : Int) 1 :=
-    (six_iso_mul_four_pow_iff_triadic_of_saturated 2 t hkt 4 1).1 hsix
+    (six_iso_mul_four_pow_iff_triadic_of_saturated 2 t hkt 4 1).1 hsix'
   rcases htri with ⟨q, hq⟩
   norm_num at hq
+  omega
 
 /-- Exact six-adic contact depth of consecutive positive powers of four. -/
 theorem consecutive_four_powers_exact_six_depth_one
