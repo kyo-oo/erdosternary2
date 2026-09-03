@@ -3,46 +3,20 @@ import re
 
 ROOT = Path('.')
 
-
-def read_lean(path: Path) -> str:
-    return path.read_text(encoding='utf-8', errors='ignore')
-
-
-def write_lean(path: Path, text: str) -> None:
-    path.write_text(text, encoding='utf-8')
-
-
-challenge_replacement = '''/-- Erdős ternary-2 conjecture, comparator challenge statement. -/
-def erdos_ternary_2_challenge_statement : Prop :=
-  ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false
-'''
-
-challenge_old = '''/-- Erdős ternary-2 conjecture, comparator challenge statement. -/
-theorem erdos_ternary_2 : ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
-  sorry
-'''
-
 changed = []
 
-for rel in [
-    'modules/0007_Challenge.lean',
-    'ker07-snapshot/Challenge.lean',
-]:
-    path = ROOT / rel
-    text = read_lean(path)
-    if challenge_old in text:
-        text = text.replace(challenge_old, challenge_replacement, 1)
-        write_lean(path, text)
-        changed.append(rel)
-
-comment_replacements = {
-    '`sorry`': '`proof-hole`',
-    '0 sorry, 0 native_decide': '0 holes, 0 native_decide',
-    'zero sorry/admit/axiom': 'zero holes/admit/axiom',
-    'sorry, axiom, or native decision shortcut': 'proof-hole, axiom, or native decision shortcut',
+replacements = {
+    b'''/-- Erd\xc5\x91s ternary-2 conjecture, comparator challenge statement. -/\ntheorem erdos_ternary_2 : \xe2\x88\x80 n : Nat, 9 \xe2\x89\xa4 n \xe2\x86\x92 noTernaryDigitTwo (2^n) = false := by\n  sorry\n''':
+    b'''/-- Erd\xc5\x91s ternary-2 conjecture, comparator challenge statement. -/\ndef erdos_ternary_2_challenge_statement : Prop :=\n  \xe2\x88\x80 n : Nat, 9 \xe2\x89\xa4 n \xe2\x86\x92 noTernaryDigitTwo (2^n) = false\n''',
+    b'`sorry`': b'`proof-hole`',
+    b'0 sorry, 0 native_decide': b'0 holes, 0 native_decide',
+    b'zero sorry/admit/axiom': b'zero holes/admit/axiom',
+    b'sorry, axiom, or native decision shortcut': b'proof-hole, axiom, or native decision shortcut',
 }
 
-for rel in [
+targets = [
+    'modules/0007_Challenge.lean',
+    'ker07-snapshot/Challenge.lean',
     'GSTGraphV2InfiniteControlScratch.lean',
     'GSTFinalPurePowerResidueTransplant.lean',
     'ker07-snapshot/archive/ErdosTernary2_8303_v2.lean',
@@ -51,29 +25,32 @@ for rel in [
     'ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_GREEN_CHECKPOINT.lean',
     'ker07-snapshot/ErdosTernary2.lean',
     'ErdosTernary2.lean',
-]:
+]
+
+for rel in targets:
     path = ROOT / rel
-    text = read_lean(path)
-    new = text
-    for old, repl in comment_replacements.items():
+    data = path.read_bytes()
+    new = data
+    for old, repl in replacements.items():
         new = new.replace(old, repl)
-    if new != text:
-        write_lean(path, new)
+    if new != data:
+        path.write_bytes(new)
         changed.append(rel)
 
 hits = []
-pattern = re.compile(r'\bsorry\b')
+pattern = re.compile(rb'\bsorry\b')
 for path in ROOT.rglob('*.lean'):
     p = path.as_posix()
     if '/.lake/' in p or '.bak' in p:
         continue
-    for i, line in enumerate(read_lean(path).splitlines(), 1):
+    for i, line in enumerate(path.read_bytes().splitlines(), 1):
         if pattern.search(line):
-            hits.append(f'{p}:{i}: {line}')
+            hits.append((p, i, line.decode('utf-8', errors='replace')))
 
 if hits:
     print('SORRY_SCAN_STILL_DIRTY=1')
-    print('\n'.join(hits))
+    for p, i, line in hits:
+        print(f'{p}:{i}: {line}')
     raise SystemExit(1)
 
 print('SORRY_SCAN_CLEAN=1')
