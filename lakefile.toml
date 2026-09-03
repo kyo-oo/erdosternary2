@@ -55,6 +55,7 @@ roots = [
   "GSTInfiniteCollision",
   "GSTInfiniteCoupledLedger",
   "GSTInfiniteGateTransport",
+  "GSTInfiniteFourPowerNavigation",
   "GSTPerfectPowerTailNavigation",
   "GSTPrefixOneOntologicalEscape",
   "GSTPrefixOneSeedCore",
