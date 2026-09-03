@@ -26,11 +26,8 @@ jobs:
           from pathlib import Path
           path = Path('ErdosTernary2.lean')
           text = path.read_text(encoding='utf-8')
-          old = """  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-      K hK5 hK7)"""
-          new = """  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)"""
+          old = "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using\n    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal\n      K hK5 hK7)"
+          new = "  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using\n    (h_creation_for_4pow K hK5 hK7)"
           if old not in text:
               if new in text:
                   print('H_CREATION_ROUTE_ALREADY_RESTORED=1')
