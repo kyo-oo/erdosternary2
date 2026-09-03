@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # comparator.sh — Lean Comparator (V5)
+# V5 trigger: rerun after GSTInfiniteFourPowerNavigation tactic hardening.
 #
 # The final verification tool referenced by the maths-researcher V5 skill.
 # Runs AFTER sorry_check.sh returns 0.
