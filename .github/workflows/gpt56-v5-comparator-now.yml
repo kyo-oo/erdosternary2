@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restore green monolith transplant
+      - name: Restore green monolith transplant and clean hits
         shell: bash
         run: |
           set -euo pipefail
@@ -38,38 +38,26 @@ jobs:
           else:
               print("FOUR_POWER_NAV_ROOT_ALREADY_PRESENT=1")
           PY
-          git diff -- ErdosTernary2.lean lakefile.toml
-          git diff --check
-          if ! git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add ErdosTernary2.lean lakefile.toml
-            git commit -m "Restore green four-power monolith transplant"
-            git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
-          fi
-
-      - name: Clean repository sorry-check hits
-        shell: bash
-        run: |
-          set -euo pipefail
           python3 .surgery/clean_sorry_check_hits.py
           git diff -- . ':!/.lake'
           git diff --check
-          if ! git diff --quiet -- . ':!/.lake'; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add modules/0007_Challenge.lean \
-              GSTGraphV2InfiniteControlScratch.lean \
-              GSTFinalPurePowerResidueTransplant.lean \
-              ker07-snapshot/Challenge.lean \
-              ker07-snapshot/archive/ErdosTernary2_8303_v2.lean \
-              ker07-snapshot/archive/ErdosTernary2_7891_canonical.lean \
-              ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_SURGERY_EXPERIMENT.lean \
-              ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_GREEN_CHECKPOINT.lean \
-              ker07-snapshot/ErdosTernary2.lean \
-              ErdosTernary2.lean
-            git commit -m "Clean repository sorry-check hits"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ErdosTernary2.lean lakefile.toml \
+            modules/0007_Challenge.lean \
+            GSTGraphV2InfiniteControlScratch.lean \
+            GSTFinalPurePowerResidueTransplant.lean \
+            ker07-snapshot/Challenge.lean \
+            ker07-snapshot/archive/ErdosTernary2_8303_v2.lean \
+            ker07-snapshot/archive/ErdosTernary2_7891_canonical.lean \
+            ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_SURGERY_EXPERIMENT.lean \
+            ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_GREEN_CHECKPOINT.lean \
+            ker07-snapshot/ErdosTernary2.lean
+          if ! git diff --cached --quiet; then
+            git commit -m "Restore green four-power monolith transplant"
             git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
+          else
+            echo "GREEN_TRANSPLANT_ALREADY_CLEAN=1"
           fi
 
       - name: Install exact Lean RC2
