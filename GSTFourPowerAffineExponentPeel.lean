@@ -30,8 +30,7 @@ theorem affineOrbit_three_mul (q : Nat) :
         rw [show 3*q = q*3 by omega, pow_mul]
       _ = (1 + 3*x)^3 := by
         rw [four_pow_eq_one_plus_three_affineOrbit q]
-        rfl
-  dsimp [peel0, x]
+  dsimp [peel0, x] at h ⊢
   nlinarith [h]
 
 /-- Exact exponent-trit peel for the `1` branch. -/
@@ -39,14 +38,16 @@ theorem affineOrbit_three_mul_add_one (q : Nat) :
     affineOrbit (3*q + 1) = 1 + 3 * peel1 (affineOrbit q) := by
   rw [show 3*q + 1 = (3*q) + 1 by omega, affineOrbit_succ,
     affineOrbit_three_mul]
-  simp [peel0, peel1]
+  unfold peel0 peel1
+  ring
 
 /-- Exact exponent-trit peel for the `2` branch. -/
 theorem affineOrbit_three_mul_add_two (q : Nat) :
     affineOrbit (3*q + 2) = 2 + 3 * peel2 (affineOrbit q) := by
   rw [show 3*q + 2 = (3*q + 1) + 1 by omega, affineOrbit_succ,
     affineOrbit_three_mul_add_one]
-  simp [peel1, peel2]
+  unfold peel1 peel2
+  ring
 
 /-- After consuming exponent trit `0`, all higher affine-orbit digits are the
     digits of the exact polynomial tail `peel0`. -/
@@ -81,43 +82,39 @@ theorem digit_peel_two (q j : Nat) :
   simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3,
     Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
 
-/-- The least ternary digit of the affine orbit literally records exponent
-    trit `0`. -/
+/-- The least ternary digit of the affine orbit literally records exponent trit `0`. -/
 theorem affineOrbit_low_trit_zero (q : Nat) :
     digit3 (affineOrbit (3*q)) 0 = 0 := by
   rw [affineOrbit_three_mul]
   simp [GSTFourPowerDirectResidue.digit3]
 
-/-- The least ternary digit of the affine orbit literally records exponent
-    trit `1`. -/
+/-- The least ternary digit of the affine orbit literally records exponent trit `1`. -/
 theorem affineOrbit_low_trit_one (q : Nat) :
     digit3 (affineOrbit (3*q+1)) 0 = 1 := by
   rw [affineOrbit_three_mul_add_one]
   simp [GSTFourPowerDirectResidue.digit3]
 
-/-- The least ternary digit of the affine orbit literally records exponent
-    trit `2`. -/
+/-- The least ternary digit of the affine orbit literally records exponent trit `2`. -/
 theorem affineOrbit_low_trit_two (q : Nat) :
     digit3 (affineOrbit (3*q+2)) 0 = 2 := by
   rw [affineOrbit_three_mul_add_two]
   simp [GSTFourPowerDirectResidue.digit3]
 
-/-- The three tail polynomials form two consecutive affine steps after the
-    common cubic core. -/
+/-- The three tail polynomials form two consecutive affine steps after the common cubic core. -/
 theorem peel1_eq_four_peel0 (x : Nat) : peel1 x = 4 * peel0 x := by
-  simp [peel0, peel1]
+  unfold peel0 peel1
   ring
 
 /-- The `2` tail is the next affine iterate after the `1` tail. -/
 theorem peel2_eq_four_peel1_add_one (x : Nat) :
     peel2 x = 4 * peel1 x + 1 := by
-  simp [peel1, peel2]
+  unfold peel1 peel2
   ring
 
 /-- Closing identity needed by the `r = 2` exponent branch. -/
 theorem peel0_affine_succ (x : Nat) :
     peel0 (4*x + 1) = 4 * peel2 x + 3 := by
-  simp [peel0, peel2]
+  unfold peel0 peel2
   ring
 
 end GSTFourPowerAffineExponentPeel
