@@ -1,1 +1,1 @@
-trigger fixed V5 comparator workflow
+trigger clean V5 comparator wrapper
