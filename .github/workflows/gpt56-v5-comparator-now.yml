@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   comparator:
@@ -17,48 +17,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restore green monolith transplant and clean hits
+      - name: Verify committed tree hygiene
         shell: bash
         run: |
           set -euo pipefail
-          GREEN_COMMIT="4f1cbe20f0e75c5beaa35f832d8091bc1fd68dae"
-          git checkout "$GREEN_COMMIT" -- ErdosTernary2.lean
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("lakefile.toml")
-          text = path.read_text(encoding="utf-8")
-          root = '  "GSTInfiniteFourPowerNavigation",\n'
-          if root not in text:
-              marker = '  "GSTPerfectPowerTailNavigation",\n'
-              if marker not in text:
-                  raise SystemExit("GSTPerfectPowerTailNavigation marker missing in lakefile.toml")
-              text = text.replace(marker, root + marker, 1)
-              path.write_text(text, encoding="utf-8")
-              print("FOUR_POWER_NAV_ROOT_ADDED=1")
-          else:
-              print("FOUR_POWER_NAV_ROOT_ALREADY_PRESENT=1")
-          PY
           python3 .surgery/clean_sorry_check_hits.py
           git diff -- . ':!/.lake'
           git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ErdosTernary2.lean lakefile.toml \
-            modules/0007_Challenge.lean \
-            GSTGraphV2InfiniteControlScratch.lean \
-            GSTFinalPurePowerResidueTransplant.lean \
-            ker07-snapshot/Challenge.lean \
-            ker07-snapshot/archive/ErdosTernary2_8303_v2.lean \
-            ker07-snapshot/archive/ErdosTernary2_7891_canonical.lean \
-            ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_SURGERY_EXPERIMENT.lean \
-            ker07-snapshot/workbench/ErdosTernary2_SOL_INLINE_GREEN_CHECKPOINT.lean \
-            ker07-snapshot/ErdosTernary2.lean
-          if ! git diff --cached --quiet; then
-            git commit -m "Restore green four-power monolith transplant"
-            git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
-          else
-            echo "GREEN_TRANSPLANT_ALREADY_CLEAN=1"
+          if ! git diff --quiet -- . ':!/.lake'; then
+            echo "V5_HYGIENE_DIRTY_TREE=1"
+            echo "The comparator must test committed source, not mutate or restore stale files."
+            exit 1
           fi
+          echo "V5_COMMITTED_TREE_CLEAN=1"
 
       - name: Install exact Lean RC2
         shell: bash
