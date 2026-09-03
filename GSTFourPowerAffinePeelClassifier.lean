@@ -143,7 +143,7 @@ theorem commonTwo_three_mul_add_two_of_q_mod_three_eq_one
   have hnext : (q+1) % 3 = 2 := by
     calc
       (q+1) % 3 = (q % 3 + 1 % 3) % 3 := Nat.add_mod q 1 3
-      _ = 2 := by rw [hq]; norm_num
+      _ = 2 := by rw [hq]
   exact noCommonTwo_three_mul_add_two_forces_next_ne_two q hNo hnext
 
 #check tail3_affineOrbit_three_mul
