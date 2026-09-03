@@ -96,6 +96,56 @@ theorem lowDigit_peel2_affineOrbit (q : Nat) :
     _ = (q % 3 + 1 % 3) % 3 := by rw [affineOrbit_mod_three]
     _ = (q + 1) % 3 := (Nat.add_mod q 1 3).symm
 
+/-- A bad exponent in branch `0` cannot have second ternary trit `2`.
+    State `0` has only `0` and `1` as surviving next reads. -/
+theorem noCommonTwo_three_mul_forces_q_mod_three_ne_two
+    (q : Nat) (hNo : ¬ CommonTwo (3*q)) : q % 3 ≠ 2 := by
+  intro hq
+  have hbad : BadChannel 0 (peel0 (affineOrbit q)) :=
+    (noCommonTwo_three_mul_iff q).mp hNo
+  rcases (badChannel_zero_iff _).mp hbad with h0 | h1
+  · have hd := h0.1
+    rw [lowDigit_peel0_affineOrbit q, hq] at hd
+    omega
+  · have hd := h1.1
+    rw [lowDigit_peel0_affineOrbit q, hq] at hd
+    omega
+
+/-- Positive form of the previous survivor law: exponent suffix `20` in
+    least-significant-first ternary order is killed immediately by the direct
+    affine automaton, hence a genuine common-two row exists. -/
+theorem commonTwo_three_mul_of_q_mod_three_eq_two
+    (q : Nat) (hq : q % 3 = 2) : CommonTwo (3*q) := by
+  by_contra hNo
+  exact noCommonTwo_three_mul_forces_q_mod_three_ne_two q hNo hq
+
+/-- A bad exponent in branch `2` cannot make the twisted second read equal `2`.
+    State `3` has only `0` and `1` as surviving next reads. -/
+theorem noCommonTwo_three_mul_add_two_forces_next_ne_two
+    (q : Nat) (hNo : ¬ CommonTwo (3*q+2)) : (q+1) % 3 ≠ 2 := by
+  intro hq
+  have hbad : BadChannel 3 (peel2 (affineOrbit q)) :=
+    (noCommonTwo_three_mul_add_two_iff q).mp hNo
+  rcases (badChannel_three_iff _).mp hbad with h0 | h1
+  · have hd := h0.1
+    rw [lowDigit_peel2_affineOrbit q, hq] at hd
+    omega
+  · have hd := h1.1
+    rw [lowDigit_peel2_affineOrbit q, hq] at hd
+    omega
+
+/-- Positive branch-`2` killing law.  If the next exponent trit is `1`, the
+    twisted affine read becomes `2`, so state `3` terminates in a common-two
+    witness. -/
+theorem commonTwo_three_mul_add_two_of_q_mod_three_eq_one
+    (q : Nat) (hq : q % 3 = 1) : CommonTwo (3*q+2) := by
+  by_contra hNo
+  have hnext : (q+1) % 3 = 2 := by
+    calc
+      (q+1) % 3 = (q % 3 + 1 % 3) % 3 := Nat.add_mod q 1 3
+      _ = 2 := by rw [hq]; norm_num
+  exact noCommonTwo_three_mul_add_two_forces_next_ne_two q hNo hnext
+
 #check tail3_affineOrbit_three_mul
 #check tail3_affineOrbit_three_mul_add_one
 #check tail3_affineOrbit_three_mul_add_two
@@ -105,8 +155,16 @@ theorem lowDigit_peel2_affineOrbit (q : Nat) :
 #check lowDigit_peel0_affineOrbit
 #check lowDigit_peel1_affineOrbit
 #check lowDigit_peel2_affineOrbit
+#check noCommonTwo_three_mul_forces_q_mod_three_ne_two
+#check commonTwo_three_mul_of_q_mod_three_eq_two
+#check noCommonTwo_three_mul_add_two_forces_next_ne_two
+#check commonTwo_three_mul_add_two_of_q_mod_three_eq_one
 #print axioms noCommonTwo_three_mul_iff
 #print axioms noCommonTwo_three_mul_add_one_iff
 #print axioms noCommonTwo_three_mul_add_two_iff
+#print axioms noCommonTwo_three_mul_forces_q_mod_three_ne_two
+#print axioms commonTwo_three_mul_of_q_mod_three_eq_two
+#print axioms noCommonTwo_three_mul_add_two_forces_next_ne_two
+#print axioms commonTwo_three_mul_add_two_of_q_mod_three_eq_one
 
 end GSTFourPowerAffinePeelClassifier
