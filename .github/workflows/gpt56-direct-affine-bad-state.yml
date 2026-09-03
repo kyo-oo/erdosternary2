@@ -3,7 +3,7 @@ name: GPT56 Direct Affine Bad-State Verify
 on:
   push:
     branches:
-      - sol/gpt56-canonical-tail-escape-20260827
+      - sol/gpt56-four-power-relocation-prod-20260903
     paths:
       - 'GSTFourPowerDirectResidue.lean'
       - 'GSTFourPowerDirectResidue27.lean'
