@@ -51,4 +51,20 @@ theorem six_pow_dvd_four_pow_mul_sub_iff_triadic_of_saturated
     · rw [hsub]
       simp
 
+/-- At the exact dyadic saturation boundary `k = 2*t`, the physical `x4`
+    chart has no remaining dyadic condition at all.  This packages the
+    boundary in the form needed by later relocation constructions. -/
+theorem six_iso_mul_four_pow_at_saturation_iff_triadic
+    (t : Nat) (x y : Int) :
+    SixAdicIsoAt (2*t) ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      TriadicShadowAt (2*t) x y := by
+  exact six_iso_mul_four_pow_iff_triadic_of_saturated (2*t) t (by rfl) x y
+
+/-- Divisibility version of the exact saturation boundary. -/
+theorem six_pow_dvd_four_pow_at_saturation_iff_triadic
+    (t : Nat) (x y : Int) :
+    (6 : Int)^(2*t) ∣ (4 : Int)^t*(x-y) ↔
+      (3 : Int)^(2*t) ∣ x-y := by
+  exact six_pow_dvd_four_pow_mul_sub_iff_triadic_of_saturated (2*t) t (by rfl) x y
+
 end GSTGraphV2SixAdicSaturationCollapse
