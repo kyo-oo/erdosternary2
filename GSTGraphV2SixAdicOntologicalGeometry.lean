@@ -1,4 +1,4 @@
-import GSTGraphV2NonEuclideanLaws
+import GSTGraphV2NonEuclidean
 
 /-!
 # GST Graph V2 Six-Adic Ontological Geometry
