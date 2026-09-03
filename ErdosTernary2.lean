@@ -16935,8 +16935,7 @@ theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
-      K hK5 hK7)
+    (h_creation_for_4pow K hK5 hK7)
 
 /-- Public prefix-one theorem.  This route is entirely positive: the green
 width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
