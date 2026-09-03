@@ -23,6 +23,7 @@ on:
       - 'GSTFourPowerAffinePrefixIsometry.lean'
       - 'GSTFourPowerAffineHappyConstruction.lean'
       - 'GSTFourPowerAffineThirdTrit.lean'
+      - 'GSTFourPowerAffineFourthTrit.lean'
       - '.github/workflows/gpt56-direct-affine-bad-state.yml'
   workflow_dispatch:
 
@@ -107,5 +108,10 @@ jobs:
           set -euo pipefail
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineThirdTrit.olean GSTFourPowerAffineThirdTrit.lean 2>&1 | tee affine-third-trit.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-third-trit.log
+      - name: Compile affine fourth-trit physical constructor
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineFourthTrit.olean GSTFourPowerAffineFourthTrit.lean 2>&1 | tee affine-fourth-trit.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-fourth-trit.log
       - name: Direct affine audit marker
-        run: echo DIRECT_AFFINE_THIRD_TRIT_PHYSICAL_HAPPY_STACK_GREEN=1
+        run: echo DIRECT_AFFINE_FOURTH_TRIT_PHYSICAL_HAPPY_STACK_GREEN=1
