@@ -23,6 +23,7 @@ roots = [
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
+  "GSTFourPowerDirectExistence",
   "GSTFourPowerOntologicalAdapter",
   "GSTGraphV2CanonicalDescentOntology",
   "GSTGraphV2CanonicalEscape",
