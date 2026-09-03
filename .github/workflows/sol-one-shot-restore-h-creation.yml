@@ -1,0 +1,61 @@
+name: SOL One-Shot Restore h_creation Route
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - .github/workflows/sol-one-shot-restore-h-creation.yml
+      - ErdosTernary2.lean
+
+permissions:
+  contents: write
+
+jobs:
+  restore-h-creation-route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-canonical-tail-escape-20260827
+          fetch-depth: 1
+
+      - name: Restore local h_creation_for_4pow route
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ErdosTernary2.lean')
+          text = path.read_text(encoding='utf-8')
+          old = """  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+      K hK5 hK7)"""
+          new = """  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (h_creation_for_4pow K hK5 hK7)"""
+          if old not in text:
+              if new in text:
+                  print('H_CREATION_ROUTE_ALREADY_RESTORED=1')
+                  raise SystemExit(0)
+              raise SystemExit('TARGET_STALE_NAVIGATION_CALL_NOT_FOUND')
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'UNEXPECTED_STALE_NAVIGATION_CALL_COUNT={count}')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          print('H_CREATION_ROUTE_RESTORED=1')
+          PY
+
+      - name: Commit exact route restoration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- ErdosTernary2.lean; then
+            echo 'NO_MONOLITH_CHANGE_NEEDED=1'
+            exit 0
+          fi
+          git diff -- ErdosTernary2.lean
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ErdosTernary2.lean
+          git commit -m 'Restore local four-power creation master route'
+          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
