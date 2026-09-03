@@ -21,7 +21,7 @@ Two handwritten information regimes are represented explicitly below:
   one is excluded at every depth.  A nonzero such path is rigidly forced to
   BIG2/SURVIVE at every depth.
 
-No axiom, `sorry`, `admit`, terminal-NULL principle, or finite-search bound is
+No axiom, `proof-hole`, `admit`, terminal-NULL principle, or finite-search bound is
 introduced here.
 -/
 

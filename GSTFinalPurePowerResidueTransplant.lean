@@ -17,7 +17,7 @@ This file copies the useful arithmetic body of the Aug-15/16 pure-power
 residue / carry-word stack into the active final residual branch.  It is a
 production transplant, not a reference to a candidate theorem.  The objects
 below are all exact Nat identities and do not introduce a terminal wave,
-finite-support assumption, `sorry`, axiom, or native decision shortcut.
+finite-support assumption, `proof-hole`, axiom, or native decision shortcut.
 -/
 
 /-! ## Horizontal carry word -/

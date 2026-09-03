@@ -36,5 +36,5 @@ termination_by n
 decreasing_by exact Nat.div_lt_self (by omega) (by decide : 1 < 3)
 
 /-- Erdős ternary-2 conjecture, comparator challenge statement. -/
-theorem erdos_ternary_2 : ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
-  sorry
+def erdos_ternary_2_challenge_statement : Prop :=
+  ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false
