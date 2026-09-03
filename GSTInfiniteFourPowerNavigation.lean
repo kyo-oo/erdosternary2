@@ -1,3 +1,4 @@
+import GSTTactic
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2UnifiedVerticalTelescope
 import GSTGraphV2SixAdicSynchronizedShadows
@@ -19,6 +20,31 @@ open GSTGraphV2UnifiedVerticalTelescope
 open GSTGraphV2SixAdicSynchronizedShadows
 open GSTFinalPurePowerResidueTransplant
 open GSTU2DEventTransport
+
+/-- Focused arithmetic closer for the four-power collision seam.
+It normalizes the local phase-window/telescope names and then tries the
+bounded arithmetic engines in a fixed order.  No axiom, no `sorry`, no
+unbounded search. -/
+elab "four_power_collision_arith" : tactic => do
+  Lean.Elab.Tactic.evalTactic (← `(tactic|
+    first
+      | contradiction
+      | omega
+      | (norm_num at * <;>
+          nlinarith [hleft, hright, hU, hWidth3, hUPositive,
+            hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
+      | (ring_nf at hU hUPositive hleft hright hWidth3 ⊢ <;>
+          nlinarith [hleft, hright, hU, hWidth3, hUPositive,
+            hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
+      | (simp_all (config := { maxSteps := 1000000 }) only [
+            Nat.add_assoc, Nat.add_comm, Nat.add_left_comm,
+            Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm,
+            Nat.pow_succ]
+          <;> first
+            | omega
+            | nlinarith [hleft, hright, hU, hWidth3, hUPositive,
+                hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
+  ))
 
 /-- Public bridge surface for the green six-adic skew theorem used by the
 four-power navigation surgery line. -/
@@ -159,8 +185,7 @@ theorem power_three_step_collision
   rw [hrightDigitExact] at hright
   dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 hUPositive ⊢
   dsimp [potentialWith, unifiedState] at hU hUPositive
-  norm_num at hU hUPositive hleft hright hWidth3
-  nlinarith [hleft, hright, hU, hWidth3, hUPositive]
+  four_power_collision_arith
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
 theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
