@@ -34,6 +34,7 @@ import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import GSTPrefixOneOntologicalEscape
+import GSTInfiniteFourPowerNavigation
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -16928,8 +16929,115 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
   intro s n hs hn _hchild
   exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
--- The independently kernel-checked terminal closure beginning here was removed from the production
--- monolith. It depended on the quarantined legacy declaration
--- `h_creation_for_4pow`, while the attempted replacement module is explicitly
--- kept outside the production import closure. All preceding kernel-checked
--- infrastructure remains available for a future proved closure.
+/-- The independently kernel-checked width-three wave supplies the exact
+four-power creation master required by the ontological prefix-one adapter. -/
+theorem gst_four_power_creation_master_inline :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+      K hK5 hK7)
+
+/-- Public prefix-one theorem.  This route is entirely positive: the green
+width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift := by
+  exact gst_prefix_one_navigation_lift_of_master_inline
+    gst_four_power_creation_master_inline
+
+
+/-- The two consecutive power waves overlap at a Happy Gate.  The left branch
+    gives a digit two in `4^a`; the right branch gives a digit two shared by
+    `4^(a-1)` and `4^a`. -/
+def GSTPowerTwoWave (a : Nat) : Prop :=
+  hasTernaryTwo (4^a) = true ∨
+    GSTNavigationWitness (4^(a-1))
+
+/-- The exact product-language obstruction for two consecutive multiplication
+    waves.  It retains both carry coordinates and forbids a Happy Gate in each
+    wave at every ternary position. -/
+def GSTTwoWaveBadTrace (R : Nat) : Prop :=
+  ∀ j,
+    GSTBadPair (gstCarry R j) (gstDigit R j) ∧
+    GSTBadPair (gstCarry (4*R) j) (gstDigit (4*R) j)
+
+/-- Failure of both Navigation alternatives is exactly a complete two-wave
+    bad trace. -/
+theorem gst_twoWave_badTrace_of_no_navigation
+    (R : Nat) (hR : ¬ GSTNavigationWitness R)
+    (h4R : ¬ GSTNavigationWitness (4*R)) :
+    GSTTwoWaveBadTrace R := by
+  intro j
+  exact ⟨gstBadTrace_of_no_navigation_witness R hR j,
+    gstBadTrace_of_no_navigation_witness (4*R) h4R j⟩
+
+/-- Exact adjacent-power identity used to instantiate the two-wave automaton. -/
+theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
+    4 * 4^(a-1) = 4^a := by
+  have hae : a = (a-1)+1 := by omega
+  calc
+    4 * 4^(a-1) = 4^(a-1) * 4 := by ac_rfl
+    _ = 4^((a-1)+1) := (Nat.pow_succ 4 (a-1)).symm
+    _ = 4^a := by rw [← hae]
+
+/-- ONE remaining universal equation: beyond the certified modular base, two
+    adjacent power waves cannot both remain forever in ALT-minus/bad space.
+    This is strictly weaker than `GSTResidualNavigationLift` and is exactly
+    what the final digit theorem consumes. -/
+theorem gst_power_two_wave_large
+    (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
+  unfold GSTPowerTwoWave
+  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
+    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
+      gst_four_power_creation_master_inline a (by omega) (by omega)
+  have hnav : GSTNavigationWitness (4^a) :=
+    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
+  obtain ⟨p, hd, _hspace⟩ := hnav
+  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+
+/-- The weaker two-wave theorem closes the even exponent directly. -/
+theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
+    hasTernaryTwo (4^a) = true := by
+  by_cases ha500 : a ≤ 500
+  · exact modular_check_base a ha ha500
+  · have htwo : GSTPowerTwoWave a :=
+      gst_power_two_wave_large a (by omega)
+    rcases htwo with hcurrent | hprevious
+    · exact hcurrent
+    · obtain ⟨p, hd, hspace⟩ := hprevious
+      have hp : 1 ≤ p := by
+        cases p with
+        | zero =>
+            simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
+            have hmod : 4^(a-1) % 3 = 1 := by
+              rw [Nat.pow_mod]
+              simp
+            omega
+        | succ p => omega
+      have hCmod : gstCarry (4^(a-1)) p % 3 = 0 :=
+        gstGoodSpace_carry_mod3_zero (4^(a-1)) p hspace
+      have hClt : gstCarry (4^(a-1)) p < 4 :=
+        gstCarry_lt_four (4^(a-1)) p hp
+      have hgood : gstCarry (4^(a-1)) p = 0 ∨
+          gstCarry (4^(a-1)) p = 3 := by omega
+      have hlift := gst_pure_lift_or_forced_cascade
+        (4^(a-1)) p hp hd hgood
+      have hd4 : gstDigit (4 * 4^(a-1)) p = 2 := by
+        rcases hlift with h | h
+        · exact h.1
+        · exact h.1
+      rw [gst_four_pow_adjacent a (by omega)] at hd4
+      exact hasTernaryTwo_of_digit (4^a) p hd4
+
+theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false := by
+  by_cases hodd : n % 2 = 1
+  · exact erdos_ternary_2_odd_universal n hn hodd
+  · have heven : n % 2 = 0 := by omega
+    have h4eq : 2^n = 4^(n/2) := by
+      have hn_eq : n = 2 * (n/2) := by omega
+      rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+    rw [h4eq]
+    have ha : 5 ≤ n/2 := by omega
+    exact has_two_imp_not_no_two (4^(n/2))
+      (erdos_ternary_2_even_universal (n/2) ha)
