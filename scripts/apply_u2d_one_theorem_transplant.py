@@ -132,7 +132,7 @@ for module in attached_modules:
 
 # These compiled modules remain transitively imported, so delete only their
 # redundant inline packets. This also removes the obsolete active
-# h_creation_for_4pow copy instead of resurrecting it.
+# gst_four_power_creation_certificate_inline copy instead of resurrecting it.
 removed_transitive_packets = 0
 for module in TRANSITIVE_ATTACHED_DUPLICATES:
     s = remove_attached_packet(s, module)
@@ -290,7 +290,7 @@ theorem gst_prefix_one_u2d_atomic_collision_inline
 
 '''
 
-if 'h_creation_for_4pow' in helper:
+if 'gst_four_power_creation_certificate_inline' in helper:
     raise SystemExit('legacy h_creation linkage reintroduced into modern collision helper')
 if 'gst_h_creation_full_power_navigation_atomic' in helper:
     raise SystemExit('legacy full-power creation adapter reintroduced')

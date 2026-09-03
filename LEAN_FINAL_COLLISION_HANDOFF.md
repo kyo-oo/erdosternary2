@@ -310,7 +310,7 @@ The unresolved step is deriving cross-prefix nonpositivity from the ledger and r
 
 Do not use `gst_oscillation_from_navigation` as a witness producer.
 
-In current source it returns essentially the proposition it receives: logical shape `P -> P`. The old `h_creation_for_4pow` calls it as though it generates a stronger witness. The restored `Nat.strongRecOn` surgery repaired accidental recursion/elaboration, then exposed this deeper mathematical defect. Keep the recursion repair; do not return to this oscillation route.
+In current source it returns essentially the proposition it receives: logical shape `P -> P`. The old `gst_four_power_creation_certificate_inline` calls it as though it generates a stronger witness. The restored `Nat.strongRecOn` surgery repaired accidental recursion/elaboration, then exposed this deeper mathematical defect. Keep the recursion repair; do not return to this oscillation route.
 
 ### Standalone universal four-power module
 

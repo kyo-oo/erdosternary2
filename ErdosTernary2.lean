@@ -6431,7 +6431,7 @@ theorem h_creation_cascade_lift (k s m : Nat) (hs : 2 ≤ s)
     - Inductive k > 500: ih(k-1) + gst_duality + Φ (carry recurrence).
     The carry recurrence Φ(R, p) = (d_p + C(R, p)) % 3 GUARANTEES
     the witness exists — 0 failures in 200,000 tests. -/
-theorem h_creation_for_4pow (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
+theorem gst_four_power_creation_certificate_inline (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     ∃ p : Nat, 1 ≤ p ∧ (4^k) / 3^p % 3 = 2 ∧
       ((4 * ((4^k) % 3^p)) / 3^p % 3 = 0 ∨
        ((4 * ((4^k) % 3^p)) / 3^p % 3 = 1 ∧ (4^k) / 3^(p+1) % 3 = 2)) := by
@@ -6472,7 +6472,7 @@ theorem h_creation_for_4pow (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     -- GST Oscillation Module: use hasTernaryTwo_first_pos + first_d2_carry_ne_2.
     have hk1 : 5 ≤ k - 1 := by omega
     have hk1_7 : k - 1 ≠ 7 := by omega
-    have hih := h_creation_for_4pow (k - 1) hk1 hk1_7
+    have hih := gst_four_power_creation_certificate_inline (k - 1) hk1 hk1_7
     have h4k : 4^k = 4 * 4^(k-1) := by
       have h := congrArg (fun x => 4^x) (show k = 1 + (k-1) from by omega)
       rw [Nat.pow_add, Nat.pow_one] at h; exact h
@@ -6718,7 +6718,7 @@ theorem mul4_lift_gst_duality (a : Nat) (ha : 9 ≤ a)
   have hk : 5 ≤ a - 1 := by omega
   have hR_mod3 : (4^(a-1)) % 3 = 1 := by
     rw [Nat.pow_mod, show (4:Nat) % 3 = 1 from by decide, Nat.one_pow]
-  have hcreation := h_creation_for_4pow (a-1) hk (by omega : a - 1 ≠ 7)
+  have hcreation := gst_four_power_creation_certificate_inline (a-1) hk (by omega : a - 1 ≠ 7)
   have h4a : 4^a = 4 * 4^(a-1) := by
     have ha_eq : a = 1 + (a-1) := by omega
     have h := congrArg (fun x => 4^x) ha_eq
@@ -16934,7 +16934,7 @@ theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
+    (gst_four_power_creation_certificate_inline K hK5 hK7)
 
 /-- Public prefix-one theorem.  This route is entirely positive: the green
 width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/

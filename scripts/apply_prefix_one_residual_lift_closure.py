@@ -127,7 +127,7 @@ for forbidden in (
 # monolith. What matters for this surgery is that the NEW live replacement does
 # not depend on them; scanning all historical text produced false failures.
 for forbidden in (
-    'h_creation_for_4pow',
+    'gst_four_power_creation_certificate_inline',
     'gst_h_creation_full_power_navigation_atomic',
     'gst_full_power_navigation_descends_atomic',
 ):

@@ -14,7 +14,7 @@ old = '''theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
+    (gst_four_power_creation_certificate_inline K hK5 hK7)
 '''
 
 new = '''theorem gst_four_power_creation_master_inline :
@@ -34,7 +34,7 @@ end = text.find("theorem gst_prefix_one_navigation_lift", start)
 if start < 0 or end < 0:
     raise SystemExit("SOL56 surgery: production theorem window not found")
 window = text[start:end]
-if "h_creation_for_4pow" in window:
+if "gst_four_power_creation_certificate_inline" in window:
     raise SystemExit("SOL56 surgery: quarantined identifier remains active in master window")
 if "gst_oscillation_from_navigation" in window:
     raise SystemExit("SOL56 surgery: historical oscillation route remains active in master window")

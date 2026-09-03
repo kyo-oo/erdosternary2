@@ -33,7 +33,7 @@ new_master = '''theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
+    (gst_four_power_creation_certificate_inline K hK5 hK7)
 '''
 if old_master in s:
     s = s.replace(old_master, new_master, 1)

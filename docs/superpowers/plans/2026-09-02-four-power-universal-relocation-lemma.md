@@ -16,7 +16,7 @@
 - Do not search the internet.
 - Do not install or use a new local Lean installation; compile through GitHub Actions.
 - Do not use `sorry`, `admit`, `axiom`, `False.elim` from an unproved contradiction, or declarations whose axiom audit includes `sorryAx`.
-- Do not reactivate the quarantined `h_creation_for_4pow` chain.
+- Do not reactivate the quarantined `gst_four_power_creation_certificate_inline` chain.
 - Do not use `gst_oscillation_from_navigation`; its historical route explicitly contained unresolved deep cases.
 - Do not treat a successful dependency build as proof of the new universal lemma. The exact theorem file must compile and its axiom print must be clean.
 - Do not transplant a conditional theorem that accepts `FourPowerCreationMaster`, `FourPowerGraphForcing`, Navigation, or the desired relocation statement as an input.
@@ -521,7 +521,7 @@ git push origin sol/gpt56-canonical-tail-escape-20260827
 **Interfaces:**
 
 - Consumes: the completed, axiom-clean proof term for `FourPowerCreationMaster`.
-- Produces: a compiling `gst_four_power_creation_master_inline` with no reference to `h_creation_for_4pow`.
+- Produces: a compiling `gst_four_power_creation_master_inline` with no reference to `gst_four_power_creation_certificate_inline`.
 
 - [ ] **Step 1: Remove the broken identifier use**
 
@@ -531,7 +531,7 @@ Delete this proof body:
 by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
+    (gst_four_power_creation_certificate_inline K hK5 hK7)
 ```
 
 - [ ] **Step 2: Insert the completed master proof**
@@ -549,7 +549,7 @@ theorem gst_four_power_creation_master_inline :
 - [ ] **Step 3: Verify the obsolete route is absent from the active declaration graph**
 
 ```bash
-rg -n "h_creation_for_4pow|gst_oscillation_from_navigation" ErdosTernary2.lean
+rg -n "gst_four_power_creation_certificate_inline|gst_oscillation_from_navigation" ErdosTernary2.lean
 ```
 
 Expected: occurrences may remain only inside clearly quarantined comments; no active production theorem may reference them.
@@ -630,7 +630,7 @@ The task is complete only if the committed production monolith compiles, the rel
 
 ## Failure interpretations for Sol
 
-- `Unknown identifier h_creation_for_4pow`: the old quarantined theorem is still wired into production. This is a surgery failure, not a new mathematical result.
+- `Unknown identifier gst_four_power_creation_certificate_inline`: the old quarantined theorem is still wired into production. This is a surgery failure, not a new mathematical result.
 - Goal contains only the latent triple and asks for a Happy existential: this is the intended universal-relocation problem. Continue the mathematical derivation there.
 - A proof requires `digit(K+1,p+1)=2`: derive it or construct a different row `q`; do not infer it from `carry(K+1,p+1)=3`.
 - A proposed lemma accepts `FourPowerGraphForcing`, `FourPowerCreationMaster`, Navigation, or the desired Happy existential: it is circular and cannot close the production DAG.
@@ -646,7 +646,7 @@ The task is complete only if the committed production monolith compiles, the rel
 - [ ] Bases `K = 5`, `K = 6`, and `K = 8` compile by exact arithmetic.
 - [ ] `four_power_graph_forcing : FourPowerGraphForcing` is kernel-green.
 - [ ] `four_power_creation_master : FourPowerCreationMaster` is kernel-green.
-- [ ] `gst_four_power_creation_master_inline` no longer references `h_creation_for_4pow`.
+- [ ] `gst_four_power_creation_master_inline` no longer references `gst_four_power_creation_certificate_inline`.
 - [ ] The monolith compiles.
 - [ ] Axiom audit contains no `sorryAx`.
 - [ ] The unchanged comparator prints `Your solution is okay!`.

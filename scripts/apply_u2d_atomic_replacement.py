@@ -20,7 +20,7 @@ if imp not in s:
 start_marker = '/-- Literal BIG-N finite-support horizon for the canonical child information. -/'
 end_marker = '/-- The two consecutive power waves overlap at a Happy Gate.'
 installed_marker = '-- SOL56 U2D ATOMIC PREFIX-ONE CLOSURE'
-creation_marker = 'theorem h_creation_for_4pow'
+creation_marker = 'theorem gst_four_power_creation_certificate_inline'
 
 if start_marker not in s:
     if installed_marker in s and 'theorem gst_prefix_one_u2d_atomic_collision_inline' in s:
@@ -31,7 +31,7 @@ if start_marker not in s:
 if end_marker not in s:
     raise SystemExit('prefix-one end marker not found')
 if creation_marker not in s:
-    raise SystemExit('existing production h_creation_for_4pow declaration not found')
+    raise SystemExit('existing production gst_four_power_creation_certificate_inline declaration not found')
 
 start = s.index(start_marker)
 end = s.index(end_marker, start)
@@ -42,10 +42,10 @@ if creation_start >= start:
     try:
         creation_end = s.index('\n/--', creation_start)
     except ValueError as exc:
-        raise SystemExit('could not locate end of h_creation_for_4pow declaration') from exc
+        raise SystemExit('could not locate end of gst_four_power_creation_certificate_inline declaration') from exc
     creation_decl = s[creation_start:creation_end].rstrip() + '\n\n'
     if creation_decl.count(creation_marker) != 1:
-        raise SystemExit('production h_creation_for_4pow extraction multiplicity changed')
+        raise SystemExit('production gst_four_power_creation_certificate_inline extraction multiplicity changed')
     if creation_start < end:
         creation_position = 'inside'
         # The normal seam replacement removes the original copy.
@@ -60,7 +60,7 @@ The carry-one branch is advanced by one exact GST carry edge. -/
 theorem gst_h_creation_full_power_navigation_atomic
     (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     GSTNavigationWitness (4^k) := by
-  obtain ⟨p, hp1, hd, hcase⟩ := h_creation_for_4pow k hk5 hk7
+  obtain ⟨p, hp1, hd, hcase⟩ := gst_four_power_creation_certificate_inline k hk5 hk7
   have hClt : gstCarry (4^k) p < 4 := gstCarry_lt_four _ _ hp1
   rcases hcase with hmod0 | hmod1
   · have hCmod : gstCarry (4^k) p % 3 = 0 := by
@@ -271,7 +271,7 @@ theorem gst_prefix_one_navigation_lift : GSTPrefixOneNavigationLift := by
   exact gst_prefix_one_u2d_atomic_collision_inline s n hs hn hchild hBad
 
 #print axioms hCreationCheck_univ
-#print axioms h_creation_for_4pow
+#print axioms gst_four_power_creation_certificate_inline
 #print axioms gst_h_creation_full_power_navigation_atomic
 #print axioms gst_full_power_navigation_descends_atomic
 #print axioms gst_prefix_one_u2d_atomic_collision_inline
@@ -288,7 +288,7 @@ if ring_count != 1:
 s = s.replace(old_ring, 'convert hshared using 1 <;> ring_nf', 1)
 
 for required in (
-    'theorem h_creation_for_4pow',
+    'theorem gst_four_power_creation_certificate_inline',
     'theorem gst_h_creation_full_power_navigation_atomic',
     'theorem gst_full_power_navigation_descends_atomic',
     'theorem gst_prefix_one_u2d_atomic_collision_inline',

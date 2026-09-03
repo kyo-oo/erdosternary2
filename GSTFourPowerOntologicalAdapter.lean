@@ -16,7 +16,7 @@ def CreationCertificate (R : Nat) : Prop :=
       R / 3^(p+1) % 3 = 2))
 
 /-- Exact standalone proposition formerly intended to be supplied by
-`h_creation_for_4pow`.  It is a dependency, not an axiom. -/
+`gst_four_power_creation_certificate_inline`.  It is a dependency, not an axiom. -/
 def FourPowerCreationMaster : Prop :=
   ∀ K : Nat, 5 ≤ K → K ≠ 7 → CreationCertificate (4^K)
 

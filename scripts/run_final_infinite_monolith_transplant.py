@@ -135,7 +135,7 @@ if packet_marker_re.findall(s2) != packet_markers_before:
 
 region = s2[start:new_end]
 for forbidden in (
-    'h_creation_for_4pow',
+    'gst_four_power_creation_certificate_inline',
     'gst_residual_navigation_lift',
     'canonical_perfect_power_block_collision',
     'let r := v3 n',

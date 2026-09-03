@@ -6,14 +6,14 @@ text = path.read_text(encoding="utf-8")
 bad = """/-- The independently kernel-checked w/-
 The former terminal closure beginning here was removed from the production
 monolith. It depended on the quarantined legacy declaration
-`h_creation_for_4pow`, while the attempted replacement module is explicitly
+`gst_four_power_creation_certificate_inline`, while the attempted replacement module is explicitly
 kept outside the production import closure. All preceding kernel-checked
 infrastructure remains available for a future proved closure.
 -/"""
 
 good = """-- The independently kernel-checked terminal closure beginning here was removed from the production
 -- monolith. It depended on the quarantined legacy declaration
--- `h_creation_for_4pow`, while the attempted replacement module is explicitly
+-- `gst_four_power_creation_certificate_inline`, while the attempted replacement module is explicitly
 -- kept outside the production import closure. All preceding kernel-checked
 -- infrastructure remains available for a future proved closure."""
 

@@ -5,7 +5,7 @@ import textwrap
 p = Path('ErdosTernary2.lean')
 s = p.read_text(encoding='utf-8')
 
-creation_marker = 'theorem h_creation_for_4pow'
+creation_marker = 'theorem gst_four_power_creation_certificate_inline'
 next_marker = '\ntheorem mul4_lift_gst_duality'
 helper_marker = 'theorem gst_h_creation_full_power_navigation_atomic'
 helper_next = 'theorem gst_full_power_navigation_descends_atomic'
@@ -14,7 +14,7 @@ live_stamp = '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED\n'
 helper_start = s.index(helper_marker)
 helper_end = s.index(helper_next, helper_start)
 helper = s[helper_start:helper_end]
-required_call = 'h_creation_for_4pow k hk5 hk7'
+required_call = 'gst_four_power_creation_certificate_inline k hk5 hk7'
 if required_call not in helper:
     raise SystemExit('atomic adapter call changed')
 
@@ -26,7 +26,7 @@ qend = s.index(next_marker, qstart)
 source_decl = s[qstart:qend].rstrip() + '\n'
 proof_anchor = ':= by\n'
 head, body = source_decl.split(proof_anchor, 1)
-recursive_old = '    have hih := h_creation_for_4pow (k - 1) hk1 hk1_7\n'
+recursive_old = '    have hih := gst_four_power_creation_certificate_inline (k - 1) hk1 hk1_7\n'
 recursive_new = '    have hih := ih (k - 1) (by omega) hk1 hk1_7\n'
 if recursive_old not in body:
     raise SystemExit('quarantined recursive call shape changed')
