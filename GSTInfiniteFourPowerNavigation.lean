@@ -153,10 +153,14 @@ theorem power_three_step_collision
   have hleftDigitExact := graph_phase_digit_window_boundary_exact E 0 b (q+1)
   have hrightDigitExact := graph_phase_digit_window_boundary_exact E N b (q+1)
 
-  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 hleftExact hrightExact hleftDigitExact hrightDigitExact ⊢
+  rw [hleftExact] at hleft
+  rw [hrightExact] at hright
+  rw [hleftDigitExact] at hleft
+  rw [hrightDigitExact] at hright
+  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 hUPositive ⊢
   dsimp [potentialWith, unifiedState] at hU hUPositive
-  nlinarith [hleft, hright, hU, hWidth3, hUPositive,
-    hleftExact, hrightExact, hleftDigitExact, hrightDigitExact]
+  norm_num at hU hUPositive hleft hright hWidth3
+  nlinarith [hleft, hright, hU, hWidth3, hUPositive]
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
 theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
