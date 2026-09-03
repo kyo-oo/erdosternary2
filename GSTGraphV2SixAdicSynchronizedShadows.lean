@@ -101,7 +101,10 @@ theorem dyadic_shadow_mul_four_pow_iff
       _ = (2 : Int)^(2*t) := by rw [pow_mul]
   have hpow : (2 : Int)^k =
       (2 : Int)^(2*t) * (2 : Int)^(k-2*t) := by
-    rw [← hk, pow_add]
+    calc
+      (2 : Int)^k = (2 : Int)^(2*t + (k-2*t)) :=
+        congrArg (fun n : Nat => (2 : Int)^n) hk.symm
+      _ = (2 : Int)^(2*t) * (2 : Int)^(k-2*t) := by rw [pow_add]
   constructor
   · rintro ⟨q, hq⟩
     refine ⟨q, ?_⟩
