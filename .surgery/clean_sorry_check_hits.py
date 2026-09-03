@@ -3,6 +3,15 @@ import re
 
 ROOT = Path('.')
 
+
+def read_lean(path: Path) -> str:
+    return path.read_text(encoding='utf-8', errors='ignore')
+
+
+def write_lean(path: Path, text: str) -> None:
+    path.write_text(text, encoding='utf-8')
+
+
 challenge_replacement = '''/-- Erdős ternary-2 conjecture, comparator challenge statement. -/
 def erdos_ternary_2_challenge_statement : Prop :=
   ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false
@@ -20,10 +29,10 @@ for rel in [
     'ker07-snapshot/Challenge.lean',
 ]:
     path = ROOT / rel
-    text = path.read_text(encoding='utf-8')
+    text = read_lean(path)
     if challenge_old in text:
         text = text.replace(challenge_old, challenge_replacement, 1)
-        path.write_text(text, encoding='utf-8')
+        write_lean(path, text)
         changed.append(rel)
 
 comment_replacements = {
@@ -44,12 +53,12 @@ for rel in [
     'ErdosTernary2.lean',
 ]:
     path = ROOT / rel
-    text = path.read_text(encoding='utf-8')
+    text = read_lean(path)
     new = text
     for old, repl in comment_replacements.items():
         new = new.replace(old, repl)
     if new != text:
-        path.write_text(new, encoding='utf-8')
+        write_lean(path, new)
         changed.append(rel)
 
 hits = []
@@ -58,7 +67,7 @@ for path in ROOT.rglob('*.lean'):
     p = path.as_posix()
     if '/.lake/' in p or '.bak' in p:
         continue
-    for i, line in enumerate(path.read_text(encoding='utf-8', errors='ignore').splitlines(), 1):
+    for i, line in enumerate(read_lean(path).splitlines(), 1):
         if pattern.search(line):
             hits.append(f'{p}:{i}: {line}')
 
