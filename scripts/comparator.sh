@@ -39,6 +39,9 @@ if lake build > "$BUILD_LOG" 2>&1; then
 else
   echo -e "  ${RED}✗ Build FAILED${RESET}"
   echo ""
+  echo "--- Build errors / failing target trail ---"
+  grep -nE 'error:|Some required targets|logged failures|Build FAILED|build failed|GSTGraphV2SixAdicOntologicalGeometry' "$BUILD_LOG" | tail -120 || true
+  echo ""
   echo "--- Build output (last 240 lines) ---"
   tail -240 "$BUILD_LOG"
   rm -f "$BUILD_LOG"
