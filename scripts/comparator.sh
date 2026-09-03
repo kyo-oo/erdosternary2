@@ -39,8 +39,8 @@ if lake build > "$BUILD_LOG" 2>&1; then
 else
   echo -e "  ${RED}✗ Build FAILED${RESET}"
   echo ""
-  echo "--- Build output (last 40 lines) ---"
-  tail -40 "$BUILD_LOG"
+  echo "--- Build output (last 240 lines) ---"
+  tail -240 "$BUILD_LOG"
   rm -f "$BUILD_LOG"
   echo ""
   echo -e "${RED}=== COMPARATOR RESULT: FAIL (build errors) ===${RESET}"
