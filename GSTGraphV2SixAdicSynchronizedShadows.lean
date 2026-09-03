@@ -59,4 +59,76 @@ theorem six_ball_membership_iff_shadows
       DyadicShadowAt k x c ∧ TriadicShadowAt k x c := by
   exact six_iso_iff_synchronized_shadows
 
+
+/-! ## Exact skew action of the physical x4 chart -/
+
+/-- Multiplication by `4^t` is a genuine isometry of every triadic shadow.
+    This is the odd-prime half of the physical chart: four is a unit modulo
+    every power of three. -/
+theorem triadic_shadow_mul_four_pow_iff
+    (k t : Nat) (x y : Int) :
+    TriadicShadowAt k ((4 : Int)^t * x) ((4 : Int)^t * y) ↔
+      TriadicShadowAt k x y := by
+  constructor
+  · rintro ⟨q, hq⟩
+    change (3 : Int)^k ∣ x-y
+    have hdiv : (3 : Int)^k ∣ (4 : Int)^t * (x-y) := by
+      refine ⟨q, ?_⟩
+      calc
+        (4 : Int)^t * (x-y) =
+            (4 : Int)^t*x - (4 : Int)^t*y := by ring
+        _ = (3 : Int)^k * q := hq
+    have hcop : IsCoprime ((3 : Int)^k) ((4 : Int)^t) :=
+      (by norm_num : IsCoprime (3 : Int) 4).pow
+    exact hcop.dvd_of_dvd_mul_left hdiv
+  · rintro ⟨q, hq⟩
+    refine ⟨(4 : Int)^t*q, ?_⟩
+    calc
+      (4 : Int)^t*x - (4 : Int)^t*y = (4 : Int)^t*(x-y) := by ring
+      _ = (4 : Int)^t*((3 : Int)^k*q) := by rw [hq]
+      _ = (3 : Int)^k*((4 : Int)^t*q) := by ring
+
+/-- Below the dyadic saturation point, multiplication by `4^t = 2^(2t)`
+    shifts dyadic resolution by exactly `2t`, in both directions. -/
+theorem dyadic_shadow_mul_four_pow_iff
+    (k t : Nat) (hkt : 2*t ≤ k) (x y : Int) :
+    DyadicShadowAt k ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      DyadicShadowAt (k-2*t) x y := by
+  have hk : 2*t + (k-2*t) = k := Nat.add_sub_of_le hkt
+  have h4 : (4 : Int)^t = (2 : Int)^(2*t) := by
+    calc
+      (4 : Int)^t = ((2 : Int)^2)^t := by norm_num
+      _ = (2 : Int)^(2*t) := by rw [pow_mul]
+  constructor
+  · rintro ⟨q, hq⟩
+    refine ⟨q, ?_⟩
+    have hc : (2 : Int)^(2*t)*(x-y) =
+        (2 : Int)^(2*t)*((2 : Int)^(k-2*t)*q) := by
+      calc
+        (2 : Int)^(2*t)*(x-y) =
+            (4 : Int)^t*x - (4 : Int)^t*y := by rw [h4]; ring
+        _ = (2 : Int)^k*q := hq
+        _ = (2 : Int)^(2*t)*((2 : Int)^(k-2*t)*q) := by
+          rw [← pow_add, hk]
+          ring
+    exact mul_left_cancel₀ (by positivity : (2 : Int)^(2*t) ≠ 0) hc
+  · rintro ⟨q, hq⟩
+    refine ⟨q, ?_⟩
+    calc
+      (4 : Int)^t*x - (4 : Int)^t*y =
+          (2 : Int)^(2*t)*(x-y) := by rw [h4]; ring
+      _ = (2 : Int)^(2*t)*((2 : Int)^(k-2*t)*q) := by rw [hq]
+      _ = (2 : Int)^k*q := by rw [← pow_add, hk]
+
+/-- Exact six-adic information retained by the physical x4 chart before
+    dyadic saturation: full triadic depth and dyadic depth reduced by `2t`. -/
+theorem six_iso_mul_four_pow_iff_skew_shadows
+    (k t : Nat) (hkt : 2*t ≤ k) (x y : Int) :
+    SixAdicIsoAt k ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      DyadicShadowAt (k-2*t) x y ∧ TriadicShadowAt k x y := by
+  rw [six_iso_iff_synchronized_shadows,
+    dyadic_shadow_mul_four_pow_iff k t hkt x y,
+    triadic_shadow_mul_four_pow_iff k t x y]
+
+
 end GSTGraphV2SixAdicSynchronizedShadows
