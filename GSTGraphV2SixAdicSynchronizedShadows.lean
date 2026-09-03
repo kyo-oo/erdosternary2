@@ -151,14 +151,20 @@ theorem dyadic_shadow_mul_four_pow_of_saturated
     calc
       (4 : Int)^t = ((2 : Int)^2)^t := by norm_num
       _ = (2 : Int)^(2*t) := by rw [pow_mul]
-  rcases (pow_dvd_pow (2 : Int) hkt) with ⟨r, hr⟩
-  refine ⟨r*(x-y), ?_⟩
+  have hfill : k + (2*t-k) = 2*t := Nat.add_sub_of_le hkt
+  have hpow : (2 : Int)^(2*t) =
+      (2 : Int)^k * (2 : Int)^(2*t-k) := by
+    calc
+      (2 : Int)^(2*t) = (2 : Int)^(k + (2*t-k)) :=
+        congrArg (fun n : Nat => (2 : Int)^n) hfill.symm
+      _ = (2 : Int)^k * (2 : Int)^(2*t-k) := by rw [pow_add]
+  refine ⟨(2 : Int)^(2*t-k)*(x-y), ?_⟩
   calc
     (4 : Int)^t*x - (4 : Int)^t*y = (2 : Int)^(2*t)*(x-y) := by
       rw [h4]
       ring
-    _ = ((2 : Int)^k*r)*(x-y) := by rw [hr]
-    _ = (2 : Int)^k*(r*(x-y)) := by ring
+    _ = ((2 : Int)^k * (2 : Int)^(2*t-k))*(x-y) := by rw [hpow]
+    _ = (2 : Int)^k*((2 : Int)^(2*t-k)*(x-y)) := by ring
 
 /-- Exact dyadic skew law for the physical `x4` chart, including the saturated
     branch.  The exponent `k-2*t` is Lean's truncated natural subtraction. -/
