@@ -67,4 +67,40 @@ theorem six_pow_dvd_four_pow_at_saturation_iff_triadic
       (3 : Int)^(2*t) ∣ x-y := by
   exact six_pow_dvd_four_pow_mul_sub_iff_triadic_of_saturated (2*t) t (by rfl) x y
 
+/-- Consecutive positive four-powers always meet at six-adic depth one.  This
+    is the exact physical pair occurring at a propagation step. -/
+theorem consecutive_four_powers_six_iso_one
+    (t : Nat) (ht : 1 ≤ t) :
+    SixAdicIsoAt 1 ((4 : Int)^(t+1)) ((4 : Int)^t) := by
+  have hkt : 1 ≤ 2*t := by omega
+  rw [pow_succ]
+  conv_rhs => rw [show (4 : Int)^t = (4 : Int)^t * 1 by ring]
+  apply (six_iso_mul_four_pow_iff_triadic_of_saturated 1 t hkt 4 1).2
+  refine ⟨1, ?_⟩
+  norm_num
+
+/-- The same consecutive four-power pair never reaches six-adic depth two.
+    Thus the saturated six-adic contact has exact depth one; any deeper
+    relocation information must come from the retained triadic coordinates,
+    not from an unproved six-adic strengthening. -/
+theorem consecutive_four_powers_not_six_iso_two
+    (t : Nat) (ht : 1 ≤ t) :
+    ¬ SixAdicIsoAt 2 ((4 : Int)^(t+1)) ((4 : Int)^t) := by
+  have hkt : 2 ≤ 2*t := by omega
+  rw [pow_succ]
+  conv_rhs => rw [show (4 : Int)^t = (4 : Int)^t * 1 by ring]
+  intro hsix
+  have htri : TriadicShadowAt 2 (4 : Int) 1 :=
+    (six_iso_mul_four_pow_iff_triadic_of_saturated 2 t hkt 4 1).1 hsix
+  rcases htri with ⟨q, hq⟩
+  norm_num at hq
+
+/-- Exact six-adic contact depth of consecutive positive powers of four. -/
+theorem consecutive_four_powers_exact_six_depth_one
+    (t : Nat) (ht : 1 ≤ t) :
+    SixAdicIsoAt 1 ((4 : Int)^(t+1)) ((4 : Int)^t) ∧
+      ¬ SixAdicIsoAt 2 ((4 : Int)^(t+1)) ((4 : Int)^t) := by
+  exact ⟨consecutive_four_powers_six_iso_one t ht,
+    consecutive_four_powers_not_six_iso_two t ht⟩
+
 end GSTGraphV2SixAdicSaturationCollapse
