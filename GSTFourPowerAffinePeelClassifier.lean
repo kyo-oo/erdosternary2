@@ -45,15 +45,19 @@ theorem noCommonTwo_three_mul_iff (q : Nat) :
 theorem noCommonTwo_three_mul_add_one_iff (q : Nat) :
     (¬ CommonTwo (3*q+1)) ↔
       BadChannel 1 (peel1 (affineOrbit q)) := by
+  have hmod : (3*q+1) % 3 = 1 := by omega
   rw [noCommonTwo_low_trit_branch]
-  simp [tail3_affineOrbit_three_mul_add_one]
+  rw [tail3_affineOrbit_three_mul_add_one]
+  simp [hmod]
 
 /-- Exact first exponent-trit classifier, branch `2`. -/
 theorem noCommonTwo_three_mul_add_two_iff (q : Nat) :
     (¬ CommonTwo (3*q+2)) ↔
       BadChannel 3 (peel2 (affineOrbit q)) := by
+  have hmod : (3*q+2) % 3 = 2 := by omega
   rw [noCommonTwo_low_trit_branch]
-  simp [tail3_affineOrbit_three_mul_add_two]
+  rw [tail3_affineOrbit_three_mul_add_two]
+  simp [hmod]
 
 /-- The low ternary digit of the `0` peel is inherited from its input. -/
 theorem peel0_mod_three (x : Nat) : peel0 x % 3 = x % 3 := by
@@ -86,7 +90,11 @@ theorem lowDigit_peel1_affineOrbit (q : Nat) :
 theorem lowDigit_peel2_affineOrbit (q : Nat) :
     lowDigit (peel2 (affineOrbit q)) = (q + 1) % 3 := by
   unfold lowDigit
-  rw [peel2_mod_three, affineOrbit_mod_three]
+  rw [peel2_mod_three]
+  calc
+    (affineOrbit q + 1) % 3 = (affineOrbit q % 3 + 1 % 3) % 3 := Nat.add_mod _ _ _
+    _ = (q % 3 + 1 % 3) % 3 := by rw [affineOrbit_mod_three]
+    _ = (q + 1) % 3 := (Nat.add_mod q 1 3).symm
 
 #check tail3_affineOrbit_three_mul
 #check tail3_affineOrbit_three_mul_add_one
