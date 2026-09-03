@@ -23,8 +23,8 @@ open GSTU2DEventTransport
 
 /-- Focused arithmetic closer for the four-power collision seam.
 It normalizes the local phase-window/telescope names and then tries the
-bounded arithmetic engines in a fixed order.  No axiom, no `sorry`, no
-unbounded search. -/
+bounded arithmetic engines in a fixed order.  No axiom, no hole placeholder,
+no unbounded search. -/
 elab "four_power_collision_arith" : tactic => do
   Lean.Elab.Tactic.evalTactic (← `(tactic|
     first
