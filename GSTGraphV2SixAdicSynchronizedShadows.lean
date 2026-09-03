@@ -99,6 +99,9 @@ theorem dyadic_shadow_mul_four_pow_iff
     calc
       (4 : Int)^t = ((2 : Int)^2)^t := by norm_num
       _ = (2 : Int)^(2*t) := by rw [pow_mul]
+  have hpow : (2 : Int)^k =
+      (2 : Int)^(2*t) * (2 : Int)^(k-2*t) := by
+    rw [← hk, pow_add]
   constructor
   · rintro ⟨q, hq⟩
     refine ⟨q, ?_⟩
@@ -109,7 +112,7 @@ theorem dyadic_shadow_mul_four_pow_iff
             (4 : Int)^t*x - (4 : Int)^t*y := by rw [h4]; ring
         _ = (2 : Int)^k*q := hq
         _ = (2 : Int)^(2*t)*((2 : Int)^(k-2*t)*q) := by
-          rw [← pow_add, hk]
+          rw [hpow]
           ring
     exact mul_left_cancel₀ (by positivity : (2 : Int)^(2*t) ≠ 0) hc
   · rintro ⟨q, hq⟩
@@ -118,7 +121,7 @@ theorem dyadic_shadow_mul_four_pow_iff
       (4 : Int)^t*x - (4 : Int)^t*y =
           (2 : Int)^(2*t)*(x-y) := by rw [h4]; ring
       _ = (2 : Int)^(2*t)*((2 : Int)^(k-2*t)*q) := by rw [hq]
-      _ = (2 : Int)^k*q := by rw [← pow_add, hk]
+      _ = (2 : Int)^k*q := by rw [hpow]; ring
 
 /-- Exact six-adic information retained by the physical x4 chart before
     dyadic saturation: full triadic depth and dyadic depth reduced by `2t`. -/
