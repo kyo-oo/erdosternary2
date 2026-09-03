@@ -15,20 +15,36 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Patch unterminated Erdos terminal comment
+      - name: Restore green monolith transplant
         shell: bash
         run: |
           set -euo pipefail
-          python3 .surgery/fix_erdos_terminal_comment.py
-          git diff -- ErdosTernary2.lean
+          GREEN_COMMIT="4f1cbe20f0e75c5beaa35f832d8091bc1fd68dae"
+          git checkout "$GREEN_COMMIT" -- ErdosTernary2.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("lakefile.toml")
+          text = path.read_text(encoding="utf-8")
+          root = '  "GSTInfiniteFourPowerNavigation",\n'
+          if root not in text:
+              marker = '  "GSTPerfectPowerTailNavigation",\n'
+              if marker not in text:
+                  raise SystemExit("GSTPerfectPowerTailNavigation marker missing in lakefile.toml")
+              text = text.replace(marker, root + marker, 1)
+              path.write_text(text, encoding="utf-8")
+              print("FOUR_POWER_NAV_ROOT_ADDED=1")
+          else:
+              print("FOUR_POWER_NAV_ROOT_ALREADY_PRESENT=1")
+          PY
+          git diff -- ErdosTernary2.lean lakefile.toml
           git diff --check
-          if ! git diff --quiet -- ErdosTernary2.lean; then
+          if ! git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add ErdosTernary2.lean
-            git commit -m "Fix ErdosTernary2 terminal comment syntax"
+            git add ErdosTernary2.lean lakefile.toml
+            git commit -m "Restore green four-power monolith transplant"
             git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
           fi
 
