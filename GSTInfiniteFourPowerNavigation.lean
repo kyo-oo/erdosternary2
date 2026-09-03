@@ -30,20 +30,20 @@ elab "four_power_collision_arith" : tactic => do
     first
       | contradiction
       | omega
-      | (norm_num at * <;>
-          nlinarith [hleft, hright, hU, hWidth3, hUPositive,
-            hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
-      | (ring_nf at hU hUPositive hleft hright hWidth3 ⊢ <;>
-          nlinarith [hleft, hright, hU, hWidth3, hUPositive,
-            hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
+      | nlinarith
+      | (norm_num at * <;> first
+          | omega
+          | nlinarith)
+      | (ring_nf at * <;> first
+          | omega
+          | nlinarith)
       | (simp_all (config := { maxSteps := 1000000 }) only [
             Nat.add_assoc, Nat.add_comm, Nat.add_left_comm,
             Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm,
             Nat.pow_succ]
           <;> first
             | omega
-            | nlinarith [hleft, hright, hU, hWidth3, hUPositive,
-                hleftExact, hrightExact, hleftDigitExact, hrightDigitExact])
+            | nlinarith)
   ))
 
 /-- Public bridge surface for the green six-adic skew theorem used by the
