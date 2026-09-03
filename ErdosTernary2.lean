@@ -34,6 +34,7 @@ import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import GSTPrefixOneOntologicalEscape
+import GSTInfiniteFourPowerNavigation
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -16934,7 +16935,8 @@ theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (h_creation_for_4pow K hK5 hK7)
+    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+      K hK5 hK7)
 
 /-- Public prefix-one theorem.  This route is entirely positive: the green
 width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
