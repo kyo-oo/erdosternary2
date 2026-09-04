@@ -63,6 +63,7 @@ roots = [
   "GSTGraphV2HandwrittenOmegaUBlock",
   "GSTGraphV2InfiniteControl",
   "GSTGraphV2InfiniteControllerBridge",
+  "GSTGraphV2NonEuclidean",
   "GSTGraphV2PerfectPowerAncestry",
   "GSTGraphV2PerfectPowerBlockCollision",
   "GSTGraphV2PerfectPowerBlockProbe",
