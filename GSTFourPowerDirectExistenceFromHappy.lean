@@ -2,6 +2,7 @@ import GSTFourPowerDirectExistence
 import GSTFourPowerExactExponentPeriod
 import GSTFourPowerDirectAdditionCarry
 import GSTFourPowerDirectNo22
+import GSTFourPowerNo22Magnitude
 import GSTFourPowerAffinePeelClassifier
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectHappyBridge
@@ -17,6 +18,7 @@ open GSTFourPowerDirectResidue
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectAdditionCarry
 open GSTFourPowerDirectNo22
+open GSTFourPowerNo22Magnitude
 open GSTFourPowerExponentTritObstruction
 open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineChannelAutomaton
@@ -30,6 +32,8 @@ open GSTFourPowerDirectCreationMaster
 positive replacement for the old opaque navigation failure packet: every field
 is extracted from the direct residue/period/affine/no-22/failure-state spine. -/
 structure DirectBadDossier (K : Nat) : Prop where
+  exactExponentPeriod :
+    ∀ p n : Nat, 4^n % 3^(p+1) = 1 ↔ 3^p ∣ n
   noMod9Five : K % 9 ≠ 5
   noMod9Six : K % 9 ≠ 6
   noMod27Fourteen : K % 27 ≠ 14
@@ -40,6 +44,8 @@ structure DirectBadDossier (K : Nat) : Prop where
   noSource22 :
     ∀ p : Nat,
       ¬ (digit3 (4^K) p = 2 ∧ digit3 (4^K) (p+1) = 2)
+  sourceNo22MagnitudeBound :
+    ∀ m : Nat, 4^K < 9^m → 8 * 4^K ≤ 7 * (9^m - 1)
   exponentTritLaw :
     ∀ p : Nat,
       digit3 (4^(exponentPrefix K p)) (p+1) =
@@ -52,8 +58,9 @@ structure DirectBadDossier (K : Nat) : Prop where
     (K % 3 = 2 ∧ BadChannel 3 (tail3 (affineOrbit K)))
 
 /-- Build the full direct bad-state dossier from `¬ CommonTwo K`.  This theorem
-is intentionally broad: it forces the residue filters, exact exponent-trit
-obstruction, source no-`22` law, and affine low-trit branch simultaneously. -/
+is intentionally broad: it forces the exact exponent period law, residue
+filters, no-`22` source language, sharp no-`22` magnitude bound, exact
+exponent-trit obstruction, and affine low-trit branch simultaneously. -/
 theorem noCommonTwo_builds_direct_bad_dossier
     (K : Nat) (hNo : ¬ CommonTwo K) :
     DirectBadDossier K := by
@@ -67,6 +74,7 @@ theorem noCommonTwo_builds_direct_bad_dossier
   have htrit := noCommonTwo_all_exponent_trit_laws K hNo
   have haff := (noCommonTwo_low_trit_branch K).1 hNo
   exact {
+    exactExponentPeriod := GSTFourPowerExactExponentPeriod.pow4_mod_one_iff_three_pow_dvd
     noMod9Five := h9.1
     noMod9Six := h9.2
     noMod27Fourteen := h27.1
@@ -75,6 +83,9 @@ theorem noCommonTwo_builds_direct_bad_dossier
     noMod27TwentyFive := h27.2.2.2
     noRowFourClass := h81
     noSource22 := h22
+    sourceNo22MagnitudeBound := by
+      intro m hm
+      exact no22_nine_power_bound (4^K) m hm h22
     exponentTritLaw := htrit
     affineLowBranch := haff
   }
@@ -98,23 +109,16 @@ theorem happy_row_to_commonTwo
     have hcarryEq :
         directCarry4 (4^K) p = GSTCanonicalTailStateIso.carry4 (4^K) p := by
       rfl
-    have hCmod : directCarry4 (4^K) p % 3 = 0 := by
+    have hcarryCases : directCarry4 (4^K) p = 0 ∨ directCarry4 (4^K) p = 3 := by
       rw [hcarryEq]
-      rcases hHappy.2 with h0 | h3
+      exact hHappy.2
+    have ht4 : digit3 (4 * (4^K)) p = 2 := by
+      rw [digit3_four_mul, hd]
+      rcases hcarryCases with h0 | h3
       · rw [h0]
         norm_num
       · rw [h3]
         norm_num
-    have ht4 : digit3 (4 * (4^K)) p = 2 := by
-      calc
-        digit3 (4 * (4^K)) p
-            = (digit3 (4^K) p + directCarry4 (4^K) p) % 3 :=
-              digit3_four_mul (4^K) p
-        _ = (2 + directCarry4 (4^K) p) % 3 := by rw [hd]
-        _ = (2 + directCarry4 (4^K) p % 3) % 3 := by
-              rw [Nat.add_mod]
-              norm_num
-        _ = 2 := by rw [hCmod]; norm_num
     simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using ht4
 
 /-- Closed four-power direct existence theorem.  Rows `5` and `6` are discharged
