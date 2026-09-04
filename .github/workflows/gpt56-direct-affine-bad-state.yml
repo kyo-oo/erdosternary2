@@ -32,6 +32,7 @@ on:
       - 'GSTFourPowerAffineSixthTrit525.lean'
       - 'GSTFourPowerAffineSixthTrit526_528.lean'
       - 'GSTFourPowerAffineSixthTrit531_532.lean'
+      - 'GSTFourPowerAffineSixthTrit536_538.lean'
       - '.github/workflows/gpt56-direct-affine-bad-state.yml'
   workflow_dispatch:
 
@@ -161,5 +162,10 @@ jobs:
           set -euo pipefail
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit531_532.olean GSTFourPowerAffineSixthTrit531_532.lean 2>&1 | tee affine-sixth-trit-531-532.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-sixth-trit-531-532.log
+      - name: Compile affine sixth-trit residues-536-538 constructors
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit536_538.olean GSTFourPowerAffineSixthTrit536_538.lean 2>&1 | tee affine-sixth-trit-536-538.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-sixth-trit-536-538.log
       - name: Direct affine audit marker
         run: echo DIRECT_AFFINE_SIXTH_TRIT_PHYSICAL_HAPPY_STACK_GREEN=1
