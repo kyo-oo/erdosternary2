@@ -1,0 +1,71 @@
+name: GPT56 Direct Affine 545-546 Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - 'GSTFourPowerAffineSixthTrit545_546.lean'
+      - '.github/workflows/gpt56-direct-affine-545-546.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  affine-545-546-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Prepare output directory
+        run: mkdir -p .lake/build/lib/lean
+      - name: Compile fresh production dependency chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules=(
+            GSTCanonicalTailStateIso
+            GSTFourPowerDirectResidue
+            GSTFourPowerDirectResidue27
+            GSTFourPowerDirectResidue81
+            GSTFourPowerExponentTritObstruction
+            GSTFourPowerDirectExistence
+            GSTFourPowerDirectAdditionCarry
+            GSTFourPowerExactExponentPeriod
+            GSTFourPowerDirectHappyBridge
+            GSTFourPowerAffineOrbit
+            GSTFourPowerAffineExponentPeel
+            GSTFourPowerAffineBadState
+            GSTFourPowerAffineChannelAutomaton
+            GSTFourPowerAffineClassifierBridge
+            GSTFourPowerAffinePeelClassifier
+            GSTFourPowerAffinePrefixIsometry
+            GSTFourPowerAffineHappyConstruction
+            GSTFourPowerAffineThirdTrit
+            GSTFourPowerAffineFourthTrit
+            GSTFourPowerAffineFifthTrit
+            GSTFourPowerAffineSixthTrit
+            GSTFourPowerAffineSixthTritSector
+            GSTFourPowerAffineSixthTrit489
+            GSTFourPowerAffineSixthTrit503
+            GSTFourPowerAffineSixthTrit525
+            GSTFourPowerAffineSixthTrit526_528
+            GSTFourPowerAffineSixthTrit531_532
+            GSTFourPowerAffineSixthTrit536_538
+          )
+          for module in "${modules[@]}"; do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+      - name: Compile residues 545-546 direct physical constructors
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit545_546.olean GSTFourPowerAffineSixthTrit545_546.lean 2>&1 | tee affine-sixth-trit-545-546.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-sixth-trit-545-546.log
+      - name: Direct affine audit marker
+        run: echo DIRECT_AFFINE_545_546_PHYSICAL_HAPPY_GREEN=1
