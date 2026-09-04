@@ -6,9 +6,10 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - GSTGraphV2FourPowerForcingBridge.lean
+      - GSTFourPowerDirectHappyBridge.lean
+      - GSTFourPowerDirectExistence.lean
       - GSTFourPowerOntologicalAdapter.lean
-      - GSTGraphV2InfiniteControl.lean
-      - GSTGraphV2CanonicalNWave.lean
+      - GSTCanonicalTailStateIso.lean
       - lakefile.toml
       - lake-manifest.json
       - .github/workflows/gpt56-four-power-forcing-bridge.yml
@@ -23,10 +24,11 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile exact Graph-V2 forcing bridge
+      - name: Compile fresh direct Graph-V2 forcing bridge
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTFourPowerOntologicalAdapter GSTGraphV2CanonicalNWave
+          lake build GSTFourPowerDirectHappyBridge GSTFourPowerOntologicalAdapter
           lake env lean GSTGraphV2FourPowerForcingBridge.lean 2>&1 | tee four-power-forcing-bridge.log
-          ! grep -E 'declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals' four-power-forcing-bridge.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' four-power-forcing-bridge.log
+          grep -F "'GSTFourPowerDirectHappyBridge.four_power_happy_propagates' depends on axioms: [propext, Classical.choice, Quot.sound]" four-power-forcing-bridge.log
