@@ -1,6 +1,5 @@
 import GSTPerfectPowerTailNavigation
 import GSTFourPowerOntologicalAdapter
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -20,8 +19,8 @@ theorem prefix_one_exponent_ge_twelve
   have hb : 4 ≤ 1 + 3*n := by omega
   nlinarith
 
-/-- POE — Prefix-One Ontological Escape, exactly downstream of the historical
-four-power creation master.  No child witness occurs. -/
+/-- POE — Prefix-One Ontological Escape, exactly downstream of the four-power
+creation master.  No child witness occurs. -/
 theorem gst_prefix_one_ontological_escape_of_master
     (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
