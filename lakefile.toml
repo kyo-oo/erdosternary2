@@ -74,6 +74,8 @@ roots = [
   "GSTGraphV2SixAdicOntologicalGeometryLaws",
   "GSTGraphV2SixAdicSynchronizedShadows",
   "GSTGraphV2SixAdicUnitIsometry",
+  "GSTGraphV2UnifiedPowerRectangle",
+  "GSTGraphV2UnifiedVerticalTelescope",
   "GSTInfiniteBadTransport",
   "GSTInfiniteCollision",
   "GSTInfiniteCoupledLedger",
