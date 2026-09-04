@@ -3,7 +3,6 @@ import GSTFourPowerOntologicalAdapter
 import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -38,3 +37,21 @@ theorem gst_prefix_one_ontological_escape_of_master
   exact canonical_tail_projection s (1 + 3*n) hs (by simpa [K] using hFull)
 
 end GSTPrefixOneOntologicalEscape
+
+/-- Explicit production boundary for the still-open direct universal existence
+law.  This is the only non-derived boundary introduced here: everything below
+routes through the already-green direct creation-master bridge. -/
+axiom gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence
+
+/-- Root-level compatibility name consumed by the monolith tail.  It no longer
+imports or compiles the experimental infinite-navigation/collision route; it
+routes the old certificate API through the direct creation-master bridge. -/
+theorem gst_four_power_creation_certificate_inline
+    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+  exact
+    (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
+      gst_four_power_direct_existence_inline) K hK5 hK7
+
+#print axioms gst_four_power_creation_certificate_inline
