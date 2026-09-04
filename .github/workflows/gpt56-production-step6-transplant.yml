@@ -41,6 +41,13 @@ jobs:
           lake build ErdosTernary2 2>&1 | tee production-step6-lean.log
           echo STEP6_PRODUCTION_MONOLITH_GREEN=1
 
+      - name: Compile Step6 closer module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTStep6Close 2>&1 | tee production-step6-closer.log
+          echo STEP6_CLOSER_MODULE_GREEN=1
+
       - name: Compile exact tactic regression
         run: |
           set -euo pipefail
@@ -74,6 +81,7 @@ jobs:
           name: gpt56-production-step6-diagnostics
           path: |
             production-step6-lean.log
+            production-step6-closer.log
             production-step6-regression.log
             production-step6-axioms.log
           if-no-files-found: warn
