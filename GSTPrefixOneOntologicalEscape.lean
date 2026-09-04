@@ -3,7 +3,6 @@ import GSTFourPowerOntologicalAdapter
 import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
