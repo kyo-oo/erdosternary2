@@ -1,9 +1,9 @@
+import GSTStep6Close
 import ErdosTernary2
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
-open GSTInfiniteV2
 open GSTV2
 open GSTStep6Close
 
