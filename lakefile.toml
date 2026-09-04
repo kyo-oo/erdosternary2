@@ -35,6 +35,7 @@ roots = [
   "GSTFourPowerDirectAdditionCarry",
   "GSTFourPowerDirectCreationMaster",
   "GSTFourPowerDirectExistence",
+  "GSTFourPowerDirectFailedRelocationState",
   "GSTFourPowerDirectHappyBridge",
   "GSTFourPowerDirectNo22",
   "GSTFourPowerDirectResidue",
