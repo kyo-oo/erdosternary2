@@ -33,6 +33,7 @@ roots = [
   "GSTFourPowerAffineRenormalizedOrbit",
   "GSTFourPowerAffineTwoTritClassifier",
   "GSTFourPowerDirectAdditionCarry",
+  "GSTFourPowerDirectCreationMaster",
   "GSTFourPowerDirectExistence",
   "GSTFourPowerDirectHappyBridge",
   "GSTFourPowerDirectNo22",
