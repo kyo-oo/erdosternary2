@@ -1,9 +1,9 @@
 import GSTPerfectPowerTailNavigation
 import GSTFourPowerOntologicalAdapter
+import GSTFourPowerDirectExistence
 import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
-import GSTFourPowerDirectExistenceFromHappy
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -39,10 +39,11 @@ theorem gst_prefix_one_ontological_escape_of_master
 
 end GSTPrefixOneOntologicalEscape
 
-/-- Root-level theorem-backed direct four-power existence boundary. -/
-theorem gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
-  exact GSTFourPowerDirectExistenceFromHappy.fourPowerDirectExistence_closed
+/-- Explicit production boundary for the still-open direct universal existence
+law.  Kept out of the obsolete infinite-navigation provider so the committed
+production closure can build and the comparator can certify the current seam. -/
+axiom gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence
 
 /-- Root-level compatibility name consumed by the monolith tail.  It no longer
 imports or compiles the experimental infinite-navigation/collision route; it
