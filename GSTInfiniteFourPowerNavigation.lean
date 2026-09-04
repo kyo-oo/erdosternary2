@@ -261,8 +261,9 @@ theorem gst_four_power_navigation_universal
 
 end GSTInfiniteFourPowerNavigation
 
-/-- Root-level compatibility name consumed by the monolith tail. -/
-theorem gst_four_power_creation_certificate_inline
+/-- Legacy infinite-route compatibility export, intentionally not using the
+monolith-facing direct-closure name. -/
+theorem gst_four_power_creation_certificate_inline_infinite_route
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
