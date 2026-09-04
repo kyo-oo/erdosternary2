@@ -35,7 +35,11 @@ theorem commonTwo_to_creation_certificate
       dsimp [c]
       exact hformula.symm
     have hcMod : c % 3 = 0 := by
-      interval_cases c <;> norm_num at hcEq ⊢
+      interval_cases c
+      · norm_num
+      · norm_num at hcEq
+      · norm_num at hcEq
+      · norm_num
     left
     dsimp [c] at hcMod
     simpa [directCarry4] using hcMod
