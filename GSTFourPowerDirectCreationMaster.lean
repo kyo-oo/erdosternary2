@@ -34,14 +34,11 @@ theorem commonTwo_to_creation_certificate
     have hcEq : (2 + c) % 3 = 2 := by
       dsimp [c]
       exact hformula.symm
-    have hc : c = 0 ∨ c = 3 := by
+    have hcMod : c % 3 = 0 := by
       interval_cases c <;> norm_num at hcEq ⊢
     left
-    change directCarry4 (4^K) p % 3 = 0
-    dsimp [c] at hc
-    rcases hc with h0 | h3
-    · simp [h0]
-    · simp [h3]
+    dsimp [c] at hcMod
+    simpa [directCarry4] using hcMod
 
 /-- The direct arithmetic existence theorem supplies the exact historical
 four-power creation master.  This is the production-facing replacement for the
