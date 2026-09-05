@@ -10,6 +10,7 @@ open GSTFourPowerDirectResidue
 open GSTFourPowerDirectResidue27
 open GSTFourPowerDirectResidue81
 open GSTFourPowerDirectExistence
+open GSTFourPowerDirectAdditionCarry
 open GSTFourPowerExponentTritObstruction
 open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineExponentPeel
