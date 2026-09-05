@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTFourPowerHappyProvider.lean'
+      - 'GSTFourPowerDirectExistenceProviderPipeline.lean'
       - 'GSTFourPowerDirectChat2Application.lean'
       - 'GSTFourPowerDirectHappyBridge.lean'
       - 'GSTFourPowerDirectExistence.lean'
@@ -37,7 +38,7 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile monolith-mined Happy provider bridge
+      - name: Compile monolith-mined Happy provider and pipeline
         shell: bash
         run: |
           set -uo pipefail
@@ -48,6 +49,8 @@ jobs:
             echo HAPPY_PROVIDER_MONOLITH_BUILD_START=1
             lake env lean GSTFourPowerHappyProvider.lean
             echo HAPPY_PROVIDER_MONOLITH_FILE_COMPILED=1
+            lake env lean GSTFourPowerDirectExistenceProviderPipeline.lean
+            echo HAPPY_PROVIDER_PIPELINE_FILE_COMPILED=1
           } 2>&1 | tee happy-provider-monolith.log
           test ${PIPESTATUS[0]} -eq 0
 
