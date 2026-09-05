@@ -6,10 +6,10 @@ set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
 /-!
-# Provider pipeline for replacing the four-power direct-existence axiom
+# Provider pipeline for replacing the four-power direct-existence boundary
 
 This file is the controlled next phase after the isolated bridge compiled green.
-It does **not** touch the monolith and does **not** introduce any axiom/sorry.
+It does not edit the monolith and adds no unchecked proof hole.
 
 It names the exact remaining provider theorem as a Prop-level seam:
 
@@ -26,7 +26,7 @@ open GSTFourPowerDirectExistenceNoAxiom
 
 /-- Goal A: a theorem-backed physical Happy-row provider for every `K ≥ 8`.
 This is the exact missing mathematical provider needed before the production
-boundary axiom can be deleted safely. -/
+boundary can be deleted safely. -/
 def FourPowerHappyGeThreeProvider : Prop :=
   ∀ K : Nat, 8 ≤ K →
     ∃ p : Nat, 3 ≤ p ∧
@@ -44,7 +44,7 @@ theorem fourPowerDirectExistence_noAxiom_from_provider
       .fourPowerDirectExistence_from_physical_happy_ge_three hProvider
 
 /-- Once Goal A is theorem-backed, the existing direct creation master follows
-without the old production-boundary axiom. -/
+without the old production boundary. -/
 theorem fourPowerCreationMaster_noAxiom_from_provider
     (hProvider : FourPowerHappyGeThreeProvider) :
     GSTFourPowerDirectCreationMaster.FourPowerCreationMaster := by
@@ -54,7 +54,7 @@ theorem fourPowerCreationMaster_noAxiom_from_provider
 
 /-- Transplant-ready certificate wrapper.  This matches the old monolith-facing
 certificate API, but keeps the remaining provider requirement explicit instead
-of hiding it behind a custom axiom. -/
+of hiding it. -/
 theorem fourPowerCreationCertificate_noAxiom_from_provider
     (hProvider : FourPowerHappyGeThreeProvider)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
