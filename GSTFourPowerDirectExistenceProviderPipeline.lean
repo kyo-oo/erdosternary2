@@ -39,15 +39,13 @@ def FourPowerHappyGeThreeProvider : Prop :=
 theorem fourPowerDirectExistence_noAxiom_from_provider
     (hProvider : FourPowerHappyGeThreeProvider) :
     FourPowerDirectExistence := by
-  exact
-    GSTFourPowerDirectExistenceNoAxiom
-      .fourPowerDirectExistence_from_physical_happy_ge_three hProvider
+  exact fourPowerDirectExistence_from_physical_happy_ge_three hProvider
 
 /-- Once Goal A is theorem-backed, the existing direct creation master follows
 without the old production boundary. -/
 theorem fourPowerCreationMaster_noAxiom_from_provider
     (hProvider : FourPowerHappyGeThreeProvider) :
-    GSTFourPowerDirectCreationMaster.FourPowerCreationMaster := by
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   exact
     GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
       (fourPowerDirectExistence_noAxiom_from_provider hProvider)
