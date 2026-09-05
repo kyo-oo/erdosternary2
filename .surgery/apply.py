@@ -10,6 +10,14 @@ original = s
 s = s.replace("import GSTStep6Close\n", "")
 s = s.replace("import GSTInfiniteFourPowerNavigation\n", "")
 
+# Production monolith talks only to the clean wrapper, never to the old raw seam.
+clean_import = "import GSTFourPowerHappyGeThreeClean\n"
+if clean_import not in s:
+    anchor = "import GSTFinalPurePowerResidueTransplant\n"
+    if anchor not in s:
+        raise SystemExit("CLEAN_WRAPPER_IMPORT_ANCHOR_NOT_FOUND")
+    s = s.replace(anchor, anchor + clean_import, 1)
+
 # Collapse repeated import churn while preserving the first import occurrence.
 seen = set()
 out = []
@@ -29,14 +37,21 @@ old_master = '''theorem gst_four_power_creation_master_inline :
   exact GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
     K hK5 hK7
 '''
-new_master = '''theorem gst_four_power_creation_master_inline :
+legacy_master = '''theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
     (h_creation_for_4pow K hK5 hK7)
 '''
+new_master = '''theorem gst_four_power_creation_master_inline :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  exact GSTFourPowerHappyGeThreeClean.four_power_creation_master_clean K hK5 hK7
+'''
 if old_master in s:
     s = s.replace(old_master, new_master, 1)
+elif legacy_master in s:
+    s = s.replace(legacy_master, new_master, 1)
 elif new_master not in s:
     raise SystemExit("MASTER_SEAM_NOT_FOUND")
 
