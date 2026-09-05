@@ -6,6 +6,7 @@ on:
       - sol/gpt56-four-power-relocation-prod-20260903
     paths:
       - 'GSTFourPowerAffineSixthTrit556_559.lean'
+      - 'GSTFourPowerAffineSixthTrit562_565.lean'
       - '.github/workflows/gpt56-direct-affine-556-559.yml'
   workflow_dispatch:
 
@@ -69,6 +70,11 @@ jobs:
           set -euo pipefail
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit556_559.olean GSTFourPowerAffineSixthTrit556_559.lean 2>&1 | tee affine-sixth-trit-556-559.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-sixth-trit-556-559.log
+      - name: RED gate for residues 562-565 direct physical constructors
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit562_565.olean GSTFourPowerAffineSixthTrit562_565.lean 2>&1 | tee affine-sixth-trit-562-565.log
       - name: Reject forbidden proof escapes in fresh module
         shell: bash
         run: |
