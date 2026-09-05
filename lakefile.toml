@@ -35,6 +35,8 @@ roots = [
   "GSTFourPowerDirectAdditionCarry",
   "GSTFourPowerDirectCreationMaster",
   "GSTFourPowerDirectExistence",
+  "GSTFourPowerDirectExistenceNoAxiom",
+  "GSTFourPowerDirectExistenceProviderPipeline",
   "GSTFourPowerDirectFailedRelocationState",
   "GSTFourPowerDirectHappyBridge",
   "GSTFourPowerDirectNo22",
