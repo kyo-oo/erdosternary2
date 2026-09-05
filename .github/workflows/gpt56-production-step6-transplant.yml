@@ -7,6 +7,7 @@ on:
     paths:
       - 'ErdosTernary2.lean'
       - 'GSTStep6Close.lean'
+      - 'GSTStep6CollisionKernel.lean'
       - 'GSTStep6CloseTest.lean'
       - 'lakefile.toml'
       - '.github/workflows/gpt56-production-step6-transplant.yml'
@@ -48,6 +49,13 @@ jobs:
           lake build GSTStep6Close 2>&1 | tee production-step6-closer.log
           echo STEP6_CLOSER_MODULE_GREEN=1
 
+      - name: Compile Step6 collision kernel
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTStep6CollisionKernel 2>&1 | tee production-step6-kernel.log
+          echo STEP6_COLLISION_KERNEL_GREEN=1
+
       - name: Compile exact tactic regression
         run: |
           set -euo pipefail
@@ -60,7 +68,7 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           printf '%s\n' \
-            'import ErdosTernary2' \
+            'import GSTStep6CollisionKernel' \
             '#print axioms gst_step6_collision_kernel' \
             '#print axioms gst_prefix_one_information_bad_descends_inline' \
             '#print axioms gst_prefix_one_child_gate_contradicts_parent_bad_inline' \
@@ -82,6 +90,7 @@ jobs:
           path: |
             production-step6-lean.log
             production-step6-closer.log
+            production-step6-kernel.log
             production-step6-regression.log
             production-step6-axioms.log
           if-no-files-found: warn
