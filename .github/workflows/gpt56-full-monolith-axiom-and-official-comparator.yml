@@ -1,0 +1,256 @@
+name: GPT56 Full Monolith Axiom and Official Comparator
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - ErdosTernary2.lean
+      - GSTPrefixOneOntologicalEscape.lean
+      - GSTFourPowerHappyProvider.lean
+      - GSTFourPowerDirectExistenceProviderPipeline.lean
+      - lakefile.toml
+      - .github/workflows/gpt56-full-monolith-axiom-and-official-comparator.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-monolith-theorem-axiom-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-canonical-tail-escape-20260827
+          fetch-depth: 1
+
+      - name: Install exact Lean RC2 and pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Build fixed monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build ErdosTernary2
+
+      - name: Generate all-theorem axiom audit for ErdosTernary2.lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import re
+          from pathlib import Path
+
+          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
+          ns = []
+          names = []
+          for raw in src.splitlines():
+              s = raw.strip()
+              if not s or s.startswith('--'):
+                  continue
+              m = re.match(r'^namespace\s+([A-Za-z_][A-Za-z0-9_\']*)\b', s)
+              if m:
+                  ns.append(m.group(1))
+                  continue
+              m = re.match(r'^end(?:\s+([A-Za-z_][A-Za-z0-9_\']*))?\b', s)
+              if m and ns:
+                  end_name = m.group(1)
+                  if end_name is None or end_name == ns[-1]:
+                      ns.pop()
+                  continue
+              if s.startswith('private theorem ') or s.startswith('private lemma '):
+                  continue
+              m = re.match(r'^(?:protected\s+)?(?:theorem|lemma)\s+([A-Za-z_][A-Za-z0-9_\']*)\b', s)
+              if m:
+                  name = m.group(1)
+                  if ns and '.' not in name:
+                      name = '.'.join(ns + [name])
+                  names.append(name)
+
+          Path('monolith-theorem-names.txt').write_text('\n'.join(names) + ('\n' if names else ''), encoding='utf-8')
+          with Path('MonolithAllTheoremAxiomAudit.lean').open('w', encoding='utf-8') as f:
+              f.write('import ErdosTernary2\n')
+              f.write('set_option maxHeartbeats 0\n')
+              f.write('set_option maxRecDepth 1000000\n\n')
+              for name in names:
+                  f.write(f'#print axioms {name}\n')
+          print(f'MONOLITH_ALL_THEOREM_DECLS={len(names)}')
+          PY
+
+      - name: Run all-theorem axiom audit
+        shell: bash
+        run: |
+          set -uo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          touch monolith-all-theorem-axioms.log
+          lake env lean MonolithAllTheoremAxiomAudit.lean 2>&1 | tee monolith-all-theorem-axioms.log
+          status=${PIPESTATUS[0]}
+          echo MONOLITH_ALL_THEOREM_AXIOM_AUDIT_EXIT=$status
+          if [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+          if grep -Fq 'sorryAx' monolith-all-theorem-axioms.log; then
+            echo MONOLITH_ALL_THEOREM_SORRYAX_DEPENDENCY=1
+            exit 1
+          fi
+          old_count=$(grep -Ec 'gst_four_power_direct_existence_inline' monolith-all-theorem-axioms.log || true)
+          echo MONOLITH_ALL_THEOREM_OLD_INLINE_AXIOM_MENTION_COUNT=$old_count
+          echo MONOLITH_ALL_THEOREM_NO_SORRYAX=1
+
+      - name: Upload all-theorem axiom diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-monolith-theorem-axiom-diagnostics
+          path: |
+            monolith-theorem-names.txt
+            MonolithAllTheoremAxiomAudit.lean
+            monolith-all-theorem-axioms.log
+          if-no-files-found: ignore
+
+  official-leanprover-comparator-noaxiom-route:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-canonical-tail-escape-20260827
+          fetch-depth: 1
+
+      - name: Install exact Lean RC2 and pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Build official leanprover/comparator at matching Lean revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git /tmp/leanprover-comparator
+          git -C /tmp/leanprover-comparator checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          cd /tmp/leanprover-comparator
+          lake update
+          lake build comparator lean4export
+
+      - name: Install landrun sandbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v go >/dev/null 2>&1; then
+            go install github.com/Zouuup/landrun/cmd/landrun@latest
+            echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+            echo OFFICIAL_COMPARATOR_LANDRUN_INSTALLED=1
+          else
+            echo OFFICIAL_COMPARATOR_LANDRUN_INSTALL_FAILED_NO_GO=1
+            exit 1
+          fi
+
+      - name: Create Challenge/Solution modules for no-axiom transplant route
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > OfficialComparatorChallenge.lean <<'EOF'
+          import GSTPrefixOneOntologicalEscape
+
+          set_option maxRecDepth 1000000
+          set_option maxHeartbeats 20000000
+
+          theorem official_comparator_noAxiom_prefixHit
+              (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
+              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+            sorry
+
+          theorem official_comparator_noAxiom_noBad
+              (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne)
+              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+            sorry
+          EOF
+
+          cat > OfficialComparatorSolution.lean <<'EOF'
+          import GSTPrefixOneOntologicalEscape
+
+          set_option maxRecDepth 1000000
+          set_option maxHeartbeats 20000000
+
+          theorem official_comparator_noAxiom_prefixHit
+              (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
+              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+            exact gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
+              hProvider K hK5 hK7
+
+          theorem official_comparator_noAxiom_noBad
+              (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne)
+              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+            exact gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
+              hNoBad K hK5 hK7
+          EOF
+
+          cat >> lakefile.toml <<'EOF'
+
+          [[lean_lib]]
+          name = "OfficialComparatorChallenge"
+
+          [[lean_lib]]
+          name = "OfficialComparatorSolution"
+          EOF
+
+          cat > official-comparator-config.json <<'EOF'
+          {
+            "challenge_module": "OfficialComparatorChallenge",
+            "solution_module": "OfficialComparatorSolution",
+            "theorem_names": [
+              "official_comparator_noAxiom_prefixHit",
+              "official_comparator_noAxiom_noBad"
+            ],
+            "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+            "enable_nanoda": false
+          }
+          EOF
+
+      - name: Run official comparator and require Your solution is okay
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$(go env GOPATH)/bin:$PATH"
+          COMPARATOR_BIN=/tmp/leanprover-comparator/.lake/build/bin/comparator
+          LEAN4EXPORT_BIN=/tmp/leanprover-comparator/.lake/packages/lean4export/.lake/build/bin/lean4export
+          LANDRUN_BIN=$(command -v landrun)
+          test -x "$COMPARATOR_BIN"
+          test -x "$LEAN4EXPORT_BIN"
+          test -x "$LANDRUN_BIN"
+          COMPARATOR_LANDRUN="$LANDRUN_BIN" \
+          COMPARATOR_LEAN4EXPORT="$LEAN4EXPORT_BIN" \
+            lake env "$COMPARATOR_BIN" official-comparator-config.json 2>&1 | tee official-comparator.log
+          grep -F 'Lean default kernel accepts the solution' official-comparator.log
+          grep -F 'Your solution is okay!' official-comparator.log
+          echo OFFICIAL_LEANPROVER_COMPARATOR_YOUR_SOLUTION_IS_OKAY=1
+
+      - name: Upload official comparator diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-leanprover-comparator-diagnostics
+          path: |
+            OfficialComparatorChallenge.lean
+            OfficialComparatorSolution.lean
+            official-comparator-config.json
+            official-comparator.log
+          if-no-files-found: ignore
