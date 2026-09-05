@@ -79,7 +79,6 @@ roots = [
   "GSTInfiniteBadTransport",
   "GSTInfiniteCollision",
   "GSTInfiniteCoupledLedger",
-  "GSTInfiniteFourPowerNavigation",
   "GSTInfiniteGateTransport",
   "GSTPerfectPowerTailNavigation",
   "GSTPrefixOneOntologicalEscape",
