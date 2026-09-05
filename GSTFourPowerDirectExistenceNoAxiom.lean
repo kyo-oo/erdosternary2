@@ -20,6 +20,8 @@ Mathematical bridge:
   `0` or `3`, hence the next power has the same digit `2` at the same position.
 -/
 
+-- Isolated probe trigger: force GitHub Actions to run Lean on this file.
+
 namespace GSTFourPowerDirectExistenceNoAxiom
 
 open GSTFourPowerDirectExistence
