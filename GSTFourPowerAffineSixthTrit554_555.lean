@@ -1,105 +1,133 @@
 import GSTFourPowerAffineSixthTrit545_546
 
-namespace GoldbachStatementTernary
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 20000000
 
-/-- Direct sixth-trit constructor for exponent residue `554 mod 729`.
+namespace GSTFourPowerAffineSixthTrit554_555
 
-The affine prefix is `512 mod 729`, whose first two ternary digits (low first)
-are `2,2`.  A bad channel starting in state `1` is therefore forced to state
-`3` after the first digit, and state `3` cannot consume the second digit `2`.
--/
-theorem commonTwo_of_mod729_fiveFiveFour {N : ℕ}
-    (hmod : N % 729 = 554) :
-    CommonTwo N := by
-  have hA : affineOrbit N % 729 = 512 := by
-    rw [affineOrbit_mod_three_pow_six_eq_of_mod]
-    simp [hmod]
-  by_contra hno
-  have hbad1 : BadChannel (affineOrbit N) 1 :=
-    (not_commonTwo_iff_badChannel_one N).mp hno
-  have hmod3_0 : affineOrbit N % 3 = 2 := by
-    omega
-  obtain ⟨h0, hnew0⟩ :=
-    (badChannel_one_iff (A := affineOrbit N)).mp hbad1
-  have hnew0' : BadChannel ((affineOrbit N - 2) / 3) 3 := by
-    rcases hnew0 with h1 | h3
-    · omega
-    · exact h3
-  have hmod9 : affineOrbit N % 9 = 8 := by
-    omega
-  have hmod3_1 : ((affineOrbit N - 2) / 3) % 3 = 2 := by
-    omega
-  obtain ⟨hc, _⟩ :=
-    (badChannel_three_iff (A := (affineOrbit N - 2) / 3)).mp hnew0'
-  omega
+open GSTFourPowerDirectExistence
+open GSTFourPowerAffineOrbit
+open GSTFourPowerAffinePrefixIsometry
+open GSTFourPowerAffineBadState
+open GSTFourPowerAffineChannelAutomaton
+open GSTFourPowerAffineClassifierBridge
+open GSTFourPowerDirectHappyBridge
 
-/-- Residue `554 mod 729` produces an actual physical Happy row. -/
-theorem physical_happy_of_mod729_fiveFiveFour {N : ℕ}
-    (hmod : N % 729 = 554) :
-    ∃ q : ℕ, 1 ≤ q ∧
-      HappyCell (carry4 (4^N) q) (digit3 (4^N) q) := by
-  exact commonTwo_to_physical_happy
-    (commonTwo_of_mod729_fiveFiveFour hmod)
+private theorem affineOrbit_mod729_eq_512_of_exponent_554
+    (N : Nat) (hN : N % 729 = 554) :
+    affineOrbit N % 729 = 512 := by
+  have h := (affineOrbit_residue_eq_iff_exponent_residue_eq 6 N 554).2 (by
+    simpa using hN)
+  norm_num [affineOrbit] at h ⊢
+  exact h
 
-/-- Direct sixth-trit constructor for exponent residue `555 mod 729`.
+/-- Prefix `22` (least-significant trit first) kills a hypothetical bad
+channel: `1 -> 3`, then trit `2` is impossible from state `3`. -/
+private theorem commonTwo_of_mod729_pattern_22_554
+    (N : Nat) (hAmod : affineOrbit N % 729 = 512) : CommonTwo N := by
+  by_contra hNo
+  let A := affineOrbit N
+  have hd0 : lowDigit A = 2 := by unfold lowDigit; dsimp [A]; omega
+  have hd1 : lowDigit (tail3 A) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hbad0 : BadChannel 1 A := by
+    dsimp [A]
+    exact (noCommonTwo_iff_badChannel_one N).mp hNo
+  have hbad1 : BadChannel 3 (tail3 A) := by
+    rw [badChannel_one_iff, hd0] at hbad0
+    simpa using hbad0
+  rw [badChannel_three_iff, hd1] at hbad1
+  simpa using hbad1
 
-The affine prefix is `591 mod 729`, whose first two ternary digits (low first)
-are `0,2`.  State `1` is forced to state `0` by the first digit, and state `0`
-cannot consume the following digit `2`.
--/
-theorem commonTwo_of_mod729_fiveFiveFive {N : ℕ}
-    (hmod : N % 729 = 555) :
-    CommonTwo N := by
-  have hA : affineOrbit N % 729 = 591 := by
-    rw [affineOrbit_mod_three_pow_six_eq_of_mod]
-    simp [hmod]
-  by_contra hno
-  have hbad1 : BadChannel (affineOrbit N) 1 :=
-    (not_commonTwo_iff_badChannel_one N).mp hno
-  have hmod3_0 : affineOrbit N % 3 = 0 := by
-    omega
-  obtain ⟨h0, hnew0⟩ :=
-    (badChannel_one_iff (A := affineOrbit N)).mp hbad1
-  have hnew0' : BadChannel (affineOrbit N / 3) 0 := by
-    rcases hnew0 with h1 | h3
-    · exact h1
-    · omega
-  have hmod9 : affineOrbit N % 9 = 6 := by
-    omega
-  have hmod3_1 : (affineOrbit N / 3) % 3 = 2 := by
-    omega
-  obtain ⟨hc, _⟩ :=
-    (badChannel_zero_iff (A := affineOrbit N / 3)).mp hnew0'
-  omega
+theorem commonTwo_of_mod729_fiveFiveFour
+    (N : Nat) (hN : N % 729 = 554) : CommonTwo N := by
+  exact commonTwo_of_mod729_pattern_22_554 N
+    (affineOrbit_mod729_eq_512_of_exponent_554 N hN)
 
-/-- Residue `555 mod 729` produces an actual physical Happy row. -/
-theorem physical_happy_of_mod729_fiveFiveFive {N : ℕ}
-    (hmod : N % 729 = 555) :
-    ∃ q : ℕ, 1 ≤ q ∧
-      HappyCell (carry4 (4^N) q) (digit3 (4^N) q) := by
-  exact commonTwo_to_physical_happy
-    (commonTwo_of_mod729_fiveFiveFive hmod)
+theorem physical_happy_of_mod729_fiveFiveFour
+    (N : Nat) (hN : N % 729 = 554) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^N) q)
+        (GSTCanonicalTailStateIso.digit3 (4^N) q) := by
+  exact commonTwo_to_physical_happy_row N
+    (commonTwo_of_mod729_fiveFiveFour N hN)
 
-/-- Task-3.3-shaped direct relocation for target residue `554 mod 729`.
-The source Happy witness is deliberately not transported: the target row is
-constructed afresh from the affine bad-channel contradiction. -/
 theorem four_power_happy_propagates_of_next_mod729_fiveFiveFour
-    {K : ℕ}
-    (_h : ∃ p : ℕ, 1 ≤ p ∧
-      HappyCell (carry4 (4^K) p) (digit3 (4^K) p))
-    (hmod : (K + 1) % 729 = 554) :
-    ∃ q : ℕ, 1 ≤ q ∧
-      HappyCell (carry4 (4^(K+1)) q) (digit3 (4^(K+1)) q) := by
-  exact physical_happy_of_mod729_fiveFiveFour (N := K + 1) hmod
+    (K p : Nat) (hK : 8 ≤ K) (hp : 1 ≤ p)
+    (hHappy :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p))
+    (hNext : (K+1) % 729 = 554) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact physical_happy_of_mod729_fiveFiveFour (K+1) hNext
 
-/-- Task-3.3-shaped direct relocation for target residue `555 mod 729`. -/
+private theorem affineOrbit_mod729_eq_591_of_exponent_555
+    (N : Nat) (hN : N % 729 = 555) :
+    affineOrbit N % 729 = 591 := by
+  have h := (affineOrbit_residue_eq_iff_exponent_residue_eq 6 N 555).2 (by
+    simpa using hN)
+  norm_num [affineOrbit] at h ⊢
+  exact h
+
+/-- Prefix `02` kills a hypothetical bad channel: `1 -> 0`, then trit `2`
+is impossible from state `0`. -/
+private theorem commonTwo_of_mod729_pattern_02_555
+    (N : Nat) (hAmod : affineOrbit N % 729 = 591) : CommonTwo N := by
+  by_contra hNo
+  let A := affineOrbit N
+  have hd0 : lowDigit A = 0 := by unfold lowDigit; dsimp [A]; omega
+  have hd1 : lowDigit (tail3 A) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hbad0 : BadChannel 1 A := by
+    dsimp [A]
+    exact (noCommonTwo_iff_badChannel_one N).mp hNo
+  have hbad1 : BadChannel 0 (tail3 A) := by
+    rw [badChannel_one_iff, hd0] at hbad0
+    simpa using hbad0
+  rw [badChannel_zero_iff, hd1] at hbad1
+  simpa using hbad1
+
+theorem commonTwo_of_mod729_fiveFiveFive
+    (N : Nat) (hN : N % 729 = 555) : CommonTwo N := by
+  exact commonTwo_of_mod729_pattern_02_555 N
+    (affineOrbit_mod729_eq_591_of_exponent_555 N hN)
+
+theorem physical_happy_of_mod729_fiveFiveFive
+    (N : Nat) (hN : N % 729 = 555) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^N) q)
+        (GSTCanonicalTailStateIso.digit3 (4^N) q) := by
+  exact commonTwo_to_physical_happy_row N
+    (commonTwo_of_mod729_fiveFiveFive N hN)
+
 theorem four_power_happy_propagates_of_next_mod729_fiveFiveFive
-    {K : ℕ}
-    (_h : ∃ p : ℕ, 1 ≤ p ∧
-      HappyCell (carry4 (4^K) p) (digit3 (4^K) p))
-    (hmod : (K + 1) % 729 = 555) :
-    ∃ q : ℕ, 1 ≤ q ∧
-      HappyCell (carry4 (4^(K+1)) q) (digit3 (4^(K+1)) q) := by
-  exact physical_happy_of_mod729_fiveFiveFive (N := K + 1) hmod
+    (K p : Nat) (hK : 8 ≤ K) (hp : 1 ≤ p)
+    (hHappy :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p))
+    (hNext : (K+1) % 729 = 555) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact physical_happy_of_mod729_fiveFiveFive (K+1) hNext
 
-end GoldbachStatementTernary
+#check commonTwo_of_mod729_fiveFiveFour
+#check physical_happy_of_mod729_fiveFiveFour
+#check four_power_happy_propagates_of_next_mod729_fiveFiveFour
+#check commonTwo_of_mod729_fiveFiveFive
+#check physical_happy_of_mod729_fiveFiveFive
+#check four_power_happy_propagates_of_next_mod729_fiveFiveFive
+#print axioms commonTwo_of_mod729_fiveFiveFour
+#print axioms physical_happy_of_mod729_fiveFiveFour
+#print axioms four_power_happy_propagates_of_next_mod729_fiveFiveFour
+#print axioms commonTwo_of_mod729_fiveFiveFive
+#print axioms physical_happy_of_mod729_fiveFiveFive
+#print axioms four_power_happy_propagates_of_next_mod729_fiveFiveFive
+
+end GSTFourPowerAffineSixthTrit554_555
