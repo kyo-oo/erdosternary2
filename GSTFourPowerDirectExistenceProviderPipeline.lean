@@ -12,15 +12,17 @@ set_option maxHeartbeats 20000000
 This file is the controlled next phase after the isolated bridge compiled green.
 It does not edit the monolith and adds no unchecked proof hole.
 
-It now exposes both legitimate proof gates:
+It now exposes the legitimate proof gates:
 
 * `FourPowerHappyGeThreeProvider`, the physical Happy-row provider originally
-  needed by the isolated bridge; and
-* `FourPowerDirectNoCounterexampleClosure`, the Chat-2 realization: close the
-  direct `CommonTwo` counterexample language produced by the affine/residue/
-  exponent-prefix surfaces.
+  needed by the isolated bridge;
+* `FourPowerDirectNoCounterexampleClosure`, the direct `CommonTwo`
+  counterexample closure; and
+* `FourPowerDirectNoBadAffineChannelOne`, the Chat-2 realization: the final
+  production target is exactly the claim that bad affine channel `B₁` never
+  occurs on `affineOrbit K` for `K ≥ 5`, `K ≠ 7`.
 
-The second gate is the corrected roadmap route.  It avoids the abandoned
+The third gate is the corrected roadmap route.  It avoids the abandoned
 future-only Happy propagation path and does not import the unresolved infinite
 navigation collision file.
 -/
@@ -30,6 +32,8 @@ namespace GSTFourPowerDirectExistenceProviderPipeline
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectExistenceNoAxiom
 open GSTFourPowerDirectChat2Application
+open GSTFourPowerAffineOrbit
+open GSTFourPowerAffineChannelAutomaton
 
 /-- Goal A: a theorem-backed physical Happy-row provider for every `K ≥ 8`.
 This is sufficient for the already-green bridge, but it is not the only route. -/
@@ -40,12 +44,17 @@ def FourPowerHappyGeThreeProvider : Prop :=
         (GSTCanonicalTailStateIso.carry4 (4^K) p)
         (GSTCanonicalTailStateIso.digit3 (4^K) p)
 
-/-- Goal B / Chat-2 gate: close the direct arithmetic counterexample language.
+/-- Goal B: close the direct arithmetic counterexample language.
 This is the productive route after the failed future-only relocation subgoal:
 prove there is no genuine `CommonTwo` counterexample for `K ≥ 5`, except the
 single excluded exponent `7`. -/
 def FourPowerDirectNoCounterexampleClosure : Prop :=
   ∀ K : Nat, 5 ≤ K → K ≠ 7 → ¬¬ CommonTwo K
+
+/-- Goal C / Chat-2 gate: kill exactly the bad affine channel that is equivalent
+    to a direct `CommonTwo` counterexample. -/
+def FourPowerDirectNoBadAffineChannelOne : Prop :=
+  ∀ K : Nat, 5 ≤ K → K ≠ 7 → ¬ BadChannel 1 (affineOrbit K)
 
 /-- The already-green isolated bridge converts Goal A into the closed
 `FourPowerDirectExistence` theorem. -/
@@ -54,12 +63,24 @@ theorem fourPowerDirectExistence_noAxiom_from_provider
     FourPowerDirectExistence := by
   exact fourPowerDirectExistence_from_physical_happy_ge_three hProvider
 
-/-- Chat-2 production gate: once the affine/exponent-prefix counterexample
+/-- Chat-2 production gate in `CommonTwo` language: once the counterexample
 language is closed, the direct universal theorem follows immediately. -/
 theorem fourPowerDirectExistence_noAxiom_from_chat2_closure
     (hClosed : FourPowerDirectNoCounterexampleClosure) :
     FourPowerDirectExistence := by
   exact chat2_fourPowerDirectExistence_from_no_counterexample hClosed
+
+/-- Chat-2 production gate in the final affine-automaton language. -/
+theorem fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
+    (hNoBad : FourPowerDirectNoBadAffineChannelOne) :
+    FourPowerDirectExistence := by
+  exact chat2_fourPowerDirectExistence_iff_no_bad_affine_channel_one.mpr hNoBad
+
+/-- The two Chat-2 closure formulations are definitionally the same target via
+    the clean bad-channel equivalence. -/
+theorem chat2_counterexample_closure_iff_no_bad_affine_channel_one :
+    FourPowerDirectNoCounterexampleClosure ↔ FourPowerDirectNoBadAffineChannelOne := by
+  exact chat2_noCounterexampleClosure_iff_no_bad_affine_channel_one
 
 /-- Chat-2 obstruction export: every attempted counterexample now carries the
 combined row-two, row-three, row-four, and parametric exponent-prefix
@@ -85,15 +106,21 @@ theorem fourPowerCreationMaster_noAxiom_from_provider
     GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
       (fourPowerDirectExistence_noAxiom_from_provider hProvider)
 
-/-- Chat-2 creation master route: this is the direct replacement route for the
-old monolith-facing boundary once `FourPowerDirectNoCounterexampleClosure` is
-proved. -/
+/-- Chat-2 creation master route from direct `CommonTwo` closure. -/
 theorem fourPowerCreationMaster_noAxiom_from_chat2_closure
     (hClosed : FourPowerDirectNoCounterexampleClosure) :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   exact
     GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
       (fourPowerDirectExistence_noAxiom_from_chat2_closure hClosed)
+
+/-- Chat-2 creation master route from the exact no-bad-affine-channel target. -/
+theorem fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one
+    (hNoBad : FourPowerDirectNoBadAffineChannelOne) :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  exact
+    GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
+      (fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one hNoBad)
 
 /-- Transplant-ready certificate wrapper for the original Happy-provider gate. -/
 theorem fourPowerCreationCertificate_noAxiom_from_provider
@@ -111,21 +138,39 @@ theorem fourPowerCreationCertificate_noAxiom_from_chat2_closure
   exact
     (fourPowerCreationMaster_noAxiom_from_chat2_closure hClosed) K hK5 hK7
 
+/-- Transplant-ready certificate wrapper for the exact no-bad-affine-channel
+    Chat-2 gate. -/
+theorem fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
+    (hNoBad : FourPowerDirectNoBadAffineChannelOne)
+    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+  exact
+    (fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one hNoBad) K hK5 hK7
+
 #check FourPowerHappyGeThreeProvider
 #check FourPowerDirectNoCounterexampleClosure
+#check FourPowerDirectNoBadAffineChannelOne
 #check fourPowerDirectExistence_noAxiom_from_provider
 #check fourPowerDirectExistence_noAxiom_from_chat2_closure
+#check fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
+#check chat2_counterexample_closure_iff_no_bad_affine_channel_one
 #check chat2_counterexample_obstruction_from_pipeline
 #check fourPowerCreationMaster_noAxiom_from_provider
 #check fourPowerCreationMaster_noAxiom_from_chat2_closure
+#check fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one
 #check fourPowerCreationCertificate_noAxiom_from_provider
 #check fourPowerCreationCertificate_noAxiom_from_chat2_closure
+#check fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
 #print axioms fourPowerDirectExistence_noAxiom_from_provider
 #print axioms fourPowerDirectExistence_noAxiom_from_chat2_closure
+#print axioms fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
+#print axioms chat2_counterexample_closure_iff_no_bad_affine_channel_one
 #print axioms chat2_counterexample_obstruction_from_pipeline
 #print axioms fourPowerCreationMaster_noAxiom_from_provider
 #print axioms fourPowerCreationMaster_noAxiom_from_chat2_closure
+#print axioms fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one
 #print axioms fourPowerCreationCertificate_noAxiom_from_provider
 #print axioms fourPowerCreationCertificate_noAxiom_from_chat2_closure
+#print axioms fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
 
 end GSTFourPowerDirectExistenceProviderPipeline
