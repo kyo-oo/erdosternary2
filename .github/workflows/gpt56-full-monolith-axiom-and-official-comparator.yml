@@ -9,6 +9,8 @@ on:
       - GSTPrefixOneOntologicalEscape.lean
       - GSTFourPowerHappyProvider.lean
       - GSTFourPowerDirectExistenceProviderPipeline.lean
+      - questions/deepmind_problem_406/Challenge.lean
+      - questions/deepmind_problem_406/Solution.lean
       - lakefile.toml
       - .github/workflows/gpt56-full-monolith-axiom-and-official-comparator.yml
   workflow_dispatch:
@@ -17,7 +19,7 @@ permissions:
   contents: read
 
 jobs:
-  full-monolith-theorem-axiom-audit:
+  problem406-submitted-monolith-axiom-audit:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -35,89 +37,47 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Build fixed monolith
+      - name: Build protected green monolith
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake build ErdosTernary2
+          echo PROBLEM406_MONOLITH_BUILD_GREEN=1
 
-      - name: Generate all-theorem axiom audit for ErdosTernary2.lean
+      - name: Kernel axiom audit of submitted Problem 406 theorem
         shell: bash
         run: |
           set -euo pipefail
-          python3 <<'PY'
-          import re
-          from pathlib import Path
-
-          src = Path('ErdosTernary2.lean').read_text(encoding='utf-8')
-          ns = []
-          names = []
-          for raw in src.splitlines():
-              s = raw.strip()
-              if not s or s.startswith('--'):
-                  continue
-              m = re.match(r'^namespace\s+([A-Za-z_][A-Za-z0-9_\']*)\b', s)
-              if m:
-                  ns.append(m.group(1))
-                  continue
-              m = re.match(r'^end(?:\s+([A-Za-z_][A-Za-z0-9_\']*))?\b', s)
-              if m and ns:
-                  end_name = m.group(1)
-                  if end_name is None or end_name == ns[-1]:
-                      ns.pop()
-                  continue
-              if s.startswith('private theorem ') or s.startswith('private lemma '):
-                  continue
-              m = re.match(r'^(?:protected\s+)?(?:theorem|lemma)\s+([A-Za-z_][A-Za-z0-9_\']*)\b', s)
-              if m:
-                  name = m.group(1)
-                  if ns and '.' not in name:
-                      name = '.'.join(ns + [name])
-                  names.append(name)
-
-          Path('monolith-theorem-names.txt').write_text('\n'.join(names) + ('\n' if names else ''), encoding='utf-8')
-          with Path('MonolithAllTheoremAxiomAudit.lean').open('w', encoding='utf-8') as f:
-              f.write('import ErdosTernary2\n')
-              f.write('set_option maxHeartbeats 0\n')
-              f.write('set_option maxRecDepth 1000000\n\n')
-              for name in names:
-                  f.write(f'#print axioms {name}\n')
-          print(f'MONOLITH_ALL_THEOREM_DECLS={len(names)}')
-          PY
-
-      - name: Run all-theorem axiom audit
-        shell: bash
-        run: |
-          set -uo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          touch monolith-all-theorem-axioms.log
-          lake env lean MonolithAllTheoremAxiomAudit.lean 2>&1 | tee monolith-all-theorem-axioms.log
-          status=${PIPESTATUS[0]}
-          echo MONOLITH_ALL_THEOREM_AXIOM_AUDIT_EXIT=$status
-          if [ "$status" -ne 0 ]; then
-            exit "$status"
-          fi
-          if grep -Fq 'sorryAx' monolith-all-theorem-axioms.log; then
-            echo MONOLITH_ALL_THEOREM_SORRYAX_DEPENDENCY=1
+          cat > MonolithProblem406AxiomAudit.lean <<'EOF'
+          import ErdosTernary2
+          set_option maxHeartbeats 0
+          set_option maxRecDepth 1000000
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean MonolithProblem406AxiomAudit.lean 2>&1 | tee monolith-problem406-axioms.log
+          if grep -Fq 'sorryAx' monolith-problem406-axioms.log; then
+            echo PROBLEM406_MONOLITH_FORBIDDEN_SORRYAX=1
             exit 1
           fi
-          old_count=$(grep -Ec 'gst_four_power_direct_existence_inline' monolith-all-theorem-axioms.log || true)
-          echo MONOLITH_ALL_THEOREM_OLD_INLINE_AXIOM_MENTION_COUNT=$old_count
-          echo MONOLITH_ALL_THEOREM_NO_SORRYAX=1
+          if grep -Fq 'gst_four_power_direct_existence_inline' monolith-problem406-axioms.log; then
+            echo PROBLEM406_MONOLITH_FORBIDDEN_INLINE_AXIOM_REACHED_SUBMITTED_THEOREM=1
+            exit 1
+          fi
+          echo PROBLEM406_MONOLITH_SUBMITTED_THEOREM_NO_FORBIDDEN_AXIOMS=1
 
-      - name: Upload all-theorem axiom diagnostics
+      - name: Upload Problem 406 monolith diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: full-monolith-theorem-axiom-diagnostics
+          name: problem406-monolith-axiom-diagnostics
           path: |
-            monolith-theorem-names.txt
-            MonolithAllTheoremAxiomAudit.lean
-            monolith-all-theorem-axioms.log
+            MonolithProblem406AxiomAudit.lean
+            monolith-problem406-axioms.log
           if-no-files-found: ignore
 
-  official-leanprover-comparator-noaxiom-route:
+  official-leanprover-comparator-problem406:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -151,7 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           if command -v go >/dev/null 2>&1; then
-            go install github.com/Zouuup/landrun/cmd/landrun@latest
+            go install github.com/zouuup/landrun/cmd/landrun@latest
             echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
             echo OFFICIAL_COMPARATOR_LANDRUN_INSTALLED=1
           else
@@ -159,49 +119,45 @@ jobs:
             exit 1
           fi
 
-      - name: Create Challenge/Solution modules for no-axiom transplant route
+      - name: Materialize DeepMind 406 challenge and monolith solution modules
         shell: bash
         run: |
           set -euo pipefail
-          cat > OfficialComparatorChallenge.lean <<'EOF'
-          import GSTPrefixOneOntologicalEscape
+          cp questions/deepmind_problem_406/Challenge.lean OfficialComparatorChallenge.lean
+          cp questions/deepmind_problem_406/Solution.lean OfficialComparatorSolution.lean
 
-          set_option maxRecDepth 1000000
-          set_option maxHeartbeats 20000000
+          python3 <<'PY'
+          from pathlib import Path
+          import re
 
-          theorem official_comparator_noAxiom_prefixHit
-              (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
-              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-            sorry
+          challenge = Path('OfficialComparatorChallenge.lean').read_text(encoding='utf-8')
+          solution = Path('OfficialComparatorSolution.lean').read_text(encoding='utf-8')
 
-          theorem official_comparator_noAxiom_noBad
-              (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne)
-              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-            sorry
-          EOF
+          if 'theorem erdos_ternary_2' not in challenge:
+              raise SystemExit('challenge is not the DeepMind/Erdos 406 theorem surface')
+          if 'sorry' not in challenge:
+              raise SystemExit('challenge must keep the intentional question-side sorry')
+          if 'import ErdosTernary2' not in solution:
+              raise SystemExit('solution does not import the green monolith')
+          forbidden_solution = []
+          for i, line in enumerate(solution.splitlines(), 1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                  forbidden_solution.append(f'{i}:{line}')
+          if forbidden_solution:
+              print('\n'.join(forbidden_solution))
+              raise SystemExit('solution contains forbidden proof escape')
 
-          cat > OfficialComparatorSolution.lean <<'EOF'
-          import GSTPrefixOneOntologicalEscape
-
-          set_option maxRecDepth 1000000
-          set_option maxHeartbeats 20000000
-
-          theorem official_comparator_noAxiom_prefixHit
-              (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
-              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-            exact gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
-              hProvider K hK5 hK7
-
-          theorem official_comparator_noAxiom_noBad
-              (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne)
-              (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-              GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-            exact gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-              hNoBad K hK5 hK7
-          EOF
+          Path('official-comparator-config.json').write_text('''{
+            "challenge_module": "OfficialComparatorChallenge",
+            "solution_module": "OfficialComparatorSolution",
+            "theorem_names": ["erdos_ternary_2"],
+            "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+            "enable_nanoda": false
+          }
+          ''', encoding='utf-8')
+          PY
 
           cat >> lakefile.toml <<'EOF'
 
@@ -211,19 +167,37 @@ jobs:
           [[lean_lib]]
           name = "OfficialComparatorSolution"
           EOF
+          echo OFFICIAL_COMPARATOR_PROBLEM406_MODULES_MATERIALIZED=1
 
-          cat > official-comparator-config.json <<'EOF'
-          {
-            "challenge_module": "OfficialComparatorChallenge",
-            "solution_module": "OfficialComparatorSolution",
-            "theorem_names": [
-              "official_comparator_noAxiom_prefixHit",
-              "official_comparator_noAxiom_noBad"
-            ],
-            "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
-            "enable_nanoda": false
-          }
+      - name: Build DeepMind 406 judge modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build ErdosTernary2 OfficialComparatorChallenge OfficialComparatorSolution
+          echo OFFICIAL_COMPARATOR_PROBLEM406_LEAN_MODULES_BUILD_GREEN=1
+
+      - name: Kernel axiom audit of solution theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > OfficialComparatorProblem406AxiomAudit.lean <<'EOF'
+          import OfficialComparatorSolution
+          set_option maxHeartbeats 0
+          set_option maxRecDepth 1000000
+          #print axioms erdos_ternary_2
           EOF
+          lake env lean OfficialComparatorProblem406AxiomAudit.lean 2>&1 | tee official-comparator-problem406-axioms.log
+          if grep -Fq 'sorryAx' official-comparator-problem406-axioms.log; then
+            echo OFFICIAL_COMPARATOR_PROBLEM406_FORBIDDEN_SORRYAX=1
+            exit 1
+          fi
+          if grep -Fq 'gst_four_power_direct_existence_inline' official-comparator-problem406-axioms.log; then
+            echo OFFICIAL_COMPARATOR_PROBLEM406_FORBIDDEN_INLINE_AXIOM_REACHED_SOLUTION=1
+            exit 1
+          fi
+          echo OFFICIAL_COMPARATOR_PROBLEM406_SOLUTION_NO_FORBIDDEN_AXIOMS=1
 
       - name: Run official comparator and require Your solution is okay
         shell: bash
@@ -241,16 +215,18 @@ jobs:
             lake env "$COMPARATOR_BIN" official-comparator-config.json 2>&1 | tee official-comparator.log
           grep -F 'Lean default kernel accepts the solution' official-comparator.log
           grep -F 'Your solution is okay!' official-comparator.log
-          echo OFFICIAL_LEANPROVER_COMPARATOR_YOUR_SOLUTION_IS_OKAY=1
+          echo OFFICIAL_LEANPROVER_COMPARATOR_PROBLEM406_YOUR_SOLUTION_IS_OKAY=1
 
       - name: Upload official comparator diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: official-leanprover-comparator-diagnostics
+          name: official-leanprover-comparator-problem406-diagnostics
           path: |
             OfficialComparatorChallenge.lean
             OfficialComparatorSolution.lean
+            OfficialComparatorProblem406AxiomAudit.lean
             official-comparator-config.json
+            official-comparator-problem406-axioms.log
             official-comparator.log
           if-no-files-found: ignore
