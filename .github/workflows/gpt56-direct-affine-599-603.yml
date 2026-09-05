@@ -81,4 +81,4 @@ jobs:
           set -euo pipefail
           ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim' GSTFourPowerAffineSixthTrit599_603.lean
       - name: Direct affine audit marker
-        run: echo DIRECT_AFFINE_599_603_PHYSICAL_HAPPY_GREEN=1
+        run: echo DIRECT_AFFINE_599_603_PHYSICAL_HAPPY_GREEN_V2=1
