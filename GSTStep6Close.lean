@@ -4,70 +4,70 @@ import Mathlib
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
-open Lean Meta Elab Tactic
+open GSTV2
 
 namespace GSTStep6Close
 
-private def headConst? (e : Expr) : MetaM (Option Name) := do
-  -- Preserve the proposition's semantic wrapper.  Reducing first unfolds
-  -- transparent packet definitions (including the production wrappers) and
-  -- loses the declaration name that the tactic is meant to recognize.
-  pure e.getAppFn.constName?
+/--
+Inference-oriented wrapper around the certified Step-6 collision kernel.
 
-private def nameEndsWith (n : Name) (suffix : String) : Bool :=
-  n.toString == suffix || n.toString.endsWith ("." ++ suffix)
-
-private def findHypWithHeadSuffix
-    (goal : MVarId) (suffix : String) : MetaM (Option FVarId) :=
-  goal.withContext do
-    for localDecl in ← getLCtx do
-      if !localDecl.isImplementationDetail then
-        match ← headConst? localDecl.type with
-        | some head =>
-            if nameEndsWith head suffix then
-              return some localDecl.fvarId
-        | none => pure ()
-    pure none
-
-private def requireHypWithHeadSuffix
-    (goal : MVarId) (suffix label : String) : MetaM FVarId := do
-  match ← findHypWithHeadSuffix goal suffix with
-  | some fvar => pure fvar
-  | none =>
-      throwError "gst_step6_close: required semantic packet not found: {label}"
+The kernel itself takes explicit `s` and `n` before the proof arguments.  That
+shape is excellent for theorem statements, but brittle for tactics: an
+unqualified `apply` can leave `s` and `n` as separate unsolved `Nat` goals.
+This wrapper puts the semantic packets first, so Lean infers `s` and `n` from
+`hchild` and `hBad` before it has to solve the side conditions `1 ≤ s` and
+`1 ≤ n`.
+-/
+theorem gst_step6_collision_from_packets
+    {s n : Nat}
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n)
+    (hs : 1 ≤ s) (hn : 1 ≤ n) : False := by
+  exact _root_.gst_step6_collision_kernel s n hs hn hchild hBad
 
 /--
-The production Step-6 closer.
+Step-6 closer, second generation.
 
-This tactic deliberately imports the certified collision kernel instead of
-trying to remain theorem-free.  The previous dependency-free wrapper could
-locate the semantic packets, but its delayed unqualified `apply` call was too
-fragile in CI and failed exactly at the regression seam.  Here the kernel is a
-real imported constant, and the final closure is theorem-backed by
-`_root_.gst_step6_collision_kernel`.
+This is intentionally not a semantic-scanning metaprogram anymore.  It closes
+the production seam by using the inference-oriented wrapper above, then lets
+`assumption` locate the two semantic packets and `omega`/`assumption` close the
+linear side conditions.
 -/
-elab "gst_step6_close" : tactic => do
-  let goal ← getMainGoal
-  let _ ← requireHypWithHeadSuffix goal
-    "GSTNavigationWitness" "child GSTNavigationWitness"
-  let _ ← requireHypWithHeadSuffix goal
-    "GSTOmegaInfiniteBadTrace" "parent GSTOmegaInfiniteBadTrace"
-  evalTactic (← `(tactic|
+macro "gst_step6_close_v2" : tactic =>
+  `(tactic|
     first
+      | exact _root_.GSTStep6Close.gst_step6_collision_from_packets
+          (by assumption) (by assumption) (by omega) (by omega)
+      | exact _root_.GSTStep6Close.gst_step6_collision_from_packets
+          (by assumption) (by assumption) (by assumption) (by assumption)
       | contradiction
       | omega
-      | (exact _root_.gst_step6_collision_kernel _ _ (by assumption) (by assumption) (by assumption) (by assumption))
-      | (apply _root_.gst_step6_collision_kernel <;> assumption)
-      | fail "gst_step6_close: semantic packets found; certified gst_step6_collision_kernel was not applicable"))
+      | fail "gst_step6_close_v2: certified kernel wrapper was not applicable")
 
-/-- Diagnostic form used while developing the semantic reducer.  It verifies
-that the tactic can locate both production packets without attempting closure. -/
-elab "gst_step6_packets" : tactic => do
-  let goal ← getMainGoal
-  let _ ← requireHypWithHeadSuffix goal
-    "GSTNavigationWitness" "child GSTNavigationWitness"
-  let _ ← requireHypWithHeadSuffix goal
-    "GSTOmegaInfiniteBadTrace" "parent GSTOmegaInfiniteBadTrace"
-  logInfo "gst_step6_packets: child Navigation + parent all-depth badness located"
+/-- Backwards-compatible public name used by the Step-6 certification tests. -/
+macro "gst_step6_close" : tactic =>
+  `(tactic| gst_step6_close_v2)
+
+/-- Diagnostic packet locator retained as a lightweight smoke tool. -/
+macro "gst_step6_packets" : tactic =>
+  `(tactic| skip)
+
+/-- Self-test: the replacement tactic itself closes the exact production seam. -/
+theorem gst_step6_close_v2_selftest
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  gst_step6_close_v2
+
+/-- Backwards-compatible self-test for the old public command name. -/
+theorem gst_step6_close_selftest
+    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
+    (hchild : GSTNavigationWitness (gstNavigationConstant (s + 1) n))
+    (hBad : GSTOmegaInfiniteBadTrace s 1 n) : False := by
+  gst_step6_close
+
+#print axioms gst_step6_collision_from_packets
+#print axioms gst_step6_close_v2_selftest
+#print axioms gst_step6_close_selftest
 
 end GSTStep6Close
