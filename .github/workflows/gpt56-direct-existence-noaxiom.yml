@@ -6,8 +6,6 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTFourPowerDirectExistenceNoAxiom.lean'
-      - 'GSTInfiniteFourPowerNavigation.lean'
-      - 'lakefile.toml'
       - '.github/workflows/gpt56-direct-existence-noaxiom.yml'
   workflow_dispatch:
 
@@ -41,8 +39,8 @@ jobs:
           touch direct-existence-noaxiom.log
           {
             set -euo pipefail
-            echo "DIRECT_EXISTENCE_DEPENDENCY_BUILD_START=1"
-            lake build GSTInfiniteFourPowerNavigation
+            echo "DIRECT_EXISTENCE_CLEAN_DEPS_BUILD_START=1"
+            lake build GSTCanonicalTailStateIso GSTFourPowerDirectExistence GSTFourPowerDirectAdditionCarry
             echo "DIRECT_EXISTENCE_TARGET_LEAN_START=1"
             lake env lean GSTFourPowerDirectExistenceNoAxiom.lean
             echo DIRECT_EXISTENCE_NOAXIOM_FILE_COMPILED=1
