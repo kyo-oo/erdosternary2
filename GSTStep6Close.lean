@@ -1,3 +1,4 @@
+import GSTStep6CollisionKernel
 import Mathlib
 
 set_option maxRecDepth 1000000
@@ -36,18 +37,14 @@ private def requireHypWithHeadSuffix
       throwError "gst_step6_close: required semantic packet not found: {label}"
 
 /--
-Dependency-free metaprogramming kernel for the prefix-one Step-6 closer.
+The production Step-6 closer.
 
-The proof mathematics is intentionally *not* imported here.  This keeps the
-custom tactic usable from the production monolith without creating a circular
-proof dependency.  Semantic packets are discovered by the head constant of
-their types, not by fragile local hypothesis names.
-
-The closing pipeline is deliberately conservative: direct contradiction and
-Presburger closure are tried first, then the importing proof layer's certified
-`gst_step6_collision_kernel` theorem is applied.  The theorem name is resolved
-at tactic invocation time, so this metaprogramming kernel remains independent
-of the production monolith and cannot introduce an import cycle.
+This tactic deliberately imports the certified collision kernel instead of
+trying to remain theorem-free.  The previous dependency-free wrapper could
+locate the semantic packets, but its delayed unqualified `apply` call was too
+fragile in CI and failed exactly at the regression seam.  Here the kernel is a
+real imported constant, and the final closure is theorem-backed by
+`_root_.gst_step6_collision_kernel`.
 -/
 elab "gst_step6_close" : tactic => do
   let goal ← getMainGoal
@@ -59,7 +56,8 @@ elab "gst_step6_close" : tactic => do
     first
       | contradiction
       | omega
-      | (apply gst_step6_collision_kernel <;> assumption)
+      | (exact _root_.gst_step6_collision_kernel _ _ (by assumption) (by assumption) (by assumption) (by assumption))
+      | (apply _root_.gst_step6_collision_kernel <;> assumption)
       | fail "gst_step6_close: semantic packets found; certified gst_step6_collision_kernel was not applicable"))
 
 /-- Diagnostic form used while developing the semantic reducer.  It verifies
