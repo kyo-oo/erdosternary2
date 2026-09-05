@@ -43,7 +43,7 @@ jobs:
           {
             set -euo pipefail
             echo HAPPY_GE_THREE_CLEAN_BUILD_START=1
-            lake build GSTGraphV2PerfectPowerBlockProbe GSTGraphV2UnifiedVerticalTelescope GSTGraphV2SixAdicSynchronizedShadows GSTFinalPurePowerResidueTransplant GSTFourPowerOntologicalAdapter GSTFourPowerDirectExistenceNoAxiom
+            lake build GSTTactic GSTGraphV2PerfectPowerBlockProbe GSTGraphV2UnifiedVerticalTelescope GSTGraphV2SixAdicSynchronizedShadows GSTFinalPurePowerResidueTransplant GSTFourPowerOntologicalAdapter GSTFourPowerDirectExistenceNoAxiom
             echo HAPPY_GE_THREE_INFINITE_PROVIDER_LEAN_START=1
             lake env lean -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean GSTInfiniteFourPowerNavigation.lean
             echo HAPPY_GE_THREE_WRAPPER_LEAN_START=1
