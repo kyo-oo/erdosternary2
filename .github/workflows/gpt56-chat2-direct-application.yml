@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTFourPowerDirectChat2Application.lean'
+      - 'GSTFourPowerDirectExistenceProviderPipeline.lean'
       - 'GSTFourPowerAffineTwoTritClassifier.lean'
       - 'GSTFourPowerAffinePeelClassifier.lean'
       - 'GSTFourPowerAffineClassifierBridge.lean'
@@ -41,7 +42,7 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile Chat2 direct application route
+      - name: Compile Chat2 direct application and pipeline gate
         shell: bash
         run: |
           set -uo pipefail
@@ -50,8 +51,9 @@ jobs:
           {
             set -euo pipefail
             echo CHAT2_DIRECT_APPLICATION_BUILD_START=1
-            lake build GSTFourPowerDirectChat2Application
+            lake build GSTFourPowerDirectChat2Application GSTFourPowerDirectExistenceProviderPipeline
             echo CHAT2_DIRECT_APPLICATION_FILE_COMPILED=1
+            echo CHAT2_PROVIDER_PIPELINE_GATE_COMPILED=1
           } 2>&1 | tee chat2-direct-application.log
           test ${PIPESTATUS[0]} -eq 0
 
