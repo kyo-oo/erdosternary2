@@ -36,11 +36,18 @@ jobs:
       - name: Compile isolated no-axiom direct-existence file
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTInfiniteFourPowerNavigation
-          lake env lean GSTFourPowerDirectExistenceNoAxiom.lean 2>&1 | tee direct-existence-noaxiom.log
-          echo DIRECT_EXISTENCE_NOAXIOM_FILE_COMPILED=1
+          touch direct-existence-noaxiom.log
+          {
+            set -euo pipefail
+            echo "DIRECT_EXISTENCE_DEPENDENCY_BUILD_START=1"
+            lake build GSTInfiniteFourPowerNavigation
+            echo "DIRECT_EXISTENCE_TARGET_LEAN_START=1"
+            lake env lean GSTFourPowerDirectExistenceNoAxiom.lean
+            echo DIRECT_EXISTENCE_NOAXIOM_FILE_COMPILED=1
+          } 2>&1 | tee direct-existence-noaxiom.log
+          test ${PIPESTATUS[0]} -eq 0
 
       - name: Reject custom axiom leakage in isolated theorem
         shell: bash
