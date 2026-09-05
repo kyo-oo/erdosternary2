@@ -106,6 +106,30 @@ theorem chat2_counterexample_obstruction_bundle
     noCommonTwo_excludes_mod81_row_four K hNo,
     noCommonTwo_all_exponent_trit_laws K hNo⟩
 
+/-- Direct bad-channel consequence of the obstruction bundle.  This is Chat-2's
+    realization in its most useful form: any surviving affine bad state inherits
+    all row and prefix obstructions. -/
+theorem chat2_bad_affine_channel_one_obstruction_bundle
+    (K : Nat) (hBad : BadChannel 1 (affineOrbit K)) :
+    (K % 9 ≠ 5 ∧ K % 9 ≠ 6) ∧
+    (K % 27 ≠ 14 ∧ K % 27 ≠ 18 ∧ K % 27 ≠ 19 ∧ K % 27 ≠ 25) ∧
+    (¬ RowFourClass (K % 81)) ∧
+    (∀ p : Nat,
+      digit3 (4^(exponentPrefix K p)) (p+1) =
+        digit3 (4^((exponentPrefix K p)+1)) (p+1) →
+      exponentTrit K p ≠
+        2 - digit3 (4^(exponentPrefix K p)) (p+1)) := by
+  have hNo : ¬ CommonTwo K := (chat2_noCommonTwo_iff_bad_channel_one K).2 hBad
+  exact chat2_counterexample_obstruction_bundle K hNo
+
+/-- The row-two classes are already killed directly in affine bad-channel form. -/
+theorem chat2_no_bad_affine_channel_one_of_mod9_five_or_six
+    (K : Nat) (hK : K % 9 = 5 ∨ K % 9 = 6) :
+    ¬ BadChannel 1 (affineOrbit K) := by
+  intro hBad
+  have hNo : ¬ CommonTwo K := (chat2_noCommonTwo_iff_bad_channel_one K).2 hBad
+  exact hNo (chat2_commonTwo_of_mod9_five_or_six K hK)
+
 /-- Failed relocation is not a future-only propagation goal.  Starting from an
     actual direct `CommonTwo` witness and assuming the next exponent is bad,
     Chat 2's realization exposes an exact physical state one sheet later. -/
@@ -164,6 +188,8 @@ theorem chat2_noCounterexampleClosure_iff_no_bad_affine_channel_one :
 #check chat2_commonTwo_of_mod9_six
 #check chat2_commonTwo_of_mod9_five_or_six
 #check chat2_counterexample_obstruction_bundle
+#check chat2_bad_affine_channel_one_obstruction_bundle
+#check chat2_no_bad_affine_channel_one_of_mod9_five_or_six
 #check chat2_failed_relocation_exposes_physical_state
 #check chat2_fourPowerDirectExistence_from_no_counterexample
 #check chat2_fourPowerDirectExistence_iff_no_bad_affine_channel_one
@@ -173,6 +199,8 @@ theorem chat2_noCounterexampleClosure_iff_no_bad_affine_channel_one :
 #print axioms chat2_first_trit_counterexample_split
 #print axioms chat2_commonTwo_of_mod9_five_or_six
 #print axioms chat2_counterexample_obstruction_bundle
+#print axioms chat2_bad_affine_channel_one_obstruction_bundle
+#print axioms chat2_no_bad_affine_channel_one_of_mod9_five_or_six
 #print axioms chat2_failed_relocation_exposes_physical_state
 #print axioms chat2_fourPowerDirectExistence_from_no_counterexample
 #print axioms chat2_fourPowerDirectExistence_iff_no_bad_affine_channel_one
