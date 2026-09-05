@@ -1,4 +1,5 @@
 import ErdosTernary2
+import GSTFourPowerHappyGeThreeClean
 
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do
@@ -13,6 +14,7 @@ def main : IO Unit := do
   IO.println "  - ErdosTernary2.single_digit_value"
   IO.println "  - ErdosTernary2.two_digit_value"
   IO.println "  - ErdosTernary2.isTernaryDigit_{zero,one,two,three}"
+  IO.println "  - GSTFourPowerHappyGeThreeClean.four_power_happy_ge_three_clean"
   IO.println ""
   IO.println "Verify cleanliness:"
   IO.println "  ./scripts/sorry_check.sh   # must return 0"
