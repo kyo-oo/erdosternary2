@@ -1,53 +1,54 @@
-import GSTInfiniteFourPowerNavigation
 import GSTFourPowerDirectExistence
 import GSTFourPowerDirectAdditionCarry
+import GSTCanonicalTailStateIso
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
 /-!
-# Separate no-axiom attempt for `FourPowerDirectExistence`
+# Separate no-axiom bridge for `FourPowerDirectExistence`
 
-This file is intentionally *not* wired into the monolith.  It tests the final
-missing seam in isolation:
+This file is intentionally *not* wired into the monolith.  It also deliberately
+avoids `GSTInfiniteFourPowerNavigation`: that experimental provider currently
+fails to build and its printed axiom audit contains `sorryAx`.
 
-`FourPowerDirectExistence.FourPowerDirectExistence`
+The clean certified content here is the arithmetic bridge:
 
-Mathematical bridge:
-* for `K = 5,6`, row `p = 2` is checked directly;
-* for `K ≥ 8`, the existing four-power navigation stack supplies a Happy cell;
-* a Happy cell means source digit is `2` and the multiplication-by-four carry is
-  `0` or `3`, hence the next power has the same digit `2` at the same position.
+* direct small cases `K = 5,6` give `CommonTwo` at row `p = 2`;
+* any physical Happy row on `4^K` gives a same-row `CommonTwo K` witness;
+* therefore a theorem-backed `K ≥ 8` Happy-row provider is exactly sufficient
+  to close `FourPowerDirectExistence` without the old production-boundary axiom.
 -/
-
--- Isolated probe trigger: force GitHub Actions to run Lean on this file.
 
 namespace GSTFourPowerDirectExistenceNoAxiom
 
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectResidue
 open GSTFourPowerDirectAdditionCarry
-open GSTInfiniteFourPowerNavigation
 
-/-- A Happy cell for `4^K` is exactly a same-row common-two witness for
+/-- A physical Happy cell for `4^K` is exactly a same-row common-two witness for
 `4^K` and `4^(K+1)`. -/
 theorem happyCell_to_commonTwo
     (K p : Nat) (hp : 1 ≤ p)
-    (hHappy : HappyCell (carry4 (4^K) p) (digit3 (4^K) p)) :
+    (hHappy :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p)) :
     CommonTwo K := by
+  unfold GSTCanonicalTailStateIso.HappyCell at hHappy
   rcases hHappy with ⟨hd, hc⟩
   refine ⟨p, hp, ?_, ?_⟩
-  · simpa [GSTFourPowerDirectResidue.digit3] using hd
+  · simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3] using hd
   · have hsrc : GSTFourPowerDirectResidue.digit3 (4^K) p = 2 := by
-      simpa [GSTFourPowerDirectResidue.digit3] using hd
-    have hcarryMod : directCarry4 (4^K) p % 3 = 0 := by
-      rcases hc with h0 | h3
-      · simpa [directCarry4, carry4, h0]
-      · simpa [directCarry4, carry4, h3]
+      simpa [GSTCanonicalTailStateIso.digit3, GSTFourPowerDirectResidue.digit3] using hd
+    have hcarry : directCarry4 (4^K) p = 0 ∨ directCarry4 (4^K) p = 3 := by
+      simpa [GSTCanonicalTailStateIso.carry4, directCarry4] using hc
     have hmulFormula := digit3_four_mul (4^K) p
     have hmul : GSTFourPowerDirectResidue.digit3 (4 * (4^K)) p = 2 := by
       rw [hmulFormula, hsrc]
-      omega
+      rcases hcarry with h0 | h3
+      · simp [h0]
+      · simp [h3]
     simpa [Nat.pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hmul
 
 /-- Direct base case `K = 5`, witnessed at row two. -/
@@ -60,13 +61,20 @@ theorem commonTwo_six : CommonTwo 6 := by
   refine ⟨2, by norm_num, ?_, ?_⟩ <;>
     norm_num [GSTFourPowerDirectResidue.digit3]
 
-/-- Candidate replacement for the production-boundary axiom
-`gst_four_power_direct_existence_inline`. -/
-theorem fourPowerDirectExistence_noAxiom : FourPowerDirectExistence := by
+/-- Clean reduction of the remaining seam.  The only mathematical input still
+needed is a theorem-backed Happy-row provider for `K ≥ 8`; no custom axiom,
+monolith transplant, or dirty navigation provider is used here. -/
+theorem fourPowerDirectExistence_from_physical_happy_ge_three
+    (happy_ge_three :
+      ∀ K : Nat, 8 ≤ K →
+        ∃ p : Nat, 3 ≤ p ∧
+          GSTCanonicalTailStateIso.HappyCell
+            (GSTCanonicalTailStateIso.carry4 (4^K) p)
+            (GSTCanonicalTailStateIso.digit3 (4^K) p)) :
+    FourPowerDirectExistence := by
   intro K hK5 hK7
   by_cases hK8 : 8 ≤ K
-  · obtain ⟨p, hp3, hHappy⟩ :=
-      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three K hK8
+  · obtain ⟨p, hp3, hHappy⟩ := happy_ge_three K hK8
     exact happyCell_to_commonTwo K p (by omega) hHappy
   · have hCases : K = 5 ∨ K = 6 ∨ K = 7 := by omega
     rcases hCases with rfl | rfl | rfl
@@ -77,6 +85,6 @@ theorem fourPowerDirectExistence_noAxiom : FourPowerDirectExistence := by
 #print axioms happyCell_to_commonTwo
 #print axioms commonTwo_five
 #print axioms commonTwo_six
-#print axioms fourPowerDirectExistence_noAxiom
+#print axioms fourPowerDirectExistence_from_physical_happy_ge_three
 
 end GSTFourPowerDirectExistenceNoAxiom
