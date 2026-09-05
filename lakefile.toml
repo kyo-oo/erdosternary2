@@ -85,6 +85,7 @@ roots = [
   "GSTPrefixOneSeedCore",
   "GSTPrefixOneU2DCollisionProof",
   "GSTSeedOneShift",
+    "GSTStep6Close",
     "GSTStep6CollisionKernel",
   "GSTU2DAtomicBridge",
   "GSTU2DCanonicalPhaseDensity",
