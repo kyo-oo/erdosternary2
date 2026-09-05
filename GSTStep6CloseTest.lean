@@ -1,5 +1,5 @@
 import GSTStep6Close
-import ErdosTernary2
+import GSTStep6CollisionKernel
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
