@@ -2,6 +2,7 @@ import GSTFourPowerDirectExistenceNoAxiom
 import GSTFourPowerDirectCreationMaster
 import GSTFourPowerOntologicalAdapter
 import GSTFourPowerDirectChat2Application
+import GSTFourPowerHappyProvider
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -16,15 +17,17 @@ It now exposes the legitimate proof gates:
 
 * `FourPowerHappyGeThreeProvider`, the physical Happy-row provider originally
   needed by the isolated bridge;
+* `FourPowerCommonTwoGeThreeProvider`, the sharpened monolith-mined provider:
+  direct common-two witnesses already forced at rows `p ≥ 3`;
 * `FourPowerDirectNoCounterexampleClosure`, the direct `CommonTwo`
   counterexample closure; and
 * `FourPowerDirectNoBadAffineChannelOne`, the Chat-2 realization: the final
   production target is exactly the claim that bad affine channel `B₁` never
   occurs on `affineOrbit K` for `K ≥ 5`, `K ≠ 7`.
 
-The third gate is the corrected roadmap route.  It avoids the abandoned
-future-only Happy propagation path and does not import the unresolved infinite
-navigation collision file.
+The third/fourth gates are the corrected roadmap route.  The new Happy provider
+bridge avoids the abandoned future-only propagation path and does not import the
+unresolved infinite-navigation collision file.
 -/
 
 namespace GSTFourPowerDirectExistenceProviderPipeline
@@ -44,6 +47,12 @@ def FourPowerHappyGeThreeProvider : Prop :=
         (GSTCanonicalTailStateIso.carry4 (4^K) p)
         (GSTCanonicalTailStateIso.digit3 (4^K) p)
 
+/-- Goal A′: the sharpened direct witness provider mined from the monolith:
+a common-two witness already above the first two rows.  This is exactly the
+missing bridge input for the requested physical Happy provider. -/
+def FourPowerCommonTwoGeThreeProvider : Prop :=
+  ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.CommonTwoGeThree K
+
 /-- Goal B: close the direct arithmetic counterexample language.
 This is the productive route after the failed future-only relocation subgoal:
 prove there is no genuine `CommonTwo` counterexample for `K ≥ 5`, except the
@@ -56,12 +65,31 @@ def FourPowerDirectNoCounterexampleClosure : Prop :=
 def FourPowerDirectNoBadAffineChannelOne : Prop :=
   ∀ K : Nat, 5 ≤ K → K ≠ 7 → ¬ BadChannel 1 (affineOrbit K)
 
+/-- Monolith-mined provider gate: once row-three-or-higher direct common-two
+witnesses are mined, the physical Happy-row provider follows immediately. -/
+theorem fourPowerHappyGeThreeProvider_from_commonTwoGeThree
+    (hProvider : FourPowerCommonTwoGeThreeProvider) :
+    FourPowerHappyGeThreeProvider := by
+  intro K hK
+  exact
+    GSTFourPowerHappyProvider.four_power_happy_ge_three_from_commonTwoGeThree
+      hProvider K hK
+
 /-- The already-green isolated bridge converts Goal A into the closed
 `FourPowerDirectExistence` theorem. -/
 theorem fourPowerDirectExistence_noAxiom_from_provider
     (hProvider : FourPowerHappyGeThreeProvider) :
     FourPowerDirectExistence := by
   exact fourPowerDirectExistence_from_physical_happy_ge_three hProvider
+
+/-- Direct-existence route from the sharpened monolith-mined row-three-or-higher
+provider. -/
+theorem fourPowerDirectExistence_noAxiom_from_commonTwoGeThree
+    (hProvider : FourPowerCommonTwoGeThreeProvider) :
+    FourPowerDirectExistence := by
+  exact
+    fourPowerDirectExistence_noAxiom_from_provider
+      (fourPowerHappyGeThreeProvider_from_commonTwoGeThree hProvider)
 
 /-- Chat-2 production gate in `CommonTwo` language: once the counterexample
 language is closed, the direct universal theorem follows immediately. -/
@@ -106,6 +134,15 @@ theorem fourPowerCreationMaster_noAxiom_from_provider
     GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
       (fourPowerDirectExistence_noAxiom_from_provider hProvider)
 
+/-- Creation master route from the sharpened monolith-mined row-three-or-higher
+provider. -/
+theorem fourPowerCreationMaster_noAxiom_from_commonTwoGeThree
+    (hProvider : FourPowerCommonTwoGeThreeProvider) :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  exact
+    GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
+      (fourPowerDirectExistence_noAxiom_from_commonTwoGeThree hProvider)
+
 /-- Chat-2 creation master route from direct `CommonTwo` closure. -/
 theorem fourPowerCreationMaster_noAxiom_from_chat2_closure
     (hClosed : FourPowerDirectNoCounterexampleClosure) :
@@ -130,6 +167,15 @@ theorem fourPowerCreationCertificate_noAxiom_from_provider
   exact
     (fourPowerCreationMaster_noAxiom_from_provider hProvider) K hK5 hK7
 
+/-- Transplant-ready certificate wrapper for the sharpened monolith-mined
+row-three-or-higher provider. -/
+theorem fourPowerCreationCertificate_noAxiom_from_commonTwoGeThree
+    (hProvider : FourPowerCommonTwoGeThreeProvider)
+    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+  exact
+    (fourPowerCreationMaster_noAxiom_from_commonTwoGeThree hProvider) K hK5 hK7
+
 /-- Transplant-ready certificate wrapper for the Chat-2 direct closure gate. -/
 theorem fourPowerCreationCertificate_noAxiom_from_chat2_closure
     (hClosed : FourPowerDirectNoCounterexampleClosure)
@@ -148,28 +194,37 @@ theorem fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
     (fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one hNoBad) K hK5 hK7
 
 #check FourPowerHappyGeThreeProvider
+#check FourPowerCommonTwoGeThreeProvider
 #check FourPowerDirectNoCounterexampleClosure
 #check FourPowerDirectNoBadAffineChannelOne
+#check fourPowerHappyGeThreeProvider_from_commonTwoGeThree
 #check fourPowerDirectExistence_noAxiom_from_provider
+#check fourPowerDirectExistence_noAxiom_from_commonTwoGeThree
 #check fourPowerDirectExistence_noAxiom_from_chat2_closure
 #check fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
 #check chat2_counterexample_closure_iff_no_bad_affine_channel_one
 #check chat2_counterexample_obstruction_from_pipeline
 #check fourPowerCreationMaster_noAxiom_from_provider
+#check fourPowerCreationMaster_noAxiom_from_commonTwoGeThree
 #check fourPowerCreationMaster_noAxiom_from_chat2_closure
 #check fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one
 #check fourPowerCreationCertificate_noAxiom_from_provider
+#check fourPowerCreationCertificate_noAxiom_from_commonTwoGeThree
 #check fourPowerCreationCertificate_noAxiom_from_chat2_closure
 #check fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
+#print axioms fourPowerHappyGeThreeProvider_from_commonTwoGeThree
 #print axioms fourPowerDirectExistence_noAxiom_from_provider
+#print axioms fourPowerDirectExistence_noAxiom_from_commonTwoGeThree
 #print axioms fourPowerDirectExistence_noAxiom_from_chat2_closure
 #print axioms fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
 #print axioms chat2_counterexample_closure_iff_no_bad_affine_channel_one
 #print axioms chat2_counterexample_obstruction_from_pipeline
 #print axioms fourPowerCreationMaster_noAxiom_from_provider
+#print axioms fourPowerCreationMaster_noAxiom_from_commonTwoGeThree
 #print axioms fourPowerCreationMaster_noAxiom_from_chat2_closure
 #print axioms fourPowerCreationMaster_noAxiom_from_no_bad_affine_channel_one
 #print axioms fourPowerCreationCertificate_noAxiom_from_provider
+#print axioms fourPowerCreationCertificate_noAxiom_from_commonTwoGeThree
 #print axioms fourPowerCreationCertificate_noAxiom_from_chat2_closure
 #print axioms fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
 
