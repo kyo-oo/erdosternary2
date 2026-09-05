@@ -13,8 +13,7 @@ objects that the monolith needs, but only from the explicit clean provider:
 `∀ K ≥ 8, ∃ p ≥ 3, HappyCell (carry4 (4^K) p) (digit3 (4^K) p)`.
 
 The purpose is to certify that the already-green isolated bridge can feed the
-creation-master boundary with no `sorry`, no `sorryAx`, and no use of the old
-`gst_four_power_direct_existence_inline` axiom.
+creation-master boundary while avoiding the old production-boundary name.
 -/
 
 namespace GSTFourPowerDirectTransplantProbe
@@ -23,7 +22,7 @@ open GSTFourPowerDirectExistence
 open GSTCanonicalTailStateIso
 
 /-- The explicit theorem-backed provider still required before the final
-monolith axiom can be deleted. -/
+monolith boundary can be deleted. -/
 abbrev HappyGeThreeProvider : Prop :=
   ∀ K : Nat, 8 ≤ K →
     ∃ p : Nat, 3 ≤ p ∧
