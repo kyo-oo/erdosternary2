@@ -46,11 +46,4 @@ theorem four_power_happy_ge_three_from_monolith
       HappyCell (carry4 (4^K) p) (digit3 (4^K) p) := by
   exact four_power_happy_ge_three_clean K hK
 
-#check power_three_step_collision_clean
-#check four_power_happy_ge_three_clean
-#check four_power_happy_ge_three_from_monolith
-#print axioms power_three_step_collision_clean
-#print axioms four_power_happy_ge_three_clean
-#print axioms four_power_happy_ge_three_from_monolith
-
 end GSTFourPowerHappyGeThreeClean
