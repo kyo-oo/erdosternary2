@@ -5,6 +5,8 @@ import GSTCanonicalTailStateIso
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
 
+-- Controlled CI trigger: clean bridge probe after Lake rollback.
+
 /-!
 # Separate no-axiom bridge for `FourPowerDirectExistence`
 
