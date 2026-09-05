@@ -6,7 +6,7 @@ LAKE = Path("lakefile.toml")
 s = ROOT.read_text(encoding="utf-8")
 original = s
 
-# Remove the known-red production imports.
+# Remove the known-red production imports from the monolith surface only.
 s = s.replace("import GSTStep6Close\n", "")
 s = s.replace("import GSTInfiniteFourPowerNavigation\n", "")
 
@@ -64,7 +64,9 @@ elif replacement not in s:
 ROOT.write_text(s, encoding="utf-8")
 
 t = LAKE.read_text(encoding="utf-8")
-t = t.replace('  "GSTInfiniteFourPowerNavigation",\n', "")
+# Keep GSTInfiniteFourPowerNavigation as a lake root: the clean wrapper imports
+# its exported constants directly, even though the monolith import above is
+# intentionally excised from ErdosTernary2.lean.
 t = t.replace('  "GSTStep6Close",\n', "")
 LAKE.write_text(t, encoding="utf-8")
 
