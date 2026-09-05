@@ -1,4 +1,5 @@
 import GSTInfiniteFourPowerNavigation
+import GSTFourPowerOntologicalAdapter
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -38,6 +39,15 @@ theorem four_power_happy_ge_three_clean
     ∃ p : Nat, 3 ≤ p ∧
       HappyCell (carry4 (4^K) p) (digit3 (4^K) p) := by
   exact GSTInfiniteFourPowerNavigation.four_power_happy_ge_three K hK
+
+/-- Clean creation-master export used by production surgery.  This preserves the
+monolith ban on direct `GSTInfiniteFourPowerNavigation` references while still
+routing through the independent kernel-checked four-power proof. -/
+theorem four_power_creation_master_clean :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal K hK5 hK7)
 
 /-- Monolith-mined public theorem name requested by the corrected plan. -/
 theorem four_power_happy_ge_three_from_monolith
