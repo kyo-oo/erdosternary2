@@ -1,4 +1,9 @@
+from pathlib import Path
+import sys
 import textwrap
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.gst_decl_manifest import classify_path, extract_declarations
 
@@ -64,3 +69,14 @@ def test_classifies_major_theorem_families():
     assert classify_path("GSTGraphV2Production.lean") == "GST Graph V2"
     assert classify_path("GSTU2DSharpCrossingBlock.lean") == "U2D and crossing charge"
     assert classify_path("GST/Problem406/PublicAPI.lean") == "Problem 406 certificate"
+
+
+def main():
+    test_extracts_documented_public_declarations()
+    test_extracts_attributes_and_private_declarations()
+    test_classifies_major_theorem_families()
+    print("GST_DECL_MANIFEST_TESTS_PASS=1")
+
+
+if __name__ == "__main__":
+    main()
