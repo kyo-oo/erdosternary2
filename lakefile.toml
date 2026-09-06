@@ -14,6 +14,9 @@ name = "GSTTactic"
 name = "ErdosTernary2"
 
 [[lean_lib]]
+name = "GST"
+
+[[lean_lib]]
 name = "GSTLocalClosure"
 roots = [
   "GST2DMixedEmergence",
