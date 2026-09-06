@@ -1,9 +1,6 @@
 name: GPT56 Residual Omega Probe
 
 on:
-  push:
-    branches:
-      - sol/gpt56-canonical-tail-escape-20260827
   workflow_dispatch:
 
 jobs:
@@ -46,4 +43,4 @@ jobs:
           PY
           lake env lean ResidualOmegaProbe.lean 2>&1 | tee residual-omega-probe.log
           echo 'RESIDUAL_OMEGA_PROBE_GREEN=1'
-          # trigger: 2026-09-01 current monolith
+          # manual-only auxiliary probe; disabled from push CI after main comparator acceptance
