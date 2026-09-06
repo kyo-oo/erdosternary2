@@ -22,7 +22,7 @@ abbrev carry : Nat → Nat → Nat := _root_.gstCarry
 abbrev digit : Nat → Nat → Nat := _root_.gstDigit
 
 /-- Space classification induced by a carry state. -/
-abbrev spaceAt : Nat → Nat → _root_.GSTSpace := _root_.gstSpaceAt
+abbrev spaceAt := _root_.gstSpaceAt
 
 /-- Seeded affine carry used to preserve incoming information across a cut. -/
 abbrev affineCarry : Nat → Nat → Nat → Nat → Nat := _root_.gstAffineMulCarry
