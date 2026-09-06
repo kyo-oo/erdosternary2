@@ -1,20 +1,30 @@
-# General Space Theory (GST) public naming rule
+# Public naming rule: Worldtrace Arithmetic and GST
 
-This repository uses `GST` as the Lean namespace abbreviation for **General Space Theory**.
+This repository now uses **Worldtrace Arithmetic** as the public umbrella name for the full mathematics.
+
+The Lean namespace `GST` remains the historical abbreviation for **General Space Theory**, which is the navigation-geometric pillar inside Worldtrace Arithmetic.
 
 ## Rule
 
-Public prose must expand the name at first mention:
+Public prose must use:
+
+```text
+Worldtrace Arithmetic
+```
+
+when referring to the whole framework.
+
+Public prose must use:
 
 ```text
 General Space Theory (GST)
 ```
 
-After first mention, `GST` is acceptable.
+only when referring to the GST/navigation/geometric pillar.
 
 ## Why Lean still uses `GST`
 
-Lean names need to be short enough for proofs and imports. The namespace remains:
+Lean names need to remain stable for proof compatibility.  The historical namespace remains:
 
 ```lean
 GST
@@ -28,20 +38,41 @@ GST.Arithmetic.digit3
 GST.FourPower.CommonTwo
 ```
 
-## Why docs must expand it
+## New umbrella import
 
-Reviewers should understand that GST is a theory framework, not a generic internal label.
+New public-facing imports should prefer:
 
-Use prose like:
-
-```text
-General Space Theory (GST) supplies the graph/navigation layer.
+```lean
+import Worldtrace.PublicAPI
 ```
 
-Avoid first mentions like:
+Primary reviewer-facing checks:
+
+```lean
+#check Worldtrace.erdos_ternary_two
+#check Worldtrace.four_power_contains_digit_two
+```
+
+## Prose examples
+
+Use:
 
 ```text
-GST supplies the graph/navigation layer.
+Worldtrace Arithmetic combines ternary event arithmetic, carry-information
+transport, four-power dynamics, collision closure, and General Space Theory
+navigation certificates.
+```
+
+Use:
+
+```text
+General Space Theory (GST) supplies the navigation-geometric pillar.
+```
+
+Avoid:
+
+```text
+GST is the whole mathematical framework.
 ```
 
 ## Public API interpretation
@@ -55,7 +86,8 @@ GST.FourPower.exponentPrefix
 should be described in prose as:
 
 ```text
-General Space Theory's four-power exponent-prefix API.
+Worldtrace Arithmetic's four-power exponent-prefix layer, using the historical
+GST namespace.
 ```
 
-This keeps Lean clean while making the mathematical identity clear.
+This keeps Lean stable while making the mathematical identity accurate.
