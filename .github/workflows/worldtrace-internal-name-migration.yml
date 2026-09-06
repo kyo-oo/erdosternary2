@@ -1,0 +1,57 @@
+name: Worldtrace Internal Name Migration
+
+on:
+  push:
+    branches:
+      - sol/problem406-professionalization-green-20260906
+    paths:
+      - '.ci/worldtrace-internal-name-migration-trigger.txt'
+      - 'scripts/worldtrace_internal_name_migration.py'
+      - '.github/workflows/worldtrace-internal-name-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-internal-names:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply Worldtrace internal-name migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/worldtrace_internal_name_migration.py
+          git diff --check
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify migrated public surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build Worldtrace.PublicAPI Worldtrace.TheoremMap GST.PublicAPI GST.Problem406.TheoremMap
+      - name: Commit migrated internal names
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'WORLDTRACE_INTERNAL_NAME_MIGRATION_NO_CHANGES=1'
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Migrate internal Worldtrace names"
+          git pull --rebase origin sol/problem406-professionalization-green-20260906
+          git push origin HEAD:sol/problem406-professionalization-green-20260906
