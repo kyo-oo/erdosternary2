@@ -4,8 +4,6 @@ Pinned comparator-final source: `de11dc2c5ee340fee1929ba2adc6834a72ab9879`.
 
 This file counts only `ErdosTernary2.lean` plus its recursive custom import closure from the comparator-final source. It excludes Mathlib and excludes later presentation-only files.
 
-The public umbrella name for the mathematics is **Worldtrace Arithmetic**.  General Space Theory (GST) is one major navigation-geometric pillar inside that larger framework.
-
 ## Executive counts
 
 | Item | Count |
@@ -33,20 +31,6 @@ The public umbrella name for the mathematics is **Worldtrace Arithmetic**.  Gene
 | Finite verification / structural decision layer | 13 |
 | Ternary digit arithmetic layer | 13 |
 | Custom tactic / automation layer | 8 |
-
-## Worldtrace layer interpretation
-
-| Census family | Worldtrace role |
-| --- | --- |
-| Final Problem406 / universal theorem layer | flagship theorem surface |
-| Four-power / residue arithmetic layer | four-power dynamics and residue tower theory |
-| Canonical tail / collision / wave layer | canonical collision theory and bad-trace closure |
-| Bridge / cascade / crossing layer | True Duality Transcendence and bridge/cascade transport |
-| General Space Theory proper | navigation-geometric pillar |
-| Carry / affine information layer | carry-information theory |
-| Finite verification / structural decision layer | finite certificate theory |
-| Ternary digit arithmetic layer | ternary event arithmetic |
-| Custom tactic / automation layer | internal proof automation support |
 
 ## Largest copied source files
 
@@ -86,5 +70,3 @@ The public umbrella name for the mathematics is **Worldtrace Arithmetic**.  Gene
 ## Public API policy
 
 The full theorem universe is indexed, not mass-aliased. Public API names should promote the proof spine and major bridge layers deliberately, while lower-level declarations stay discoverable through this manifest until they are intentionally promoted.
-
-Worldtrace-level wrappers are the correct first step. Direct internal declaration renames should happen only through a dependency-safe migration and full CI pass.
