@@ -24,6 +24,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
+          lake build
           lake env lean GST/Problem406/PublicAPI.lean
           lake env lean GST/Problem406/TheoremMap.lean
           lake env lean GST/Arithmetic/TernaryDigits.lean
