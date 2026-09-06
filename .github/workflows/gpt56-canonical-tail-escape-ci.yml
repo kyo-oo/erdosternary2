@@ -54,21 +54,25 @@ jobs:
           lake build ErdosTernary2
           echo 'TAIL_ESCAPE_MONOLITH_GREEN=1'
 
-      - name: Kernel axiom audit committed production chain
+      - name: Kernel axiom audit no-axiom transplant endpoints
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           cat > ProductionTailEscapeAudit.lean <<'EOF'
-          import ErdosTernary2
-          #print axioms gst_prefix_one_information_bad_descends_inline
-          #print axioms gst_prefix_one_child_gate_contradicts_parent_bad_inline
-          #print axioms gst_prefix_one_navigation_lift
-          #print axioms erdos_ternary_2_universal
+          import GSTPrefixOneOntologicalEscape
+          #print axioms gst_four_power_creation_certificate_noAxiom_from_provider
+          #print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
+          #print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
+          #print axioms gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
           EOF
           lake env lean ProductionTailEscapeAudit.lean 2>&1 | tee production-tail-escape-axioms.log
           if grep -Fq 'sorryAx' production-tail-escape-axioms.log; then
-            echo 'Hidden sorryAx detected in production chain'
+            echo 'TAIL_ESCAPE_FORBIDDEN_SORRYAX=1'
             exit 1
           fi
-          echo 'TAIL_ESCAPE_AXIOM_AUDIT_GREEN=1'
+          if grep -Fq 'gst_four_power_direct_existence_inline' production-tail-escape-axioms.log; then
+            echo 'TAIL_ESCAPE_FORBIDDEN_INLINE_AXIOM_REACHED_NOAXIOM_ENDPOINT=1'
+            exit 1
+          fi
+          echo 'TAIL_ESCAPE_NOAXIOM_AUDIT_GREEN=1'
