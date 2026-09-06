@@ -23,7 +23,7 @@ private theorem commonTwo_of_mod729_pattern_2022_701
     (N : Nat) (hAmod : affineOrbit N % 729 = 74) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 2 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 2 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -73,7 +73,7 @@ private theorem commonTwo_of_mod729_pattern_0002_702
     (N : Nat) (hAmod : affineOrbit N % 729 = 297) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 0 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 0 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -123,7 +123,7 @@ private theorem commonTwo_of_mod729_pattern_1002_703
     (N : Nat) (hAmod : affineOrbit N % 729 = 460) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 1 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 1 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -173,7 +173,7 @@ private theorem commonTwo_of_mod729_pattern_2102_704
     (N : Nat) (hAmod : affineOrbit N % 729 = 383) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 2 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 2 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -223,7 +223,7 @@ private theorem commonTwo_of_mod729_pattern_0122_705
     (N : Nat) (hAmod : affineOrbit N % 729 = 75) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 0 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 0 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -273,7 +273,7 @@ private theorem commonTwo_of_mod729_pattern_1102_706
     (N : Nat) (hAmod : affineOrbit N % 729 = 301) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 1 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 1 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd2 : lowDigit (tail3 (tail3 A)) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
   have hd3 : lowDigit (tail3 (tail3 (tail3 A))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
@@ -323,7 +323,7 @@ private theorem commonTwo_of_mod729_pattern_22_707
     (N : Nat) (hAmod : affineOrbit N % 729 = 476) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 2 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 2 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
   have hbad0 : BadChannel 1 A := by
     dsimp [A]
@@ -365,7 +365,7 @@ private theorem commonTwo_of_mod729_pattern_02_708
     (N : Nat) (hAmod : affineOrbit N % 729 = 447) : CommonTwo N := by
   by_contra hNo
   let A := affineOrbit N
-  have hd0 : lowDigit A = 0 := by unfold lowDigit tail3; dsimp [A]; omega
+  have hd0 : lowDigit A = 0 := by unfold lowDigit; dsimp [A]; omega
   have hd1 : lowDigit (tail3 A) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
   have hbad0 : BadChannel 1 A := by
     dsimp [A]
