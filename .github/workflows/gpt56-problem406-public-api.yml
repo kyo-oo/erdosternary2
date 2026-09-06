@@ -33,27 +33,28 @@ jobs:
             GSTCanonicalCarryDynamics \
             GSTFourPowerDirectExistence \
             GSTFourPowerExponentTritObstruction \
-            GSTFourPowerOntologicalAdapter
+            GSTFourPowerOntologicalAdapter \
+            GST
           echo 'PROBLEM406_TRANSITIVE_IMPORTS_GREEN=1'
       - name: Verify public API wrappers
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          for lean_file in \
-            GST/Problem406/PublicAPI.lean \
-            GST/Problem406/TheoremMap.lean \
-            GST/Arithmetic/TernaryDigits.lean \
-            GST/Arithmetic/Carries.lean \
-            GST/FourPower/CommonTwo.lean \
-            GST/FourPower/PrefixLaw.lean \
-            GST/FourPower/Certificate.lean \
-            GST/PublicAPI.lean \
-            GST/Audit/PublicSurfaceCheck.lean \
-            GST/Audit/Problem406AxiomReport.lean
+          for lean_module in \
+            GST.Problem406.PublicAPI \
+            GST.Problem406.TheoremMap \
+            GST.Arithmetic.TernaryDigits \
+            GST.Arithmetic.Carries \
+            GST.FourPower.CommonTwo \
+            GST.FourPower.PrefixLaw \
+            GST.FourPower.Certificate \
+            GST.PublicAPI \
+            GST.Audit.PublicSurfaceCheck \
+            GST.Audit.Problem406AxiomReport
           do
-            echo "-- lake env lean ${lean_file}"
-            lake env lean "${lean_file}"
+            echo "-- lake build ${lean_module}"
+            lake build "${lean_module}"
           done
           echo 'PROBLEM406_PUBLIC_API_GREEN=1'
           echo 'GST_PUBLIC_API_GREEN=1'
