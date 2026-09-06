@@ -33,8 +33,7 @@ jobs:
             GSTCanonicalCarryDynamics \
             GSTFourPowerDirectExistence \
             GSTFourPowerExponentTritObstruction \
-            GSTFourPowerOntologicalAdapter \
-            GST
+            GSTFourPowerOntologicalAdapter
           echo 'PROBLEM406_TRANSITIVE_IMPORTS_GREEN=1'
       - name: Verify public API wrappers
         shell: bash
@@ -49,6 +48,7 @@ jobs:
             GST.FourPower.CommonTwo \
             GST.FourPower.PrefixLaw \
             GST.FourPower.Certificate \
+            GST.Problem406 \
             GST.PublicAPI \
             GST.Audit.PublicSurfaceCheck \
             GST.Audit.Problem406AxiomReport
