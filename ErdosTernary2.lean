@@ -1,29 +1,3 @@
-/-!
-# Erdős ternary-2 theorem
-
-This file contains the monolithic Lean proof object for the ternary digit-two
-theorem: for every exponent `n ≥ 9`, the ternary expansion of `2^n` contains
-the digit `2`.
-
-The file is intentionally kept as a single checked proof artifact.  Public,
-reviewer-facing names are provided in the `GST.Problem406.*` API modules.  The
-statements below remain the internal proof spine used by those wrappers.
-
-## Main declarations
-
-* `erdos_ternary_2_universal`: final theorem for powers of two.
-* `erdos_ternary_2_even_universal`: even-exponent reduction through powers of four.
-* `gst_power_two_wave_large`: large adjacent-four-power wave theorem.
-* `gst_prefix_one_navigation_lift`: prefix-one navigation bridge.
-* `gst_four_power_creation_master_inline`: creation master used by the bridge.
-
-## Presentation discipline
-
-Comments in this file describe mathematical interfaces, proof reductions, and
-local finite classifications.  Personal handoff notes, tool references, and
-chronological scratch labels are excluded from the public presentation layer.
--/
-
 import GSTTactic
 import GSTPrefixOneU2DCollisionProof
 import Mathlib
