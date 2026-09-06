@@ -17,7 +17,7 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Build public Problem 406 API
+      - name: Build public Problem 406 and GST APIs
         shell: bash
         run: |
           set -euo pipefail
@@ -26,4 +26,11 @@ jobs:
           lake exe cache get
           lake env lean GST/Problem406/PublicAPI.lean
           lake env lean GST/Problem406/TheoremMap.lean
+          lake env lean GST/Arithmetic/TernaryDigits.lean
+          lake env lean GST/Arithmetic/Carries.lean
+          lake env lean GST/FourPower/CommonTwo.lean
+          lake env lean GST/FourPower/PrefixLaw.lean
+          lake env lean GST/FourPower/Certificate.lean
+          lake env lean GST/PublicAPI.lean
           echo 'PROBLEM406_PUBLIC_API_GREEN=1'
+          echo 'GST_PUBLIC_API_GREEN=1'
