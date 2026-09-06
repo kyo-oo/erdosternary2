@@ -34,3 +34,14 @@ jobs:
           lake env lean GST/PublicAPI.lean
           echo 'PROBLEM406_PUBLIC_API_GREEN=1'
           echo 'GST_PUBLIC_API_GREEN=1'
+      - name: Generate GST declaration manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tests/test_gst_decl_manifest.py
+          python scripts/gst_decl_manifest.py
+          test -s docs/gst/generated/theorem-manifest.md
+          test -s docs/gst/generated/declaration-counts.md
+          grep -q 'Total declarations:' docs/gst/generated/theorem-manifest.md
+          grep -q 'Four-power direct arithmetic' docs/gst/generated/declaration-counts.md
+          echo 'GST_DECLARATION_MANIFEST_GREEN=1'
