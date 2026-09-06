@@ -16,7 +16,8 @@ import re
 from collections import Counter, defaultdict
 
 DECL_RE = re.compile(
-    r"^\s*(?P<visibility>private\s+|protected\s+)?"
+    r"^\s*(?:@\[[^\]]+\]\s*)*"
+    r"(?P<visibility>private\s+|protected\s+)?"
     r"(?P<prefix>noncomputable\s+|partial\s+)?"
     r"(?P<kind>theorem|lemma|def|abbrev|structure|inductive|axiom)\s+"
     r"(?P<name>[A-Za-z_][A-Za-z0-9_'.]*)"
