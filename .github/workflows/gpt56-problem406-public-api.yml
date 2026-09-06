@@ -1,4 +1,4 @@
-name: GPT56 Problem406 Public API
+name: Worldtrace Public API
 
 on:
   push:
@@ -51,13 +51,25 @@ jobs:
             GST.Problem406 \
             GST.PublicAPI \
             GST.Audit.PublicSurfaceCheck \
-            GST.Audit.Problem406AxiomReport
+            GST.Audit.Problem406AxiomReport \
+            Worldtrace.Genesis \
+            Worldtrace.Ternary \
+            Worldtrace.Carry \
+            Worldtrace.Residue \
+            Worldtrace.FourPower \
+            Worldtrace.Navigation \
+            Worldtrace.Collision \
+            Worldtrace.Phase \
+            Worldtrace.Certificate \
+            Worldtrace.PublicAPI \
+            Worldtrace.TheoremMap
           do
             echo "-- lake build ${lean_module}"
             lake build "${lean_module}"
           done
           echo 'PROBLEM406_PUBLIC_API_GREEN=1'
           echo 'GST_PUBLIC_API_GREEN=1'
+          echo 'WORLDTRACE_PUBLIC_API_GREEN=1'
           echo 'GST_PUBLIC_AUDIT_GREEN=1'
       - name: Generate GST declaration manifest
         shell: bash
