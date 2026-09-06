@@ -1,0 +1,35 @@
+name: Professional Public Surface
+
+on:
+  push:
+    branches:
+      - sol/problem406-professionalization-green-20260906
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  professional-public-surface:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply professional public surface pass
+        run: python scripts/professionalize_public_surface.py
+      - name: Check generated diff hygiene
+        run: git diff --check
+      - name: Commit generated professional surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No generated changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ErdosTernary2.lean FINISHER GST docs/problem406 lakefile.toml scripts/professionalize_public_surface.py scripts/professional_surface_apply.py
+          git commit -m "Professionalize public theorem surface"
+          git push
