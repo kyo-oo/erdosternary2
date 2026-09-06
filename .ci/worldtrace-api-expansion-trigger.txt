@@ -1,0 +1,2 @@
+Worldtrace API expansion CI anchor
+Generated after layered public API promotion and FINISHER overlay.
