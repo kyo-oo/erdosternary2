@@ -86,6 +86,11 @@ def run(*args: str) -> str:
     return subprocess.check_output(args, text=True)
 
 
+def read_lossless_enough(path: Path) -> str:
+    """Read a tracked text candidate without letting legacy bytes stop the pass."""
+    return path.read_bytes().decode("utf-8", errors="replace")
+
+
 def tracked_files() -> list[Path]:
     out = run("git", "ls-files")
     files: list[Path] = []
@@ -162,7 +167,7 @@ def apply_text_rewrites(files: list[Path], moves: dict[str, str]) -> list[FileCh
     changes: list[FileChange] = []
     # Recompute because filenames may have moved.
     for path in tracked_files():
-        before = path.read_text(encoding="utf-8")
+        before = read_lossless_enough(path)
         after = rewrite_text(path, before)
         if after == before:
             continue
@@ -184,7 +189,7 @@ def apply_text_rewrites(files: list[Path], moves: dict[str, str]) -> list[FileCh
 def remaining_hits() -> list[dict[str, object]]:
     hits: list[dict[str, object]] = []
     for path in tracked_files():
-        text = path.read_text(encoding="utf-8", errors="replace")
+        text = read_lossless_enough(path)
         for lineno, line in enumerate(text.splitlines(), 1):
             if WORD_HIT_RE.search(line):
                 hits.append({"path": str(path), "line": lineno, "text": line[:240]})
