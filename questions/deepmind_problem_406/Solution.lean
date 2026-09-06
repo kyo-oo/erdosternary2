@@ -1,3 +1,5 @@
+import ErdosTernary2
+
 /-!
 # DeepMind Problem 406 — comparator solution
 
@@ -5,8 +7,6 @@ This is the solution-side Lean file for the official comparator harness.
 It imports the checked green monolith `ErdosTernary2` and bridges the
 question-side recursive predicate to the monolith's `noTernaryTwo` predicate.
 -/
-
-import ErdosTernary2
 
 /-- Byte-identical challenge-side definition. -/
 def noTernaryDigitTwo (n : Nat) : Bool :=
