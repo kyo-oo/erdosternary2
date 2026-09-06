@@ -4,7 +4,30 @@ This audit covers Lean source files after the professional surface pass.
 
 ## Monolith comment cleanup
 
-Pre-cleanup personal/tool-era comment hits in the monolith copies: **0**.
+Pre-cleanup personal/tool-era comment hits in the monolith copies: **22**.
+
+Representative removed or neutralized lines:
+
+- `FINISHER/ErdosTernary2.lean:2: -- 🌟 CHRONOLOGICAL LABEL — MAIN BASE FILE — #1133 / 1133`
+- `FINISHER/ErdosTernary2.lean:42: -- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed`
+- `FINISHER/ErdosTernary2.lean:43: -- SOL56 CANONICAL TAIL SURGERY: direct *Scratch imports neutralized because their declarations are inlined`
+- `FINISHER/ErdosTernary2.lean:11541: This scratch formalizes the parts of Boss's handwritten operator that can be`
+- `FINISHER/ErdosTernary2.lean:11797: Boss's handwritten operator has two natural axes:`
+- `FINISHER/ErdosTernary2.lean:14541: /-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event`
+- `FINISHER/ErdosTernary2.lean:14568: Boss's kernel magnitude '|7/(m-6)|' has denominator '6-m' on the physical`
+- `FINISHER/ErdosTernary2.lean:14775: # Pathwise BIG1 projector for Boss's handwritten operator`
+- `FINISHER/ErdosTernary2.lean:14817: /-- Pathwise form of Boss's 'I ≠ BIG1' condition.  'd j' is the information`
+- `FINISHER/ErdosTernary2.lean:15004: Boss's handwritten condition 'I ≠ 1' is used here ONLY while resolving one`
+- `FINISHER/ErdosTernary2.lean:15051: At an actual physical cell whose input information is BIG2, applying Boss's`
+- `FINISHER/ErdosTernary2.lean:15108: /-- At a physical Happy digit-two cell, Boss's local 'I ≠ 1' condition is`
+- `FINISHER/ErdosTernary2.lean:15207: This file connects Boss's local two-digit 'I ≠ 1' blade to the real child`
+- `FINISHER/ErdosTernary2.lean:15217: This is the precise hand-off point between younger-Sol's microscopic`
+- `FINISHER/ErdosTernary2.lean:15218: six-state chord and Old Sol's information-regeneration descent.`
+- `FINISHER/ErdosTernary2.lean:16026: This module enforces Boss's scope correction precisely:`
+- `FINISHER/ErdosTernary2.lean:16117: Boss's two-digit formula and Younger Sol's commuting-square information law. -/`
+- `FINISHER/ErdosTernary2.lean:16210: with Boss's corrected two-digit handwritten chord.`
+- `FINISHER/ErdosTernary2.lean:16225: Thus Boss's 'I ≠ 1' condition is used only to classify this actual two-digit`
+- `FINISHER/ErdosTernary2.lean:16416: On the active BIG2 events Boss's kernel 7/(J-6) has the exact signed values`
 
 The script verifies that the comment-stripped, whitespace-normalized Lean proof stream is unchanged before writing each monolith.
 
