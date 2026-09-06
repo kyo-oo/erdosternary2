@@ -2,7 +2,7 @@
 
 `FINISHER/` is the clean final presentation bundle for the Erdős ternary-2 / Problem 406 Lean project.
 
-It freezes the comparator-final proof source and keeps the professional presentation layer beside it.
+It freezes the comparator-final proof source and presents it under the public umbrella name **Worldtrace Arithmetic**.
 
 ## Frozen proof source
 
@@ -34,12 +34,22 @@ The recursive custom import closure is copied into this folder using the origina
 
 ## Important entrypoints
 
+- `WORLDTRACE_ARITHMETIC.md` — public identity and framework architecture.
+- `Worldtrace/PublicAPI.lean` — umbrella public API facade.
 - `ErdosTernary2.lean` — finalized comparator monolith.
 - `THEOREM_FAMILIES.md` — theorem-family map.
 - `FINISHER.lock.json` — exact machine-readable lock and census.
-- `GST/PublicAPI.lean` — curated public API surface.
-- `docs/problem406/` and `docs/gst/` — reviewer-facing documentation.
+- `GST/PublicAPI.lean` — historical compatibility API surface.
+- `docs/problem406/`, `docs/worldtrace/`, and `docs/gst/` — reviewer-facing documentation.
+
+## Naming decision
+
+Use **Worldtrace Arithmetic** for the whole framework.
+
+Use **General Space Theory (GST)** for the navigation-geometric pillar and historical Lean namespace compatibility.
 
 ## Decision
 
-Do not mass-wrap all theorem-like declarations. The professional shape is: frozen corpus, full theorem index, then curated public API over the proof spine.
+Do not mass-wrap all theorem-like declarations.  The professional shape is: frozen corpus, full theorem index, then curated public API over the proof spine.
+
+Worldtrace-level names are promoted through wrappers first.  Internal declaration migration should be dependency-safe and CI-checked.
