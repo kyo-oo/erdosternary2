@@ -1,22 +1,28 @@
-import ErdosTernary2
+import GST.Problem406.Core
+import GST.Problem406.FourPower
+import GST.Problem406.PrefixOne
+import GST.Problem406.LocalCell
+import GST.Problem406.Navigation
 
 /-!
 # Public API for Problem 406
 
-This file gives stable, readable names for the comparator-passing theorem.
-It does not alter the monolith proof. The original proof artifact remains
-`ErdosTernary2.lean`; this file only re-exports its main result under a clean
-review-facing namespace.
+Reviewer-facing namespace for the formalized ternary digit-two theorem.
+
+This file intentionally exposes clean names while preserving the internal
+monolithic proof artifact.  The old internal identifiers remain available for
+compatibility, but new documentation should cite the names under
+`GST.Problem406`.
 -/
 
 namespace GST
 namespace Problem406
 
-/-- For every exponent `n ≥ 9`, the ternary expansion of `2^n` contains digit `2`. -/
+/-- Compatibility name: every exponent `n ≥ 9` gives a ternary digit `2` in `2^n`. -/
 theorem contains_two_digit_of_nine_le
     (n : Nat) (hn : 9 ≤ n) :
-    noTernaryTwo (2^n) = false := by
-  exact erdos_ternary_2_universal n hn
+    containsNoDigitTwo (2^n) = false := by
+  exact power_of_two_contains_digit_two n hn
 
 end Problem406
 end GST

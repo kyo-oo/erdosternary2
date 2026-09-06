@@ -10,6 +10,7 @@ import GST.FourPower.Certificate
 
 Reviewer-facing imports for the Problem 406 formalization.
 
-This umbrella module exposes clean public namespaces while preserving the green
-monolith and internal proof modules unchanged.
+This umbrella module exposes clean public namespaces while preserving the proof
+artifact and internal modules.  The theorem universe is indexed separately; this
+API promotes only the mathematical spine and stable bridge statements.
 -/

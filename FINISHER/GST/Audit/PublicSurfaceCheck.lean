@@ -3,12 +3,21 @@ import GST.PublicAPI
 /-!
 # Public surface smoke check
 
-This audit module keeps reviewer-facing `#check` commands out of the smallest
-public API wrappers. It has no proof bodies and exists only to compile-check the
-names exported by the professional shell.
+Compile-checks the clean reviewer-facing public names.  This module contains no
+proof bodies.
 -/
 
+#check GST.Problem406.power_of_two_contains_digit_two
 #check GST.Problem406.contains_two_digit_of_nine_le
+#check GST.Problem406.four_power_contains_digit_two
+#check GST.Problem406.adjacent_four_power_identity
+#check GST.Problem406.large_adjacent_four_power_wave
+#check GST.Problem406.four_power_creation_master
+#check GST.Problem406.prefix_one_navigation_lift
+#check GST.Problem406.terminal_step_six_packet
+#check GST.Problem406.happy_digit_two_right_chord_dichotomy
+#check GST.Problem406.last_child_gate_right_chord
+#check GST.Problem406.navigation_witness_of_canonical_navigation
 #check GST.Arithmetic.digit3
 #check GST.Arithmetic.Navigation
 #check GST.Arithmetic.carry4
