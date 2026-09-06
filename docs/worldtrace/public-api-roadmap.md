@@ -1,6 +1,6 @@
 # Worldtrace public API roadmap
 
-This document defines the next professionalization phase after confirming the umbrella name **Worldtrace Arithmetic**.
+This document tracks the professionalization phase after confirming the umbrella name **Worldtrace Arithmetic**.
 
 ## Status
 
@@ -11,35 +11,47 @@ Completed:
 - Professional monolith comments and header discipline.
 - FINISHER theorem-family census.
 - `Worldtrace.PublicAPI` facade over the checked proof corpus.
+- `Worldtrace.Genesis` for the original 0--6k arithmetic engine.
+- `Worldtrace.Ternary` for digit/event predicates and prefix scans.
+- `Worldtrace.Carry` for carry-information and affine transport.
+- `Worldtrace.Residue` for stable residues and exponent-prefix laws.
+- `Worldtrace.FourPower` for adjacent four-power/common-two dynamics.
+- `Worldtrace.Navigation` for the General Space Theory navigation pillar.
+- `Worldtrace.Collision` for bad-trace, terminal NULL, and physical rectangle closure.
+- `Worldtrace.Phase` for NULL regeneration and seed-cycle transport.
+- `Worldtrace.Certificate` for finite certificates and bridge packages.
+- `Worldtrace.TheoremMap` compile-check index.
+- Reviewer guide, theorem-promotion map, migration plan, and CI/release plan.
+- CI workflow title and public API check updated for Worldtrace modules.
 
-Not completed yet:
+Still pending until CI confirms:
 
-- Full dependency-safe neutralization of old internal `gpt56*` / tool-era declaration names.
-- Worldtrace-level wrappers for every major family outside the current Problem 406 spine.
-- Reviewer guide that tells a mathematician exactly how to audit the proof route.
-- CI workflow naming cleanup.
+- completed green run for the final branch tip;
+- dependency-safe neutralization of old internal `gpt56*` / tool-era declaration names;
+- release tag or final branch freeze.
 
 ## Public API categories
 
-The public API should be arranged by mathematical role, not by construction history.
+The public API is arranged by mathematical role, not by construction history.
 
-| Category | Purpose | Public module target |
+| Category | Purpose | Public module |
 | --- | --- | --- |
 | Core theorem | Final Problem 406 statement. | `Worldtrace.PublicAPI` |
+| Genesis arithmetic | Original early monolith engine: cascade constant, low-tower identity, structural computation, cascade lift. | `Worldtrace.Genesis` |
 | Ternary events | Digit-two predicates and finite-position witnesses. | `Worldtrace.Ternary` |
 | Carry information | Carry bounds, affine carry, and carry transport. | `Worldtrace.Carry` |
-| Residue towers | Stable `3^k` residue fingerprints. | `Worldtrace.Residue` |
-| Four-power dynamics | Adjacent powers, common-two witnesses, exponent-prefix obstruction. | `Worldtrace.FourPower` |
-| Navigation geometry | General Space Theory gates, spaces, witnesses, certificates. | `Worldtrace.Navigation` |
-| Collision closure | Canonical tail, bad-trace, collision, and terminal-extinction layer. | `Worldtrace.Collision` |
+| Residue towers | Stable `3^k` residue fingerprints and exponent-prefix obstruction. | `Worldtrace.Residue` |
+| Four-power dynamics | Adjacent powers, common-two witnesses, exponent-prefix obstruction, creation master. | `Worldtrace.FourPower` |
+| Navigation geometry | General Space Theory gates, spaces, witnesses, origin fingerprints, graph lifts. | `Worldtrace.Navigation` |
+| Collision closure | Local chord classification, bad-trace, residual NULL, terminal closure, exact rectangles. | `Worldtrace.Collision` |
 | Phase cycles | NULL regeneration, phase transport, shared information equations. | `Worldtrace.Phase` |
-| Finite certificates | Kernel-decided local certificates and base closures. | `Worldtrace.Certificate` |
+| Finite certificates | Kernel-decided local certificates and bridge packages. | `Worldtrace.Certificate` |
 
 ## Phase plan
 
 ### Phase 1 — identity lock
 
-Goal: make Worldtrace Arithmetic visible as the umbrella without changing proof internals.
+Status: complete.
 
 Deliverables:
 
@@ -50,10 +62,11 @@ Deliverables:
 
 ### Phase 2 — API expansion by layer
 
-Goal: promote the proof stack into clean mathematical modules.
+Status: implemented; waiting on CI.
 
 Deliverables:
 
+- `Worldtrace.Genesis`
 - `Worldtrace.Ternary`
 - `Worldtrace.Carry`
 - `Worldtrace.Residue`
@@ -62,12 +75,13 @@ Deliverables:
 - `Worldtrace.Collision`
 - `Worldtrace.Phase`
 - `Worldtrace.Certificate`
+- `Worldtrace.TheoremMap`
 
-Each module should expose a small curated set of wrapper names and docstrings.  It should not rename internal declarations directly.
+Each module exposes a curated set of wrapper names and docstrings.  It does not rename internal declarations directly.
 
 ### Phase 3 — internal-name migration
 
-Goal: remove tool-era names from live source without breaking dependencies.
+Status: planned and documented.
 
 Rules:
 
@@ -77,28 +91,37 @@ Rules:
 4. Keep compatibility aliases temporarily when needed.
 5. Run the full Lean build before deleting aliases.
 
+Documentation:
+
+- `docs/worldtrace/internal-name-migration.md`
+
 ### Phase 4 — reviewer packet
 
-Goal: make the project auditable by an external reader.
+Status: started.
 
-Deliverables:
+Deliverables now present or generated by the FINISHER overlay:
 
-- `FINISHER/REVIEWER_GUIDE.md`
+- `docs/worldtrace/reviewer-guide.md`
+- `docs/worldtrace/theorem-promotion-map.md`
 - `FINISHER/WORLDTRACE_ARITHMETIC.md`
-- `FINISHER/API_MAP.md`
-- `FINISHER/AUDIT_STATUS.md`
+- `FINISHER/docs/worldtrace/*`
+
+Pending after CI:
+
+- final `FINISHER/API_MAP.md` if a separate root-level bundle map is desired;
+- final `FINISHER/AUDIT_STATUS.md` after green checks.
 
 ### Phase 5 — CI and release polish
 
-Goal: presentation looks professional from the first GitHub page.
+Status: started.
 
 Deliverables:
 
-- neutral CI workflow names;
-- updated badge surface;
-- public API build check for `Worldtrace.PublicAPI`;
-- release tag or branch freeze once green.
+- workflow title changed to `Worldtrace Public API`;
+- public API workflow now checks Worldtrace layer modules;
+- `docs/worldtrace/ci-release-plan.md` added;
+- release tag/freeze remains pending on green CI.
 
 ## Decision rule
 
-Worldtrace Arithmetic is the public identity.  GST remains a named pillar and compatibility namespace.  The public surface should explain the full mathematics without pretending every theorem belongs only to GST.
+Worldtrace Arithmetic is the public identity.  GST remains a named pillar and compatibility namespace.  The public surface now explains the full mathematics without pretending every theorem belongs only to GST.
