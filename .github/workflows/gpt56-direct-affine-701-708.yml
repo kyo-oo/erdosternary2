@@ -86,8 +86,20 @@ jobs:
       - name: Compile residues 701-708 direct physical constructors
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSixthTrit701_708.olean GSTFourPowerAffineSixthTrit701_708.lean 2>&1 | tee affine-sixth-trit-701-708.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo '--- Lean failure tail ---'
+            tail -80 affine-sixth-trit-701-708.log
+            while IFS= read -r line; do
+              safe=${line//'%'/'%25'}
+              safe=${safe//$'\r'/'%0D'}
+              safe=${safe//$'\n'/'%0A'}
+              echo "::error file=GSTFourPowerAffineSixthTrit701_708.lean::$safe"
+            done < <(tail -40 affine-sixth-trit-701-708.log)
+            exit "$rc"
+          fi
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-sixth-trit-701-708.log
       - name: Reject forbidden proof escapes in fresh module
         shell: bash
