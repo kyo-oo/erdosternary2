@@ -6,14 +6,11 @@ import GST.FourPower.PrefixLaw
 import GST.FourPower.Certificate
 
 /-!
-# General Space Theory compatibility API
+# GST public API
 
-This module preserves the historical `GST.*` public imports used by the checked
-proof corpus.
+Reviewer-facing imports for the Problem 406 formalization.
 
-For the whole mathematical framework, use `Worldtrace.PublicAPI`.  General Space
-Theory is the navigation-geometric pillar inside Worldtrace Arithmetic; the
-Problem 406 proof also uses ternary event arithmetic, carry-information theory,
-residue tower laws, four-power dynamics, collision/wave closure, phase-cycle
-transport, and finite certificate kernels.
+This umbrella module exposes clean public namespaces while preserving the proof
+artifact and internal modules.  The theorem universe is indexed separately; this
+API promotes only the mathematical spine and stable bridge statements.
 -/
