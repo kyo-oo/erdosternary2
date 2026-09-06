@@ -26,14 +26,12 @@ theorem adjacent_four_power_identity
   exact gst_four_pow_adjacent a ha
 
 /-- Failure of both navigation alternatives gives a complete two-wave bad trace. -/
-theorem adjacent_bad_trace_of_no_navigation :
-    _ := by
-  exact gst_twoWave_badTrace_of_no_navigation
+abbrev adjacent_bad_trace_of_no_navigation :=
+  gst_twoWave_badTrace_of_no_navigation
 
 /-- Large adjacent four-power waves satisfy the navigation alternative. -/
-theorem large_adjacent_four_power_wave :
-    _ := by
-  exact gst_power_two_wave_large
+abbrev large_adjacent_four_power_wave :=
+  gst_power_two_wave_large
 
 /-- Every `4^a` with `a ≥ 5` has ternary digit `2`. -/
 theorem four_power_contains_digit_two
