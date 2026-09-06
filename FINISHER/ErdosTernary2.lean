@@ -1,3 +1,15 @@
+import GSTTactic
+import GSTPrefixOneU2DCollisionProof
+import Mathlib
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
+import GSTPrefixOneOntologicalEscape
+import GSTGraphV2ProductionLaws
+import GSTGraphV2InfiniteControllerBridge
+import GSTGraphV2PerfectPowerBlockProbe
+import GSTU2DSharpCrossingBlock
+import GSTFinalPurePowerResidueTransplant
+
 /-!
 # Erdős ternary-2 theorem
 
@@ -23,18 +35,6 @@ Comments in this file describe mathematical interfaces, proof reductions, and
 local finite classifications.  Personal handoff notes, tool references, and
 chronological scratch labels are excluded from the public presentation layer.
 -/
-
-import GSTTactic
-import GSTPrefixOneU2DCollisionProof
-import Mathlib
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.Ring
-import GSTPrefixOneOntologicalEscape
-import GSTGraphV2ProductionLaws
-import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2PerfectPowerBlockProbe
-import GSTU2DSharpCrossingBlock
-import GSTFinalPurePowerResidueTransplant
 
 -- Canonical pure-power/information transplant layer: the following declarations
 -- connect the finite residue machinery to the prefix-one navigation interface.

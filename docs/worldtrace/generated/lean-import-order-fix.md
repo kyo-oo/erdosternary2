@@ -6,4 +6,4 @@ block.
 
 | Fixed file |
 | --- |
-| `ErdosTernary2.lean` |
+| `FINISHER/ErdosTernary2.lean` |
