@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - sol/problem406-professionalization-green-20260906
+    paths-ignore:
+      - '.ci/**'
   workflow_dispatch:
 
 permissions:
@@ -11,6 +13,7 @@ permissions:
 
 jobs:
   professional-public-surface:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
