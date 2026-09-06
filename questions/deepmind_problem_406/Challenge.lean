@@ -1,3 +1,5 @@
+import Mathlib
+
 /-!
 # DeepMind Problem 406 — comparator challenge
 
@@ -8,8 +10,6 @@ for every exponent `n ≥ 9`, the ternary expansion of `2^n` contains digit `2`.
 The `sorry` below is intentional on the challenge side only.  The solution file
 must provide the proof, importing the green monolith.
 -/
-
-import Mathlib
 
 /-- A number has no ternary digit `2` iff all of its base-3 digits are `0` or `1`. -/
 def noTernaryDigitTwo (n : Nat) : Bool :=
