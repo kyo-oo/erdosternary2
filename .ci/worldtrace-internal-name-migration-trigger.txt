@@ -1,2 +1,3 @@
 Worldtrace internal-name migration trigger
 retry after UTF-8 hardening
+retry after Lean import-order fix
