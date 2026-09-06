@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
+      - sol/problem406-professionalization-*
+      - codex/new-problem-406-v5-pipeline-*
   workflow_dispatch:
 
 jobs:
@@ -17,23 +19,38 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Build public Problem 406 and GST APIs
+      - name: Build Lean dependency graph
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-          lake env lean GST/Problem406/PublicAPI.lean
-          lake env lean GST/Problem406/TheoremMap.lean
-          lake env lean GST/Arithmetic/TernaryDigits.lean
-          lake env lean GST/Arithmetic/Carries.lean
-          lake env lean GST/FourPower/CommonTwo.lean
-          lake env lean GST/FourPower/PrefixLaw.lean
-          lake env lean GST/FourPower/Certificate.lean
-          lake env lean GST/PublicAPI.lean
+          lake build ErdosTernary2 GSTTactic GSTLocalClosure
+          echo 'PROBLEM406_TRANSITIVE_IMPORTS_GREEN=1'
+      - name: Verify public API wrappers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          for lean_file in \
+            GST/Problem406/PublicAPI.lean \
+            GST/Problem406/TheoremMap.lean \
+            GST/Arithmetic/TernaryDigits.lean \
+            GST/Arithmetic/Carries.lean \
+            GST/FourPower/CommonTwo.lean \
+            GST/FourPower/PrefixLaw.lean \
+            GST/FourPower/Certificate.lean \
+            GST/PublicAPI.lean \
+            GST/Audit/PublicSurfaceCheck.lean \
+            GST/Audit/Problem406AxiomReport.lean
+          do
+            echo "-- lake env lean ${lean_file}"
+            lake env lean "${lean_file}"
+          done
           echo 'PROBLEM406_PUBLIC_API_GREEN=1'
           echo 'GST_PUBLIC_API_GREEN=1'
+          echo 'GST_PUBLIC_AUDIT_GREEN=1'
       - name: Generate GST declaration manifest
         shell: bash
         run: |
