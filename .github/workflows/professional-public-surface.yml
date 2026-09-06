@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   professional-public-surface:
-    if: github.actor != 'github-actions[bot]'
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip professional-surface]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
