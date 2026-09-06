@@ -15,6 +15,19 @@ name = "ErdosTernary2"
 
 [[lean_lib]]
 name = "GST"
+roots = [
+  "GST.Arithmetic.TernaryDigits",
+  "GST.Arithmetic.Carries",
+  "GST.FourPower.CommonTwo",
+  "GST.FourPower.PrefixLaw",
+  "GST.FourPower.Certificate",
+  "GST.Problem406.PublicAPI",
+  "GST.Problem406.TheoremMap",
+  "GST.Problem406",
+  "GST.PublicAPI",
+  "GST.Audit.PublicSurfaceCheck",
+  "GST.Audit.Problem406AxiomReport",
+]
 
 [[lean_lib]]
 name = "GSTLocalClosure"
