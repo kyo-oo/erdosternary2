@@ -37,7 +37,17 @@ roots = [
 [[lean_lib]]
 name = "Worldtrace"
 roots = [
+  "Worldtrace.Genesis",
+  "Worldtrace.Ternary",
+  "Worldtrace.Carry",
+  "Worldtrace.Residue",
+  "Worldtrace.FourPower",
+  "Worldtrace.Navigation",
+  "Worldtrace.Collision",
+  "Worldtrace.Phase",
+  "Worldtrace.Certificate",
   "Worldtrace.PublicAPI",
+  "Worldtrace.TheoremMap",
 ]
 
 [[lean_lib]]
