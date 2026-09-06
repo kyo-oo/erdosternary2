@@ -81,7 +81,4 @@ theorem happy_digit_two_right_chord_dichotomy := Collision.happy_digit_two_right
 /-- Canonical standalone navigation gives the navigation witness. -/
 theorem navigation_witness_of_canonical_navigation := Navigation.witness_of_canonical_navigation
 
-/-- Compile-checked theorem map for the promoted Worldtrace layer. -/
-#check Worldtrace.TheoremMap
-
 end Worldtrace
