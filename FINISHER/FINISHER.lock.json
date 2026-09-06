@@ -141,7 +141,7 @@
     "GSTU2DSharpCrossingBlock.lean",
     "GSTV2InfiniteCore.lean"
   ],
-  "current_branch_head_when_generated": "c2445f55f769cc6d5fc19a22fba919bd9ea382ba",
+  "current_branch_head_when_generated": "ff099a7b6284da944b5395d035c7da0a0a4e66b8",
   "custom_import_closure_declaration_kinds": {
     "abbrev": 1,
     "axiom": 1,
