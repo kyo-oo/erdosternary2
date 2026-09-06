@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   build-finisher:
-    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, 'Create FINISHER proof bundle')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -27,11 +26,7 @@ jobs:
 
           python - <<'PY'
           from __future__ import annotations
-
-          import json
-          import re
-          import shutil
-          import subprocess
+          import json, re, shutil, subprocess
           from collections import Counter
           from pathlib import Path
 
@@ -41,11 +36,7 @@ jobs:
           MAIN = Path("ErdosTernary2.lean")
           EXTERNAL = ("Mathlib", "Std", "Lean", "Init")
           IMPORT_RE = re.compile(r"^\s*import\s+([A-Za-z0-9_'.]+)\s*$")
-          DECL_RE = re.compile(
-              r"^\s*(?:@[\w\[\]\s,._:=()'\"/-]+\s+)*"
-              r"(?P<kind>theorem|lemma|def|abbrev|axiom|opaque|inductive|structure|class|instance)"
-              r"\s+(?P<name>[^\s:{(]+)"
-          )
+          DECL_RE = re.compile(r"^\s*(?:@[\w\[\]\s,._:=()'\"/-]+\s+)*(?P<kind>theorem|lemma|def|abbrev|axiom|opaque|inductive|structure|class|instance)\s+(?P<name>[^\s:{(]+)")
 
           def git_bytes(ref: str, path: str) -> bytes:
               return subprocess.check_output(["git", "show", f"{ref}:{path}"])
@@ -56,9 +47,31 @@ jobs:
           def exists_at(ref: str, path: str) -> bool:
               return subprocess.run(["git", "cat-file", "-e", f"{ref}:{path}"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
 
-          def write_bytes(dest: Path, data: bytes) -> None:
-              dest.parent.mkdir(parents=True, exist_ok=True)
-              dest.write_bytes(data)
+          def write_bytes(path: Path, data: bytes) -> None:
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(data)
+
+          def module_to_path(module: str) -> Path:
+              return Path(*module.split(".")).with_suffix(".lean")
+
+          def imports(ref: str, path: Path) -> list[str]:
+              return [m.group(1) for line in git_text(ref, str(path)).splitlines() if (m := IMPORT_RE.match(line))]
+
+          def closure(ref: str, start: Path) -> list[Path]:
+              seen: set[Path] = set()
+              stack = [start]
+              while stack:
+                  path = stack.pop()
+                  if path in seen or not exists_at(ref, str(path)):
+                      continue
+                  seen.add(path)
+                  for module in imports(ref, path):
+                      if module.startswith(EXTERNAL):
+                          continue
+                      candidate = module_to_path(module)
+                      if exists_at(ref, str(candidate)) and candidate not in seen:
+                          stack.append(candidate)
+              return sorted(seen, key=str)
 
           def strip_comments(src: str) -> str:
               out = []
@@ -88,30 +101,8 @@ jobs:
                   i += 1
               return "".join(out)
 
-          def module_to_path(module: str) -> Path:
-              return Path(*module.split(".")).with_suffix(".lean")
-
-          def direct_imports_from_ref(ref: str, path: Path) -> list[str]:
-              text = git_text(ref, str(path))
-              return [m.group(1) for line in text.splitlines() if (m := IMPORT_RE.match(line))]
-
-          def custom_import_closure(ref: str, start: Path) -> list[Path]:
-              seen: set[Path] = set()
-              stack = [start]
-              while stack:
-                  path = stack.pop()
-                  if path in seen:
-                      continue
-                  if not exists_at(ref, str(path)):
-                      continue
-                  seen.add(path)
-                  for module in direct_imports_from_ref(ref, path):
-                      if module.startswith(EXTERNAL):
-                          continue
-                      candidate = module_to_path(module)
-                      if exists_at(ref, str(candidate)) and candidate not in seen:
-                          stack.append(candidate)
-              return sorted(seen, key=str)
+          def line_count(text: str) -> int:
+              return 0 if text == "" else text.count("\n") + (0 if text.endswith("\n") else 1)
 
           def family(path: str, name: str) -> str:
               x = f"{path} {name}".lower()
@@ -139,29 +130,7 @@ jobs:
                   return "General Space Theory proper"
               return "Other support theorem layer"
 
-          def line_count_text(text: str) -> int:
-              return 0 if text == "" else text.count("\n") + (0 if text.endswith("\n") else 1)
-
-          def declarations_from_target(paths: list[Path]) -> list[dict[str, object]]:
-              decls: list[dict[str, object]] = []
-              for path in paths:
-                  clean = strip_comments(git_text(TARGET, str(path)))
-                  for line_no, line in enumerate(clean.splitlines(), 1):
-                      m = DECL_RE.match(line)
-                      if not m:
-                          continue
-                      name = m.group("name")
-                      kind = m.group("kind")
-                      decls.append({
-                          "path": str(path),
-                          "line": line_no,
-                          "kind": kind,
-                          "name": name,
-                          "family": family(str(path), name),
-                      })
-              return decls
-
-          def copy_current_tree(src: Path, dst: Path) -> list[str]:
+          def copy_tree(src: Path, dst: Path) -> list[str]:
               if not src.exists():
                   return []
               if dst.exists():
@@ -173,19 +142,10 @@ jobs:
           shutil.rmtree(FINISHER, ignore_errors=True)
           FINISHER.mkdir(parents=True)
 
-          closure = custom_import_closure(TARGET, MAIN)
-          direct_imports = direct_imports_from_ref(TARGET, MAIN)
-          direct_custom = [m for m in direct_imports if not m.startswith(EXTERNAL)]
-          direct_external = [m for m in direct_imports if m.startswith(EXTERNAL)]
-
-          # 1. Comparator-final source corpus, copied byte-for-byte from de11.
-          copied_source_files: list[str] = []
-          for rel in closure:
+          source_files = closure(TARGET, MAIN)
+          for rel in source_files:
               write_bytes(FINISHER / rel, git_bytes(TARGET, str(rel)))
-              copied_source_files.append(str(rel))
 
-          # 2. Reproducibility files.  Keep current lakefile as the default public/presentation build,
-          #    and preserve the original de11 lakefile separately.
           for name in ["lean-toolchain", "lake-manifest.json", "README.md"]:
               if exists_at(TARGET, name):
                   write_bytes(FINISHER / name, git_bytes(TARGET, name))
@@ -194,90 +154,91 @@ jobs:
           if exists_at(TARGET, "lakefile.toml"):
               write_bytes(FINISHER / "lakefile.de11.original.toml", git_bytes(TARGET, "lakefile.toml"))
 
-          # 3. Public API/presentation layer from the current professionalization branch.
-          public_api_files = copy_current_tree(ROOT / "GST", FINISHER / "GST")
-
-          # 4. Curated documentation and scripts from the current professionalization branch.
-          copied_doc_files: list[str] = []
+          public_api_files = copy_tree(ROOT / "GST", FINISHER / "GST")
+          doc_files: list[str] = []
           for doc_subdir in [Path("docs/gst"), Path("docs/problem406")]:
-              copied_doc_files += copy_current_tree(ROOT / doc_subdir, FINISHER / doc_subdir)
-          copied_script_files: list[str] = []
-          if (ROOT / "scripts").exists():
-              (FINISHER / "scripts").mkdir(exist_ok=True)
-              for script_name in ["gst_decl_manifest.py", "problem406_repo_census.py"]:
-                  src = ROOT / "scripts" / script_name
-                  if src.exists():
-                      shutil.copy2(src, FINISHER / "scripts" / script_name)
-                      copied_script_files.append(f"scripts/{script_name}")
-
-          # 5. CI references, copied as inert documentation under FINISHER/ci.
-          copied_ci_files: list[str] = []
-          ci_dir = FINISHER / "ci"
-          ci_dir.mkdir(exist_ok=True)
-          for wf in [
-              ".github/workflows/final-comparator.yml",
-              ".github/workflows/gpt56-problem406-public-api.yml",
-              ".github/workflows/gpt56-finalized-de11-census.yml",
-              ".github/workflows/gpt56-problem406-theorem-census.yml",
-          ]:
+              doc_files += copy_tree(ROOT / doc_subdir, FINISHER / doc_subdir)
+          script_files: list[str] = []
+          (FINISHER / "scripts").mkdir(exist_ok=True)
+          for script_name in ["gst_decl_manifest.py", "problem406_repo_census.py"]:
+              src = ROOT / "scripts" / script_name
+              if src.exists():
+                  shutil.copy2(src, FINISHER / "scripts" / script_name)
+                  script_files.append(f"scripts/{script_name}")
+          ci_files: list[str] = []
+          (FINISHER / "ci").mkdir(exist_ok=True)
+          for wf in [".github/workflows/final-comparator.yml", ".github/workflows/gpt56-problem406-public-api.yml", ".github/workflows/gpt56-finalized-de11-census.yml", ".github/workflows/gpt56-problem406-theorem-census.yml"]:
               src = ROOT / wf
               if src.exists():
-                  dst = ci_dir / Path(wf).name
+                  dst = FINISHER / "ci" / Path(wf).name
                   shutil.copy2(src, dst)
-                  copied_ci_files.append(str(dst.relative_to(FINISHER)))
+                  ci_files.append(str(dst.relative_to(FINISHER)))
 
-          decls = declarations_from_target(closure)
+          decls = []
+          line_counts = {}
+          for path in source_files:
+              text = git_text(TARGET, str(path))
+              line_counts[str(path)] = line_count(text)
+              clean = strip_comments(text)
+              for idx, line in enumerate(clean.splitlines(), 1):
+                  m = DECL_RE.match(line)
+                  if m:
+                      name = m.group("name")
+                      kind = m.group("kind")
+                      decls.append({"path": str(path), "line": idx, "kind": kind, "name": name, "family": family(str(path), name)})
+
           kinds = Counter(d["kind"] for d in decls)
           theorem_like = [d for d in decls if d["kind"] in {"theorem", "lemma"}]
           families = Counter(d["family"] for d in theorem_like)
-          lines_by_file = {str(path): line_count_text(git_text(TARGET, str(path))) for path in closure}
+          total_lines = sum(line_counts.values())
+          gst_count = families.get("General Space Theory proper", 0)
 
           lock = {
               "bundle": "FINISHER",
-              "role": "pinned comparator-final proof bundle plus professional presentation surface",
               "source_target_ref": TARGET,
-              "source_target_meaning": "finalized comparator-accepted source, before public API/docs professionalization",
+              "source_target_meaning": "comparator-final source before public API/docs professionalization",
               "current_branch_head_when_generated": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "main_monolith": "ErdosTernary2.lean",
-              "monolith_lines": lines_by_file["ErdosTernary2.lean"],
-              "custom_import_closure_files": len(closure),
-              "custom_import_closure_lines": sum(lines_by_file.values()),
+              "monolith_lines": line_counts["ErdosTernary2.lean"],
+              "custom_import_closure_files": len(source_files),
+              "custom_import_closure_lines": total_lines,
               "custom_import_closure_declarations": len(decls),
               "custom_import_closure_declaration_kinds": dict(sorted(kinds.items())),
               "custom_import_closure_theorem_like": len(theorem_like),
+              "general_space_theory_proper_theorem_like": gst_count,
+              "non_gst_theorem_like": len(theorem_like) - gst_count,
               "theorem_like_families": dict(sorted(families.items())),
-              "non_gst_theorem_like": len(theorem_like) - families.get("General Space Theory proper", 0),
-              "direct_custom_imports": direct_custom,
-              "direct_external_imports": direct_external,
-              "copied_source_files": copied_source_files,
+              "direct_custom_imports": [m for m in imports(TARGET, MAIN) if not m.startswith(EXTERNAL)],
+              "direct_external_imports": [m for m in imports(TARGET, MAIN) if m.startswith(EXTERNAL)],
+              "copied_source_files": [str(p) for p in source_files],
               "copied_public_api_files": public_api_files,
-              "copied_doc_files": copied_doc_files,
-              "copied_script_files": copied_script_files,
-              "copied_ci_files": copied_ci_files,
+              "copied_doc_files": doc_files,
+              "copied_script_files": script_files,
+              "copied_ci_files": ci_files,
           }
           (FINISHER / "FINISHER.lock.json").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
           fam_rows = "\n".join(f"| {name} | {count} |" for name, count in sorted(families.items(), key=lambda kv: (-kv[1], kv[0])))
-          top_files = "\n".join(f"| `{path}` | {lines} |" for path, lines in sorted(lines_by_file.items(), key=lambda kv: (-kv[1], kv[0]))[:30])
-          theorem_index = f"""# FINISHER theorem-family index
+          top_rows = "\n".join(f"| `{path}` | {n} |" for path, n in sorted(line_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:30])
+          (FINISHER / "THEOREM_FAMILIES.md").write_text(f"""# FINISHER theorem-family index
 
-Pinned source commit: `{TARGET}`.
+Pinned comparator-final source: `{TARGET}`.
 
-This index is generated from the comparator-final source corpus copied into `FINISHER/`.  It counts only the original finalized monolith plus its recursive custom import closure, excluding Mathlib and excluding later professionalization-only files.
+This file counts only `ErdosTernary2.lean` plus its recursive custom import closure from the comparator-final source. It excludes Mathlib and excludes later presentation-only files.
 
 ## Executive counts
 
-| Scope | Count |
+| Item | Count |
 | --- | ---: |
-| Comparator-final source files | {len(closure)} |
-| Comparator-final source lines | {sum(lines_by_file.values())} |
-| Main monolith lines | {lines_by_file['ErdosTernary2.lean']} |
+| Source files | {len(source_files)} |
+| Source lines | {total_lines} |
+| Main monolith lines | {line_counts['ErdosTernary2.lean']} |
 | Total declarations | {len(decls)} |
 | Theorem declarations | {kinds.get('theorem', 0)} |
 | Lemma declarations | {kinds.get('lemma', 0)} |
 | Theorem-like declarations | {len(theorem_like)} |
-| General Space Theory proper theorem-like declarations | {families.get('General Space Theory proper', 0)} |
-| Non-GST theorem-like declarations | {len(theorem_like) - families.get('General Space Theory proper', 0)} |
+| General Space Theory proper theorem-like declarations | {gst_count} |
+| Non-GST theorem-like declarations | {len(theorem_like) - gst_count} |
 
 ## Theorem families
 
@@ -285,82 +246,74 @@ This index is generated from the comparator-final source corpus copied into `FIN
 | --- | ---: |
 {fam_rows}
 
-## Largest source files
+## Largest copied source files
 
 | File | Lines |
 | --- | ---: |
-{top_files}
+{top_rows}
 
 ## Public API policy
 
-Do not create one public alias for every theorem-like declaration.  That would hide the architecture under noise.
+The full theorem universe is indexed, not mass-aliased. Public API names should promote the proof spine and major bridge layers deliberately, while lower-level declarations stay discoverable through this manifest until they are intentionally promoted.
+""", encoding="utf-8")
 
-The professional surface should be three-layered:
-
-1. **Frozen corpus:** every comparator-final source file is copied exactly into `FINISHER/`.
-2. **Manifest/index:** every theorem family is counted and classified by `FINISHER/FINISHER.lock.json` and this file.
-3. **Curated public API:** clean theorem names expose the proof spine and major bridges first; lower-level declarations remain indexed until promoted intentionally.
-"""
-          (FINISHER / "THEOREM_FAMILIES.md").write_text(theorem_index, encoding="utf-8")
-
-          readme = f"""# FINISHER
+          (FINISHER / "README.md").write_text(f"""# FINISHER
 
 `FINISHER/` is the clean final presentation bundle for the Erdős ternary-2 / Problem 406 Lean project.
 
-It separates three things that must not be confused:
+It freezes the comparator-final proof source and keeps the professional presentation layer beside it.
 
-1. **Comparator-final proof source** pinned to `{TARGET}`.
-2. **Professional public API surface** copied from the current presentation branch.
-3. **Documentation and audit material** copied under `FINISHER/docs/` and indexed by `FINISHER/FINISHER.lock.json`.
+## Frozen proof source
 
-## What is frozen here
+Pinned source commit:
 
-The original finalized proof corpus is copied into this folder from commit `{TARGET}`.  The main monolith is:
+```text
+{TARGET}
+```
+
+Main monolith:
 
 ```text
 FINISHER/ErdosTernary2.lean
 ```
 
-The recursive custom import closure is also copied into `FINISHER/` using the original module paths, so the source layout remains Lean-readable when this folder is treated as a project root.
+The recursive custom import closure is copied into this folder using the original module paths.
 
-## Verified counts for the pinned source corpus
+## Counts
 
 | Item | Count |
 | --- | ---: |
-| Main monolith lines | {lines_by_file['ErdosTernary2.lean']} |
-| Custom import-closure files | {len(closure)} |
-| Custom import-closure lines | {sum(lines_by_file.values())} |
+| Main monolith lines | {line_counts['ErdosTernary2.lean']} |
+| Custom import-closure files | {len(source_files)} |
+| Custom import-closure lines | {total_lines} |
 | Total declarations | {len(decls)} |
 | Theorem-like declarations | {len(theorem_like)} |
-| GST-proper theorem-like declarations | {families.get('General Space Theory proper', 0)} |
-| Non-GST theorem-like declarations | {len(theorem_like) - families.get('General Space Theory proper', 0)} |
+| GST-proper theorem-like declarations | {gst_count} |
+| Non-GST theorem-like declarations | {len(theorem_like) - gst_count} |
 
-## Entry points
+## Important entrypoints
 
-- `ErdosTernary2.lean` — original finalized monolith.
-- `THEOREM_FAMILIES.md` — human-readable theorem-family map.
-- `FINISHER.lock.json` — machine-readable source lock and census.
-- `GST/PublicAPI.lean` — curated clean public API surface.
-- `docs/problem406/` and `docs/gst/` — professional exposition and reviewer-facing documentation.
+- `ErdosTernary2.lean` — finalized comparator monolith.
+- `THEOREM_FAMILIES.md` — theorem-family map.
+- `FINISHER.lock.json` — exact machine-readable lock and census.
+- `GST/PublicAPI.lean` — curated public API surface.
+- `docs/problem406/` and `docs/gst/` — reviewer-facing documentation.
 
-## API decision
+## Decision
 
-The correct public API strategy is **curated spine first**, not mass wrapping.  The full theorem universe is indexed here, while only stable narrative-critical theorem names are promoted into the public API.
-
-That keeps the project professional: reviewers see the final theorem, the major bridge layers, the GST mechanism, and the exact full corpus without drowning in 1,396 aliases.
-"""
-          (FINISHER / "README.md").write_text(readme, encoding="utf-8")
+Do not mass-wrap all theorem-like declarations. The professional shape is: frozen corpus, full theorem index, then curated public API over the proof spine.
+""", encoding="utf-8")
 
           print("FINISHER_BUNDLE_JSON_BEGIN")
           print(json.dumps(lock, indent=2, sort_keys=True))
           print("FINISHER_BUNDLE_JSON_END")
           print(f"FINISHER_SOURCE_REF={TARGET}")
-          print(f"FINISHER_MONOLITH_LINES={lines_by_file['ErdosTernary2.lean']}")
-          print(f"FINISHER_CLOSURE_FILES={len(closure)}")
-          print(f"FINISHER_CLOSURE_LINES={sum(lines_by_file.values())}")
+          print(f"FINISHER_MONOLITH_LINES={line_counts['ErdosTernary2.lean']}")
+          print(f"FINISHER_CLOSURE_FILES={len(source_files)}")
+          print(f"FINISHER_CLOSURE_LINES={total_lines}")
           print(f"FINISHER_THEOREM_LIKE={len(theorem_like)}")
-          print(f"FINISHER_GST_PROPER_THEOREM_LIKE={families.get('General Space Theory proper', 0)}")
-          print(f"FINISHER_NON_GST_THEOREM_LIKE={len(theorem_like) - families.get('General Space Theory proper', 0)}")
+          print(f"FINISHER_GST_PROPER_THEOREM_LIKE={gst_count}")
+          print(f"FINISHER_NON_GST_THEOREM_LIKE={len(theorem_like) - gst_count}")
           PY
 
           git status --short -- FINISHER
