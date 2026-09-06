@@ -44,7 +44,7 @@ The FINISHER bundle freezes the Lean proof corpus and presents it through a prof
 
 ## Identity
 
-Worldtrace Arithmetic studies arithmetic objects as trace-bearing worlds.  A worldtrace records how digit states, carry states, residue towers, navigation positions, collision layers, and obstruction certificates remain coupled across transformations.
+Worldtrace Arithmetic studies arithmetic objects as trace-bearing worlds.  A worldtrace records how digit states, carry states, residue towers, navigation positions, collision layers, phase cycles, and obstruction certificates remain coupled across transformations.
 
 ## Why this is not only GST
 
@@ -70,7 +70,7 @@ Problem 406 = first flagship theorem
 
 ```text
 Worldtrace Arithmetic
-├── True Duality Transcendence
+├── True Duality Transcendence / genesis arithmetic
 ├── Ternary Event Arithmetic
 ├── Carry-Information Theory
 ├── Residue Tower Theory
@@ -86,9 +86,13 @@ Worldtrace Arithmetic
 
 ```lean
 import Worldtrace.PublicAPI
+import Worldtrace.TheoremMap
 
 #check Worldtrace.erdos_ternary_two
 #check Worldtrace.four_power_contains_digit_two
+#check Worldtrace.Genesis.low_tower_identity
+#check Worldtrace.Navigation.orthogonal_origin_split
+#check Worldtrace.Phase.phase_zero_to_one_shared_information
 ```
 
 Historical compatibility entrypoints remain:
@@ -105,11 +109,14 @@ import GST.PublicAPI
 A reviewer should read the bundle in this order:
 
 1. `WORLDTRACE_ARITHMETIC.md` — branch identity and layer map.
-2. `THEOREM_FAMILIES.md` — census of the frozen proof corpus.
-3. `GST/Problem406/TheoremMap.lean` — compile-checked theorem surface.
-4. `Worldtrace/PublicAPI.lean` — umbrella public facade.
-5. `ErdosTernary2.lean` — monolithic proof object.
-6. `FINISHER.lock.json` — exact pinned source and machine-readable census.
+2. `REVIEWER_GUIDE.md` — proof-reading route.
+3. `API_MAP.md` — promoted public names by layer.
+4. `THEOREM_FAMILIES.md` — census of the frozen proof corpus.
+5. `Worldtrace/TheoremMap.lean` — compile-checked promoted theorem surface.
+6. `Worldtrace/PublicAPI.lean` — umbrella public facade.
+7. `GST/Problem406/TheoremMap.lean` — compatibility theorem map.
+8. `ErdosTernary2.lean` — monolithic proof object.
+9. `FINISHER.lock.json` — exact pinned source and machine-readable census.
 
 ## Policy
 
@@ -119,12 +126,26 @@ Worldtrace names are promoted through thin wrapper modules first.  The internal 
     )
 
 
+def write_finisher_shortcuts() -> None:
+    copy_file(ROOT / "docs" / "worldtrace" / "theorem-promotion-map.md", FINISHER / "API_MAP.md")
+    copy_file(ROOT / "docs" / "worldtrace" / "reviewer-guide.md", FINISHER / "REVIEWER_GUIDE.md")
+    copy_file(ROOT / "docs" / "worldtrace" / "ci-release-plan.md", FINISHER / "AUDIT_STATUS.md")
+
+    if not (FINISHER / "API_MAP.md").exists():
+        (FINISHER / "API_MAP.md").write_text("# Worldtrace API map\n\nSee `Worldtrace/TheoremMap.lean`.\n", encoding="utf-8")
+    if not (FINISHER / "REVIEWER_GUIDE.md").exists():
+        (FINISHER / "REVIEWER_GUIDE.md").write_text("# Worldtrace reviewer guide\n\nSee `WORLDTRACE_ARITHMETIC.md`.\n", encoding="utf-8")
+    if not (FINISHER / "AUDIT_STATUS.md").exists():
+        (FINISHER / "AUDIT_STATUS.md").write_text("# Worldtrace audit status\n\nCI confirmation is required before release freeze.\n", encoding="utf-8")
+
+
 def main() -> None:
     FINISHER.mkdir(parents=True, exist_ok=True)
     copy_file(ROOT / "WORLDTRACE.md", FINISHER / "WORLDTRACE.md")
     copy_tree(ROOT / "Worldtrace", FINISHER / "Worldtrace")
     copy_tree(ROOT / "docs" / "worldtrace", FINISHER / "docs" / "worldtrace")
     write_finisher_identity()
+    write_finisher_shortcuts()
     print("WORLDTRACE_FINISHER_OVERLAY=1")
 
 
