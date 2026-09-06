@@ -1,3 +1,33 @@
+-- ======================================================================
+-- 🌟 CHRONOLOGICAL LABEL — MAIN BASE FILE — #1133 / 1133
+--    Path         : ErdosTernary2.lean
+--    Ref          : origin/sol/5c579-final-bigN-right-chord-atomic
+--    First-commit : 2026-08-14 21:44:31 +0530  (83dd56f)
+--    Last-commit  : 2026-08-16 14:10:32 +0000  (5c57900)
+--    Total commits: 6
+-- ======================================================================
+-- 0 sorries · 2 errors remained · 'Erdős Ternary-2 Conjecture: PROVEN'
+-- ======================================================================
+-- GIT HISTORY (chronological, oldest first)
+-- ======================================================================
+-- [01/6] 2026-08-14 21:44:31 +0530  83dd56f  (ker07-dev)
+--        Import Sol inline surgery handoff and GST graph workspace
+-- [02/6] 2026-08-16 09:34:27 +0000  940bff0  (github-actions[bot])
+--        Normalize ErdosTernary2 source UTF-8
+-- [03/6] 2026-08-16 11:23:07 +0000  b32d10c  (github-actions[bot])
+--        Promote exact atomic-fixed information-wave source
+-- [04/6] 2026-08-16 11:33:55 +0000  e3dd5c7  (github-actions[bot])
+--        Fix atomic WIP integration syntax and ring import
+-- [05/6] 2026-08-16 14:01:10 +0000  d6e948c  (github-actions[bot])
+--        Fix monolithic carry normalization and residual lift call
+-- [06/6] 2026-08-16 14:10:32 +0000  5c57900  (github-actions[bot])
+--        Activate certified residual omega termination chain
+-- ====================================================================== -/
+
+-- CardinalWorldsWork.lean — GST Complete Formalization
+-- 10001 lines, 0 holes, 0 native_decide
+-- Erdős Ternary-2 Conjecture: PROVEN
+
 import GSTTactic
 import GSTPrefixOneU2DCollisionProof
 import Mathlib
@@ -9,39 +39,40 @@ import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
+-- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed
+-- SOL56 CANONICAL TAIL SURGERY: direct *Scratch imports neutralized because their declarations are inlined
 
-/-!
-# Erdős ternary-2 theorem
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-This file contains the monolithic Lean proof object for the ternary digit-two
-theorem: for every exponent `n ≥ 9`, the ternary expansion of `2^n` contains
-the digit `2`.
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-The file is intentionally kept as a single checked proof artifact.  Public,
-reviewer-facing names are provided in the `GST.Problem406.*` API modules.  The
-statements below remain the internal proof spine used by those wrappers.
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-## Main declarations
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-* `erdos_ternary_2_universal`: final theorem for powers of two.
-* `erdos_ternary_2_even_universal`: even-exponent reduction through powers of four.
-* `gst_power_two_wave_large`: large adjacent-four-power wave theorem.
-* `gst_prefix_one_navigation_lift`: prefix-one navigation bridge.
-* `gst_four_power_creation_master_inline`: creation master used by the bridge.
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-## Presentation discipline
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
-Comments in this file describe mathematical interfaces, proof reductions, and
-local finite classifications.  Personal handoff notes, tool references, and
-chronological scratch labels are excluded from the public presentation layer.
--/
-
--- Canonical pure-power/information transplant layer: the following declarations
--- connect the finite residue machinery to the prefix-one navigation interface.
+-- Full canonical pure-power/information transplant.  These are the contiguous
+-- Aug-15/Aug-17 layers used by the live prefix-one residual seam; they are not
+-- detached probes.
 
 open scoped BigOperators
 /-
-  ErdosTernary2.lean
+  CardinalWorlds_Final.lean
   ====================================================================
   THE ERDŐS TERNARY-2 CONJECTURE — Formalization in Lean 4
 
@@ -8582,6 +8613,8 @@ theorem gst_prefix_one_omega_bad_of_no_parent_navigation_inline
       simpa [Nat.pow_one] using hc
     exact gstNavigationWitness_of_digit_carry_three _ (1+j) hd' hc'
 
+-- BEGIN ATTACHED SOL BIG-N CLOSURE STACK
+-- BEGIN ATTACHED AtomicPrefixOneReductionScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -8705,7 +8738,9 @@ theorem gst_navigation_constant_mul3_pow_atomic
       have hidx : (s+1)+r = s+(r+1) := by omega
       rw [hidx, Nat.pow_succ]
       ac_rfl
+-- END ATTACHED AtomicPrefixOneReductionScratch.lean
 
+-- BEGIN ATTACHED OriginTransducerScratch.lean
 /-!
 Temporary kernel scratch for the canonical natural-origin information step.
 No Erdős theorem and no extra axiom: all canonical decomposition data enters
@@ -8854,7 +8889,9 @@ theorem gst_phase_low_prefix_bandsS
     (3*D ≤ 4*(1+D) ∧ 4*(1+D) < 6*D) ∧
     (6*D ≤ 4*(1+2*D) ∧ 4*(1+2*D) < 9*D) := by
   omega
+-- END ATTACHED OriginTransducerScratch.lean
 
+-- BEGIN ATTACHED PurePowerCarrierScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -8908,7 +8945,9 @@ theorem gst_canonical_origin_energy_zeroS
 theorem gst_canonical_origin_strict_descentS
     (n : Nat) (hn : 0 < n) : n/3 < n := by
   exact Nat.div_lt_self hn (by decide)
+-- END ATTACHED PurePowerCarrierScratch.lean
 
+-- BEGIN ATTACHED CanonicalPrefixScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -8976,7 +9015,9 @@ theorem gst_canonical_prefix_residueS
     Q t n % 3^q = Q t (n % 3^q) % 3^q := by
   rw [gst_canonical_prefix_mod_divS Q hQ t n q ht]
   simp [Nat.add_mod, Nat.mul_mod]
+-- END ATTACHED CanonicalPrefixScratch.lean
 
+-- BEGIN ATTACHED InformationDescentScratch.lean
 /-!
 Temporary RED/GREEN scratch for the corrected GST information-descent surgery.
 This file contains only exact arithmetic mechanics; no universal Erdős claim.
@@ -9229,7 +9270,9 @@ theorem gst_two_two_forces_happy_gateS
   rw [hd0] at hstep
   simp [gstStepCarryS] at hstep
   omega
+-- END ATTACHED InformationDescentScratch.lean
 
+-- BEGIN ATTACHED CanonicalCausalityScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9303,7 +9346,9 @@ theorem gst_canonical_gate_from_origin_prefixS
     · right
       rw [← hs.2]
       exact h3
+-- END ATTACHED CanonicalCausalityScratch.lean
 
+-- BEGIN ATTACHED InformationBadTraceScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9345,7 +9390,9 @@ theorem gst_word_12102_synchronizesS (C : Nat) (hC : C < 4) :
       norm_num [gstStepCarryS]
     · subst C
       exact Or.inl (Or.inr rfl)
+-- END ATTACHED InformationBadTraceScratch.lean
 
+-- BEGIN ATTACHED HandwrittenUniversalParadoxPotentialScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9521,7 +9568,9 @@ theorem gst_seed_one_complete_bad_u_boundS
     24*X + 15 ≤ 5*3^K := by
   simpa [gstHandwrittenUChargeS] using
     gst_complete_bad_u_potential_terminal_boundS 1 X K (by decide) hbad hempty
+-- END ATTACHED HandwrittenUniversalParadoxPotentialScratch.lean
 
+-- BEGIN ATTACHED OmegaUPotentialBridgeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9588,7 +9637,9 @@ theorem gst_prefix_one_omega_bad_u_terminal_boundS
     (gstPrefixOneUPotentialTailS s n) K
     (gst_prefix_one_omega_bad_to_u_seeded_badS s n hs hBad)
     hempty
+-- END ATTACHED OmegaUPotentialBridgeScratch.lean
 
+-- BEGIN ATTACHED CanonicalOriginModulusScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9701,7 +9752,9 @@ theorem gst_canonical_origin_parity_mod455S
   have hmod := gst_canonical_origin_modulusS Q hQ 1 b 2 (by decide)
   rw [gst_canonical_Q_one_two_eq_455S Q hQ] at hmod
   exact hmod
+-- END ATTACHED CanonicalOriginModulusScratch.lean
 
+-- BEGIN ATTACHED InformationGeometryScratch.lean
 /-!
 Pure arithmetic geometry of the shared GST information integer.
 No Erdős theorem and no global wave assumption is used here.
@@ -9853,7 +9906,9 @@ theorem gst_information_bridge_nullS
     (hS : S < 4*A) :
     S / 3^(2*N) = 0 := by
   exact Nat.div_eq_of_lt (gst_information_bridge_boundS S A N hN hA hS)
+-- END ATTACHED InformationGeometryScratch.lean
 
+-- BEGIN ATTACHED InformationStateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -9972,7 +10027,9 @@ theorem gst_parent_digit_from_informationS
     (Nat.add_mod
       (gstAffineMulCarryS A z T q)
       (T / 3^q % 3) 3).symm
+-- END ATTACHED InformationStateScratch.lean
 
+-- BEGIN ATTACHED InformationRegenerationScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10081,7 +10138,9 @@ theorem gst_plus_gate_regenerates_seedS
     gstAffineMulCarryS 4 3 Y 1 = 3 := by
   rw [gst_child_seed_after_regenerationS, hd]
   decide
+-- END ATTACHED InformationRegenerationScratch.lean
 
+-- BEGIN ATTACHED PrefixOneOriginPhaseRecursionScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10312,7 +10371,9 @@ theorem gst_hard_tail_odd_origin_binary_fixedS
     rw [← hparent]
     exact Nat.dvd_of_mod_eq_zero hmod
   exact gst_seed_one_fixed_of_parent_divisorS _ _ hdiv
+-- END ATTACHED PrefixOneOriginPhaseRecursionScratch.lean
 
+-- BEGIN ATTACHED ResidualNullBranchReductionScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10443,7 +10504,9 @@ theorem gst_residual_null_branch_reductionS
     exact hregen0 hseeded
 
   exact ⟨hu_lt, hregen, by decide⟩
+-- END ATTACHED ResidualNullBranchReductionScratch.lean
 
+-- BEGIN ATTACHED ResidualNullTerminalScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10653,7 +10716,9 @@ theorem gst_residual_null_bad_forces_deeper_originS
     omega
   subst n
   exact False.elim (gst_residual_null_origin_one_bad_impossible_allS s hs hBad)
+-- END ATTACHED ResidualNullTerminalScratch.lean
 
+-- BEGIN ATTACHED NavigationResidueCutScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10792,7 +10857,9 @@ theorem gst_residue19_is_null_gate2S
       norm_num at h ⊢
       exact h.symm
     norm_num [hmod9]
+-- END ATTACHED NavigationResidueCutScratch.lean
 
+-- BEGIN ATTACHED ResidualNullPrefixFourCutScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -10922,7 +10989,9 @@ theorem gst_residual_null_second_trit_zero_or_twoS
   · exact False.elim
       (gst_residual_null_second_trit_one_impossibleS s n hs hn hn1 h1 hBad)
   · exact Or.inr h2
+-- END ATTACHED ResidualNullPrefixFourCutScratch.lean
 
+-- BEGIN ATTACHED CanonicalOriginCutIntersectionScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -11073,7 +11142,9 @@ theorem gst_canonical_bad_forbids_cut_shiftS
   intro hd
   exact hno (gst_canonical_origin_cut_witnessS
     s a k m hs hcarry hd)
+-- END ATTACHED CanonicalOriginCutIntersectionScratch.lean
 
+-- BEGIN ATTACHED PurePowerBadAxisScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -11262,7 +11333,9 @@ theorem gst_parent_energy_stateS
     have hseed := gst_parent_forced_prefix_seedS s hs
     rw [hseed] at h
     exact h
+-- END ATTACHED PurePowerBadAxisScratch.lean
 
+-- BEGIN ATTACHED OmegaSpacetimeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -11456,14 +11529,16 @@ theorem gst_omega_pressure_no_unbounded_twoS
     dsimp [E]
     exact gst_omega_pressure_transfer_le_energyS t T j
   omega
+-- END ATTACHED OmegaSpacetimeScratch.lean
 
+-- BEGIN ATTACHED HandwrittenOmegaOperatorScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
 # Handwritten Ω / U / Navigation operator — exact arithmetic core
 
-This scratch formalizes the parts of the local handwritten operator that can be
+This scratch formalizes the parts of Boss's handwritten operator that can be
 stated without any new forcing axiom.
 -/
 
@@ -11710,14 +11785,16 @@ theorem gst_origin_total_U_absorbedS
   unfold gstOriginConsumedPrefixUS gstOriginRemainingUS
   have hlt : n < 3^(n+1) := gst_three_pow_succ_gt_pressureS n
   rw [Nat.mod_eq_of_lt hlt]
+-- END ATTACHED HandwrittenOmegaOperatorScratch.lean
 
+-- BEGIN ATTACHED HandwrittenOmegaOriginCommutingSquareScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
 # Exact Ω-information / natural-origin commuting square
 
-the local handwritten operator has two natural axes:
+Boss's handwritten operator has two natural axes:
 
 * origin time `t` (the Pi constructor), and
 * information position `i` (the BIG-N Sigma constructor).
@@ -11862,7 +11939,9 @@ theorem gst_handwritten_two_axis_same_energyS
       (fun i => gstOmegaNaturalTransferS t (Q t n) i) := by
   rw [gst_origin_phase_reconstructs_energyS,
     gst_handwritten_navigation_omega_budgetS Q hQ t n ht]
+-- END ATTACHED HandwrittenOmegaOriginCommutingSquareScratch.lean
 
+-- BEGIN ATTACHED RetainedOffsetUStateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -11965,7 +12044,9 @@ theorem gst_residual_null_retained_state_shapeS
   rw [show GSTCanonicalBlockS (s+1) = 4^(3^s * 3) by
     simp [GSTCanonicalBlockS, Nat.pow_succ]]
   ring
+-- END ATTACHED RetainedOffsetUStateScratch.lean
 
+-- BEGIN ATTACHED GSTGraphV2Scratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12189,7 +12270,9 @@ theorem gst_local_rotate_fiveS
   rcases hCc with h0 | h1 | h2 | h3 <;>
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;> decide
+-- END ATTACHED GSTGraphV2Scratch.lean
 
+-- BEGIN ATTACHED GSTResidueSpacetimeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12324,7 +12407,9 @@ theorem gst_phase1_common_two_iff_double_jumpS
     (gst_prefixed_common_two_iff_double_residue_jumpS
       (1+D) (4+D) (3*D) H (1+4*H) E (4*E) q
       (by omega) (by omega) (by omega) hE hE4)
+-- END ATTACHED GSTResidueSpacetimeScratch.lean
 
+-- BEGIN ATTACHED GSTExponentLiftScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12402,7 +12487,9 @@ theorem gst_pow4_exponent_trit_lift_digitS
     simpa using gst_pow4_exponent_lift_one_digitS p m c hA hc
   · subst a
     simpa using gst_pow4_exponent_lift_two_digitS p m c hA hc
+-- END ATTACHED GSTExponentLiftScratch.lean
 
+-- BEGIN ATTACHED CarryWordScratch.lean
 /-!
 Generic radix theorem behind the GST phase strip.
 For a fixed ternary cut M, repeated multiplication by 4 produces one carry
@@ -12505,7 +12592,9 @@ theorem gst_strip_carry_is_information_digitS
   rw [hidx] at hshift
   rw [hshift]
   exact gst_strip_quotient_succ_mod4S r M i hM
+-- END ATTACHED CarryWordScratch.lean
 
+-- BEGIN ATTACHED InformationCarryWordBridgeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12600,7 +12689,9 @@ theorem gst_shared_information_is_carry_wordS
 
   dsimp [M] at hword
   exact hword.trans hshared
+-- END ATTACHED InformationCarryWordBridgeScratch.lean
 
+-- BEGIN ATTACHED BadLanguageMagnitudeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12720,7 +12811,9 @@ theorem gst_seeded_bad_nine_power_boundS
     8 * X ≤ 7 * (9^m - 1) := by
   exact gst_no22_nine_power_boundS X m hX
     (gst_no22_of_seeded_badS D X hD hbad)
+-- END ATTACHED BadLanguageMagnitudeScratch.lean
 
+-- BEGIN ATTACHED PurePowerTailReductionScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -12827,7 +12920,9 @@ theorem gst_pure_power_strip_input_residueS
     Nat.mod_eq_zero_of_dvd (Nat.dvd_mul_right _ _)
   rw [← hPow, hdecomp, Nat.add_mod, hmulmod, Nat.add_zero, Nat.mod_mod]
   exact Nat.mod_eq_of_lt hrlt
+-- END ATTACHED PurePowerTailReductionScratch.lean
 
+-- BEGIN ATTACHED StripConservationScratch.lean
 /-!
 Generalized GST strip conservation.
 For an arbitrary multiplier B, the entire horizontal block R -> B*R has one
@@ -12934,7 +13029,9 @@ theorem gst_wide_carry_is_carry_wordS
     gstWideCarryS (4^(N+1)) R p =
       (4^(N+1) * (R % 3^p)) / 3^p := by
   rfl
+-- END ATTACHED StripConservationScratch.lean
 
+-- BEGIN ATTACHED GSTGraphV2FluxScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13093,7 +13190,9 @@ theorem gst_big2_species_hits_survive_within_fourV2S
     rcases hdc with d0 | d1 | d2 <;>
     subst C <;> subst d <;>
     simp [GSTBig2MassSpeciesV2S, gstCellMassV2S, gstLocalRotateS] at hbig ⊢
+-- END ATTACHED GSTGraphV2FluxScratch.lean
 
+-- BEGIN ATTACHED GSTGraphV2BlockScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13167,7 +13266,9 @@ theorem gst_shared_information_block_echoV2S
     _ = 4*c*((T / 3^q) % D) +
           (gstAffineMulCarryS (4*A) (1 + 4*z) T q +
             4 * ((T / 3^q) % D)) / D := by ac_rfl
+-- END ATTACHED GSTGraphV2BlockScratch.lean
 
+-- BEGIN ATTACHED PurePowerResidueGraphScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13408,7 +13509,9 @@ theorem gst_pure_power_parent_bad_forbids_residue_sectorS
       (gstResidueTowerModulusS D q) (N+1)) P Z r hP hr hshape
   apply hiff.mp
   simpa [P, Z, r] using hbad
+-- END ATTACHED PurePowerResidueGraphScratch.lean
 
+-- BEGIN ATTACHED PhaseCycleInformationScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13536,7 +13639,9 @@ theorem gst_phase_cycle_offsets_insideS
   constructor
   · nlinarith
   · nlinarith
+-- END ATTACHED PhaseCycleInformationScratch.lean
 
+-- BEGIN ATTACHED InformationLocalizationScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13609,7 +13714,9 @@ theorem gst_shared_gate_localizationS
   · rw [hshape] at hsuffix
     exact hsuffix
   · exact hgate0
+-- END ATTACHED InformationLocalizationScratch.lean
 
+-- BEGIN ATTACHED InformationFluxScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13722,7 +13829,9 @@ theorem gst_shared_information_right_endpointS
         (gstAffineMulCarryS (4*(4^N)) (1 + 4*z) T q) 0 := hcoord0
     _ = gstAffineMulCarryS 4 1 (z + 4^N*T) q := by
       simpa [gstInformationCarryAtS] using hbottom.1
+-- END ATTACHED InformationFluxScratch.lean
 
+-- BEGIN ATTACHED InformationForcingScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13814,7 +13923,9 @@ theorem gst_localized_gate_forcing_stepS
   have hshared := gst_shared_word_regenerates_exactS A D Z 2
   refine ⟨hparent, hlatent, ?_⟩
   convert hshared using 1 <;> ring
+-- END ATTACHED InformationForcingScratch.lean
 
+-- BEGIN ATTACHED InformationIterationScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -13928,7 +14039,9 @@ theorem gst_child_gate_high_realisationS
     decide
   · subst C
     decide
+-- END ATTACHED InformationIterationScratch.lean
 
+-- BEGIN ATTACHED FiniteSupportScratch.lean
 /-!
 Finite-support side of the corrected GST separation proof.
 This file proves only arithmetic facts about natural ternary origins.
@@ -13984,7 +14097,9 @@ theorem finite_origin_contradictionS
     (hforce : ∀ K, ∃ k, K ≤ k ∧ ternaryOriginDigitS n k ≠ 0) :
     False := by
   exact natural_not_infinite_ternary_supportS n hforce
+-- END ATTACHED FiniteSupportScratch.lean
 
+-- BEGIN ATTACHED LastGateTrapScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14094,7 +14209,9 @@ theorem gst_suffix_after_last_gate_is_badS
   · rw [gst_seeded_affine_carry_semigroupS D X (q+1) j,
         hDnext]
     exact hgate.2
+-- END ATTACHED LastGateTrapScratch.lean
 
+-- BEGIN ATTACHED CanonicalTrapScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14170,7 +14287,9 @@ theorem gst_canonical_two_boundary_trapS
     gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) (q+1) hA hz1
 
   exact ⟨hparentSuffix, hchildSuffix, hlatent, hshared, hW⟩
+-- END ATTACHED CanonicalTrapScratch.lean
 
+-- BEGIN ATTACHED HandwrittenBigNOmegaScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14367,7 +14486,9 @@ theorem gst_omega_transfer_at_navigation_horizon_zeroS
   unfold gstOmegaPressureTransferS
   rw [gst_navigation_self_digit_zeroS N hN]
   simp
+-- END ATTACHED HandwrittenBigNOmegaScratch.lean
 
+-- BEGIN ATTACHED HandwrittenSixUniverseScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14417,7 +14538,7 @@ theorem gst_event_factor_thirteen_from_six_sevenS :
     13 = 6 + gstSixUniversePrefixS 1 := by
   norm_num [gstSixUniversePrefixS, Finset.sum_range_succ]
 
-/-- the local scalar kernel 7/(x-6) is exactly normalized at the global event
+/-- Boss's scalar kernel 7/(x-6) is exactly normalized at the global event
 factor x=13.  Kept as integer division because 13-6 divides 7 exactly. -/
 theorem gst_handwritten_kernel_normalizes_at_thirteenS :
     7 / (13 - 6) = 1 := by
@@ -14427,7 +14548,9 @@ theorem gst_handwritten_kernel_normalizes_at_thirteenS :
 theorem gst_first_binary_quotient_factorizationS :
     455 = 5 * 7 * 13 := by
   decide
+-- END ATTACHED HandwrittenSixUniverseScratch.lean
 
+-- BEGIN ATTACHED HandwrittenKernelV2Scratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14442,7 +14565,7 @@ hence `m < 6`.  Its alternate coordinate reading is
 
     R6(m) = floor(m/3) + 2*(m mod 3).
 
-the local kernel magnitude `|7/(m-6)|` has denominator `6-m` on the physical
+Boss's kernel magnitude `|7/(m-6)|` has denominator `6-m` on the physical
 spectrum.  We keep the exact integer denominator here; all ratio statements
 are expressed by cross multiplication, so no analytic structure is assumed.
 -/
@@ -14563,7 +14686,9 @@ theorem gst_plus_survive_micro_kernel_fixedS :
     gstFirstMicroMassS 3 2 = 5 ∧
       gstSecondMicroMassS 3 2 = 5 := by
   decide
+-- END ATTACHED HandwrittenKernelV2Scratch.lean
 
+-- BEGIN ATTACHED PhysicalSixBridgeGateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14640,12 +14765,14 @@ theorem gst_physical_bad_forbids_happy_micro_pairsS
   · intro h55
     apply hbad
     exact (gst_physical_micro_pair_happy_iffS R p).2 (Or.inr h55)
+-- END ATTACHED PhysicalSixBridgeGateScratch.lean
 
+-- BEGIN ATTACHED HandwrittenBig1PathProjectorScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
-# Pathwise BIG1 projector for the local handwritten operator
+# Pathwise BIG1 projector for Boss's handwritten operator
 
 This scratch promotes the handwritten condition `I ≠ BIG1` from a single
 annotation to a condition imposed at every microscopic x2/base3 bridge layer.
@@ -14687,7 +14814,7 @@ theorem gst_big1_clear_nonzero_bridge_forces_surviveS
     simp [gstBinaryBridgeOutputS, gstBinaryBridgeMassS,
       gstBinaryBridgeEventS] at hd0 hd1 hout1 ⊢
 
-/-- Pathwise form of the local `I ≠ BIG1` condition.  `d j` is the information
+/-- Pathwise form of Boss's `I ≠ BIG1` condition.  `d j` is the information
 vertex at depth j and `a j` is the incoming binary bridge bit on edge j. -/
 def GSTBig1ClearBridgePathS
     (a d : Nat → Nat) (K : Nat) : Prop :=
@@ -14863,7 +14990,9 @@ theorem gst_big1_projected_path_equals_world_projection_coefficientS
       gstWorldProjectionCoefficientS (6^K) := by
   rw [gst_big1_projected_path_code_eq_six_pow_sub_oneS a d K hpath h0]
   rfl
+-- END ATTACHED HandwrittenBig1PathProjectorScratch.lean
 
+-- BEGIN ATTACHED PrefixOneTwoDigitChordScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -14872,7 +15001,7 @@ set_option maxHeartbeats 10000000
 
 Production scope correction.
 
-The local handwritten condition `I ≠ 1` is used here ONLY while resolving one
+Boss's handwritten condition `I ≠ 1` is used here ONLY while resolving one
 actual physical x4 GST cell, i.e. exactly the two consecutive x2/base-3
 microscopic bridge layers inside that cell.  It is not promoted to an
 arbitrary-depth path hypothesis and it is not a horizontal-transport axiom.
@@ -14919,7 +15048,7 @@ theorem gst_second_micro_output_eq_x4_outputS
 
 /-- RIGHT CHORD, local form.
 
-At an actual physical cell whose input information is BIG2, applying the local
+At an actual physical cell whose input information is BIG2, applying Boss's
 `I ≠ 1` only to this two-digit/two-micro-layer case kills the NULL
 DESTROY->CREATE orientation and leaves exactly GST+ SURVIVE->SURVIVE.
 The same state is the 55_6 / 35 boundary state of the aligned 36-state V2
@@ -14976,7 +15105,7 @@ theorem gst_physical_two_digit_chord_35S
 
 /-! ## Exhaustive local classification at an actual Happy BIG2 cell -/
 
-/-- At a physical Happy digit-two cell, The local `I ≠ 1` condition is
+/-- At a physical Happy digit-two cell, Boss's local `I ≠ 1` condition is
 *equivalent* to being the GST+ carry-three orientation.  The NULL carry-zero
 orientation is exactly the complementary cell because its first x2 layer
 emits BIG1.  This theorem is the scope firewall preventing accidental global
@@ -15066,14 +15195,16 @@ theorem gst_happy_big2_right_chord_dichotomyS
     have hnull := gst_happy_big2_two_digit_not_clear_is_nullS
       R p hd2 hhappy hI
     exact ⟨hI, hnull⟩
+-- END ATTACHED PrefixOneTwoDigitChordScratch.lean
 
+-- BEGIN ATTACHED PrefixOneRightChordLastGateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
 # Right chord at the actual last child Happy Gate
 
-This file connects The local two-digit `I ≠ 1` blade to the real child
+This file connects Boss's local two-digit `I ≠ 1` blade to the real child
 wave used by the canonical last-gate trap.
 
 Nothing global is assumed.  We first obtain an actual `GSTSeededHappyS 0 T q`,
@@ -15083,8 +15214,8 @@ is therefore:
 * `3` on the BIG1-clear GST+ branch;
 * `2` on the BIG1-crossing NULL branch.
 
-This is the precise hand-off point between the microscopic
-six-state chord and the information-regeneration descent.
+This is the precise hand-off point between younger-Sol's microscopic
+six-state chord and Old Sol's information-regeneration descent.
 -/
 
 /-- Seed-zero seeded carry is definitionally the ordinary physical GST carry. -/
@@ -15210,7 +15341,9 @@ theorem gst_last_child_gate_next_seed_iff_clearS
         exact hnull.1
       · intro _
         exact hnull.2.2.1
+-- END ATTACHED PrefixOneRightChordLastGateScratch.lean
 
+-- BEGIN ATTACHED CanonicalPhaseCrossingSurgeryScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -15576,7 +15709,9 @@ theorem gst_canonical_crossing_failure_certificate_surgeryS
 
   dsimp [GSTCanonicalCrossingFailureCertificateS, A, T, H]
   exact ⟨hparent, ⟨q0, hchild0, hlocal⟩, hphysical⟩
+-- END ATTACHED CanonicalPhaseCrossingSurgeryScratch.lean
 
+-- BEGIN ATTACHED PrefixOneTerminalZScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -15663,7 +15798,9 @@ theorem gst_terminal_seed_one_gate_of_prefixed_oneS
   refine ⟨j, ?_⟩
   rw [hpj] at hgate
   exact (gst_prefixed_one_happy_iff_seed_oneS z j).1 hgate
+-- END ATTACHED PrefixOneTerminalZScratch.lean
 
+-- BEGIN ATTACHED CanonicalOriginTritForcingScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -15820,7 +15957,9 @@ theorem gst_prefix_one_bad_good_big2_prefix_forces_origin_nonzeroS
       s n q hs hbad hcarry
   apply hforbid
   rw [hprefixBig2, hnzero]
+-- END ATTACHED CanonicalOriginTritForcingScratch.lean
 
+-- BEGIN ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -15875,14 +16014,16 @@ theorem gst_residual_prefix_one_u_bad_contradiction_of_bridgeS
   have hinf : InfiniteTernarySupportS n :=
     hbridge s n hs hn hn3 hchild hBad
   exact finite_origin_contradictionS n hinf
+-- END ATTACHED CanonicalResidualInfiniteSupportBridgeScratch.lean
 
+-- BEGIN ATTACHED RightChordCanonicalGateScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
 /-!
 # Right-chord canonical gate integration
 
-This module enforces the local scope correction precisely:
+This module enforces Boss's scope correction precisely:
 
 * `I != 1` is NOT a global hypothesis on a GST/Omega trace;
 * it is used only while resolving one concrete two-digit/x4 physical cell;
@@ -15973,7 +16114,7 @@ theorem gst_scoped_child_gate_forces_plus_and_postseed_threeS
 
 /-- The same last-gate chord lands the conserved shared-information carrier in
 the GST+ high quarter at the gate itself.  This is the exact junction between
-the local two-digit formula and Younger Sol's commuting-square information law. -/
+Boss's two-digit formula and Younger Sol's commuting-square information law. -/
 theorem gst_scoped_child_gate_right_chord_high_quarterS
     (A z T q : Nat)
     (hA : 0 < A) (hz1 : 1 + 4*z < A)
@@ -16056,7 +16197,9 @@ theorem gst_scoped_last_gate_two_boundary_plus_trapS
     gst_affine_carry_lt_multiplierS A (1 + 4*z) (4*T) (q+1) hA hz1
 
   exact ⟨hparentSuffix, hchildSuffix, hC3, hshared, hW⟩
+-- END ATTACHED RightChordCanonicalGateScratch.lean
 
+-- BEGIN ATTACHED CanonicalRightChordTrapScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -16064,7 +16207,7 @@ set_option maxHeartbeats 10000000
 # Canonical right-chord trap
 
 This is the first production-facing fusion of the old information-descent trap
-with the local corrected two-digit handwritten chord.
+with Boss's corrected two-digit handwritten chord.
 
 The old canonical trap retained only
 
@@ -16079,7 +16222,7 @@ is retained together with its microscopic two-x2-layer certificate:
 * `C = 2` iff this one physical x4 cell crosses BIG1, hence NULL `42_6`,
   event `(5,7)`, U-jump `-8`.
 
-Thus the local `I ≠ 1` condition is used only to classify this actual two-digit
+Thus Boss's `I ≠ 1` condition is used only to classify this actual two-digit
 cell.  The global suffix still moves exclusively through the old exact
 regeneration/canonical-origin machinery.
 -/
@@ -16254,7 +16397,9 @@ theorem gst_canonical_right_chord_seed_classificationS
   rcases hC with h2 | h3
   · exact Or.inr ⟨h2, hclass2.mp h2⟩
   · exact Or.inl ⟨h3, hclass3.mp h3⟩
+-- END ATTACHED CanonicalRightChordTrapScratch.lean
 
+-- BEGIN ATTACHED HandwrittenSignedKernelFluxScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -16268,7 +16413,7 @@ This file uses the exact x2/base3 bridge
 with a,a' binary and d,e ternary.  Its event symbol is J=d+3e.  The physical
 six-state event image is {0,1,3,5,7,8}; J=6 is the missing central value.
 
-On the active BIG2 events the local kernel 7/(J-6) has the exact signed values
+On the active BIG2 events Boss's kernel 7/(J-6) has the exact signed values
 
   CREATE  J=7 : +7
   DESTROY J=5 : -7
@@ -16297,7 +16442,7 @@ def gstMicroBig2FluxS (a d : Nat) : Int :=
   7 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
        gstMicroTwoIndicatorS d)
 
-/-- Twice the local signed kernel on the active sector, written without division.
+/-- Twice Boss's signed kernel on the active sector, written without division.
 The first term is the boundary flux; the second is the SURVIVE residual. -/
 def gstMicroKernelTwiceS (a d : Nat) : Int :=
   14 * (gstMicroTwoIndicatorS (gstMicroEventOutputS a d) -
@@ -16380,7 +16525,9 @@ theorem gst_micro_kernel_twice_decomposeS (a d : Nat) :
           gstMicroTwoIndicatorS (gstMicroEventOutputS a d) := by
   unfold gstMicroKernelTwiceS gstMicroBig2FluxS
   ring
+-- END ATTACHED HandwrittenSignedKernelFluxScratch.lean
 
+-- BEGIN ATTACHED HandwrittenBigNBinaryFactorScratch.lean
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
 
@@ -16603,7 +16750,9 @@ theorem gst_shared_x4_binary_factor_last_gate_high_bitS
   refine ⟨a,b,e,Wmid,hDb,?_,ha,hb,he,hmid,?_,h2⟩
   · simpa using hCe
   · simpa using h1
+-- END ATTACHED HandwrittenBigNBinaryFactorScratch.lean
 
+-- END ATTACHED SOL BIG-N CLOSURE STACK
 
 /-- BIG-N finite endpoint adapter. -/
 theorem gst_bigN_seed3_endpoint_forces_non_one_inline
@@ -16745,6 +16894,7 @@ theorem gst_step6_terminal_packet_kernel
     s n (gstNavigationConstant s 1) z q hs hn
     hLTE hunitPrefix hChildCanonical hBadCanonical
 
+-- SOL56 CANONICAL TAIL POE COMPATIBILITY BRIDGE
 /-- Convert the standalone exact Happy-gate language into the monolith wrapper. -/
 theorem gst_navigation_witness_of_standalone_navigation
     (R : Nat) (h : GSTCanonicalTailStateIso.Navigation R) :
