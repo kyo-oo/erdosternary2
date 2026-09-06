@@ -37,11 +37,17 @@ for rel in targets:
         path.write_bytes(new)
         changed.append(rel)
 
+allowed_question_holes = {
+    './questions/deepmind_problem_406/Challenge.lean',
+}
+
 hits = []
 pattern = re.compile(rb'\bsorry\b')
 for path in ROOT.rglob('*.lean'):
-    p = path.as_posix()
+    p = './' + path.as_posix().lstrip('./')
     if '/.lake/' in p or '.bak' in p:
+        continue
+    if p in allowed_question_holes:
         continue
     for i, line in enumerate(path.read_bytes().splitlines(), 1):
         if pattern.search(line):
@@ -54,6 +60,7 @@ if hits:
     raise SystemExit(1)
 
 print('SORRY_SCAN_CLEAN=1')
+print('INTENTIONAL_PROBLEM406_CHALLENGE_HOLE_EXCLUDED=1')
 if changed:
     print('UPDATED_FILES=' + ','.join(changed))
 else:
