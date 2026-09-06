@@ -1,0 +1,39 @@
+name: GPT56 FINISHER Bundle
+
+on:
+  push:
+    branches:
+      - sol/problem406-professionalization-green-20260906
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-finisher:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Build FINISHER bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/create_finisher_bundle.py
+
+      - name: Commit FINISHER bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short -- FINISHER
+          if [ -z "$(git status --porcelain -- FINISHER)" ]; then
+            echo "FINISHER_NO_CHANGES=1"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add FINISHER
+            git commit -m "Create FINISHER proof bundle"
+            git push
+          fi

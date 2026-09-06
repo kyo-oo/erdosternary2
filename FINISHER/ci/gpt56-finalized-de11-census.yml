@@ -1,0 +1,182 @@
+name: GPT56 Finalized de11 Census
+
+on:
+  push:
+    branches:
+      - sol/problem406-professionalization-green-20260906
+  workflow_dispatch:
+
+jobs:
+  finalized-de11-census:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Census finalized comparator commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_REF="de11dc2c5ee340fee1929ba2adc6834a72ab9879"
+          git checkout --detach "$TARGET_REF"
+          python - <<'PY'
+          from __future__ import annotations
+          import json, re, subprocess
+          from collections import Counter
+          from pathlib import Path
+
+          ROOT = Path.cwd()
+          MAIN = Path("ErdosTernary2.lean")
+          TARGET = "de11dc2c5ee340fee1929ba2adc6834a72ab9879"
+          EXTERNAL = ("Mathlib", "Std", "Lean", "Init")
+          IMPORT_RE = re.compile(r"^\s*import\s+([A-Za-z0-9_'.]+)\s*$")
+          DECL_RE = re.compile(
+              r"^\s*(?:@[\w\[\]\s,._:=()'\"/-]+\s+)*"
+              r"(?P<kind>theorem|lemma|def|abbrev|axiom|opaque|inductive|structure|class|instance)"
+              r"\s+(?P<name>[^\s:{(]+)"
+          )
+
+          def strip_comments(src: str) -> str:
+              out = []
+              i = 0
+              depth = 0
+              while i < len(src):
+                  if depth == 0 and src.startswith("--", i):
+                      j = src.find("\n", i)
+                      if j == -1:
+                          break
+                      out.append("\n")
+                      i = j + 1
+                      continue
+                  if src.startswith("/-", i):
+                      depth += 1
+                      i += 2
+                      continue
+                  if depth > 0 and src.startswith("-/", i):
+                      depth -= 1
+                      i += 2
+                      continue
+                  ch = src[i]
+                  if depth == 0:
+                      out.append(ch)
+                  elif ch == "\n":
+                      out.append("\n")
+                  i += 1
+              return "".join(out)
+
+          def line_count(p: Path) -> int:
+              s = (ROOT / p).read_text(encoding="utf-8")
+              return 0 if s == "" else s.count("\n") + (0 if s.endswith("\n") else 1)
+
+          def lean_files(include_archives: bool) -> list[Path]:
+              files = []
+              for p in ROOT.rglob("*.lean"):
+                  rel = p.relative_to(ROOT)
+                  if ".lake" in rel.parts:
+                      continue
+                  if any(part.startswith(".") for part in rel.parts):
+                      continue
+                  if not include_archives and rel.parts and rel.parts[0] in {"ker07-snapshot", "modules", "archive", "workbench"}:
+                      continue
+                  files.append(rel)
+              return sorted(files, key=str)
+
+          def direct_imports(p: Path) -> list[str]:
+              text = (ROOT / p).read_text(encoding="utf-8")
+              return [m.group(1) for line in text.splitlines() if (m := IMPORT_RE.match(line))]
+
+          def module_to_path(m: str) -> Path:
+              return Path(*m.split(".")).with_suffix(".lean")
+
+          def custom_import_closure(start: Path) -> list[Path]:
+              seen = set()
+              stack = [start]
+              while stack:
+                  p = stack.pop()
+                  if p in seen or not (ROOT / p).exists():
+                      continue
+                  seen.add(p)
+                  for m in direct_imports(p):
+                      if m.startswith(EXTERNAL):
+                          continue
+                      q = module_to_path(m)
+                      if (ROOT / q).exists() and q not in seen:
+                          stack.append(q)
+              return sorted(seen, key=str)
+
+          def family(path: str, name: str) -> str:
+              x = f"{path} {name}".lower()
+              def has(*xs): return any(t in x for t in xs)
+              if has("erdos", "problem406", "universal", "final"):
+                  return "Final Problem406 / universal theorem layer"
+              if has("tdt", "duality", "transcendence"):
+                  return "True Duality Transcendence layer"
+              if has("cascade", "tower", "stable", "bridge", "crossing"):
+                  return "Bridge/cascade/crossing layer"
+              if has("bounded", "modular_depth", "decide", "struct", "verification"):
+                  return "Finite verification / structural decision layer"
+              if has("four", "pow4", "power", "residue", "mod9", "mod27", "mod81"):
+                  return "Four-power/residue arithmetic layer"
+              if has("digit", "ternary", "noternarytwo", "hastwo", "base3"):
+                  return "Ternary digit arithmetic layer"
+              if has("carry", "affine", "information", "coordinate", "quotient"):
+                  return "Carry / affine information layer"
+              if has("canonical", "tail", "collision", "wave", "u2d", "phase", "escape"):
+                  return "Canonical tail / collision / wave layer"
+              if has("tactic", "macro", "elab", "syntax"):
+                  return "Custom tactic / automation layer"
+              if has("gst", "graph", "navigation", "world", "ontological", "space", "happy"):
+                  return "General Space Theory proper"
+              return "Other support theorem layer"
+
+          def declarations(paths: list[Path]) -> list[dict]:
+              out = []
+              for p in paths:
+                  clean = strip_comments((ROOT / p).read_text(encoding="utf-8"))
+                  for i, line in enumerate(clean.splitlines(), 1):
+                      m = DECL_RE.match(line)
+                      if m:
+                          out.append({"path": str(p), "line": i, "kind": m.group("kind"), "name": m.group("name"), "family": family(str(p), m.group("name"))})
+              return out
+
+          def summarize(label: str, paths: list[Path]) -> dict:
+              decls = declarations(paths)
+              kinds = Counter(d["kind"] for d in decls)
+              thms = [d for d in decls if d["kind"] in {"theorem", "lemma"}]
+              fams = Counter(d["family"] for d in thms)
+              return {
+                  "label": label,
+                  "file_count": len(paths),
+                  "total_lines": sum(line_count(p) for p in paths),
+                  "declaration_count": len(decls),
+                  "declaration_kinds": dict(sorted(kinds.items())),
+                  "theorem_like_count": len(thms),
+                  "theorem_like_families": dict(sorted(fams.items())),
+                  "largest_files_by_lines": sorted([[str(p), line_count(p)] for p in paths], key=lambda x: (-x[1], x[0]))[:25],
+              }
+
+          all_live = lean_files(False)
+          all_repo = lean_files(True)
+          closure = custom_import_closure(MAIN)
+          live_tactics = [p for p in all_live if "tactic" in str(p).lower()]
+          closure_plus_live_tactics = sorted(set(closure) | set(live_tactics), key=str)
+          report = {
+              "target_ref": TARGET,
+              "head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "monolith_direct_custom_imports": [m for m in direct_imports(MAIN) if not m.startswith(EXTERNAL)],
+              "monolith_direct_external_imports": [m for m in direct_imports(MAIN) if m.startswith(EXTERNAL)],
+              "main_monolith_only": summarize("ErdosTernary2.lean only", [MAIN]),
+              "main_monolith_custom_import_closure": summarize("ErdosTernary2.lean recursive custom import closure", closure),
+              "main_monolith_closure_plus_live_tactics": summarize("ErdosTernary2.lean closure plus non-archive tactic files", closure_plus_live_tactics),
+              "all_non_archive_custom_lean": summarize("all non-archive custom Lean files", all_live),
+              "all_repo_custom_lean_including_snapshots": summarize("all repo custom Lean files including snapshots", all_repo),
+          }
+          print("FINALIZED_DE11_CENSUS_JSON_BEGIN")
+          print(json.dumps(report, indent=2, sort_keys=True))
+          print("FINALIZED_DE11_CENSUS_JSON_END")
+          for key in ["main_monolith_only", "main_monolith_custom_import_closure", "main_monolith_closure_plus_live_tactics", "all_non_archive_custom_lean", "all_repo_custom_lean_including_snapshots"]:
+              item = report[key]
+              print(f"FINALIZED_DE11_{key.upper()}_FILES={item['file_count']}")
+              print(f"FINALIZED_DE11_{key.upper()}_LINES={item['total_lines']}")
+              print(f"FINALIZED_DE11_{key.upper()}_THEOREM_LIKE={item['theorem_like_count']}")
+          PY
