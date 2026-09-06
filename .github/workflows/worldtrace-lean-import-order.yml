@@ -1,0 +1,43 @@
+name: Worldtrace Lean Import Order Hygiene
+
+on:
+  push:
+    branches:
+      - sol/problem406-professionalization-green-20260906
+    paths:
+      - '.ci/worldtrace-lean-import-order-trigger.txt'
+      - 'scripts/fix_lean_import_order.py'
+      - '.github/workflows/worldtrace-lean-import-order.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-import-order:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Fix Lean import order
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/fix_lean_import_order.py
+          git diff --check
+      - name: Commit Lean import order fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'LEAN_IMPORT_ORDER_NO_CHANGES=1'
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix Lean import ordering"
+          git pull --rebase origin sol/problem406-professionalization-green-20260906
+          git push origin HEAD:sol/problem406-professionalization-green-20260906
