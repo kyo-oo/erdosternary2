@@ -1,2 +1,2 @@
 Worldtrace API expansion CI anchor
-Generated after layered public API promotion and FINISHER overlay.
+Generated after layered public API promotion, FINISHER overlay, and FINISHER trigger guard.
