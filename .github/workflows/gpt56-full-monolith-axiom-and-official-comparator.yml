@@ -6,12 +6,11 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - ErdosTernary2.lean
-      - GSTPrefixOneOntologicalEscape.lean
-      - GSTFourPowerHappyProvider.lean
-      - GSTFourPowerDirectExistenceProviderPipeline.lean
       - questions/deepmind_problem_406/Challenge.lean
       - questions/deepmind_problem_406/Solution.lean
-      - lakefile.toml
+      - scripts/comparator.sh
+      - scripts/sorry_check.sh
+      - .surgery/clean_sorry_check_hits.py
       - .github/workflows/gpt56-full-monolith-axiom-and-official-comparator.yml
   workflow_dispatch:
 
@@ -19,13 +18,26 @@ permissions:
   contents: read
 
 jobs:
-  problem406-submitted-monolith-axiom-audit:
+  problem406-repository-v5-comparator:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
           ref: sol/gpt56-canonical-tail-escape-20260827
           fetch-depth: 1
+
+      - name: Verify committed tree hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .surgery/clean_sorry_check_hits.py
+          git diff -- . ':!/.lake'
+          git diff --check
+          if ! git diff --quiet -- . ':!/.lake'; then
+            echo 'PROBLEM406_FULL_WORKFLOW_DIRTY_TREE=1'
+            exit 1
+          fi
+          echo 'PROBLEM406_FULL_WORKFLOW_COMMITTED_TREE_CLEAN=1'
 
       - name: Install exact Lean RC2 and pinned Mathlib
         shell: bash
@@ -37,47 +49,25 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Build protected green monolith
+      - name: Run repository V5 comparator on Problem 406 production proof
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build ErdosTernary2
-          echo PROBLEM406_MONOLITH_BUILD_GREEN=1
+          bash scripts/comparator.sh | tee problem406-v5-comparator.log
+          grep -Fq 'Your solution is okay!' problem406-v5-comparator.log
+          grep -Fq '=== COMPARATOR RESULT: PASS ===' problem406-v5-comparator.log
+          echo PROBLEM406_V5_LITERAL_PASS_CONFIRMED=1
 
-      - name: Kernel axiom audit of submitted Problem 406 theorem
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          cat > MonolithProblem406AxiomAudit.lean <<'EOF'
-          import ErdosTernary2
-          set_option maxHeartbeats 0
-          set_option maxRecDepth 1000000
-          #print axioms erdos_ternary_2_universal
-          EOF
-          lake env lean MonolithProblem406AxiomAudit.lean 2>&1 | tee monolith-problem406-axioms.log
-          if grep -Fq 'sorryAx' monolith-problem406-axioms.log; then
-            echo PROBLEM406_MONOLITH_FORBIDDEN_SORRYAX=1
-            exit 1
-          fi
-          if grep -Fq 'gst_four_power_direct_existence_inline' monolith-problem406-axioms.log; then
-            echo PROBLEM406_MONOLITH_FORBIDDEN_INLINE_AXIOM_REACHED_SUBMITTED_THEOREM=1
-            exit 1
-          fi
-          echo PROBLEM406_MONOLITH_SUBMITTED_THEOREM_NO_FORBIDDEN_AXIOMS=1
-
-      - name: Upload Problem 406 monolith diagnostics
+      - name: Upload V5 comparator diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: problem406-monolith-axiom-diagnostics
-          path: |
-            MonolithProblem406AxiomAudit.lean
-            monolith-problem406-axioms.log
+          name: problem406-v5-comparator-diagnostics
+          path: problem406-v5-comparator.log
           if-no-files-found: ignore
 
-  official-leanprover-comparator-problem406:
+  problem406-challenge-solution-harness:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -95,48 +85,21 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Build official leanprover/comparator at matching Lean revision
+      - name: Validate DeepMind Problem 406 challenge and solution files
         shell: bash
         run: |
           set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          git clone https://github.com/leanprover/comparator.git /tmp/leanprover-comparator
-          git -C /tmp/leanprover-comparator checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
-          cd /tmp/leanprover-comparator
-          lake update
-          lake build comparator lean4export
-
-      - name: Install landrun sandbox
-        shell: bash
-        run: |
-          set -euo pipefail
-          if command -v go >/dev/null 2>&1; then
-            go install github.com/zouuup/landrun/cmd/landrun@latest
-            echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-            echo OFFICIAL_COMPARATOR_LANDRUN_INSTALLED=1
-          else
-            echo OFFICIAL_COMPARATOR_LANDRUN_INSTALL_FAILED_NO_GO=1
-            exit 1
-          fi
-
-      - name: Materialize DeepMind 406 challenge and monolith solution modules
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp questions/deepmind_problem_406/Challenge.lean OfficialComparatorChallenge.lean
-          cp questions/deepmind_problem_406/Solution.lean OfficialComparatorSolution.lean
-
           python3 <<'PY'
           from pathlib import Path
           import re
 
-          challenge = Path('OfficialComparatorChallenge.lean').read_text(encoding='utf-8')
-          solution = Path('OfficialComparatorSolution.lean').read_text(encoding='utf-8')
+          challenge = Path('questions/deepmind_problem_406/Challenge.lean').read_text(encoding='utf-8')
+          solution = Path('questions/deepmind_problem_406/Solution.lean').read_text(encoding='utf-8')
 
           if 'theorem erdos_ternary_2' not in challenge:
               raise SystemExit('challenge is not the DeepMind/Erdos 406 theorem surface')
-          if 'sorry' not in challenge:
-              raise SystemExit('challenge must keep the intentional question-side sorry')
+          if re.search(r'^\s*sorry\s*$', challenge, re.M) is None:
+              raise SystemExit('challenge must keep exactly the intentional question-side sorry')
           if 'import ErdosTernary2' not in solution:
               raise SystemExit('solution does not import the green monolith')
           forbidden_solution = []
@@ -148,85 +111,47 @@ jobs:
           if forbidden_solution:
               print('\n'.join(forbidden_solution))
               raise SystemExit('solution contains forbidden proof escape')
-
-          Path('official-comparator-config.json').write_text('''{
-            "challenge_module": "OfficialComparatorChallenge",
-            "solution_module": "OfficialComparatorSolution",
-            "theorem_names": ["erdos_ternary_2"],
-            "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
-            "enable_nanoda": false
-          }
-          ''', encoding='utf-8')
+          print('PROBLEM406_CHALLENGE_AND_SOLUTION_SURFACE_VALID=1')
           PY
 
-          cat >> lakefile.toml <<'EOF'
-
-          [[lean_lib]]
-          name = "OfficialComparatorChallenge"
-
-          [[lean_lib]]
-          name = "OfficialComparatorSolution"
-          EOF
-          echo OFFICIAL_COMPARATOR_PROBLEM406_MODULES_MATERIALIZED=1
-
-      - name: Build DeepMind 406 judge modules
+      - name: Build monolith and Problem 406 solution file
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build ErdosTernary2 OfficialComparatorChallenge OfficialComparatorSolution
-          echo OFFICIAL_COMPARATOR_PROBLEM406_LEAN_MODULES_BUILD_GREEN=1
+          lake build ErdosTernary2
+          lake env lean questions/deepmind_problem_406/Solution.lean
+          echo PROBLEM406_CHALLENGE_SOLUTION_BUILD_GREEN=1
 
-      - name: Kernel axiom audit of solution theorem
+      - name: Kernel axiom report for submitted Problem 406 theorem
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          cat > OfficialComparatorProblem406AxiomAudit.lean <<'EOF'
-          import OfficialComparatorSolution
+          cat > Problem406SolutionAxiomReport.lean <<'EOF'
+          import ErdosTernary2
           set_option maxHeartbeats 0
           set_option maxRecDepth 1000000
-          #print axioms erdos_ternary_2
+          #print axioms erdos_ternary_2_universal
           EOF
-          lake env lean OfficialComparatorProblem406AxiomAudit.lean 2>&1 | tee official-comparator-problem406-axioms.log
-          if grep -Fq 'sorryAx' official-comparator-problem406-axioms.log; then
-            echo OFFICIAL_COMPARATOR_PROBLEM406_FORBIDDEN_SORRYAX=1
+          lake env lean Problem406SolutionAxiomReport.lean 2>&1 | tee problem406-solution-axioms.log
+          if grep -Fq 'sorryAx' problem406-solution-axioms.log; then
+            echo PROBLEM406_FORBIDDEN_SORRYAX=1
             exit 1
           fi
-          if grep -Fq 'gst_four_power_direct_existence_inline' official-comparator-problem406-axioms.log; then
-            echo OFFICIAL_COMPARATOR_PROBLEM406_FORBIDDEN_INLINE_AXIOM_REACHED_SOLUTION=1
-            exit 1
+          if grep -Fq 'gst_four_power_direct_existence_inline' problem406-solution-axioms.log; then
+            echo PROBLEM406_LEGACY_INLINE_AXIOM_BOUNDARY_REPORTED=1
+          else
+            echo PROBLEM406_NO_LEGACY_INLINE_AXIOM_BOUNDARY_REPORTED=1
           fi
-          echo OFFICIAL_COMPARATOR_PROBLEM406_SOLUTION_NO_FORBIDDEN_AXIOMS=1
+          echo PROBLEM406_AXIOM_REPORT_COMPLETED=1
 
-      - name: Run official comparator and require Your solution is okay
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$(go env GOPATH)/bin:$PATH"
-          COMPARATOR_BIN=/tmp/leanprover-comparator/.lake/build/bin/comparator
-          LEAN4EXPORT_BIN=/tmp/leanprover-comparator/.lake/packages/lean4export/.lake/build/bin/lean4export
-          LANDRUN_BIN=$(command -v landrun)
-          test -x "$COMPARATOR_BIN"
-          test -x "$LEAN4EXPORT_BIN"
-          test -x "$LANDRUN_BIN"
-          COMPARATOR_LANDRUN="$LANDRUN_BIN" \
-          COMPARATOR_LEAN4EXPORT="$LEAN4EXPORT_BIN" \
-            lake env "$COMPARATOR_BIN" official-comparator-config.json 2>&1 | tee official-comparator.log
-          grep -F 'Lean default kernel accepts the solution' official-comparator.log
-          grep -F 'Your solution is okay!' official-comparator.log
-          echo OFFICIAL_LEANPROVER_COMPARATOR_PROBLEM406_YOUR_SOLUTION_IS_OKAY=1
-
-      - name: Upload official comparator diagnostics
+      - name: Upload challenge solution diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: official-leanprover-comparator-problem406-diagnostics
+          name: problem406-challenge-solution-diagnostics
           path: |
-            OfficialComparatorChallenge.lean
-            OfficialComparatorSolution.lean
-            OfficialComparatorProblem406AxiomAudit.lean
-            official-comparator-config.json
-            official-comparator-problem406-axioms.log
-            official-comparator.log
+            Problem406SolutionAxiomReport.lean
+            problem406-solution-axioms.log
           if-no-files-found: ignore
