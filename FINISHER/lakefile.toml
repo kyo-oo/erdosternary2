@@ -35,6 +35,12 @@ roots = [
 ]
 
 [[lean_lib]]
+name = "Worldtrace"
+roots = [
+  "Worldtrace.PublicAPI",
+]
+
+[[lean_lib]]
 name = "GSTLocalClosure"
 roots = [
   "GST2DMixedEmergence",
