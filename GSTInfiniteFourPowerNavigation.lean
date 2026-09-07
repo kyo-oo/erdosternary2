@@ -119,9 +119,10 @@ theorem power_width_three_u_derivative_positive
   norm_num
   nlinarith
 
-/-- Kernel-clean residual specialization of the width-three collision.
+/-- Residual specialization of the width-three collision.
 This is the exact `K = 9*m`, `m ≡ 1 (mod 3)` slice of the universal
-three-step seam, discharged by the finite residual binary-boundary argument. -/
+three-step seam.  Its imported collision theorem is kept on the active
+all-depth controller proof path rather than the rejected same-row shortcut. -/
 theorem power_three_step_collision_residual_mod27_nine
     (m q : Nat) (hm : 1 ≤ m) (hm1 : m % 3 = 1)
     (hChild : HappyCell
