@@ -24,87 +24,164 @@ private theorem affineOrbit_mod3486784401_eq_3249436044_of_exponent_39
 private theorem commonTwo_of_mod3486784401_pattern_01012001110101110122_39
     (N : Nat) (hAmod : affineOrbit N % 3486784401 = 3249436044) : CommonTwo N := by
   by_contra hNo
-  let A := affineOrbit N
-  have hd0 : lowDigit (A) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd1 : lowDigit (tail3 (A)) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd2 : lowDigit (tail3 (tail3 (A))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd3 : lowDigit (tail3 (tail3 (tail3 (A)))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd4 : lowDigit (tail3 (tail3 (tail3 (tail3 (A))))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd5 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd6 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd7 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd8 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd9 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd10 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd11 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd12 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd13 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd14 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd15 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd16 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))))) = 0 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd17 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))))) = 1 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd18 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))))))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hd19 : lowDigit (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))))))) = 2 := by unfold lowDigit tail3; dsimp [A]; omega
-  have hbad0 : BadChannel 1 A := by
-    dsimp [A]
+  let A0 := affineOrbit N
+  let A1 := tail3 A0
+  let A2 := tail3 A1
+  let A3 := tail3 A2
+  let A4 := tail3 A3
+  let A5 := tail3 A4
+  let A6 := tail3 A5
+  let A7 := tail3 A6
+  let A8 := tail3 A7
+  let A9 := tail3 A8
+  let A10 := tail3 A9
+  let A11 := tail3 A10
+  let A12 := tail3 A11
+  let A13 := tail3 A12
+  let A14 := tail3 A13
+  let A15 := tail3 A14
+  let A16 := tail3 A15
+  let A17 := tail3 A16
+  let A18 := tail3 A17
+  let A19 := tail3 A18
+  have hR0 : A0 % 3486784401 = 3249436044 := by simpa [A0] using hAmod
+  have hR1 : A1 % 1162261467 = 1083145348 := by
+    dsimp [A1, tail3]
+    omega
+  have hR2 : A2 % 387420489 = 361048449 := by
+    dsimp [A2, tail3]
+    omega
+  have hR3 : A3 % 129140163 = 120349483 := by
+    dsimp [A3, tail3]
+    omega
+  have hR4 : A4 % 43046721 = 40116494 := by
+    dsimp [A4, tail3]
+    omega
+  have hR5 : A5 % 14348907 = 13372164 := by
+    dsimp [A5, tail3]
+    omega
+  have hR6 : A6 % 4782969 = 4457388 := by
+    dsimp [A6, tail3]
+    omega
+  have hR7 : A7 % 1594323 = 1485796 := by
+    dsimp [A7, tail3]
+    omega
+  have hR8 : A8 % 531441 = 495265 := by
+    dsimp [A8, tail3]
+    omega
+  have hR9 : A9 % 177147 = 165088 := by
+    dsimp [A9, tail3]
+    omega
+  have hR10 : A10 % 59049 = 55029 := by
+    dsimp [A10, tail3]
+    omega
+  have hR11 : A11 % 19683 = 18343 := by
+    dsimp [A11, tail3]
+    omega
+  have hR12 : A12 % 6561 = 6114 := by
+    dsimp [A12, tail3]
+    omega
+  have hR13 : A13 % 2187 = 2038 := by
+    dsimp [A13, tail3]
+    omega
+  have hR14 : A14 % 729 = 679 := by
+    dsimp [A14, tail3]
+    omega
+  have hR15 : A15 % 243 = 226 := by
+    dsimp [A15, tail3]
+    omega
+  have hR16 : A16 % 81 = 75 := by
+    dsimp [A16, tail3]
+    omega
+  have hR17 : A17 % 27 = 25 := by
+    dsimp [A17, tail3]
+    omega
+  have hR18 : A18 % 9 = 8 := by
+    dsimp [A18, tail3]
+    omega
+  have hR19 : A19 % 3 = 2 := by
+    dsimp [A19, tail3]
+    omega
+  have hd0 : lowDigit A0 = 0 := by dsimp [lowDigit]; omega
+  have hd1 : lowDigit A1 = 1 := by dsimp [lowDigit]; omega
+  have hd2 : lowDigit A2 = 0 := by dsimp [lowDigit]; omega
+  have hd3 : lowDigit A3 = 1 := by dsimp [lowDigit]; omega
+  have hd4 : lowDigit A4 = 2 := by dsimp [lowDigit]; omega
+  have hd5 : lowDigit A5 = 0 := by dsimp [lowDigit]; omega
+  have hd6 : lowDigit A6 = 0 := by dsimp [lowDigit]; omega
+  have hd7 : lowDigit A7 = 1 := by dsimp [lowDigit]; omega
+  have hd8 : lowDigit A8 = 1 := by dsimp [lowDigit]; omega
+  have hd9 : lowDigit A9 = 1 := by dsimp [lowDigit]; omega
+  have hd10 : lowDigit A10 = 0 := by dsimp [lowDigit]; omega
+  have hd11 : lowDigit A11 = 1 := by dsimp [lowDigit]; omega
+  have hd12 : lowDigit A12 = 0 := by dsimp [lowDigit]; omega
+  have hd13 : lowDigit A13 = 1 := by dsimp [lowDigit]; omega
+  have hd14 : lowDigit A14 = 1 := by dsimp [lowDigit]; omega
+  have hd15 : lowDigit A15 = 1 := by dsimp [lowDigit]; omega
+  have hd16 : lowDigit A16 = 0 := by dsimp [lowDigit]; omega
+  have hd17 : lowDigit A17 = 1 := by dsimp [lowDigit]; omega
+  have hd18 : lowDigit A18 = 2 := by dsimp [lowDigit]; omega
+  have hd19 : lowDigit A19 = 2 := by dsimp [lowDigit]; omega
+  have hbad0 : BadChannel 1 A0 := by
+    dsimp [A0]
     exact (noCommonTwo_iff_badChannel_one N).mp hNo
-  have hbad1 : BadChannel 0 (tail3 (A)) := by
+  have hbad1 : BadChannel 0 A1 := by
     rw [badChannel_one_iff, hd0] at hbad0
-    simpa using hbad0
-  have hbad2 : BadChannel 1 (tail3 (tail3 (A))) := by
+    simpa [A1] using hbad0
+  have hbad2 : BadChannel 1 A2 := by
     rw [badChannel_zero_iff, hd1] at hbad1
-    simpa using hbad1
-  have hbad3 : BadChannel 0 (tail3 (tail3 (tail3 (A)))) := by
+    simpa [A2] using hbad1
+  have hbad3 : BadChannel 0 A3 := by
     rw [badChannel_one_iff, hd2] at hbad2
-    simpa using hbad2
-  have hbad4 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (A))))) := by
+    simpa [A3] using hbad2
+  have hbad4 : BadChannel 1 A4 := by
     rw [badChannel_zero_iff, hd3] at hbad3
-    simpa using hbad3
-  have hbad5 : BadChannel 3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))) := by
+    simpa [A4] using hbad3
+  have hbad5 : BadChannel 3 A5 := by
     rw [badChannel_one_iff, hd4] at hbad4
-    simpa using hbad4
-  have hbad6 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))) := by
+    simpa [A5] using hbad4
+  have hbad6 : BadChannel 1 A6 := by
     rw [badChannel_three_iff, hd5] at hbad5
-    simpa using hbad5
-  have hbad7 : BadChannel 0 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))) := by
+    simpa [A6] using hbad5
+  have hbad7 : BadChannel 0 A7 := by
     rw [badChannel_one_iff, hd6] at hbad6
-    simpa using hbad6
-  have hbad8 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))) := by
+    simpa [A7] using hbad6
+  have hbad8 : BadChannel 1 A8 := by
     rw [badChannel_zero_iff, hd7] at hbad7
-    simpa using hbad7
-  have hbad9 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))) := by
+    simpa [A8] using hbad7
+  have hbad9 : BadChannel 1 A9 := by
     rw [badChannel_one_iff, hd8] at hbad8
-    simpa using hbad8
-  have hbad10 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))) := by
+    simpa [A9] using hbad8
+  have hbad10 : BadChannel 1 A10 := by
     rw [badChannel_one_iff, hd9] at hbad9
-    simpa using hbad9
-  have hbad11 : BadChannel 0 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))) := by
+    simpa [A10] using hbad9
+  have hbad11 : BadChannel 0 A11 := by
     rw [badChannel_one_iff, hd10] at hbad10
-    simpa using hbad10
-  have hbad12 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))) := by
+    simpa [A11] using hbad10
+  have hbad12 : BadChannel 1 A12 := by
     rw [badChannel_zero_iff, hd11] at hbad11
-    simpa using hbad11
-  have hbad13 : BadChannel 0 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))) := by
+    simpa [A12] using hbad11
+  have hbad13 : BadChannel 0 A13 := by
     rw [badChannel_one_iff, hd12] at hbad12
-    simpa using hbad12
-  have hbad14 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))) := by
+    simpa [A13] using hbad12
+  have hbad14 : BadChannel 1 A14 := by
     rw [badChannel_zero_iff, hd13] at hbad13
-    simpa using hbad13
-  have hbad15 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))) := by
+    simpa [A14] using hbad13
+  have hbad15 : BadChannel 1 A15 := by
     rw [badChannel_one_iff, hd14] at hbad14
-    simpa using hbad14
-  have hbad16 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))))) := by
+    simpa [A15] using hbad14
+  have hbad16 : BadChannel 1 A16 := by
     rw [badChannel_one_iff, hd15] at hbad15
-    simpa using hbad15
-  have hbad17 : BadChannel 0 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))))) := by
+    simpa [A16] using hbad15
+  have hbad17 : BadChannel 0 A17 := by
     rw [badChannel_one_iff, hd16] at hbad16
-    simpa using hbad16
-  have hbad18 : BadChannel 1 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A))))))))))))))))))) := by
+    simpa [A17] using hbad16
+  have hbad18 : BadChannel 1 A18 := by
     rw [badChannel_zero_iff, hd17] at hbad17
-    simpa using hbad17
-  have hbad19 : BadChannel 3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (tail3 (A)))))))))))))))))))) := by
+    simpa [A18] using hbad17
+  have hbad19 : BadChannel 3 A19 := by
     rw [badChannel_one_iff, hd18] at hbad18
-    simpa using hbad18
+    simpa [A19] using hbad18
   rw [badChannel_three_iff, hd19] at hbad19
   simpa using hbad19
 
