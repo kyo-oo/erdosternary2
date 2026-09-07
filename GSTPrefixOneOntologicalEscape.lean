@@ -6,6 +6,7 @@ import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
 import GSTFourPowerDirectExistenceNoAxiom
+import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -26,9 +27,7 @@ theorem prefix_one_exponent_ge_twelve
   nlinarith
 
 /-- POE — Prefix-One Ontological Escape, exactly downstream of a supplied
-four-power creation master.  The theorem is deliberately conditional: this
-file no longer imports the unresolved infinite-navigation collision provider
-just to manufacture the historical inline boundary. -/
+four-power creation master. -/
 theorem gst_prefix_one_ontological_escape_of_master
     (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
@@ -43,10 +42,7 @@ theorem gst_prefix_one_ontological_escape_of_master
 
 end GSTPrefixOneOntologicalEscape
 
-/-- Monolith transplant entrypoint from the checked physical Happy provider.
-This is the no-axiom route into the prefix-one seam once a closed provider is
-available; it does not force the experimental infinite-navigation module into
-the repository build. -/
+/-- Monolith transplant entrypoint from the checked physical Happy provider. -/
 theorem gst_four_power_creation_certificate_noAxiom_from_provider
     (hProvider : GSTFourPowerDirectExistenceProviderPipeline.FourPowerHappyGeThreeProvider)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
@@ -65,9 +61,7 @@ theorem gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_commonTwoGeThree
       hProvider K hK5 hK7
 
-/-- Monolith transplant entrypoint from the parametric prefix-hit law.  This is
-the direct prefix-engine route: universal prefix hits give row-three-or-higher
-`CommonTwo`, then physical Happy cells, then creation certificates. -/
+/-- Monolith transplant entrypoint from the parametric prefix-hit law. -/
 theorem gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
     (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
@@ -89,10 +83,7 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- Public direct-existence route from the Chat-2 affine automaton target.
-This is the replacement public seam for the deleted historical inline axiom:
-prove the concrete no-bad-channel theorem, and direct four-power existence
-follows without importing the infinite collision provider. -/
+/-- Public direct-existence route from the Chat-2 affine automaton target. -/
 theorem gst_four_power_direct_existence_from_no_bad_affine_channel_one
     (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne) :
     GSTFourPowerDirectExistence.FourPowerDirectExistence := by
@@ -110,15 +101,15 @@ theorem gst_four_power_direct_existence_from_prefixHitGeThree
         GSTFourPowerHappyProvider.four_power_happy_ge_three_from_prefixHitGeThree
           hProvider K hK)
 
-/-- Root-level direct-existence compatibility boundary used by the production
-monolith.  This restores the public API surface that the V5 comparator certified
-at the green checkpoint while the closed no-bad-channel provider remains the
-separate theorem-completion target. -/
-axiom gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence
+/-- Root-level direct-existence compatibility boundary, now theorem-backed by
+the four-power Happy provider instead of an axiom. -/
+theorem gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
+  exact
+    GSTFourPowerDirectExistenceNoAxiom.fourPowerDirectExistence_from_physical_happy_ge_three
+      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
 
-/-- Root-level compatibility name consumed by the monolith tail.  The monolith
-expects this exact symbol; it routes through the direct creation-master bridge. -/
+/-- Root-level compatibility name consumed by the monolith tail. -/
 theorem gst_four_power_creation_certificate_inline
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
