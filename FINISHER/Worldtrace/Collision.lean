@@ -1,4 +1,5 @@
 import ErdosTernary2
+import GST.Problem406.FourPower
 import GST.Problem406.LocalCell
 
 /-!

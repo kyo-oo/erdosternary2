@@ -1,5 +1,6 @@
 import ErdosTernary2
 import GST.Problem406.FourPower
+import GST.Problem406.PrefixOne
 import GST.FourPower.CommonTwo
 import GST.FourPower.PrefixLaw
 import GST.FourPower.Certificate
