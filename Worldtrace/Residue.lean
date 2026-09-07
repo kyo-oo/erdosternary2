@@ -26,31 +26,31 @@ abbrev exponentPrefix : Nat → Nat → Nat := GST.FourPower.exponentPrefix
 abbrev exponentTrit : Nat → Nat → Nat := GST.FourPower.exponentTrit
 
 /-- Mod-three cascade fingerprint. -/
-theorem cascade_mod_three := Worldtrace.Genesis.cascade_mod_three
+abbrev cascade_mod_three := Worldtrace.Genesis.cascade_mod_three
 
 /-- Mod-nine cascade fingerprint. -/
-theorem cascade_mod_nine := Worldtrace.Genesis.cascade_mod_nine
+abbrev cascade_mod_nine := Worldtrace.Genesis.cascade_mod_nine
 
 /-- Stable mod-three residue of the cascade constant. -/
-theorem stable_cascade_mod_three := Worldtrace.Genesis.stable_cascade_mod_three
+abbrev stable_cascade_mod_three := Worldtrace.Genesis.stable_cascade_mod_three
 
 /-- Stable mod-nine residue of the cascade constant. -/
-theorem stable_cascade_mod_nine := Worldtrace.Genesis.stable_cascade_mod_nine
+abbrev stable_cascade_mod_nine := Worldtrace.Genesis.stable_cascade_mod_nine
 
 /-- Stable mod-eighty-one residue of the cascade constant. -/
-theorem cascade_mod_eighty_one_stable := Worldtrace.Genesis.cascade_mod_eighty_one_stable
+abbrev cascade_mod_eighty_one_stable := Worldtrace.Genesis.cascade_mod_eighty_one_stable
 
 /-- Stable mod-two-hundred-forty-three residue of the cascade constant. -/
-theorem cascade_mod_two_four_three_stable := Worldtrace.Genesis.cascade_mod_two_four_three_stable
+abbrev cascade_mod_two_four_three_stable := Worldtrace.Genesis.cascade_mod_two_four_three_stable
 
 /-- Exact decomposition of an exponent into prefix, trit, and suffix. -/
-theorem exponent_prefix_trit_decomposition := GST.FourPower.exponent_prefix_trit_decomposition
+abbrev exponent_prefix_trit_decomposition := GST.FourPower.exponent_prefix_trit_decomposition
 
 /-- Pair formula for consecutive powers of four from one exponent trit. -/
-theorem pow4_pair_from_exponent_trit := GST.FourPower.pow4_pair_from_exponent_trit
+abbrev pow4_pair_from_exponent_trit := GST.FourPower.pow4_pair_from_exponent_trit
 
 /-- Parametric obstruction for a common-two-free exponent trit. -/
-theorem no_common_two_exponent_trit_obstruction := GST.FourPower.no_common_two_exponent_trit_obstruction
+abbrev no_common_two_exponent_trit_obstruction := GST.FourPower.no_common_two_exponent_trit_obstruction
 
 end Residue
 end Worldtrace

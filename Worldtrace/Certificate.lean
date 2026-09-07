@@ -27,34 +27,34 @@ abbrev PrefixOneNavigationLift : Prop := GST.Problem406.PrefixOneNavigationLift
 abbrev FourPowerCreationMaster : Prop := GST.Problem406.FourPowerCreationMaster
 
 /-- A creation certificate gives a navigation witness. -/
-theorem creation_certificate_to_navigation := GST.FourPower.creation_certificate_to_navigation
+abbrev creation_certificate_to_navigation := GST.FourPower.creation_certificate_to_navigation
 
 /-- Four-power creation master certified inside the proof corpus. -/
-theorem four_power_creation_master := GST.Problem406.four_power_creation_master
+abbrev four_power_creation_master := GST.Problem406.four_power_creation_master
 
 /-- A creation master supplies the prefix-one navigation lift. -/
-theorem prefix_one_navigation_lift_of_creation_master := GST.Problem406.prefix_one_navigation_lift_of_creation_master
+abbrev prefix_one_navigation_lift_of_creation_master := GST.Problem406.prefix_one_navigation_lift_of_creation_master
 
 /-- Certified prefix-one navigation lift. -/
-theorem prefix_one_navigation_lift := GST.Problem406.prefix_one_navigation_lift
+abbrev prefix_one_navigation_lift := GST.Problem406.prefix_one_navigation_lift
 
 /-- Terminal Step-6 packet exported under a neutral reviewer-facing name. -/
-theorem terminal_step_six_packet := GST.Problem406.terminal_step_six_packet
+abbrev terminal_step_six_packet := GST.Problem406.terminal_step_six_packet
 
 /-- Exact local hand-off at the last child Happy gate. -/
-theorem last_child_gate_right_chord := GST.Problem406.last_child_gate_right_chord
+abbrev last_child_gate_right_chord := GST.Problem406.last_child_gate_right_chord
 
 /-- Explicit low-level terminal base for level one. -/
-theorem residual_null_terminal_happy_s1 := _root_.gst_residual_null_terminal_happy_s1S
+abbrev residual_null_terminal_happy_s1 := _root_.gst_residual_null_terminal_happy_s1S
 
 /-- Explicit low-level terminal base for level two. -/
-theorem residual_null_terminal_happy_s2 := _root_.gst_residual_null_terminal_happy_s2S
+abbrev residual_null_terminal_happy_s2 := _root_.gst_residual_null_terminal_happy_s2S
 
 /-- Explicit low-level terminal base for level three. -/
-theorem residual_null_terminal_happy_s3 := _root_.gst_residual_null_terminal_happy_s3S
+abbrev residual_null_terminal_happy_s3 := _root_.gst_residual_null_terminal_happy_s3S
 
 /-- Uniform terminal certificate for all positive canonical levels. -/
-theorem residual_null_terminal_happy_all := _root_.gst_residual_null_terminal_happy_allS
+abbrev residual_null_terminal_happy_all := _root_.gst_residual_null_terminal_happy_allS
 
 end Certificate
 end Worldtrace

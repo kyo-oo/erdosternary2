@@ -37,25 +37,25 @@ abbrev hasDigitTwoInPrefixStruct : Nat → Nat → Bool := _root_.hasTwoInFirstK
 abbrev digit : Nat → Nat → Nat := GST.Arithmetic.digit3
 
 /-- Structural no-digit-two computation agrees with the recursive predicate past the full horizon. -/
-theorem no_digit_two_eq_struct := _root_.noTernaryTwo_eq_struct
+abbrev no_digit_two_eq_struct := _root_.noTernaryTwo_eq_struct
 
 /-- Prefix scanner agrees with its structural form. -/
-theorem prefix_scan_eq_struct := _root_.hasTwoInFirstK_eq_struct
+abbrev prefix_scan_eq_struct := _root_.hasTwoInFirstK_eq_struct
 
 /-- A successful prefix scan gives an explicit digit-two position. -/
-theorem prefix_scan_has_position := _root_.hasTwoInFirstK_pos
+abbrev prefix_scan_has_position := _root_.hasTwoInFirstK_pos
 
 /-- A bounded prefix witness lifts to an unbounded digit-two witness. -/
-theorem prefix_scan_contains_digit_two := _root_.hasTwoInFirstK_imp_hasTernaryTwo
+abbrev prefix_scan_contains_digit_two := _root_.hasTwoInFirstK_imp_hasTernaryTwo
 
 /-- A low-residue digit-two witness lifts to the original number. -/
-theorem residue_contains_digit_two := _root_.mod_has_two
+abbrev residue_contains_digit_two := _root_.mod_has_two
 
 /-- Exact digit projection through a low prefix. -/
-theorem prefix_slice_digit_exact := GST.Arithmetic.prefix_slice_digit_exact
+abbrev prefix_slice_digit_exact := GST.Arithmetic.prefix_slice_digit_exact
 
 /-- Canonical tail digit/carry state isomorphism. -/
-theorem canonical_tail_state_isomorphism := GST.Arithmetic.canonical_tail_state_isomorphism
+abbrev canonical_tail_state_isomorphism := GST.Arithmetic.canonical_tail_state_isomorphism
 
 end Ternary
 end Worldtrace

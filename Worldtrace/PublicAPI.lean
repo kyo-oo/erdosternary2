@@ -62,24 +62,24 @@ theorem adjacent_four_power_identity
   exact GST.Problem406.adjacent_four_power_identity a ha
 
 /-- Failure of both navigation alternatives gives a complete two-wave bad trace. -/
-theorem adjacent_bad_trace_of_no_navigation := FourPower.adjacent_bad_trace_of_no_navigation
+abbrev adjacent_bad_trace_of_no_navigation := FourPower.adjacent_bad_trace_of_no_navigation
 
 /-- Large adjacent four-power waves satisfy the navigation alternative. -/
-theorem large_adjacent_four_power_wave := FourPower.large_adjacent_wave
+abbrev large_adjacent_four_power_wave := FourPower.large_adjacent_wave
 
 /-- Certified prefix-one navigation lift. -/
-theorem prefix_one_navigation_lift := Certificate.prefix_one_navigation_lift
+abbrev prefix_one_navigation_lift := Certificate.prefix_one_navigation_lift
 
 /-- Four-power creation master certified by the proof corpus. -/
-theorem four_power_creation_master := FourPower.creation_master
+abbrev four_power_creation_master := FourPower.creation_master
 
 /-- Event-word form of the positive local chord. -/
-theorem physical_two_digit_chord_event_word := Collision.physical_two_digit_chord_event_word
+abbrev physical_two_digit_chord_event_word := Collision.physical_two_digit_chord_event_word
 
 /-- Complete two-branch local dichotomy for a Happy digit-two cell. -/
-theorem happy_digit_two_right_chord_dichotomy := Collision.happy_digit_two_right_chord_dichotomy
+abbrev happy_digit_two_right_chord_dichotomy := Collision.happy_digit_two_right_chord_dichotomy
 
 /-- Canonical standalone navigation gives the navigation witness. -/
-theorem navigation_witness_of_canonical_navigation := Navigation.witness_of_canonical_navigation
+abbrev navigation_witness_of_canonical_navigation := Navigation.witness_of_canonical_navigation
 
 end Worldtrace
