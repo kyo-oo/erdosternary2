@@ -3,7 +3,6 @@ import GSTGraphV2UnifiedVerticalTelescope
 import GSTGraphV2SixAdicSynchronizedShadows
 import GSTFinalPurePowerResidueTransplant
 import GSTFourPowerOntologicalAdapter
-import GSTFinalResidualCollision
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -119,32 +118,6 @@ theorem power_width_three_u_derivative_positive
   norm_num
   nlinarith
 
-/-- Residual specialization of the width-three collision.
-This is the exact `K = 9*m`, `m ≡ 1 (mod 3)` slice of the universal
-three-step seam.  Its imported collision theorem is kept on the active
-all-depth controller proof path rather than the rejected same-row shortcut. -/
-theorem power_three_step_collision_residual_mod27_nine
-    (m q : Nat) (hm : 1 ≤ m) (hm1 : m % 3 = 1)
-    (hChild : HappyCell
-      (graph (4^(9*m)) 0 (3+q)).seven.carry
-      (graph (4^(9*m)) 0 (3+q)).seven.digit)
-    (hRightBad : ∀ j, ¬ HappyCell
-      (graph (4^(9*m)) 3 (3+j)).seven.carry
-      (graph (4^(9*m)) 3 (3+j)).seven.digit) :
-    False := by
-  have h :=
-    GSTFinalResidualCollision.residual_level_one_origin_one_collision
-      1 m q (by decide) hm hm1
-  apply h
-  · simpa [GSTGraphV2Production.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-      Nat.add_assoc] using hChild
-  · intro j
-    simpa [GSTGraphV2Production.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
-      GSTGraphV2HandwrittenOmegaUBlock.residualWidth,
-      Nat.add_assoc] using hRightBad j
-
 /-- Power-specific three-step collision.  This is the focused induction seam. -/
 theorem power_three_step_collision
     (K q : Nat)
@@ -188,19 +161,10 @@ theorem power_three_step_collision
   have hWidth3 := power_width_three_exact_conservation K q
   have hUPositive := power_width_three_u_derivative_positive K q hChild
     (hRightBad q)
-  have hleftExact := graph_phase_window_exact E 0 b (q+1)
-  have hrightExact := graph_phase_window_exact E N b (q+1)
-  have hleftDigitExact := graph_phase_digit_window_boundary_exact E 0 b (q+1)
-  have hrightDigitExact := graph_phase_digit_window_boundary_exact E N b (q+1)
 
-  rw [hleftExact] at hleft
-  rw [hrightExact] at hright
-  rw [hleftDigitExact] at hleft
-  rw [hrightDigitExact] at hright
-  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 hUPositive ⊢
-  dsimp [potentialWith, unifiedState] at hU hUPositive
-  trace_state
-  four_power_collision_arith
+  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 ⊢
+  dsimp [potentialWith, unifiedState] at hUPositive
+  nlinarith [hleft, hright, hU, hWidth3, hUPositive]
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
 theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
