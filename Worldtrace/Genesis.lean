@@ -25,58 +25,58 @@ abbrev StableCascadeConstant : Nat → Nat := _root_.c_stable
 abbrev powMod : Nat → Nat → Nat → Nat := _root_.powMod
 
 /-- Correctness of structural modular exponentiation. -/
-theorem pow_mod_eq := _root_.powMod_eq
+abbrev pow_mod_eq := _root_.powMod_eq
 
 /-- Strengthened correctness form for structural modular exponentiation. -/
-theorem pow_mod_correct := _root_.powMod_correct
+abbrev pow_mod_correct := _root_.powMod_correct
 
 /-- Local multiplication power law used by the early arithmetic engine. -/
-theorem mul_pow := _root_.mul_pow_local
+abbrev mul_pow := _root_.mul_pow_local
 
 /-- Cubic expansion driving the cascade recurrence. -/
-theorem cubic_expansion := _root_.cubic_expansion
+abbrev cubic_expansion := _root_.cubic_expansion
 
 /-- Recurrence for the cascade constant. -/
-theorem cascade_recursion := _root_.c_recursion
+abbrev cascade_recursion := _root_.c_recursion
 
 /-- One-step low-tower cubic identity. -/
-theorem low_tower_cubic_step := _root_.lte_cubic_step
+abbrev low_tower_cubic_step := _root_.lte_cubic_step
 
 /-- Low-tower identity: `4^(3^s)` is `1` plus a controlled ternary tail. -/
-theorem low_tower_identity := _root_.lte_identity
+abbrev low_tower_identity := _root_.lte_identity
 
 /-- Mod-three bridge signature of the cascade constant. -/
-theorem cascade_mod_three := _root_.c_mod3
+abbrev cascade_mod_three := _root_.c_mod3
 
 /-- Mod-nine bridge signature of the cascade constant. -/
-theorem cascade_mod_nine := _root_.c_mod9
+abbrev cascade_mod_nine := _root_.c_mod9
 
 /-- First stable cascade value. -/
-theorem stable_cascade_one := _root_.c_stable_1
+abbrev stable_cascade_one := _root_.c_stable_1
 
 /-- Second stable cascade value. -/
-theorem stable_cascade_two := _root_.c_stable_2
+abbrev stable_cascade_two := _root_.c_stable_2
 
 /-- Third stable cascade value. -/
-theorem stable_cascade_three := _root_.c_stable_3
+abbrev stable_cascade_three := _root_.c_stable_3
 
 /-- Fourth stable cascade value. -/
-theorem stable_cascade_four := _root_.c_stable_4
+abbrev stable_cascade_four := _root_.c_stable_4
 
 /-- Stable mod-three law for the cascade residue. -/
-theorem stable_cascade_mod_three := _root_.c_stable_mod3
+abbrev stable_cascade_mod_three := _root_.c_stable_mod3
 
 /-- Stable mod-nine law for the cascade residue. -/
-theorem stable_cascade_mod_nine := _root_.c_stable_mod9
+abbrev stable_cascade_mod_nine := _root_.c_stable_mod9
 
 /-- Stable mod-eighty-one law for the cascade constant. -/
-theorem cascade_mod_eighty_one_stable := _root_.c_mod81_stable
+abbrev cascade_mod_eighty_one_stable := _root_.c_mod81_stable
 
 /-- Stable mod-two-hundred-forty-three law for the cascade constant. -/
-theorem cascade_mod_two_four_three_stable := _root_.c_mod243_stable
+abbrev cascade_mod_two_four_three_stable := _root_.c_mod243_stable
 
 /-- Cascade lift from a finite prefix witness into a full four-power witness. -/
-theorem cascade_lift := _root_.cascade_lift
+abbrev cascade_lift := _root_.cascade_lift
 
 end Genesis
 end Worldtrace
