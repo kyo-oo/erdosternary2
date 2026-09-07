@@ -8,7 +8,9 @@ on:
       - GSTInfiniteFourPowerNavigation.lean
       - GSTGraphV2PerfectPowerBlockProbe.lean
       - GSTGraphV2UnifiedVerticalTelescope.lean
+      - GSTGraphV2SixAdicSynchronizedShadows.lean
       - GSTFinalPurePowerResidueTransplant.lean
+      - GSTFinalResidualCollision.lean
       - .github/workflows/sol56-universal-navigation-audit.yml
   workflow_dispatch:
 
@@ -21,21 +23,24 @@ jobs:
         with:
           build: false
           test: false
-      - name: Compile universal navigation and audit axioms
+      - name: Compile universal navigation
         shell: bash
         run: |
           set -euo pipefail
-          lake build \
-            GSTGraphV2PerfectPowerBlockProbe \
-            GSTGraphV2UnifiedVerticalTelescope \
-            GSTFinalPurePowerResidueTransplant \
-            2>&1 | tee universal-deps.log
-          mkdir -p .lake/build/lib/lean
-          lake env lean \
-            -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean \
-            GSTInfiniteFourPowerNavigation.lean 2>&1 | tee universal.log
+          lake build GSTInfiniteFourPowerNavigation 2>&1 | tee universal.log
+      - name: Audit universal navigation axioms
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > SOL56UniversalNavigationAudit.lean <<'EOF'
+          import GSTInfiniteFourPowerNavigation
+          #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
+          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
+          #print axioms GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+          EOF
+          lake env lean SOL56UniversalNavigationAudit.lean 2>&1 | tee universal-axioms.log
           if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            universal-deps.log universal.log; then
+            universal.log universal-axioms.log; then
             echo 'Universal navigation audit failed.'
             exit 1
           fi
