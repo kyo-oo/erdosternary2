@@ -22,7 +22,7 @@ private def signC (s n : Nat) : Nat → Nat → Nat :=
 private def signD (s n : Nat) : Nat → Nat → Nat :=
   fun t p => (graph (residualEnergy s 1 n) t (s + 2 + p)).seven.digit
 
-/-- Isolated all-depth Step-6 sign seam. -/
+/-- All-depth Step-6 sign seam on the canonical residual rectangle. -/
 theorem step6_sign_closure
     (s n q : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n)
     (hRightBad : ∀ j,
