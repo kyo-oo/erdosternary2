@@ -85,6 +85,30 @@ theorem residual_level_one_origin_one_collision
     intro j
     simpa [E, b, Nat.add_assoc] using hRightBad j
 
+  -- Replace the old same-row binary-chord shortcut by the exact all-depth
+  -- controller carried by the physical width-three rectangle.
+  let st := GSTGraphV2InfiniteControllerBridge.graphCoupledState E 3 b
+  have hControl : GSTV2.InfiniteBadCoupledControl (4^3) st := by
+    dsimp [st]
+    exact GSTGraphV2InfiniteControllerBridge.graph_infinite_bad_control
+      E 3 b hBaseCarryZero hRightBad'
+
+  have hInvariant : GSTV2.CoupledInvariant (4^3) st := by
+    dsimp [st]
+    exact GSTGraphV2InfiniteControllerBridge.graphCoupledState_invariant E 3 b
+
+  have hLedger : GSTV2.InfiniteCoupledLedger (4^3) st :=
+    GSTV2.infinite_coupled_ledger (4^3) st (by positivity) hInvariant
+
+  have hLatent : GSTV2.LatentGateTransfer (4^3) st q := by
+    dsimp [st]
+    exact GSTGraphV2InfiniteControllerBridge.graph_child_happy_latent_transfer
+      E 3 b q hBaseCarryZero hRightBad' hChild'
+
+  have hLedgerAfterGate := hLedger.pastSynchronized (q+1)
+  have hBadAfterGate := hLatent.nextParentBadSuffix
+  have hCarryAfterGate := hLatent.nextCarryTwoOrThree
+
   obtain ⟨q0, hNull | hPlus⟩ :=
     GSTFinalResidualEarliestGateBridge.graph_exposed_tail_first_seedzero_chord
       E 3 b q hBaseCarryZero hChild'
