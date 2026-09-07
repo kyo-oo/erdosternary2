@@ -119,6 +119,31 @@ theorem power_width_three_u_derivative_positive
   norm_num
   nlinarith
 
+/-- Kernel-clean residual specialization of the width-three collision.
+This is the exact `K = 9*m`, `m ≡ 1 (mod 3)` slice of the universal
+three-step seam, discharged by the finite residual binary-boundary argument. -/
+theorem power_three_step_collision_residual_mod27_nine
+    (m q : Nat) (hm : 1 ≤ m) (hm1 : m % 3 = 1)
+    (hChild : HappyCell
+      (graph (4^(9*m)) 0 (3+q)).seven.carry
+      (graph (4^(9*m)) 0 (3+q)).seven.digit)
+    (hRightBad : ∀ j, ¬ HappyCell
+      (graph (4^(9*m)) 3 (3+j)).seven.carry
+      (graph (4^(9*m)) 3 (3+j)).seven.digit) :
+    False := by
+  have h :=
+    GSTFinalResidualCollision.residual_level_one_origin_one_collision
+      1 m q (by decide) hm hm1
+  apply h
+  · simpa [GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      Nat.add_assoc] using hChild
+  · intro j
+    simpa [GSTGraphV2Production.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualEnergy,
+      GSTGraphV2HandwrittenOmegaUBlock.residualWidth,
+      Nat.add_assoc] using hRightBad j
+
 /-- Power-specific three-step collision.  This is the focused induction seam. -/
 theorem power_three_step_collision
     (K q : Nat)
