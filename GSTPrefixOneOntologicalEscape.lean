@@ -6,7 +6,6 @@ import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
 import GSTFourPowerDirectExistenceNoAxiom
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -26,8 +25,10 @@ theorem prefix_one_exponent_ge_twelve
   have hb : 4 ≤ 1 + 3*n := by omega
   nlinarith
 
-/-- POE — Prefix-One Ontological Escape, exactly downstream of the four-power
-creation master.  No child witness occurs. -/
+/-- POE — Prefix-One Ontological Escape, exactly downstream of a supplied
+four-power creation master.  The theorem is deliberately conditional: this
+file no longer imports the unresolved infinite-navigation collision provider
+just to manufacture the historical inline boundary. -/
 theorem gst_prefix_one_ontological_escape_of_master
     (hMaster : FourPowerCreationMaster)
     (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
@@ -43,9 +44,9 @@ theorem gst_prefix_one_ontological_escape_of_master
 end GSTPrefixOneOntologicalEscape
 
 /-- Monolith transplant entrypoint from the checked physical Happy provider.
-This is the no-axiom route into the old prefix-one seam: once the provider is
-available, the historical creation-certificate name is produced by the checked
-four-power provider pipeline rather than by the legacy inline axiom. -/
+This is the no-axiom route into the prefix-one seam once a closed provider is
+available; it does not force the experimental infinite-navigation module into
+the repository build. -/
 theorem gst_four_power_creation_certificate_noAxiom_from_provider
     (hProvider : GSTFourPowerDirectExistenceProviderPipeline.FourPowerHappyGeThreeProvider)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
@@ -65,9 +66,8 @@ theorem gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
       hProvider K hK5 hK7
 
 /-- Monolith transplant entrypoint from the parametric prefix-hit law.  This is
-where the newly accepted prefix engine enters the production seam: a universal
-`PrefixHitGeThree` provider gives the physical Happy provider, then the direct
-existence and creation-certificate bridge close through the checked pipeline. -/
+the direct prefix-engine route: universal prefix hits give row-three-or-higher
+`CommonTwo`, then physical Happy cells, then creation certificates. -/
 theorem gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
     (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
@@ -89,35 +89,36 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- The public four-power direct-existence theorem is now routed through the
-kernel-checked infinite Graph-V2 Happy provider and the clean arithmetic
-Happy-to-common-two bridge.  This replaces the former production-boundary
-axiom at the old API name. -/
-theorem gst_four_power_direct_existence_inline :
+/-- Public direct-existence route from the Chat-2 affine automaton target.
+This is the replacement public seam for the deleted historical inline axiom:
+prove the concrete no-bad-channel theorem, and direct four-power existence
+follows without importing the infinite collision provider. -/
+theorem gst_four_power_direct_existence_from_no_bad_affine_channel_one
+    (hNoBad : GSTFourPowerDirectExistenceProviderPipeline.FourPowerDirectNoBadAffineChannelOne) :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
+  exact
+    GSTFourPowerDirectExistenceProviderPipeline.fourPowerDirectExistence_noAxiom_from_no_bad_affine_channel_one
+      hNoBad
+
+/-- Public direct-existence route from the parametric prefix-hit theorem. -/
+theorem gst_four_power_direct_existence_from_prefixHitGeThree
+    (hProvider : ∀ K : Nat, 8 ≤ K → GSTFourPowerHappyProvider.PrefixHitGeThree K) :
     GSTFourPowerDirectExistence.FourPowerDirectExistence := by
   exact
     GSTFourPowerDirectExistenceNoAxiom.fourPowerDirectExistence_from_physical_happy_ge_three
-      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-
-/-- Root-level compatibility name consumed by the monolith tail.  It now routes
-the old certificate API through theorem-backed direct existence, not through a
-custom production-boundary axiom. -/
-theorem gst_four_power_creation_certificate_inline
-    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-  exact
-    (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-      gst_four_power_direct_existence_inline) K hK5 hK7
+      (fun K hK =>
+        GSTFourPowerHappyProvider.four_power_happy_ge_three_from_prefixHitGeThree
+          hProvider K hK)
 
 #check gst_four_power_creation_certificate_noAxiom_from_provider
 #check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#check gst_four_power_direct_existence_inline
-#check gst_four_power_creation_certificate_inline
+#check gst_four_power_direct_existence_from_no_bad_affine_channel_one
+#check gst_four_power_direct_existence_from_prefixHitGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_provider
 #print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#print axioms gst_four_power_direct_existence_inline
-#print axioms gst_four_power_creation_certificate_inline
+#print axioms gst_four_power_direct_existence_from_no_bad_affine_channel_one
+#print axioms gst_four_power_direct_existence_from_prefixHitGeThree
