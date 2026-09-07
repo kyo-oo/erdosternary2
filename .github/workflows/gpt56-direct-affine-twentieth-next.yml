@@ -38,6 +38,7 @@ jobs:
             GSTFourPowerExactExponentPeriod
             GSTFourPowerDirectHappyBridge
             GSTFourPowerAffineOrbit
+            GSTFourPowerAffineExponentPeel
             GSTFourPowerAffineBadState
             GSTFourPowerAffineChannelAutomaton
             GSTFourPowerAffineClassifierBridge
