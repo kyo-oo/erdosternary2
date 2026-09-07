@@ -1,4 +1,6 @@
-import GSTFourPowerAffineEighteenthTritNext
+import GSTFourPowerAffinePrefixIsometry
+import GSTFourPowerAffineClassifierBridge
+import GSTFourPowerDirectHappyBridge
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
