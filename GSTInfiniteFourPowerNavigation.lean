@@ -3,6 +3,7 @@ import GSTGraphV2UnifiedVerticalTelescope
 import GSTGraphV2SixAdicSynchronizedShadows
 import GSTFinalPurePowerResidueTransplant
 import GSTFourPowerOntologicalAdapter
+import GSTFinalResidualCollision
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
