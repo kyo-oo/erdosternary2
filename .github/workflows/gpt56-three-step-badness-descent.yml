@@ -1,0 +1,42 @@
+name: GPT56 Three-Step Badness Descent
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - GSTFourPowerThreeStepBadnessDescent.lean
+      - .github/workflows/gpt56-three-step-badness-descent.yml
+  workflow_dispatch:
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Compile descent seam
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
+      - name: Audit seam axioms
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > GPT56ThreeStepBadnessAudit.lean <<'EOF'
+          import GSTFourPowerThreeStepBadnessDescent
+          #print axioms GSTFourPowerThreeStepBadnessDescent.badAboveThree_iff_graph_right_bad
+          #print axioms GSTFourPowerThreeStepBadnessDescent.badAboveThree_iff_graph_left_bad
+          #print axioms GSTFourPowerThreeStepBadnessDescent.collision_of_three_step_badness_descent
+          #print axioms GSTFourPowerThreeStepBadnessDescent.happy_ge_three_of_three_step_badness_descent
+          EOF
+          lake env lean GPT56ThreeStepBadnessAudit.lean 2>&1 | tee descent-axioms.log
+          if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' descent.log descent-axioms.log; then
+            echo 'Three-step badness descent seam audit failed.'
+            exit 1
+          fi
+          echo 'Three-step badness descent seam audit clean.'
