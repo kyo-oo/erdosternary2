@@ -61,3 +61,5 @@ jobs:
           ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim' GSTFourPowerAffineTwentySecondTritNext.lean
       - name: Direct affine audit marker
         run: echo DIRECT_AFFINE_TWENTY_SECOND_NEXT_PHYSICAL_HAPPY_GREEN_V1=1
+
+# Re-trigger after the previous runner failed during Elan setup before Lean compilation.
