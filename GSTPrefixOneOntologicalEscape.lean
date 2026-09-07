@@ -5,6 +5,8 @@ import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
+import GSTFourPowerDirectExistenceNoAxiom
+import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -87,15 +89,19 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- Explicit production boundary for the still-open direct universal existence
-law.  Kept out of the obsolete infinite-navigation provider so the committed
-production closure can build and the comparator can certify the current seam. -/
-axiom gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence
+/-- The public four-power direct-existence theorem is now routed through the
+kernel-checked infinite Graph-V2 Happy provider and the clean arithmetic
+Happy-to-common-two bridge.  This replaces the former production-boundary
+axiom at the old API name. -/
+theorem gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
+  exact
+    GSTFourPowerDirectExistenceNoAxiom.fourPowerDirectExistence_from_physical_happy_ge_three
+      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
 
-/-- Root-level compatibility name consumed by the monolith tail.  It no longer
-imports or compiles the experimental infinite-navigation/collision route; it
-routes the old certificate API through the direct creation-master bridge. -/
+/-- Root-level compatibility name consumed by the monolith tail.  It now routes
+the old certificate API through theorem-backed direct existence, not through a
+custom production-boundary axiom. -/
 theorem gst_four_power_creation_certificate_inline
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
@@ -107,6 +113,8 @@ theorem gst_four_power_creation_certificate_inline
 #check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
+#check gst_four_power_direct_existence_inline
+#check gst_four_power_creation_certificate_inline
 #print axioms gst_four_power_creation_certificate_noAxiom_from_provider
 #print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
