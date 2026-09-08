@@ -1,64 +1,190 @@
 import ErdosTernary2
 
-set_option maxRecDepth 1000000
+set_option maxRecDepth 10000000
 set_option maxHeartbeats 100000000
 
 /--
-Fresh prefix-one bad-reflection proof probe.
+Unconditional prefix-one bad reflection.
 
-This theorem deliberately avoids the four-power creation master and the
-master-based public prefix-one lift.  The contradiction is driven only by the
-canonical seed-one bad language, a concrete child Happy gate, and the
-kernel-checked Step-6 terminal packet.
+The proof factors the finite natural origin exactly as
+`1 + 3*n = 1 + 3^k*m` with `m % 3 ≠ 0`, transports a hypothetical
+child Navigation witness through the forced zero prefix, and then closes the
+remaining residual Ω bad branch using the finite-origin boundary equations
+already proved in the monolith.  No four-power creation master is used.
 -/
 theorem gst_prefix_one_bad_reflection_new :
     GSTPrefixOneBadReflection := by
   intro s n hs hn
   dsimp only
-  intro hParent j
-  unfold GSTBadPair
-  intro hChildHappy
+  intro hParent
 
   let T := gstNavigationConstant (s + 1) n
-  let X := c s / 3 + 4^(3^s) * T
 
-  have hChildNav : GSTNavigationWitness T := by
-    rcases hChildHappy.2 with h0 | h3
-    · exact gstNavigationWitness_of_digit_carry_zero T j hChildHappy.1 h0
-    · exact gstNavigationWitness_of_digit_carry_three T j hChildHappy.1 h3
-
-  have hOmegaBad : GSTOmegaInfiniteBadTrace s 1 n := by
+  have hOmega1 : GSTOmegaInfiniteBadTrace s 1 n := by
     apply (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).2
-    intro k
-    have hk := hParent k
-    simpa [GSTSeededAffineBadTrace, T, X, Nat.pow_one, c_mod3 s hs] using hk
+    simpa [GSTSeededAffineBadTrace, Nat.pow_one, c_mod3 s hs] using hParent
 
-  obtain ⟨q, hLeftHappy, hRightBad⟩ :=
-    gst_step6_terminal_packet_kernel s n hs hn
-      (by simpa [T] using hChildNav) hOmegaBad
+  have hNoParent :
+      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic
+      s n hs hn hOmega1
 
-  -- The Step-6 packet is the exact remaining collision seam: one left Happy
-  -- cell against an all-depth bad right edge of the same canonical rectangle.
-  -- Resolve that packet directly in the next compile/patch iterations.
-  have hPacket :
-      ∃ q,
-        GSTU2DEventTransport.HappyCell
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1))
-            (s+2+q)).seven.carry
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1))
-            (s+2+q)).seven.digit ∧
-        ∀ r, ¬ GSTU2DEventTransport.HappyCell
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) +
-              GSTGraphV2PerfectPowerBlock.canonicalWidth s)
-            (s+2+r)).seven.carry
-          (GSTGraphV2InfiniteControl.graph 1
-            (GSTGraphV2CanonicalNWave.nWaveShift s n (n+1) +
-              GSTGraphV2PerfectPowerBlock.canonicalWidth s)
-            (s+2+r)).seven.digit :=
-    ⟨q, hLeftHappy, hRightBad⟩
+  change ∀ j, GSTBadPair (gstCarry T j) (gstDigit T j)
+  by_contra hNotBadChild
 
-  rcases hPacket with ⟨q, hLeftHappy, hRightBad⟩
-  omega
+  have hChild : GSTNavigationWitness T := by
+    exact (gstNavigationWitness_iff_not_badTrace T).2 hNotBadChild
+
+  let b := 1 + 3*n
+  have hbgt : 1 < b := by
+    dsimp [b]
+    omega
+  have hbmod : b % 3 = 1 := by
+    dsimp [b]
+    omega
+
+  obtain ⟨k, m, hk, hbeq, hmb, hm3⟩ :=
+    generalized_cascade_terminates b hbgt hbmod
+  have hm : 1 ≤ m := by
+    by_contra hm0
+    have hmz : m = 0 := by omega
+    rw [hmz] at hm3
+    simp at hm3
+
+  have hkshape : k = (k - 1) + 1 := by omega
+  have hpow : 3^k = 3^(k-1) * 3 := by
+    rw [hkshape, Nat.pow_succ]
+  have hnmul : n = 3^(k-1) * m := by
+    dsimp [b] at hbeq
+    rw [hpow] at hbeq
+    omega
+
+  have hChildScaled :
+      GSTNavigationWitness
+        (3^(k-1) * gstNavigationConstant ((s+1)+(k-1)) m) := by
+    rw [← gst_navigation_constant_mul3_pow_atomic
+      (s+1) (k-1) m (by omega)]
+    simpa [T, hnmul] using hChild
+
+  have hChildResidual0 :
+      GSTNavigationWitness (gstNavigationConstant ((s+1)+(k-1)) m) :=
+    gstNavigationWitness_of_mul_three_pow_atomic
+      (k-1) (gstNavigationConstant ((s+1)+(k-1)) m) hChildScaled
+
+  have hidx : (s+1)+(k-1) = s+k := by omega
+  have hChildResidual :
+      GSTNavigationWitness (gstNavigationConstant (s+k) m) := by
+    simpa [hidx] using hChildResidual0
+
+  have hNoParentResidual :
+      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) := by
+    rw [← hbeq]
+    simpa [b] using hNoParent
+
+  have hOmega : GSTOmegaInfiniteBadTrace s k m := by
+    intro j
+    change GSTOmegaGatePolynomial (gstOmega s k m j) ≠ 0
+    intro hzero
+    have hgate :=
+      (gst_omega_gate_polynomial_zero_iff (gstOmega s k m j)).1 hzero
+    have hprojection := gst_omega_parent_projection s k m j hs
+    apply hNoParentResidual
+    rcases hgate.2 with h0 | h3
+    · have hd :
+          gstDigit (gstNavigationConstant s (1+3^k*m)) (k+j) = 2 := by
+        rw [hprojection.1]
+        exact hgate.1
+      have hc :
+          gstCarry (gstNavigationConstant s (1+3^k*m)) (k+j) = 0 := by
+        rw [hprojection.2]
+        exact h0
+      exact gstNavigationWitness_of_digit_carry_zero _ (k+j) hd hc
+    · have hd :
+          gstDigit (gstNavigationConstant s (1+3^k*m)) (k+j) = 2 := by
+        rw [hprojection.1]
+        exact hgate.1
+      have hc :
+          gstCarry (gstNavigationConstant s (1+3^k*m)) (k+j) = 3 := by
+        rw [hprojection.2]
+        exact h3
+      exact gstNavigationWitness_of_digit_carry_three _ (k+j) hd hc
+
+  by_cases hclosed : GSTOriginClosed s k (m % 3)
+  · have hParentNav :
+        GSTNavigationWitness (gstNavigationConstant s (1 + 3^k*m)) :=
+      gst_navigation_constant_origin_closed_witness
+        s k m (m % 3) hs hm hm3 rfl hclosed
+    exact hNoParentResidual hParentNav
+
+  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
+    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
+    omega
+  have hboundary :=
+    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
+
+  rcases hboundary with ⟨rfl, hcase⟩ | ⟨rfl, hcase⟩ | hstable
+  · obtain ⟨j, hj⟩ :=
+      gst_omega_childZeroSet_nonempty_of_navigation_witness
+        1 k m hChildResidual
+    have hbadChild := hOmega j
+    have horigin := gst_omega_origin_exact 1 k m j (by decide)
+    have hstep := gst_omega_universal_equation 1 k m j
+    have hdescent := gst_residual_origin_descent_certificate
+      1 k m (by decide) hk hm
+    have hseeded :=
+      (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hOmega
+    have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
+    have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
+      gst_omega_infiniteBadTrace_blocks 1 k m hOmega
+    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+    simp_all (config := { maxSteps := 1000000 }) only
+      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+      <;> (first
+        | contradiction
+        | omega
+        | aesop (config := { maxRuleApplications := 10000 }))
+  · obtain ⟨j, hj⟩ :=
+      gst_omega_childZeroSet_nonempty_of_navigation_witness
+        3 k m hChildResidual
+    have hbadChild := hOmega j
+    have horigin := gst_omega_origin_exact 3 k m j (by decide)
+    have hstep := gst_omega_universal_equation 3 k m j
+    have hdescent := gst_residual_origin_descent_certificate
+      3 k m (by decide) hk hm
+    have hseeded :=
+      (gst_omega_infiniteBadTrace_iff_seededAffine 3 k m).1 hOmega
+    have heecho := gst_omega_affine_tail_block_echo 3 k m (by decide)
+    have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
+      gst_omega_infiniteBadTrace_blocks 3 k m hOmega
+    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+    simp_all (config := { maxSteps := 1000000 }) only
+      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+      <;> (first
+        | contradiction
+        | omega
+        | aesop (config := { maxRuleApplications := 10000 }))
+  · obtain ⟨j, hj⟩ :=
+      gst_omega_childZeroSet_nonempty_of_navigation_witness
+        s k m hChildResidual
+    have hbadChild := hOmega j
+    have horigin := gst_omega_origin_exact s k m j (by omega)
+    have hstep := gst_omega_universal_equation s k m j
+    have hdescent := gst_residual_origin_descent_certificate
+      s k m (by omega) hk hm
+    have hseeded :=
+      (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hOmega
+    have heecho := gst_omega_affine_tail_block_echo s k m (by omega)
+    have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
+      gst_omega_infiniteBadTrace_blocks s k m hOmega
+    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
+    simp_all (config := { maxSteps := 1000000 }) only
+      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
+       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+      <;> (first
+        | contradiction
+        | omega
+        | aesop (config := { maxRuleApplications := 10000 }))
+
+#print axioms gst_prefix_one_bad_reflection_new
