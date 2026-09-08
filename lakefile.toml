@@ -52,6 +52,7 @@ roots = [
   "GSTFourPowerExponentTritObstruction",
   "GSTFourPowerNo22Magnitude",
   "GSTFourPowerOntologicalAdapter",
+  "GSTFourPowerThreeStepBadnessDescent",
   "GSTGraphV2CanonicalDescentOntology",
   "GSTGraphV2CanonicalEscape",
   "GSTGraphV2CanonicalInfiniteCycle",
