@@ -7365,45 +7365,10 @@ theorem gst_omega_seededAffine_block_echo
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
 /- QUARANTINED INCOMPLETE STRONGER RESIDUAL THEOREM.
-This general GSTResidualOmegaTermination overproof is not part of the
-prefix-one replacement target.  Its last residual boundary branches are not
-kernel-closed, so it is deliberately excluded while the exact
-GSTPrefixOneBadReflection replacement is proved independently.
-
-/-- Axiom-replacement theorem: every residual perfect-power Ω orbit
-terminates.  This is the exact assumption-free content needed by the universal
-wave; the proof uses the finite child gate, exact origin/step equations, the
-seeded affine echo, and the exhaustive residual boundary classification. - /
-theorem gst_residual_omega_termination_replacement :
-    GSTResidualOmegaTermination := by
-  intro s k m hs hk hm hm3 hnot hchild
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary := gst_origin_not_closed_boundary
-    s k (m % 3) hs hk hrange hnot
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact s k m j hs
-  have hstep := gst_omega_universal_equation s k m j
-  have hdescent := gst_residual_origin_descent_certificate s k m hs hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo s k m hs
-  have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-    gst_omega_infiniteBadTrace_blocks s k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-
+The attempted general GSTResidualOmegaTermination replacement was strictly
+stronger than the requested prefix-one reflection theorem and left genuine
+residual boundary goals open.  It is excluded from production while the exact
+GSTPrefixOneBadReflection theorem is developed and kernel-checked separately.
 -/
 
 /-
