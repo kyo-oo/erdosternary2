@@ -16961,9 +16961,10 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
   intro s n hs hn _hchild
   exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
-/-- Public prefix-one theorem, now discharged by the assumption-free
-residual-Ω termination theorem rather than a four-power creation master. -/
-theorem gst_prefix_one_navigation_lift :
+/-- Assumption-free residual proof of the prefix-one lift.  This is kept
+internal to the replacement argument so the public theorem can be routed
+through the explicit bad-reflection theorem below. -/
+theorem gst_prefix_one_navigation_lift_residual :
     GSTPrefixOneNavigationLift := by
   have hresidual : GSTResidualNavigationLift :=
     gst_residual_navigation_lift_of_omega_termination
@@ -16974,6 +16975,42 @@ theorem gst_prefix_one_navigation_lift :
     simp
   exact gst_navigation_witness_all_of_residual hresidual
     s (1 + 3*n) hs hb hb3 (Or.inr (by omega))
+
+/-- New unconditional prefix-one reflection theorem.  A completely bad
+seed-one parent affine state induces the exact Ω∞ bad orbit.  If the canonical
+child were not completely bad, its Navigation witness would lift through the
+assumption-free residual theorem and contradict that Ω∞ parent badness. -/
+theorem gst_prefix_one_bad_reflection_new :
+    GSTPrefixOneBadReflection := by
+  intro s n hs hn
+  dsimp only
+  intro hbadSeed j
+  have hbadOmega : GSTOmegaInfiniteBadTrace s 1 n := by
+    apply (gst_omega_infiniteBadTrace_iff_seededAffine s 1 n).2
+    simpa [GSTSeededAffineBadTrace, Nat.pow_one, c_mod3 s hs] using hbadSeed
+  have hnoParent :
+      ¬ GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_prefix_one_no_parent_navigation_of_omega_bad_atomic
+      s n hs hn hbadOmega
+  by_contra hnotBad
+  have hchild :
+      GSTNavigationWitness (gstNavigationConstant (s+1) n) := by
+    apply (gstNavigationWitness_iff_not_badTrace
+      (gstNavigationConstant (s+1) n)).2
+    intro hall
+    exact hnotBad (hall j)
+  have hparent :
+      GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) :=
+    gst_prefix_one_navigation_lift_residual s n hs hn hchild
+  exact hnoParent hparent
+
+/-- Public prefix-one theorem.  The old master/provider route is no longer
+needed: the public dependency now passes through the unconditional replacement
+reflection theorem. -/
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift :=
+  gst_prefix_one_navigation_lift_of_bad_reflection
+    gst_prefix_one_bad_reflection_new
 
 /-- The two consecutive power waves overlap at a Happy Gate.  The left branch
     gives a digit two in `4^a`; the right branch gives a digit two shared by
