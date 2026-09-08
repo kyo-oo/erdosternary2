@@ -53,6 +53,7 @@ roots = [
   "GSTFourPowerNo22Magnitude",
   "GSTFourPowerOntologicalAdapter",
   "GSTFourPowerThreeStepBadnessDescent",
+  "GSTFourPowerThreeStepQuotientChannel",
   "GSTGraphV2CanonicalDescentOntology",
   "GSTGraphV2CanonicalEscape",
   "GSTGraphV2CanonicalInfiniteCycle",
