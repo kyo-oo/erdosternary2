@@ -121,5 +121,8 @@ theorem gst_prefix_one_bad_child_coupled_trap_new
     rw [hAeq]
     simpa [z, gstCanonicalPrefixOffsetS] using hoff.2
 
+  have hApos : 0 < A := by
+    dsimp [A, GSTCanonicalBlockS]
+    exact Nat.pow_pos (by decide)
   exact gst_canonical_two_boundary_trapS
-    A z T (by positivity) hz1 hParent hChildHappy
+    A z T hApos hz1 hParent hChildHappy
