@@ -41,20 +41,13 @@ jobs:
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
-          stale_carry_one = '''    have hnext := gstCarry_forward_exact (4^k) p hp1
-              rw [hC, hd] at hnext
-              norm_num [gstStepCarry] at hnext'''
-          fixed_carry_one = '''    have hnext := gstCarry_forward_exact (4^k) p hp1
-              have hd0 : gstDigit (4^k) p = 2 := by
-                simpa [gstDigit] using hd
-              rw [hC, hd0] at hnext
-              norm_num [gstStepCarry] at hnext'''
-          if stale_carry_one in s:
-              s = s.replace(stale_carry_one, fixed_carry_one, 1)
-              p.write_text(s, encoding='utf-8')
-              print('ORCHESTRATOR_PATCHED_CARRY_ONE_REWRITE=1')
-          else:
-              print('ORCHESTRATOR_PATCHED_CARRY_ONE_REWRITE=0')
+          old_pair = '    rw [hC, hd] at hnext\n    norm_num [gstStepCarry] at hnext'
+          new_pair = '    have hd0 : gstDigit (4^k) p = 2 := by\n      simpa [gstDigit] using hd\n    rw [hC, hd0] at hnext\n    norm_num [gstStepCarry] at hnext'
+          if old_pair not in s:
+              raise SystemExit('carry-one stale rewrite patch target not found')
+          s = s.replace(old_pair, new_pair, 1)
+          p.write_text(s, encoding='utf-8')
+          print('ORCHESTRATOR_PATCHED_CARRY_ONE_REWRITE=1')
 
           # The monolith contains these scratch packets inline. Keep the inline
           # declarations and neutralize only duplicate import edges.
