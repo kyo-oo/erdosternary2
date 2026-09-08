@@ -7,15 +7,12 @@ set_option maxHeartbeats 20000000
 
 namespace GSTFourPowerThreeStepBadnessDescent
 
-open GSTCanonicalTailStateIso
-open GSTCanonicalSevenAxisBridge
-open GSTU2DEventTransport
-open GSTGraphV2PerfectPowerAncestry
-
 /-- Complete absence of physical Happy cells from ternary row three upward. -/
 def BadAboveThree (K : Nat) : Prop :=
   ∀ p : Nat, 3 ≤ p →
-    ¬ HappyCell (carry4 (4^K) p) (digit3 (4^K) p)
+    ¬ GSTU2DEventTransport.HappyCell
+      (GSTCanonicalSevenAxisBridge.carry4 (4^K) p)
+      (GSTCanonicalSevenAxisBridge.digit3 (4^K) p)
 
 /-- The genuinely all-depth replacement for the former one-row collision seam.
 
@@ -28,13 +25,15 @@ def ThreeStepBadnessDescent : Prop :=
 /-- Graph formulation of BadAboveThree on the width-three right boundary. -/
 theorem badAboveThree_iff_graph_right_bad (K : Nat) :
     BadAboveThree (K+3) ↔
-      ∀ j : Nat, ¬ HappyCell
-        (graph (4^K) 3 (3+j)).seven.carry
-        (graph (4^K) 3 (3+j)).seven.digit := by
+      ∀ j : Nat, ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.digit := by
   constructor
   · intro h j hHappy
     apply h (3+j) (by omega)
-    simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex,
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex,
       Nat.pow_add, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hHappy
   · intro h p hp hHappy
     let j := p - 3
@@ -47,38 +46,44 @@ theorem badAboveThree_iff_graph_right_bad (K : Nat) :
       congr 1
       omega
     rw [← hpow] at hHappy
-    simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex, hpj,
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex, hpj,
       Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hHappy
 
 /-- Graph formulation of BadAboveThree on the left boundary. -/
 theorem badAboveThree_iff_graph_left_bad (K : Nat) :
     BadAboveThree K ↔
-      ∀ j : Nat, ¬ HappyCell
-        (graph (4^K) 0 (3+j)).seven.carry
-        (graph (4^K) 0 (3+j)).seven.digit := by
+      ∀ j : Nat, ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph (4^K) 0 (3+j)).seven.carry
+        (GSTGraphV2InfiniteControl.graph (4^K) 0 (3+j)).seven.digit := by
   constructor
   · intro h j hHappy
     apply h (3+j) (by omega)
-    simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex] using hHappy
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex] using hHappy
   · intro h p hp hHappy
     let j := p - 3
     have hpj : 3 + j = p := by
       dsimp [j]
       omega
     apply h j
-    simpa [graph, cell, GSTCanonicalSevenAxisBridge.vertex, hpj] using hHappy
+    simpa [GSTGraphV2InfiniteControl.graph,
+      GSTGraphV2InfiniteControl.cell,
+      GSTCanonicalSevenAxisBridge.vertex, hpj] using hHappy
 
 /-- Once ThreeStepBadnessDescent is established, the old collision is immediate.
 This theorem is kernel-clean and deliberately contains no arithmetic closer. -/
 theorem collision_of_three_step_badness_descent
     (hDescent : ThreeStepBadnessDescent)
     (K q : Nat)
-    (hChild : HappyCell
-      (graph (4^K) 0 (3+q)).seven.carry
-      (graph (4^K) 0 (3+q)).seven.digit)
-    (hRightBad : ∀ j, ¬ HappyCell
-      (graph (4^K) 3 (3+j)).seven.carry
-      (graph (4^K) 3 (3+j)).seven.digit) :
+    (hChild : GSTU2DEventTransport.HappyCell
+      (GSTGraphV2InfiniteControl.graph (4^K) 0 (3+q)).seven.carry
+      (GSTGraphV2InfiniteControl.graph (4^K) 0 (3+q)).seven.digit)
+    (hRightBad : ∀ j, ¬ GSTU2DEventTransport.HappyCell
+      (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.carry
+      (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.digit) :
     False := by
   have hBadNext : BadAboveThree (K+3) :=
     (badAboveThree_iff_graph_right_bad K).2 hRightBad
@@ -92,7 +97,10 @@ boundary descends by three exponents. -/
 theorem happy_ge_three_of_three_step_badness_descent
     (hDescent : ThreeStepBadnessDescent) :
     ∀ k : Nat, 8 ≤ k →
-      ∃ p : Nat, 3 ≤ p ∧ HappyCell (carry4 (4^k) p) (digit3 (4^k) p) := by
+      ∃ p : Nat, 3 ≤ p ∧
+        GSTU2DEventTransport.HappyCell
+          (GSTCanonicalSevenAxisBridge.carry4 (4^k) p)
+          (GSTCanonicalSevenAxisBridge.digit3 (4^k) p) := by
   intro k hk
   induction k using Nat.strongRecOn with
   | ind k ih =>
@@ -112,11 +120,17 @@ theorem happy_ge_three_of_three_step_badness_descent
       · have hkCases : k = 8 ∨ k = 9 ∨ k = 10 := by omega
         rcases hkCases with rfl | rfl | rfl
         · refine ⟨4, by decide, ?_⟩
-          norm_num [HappyCell, carry4, digit3]
+          norm_num [GSTU2DEventTransport.HappyCell,
+            GSTCanonicalSevenAxisBridge.carry4,
+            GSTCanonicalSevenAxisBridge.digit3]
         · refine ⟨7, by decide, ?_⟩
-          norm_num [HappyCell, carry4, digit3]
+          norm_num [GSTU2DEventTransport.HappyCell,
+            GSTCanonicalSevenAxisBridge.carry4,
+            GSTCanonicalSevenAxisBridge.digit3]
         · refine ⟨10, by decide, ?_⟩
-          norm_num [HappyCell, carry4, digit3]
+          norm_num [GSTU2DEventTransport.HappyCell,
+            GSTCanonicalSevenAxisBridge.carry4,
+            GSTCanonicalSevenAxisBridge.digit3]
 
 #check BadAboveThree
 #check ThreeStepBadnessDescent
