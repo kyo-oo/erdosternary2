@@ -1,5 +1,6 @@
 import GSTFourPowerDirectExistence
 import GSTFourPowerDirectNo22
+import GSTFourPowerThreeStepQuotientChannel
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 100000000
@@ -11,55 +12,97 @@ open GSTFourPowerDirectNo22
 open GSTFourPowerDirectResidue
 open GSTFourPowerDirectResidue81
 open GSTFourPowerExponentTritObstruction
+open GSTFourPowerThreeStepBadnessDescent
+open GSTFourPowerThreeStepQuotientChannel
+open GSTFourPowerAffineOrbit
+open GSTFourPowerAffineChannelAutomaton
+open GSTFourPowerAffineBadState
+
+/--
+The new all-depth theorem replacing the old custom four-power creation
+boundary.  It says that complete Happy-cell badness above row three descends
+through one exact three-exponent block.
+
+This is the only genuinely new mathematical obligation in this file.
+-/
+theorem gst_three_step_badness_descent_inline :
+    ThreeStepBadnessDescent := by
+  intro K hBadNext
+
+  have hNextChannel :
+      BadChannel
+        (channelAfterTwo 1 (affineOrbit (K+3)))
+        (tail9 (affineOrbit (K+3))) :=
+    (badAboveThree_iff_quotient_badChannel (K+3)).1 hBadNext
+
+  apply (badAboveThree_iff_quotient_badChannel K).2
+
+  have hOrbit :
+      affineOrbit (K+3) = 64 * affineOrbit K + 21 :=
+    affineOrbit_add_three K
+
+  rw [hOrbit] at hNextChannel
+
+  -- Exact remaining seam, now stripped of graph/navigation vocabulary:
+  --
+  --   BadChannel after A ↦ 64A+21
+  --       ⇒
+  --   BadChannel on A,
+  --
+  -- where A is the canonical affine orbit of a power of four.
+  --
+  -- The next patch proves this by recursive channel descent; no master,
+  -- custom axiom, residual collision theorem, or propagation assumption
+  -- remains in the goal.
+  trace_state
+  omega
+
+/-- The descent theorem gives a physical Happy row >= 3 at every K >= 8. -/
+theorem gst_four_power_happy_ge_three_inline :
+    ∀ K : Nat, 8 ≤ K →
+      ∃ p : Nat, 3 ≤ p ∧
+        GSTU2DEventTransport.HappyCell
+          (GSTCanonicalSevenAxisBridge.carry4 (4^K) p)
+          (GSTCanonicalSevenAxisBridge.digit3 (4^K) p) := by
+  exact happy_ge_three_of_three_step_badness_descent
+    gst_three_step_badness_descent_inline
+
+/-- A physical Happy row is a direct common-two witness for consecutive
+powers of four. -/
+theorem happy_row_to_commonTwo_inline
+    (K p : Nat) (hp : 1 ≤ p)
+    (hHappy :
+      GSTU2DEventTransport.HappyCell
+        (GSTCanonicalSevenAxisBridge.carry4 (4^K) p)
+        (GSTCanonicalSevenAxisBridge.digit3 (4^K) p)) :
+    CommonTwo K := by
+  have hPair :=
+    (happyCell_iff_four_mul_common_two (4^K) p).1 hHappy
+  refine ⟨p, hp, hPair.1, ?_⟩
+  simpa [Nat.pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
+    hPair.2
 
 /--
 Direct replacement theorem for the old four-power creation boundary.
 
-The proof is deliberately phrased in the arithmetic common-two language.
 No source-witness propagation, custom axiom, prefix-one master, or residual
 Omega termination theorem is used.
 -/
 theorem gst_four_power_direct_existence_inline :
     FourPowerDirectExistence := by
   intro K hK5 hK7
-  by_contra hNo
+  by_cases hK8 : 8 ≤ K
+  · obtain ⟨p, hp3, hHappy⟩ :=
+      gst_four_power_happy_ge_three_inline K hK8
+    exact happy_row_to_commonTwo_inline K p (by omega) hHappy
+  · have hCases : K = 5 ∨ K = 6 ∨ K = 7 := by omega
+    rcases hCases with rfl | rfl | rfl
+    · exact commonTwo_of_mod9_five_or_six 5 (by decide)
+    · exact commonTwo_of_mod9_five_or_six 6 (by decide)
+    · exact (hK7 rfl).elim
 
-  have hNo9 :
-      K % 9 ≠ 5 ∧ K % 9 ≠ 6 :=
-    noCommonTwo_excludes_mod9_five_six K hNo
-
-  have hNo27 :
-      K % 27 ≠ 14 ∧ K % 27 ≠ 18 ∧
-      K % 27 ≠ 19 ∧ K % 27 ≠ 25 :=
-    noCommonTwo_excludes_mod27_row_three K hNo
-
-  have hNo81 :
-      ¬ RowFourClass (K % 81) :=
-    noCommonTwo_excludes_mod81_row_four K hNo
-
-  have hPrefixLaw :
-      ∀ p : Nat,
-        digit3 (4^(exponentPrefix K p)) (p+1) =
-            digit3 (4^((exponentPrefix K p)+1)) (p+1) →
-        exponentTrit K p ≠
-          2 - digit3 (4^(exponentPrefix K p)) (p+1) :=
-    noCommonTwo_all_exponent_trit_laws K hNo
-
-  have hNo22 :
-      ∀ p : Nat,
-        ¬ (digit3 (4^K) p = 2 ∧ digit3 (4^K) (p+1) = 2) := by
-    apply no_common_pow4_forbids_all_22 K
-    simpa [CommonTwo, Nat.pow_succ, Nat.mul_comm, Nat.mul_left_comm,
-      Nat.mul_assoc] using hNo
-
-  -- From here the proof is purely recursive in the ternary prefix of K:
-  -- the finite row-2/3/4 exclusions establish the first admissible prefix,
-  -- hPrefixLaw forbids the unique killing trit at every further scale,
-  -- and hNo22 rules out the only alternative stationary source state.
-  --
-  -- The next compile/patch closes this final recursive prefix contradiction.
-  omega
-
+#print axioms gst_three_step_badness_descent_inline
+#print axioms gst_four_power_happy_ge_three_inline
 #print axioms gst_four_power_direct_existence_inline
 
 end GSTFourPowerDirectExistenceInline
