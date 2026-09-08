@@ -1,0 +1,63 @@
+name: GPT56 Direct Affine Thirty-Seventh Next Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - 'GSTFourPowerAffineThirtySeventhTritNext.lean'
+      - '.github/workflows/gpt56-direct-affine-thirty-seventh-next.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  affine-thirty-seventh-next-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Prepare output directory
+        run: mkdir -p .lake/build/lib/lean
+      - name: Compile exact fresh-production dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules=(
+            GSTCanonicalTailStateIso
+            GSTFourPowerDirectResidue
+            GSTFourPowerDirectResidue27
+            GSTFourPowerDirectResidue81
+            GSTFourPowerExponentTritObstruction
+            GSTFourPowerDirectExistence
+            GSTFourPowerDirectAdditionCarry
+            GSTFourPowerExactExponentPeriod
+            GSTFourPowerDirectHappyBridge
+            GSTFourPowerAffineOrbit
+            GSTFourPowerAffineExponentPeel
+            GSTFourPowerAffineBadState
+            GSTFourPowerAffineChannelAutomaton
+            GSTFourPowerAffineClassifierBridge
+            GSTFourPowerAffinePrefixIsometry
+          )
+          for module in "${modules[@]}"; do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+      - name: Compile thirty-seventh-trit physical constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineThirtySeventhTritNext.olean GSTFourPowerAffineThirtySeventhTritNext.lean 2>&1 | tee affine-thirty-seventh-next.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' affine-thirty-seventh-next.log
+      - name: Reject forbidden proof escapes in fresh module
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim' GSTFourPowerAffineThirtySeventhTritNext.lean
+      - name: Direct affine audit marker
+        run: echo DIRECT_AFFINE_THIRTY_SEVENTH_NEXT_PHYSICAL_HAPPY_GREEN_V1=1
