@@ -8,6 +8,7 @@ on:
       - ErdosTernary2.lean
       - GSTTactic.lean
       - lakefile.toml
+      - scripts/apply_u2d_atomic_replacement.py
       - ker07-snapshot/Challenge.lean
       - ker07-snapshot/Solution.lean
       - modules/0009_comparator_config.json
@@ -18,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: orchestrator-official-comparator-${{ github.sha }}
+  group: orchestrator-official-comparator-${{ github.event_name }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -29,13 +30,62 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Show checked head
+      - name: Apply exact current U2D production splice
         shell: bash
         run: |
           set -euo pipefail
           echo "ORCHESTRATOR_SOURCE_HEAD=$(git rev-parse HEAD)"
+          python3 scripts/apply_u2d_atomic_replacement.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ErdosTernary2.lean')
+          s = p.read_text(encoding='utf-8')
 
-      - name: Materialize official challenge, solution, and comparator config
+          # The monolith contains these scratch packets inline. Keep the inline
+          # declarations and neutralize only duplicate import edges.
+          exact_drop = {
+              'GSTPrefixOnePhaseIncidenceControl',
+              'GSTPrefixOneSpacetimeIncidenceControl',
+              'GSTGraphV2InfiniteControllerBridge',
+          }
+          out = []
+          neutralized = []
+          for line in s.splitlines(keepends=True):
+              stripped = line.strip()
+              if stripped.startswith('import '):
+                  mods = stripped[len('import '):].split()
+                  if len(mods) == 1:
+                      mod = mods[0]
+                      if mod in exact_drop or mod.endswith('Scratch'):
+                          nl = '\n' if line.endswith('\n') else ''
+                          out.append(f'-- FINAL COMPARATOR NEUTRALIZED DUPLICATE IMPORT: {mod}{nl}')
+                          neutralized.append(mod)
+                          continue
+              out.append(line)
+          s = ''.join(out)
+          p.write_text(s, encoding='utf-8')
+
+          required = [
+              'theorem gst_h_creation_full_power_navigation_atomic',
+              'theorem gst_full_power_navigation_descends_atomic',
+              'theorem gst_prefix_one_u2d_atomic_collision_inline',
+              'theorem gst_prefix_one_information_bad_descends_inline',
+              'theorem gst_prefix_one_navigation_lift',
+              'theorem erdos_ternary_2_universal',
+          ]
+          for marker in required:
+              if marker not in s:
+                  raise SystemExit(f'missing required theorem marker: {marker}')
+          if 'trace_state\n  contradiction' in s:
+              raise SystemExit('old red residual seam survived U2D replacement')
+          if '-- SOL56 LIVE GENERAL H_CREATION REACTIVATED' in s:
+              raise SystemExit('forbidden quarantined h_creation reactivation reached comparator artifact')
+          print(f'FINAL_NEUTRALIZED_IMPORT_COUNT={len(neutralized)}')
+          print(f'FINAL_TRANSFORMED_LINES={len(s.splitlines())}')
+          print('FINAL_U2D_ARTIFACT_VERIFIED=1')
+          PY
+
+      - name: Materialize clean judge modules and exact package
         shell: bash
         run: |
           set -euo pipefail
@@ -54,15 +104,8 @@ jobs:
               raise SystemExit('comparator config payload not found')
           Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
           Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
-          p = Path('lakefile.toml')
-          s = p.read_text(encoding='utf-8')
-          if 'name = "Challenge"' not in s:
-              s += '\n[[lean_lib]]\nname = "Challenge"\n'
-          if 'name = "Solution"' not in s:
-              s += '\n[[lean_lib]]\nname = "Solution"\n'
-          p.write_text(s, encoding='utf-8')
+          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
           Path('lake-manifest.json').unlink(missing_ok=True)
-          print('ORCHESTRATOR_OFFICIAL_SURFACE_MATERIALIZED=1')
           PY
 
       - name: Install exact Lean RC2 and Mathlib
@@ -75,29 +118,114 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Compile monolith and official judge modules
+      - name: Materialize exact transformed local import closure
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTactic GSTLocalClosure ErdosTernary2 Challenge Solution
-          echo 'ORCHESTRATOR_MONOLITH_AND_JUDGE_BUILD_GREEN=1'
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          ROOT = Path('ErdosTernary2.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              result = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = import_re.match(code)
+                  if m:
+                      result.extend(m.group(1).split())
+              return result
+
+          order = []
+          permanent = set()
+          temporary = []
+
+          def visit(module: str):
+              if module == 'ErdosTernary2' or module in permanent:
+                  return
+              path = local_path(module)
+              if not path.exists():
+                  return
+              if module in temporary:
+                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary + [module]))
+              temporary.append(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              temporary.pop()
+              permanent.add(module)
+              order.append((module, path))
+
+          for module in imports_of(ROOT):
+              visit(module)
+
+          print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
+          BUILD.mkdir(parents=True, exist_ok=True)
+          for module, path in order:
+              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              if out.exists():
+                  continue
+              print(f'=== compiling local import {module} ===', flush=True)
+              subprocess.run(['lake', 'env', 'lean', '-o', str(out), str(path)], check=True)
+          print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
+          PY
+
+      - name: Compile exact transformed monolith and judge modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2 Challenge Solution
+          echo 'FINAL_MONOLITH_BUILD_GREEN=1'
 
       - name: Kernel axiom audit of submitted theorem chain
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          cat > OrchestratorOfficialAudit.lean <<'EOF'
+          cat > FinalComparatorAudit.lean <<'EOF'
           import ErdosTernary2
+          #print axioms gst_h_creation_full_power_navigation_atomic
+          #print axioms gst_full_power_navigation_descends_atomic
+          #print axioms gst_prefix_one_u2d_atomic_collision_inline
+          #print axioms gst_prefix_one_information_bad_descends_inline
+          #print axioms gst_prefix_one_navigation_lift
           #print axioms erdos_ternary_2_universal
           EOF
-          lake env lean OrchestratorOfficialAudit.lean | tee orchestrator-official-axioms.log
-          if grep -Fq 'sorryAx' orchestrator-official-axioms.log; then
-            echo 'ORCHESTRATOR_FORBIDDEN_SORRYAX=1'
+          lake env lean FinalComparatorAudit.lean | tee final-comparator-axioms.log
+          if grep -Fq 'sorryAx' final-comparator-axioms.log; then
+            echo 'forbidden sorryAx reached submitted theorem chain'
             exit 1
           fi
-          echo 'ORCHESTRATOR_AXIOM_AUDIT_GREEN=1'
+          echo 'FINAL_AXIOM_AUDIT_GREEN=1'
+
+      - name: Audit executable solution sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          bad = []
+          for name in ['GSTTactic.lean', 'ErdosTernary2.lean', 'Solution.lean']:
+              for i, line in enumerate(Path(name).read_text(encoding='utf-8').splitlines(), 1):
+                  if line.lstrip().startswith('--'):
+                      continue
+                  if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                      bad.append(f'{name}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('executable solution contains forbidden proof escape')
+          print('executable solution audit: clean')
+          PY
 
       - name: Build pinned lean4export
         shell: bash
