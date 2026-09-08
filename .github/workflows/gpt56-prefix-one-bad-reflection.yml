@@ -26,18 +26,30 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Build monolith dependency
+      - name: Build pre-master monolith kernel
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build ErdosTernary2
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path("ErdosTernary2.lean").read_text(encoding="utf-8")
+          marker = "-- SOL56 CANONICAL TAIL POE COMPATIBILITY BRIDGE"
+          if marker not in src:
+              raise SystemExit("PRE_MASTER_MARKER_NOT_FOUND")
+          Path("ErdosTernary2PrefixKernel.lean").write_text(
+              src.split(marker, 1)[0], encoding="utf-8")
+          PY
+          lake env lean -o .lake/build/lib/lean/ErdosTernary2PrefixKernel.olean ErdosTernary2PrefixKernel.lean
       - name: Compile fresh bad-reflection theorem
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTPrefixOneBadReflectionNew.lean 2>&1 | tee prefix-one-bad-reflection.log
+          sed 's/^import ErdosTernary2$/import ErdosTernary2PrefixKernel/' \
+            GSTPrefixOneBadReflectionNew.lean > GSTPrefixOneBadReflectionCompile.lean
+          lake env lean -o .lake/build/lib/lean/GSTPrefixOneBadReflectionCompile.olean \
+            GSTPrefixOneBadReflectionCompile.lean 2>&1 | tee prefix-one-bad-reflection.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' prefix-one-bad-reflection.log
       - name: Axiom audit
         shell: bash
@@ -45,7 +57,7 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           cat > GSTPrefixOneBadReflectionAudit.lean <<'LEAN'
-          import GSTPrefixOneBadReflectionNew
+          import GSTPrefixOneBadReflectionCompile
           #print axioms gst_prefix_one_bad_reflection_new
           LEAN
           lake env lean GSTPrefixOneBadReflectionAudit.lean 2>&1 | tee prefix-one-bad-reflection-axioms.log
