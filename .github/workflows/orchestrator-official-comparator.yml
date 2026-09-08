@@ -7,6 +7,7 @@ on:
     paths:
       - ErdosTernary2.lean
       - GSTTactic.lean
+      - lakefile.toml
       - ker07-snapshot/Challenge.lean
       - ker07-snapshot/Solution.lean
       - modules/0009_comparator_config.json
@@ -53,7 +54,13 @@ jobs:
               raise SystemExit('comparator config payload not found')
           Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
           Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
-          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          if 'name = "Challenge"' not in s:
+              s += '\n[[lean_lib]]\nname = "Challenge"\n'
+          if 'name = "Solution"' not in s:
+              s += '\n[[lean_lib]]\nname = "Solution"\n'
+          p.write_text(s, encoding='utf-8')
           Path('lake-manifest.json').unlink(missing_ok=True)
           print('ORCHESTRATOR_OFFICIAL_SURFACE_MATERIALIZED=1')
           PY
@@ -68,72 +75,12 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Materialize exact local import closure
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          import subprocess
-
-          ROOT = Path('ErdosTernary2.lean')
-          BUILD = Path('.lake/build/lib/lean')
-          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
-
-          def local_path(module: str) -> Path:
-              return Path(*module.split('.')).with_suffix('.lean')
-
-          def imports_of(path: Path):
-              result = []
-              for raw in path.read_text(encoding='utf-8').splitlines():
-                  code = raw.split('--', 1)[0].rstrip()
-                  m = import_re.match(code)
-                  if m:
-                      result.extend(m.group(1).split())
-              return result
-
-          order = []
-          permanent = set()
-          temporary = []
-
-          def visit(module: str):
-              if module == 'ErdosTernary2' or module in permanent:
-                  return
-              path = local_path(module)
-              if not path.exists():
-                  return
-              if module in temporary:
-                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary + [module]))
-              temporary.append(module)
-              for dep in imports_of(path):
-                  visit(dep)
-              temporary.pop()
-              permanent.add(module)
-              order.append((module, path))
-
-          for module in imports_of(ROOT):
-              visit(module)
-
-          print(f'LOCAL_IMPORT_CLOSURE_COUNT={len(order)}')
-          BUILD.mkdir(parents=True, exist_ok=True)
-          for module, path in order:
-              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
-              out.parent.mkdir(parents=True, exist_ok=True)
-              if out.exists():
-                  continue
-              print(f'=== compiling local import {module} ===', flush=True)
-              subprocess.run(['lake', 'env', 'lean', '-o', str(out), str(path)], check=True)
-          print('LOCAL_IMPORT_CLOSURE_MATERIALIZED=1')
-          PY
-
       - name: Compile monolith and official judge modules
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTactic ErdosTernary2 Challenge Solution
+          lake build GSTTactic GSTLocalClosure ErdosTernary2 Challenge Solution
           echo 'ORCHESTRATOR_MONOLITH_AND_JUDGE_BUILD_GREEN=1'
 
       - name: Kernel axiom audit of submitted theorem chain
