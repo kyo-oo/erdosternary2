@@ -41,6 +41,21 @@ jobs:
           p = Path('ErdosTernary2.lean')
           s = p.read_text(encoding='utf-8')
 
+          stale_carry_one = '''    have hnext := gstCarry_forward_exact (4^k) p hp1
+              rw [hC, hd] at hnext
+              norm_num [gstStepCarry] at hnext'''
+          fixed_carry_one = '''    have hnext := gstCarry_forward_exact (4^k) p hp1
+              have hd0 : gstDigit (4^k) p = 2 := by
+                simpa [gstDigit] using hd
+              rw [hC, hd0] at hnext
+              norm_num [gstStepCarry] at hnext'''
+          if stale_carry_one in s:
+              s = s.replace(stale_carry_one, fixed_carry_one, 1)
+              p.write_text(s, encoding='utf-8')
+              print('ORCHESTRATOR_PATCHED_CARRY_ONE_REWRITE=1')
+          else:
+              print('ORCHESTRATOR_PATCHED_CARRY_ONE_REWRITE=0')
+
           # The monolith contains these scratch packets inline. Keep the inline
           # declarations and neutralize only duplicate import edges.
           exact_drop = {
