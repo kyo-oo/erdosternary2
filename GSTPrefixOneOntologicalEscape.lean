@@ -100,6 +100,6 @@ theorem gst_four_power_direct_existence_from_prefixHitGeThree
         GSTFourPowerHappyProvider.four_power_happy_ge_three_from_prefixHitGeThree
           hProvider K hK)
 
-/-- The historical root-level direct-existence shortcut has been removed.
+/- The historical root-level direct-existence shortcut has been removed.
 The production monolith now closes the universal wave through its residual-Ω
 termination theorem instead of importing the failed infinite-navigation provider. -/
