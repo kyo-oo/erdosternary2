@@ -1,0 +1,143 @@
+name: Orchestrator Official Comparator
+
+on:
+  push:
+    branches:
+      - orchestrator-final-bridge
+    paths:
+      - ErdosTernary2.lean
+      - GSTTactic.lean
+      - ker07-snapshot/Challenge.lean
+      - ker07-snapshot/Solution.lean
+      - modules/0009_comparator_config.json
+      - .github/workflows/orchestrator-official-comparator.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orchestrator-official-comparator-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  official-comparator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Show checked head
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ORCHESTRATOR_SOURCE_HEAD=$(git rev-parse HEAD)"
+
+      - name: Materialize official challenge, solution, and comparator config
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['Challenge.lean', 'Solution.lean']:
+              src = Path('ker07-snapshot') / name
+              text = src.read_text(encoding='utf-8')
+              i = text.find('import ')
+              if i < 0:
+                  raise SystemExit(f'no import marker in {src}')
+              Path(name).write_text(text[i:], encoding='utf-8')
+          raw = Path('modules/0009_comparator_config.json').read_text(encoding='utf-8')
+          j = raw.find('{')
+          if j < 0:
+              raise SystemExit('comparator config payload not found')
+          Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
+          Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
+          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
+          Path('lake-manifest.json').unlink(missing_ok=True)
+          print('ORCHESTRATOR_OFFICIAL_SURFACE_MATERIALIZED=1')
+          PY
+
+      - name: Install exact Lean RC2 and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Compile monolith and official judge modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2 Challenge Solution
+          echo 'ORCHESTRATOR_MONOLITH_AND_JUDGE_BUILD_GREEN=1'
+
+      - name: Kernel axiom audit of submitted theorem chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > OrchestratorOfficialAudit.lean <<'EOF'
+          import ErdosTernary2
+          #print axioms erdos_ternary_2_universal
+          EOF
+          lake env lean OrchestratorOfficialAudit.lean | tee orchestrator-official-axioms.log
+          if grep -Fq 'sorryAx' orchestrator-official-axioms.log; then
+            echo 'ORCHESTRATOR_FORBIDDEN_SORRYAX=1'
+            exit 1
+          fi
+          if grep -Eiq 'axiom|sorryAx|admit|native_decide' ErdosTernary2.lean Solution.lean GSTTactic.lean; then
+            echo 'ORCHESTRATOR_FORBIDDEN_SOURCE_ESCAPE=1'
+            exit 1
+          fi
+          echo 'ORCHESTRATOR_AXIOM_AUDIT_GREEN=1'
+
+      - name: Build pinned lean4export
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .tools
+          git clone https://github.com/leanprover/lean4export.git .tools/lean4export
+          cd .tools/lean4export
+          git checkout 9fb131bb100eb32ccf6836f14e4f8328d13b6792
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build lean4export
+
+      - name: Build pinned official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git .tools/comparator
+          cd .tools/comparator
+          git checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('rev = "master"', 'rev = "9fb131bb100eb32ccf6836f14e4f8328d13b6792"')
+          p.write_text(s, encoding='utf-8')
+          PY
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build comparator
+
+      - name: Run official comparator against orchestrator monolith
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          ROOT="$PWD"
+          CMP_ROOT="$ROOT/.tools/comparator"
+          EXPORT_ROOT="$ROOT/.tools/lean4export"
+          COMPARATOR_LANDRUN="$CMP_ROOT/scripts/fake-landrun.sh" \
+          COMPARATOR_LEAN4EXPORT="$EXPORT_ROOT/.lake/build/bin/lean4export" \
+          lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee orchestrator-official-comparator.log
+          grep -F "Your solution is okay!" orchestrator-official-comparator.log
+          echo 'ORCHESTRATOR_OFFICIAL_LITERAL_COMPARATOR_GREEN=1'
