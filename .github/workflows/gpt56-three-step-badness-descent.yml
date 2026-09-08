@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
+          lake build GSTFourPowerThreeStepBadnessDescent 2>&1 | tee descent.log
       - name: Audit seam axioms
         shell: bash
         run: |
