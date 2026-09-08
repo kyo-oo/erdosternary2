@@ -40,6 +40,10 @@ jobs:
           Path("ErdosTernary2PrefixKernel.lean").write_text(
               src.split(marker, 1)[0], encoding="utf-8")
           PY
+          lake build GSTTactic GSTPrefixOneU2DCollisionProof \
+            GSTPrefixOneOntologicalEscape GSTGraphV2ProductionLaws \
+            GSTGraphV2InfiniteControllerBridge GSTGraphV2PerfectPowerBlockProbe \
+            GSTU2DSharpCrossingBlock GSTFinalPurePowerResidueTransplant
           lake env lean -o .lake/build/lib/lean/ErdosTernary2PrefixKernel.olean ErdosTernary2PrefixKernel.lean
       - name: Compile fresh bad-reflection theorem
         shell: bash
