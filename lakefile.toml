@@ -22,6 +22,7 @@ roots = [
   "GSTCanonicalTailLTE",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
+  "GSTFinalPrefixOneDirectU2DCollision",
   "Task33ResidualCollisionBridge",
   "GSTFinalResidualBinaryBoundaryBridge",
   "GSTFinalResidualEarliestGateBridge",
