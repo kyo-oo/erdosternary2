@@ -6,7 +6,6 @@ import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
 import GSTFourPowerDirectExistenceNoAxiom
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -101,35 +100,6 @@ theorem gst_four_power_direct_existence_from_prefixHitGeThree
         GSTFourPowerHappyProvider.four_power_happy_ge_three_from_prefixHitGeThree
           hProvider K hK)
 
-/-- Root-level direct-existence compatibility boundary, now theorem-backed by
-the four-power Happy provider instead of an axiom. -/
-theorem gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
-  exact
-    GSTFourPowerDirectExistenceNoAxiom.fourPowerDirectExistence_from_physical_happy_ge_three
-      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-
-/-- Root-level compatibility name consumed by the monolith tail. -/
-theorem gst_four_power_creation_certificate_inline
-    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-  exact
-    (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-      gst_four_power_direct_existence_inline) K hK5 hK7
-
-#check gst_four_power_creation_certificate_noAxiom_from_provider
-#check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
-#check gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
-#check gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#check gst_four_power_direct_existence_from_no_bad_affine_channel_one
-#check gst_four_power_direct_existence_from_prefixHitGeThree
-#check gst_four_power_direct_existence_inline
-#check gst_four_power_creation_certificate_inline
-#print axioms gst_four_power_creation_certificate_noAxiom_from_provider
-#print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
-#print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
-#print axioms gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#print axioms gst_four_power_direct_existence_from_no_bad_affine_channel_one
-#print axioms gst_four_power_direct_existence_from_prefixHitGeThree
-#print axioms gst_four_power_direct_existence_inline
-#print axioms gst_four_power_creation_certificate_inline
+/-- The historical root-level direct-existence shortcut has been removed.
+The production monolith now closes the universal wave through its residual-Ω
+termination theorem instead of importing the failed infinite-navigation provider. -/
