@@ -8,6 +8,7 @@ on:
       - GSTFourPowerThreeStepBadnessDescent.lean
       - GSTFourPowerThreeStepQuotientChannel.lean
       - GSTFinalPrefixOneDirectU2DCollision.lean
+      - GSTPrefixOneDirectNavigationLift.lean
       - lakefile.toml
       - .github/workflows/gpt56-three-step-badness-descent.yml
   workflow_dispatch:
@@ -25,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTFourPowerThreeStepBadnessDescent GSTFourPowerThreeStepQuotientChannel GSTFinalPrefixOneDirectU2DCollision 2>&1 | tee descent.log
+          lake build GSTFourPowerThreeStepBadnessDescent GSTFourPowerThreeStepQuotientChannel GSTFinalPrefixOneDirectU2DCollision GSTPrefixOneDirectNavigationLift 2>&1 | tee descent.log
       - name: Audit seam axioms
         shell: bash
         run: |
@@ -43,6 +44,7 @@ jobs:
           #print axioms GSTFourPowerThreeStepQuotientChannel.affine_tail9_nine_mul_add
           #print axioms GSTFinalPrefixOneDirectU2DCollision.canonical_perfect_power_block_collision_direct
           #print axioms GSTFinalPrefixOneDirectU2DCollision.canonical_right_bad_forces_no_child_navigation
+          #print axioms GSTPrefixOneDirectNavigationLift.canonical_prefix_one_navigation_lift
           EOF
           lake env lean GPT56ThreeStepBadnessAudit.lean 2>&1 | tee descent-axioms.log
           if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' descent.log descent-axioms.log; then
