@@ -42,7 +42,7 @@ jobs:
         run: |
           cat > BridgeProbe.lean <<'LEAN'
           import ErdosTernary2
-          #check h_creation_for_4pow
+          #check gst_four_power_creation_certificate_inline
           #check gst_duality
           #check gst_oscillation_from_navigation
           #check mul4_lift_a9_6

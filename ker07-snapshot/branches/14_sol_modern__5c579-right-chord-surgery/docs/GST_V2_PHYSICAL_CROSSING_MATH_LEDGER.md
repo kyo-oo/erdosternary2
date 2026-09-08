@@ -276,7 +276,7 @@ For the full-power cell `R=4^k`, exact computation through large ranges shows a 
 
 `k = 1,2,3,4,7`.
 
-This is the old `h_creation_for_4pow` target. Its old proof fails in the exact hard case where the highest input digit-two is destroyed with carry `1` or `2`, and the eventual `6^k` carry-zero occurs only after the last digit-two. No theorem is claimed here from the experiment.
+This is the old `gst_four_power_creation_certificate_inline` target. Its old proof fails in the exact hard case where the highest input digit-two is destroyed with carry `1` or `2`, and the eventual `6^k` carry-zero occurs only after the last digit-two. No theorem is claimed here from the experiment.
 
 A second experiment on the gate-free language shows unusually low 2-adic divisibility compared with pure powers. For exact ternary length `L`, observed maximal `v2` values include
 
