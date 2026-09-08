@@ -104,10 +104,8 @@ theorem happyCell_iff_four_mul_common_two
   · rintro ⟨hd, h0 | h3⟩
     · refine ⟨hd, ?_⟩
       rw [hformula, hd, h0]
-      decide
     · refine ⟨hd, ?_⟩
       rw [hformula, hd, h3]
-      decide
   · rintro ⟨hd, ht⟩
     refine ⟨hd, ?_⟩
     rw [hformula, hd] at ht
