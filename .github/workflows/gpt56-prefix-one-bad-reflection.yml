@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTPrefixOneBadReflectionNew.lean'
+      - 'GSTPrefixOneRetainedDescentNew.lean'
       - '.github/workflows/gpt56-prefix-one-bad-reflection.yml'
   workflow_dispatch:
 
@@ -45,6 +46,17 @@ jobs:
             GSTGraphV2InfiniteControllerBridge GSTGraphV2PerfectPowerBlockProbe \
             GSTU2DSharpCrossingBlock GSTFinalPurePowerResidueTransplant
           lake env lean -o .lake/build/lib/lean/ErdosTernary2PrefixKernel.olean ErdosTernary2PrefixKernel.lean
+      - name: Compile residual descent packet
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          sed 's/^import ErdosTernary2$/import ErdosTernary2PrefixKernel/' \
+            GSTPrefixOneRetainedDescentNew.lean > GSTPrefixOneRetainedDescentCompile.lean
+          lake env lean -o .lake/build/lib/lean/GSTPrefixOneRetainedDescentCompile.olean \
+            GSTPrefixOneRetainedDescentCompile.lean 2>&1 | tee retained-descent.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' retained-descent.log
+
       - name: Compile fresh bad-reflection theorem
         shell: bash
         run: |
