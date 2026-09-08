@@ -9,7 +9,6 @@ set_option maxHeartbeats 20000000
 
 namespace GSTFourPowerThreeStepQuotientChannel
 
-open GSTCanonicalTailStateIso
 open GSTFourPowerDirectResidue
 open GSTFourPowerDirectAdditionCarry
 open GSTFourPowerAffineOrbit
@@ -90,9 +89,9 @@ theorem noPairCommonTwoFromTwo_iff_badChannel
 /-- A physical Happy cell is exactly a common-two row for R and 4R. -/
 theorem happyCell_iff_four_mul_common_two
     (R p : Nat) :
-    HappyCell
-        (GSTCanonicalTailStateIso.carry4 R p)
-        (GSTCanonicalTailStateIso.digit3 R p) ↔
+    GSTU2DEventTransport.HappyCell
+        (GSTCanonicalSevenAxisBridge.carry4 R p)
+        (GSTCanonicalSevenAxisBridge.digit3 R p) ↔
       digit3 R p = 2 ∧ digit3 (4*R) p = 2 := by
   have hcarryLt := directCarry4_lt_four R p
   have hformula := digit3_four_mul R p
@@ -179,9 +178,7 @@ theorem affineOrbit_nine_mul_eq_canonicalTail_two (m : Nat) :
   have hAffine := four_pow_eq_one_plus_three_affineOrbit (9*m)
   have hTail := canonical_tail_decomposition 2 m
   norm_num at hTail
-  have hExp : 3^2 * m = 9*m := by norm_num
-  rw [hExp] at hTail
-  nlinarith
+  nlinarith [hAffine, hTail]
 
 /-- Original base-nine canonical quotient identity.  For K=9m+s, deleting two
 affine trits exposes a fixed residue-class offset plus a scaled canonical
