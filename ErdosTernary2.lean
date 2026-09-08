@@ -7364,13 +7364,6 @@ theorem gst_omega_seededAffine_block_echo
           3^(s+1) * c s * gstNavigationConstant (s+k) m) := by
   rw [gst_omega_affine_tail_block_echo s k m hs]
 
-/- QUARANTINED INCOMPLETE STRONGER RESIDUAL THEOREM.
-The attempted general GSTResidualOmegaTermination replacement was strictly
-stronger than the requested prefix-one reflection theorem and left genuine
-residual boundary goals open.  It is excluded from production while the exact
-GSTPrefixOneBadReflection theorem is developed and kernel-checked separately.
--/
-
 /-
   Legacy residual overproof.  The final digit theorem does not require a pure
   Navigation witness at every exponent; the two-wave theorem below is strictly
