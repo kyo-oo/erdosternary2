@@ -31,6 +31,7 @@ jobs:
           set -euo pipefail
           cat > GPT56ThreeStepBadnessAudit.lean <<'EOF'
           import GSTFourPowerThreeStepBadnessDescent
+          import GSTFourPowerThreeStepQuotientChannel
           #print axioms GSTFourPowerThreeStepBadnessDescent.badAboveThree_iff_graph_right_bad
           #print axioms GSTFourPowerThreeStepBadnessDescent.badAboveThree_iff_graph_left_bad
           #print axioms GSTFourPowerThreeStepBadnessDescent.collision_of_three_step_badness_descent
