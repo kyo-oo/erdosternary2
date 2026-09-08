@@ -16961,21 +16961,19 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
   intro s n hs hn _hchild
   exact gst_prefix_one_ontological_escape_of_master_inline hMaster s n hs hn
 
-/-- The independently kernel-checked width-three wave supplies the exact
-four-power creation master required by the ontological prefix-one adapter. -/
-theorem gst_four_power_creation_master_inline :
-    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
-  intro K hK5 hK7
-  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (gst_four_power_creation_certificate_inline K hK5 hK7)
-
-/-- Public prefix-one theorem.  This route is entirely positive: the green
-width-three wave builds FP-NAV, and POE constructs the parent Happy gate. -/
+/-- Public prefix-one theorem, now discharged by the assumption-free
+residual-Ω termination theorem rather than a four-power creation master. -/
 theorem gst_prefix_one_navigation_lift :
     GSTPrefixOneNavigationLift := by
-  exact gst_prefix_one_navigation_lift_of_master_inline
-    gst_four_power_creation_master_inline
-
+  have hresidual : GSTResidualNavigationLift :=
+    gst_residual_navigation_lift_of_omega_termination
+      gst_residual_omega_termination_replacement
+  intro s n hs hn _hchild
+  have hb : 1 ≤ 1 + 3*n := by omega
+  have hb3 : (1 + 3*n) % 3 ≠ 0 := by
+    simp
+  exact gst_navigation_witness_all_of_residual hresidual
+    s (1 + 3*n) hs hb hb3 (Or.inr (by omega))
 
 /-- The two consecutive power waves overlap at a Happy Gate.  The left branch
     gives a digit two in `4^a`; the right branch gives a digit two shared by
@@ -17018,13 +17016,65 @@ theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
 theorem gst_power_two_wave_large
     (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
   unfold GSTPowerTwoWave
-  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
-    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
-      gst_four_power_creation_master_inline a (by omega) (by omega)
-  have hnav : GSTNavigationWitness (4^a) :=
-    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
-  obtain ⟨p, hd, _hspace⟩ := hnav
-  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+  have hresidual : GSTResidualNavigationLift :=
+    gst_residual_navigation_lift_of_omega_termination
+      gst_residual_omega_termination_replacement
+
+  have hnavDiv :
+      ∀ t : Nat, 500 < t → t % 3 = 0 →
+        GSTNavigationWitness (4^t) := by
+    intro t ht ht3
+    have htpos : 0 < t := by omega
+    have hs : 1 ≤ v3 t := by
+      rw [v3_succ_of_div3 t htpos ht3]
+      omega
+    have hdvd : 3^(v3 t) ∣ t := pow_v3_dvd t htpos
+    have hmod : t % 3^(v3 t) = 0 := Nat.mod_eq_zero_of_dvd hdvd
+    have ht_eq : t = 3^(v3 t) * (t / 3^(v3 t)) := by
+      have h := Nat.div_add_mod t (3^(v3 t))
+      rw [hmod, Nat.add_zero] at h
+      exact h.symm
+    have hb : 1 ≤ t / 3^(v3 t) := by
+      apply Nat.one_le_iff_ne_zero.mpr
+      intro hz
+      rw [hz, Nat.mul_zero] at ht_eq
+      omega
+    have hb3 : (t / 3^(v3 t)) % 3 ≠ 0 :=
+      v3_maximal t htpos
+    have hdomain : 2 ≤ v3 t ∨ 1 < t / 3^(v3 t) := by
+      by_cases hs2 : 2 ≤ v3 t
+      · exact Or.inl hs2
+      · right
+        have hs1 : v3 t = 1 := by omega
+        rw [hs1] at ht_eq
+        norm_num at ht_eq
+        have hlarge : 3 * 167 ≤ t := by omega
+        have hdiv : 167 ≤ t / 3 := by
+          exact (Nat.le_div_iff_mul_le (by decide : 0 < 3)).2 (by
+            simpa [Nat.mul_comm] using hlarge)
+        simpa [hs1] using (show 1 < t / 3 from by omega)
+    have hQ : GSTNavigationWitness
+        (gstNavigationConstant (v3 t) (t / 3^(v3 t))) :=
+      gst_navigation_witness_all_of_residual hresidual
+        (v3 t) (t / 3^(v3 t)) hs hb hb3 hdomain
+    have hfull : GSTNavigationWitness
+        (4^(3^(v3 t) * (t / 3^(v3 t)))) :=
+      gst_full_power_navigation_of_constant
+        (v3 t) (t / 3^(v3 t)) hs hb hb3 hQ
+    rw [← ht_eq] at hfull
+    exact hfull
+
+  have hmodlt : a % 3 < 3 := Nat.mod_lt _ (by decide)
+  by_cases h2 : a % 3 = 2
+  · exact Or.inl (even_case_a_mod3_2 a h2)
+  · by_cases h0 : a % 3 = 0
+    · have hnav := hnavDiv a ha h0
+      obtain ⟨p, hd, _⟩ := hnav
+      exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+    · have h1 : a % 3 = 1 := by omega
+      have ha1 : 500 < a - 1 := by omega
+      have hm1 : (a - 1) % 3 = 0 := by omega
+      exact Or.inr (hnavDiv (a - 1) ha1 hm1)
 
 /-- The weaker two-wave theorem closes the even exponent directly. -/
 theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
