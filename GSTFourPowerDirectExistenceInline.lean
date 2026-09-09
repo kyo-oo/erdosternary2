@@ -19,54 +19,53 @@ open GSTFourPowerAffineChannelAutomaton
 open GSTFourPowerAffineBadState
 
 /--
-All-depth theorem replacing the old custom four-power creation boundary.
-It says that complete Happy-cell badness above row three descends through one
-exact three-exponent block.
+The exact remaining pure-power seam after all Graph-V2 and Navigation wrappers
+are stripped away.
 
-This file is intentionally not wired into the production monolith until this
-theorem compiles and its axiom audit is clean.
+This is intentionally restricted to the canonical affine orbit `affineOrbit K`.
+The unrestricted statement for arbitrary naturals is false, so this is the only
+legitimate theorem target for the replacement proof.
 -/
-theorem gst_three_step_badness_descent_inline :
+def CanonicalThreeStepChannelDescent : Prop :=
+  ∀ K : Nat,
+    BadChannel
+      (channelAfterTwo 1 (affineOrbit (K+3)))
+      (tail9 (affineOrbit (K+3))) →
+    BadChannel
+      (channelAfterTwo 1 (affineOrbit K))
+      (tail9 (affineOrbit K))
+
+/--
+The canonical channel descent is exactly the missing all-depth badness descent.
+This theorem is a checked bridge only; it does not pretend to solve the pure
+power channel invariant.
+-/
+theorem gst_three_step_badness_descent_of_canonical_channel_descent
+    (hChannel : CanonicalThreeStepChannelDescent) :
     ThreeStepBadnessDescent := by
   intro K hBadNext
-
   have hNextChannel :
       BadChannel
         (channelAfterTwo 1 (affineOrbit (K+3)))
         (tail9 (affineOrbit (K+3))) :=
     (badAboveThree_iff_quotient_badChannel (K+3)).1 hBadNext
+  exact (badAboveThree_iff_quotient_badChannel K).2
+    (hChannel K hNextChannel)
 
-  apply (badAboveThree_iff_quotient_badChannel K).2
-
-  have hOrbit :
-      affineOrbit (K+3) = 64 * affineOrbit K + 21 :=
-    affineOrbit_add_three K
-
-  rw [hOrbit] at hNextChannel
-
-  -- Exact remaining seam after all Graph-V2/Navigation wrappers are stripped:
-  -- prove that the bad finite channel descends along the canonical pure-power
-  -- affine orbit, not along arbitrary naturals.
-  --
-  --   BadChannel after A ↦ 64A+21
-  --       ⇒
-  --   BadChannel on A,
-  --
-  -- where A is `affineOrbit K`.
-  omega
-
-/-- The descent theorem gives a physical Happy row >= 3 at every K >= 8. -/
-theorem gst_four_power_happy_ge_three_inline :
+/-- The canonical channel descent gives a physical Happy row >= 3 at every
+K >= 8. -/
+theorem gst_four_power_happy_ge_three_of_canonical_channel_descent
+    (hChannel : CanonicalThreeStepChannelDescent) :
     ∀ K : Nat, 8 ≤ K →
       ∃ p : Nat, 3 ≤ p ∧
         GSTU2DEventTransport.HappyCell
           (GSTCanonicalSevenAxisBridge.carry4 (4^K) p)
           (GSTCanonicalSevenAxisBridge.digit3 (4^K) p) := by
   exact happy_ge_three_of_three_step_badness_descent
-    gst_three_step_badness_descent_inline
+    (gst_three_step_badness_descent_of_canonical_channel_descent hChannel)
 
-/-- A physical Happy row is a direct common-two witness for consecutive
-powers of four. -/
+/-- A physical Happy row is a direct common-two witness for consecutive powers
+of four. -/
 theorem happy_row_to_commonTwo_inline
     (K p : Nat) (hp : 1 ≤ p)
     (hHappy :
@@ -81,16 +80,16 @@ theorem happy_row_to_commonTwo_inline
     hPair.2
 
 /--
-Direct replacement theorem for the old four-power creation boundary.
-No production axiom, prefix-one master, or dirty infinite-navigation provider is
-allowed in this standalone file.
+Conditional replacement theorem for the old four-power creation boundary.
+The only remaining mathematical input is `CanonicalThreeStepChannelDescent`.
 -/
-theorem gst_four_power_direct_existence_inline :
+theorem gst_four_power_direct_existence_of_canonical_channel_descent
+    (hChannel : CanonicalThreeStepChannelDescent) :
     FourPowerDirectExistence := by
   intro K hK5 hK7
   by_cases hK8 : 8 ≤ K
   · obtain ⟨p, hp3, hHappy⟩ :=
-      gst_four_power_happy_ge_three_inline K hK8
+      gst_four_power_happy_ge_three_of_canonical_channel_descent hChannel K hK8
     exact happy_row_to_commonTwo_inline K p (by omega) hHappy
   · have hCases : K = 5 ∨ K = 6 ∨ K = 7 := by omega
     rcases hCases with rfl | rfl | rfl
@@ -98,8 +97,14 @@ theorem gst_four_power_direct_existence_inline :
     · exact commonTwo_of_mod9_five_or_six 6 (by decide)
     · exact (hK7 rfl).elim
 
-#print axioms gst_three_step_badness_descent_inline
-#print axioms gst_four_power_happy_ge_three_inline
-#print axioms gst_four_power_direct_existence_inline
+#check CanonicalThreeStepChannelDescent
+#check gst_three_step_badness_descent_of_canonical_channel_descent
+#check gst_four_power_happy_ge_three_of_canonical_channel_descent
+#check happy_row_to_commonTwo_inline
+#check gst_four_power_direct_existence_of_canonical_channel_descent
+#print axioms gst_three_step_badness_descent_of_canonical_channel_descent
+#print axioms gst_four_power_happy_ge_three_of_canonical_channel_descent
+#print axioms happy_row_to_commonTwo_inline
+#print axioms gst_four_power_direct_existence_of_canonical_channel_descent
 
 end GSTFourPowerDirectExistenceInline
