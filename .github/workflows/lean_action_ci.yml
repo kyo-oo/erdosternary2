@@ -77,7 +77,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
-          #print axioms gst_four_power_creation_master_inline
+          #print axioms gst_residual_navigation_lift_recovered
           #print axioms gst_prefix_one_navigation_lift
           #print axioms gst_power_two_wave_large
           #print axioms erdos_ternary_2_universal
