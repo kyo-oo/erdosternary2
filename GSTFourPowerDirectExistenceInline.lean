@@ -5,6 +5,8 @@ import GSTFourPowerThreeStepQuotientChannel
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 100000000
 
+-- CI trigger: standalone conditional bridge only; no production transplant.
+
 namespace GSTFourPowerDirectExistenceInline
 
 open GSTFourPowerDirectExistence
