@@ -33,7 +33,6 @@ import GSTPrefixOneU2DCollisionProof
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
-import GSTFourPowerOntologicalAdapter
 import GSTGraphV2ProductionLaws
 import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
@@ -17027,27 +17026,6 @@ theorem gst_navigation_witness_of_standalone_navigation
         simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h0))
     · exact Or.inl (gstSpaceAt_of_carry_three R j (by
         simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h3))
-
-/-- Monolith-facing POE.  The recovered residual Ω theorem now closes
-the prefix-one parent directly; the historical master argument is retained only
-as an API parameter and is not used. -/
-theorem gst_prefix_one_ontological_escape_of_master_inline
-    (_hMaster : GSTFourPowerOntologicalAdapter.FourPowerCreationMaster)
-    (s n : Nat) (hs : 1 ≤ s) (hn : 1 ≤ n) :
-    GSTNavigationWitness (gstNavigationConstant s (1 + 3*n)) := by
-  exact
-    gst_navigation_witness_all_of_residual
-      gst_residual_navigation_lift_recovered
-      s (1 + 3*n) hs (by omega) (by omega) (Or.inr (by omega))
-
-/-- Compatibility version of the old lift.  The child and historical master
-are unnecessary once residual Ω termination is available. -/
-theorem gst_prefix_one_navigation_lift_of_master_inline
-    (hMaster : GSTFourPowerOntologicalAdapter.FourPowerCreationMaster) :
-    GSTPrefixOneNavigationLift := by
-  intro s n hs hn _hchild
-  exact gst_prefix_one_ontological_escape_of_master_inline
-    hMaster s n hs hn
 
 /-- Public prefix-one theorem, now closed without any four-power custom axiom. -/
 theorem gst_prefix_one_navigation_lift :
