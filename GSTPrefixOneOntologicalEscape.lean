@@ -5,6 +5,7 @@ import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
+import GSTGraphV2FourPowerThirdWave
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -87,11 +88,12 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- Explicit production boundary for the still-open direct universal existence
-law.  Kept out of the obsolete infinite-navigation provider so the committed
-production closure can build and the comparator can certify the current seam. -/
-axiom gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence
+/-- Production four-power direct existence, discharged by the Graph-V2
+third-wave theorem.  This declaration replaces the former custom axiom with a
+kernel-checkable theorem of the identical public type. -/
+theorem gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence :=
+  GSTGraphV2FourPowerThirdWave.fourPowerDirectExistence
 
 /-- Root-level compatibility name consumed by the monolith tail.  It no longer
 imports or compiles the experimental infinite-navigation/collision route; it
