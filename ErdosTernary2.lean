@@ -30,6 +30,7 @@
 
 import GSTTactic
 import GSTPrefixOneU2DCollisionProof
+import GSTFinalPrefixOneDirectU2DCollision
 import Mathlib
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
@@ -7482,126 +7483,6 @@ theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
 QUARANTINED LEGACY RESIDUAL OMEGA END -/
-
--- ============================================================================
--- §RECOVERED RESIDUAL Ω TERMINATION — production no-axiom route
--- ============================================================================
-
-/-- First residual Ω termination surface, recovered from the quarantined
-finite-natural proof and kept independent of the four-power master. -/
-theorem gst_omega_termination_s1_recovered
-    (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary 1 k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (1+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace 1 k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness 1 k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact 1 k m j (by decide)
-  have hstep := gst_omega_universal_equation 1 k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    1 k m (by decide) hk hm
-  have hseeded : GSTSeededAffineBadTrace
-      ((4 * (c 1 % 3^k)) / 3^k)
-      (c 1 / 3^k + 4^(3^1) * gstNavigationConstant (1+k) m) :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
-  have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
-    gst_omega_infiniteBadTrace_blocks 1 k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- Level-three recovered residual Ω termination. -/
-theorem gst_omega_termination_s3_recovered
-    (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary 3 k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (3+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace 3 k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness 3 k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact 3 k m j (by decide)
-  have hstep := gst_omega_universal_equation 3 k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    3 k m (by decide) hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine 3 k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo 3 k m (by decide)
-  have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
-    gst_omega_infiniteBadTrace_blocks 3 k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- Stable recovered residual Ω termination. -/
-theorem gst_omega_termination_stable_recovered
-    (s k m : Nat) (hs : 2 ≤ s) (hs3 : s ≠ 3)
-    (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary s k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace s k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact s k m j (by omega)
-  have hstep := gst_omega_universal_equation s k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    s k m (by omega) hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo s k m (by omega)
-  have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-    gst_omega_infiniteBadTrace_blocks s k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- Assumption-free residual Ω termination reconstructed from the three exact
-finite boundary worlds. -/
-theorem gst_residual_omega_termination_recovered :
-    GSTResidualOmegaTermination := by
-  intro s k m hs hk hm hm3 hnot hchild
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary := gst_origin_not_closed_boundary
-    s k (m % 3) hs hk hrange hnot
-  rcases hboundary with ⟨rfl, hcase⟩ | ⟨rfl, hcase⟩ | hstable
-  · exact gst_omega_termination_s1_recovered k m hk hm hm3
-      (Or.inl ⟨rfl, hcase⟩) hchild
-  · exact gst_omega_termination_s3_recovered k m hk hm hm3
-      (Or.inr (Or.inl ⟨rfl, hcase⟩)) hchild
-  · exact gst_omega_termination_stable_recovered s k m
-      hstable.1 hstable.2.1 hk hm hm3
-      (Or.inr (Or.inr hstable)) hchild
-
-/-- Recovered residual Navigation lift.  This is the new production theorem
-that replaces the old four-power custom boundary in the live dependency DAG. -/
-theorem gst_residual_navigation_lift_recovered :
-    GSTResidualNavigationLift :=
-  gst_residual_navigation_lift_of_omega_termination
-    gst_residual_omega_termination_recovered
-
-
 
 /-
 /-- Numerical ceiling used to bound every power-of-four graph witness. -/
@@ -17027,14 +16908,120 @@ theorem gst_navigation_witness_of_standalone_navigation
     · exact Or.inl (gstSpaceAt_of_carry_three R j (by
         simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h3))
 
-/-- Public prefix-one theorem, now closed without any four-power custom axiom. -/
-theorem gst_prefix_one_navigation_lift :
-    GSTPrefixOneNavigationLift := by
-  intro s n hs hn _hchild
+/-- Direct prefix-one bad reflection.  A complete bad affine parent
+boundary would give the all-depth bad right edge of the canonical residual
+rectangle.  The direct U2D collision theorem then contradicts any child Happy
+gate.  This is the exact child-to-parent theorem required by the locked
+BadReflection -> SeedCore -> NavigationLift API, with no four-power master. -/
+theorem gst_prefix_one_bad_reflection_new :
+    GSTPrefixOneBadReflection := by
+  intro s n hs hn
+  dsimp only
+  intro hbad j hgood
+
+  have hchildNav :
+      GSTCanonicalTailStateIso.Navigation
+        (GSTFinalPrefixOneDirectU2DCollision.directChild s n) := by
+    refine ⟨j, ?_⟩
+    simpa [GSTFinalPrefixOneDirectU2DCollision.directChild,
+      GSTPerfectPowerTailNavigation.canonicalTail, gstNavigationConstant,
+      GSTCanonicalTailStateIso.HappyCell,
+      GSTCanonicalTailStateIso.carry4, GSTCanonicalTailStateIso.digit3,
+      gstCarry, gstDigit] using hgood
+
+  have hRightBad : ∀ r,
+      ¬ GSTU2DEventTransport.HappyCell
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s 1 n)
+          (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
+          (s+2+r)).seven.carry
+        (GSTGraphV2InfiniteControl.graph
+          (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s 1 n)
+          (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
+          (s+2+r)).seven.digit := by
+    intro r hRight
+
+    have hFullGraph :
+        GSTU2DEventTransport.HappyCell
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s 1 n)
+            (s+2+r)).seven.carry
+          (GSTGraphV2InfiniteControl.graph 1
+            (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s 1 n)
+            (s+2+r)).seven.digit :=
+      (GSTGraphV2HandwrittenOmegaUBlock.residual_parent_happy_iff
+        s 1 n (s+2+r)).1 hRight
+
+    have hPowerGraph :
+        GSTU2DEventTransport.HappyCell
+          (GSTGraphV2InfiniteControl.graph
+            (4^(GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s 1 n))
+            0 (s+2+r)).seven.carry
+          (GSTGraphV2InfiniteControl.graph
+            (4^(GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s 1 n))
+            0 (s+2+r)).seven.digit := by
+      exact
+        (GSTGraphV2PerfectPowerAncestry.power_origin_happy_iff
+          (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s 1 n)
+          0 (s+2+r)).2 (by simpa using hFullGraph)
+
+    have hFull :
+        GSTCanonicalTailStateIso.HappyCell
+          (GSTCanonicalTailStateIso.carry4
+            (4^(3^s * (1 + 3*n))) (s+2+r))
+          (GSTCanonicalTailStateIso.digit3
+            (4^(3^s * (1 + 3*n))) (s+2+r)) := by
+      simpa [GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent,
+        GSTGraphV2InfiniteControl.graph,
+        GSTGraphV2InfiniteControl.cell,
+        GSTCanonicalSevenAxisBridge.vertex,
+        GSTU2DEventTransport.HappyCell,
+        GSTCanonicalTailStateIso.HappyCell,
+        GSTCanonicalSevenAxisBridge.carry4,
+        GSTCanonicalSevenAxisBridge.digit3,
+        GSTCanonicalTailStateIso.carry4,
+        GSTCanonicalTailStateIso.digit3] using hPowerGraph
+
+    have hTail :
+        GSTCanonicalTailStateIso.HappyCell
+          (GSTCanonicalTailStateIso.carry4
+            (GSTPerfectPowerTailNavigation.canonicalTail s (1 + 3*n)) (1+r))
+          (GSTCanonicalTailStateIso.digit3
+            (GSTPerfectPowerTailNavigation.canonicalTail s (1 + 3*n)) (1+r)) := by
+      apply
+        (GSTCanonicalTailStateIso.canonical_tail_happy_iff
+          (s+1)
+          (GSTPerfectPowerTailNavigation.canonicalTail s (1 + 3*n))
+          (1+r) (by omega)).1
+      have h := hFull
+      rw [GSTPerfectPowerTailNavigation.canonical_tail_decomposition
+        s (1 + 3*n)] at h
+      simpa [Nat.add_assoc] using h
+
+    have hParentGood :
+        gstDigit (gstNavigationConstant s (1 + 3*n)) (1+r) = 2 ∧
+          (gstCarry (gstNavigationConstant s (1 + 3*n)) (1+r) = 0 ∨
+           gstCarry (gstNavigationConstant s (1 + 3*n)) (1+r) = 3) := by
+      simpa [GSTPerfectPowerTailNavigation.canonicalTail,
+        gstNavigationConstant,
+        GSTCanonicalTailStateIso.HappyCell,
+        GSTCanonicalTailStateIso.carry4,
+        GSTCanonicalTailStateIso.digit3,
+        gstCarry, gstDigit] using hTail
+
+    have hstate := gst_prefix_one_product_state s n r hs
+    rw [hstate.1, hstate.2] at hParentGood
+    exact hbad r hParentGood
+
   exact
-    gst_navigation_witness_all_of_residual
-      gst_residual_navigation_lift_recovered
-      s (1 + 3*n) hs (by omega) (by omega) (Or.inr (by omega))
+    GSTFinalPrefixOneDirectU2DCollision.canonical_perfect_power_block_collision_direct
+      s n hs hn hchildNav hRightBad
+
+/-- Public prefix-one theorem, closed through the direct BadReflection theorem. -/
+theorem gst_prefix_one_navigation_lift :
+    GSTPrefixOneNavigationLift :=
+  gst_prefix_one_navigation_lift_of_bad_reflection
+    gst_prefix_one_bad_reflection_new
 
 
 /-- The two consecutive power waves overlap at a Happy Gate.  The left branch
