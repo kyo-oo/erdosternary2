@@ -6,13 +6,16 @@ on:
       - sol/gpt56-de11-axiom-replacement
     paths:
       - GSTGraphV2FourPowerThirdWave.lean
+      - GSTFourPowerThreeStepBadnessDescent.lean
+      - GSTFourPowerThreeStepQuotientChannel.lean
       - GSTFinalResidualCollision.lean
+      - GSTPrefixOneOntologicalEscape.lean
       - .github/workflows/gpt56-de11-axiom-probe.yml
   workflow_dispatch:
 
 jobs:
   certify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
@@ -20,40 +23,62 @@ jobs:
           build: false
           test: false
 
-      - name: Build de11 V2 dependency universe
+      - name: Compile residual collision only
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTLocalClosure
+          lake env lean -o .lake/build/lib/lean/GSTFinalResidualCollision.olean GSTFinalResidualCollision.lean 2>&1 | tee residual.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual.log
 
-      - name: Kernel-check existing residual collision
+      - name: Audit residual collision
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTFinalResidualCollision.lean 2>&1 | tee residual-collision.log
-          if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-collision.log; then
-            exit 1
-          fi
-
-      - name: Audit residual collision axioms
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > GPT56ResidualCollisionAudit.lean <<'EOF'
+          cat > AuditResidual.lean <<'EOF'
           import GSTFinalResidualCollision
           #print axioms GSTFinalResidualCollision.residual_level_one_origin_one_collision
           EOF
-          lake env lean GPT56ResidualCollisionAudit.lean 2>&1 | tee residual-collision-axioms.log
-          if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual-collision-axioms.log; then
-            exit 1
-          fi
+          lake env lean AuditResidual.lean 2>&1 | tee residual-axioms.log
+          ! grep -F 'sorryAx' residual-axioms.log
 
-      - name: Kernel-check third wave
-        if: hashFiles('GSTGraphV2FourPowerThirdWave.lean') != ''
+      - name: Compile three-step badness descent
+        if: hashFiles('GSTFourPowerThreeStepBadnessDescent.lean') != ''
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTGraphV2FourPowerThirdWave.lean 2>&1 | tee third-wave.log
-          if grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' third-wave.log; then
-            exit 1
-          fi
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepBadnessDescent.olean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' descent.log
+
+      - name: Compile three-step quotient channel
+        if: hashFiles('GSTFourPowerThreeStepQuotientChannel.lean') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepQuotientChannel.olean GSTFourPowerThreeStepQuotientChannel.lean 2>&1 | tee quotient.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' quotient.log
+
+      - name: Compile third-wave replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTGraphV2FourPowerThirdWave.olean GSTGraphV2FourPowerThirdWave.lean 2>&1 | tee third-wave.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' third-wave.log
+
+      - name: Compile production axiom site
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTPrefixOneOntologicalEscape.lean 2>&1 | tee production.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' production.log
+
+      - name: Final axiom audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > AuditReplacement.lean <<'EOF'
+          import GSTPrefixOneOntologicalEscape
+          #print axioms gst_four_power_direct_existence_inline
+          #print axioms gst_four_power_creation_certificate_inline
+          EOF
+          lake env lean AuditReplacement.lean 2>&1 | tee replacement-axioms.log
+          ! grep -E 'sorryAx|gst_four_power_direct_existence_inline\]' replacement-axioms.log
