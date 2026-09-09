@@ -15,20 +15,23 @@ open GSTFourPowerAffineChannelAutomaton
 open GSTFourPowerAffineClassifierBridge
 open GSTFourPowerDirectHappyBridge
 
+private def affineOrbitMod (m : Nat) : Nat → Nat
+  | 0 => 0
+  | n + 1 => (4 * affineOrbitMod m n + 1) % m
+
+private theorem affineOrbit_mod_eq_affineOrbitMod (m n : Nat) :
+    affineOrbit n % m = affineOrbitMod m n := by
+  induction n with
+  | zero => simp [affineOrbit, affineOrbitMod]
+  | succ n ih =>
+      simp [affineOrbit, affineOrbitMod, Nat.add_mod, Nat.mul_mod, ih]
+
 private theorem affineOrbit_mod328256967394537077627_eq_304509595025840762815_of_exponent_43486
     (N : Nat) (hN : N % 328256967394537077627 = 43486) : affineOrbit N % 328256967394537077627 = 304509595025840762815 := by
   have h := (affineOrbit_residue_eq_iff_exponent_residue_eq 43 N 43486).2 (by simpa using hN)
-  have hRefModeq : affineOrbit 43486 ≡ 304509595025840762815 [MOD 328256967394537077627] := by
-    have hp : 4 ^ 43486 ≡ 913528785077522288446 [MOD 984770902183611232881] := by
-      norm_num [Nat.ModEq]
-    rw [four_pow_eq_one_plus_three_affineOrbit] at hp
-    have hr : 913528785077522288446 = 1 + 3 * 304509595025840762815 := by norm_num
-    rw [hr] at hp
-    have hc := Nat.ModEq.add_left_cancel' 1 hp
-    change 3 * affineOrbit 43486 ≡ 3 * 304509595025840762815 [MOD 3 * 328256967394537077627] at hc
-    exact Nat.ModEq.mul_left_cancel' (by norm_num : 3 ≠ 0) hc
   have hRef : affineOrbit 43486 % 328256967394537077627 = 304509595025840762815 := by
-    simpa [Nat.ModEq] using hRefModeq
+    rw [affineOrbit_mod_eq_affineOrbitMod]
+    decide
   norm_num at h
   exact h.trans hRef
 
