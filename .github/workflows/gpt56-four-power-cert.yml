@@ -76,14 +76,14 @@ jobs:
               subprocess.run(['lake','env','lean','-o',str(out),str(path)],check=True)
           print('DIRECT_IMPORT_CLOSURE_GREEN=1')
           PY
-      - name: Compile standalone direct replacement
+      - name: Compile standalone direct replacement bridge
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectExistenceInline.olean GSTFourPowerDirectExistenceInline.lean 2>&1 | tee direct-replacement.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-replacement.log
-          echo 'DIRECT_REPLACEMENT_COMPILED=1'
+          echo 'DIRECT_REPLACEMENT_BRIDGE_COMPILED=1'
       - name: Axiom audit
         shell: bash
         run: |
@@ -91,13 +91,14 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > GPT56FourPowerDirectAudit.lean <<'EOF'
           import GSTFourPowerDirectExistenceInline
-          #print axioms GSTFourPowerDirectExistenceInline.gst_three_step_badness_descent_inline
-          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_happy_ge_three_inline
-          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_direct_existence_inline
+          #print axioms GSTFourPowerDirectExistenceInline.gst_three_step_badness_descent_of_canonical_channel_descent
+          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_happy_ge_three_of_canonical_channel_descent
+          #print axioms GSTFourPowerDirectExistenceInline.happy_row_to_commonTwo_inline
+          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_direct_existence_of_canonical_channel_descent
           EOF
           lake env lean GPT56FourPowerDirectAudit.lean 2>&1 | tee direct-replacement-axioms.log
           if grep -Fq 'sorryAx' direct-replacement-axioms.log; then
-            echo 'FORBIDDEN_SORRYAX_IN_DIRECT_REPLACEMENT=1'
+            echo 'FORBIDDEN_SORRYAX_IN_DIRECT_REPLACEMENT_BRIDGE=1'
             exit 1
           fi
-          echo 'DIRECT_REPLACEMENT_AXIOM_AUDIT_GREEN=1'
+          echo 'DIRECT_REPLACEMENT_BRIDGE_AXIOM_AUDIT_GREEN=1'
