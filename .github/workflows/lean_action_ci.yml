@@ -56,6 +56,15 @@ jobs:
           echo 'LEAN_ACTION_CI_SURGERY_DISABLED=1'
           echo 'This workflow is verification-only and must never mutate lakefile.toml or ErdosTernary2.lean.'
 
+      - name: Assert four-power master absent from monolith
+        run: |
+          set -euo pipefail
+          if grep -En 'GSTFourPowerOntologicalAdapter|FourPowerCreationMaster|gst_prefix_one_ontological_escape_of_master_inline|gst_prefix_one_navigation_lift_of_master_inline|gst_four_power_creation_master_inline|GSTPrefixOneOntologicalEscape|gst_four_power_direct_existence_inline' ErdosTernary2.lean; then
+            echo 'ERROR: legacy four-power master/custom-axiom seam re-entered the monolith.'
+            exit 1
+          fi
+          echo FOUR_POWER_MASTER_ABSENT_FROM_MONOLITH=1
+
       - name: Hard build
         run: |
           set -euo pipefail
