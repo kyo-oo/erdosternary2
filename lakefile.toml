@@ -82,7 +82,6 @@ roots = [
   "GSTGraphV2UnifiedVerticalTelescope",
   "GSTInfiniteBadTransport",
   "GSTInfiniteCollision",
-  "GSTInfiniteFourPowerNavigation",
   "GSTInfiniteCoupledLedger",
   "GSTInfiniteGateTransport",
   "GSTPerfectPowerTailNavigation",
