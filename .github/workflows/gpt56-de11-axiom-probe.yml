@@ -23,142 +23,31 @@ jobs:
           build: false
           test: false
 
-      - name: Materialize focused local import closure
+      - name: Build focused dependency universe
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, subprocess
-          roots = [
-            Path('GSTFinalResidualCollision.lean'),
-            Path('GSTFourPowerThreeStepBadnessDescent.lean'),
-            Path('GSTFourPowerThreeStepQuotientChannel.lean'),
-            Path('GSTGraphV2FourPowerThirdWave.lean'),
-          ]
-          build = Path('.lake/build/lib/lean')
-          rx = re.compile(r'^\\s*import\\s+(.+?)\\s*
-      - name: Audit residual collision
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > AuditResidual.lean <<'EOF'
-          import GSTFinalResidualCollision
-          #print axioms GSTFinalResidualCollision.residual_level_one_origin_one_collision
-          EOF
-          lake env lean AuditResidual.lean 2>&1 | tee residual-axioms.log
-          ! grep -F 'sorryAx' residual-axioms.log
+          lake build GSTLocalClosure
 
       - name: Compile three-step badness descent
-        if: hashFiles('GSTFourPowerThreeStepBadnessDescent.lean') != ''
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepBadnessDescent.olean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
+          lake env lean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' descent.log
 
       - name: Compile three-step quotient channel
-        if: hashFiles('GSTFourPowerThreeStepQuotientChannel.lean') != ''
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepQuotientChannel.olean GSTFourPowerThreeStepQuotientChannel.lean 2>&1 | tee quotient.log
+          lake env lean GSTFourPowerThreeStepQuotientChannel.lean 2>&1 | tee quotient.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' quotient.log
 
       - name: Compile third-wave replacement
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2FourPowerThirdWave.olean GSTGraphV2FourPowerThirdWave.lean 2>&1 | tee third-wave.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' third-wave.log
-
-      - name: Compile production axiom site
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean GSTPrefixOneOntologicalEscape.lean 2>&1 | tee production.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' production.log
-
-      - name: Final axiom audit
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > AuditReplacement.lean <<'EOF'
-          import GSTPrefixOneOntologicalEscape
-          #print axioms gst_four_power_direct_existence_inline
-          #print axioms gst_four_power_creation_certificate_inline
-          EOF
-          lake env lean AuditReplacement.lean 2>&1 | tee replacement-axioms.log
-          ! grep -E 'sorryAx|gst_four_power_direct_existence_inline\]' replacement-axioms.log
-)
-          def path_of(m): return Path(*m.split('.')).with_suffix('.lean')
-          def imports(p):
-              out=[]
-              for raw in p.read_text(encoding='utf-8').splitlines():
-                  code=raw.split('--',1)[0].rstrip()
-                  mm=rx.match(code)
-                  if mm: out.extend(mm.group(1).split())
-              return out
-          done=set(); active=[]; order=[]
-          def visit(m):
-              if m in done: return
-              p=path_of(m)
-              if not p.exists(): return
-              if m in active: raise SystemExit('cycle: '+' -> '.join(active+[m]))
-              active.append(m)
-              for d in imports(p): visit(d)
-              active.pop(); done.add(m); order.append((m,p))
-          for root in roots:
-              for m in imports(root): visit(m)
-          build.mkdir(parents=True, exist_ok=True)
-          for m,p in order:
-              out=build.joinpath(*m.split('.')).with_suffix('.olean')
-              out.parent.mkdir(parents=True, exist_ok=True)
-              if out.exists(): continue
-              print('COMPILE_DEP',m,flush=True)
-              subprocess.run(['lake','env','lean','-o',str(out),str(p)],check=True)
-          print('FOCUSED_IMPORT_CLOSURE_GREEN=1')
-          PY
-
-      - name: Compile residual collision only
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFinalResidualCollision.olean GSTFinalResidualCollision.lean 2>&1 | tee residual.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' residual.log
-
-      - name: Audit residual collision
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > AuditResidual.lean <<'EOF'
-          import GSTFinalResidualCollision
-          #print axioms GSTFinalResidualCollision.residual_level_one_origin_one_collision
-          EOF
-          lake env lean AuditResidual.lean 2>&1 | tee residual-axioms.log
-          ! grep -F 'sorryAx' residual-axioms.log
-
-      - name: Compile three-step badness descent
-        if: hashFiles('GSTFourPowerThreeStepBadnessDescent.lean') != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepBadnessDescent.olean GSTFourPowerThreeStepBadnessDescent.lean 2>&1 | tee descent.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' descent.log
-
-      - name: Compile three-step quotient channel
-        if: hashFiles('GSTFourPowerThreeStepQuotientChannel.lean') != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTFourPowerThreeStepQuotientChannel.olean GSTFourPowerThreeStepQuotientChannel.lean 2>&1 | tee quotient.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' quotient.log
-
-      - name: Compile third-wave replacement
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean -o .lake/build/lib/lean/GSTGraphV2FourPowerThirdWave.olean GSTGraphV2FourPowerThirdWave.lean 2>&1 | tee third-wave.log
+          lake env lean GSTGraphV2FourPowerThirdWave.lean 2>&1 | tee third-wave.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' third-wave.log
 
       - name: Compile production axiom site
