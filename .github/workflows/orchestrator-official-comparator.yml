@@ -277,3 +277,5 @@ jobs:
           lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee orchestrator-official-comparator.log
           grep -F "Your solution is okay!" orchestrator-official-comparator.log
           echo 'ORCHESTRATOR_OFFICIAL_LITERAL_COMPARATOR_GREEN=1'
+
+# trigger: audit transplanted theorem tree on orchestrator-final-bridge
