@@ -3,7 +3,7 @@ name: GPT56 Four Power Navigation Cert
 on:
   push:
     branches:
-      - sol/gpt56-canonical-tail-escape-20260827
+      - sol/gpt56-de11-axiom-replacement
     paths:
       - '.github/workflows/gpt56-four-power-cert.yml'
       - 'GSTInfiniteFourPowerNavigation.lean'
