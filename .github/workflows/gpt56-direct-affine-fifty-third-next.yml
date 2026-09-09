@@ -43,6 +43,7 @@ jobs:
             GSTFourPowerAffineChannelAutomaton
             GSTFourPowerAffineClassifierBridge
             GSTFourPowerAffinePrefixIsometry
+            GSTFourPowerAffineFiftyThirdResidueClosed
           )
           for module in "${modules[@]}"; do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
