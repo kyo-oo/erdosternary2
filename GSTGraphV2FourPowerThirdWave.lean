@@ -2,6 +2,8 @@ import GSTGraphV2FourPowerRelocation
 import GSTGraphV2PerfectPowerAncestry
 import GSTGraphV2SixAdicSynchronizedShadows
 import GSTFourPowerDirectFailedRelocationState
+import GSTInfiniteFourPowerNavigation
+import GSTFourPowerThreeStepQuotientChannel
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -129,6 +131,31 @@ theorem failed_relocation_to_third_wave_state
   obtain ⟨q, hq, hC3, hEq, hlt, hb1, hnext⟩ :=
     commonTwo_failed_relocation_two_step_physical_state K hCommon hNoNext
   exact ⟨q, hq, hC3, hEq, hlt, hb1, hnext⟩
+
+
+/-- Universal four-power direct existence, with no production axiom.
+For K >= 8 the independent width-three pure-power theorem supplies a physical
+Happy cell, which is exactly a common-two row for 4^K and 4^(K+1).  The two
+small admissible exponents are discharged by the exact row-two residue theorem. -/
+theorem fourPowerDirectExistence :
+    FourPowerDirectExistence := by
+  intro K hK5 hK7
+  by_cases hK8 : 8 ≤ K
+  · obtain ⟨p, hp3, hHappy⟩ :=
+      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three K hK8
+    have hPair :=
+      (GSTFourPowerThreeStepQuotientChannel.happyCell_iff_four_mul_common_two
+        (4^K) p).1 hHappy
+    refine ⟨p, by omega, hPair.1, ?_⟩
+    simpa [Nat.pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
+      hPair.2
+  · have hCases : K = 5 ∨ K = 6 ∨ K = 7 := by omega
+    rcases hCases with rfl | rfl | rfl
+    · exact commonTwo_of_mod9_five_or_six 5 (by decide)
+    · exact commonTwo_of_mod9_five_or_six 6 (by decide)
+    · exact (hK7 rfl).elim
+
+#print axioms fourPowerDirectExistence
 
 #check waveCell
 #check waveEnergy
