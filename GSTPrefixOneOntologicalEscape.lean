@@ -1,12 +1,6 @@
 import GSTPerfectPowerTailNavigation
 import GSTFourPowerOntologicalAdapter
-import GSTFourPowerDirectExistence
-import GSTFourPowerDirectCreationMaster
-import GSTFourPowerDirectHappyBridge
-import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
-import GSTFourPowerDirectExistenceNoAxiom
-import GSTInfiniteFourPowerNavigation
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -88,33 +82,3 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
   exact
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
-
-/-- Production boundary discharged without the old custom axiom.  The historical
-inline name now routes through the checked no-axiom direct-existence bridge,
-using the universal four-power Happy provider as its mathematical input. -/
-theorem gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
-  exact
-    GSTFourPowerDirectExistenceNoAxiom.fourPowerDirectExistence_from_physical_happy_ge_three
-      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-
-/-- Root-level compatibility name consumed by the monolith tail.  It no longer
-imports or compiles the experimental infinite-navigation/collision route; it
-routes the old certificate API through the direct creation-master bridge. -/
-theorem gst_four_power_creation_certificate_inline
-    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
-    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-  exact
-    (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-      gst_four_power_direct_existence_inline) K hK5 hK7
-
-#check gst_four_power_creation_certificate_noAxiom_from_provider
-#check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
-#check gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
-#check gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#print axioms gst_four_power_creation_certificate_noAxiom_from_provider
-#print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
-#print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
-#print axioms gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
-#print axioms gst_four_power_direct_existence_inline
-#print axioms gst_four_power_creation_certificate_inline
