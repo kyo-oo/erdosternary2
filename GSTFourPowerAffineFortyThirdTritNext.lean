@@ -18,7 +18,7 @@ open GSTFourPowerDirectHappyBridge
 private theorem affineOrbit_mod328256967394537077627_eq_304509595025840762815_of_exponent_43486
     (N : Nat) (hN : N % 328256967394537077627 = 43486) : affineOrbit N % 328256967394537077627 = 304509595025840762815 := by
   have h := (affineOrbit_residue_eq_iff_exponent_residue_eq 43 N 43486).2 (by simpa using hN)
-  norm_num [affineOrbit] at h ⊢
+  norm_num (config := { maxSteps := 1000000 }) [affineOrbit] at h ⊢
   exact h
 
 private theorem commonTwo_of_mod328256967394537077627_pattern_1210100012110011111000012112111100120100122_43486
