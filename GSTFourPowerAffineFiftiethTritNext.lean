@@ -179,7 +179,7 @@ private theorem commonTwo_of_mod717897987691852588770249_pattern_012120111211012
   have hd34 : lowDigit A34 = 2 := by dsimp [lowDigit]; omega
   have hd35 : lowDigit A35 = 1 := by dsimp [lowDigit]; omega
   have hd36 : lowDigit A36 = 2 := by dsimp [lowDigit]; omega
-  have hd37 : lowDigit A37 = 0 := by dsimp [lowDigit]; omega
+  have hd37 : lowDigit A37 = 1 := by dsimp [lowDigit]; omega
   have hd38 : lowDigit A38 = 2 := by dsimp [lowDigit]; omega
   have hd39 : lowDigit A39 = 0 := by dsimp [lowDigit]; omega
   have hd40 : lowDigit A40 = 2 := by dsimp [lowDigit]; omega
@@ -216,8 +216,8 @@ private theorem commonTwo_of_mod717897987691852588770249_pattern_012120111211012
   have hbad19 : BadChannel 2 A19 := by rw [badChannel_three_iff, hd18] at hbad18; simpa [A19] using hbad18
   have hbad20 : BadChannel 3 A20 := by rw [badChannel_two_iff, hd19] at hbad19; simpa [A20] using hbad19
   have hbad21 : BadChannel 2 A21 := by rw [badChannel_three_iff, hd20] at hbad20; simpa [A21] using hbad20
-  have hbad22 : BadChannel 2 A22 := by rw [badChannel_two_iff, hd21] at hbad21; simpa [A22] using hbad21
-  have hbad23 : BadChannel 0 A23 := by rw [badChannel_two_iff, hd22] at hbad22; simpa [A23] using hbad22
+  have hbad22 : BadChannel 0 A22 := by rw [badChannel_two_iff, hd21] at hbad21; simpa [A22] using hbad21
+  have hbad23 : BadChannel 0 A23 := by rw [badChannel_zero_iff, hd22] at hbad22; simpa [A23] using hbad22
   have hbad24 : BadChannel 0 A24 := by rw [badChannel_zero_iff, hd23] at hbad23; simpa [A24] using hbad23
   have hbad25 : BadChannel 1 A25 := by rw [badChannel_zero_iff, hd24] at hbad24; simpa [A25] using hbad24
   have hbad26 : BadChannel 1 A26 := by rw [badChannel_one_iff, hd25] at hbad25; simpa [A26] using hbad25
@@ -232,8 +232,8 @@ private theorem commonTwo_of_mod717897987691852588770249_pattern_012120111211012
   have hbad35 : BadChannel 3 A35 := by rw [badChannel_two_iff, hd34] at hbad34; simpa [A35] using hbad34
   have hbad36 : BadChannel 2 A36 := by rw [badChannel_three_iff, hd35] at hbad35; simpa [A36] using hbad35
   have hbad37 : BadChannel 3 A37 := by rw [badChannel_two_iff, hd36] at hbad36; simpa [A37] using hbad36
-  have hbad38 : BadChannel 1 A38 := by rw [badChannel_three_iff, hd37] at hbad37; simpa [A38] using hbad37
-  have hbad39 : BadChannel 3 A39 := by rw [badChannel_one_iff, hd38] at hbad38; simpa [A39] using hbad38
+  have hbad38 : BadChannel 2 A38 := by rw [badChannel_three_iff, hd37] at hbad37; simpa [A38] using hbad37
+  have hbad39 : BadChannel 3 A39 := by rw [badChannel_two_iff, hd38] at hbad38; simpa [A39] using hbad38
   have hbad40 : BadChannel 1 A40 := by rw [badChannel_three_iff, hd39] at hbad39; simpa [A40] using hbad39
   have hbad41 : BadChannel 3 A41 := by rw [badChannel_one_iff, hd40] at hbad40; simpa [A41] using hbad40
   have hbad42 : BadChannel 1 A42 := by rw [badChannel_three_iff, hd41] at hbad41; simpa [A42] using hbad41
