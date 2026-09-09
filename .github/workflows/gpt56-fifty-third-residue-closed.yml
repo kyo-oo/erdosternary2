@@ -39,4 +39,4 @@ jobs:
           set -euo pipefail
           ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim|native_decide' GSTFourPowerAffineFiftyThirdResidueClosed.lean
       - name: Closed-form audit marker
-        run: echo DIRECT_AFFINE_FIFTY_THIRD_CLOSED_RESIDUE_V2=1
+        run: echo DIRECT_AFFINE_FIFTY_THIRD_CLOSED_RESIDUE_V3=1
