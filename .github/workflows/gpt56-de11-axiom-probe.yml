@@ -1,0 +1,29 @@
+name: GPT56 de11 Axiom Replacement Probe
+
+on:
+  push:
+    branches:
+      - sol/gpt56-de11-axiom-replacement
+    paths:
+      - GPT56AxiomReplacementProbe.lean
+      - .github/workflows/gpt56-de11-axiom-probe.yml
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Expose exact collision goal
+        shell: bash
+        run: |
+          set +e
+          lake env lean GPT56AxiomReplacementProbe.lean > probe.log 2>&1
+          status=$?
+          cat probe.log
+          echo "LEAN_PROBE_EXIT=$status"
+          exit 0
