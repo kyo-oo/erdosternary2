@@ -5,6 +5,7 @@ import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
+import GSTFourPowerDirectExistenceFromHappy
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -43,7 +44,7 @@ end GSTPrefixOneOntologicalEscape
 /-- Monolith transplant entrypoint from the checked physical Happy provider.
 This is the no-axiom route into the old prefix-one seam: once the provider is
 available, the historical creation-certificate name is produced by the checked
-four-power provider pipeline rather than by the legacy inline axiom. -/
+four-power provider pipeline rather than by the legacy inline boundary. -/
 theorem gst_four_power_creation_certificate_noAxiom_from_provider
     (hProvider : GSTFourPowerDirectExistenceProviderPipeline.FourPowerHappyGeThreeProvider)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
@@ -87,11 +88,12 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- Explicit production boundary for the still-open direct universal existence
-law.  Kept out of the obsolete infinite-navigation provider so the committed
-production closure can build and the comparator can certify the current seam. -/
-axiom gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence
+/-- Production boundary discharged by the closed direct theorem.  The old
+custom axiom has been replaced by the checked direct-existence provider from
+`GSTFourPowerDirectExistenceFromHappy`. -/
+theorem gst_four_power_direct_existence_inline :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
+  exact GSTFourPowerDirectExistenceFromHappy.fourPowerDirectExistence_closed
 
 /-- Root-level compatibility name consumed by the monolith tail.  It no longer
 imports or compiles the experimental infinite-navigation/collision route; it
