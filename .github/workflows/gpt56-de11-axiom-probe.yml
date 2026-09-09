@@ -11,6 +11,7 @@ on:
       - GSTFinalResidualCollision.lean
       - GSTPrefixOneOntologicalEscape.lean
       - .github/workflows/gpt56-de11-axiom-probe.yml
+      - lakefile.toml
   workflow_dispatch:
 
 jobs:
