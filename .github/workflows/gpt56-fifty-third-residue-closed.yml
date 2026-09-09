@@ -1,0 +1,40 @@
+name: GPT56 Fifty-Third Closed Residue Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - 'GSTFourPowerAffineFiftyThirdResidueClosed.lean'
+      - '.github/workflows/gpt56-fifty-third-residue-closed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fifty-third-closed-residue-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Prepare output directory
+        run: mkdir -p .lake/build/lib/lean
+      - name: Compile dependency
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTCanonicalTailStateIso.olean GSTCanonicalTailStateIso.lean
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean GSTFourPowerDirectResidue.lean
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOrbit.olean GSTFourPowerAffineOrbit.lean
+      - name: Compile closed residue certificate
+        run: |
+          set -euo pipefail
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineFiftyThirdResidueClosed.olean GSTFourPowerAffineFiftyThirdResidueClosed.lean 2>&1 | tee closed53.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' closed53.log
+      - name: Reject forbidden proof escapes
+        run: |
+          set -euo pipefail
+          ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim|native_decide' GSTFourPowerAffineFiftyThirdResidueClosed.lean
