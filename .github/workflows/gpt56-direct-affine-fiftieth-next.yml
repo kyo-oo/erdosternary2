@@ -61,3 +61,5 @@ jobs:
           ! grep -nE '\b(sorry|admit|axiom|sorryAx)\b|False\.elim' GSTFourPowerAffineFiftiethTritNext.lean
       - name: Direct affine audit marker
         run: echo DIRECT_AFFINE_FIFTIETH_NEXT_PHYSICAL_HAPPY_GREEN_V1=1
+
+# repair-recheck-v2
