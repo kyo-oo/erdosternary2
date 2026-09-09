@@ -35,7 +35,8 @@ private theorem affineOrbit_mod328256967394537077627_eq_304509595025840762815_of
   have hRef : affineOrbit 43486 % 328256967394537077627 = 304509595025840762815 := by
     rw [affineOrbit_mod_eq_affineOrbitMod]
     decide
-  norm_num at h
+  have hPow : 3 ^ 43 = 328256967394537077627 := by norm_num
+  rw [hPow] at h
   exact h.trans hRef
 
 private theorem commonTwo_of_mod328256967394537077627_pattern_1210100012110011111000012112111100120100122_43486
