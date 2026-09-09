@@ -1,0 +1,57 @@
+name: GPT56 Patch Fiftieth First Failure
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - '.github/workflows/gpt56-patch-fiftieth-first-failure.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-fiftieth-first-failure:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-four-power-relocation-prod-20260903
+          fetch-depth: 0
+      - name: Repair exact trit and channel-state failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('GSTFourPowerAffineFiftiethTritNext.lean')
+          s = p.read_text()
+          replacements = {
+            '  have hd37 : lowDigit A37 = 0 := by dsimp [lowDigit]; omega':
+            '  have hd37 : lowDigit A37 = 1 := by dsimp [lowDigit]; omega',
+            '  have hbad22 : BadChannel 2 A22 := by rw [badChannel_two_iff, hd21] at hbad21; simpa [A22] using hbad21':
+            '  have hbad22 : BadChannel 0 A22 := by rw [badChannel_two_iff, hd21] at hbad21; simpa [A22] using hbad21',
+            '  have hbad23 : BadChannel 0 A23 := by rw [badChannel_two_iff, hd22] at hbad22; simpa [A23] using hbad22':
+            '  have hbad23 : BadChannel 0 A23 := by rw [badChannel_zero_iff, hd22] at hbad22; simpa [A23] using hbad22',
+            '  have hbad38 : BadChannel 1 A38 := by rw [badChannel_three_iff, hd37] at hbad37; simpa [A38] using hbad37':
+            '  have hbad38 : BadChannel 2 A38 := by rw [badChannel_three_iff, hd37] at hbad37; simpa [A38] using hbad37',
+            '  have hbad39 : BadChannel 3 A39 := by rw [badChannel_one_iff, hd38] at hbad38; simpa [A39] using hbad38':
+            '  have hbad39 : BadChannel 3 A39 := by rw [badChannel_two_iff, hd38] at hbad38; simpa [A39] using hbad38',
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'missing exact source line: {old}')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- GSTFourPowerAffineFiftiethTritNext.lean
+      - name: Commit repaired constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'kyo-oo'
+          git config user.email 'lordoftreasures7@gmail.com'
+          git add GSTFourPowerAffineFiftiethTritNext.lean
+          git commit -m 'Repair fiftieth-trit channel chain'
+          git push origin HEAD:sol/gpt56-four-power-relocation-prod-20260903
