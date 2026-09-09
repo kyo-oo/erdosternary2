@@ -1,6 +1,7 @@
 import GSTFourPowerAffinePrefixIsometry
 import GSTFourPowerAffineClassifierBridge
 import GSTFourPowerDirectHappyBridge
+import GSTFourPowerAffineFiftyThirdResidueClosed
 
 set_option maxRecDepth 5000000
 set_option maxHeartbeats 30000000
@@ -15,26 +16,14 @@ open GSTFourPowerAffineChannelAutomaton
 open GSTFourPowerAffineClassifierBridge
 open GSTFourPowerDirectHappyBridge
 
-private def affineOrbitMod (m : Nat) : Nat → Nat
-  | 0 => 0
-  | n + 1 => (4 * affineOrbitMod m n + 1) % m
-
-private theorem affineOrbit_mod_eq_affineOrbitMod (m n : Nat) :
-    affineOrbit n % m = affineOrbitMod m n := by
-  induction n with
-  | zero => simp [affineOrbit, affineOrbitMod]
-  | succ n ih =>
-      simp [affineOrbit, affineOrbitMod, Nat.add_mod, Nat.mul_mod, ih]
-
 private theorem affineOrbit_mod19383245667680019896796723_eq_18090587917995305367585538_of_exponent_279775
     (N : Nat) (hN : N % 19383245667680019896796723 = 279775) : affineOrbit N % 19383245667680019896796723 = 18090587917995305367585538 := by
   have hExp : N % 3 ^ 53 = 279775 % 3 ^ 53 := by
     norm_num
     exact hN
   have h := (affineOrbit_residue_eq_iff_exponent_residue_eq 53 N 279775).2 hExp
-  have hRef : affineOrbit 279775 % 19383245667680019896796723 = 18090587917995305367585538 := by
-    rw [affineOrbit_mod_eq_affineOrbitMod]
-    decide
+  have hRef : affineOrbit 279775 % 19383245667680019896796723 = 18090587917995305367585538 :=
+    GSTFourPowerAffineFiftyThirdResidueClosed.affineOrbit_279775_mod53_closed
   have hPow : 3 ^ 53 = 19383245667680019896796723 := by norm_num
   rw [hPow] at h
   exact h.trans hRef
