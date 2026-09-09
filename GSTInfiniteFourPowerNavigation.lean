@@ -1,6 +1,9 @@
+import GSTTactic
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTGraphV2UnifiedVerticalTelescope
+import GSTGraphV2SixAdicSynchronizedShadows
 import GSTFinalPurePowerResidueTransplant
+import GSTFourPowerOntologicalAdapter
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -15,8 +18,46 @@ open GSTGraphV2PerfectPowerAncestry
 open GSTGraphV2PerfectPowerBlock
 open GSTGraphV2UnifiedPowerRectangle
 open GSTGraphV2UnifiedVerticalTelescope
+open GSTGraphV2SixAdicSynchronizedShadows
 open GSTFinalPurePowerResidueTransplant
 open GSTU2DEventTransport
+
+/-- Focused arithmetic closer for the four-power collision seam.
+It deliberately avoids explicit local-hypothesis names after simplification,
+because Lean may hygienically rename consumed hypotheses. -/
+macro "four_power_collision_arith" : tactic =>
+  `(tactic|
+    first
+      | contradiction
+      | omega
+      | nlinarith
+      | (norm_num at * <;> first | contradiction | omega | nlinarith)
+      | (ring_nf at * <;> first | contradiction | omega | nlinarith))
+
+/-- Public bridge surface for the green six-adic skew theorem used by the
+four-power navigation surgery line. -/
+theorem four_power_six_adic_skew_bridge
+    (k t : Nat) (x y : Int) :
+    (6 : Int)^k ∣ (4 : Int)^t*(x-y) ↔
+      (3 : Int)^k ∣ x-y ∧ (2 : Int)^(k-2*t) ∣ x-y := by
+  exact six_pow_dvd_four_pow_mul_sub_iff_truncated k t x y
+
+/-- Dyadic branch of the same bridge, including the saturated case. -/
+theorem four_power_dyadic_shadow_bridge
+    (k t : Nat) (x y : Int) :
+    GSTGraphV2SixAdicOntologicalGeometry.DyadicShadowAt k
+        ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      GSTGraphV2SixAdicOntologicalGeometry.DyadicShadowAt (k-2*t) x y := by
+  exact dyadic_shadow_mul_four_pow_iff_truncated k t x y
+
+/-- Triadic branch of the same bridge: multiplying by a power of four preserves
+all triadic shadow depth. -/
+theorem four_power_triadic_shadow_bridge
+    (k t : Nat) (x y : Int) :
+    GSTGraphV2SixAdicOntologicalGeometry.TriadicShadowAt k
+        ((4 : Int)^t*x) ((4 : Int)^t*y) ↔
+      GSTGraphV2SixAdicOntologicalGeometry.TriadicShadowAt k x y := by
+  exact triadic_shadow_mul_four_pow_iff k t x y
 
 /-- Exact width-three pure-power conservation at the production cut. -/
 theorem power_width_three_exact_conservation (K q : Nat) :
@@ -78,7 +119,7 @@ theorem power_width_three_u_derivative_positive
   norm_num
   nlinarith
 
-/-- Power-specific three-step collision.  This is the only induction seam. -/
+/-- Power-specific three-step collision.  This is the focused induction seam. -/
 theorem power_three_step_collision
     (K q : Nat)
     (hChild : HappyCell
@@ -121,10 +162,18 @@ theorem power_three_step_collision
   have hWidth3 := power_width_three_exact_conservation K q
   have hUPositive := power_width_three_u_derivative_positive K q hChild
     (hRightBad q)
+  have hleftExact := graph_phase_window_exact E 0 b (q+1)
+  have hrightExact := graph_phase_window_exact E N b (q+1)
+  have hleftDigitExact := graph_phase_digit_window_boundary_exact E 0 b (q+1)
+  have hrightDigitExact := graph_phase_digit_window_boundary_exact E N b (q+1)
 
-  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 ⊢
-  dsimp [potentialWith, unifiedState] at hUPositive
-  nlinarith [hleft, hright, hU, hWidth3, hUPositive]
+  rw [hleftExact] at hleft
+  rw [hrightExact] at hright
+  rw [hleftDigitExact] at hleft
+  rw [hrightDigitExact] at hright
+  dsimp [E, N, b] at hleft hright hleftAbs hrightAbs hU hWidth3 hUPositive ⊢
+  dsimp [potentialWith, unifiedState] at hU hUPositive
+  four_power_collision_arith
 
 /-- From exponent 8 onward a Happy gate exists at a ternary coordinate at least 3. -/
 theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
@@ -165,7 +214,7 @@ theorem four_power_happy_ge_three (k : Nat) (hk : 8 ≤ k) :
         · refine ⟨10, by decide, ?_⟩
           norm_num [HappyCell, carry4, digit3]
 
-/-- A Happy cell is the first branch of the historical creation certificate. -/
+/-- A Happy cell is the first branch of the creation certificate. -/
 theorem happy_to_creation_certificate
     (R p : Nat) (hp : 1 ≤ p)
     (hHappy : HappyCell (carry4 R p) (digit3 R p)) :
@@ -182,7 +231,7 @@ theorem happy_to_creation_certificate
     · simp [h0]
     · simp [h3]
 
-/-- Universal replacement for the broken recursive `h_creation_for_4pow`. -/
+/-- Universal four-power creation certificate provider. -/
 theorem gst_four_power_navigation_universal
     (k : Nat) (hk5 : 5 ≤ k) (hk7 : k ≠ 7) :
     ∃ p : Nat, 1 ≤ p ∧ (4^k) / 3^p % 3 = 2 ∧
@@ -201,6 +250,9 @@ theorem gst_four_power_navigation_universal
       norm_num
     · exact (hk7 rfl).elim
 
+#print axioms four_power_six_adic_skew_bridge
+#print axioms four_power_dyadic_shadow_bridge
+#print axioms four_power_triadic_shadow_bridge
 #print axioms power_width_three_exact_conservation
 #print axioms power_width_three_u_derivative_positive
 #print axioms power_three_step_collision
@@ -208,3 +260,11 @@ theorem gst_four_power_navigation_universal
 #print axioms gst_four_power_navigation_universal
 
 end GSTInfiniteFourPowerNavigation
+
+/-- Legacy infinite-route compatibility export, intentionally not using the
+monolith-facing direct-closure name. -/
+theorem gst_four_power_creation_certificate_inline_infinite_route
+    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal K hK5 hK7
