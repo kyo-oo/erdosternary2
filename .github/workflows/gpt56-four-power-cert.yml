@@ -1,4 +1,4 @@
-name: GPT56 Four Power Navigation Cert
+name: GPT56 Four Power Direct Replacement Cert
 
 on:
   push:
@@ -6,11 +6,13 @@ on:
       - sol/gpt56-de11-axiom-replacement
     paths:
       - '.github/workflows/gpt56-four-power-cert.yml'
-      - 'GSTInfiniteFourPowerNavigation.lean'
+      - 'GSTFourPowerDirectExistenceInline.lean'
+      - 'GSTFourPowerThreeStepBadnessDescent.lean'
+      - 'GSTFourPowerThreeStepQuotientChannel.lean'
   workflow_dispatch:
 
 concurrency:
-  group: gpt56-four-power-cert-${{ github.ref }}
+  group: gpt56-four-power-direct-replacement-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -35,7 +37,7 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Materialize navigation import closure
+      - name: Materialize direct replacement import closure
         shell: bash
         run: |
           set -euo pipefail
@@ -43,7 +45,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re, subprocess
-          ROOT = Path('GSTInfiniteFourPowerNavigation.lean')
+          ROOT = Path('GSTFourPowerDirectExistenceInline.lean')
           BUILD = Path('.lake/build/lib/lean')
           import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
           def local_path(module): return Path(*module.split('.')).with_suffix('.lean')
@@ -64,7 +66,7 @@ jobs:
               for dep in imports_of(path): visit(dep)
               temp.pop(); done.add(module); order.append((module,path))
           for module in imports_of(ROOT): visit(module)
-          print(f'NAV_IMPORT_CLOSURE_COUNT={len(order)}')
+          print(f'DIRECT_IMPORT_CLOSURE_COUNT={len(order)}')
           BUILD.mkdir(parents=True, exist_ok=True)
           for module,path in order:
               out=BUILD.joinpath(*module.split('.')).with_suffix('.olean')
@@ -72,29 +74,30 @@ jobs:
               if out.exists(): continue
               print(f'=== compiling {module} ===', flush=True)
               subprocess.run(['lake','env','lean','-o',str(out),str(path)],check=True)
-          print('NAV_IMPORT_CLOSURE_GREEN=1')
+          print('DIRECT_IMPORT_CLOSURE_GREEN=1')
           PY
-      - name: Compile independent four-power navigation
+      - name: Compile standalone direct replacement
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean -o .lake/build/lib/lean/GSTInfiniteFourPowerNavigation.olean GSTInfiniteFourPowerNavigation.lean 2>&1 | tee four-power.log
-          echo 'FOUR_POWER_NAV_GREEN=1'
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectExistenceInline.olean GSTFourPowerDirectExistenceInline.lean 2>&1 | tee direct-replacement.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-replacement.log
+          echo 'DIRECT_REPLACEMENT_COMPILED=1'
       - name: Axiom audit
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          cat > GPT56FourPowerAudit.lean <<'EOF'
-          import GSTInfiniteFourPowerNavigation
-          #print axioms GSTInfiniteFourPowerNavigation.power_three_step_collision
-          #print axioms GSTInfiniteFourPowerNavigation.four_power_happy_ge_three
-          #print axioms GSTInfiniteFourPowerNavigation.gst_four_power_navigation_universal
+          cat > GPT56FourPowerDirectAudit.lean <<'EOF'
+          import GSTFourPowerDirectExistenceInline
+          #print axioms GSTFourPowerDirectExistenceInline.gst_three_step_badness_descent_inline
+          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_happy_ge_three_inline
+          #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_direct_existence_inline
           EOF
-          lake env lean GPT56FourPowerAudit.lean 2>&1 | tee four-power-axioms.log
-          if grep -Fq 'sorryAx' four-power-axioms.log; then
-            echo 'FORBIDDEN_SORRYAX_IN_FOUR_POWER_NAV=1'
+          lake env lean GPT56FourPowerDirectAudit.lean 2>&1 | tee direct-replacement-axioms.log
+          if grep -Fq 'sorryAx' direct-replacement-axioms.log; then
+            echo 'FORBIDDEN_SORRYAX_IN_DIRECT_REPLACEMENT=1'
             exit 1
           fi
-          echo 'FOUR_POWER_AXIOM_AUDIT_GREEN=1'
+          echo 'DIRECT_REPLACEMENT_AXIOM_AUDIT_GREEN=1'
