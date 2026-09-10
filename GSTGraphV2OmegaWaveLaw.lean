@@ -588,10 +588,8 @@ theorem omega_row2_digit_two (K : Nat) (hK : K % 9 = 7) :
   have h47 : (4^7) % 27 = 22 := by decide
   have h1 : ((4^9)^(K / 9)) % 27 = 1 := by
     rw [Nat.pow_mod, h49, Nat.one_pow]
-    omega
   have hmod : (4^K) % 27 = 22 := by
     rw [← hpow, Nat.mul_mod, h1, h47]
-    norm_num
   exact omega_digit_row_two_of_mod_27 (4^K) hmod
 
 /-- Every positive number splits as a pure power of three times a
