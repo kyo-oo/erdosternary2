@@ -26,6 +26,9 @@ jobs:
           modules=(
             GSTCanonicalTailStateIso
             GSTFourPowerDirectResidue
+            GSTFourPowerDirectResidue27
+            GSTFourPowerDirectResidue81
+            GSTFourPowerExponentTritObstruction
             GSTFourPowerExactExponentPeriod
             GSTFourPowerDirectExistence
             GSTFourPowerDirectAdditionCarry
