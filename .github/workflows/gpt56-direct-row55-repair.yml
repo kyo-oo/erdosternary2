@@ -1,0 +1,63 @@
+name: GPT56 Direct Row55 Repair Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - GSTFourPowerDirectFiftyFifthRow.lean
+      - .github/workflows/gpt56-direct-row55-repair.yml
+  workflow_dispatch:
+
+jobs:
+  direct-row55-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Compile exact fresh-production dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean
+          modules=(
+            GSTCanonicalTailStateIso
+            GSTFourPowerDirectResidue
+            GSTFourPowerExactExponentPeriod
+            GSTFourPowerDirectExistence
+            GSTFourPowerDirectAdditionCarry
+            GSTFourPowerDirectHappyBridge
+            GSTFourPowerAffinePrefixIsometry
+          )
+          for module in "${modules[@]}"; do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+      - name: Compile direct row55 physical constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -s 65536
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectFiftyFifthRow.olean GSTFourPowerDirectFiftyFifthRow.lean 2>&1 | tee direct-row55.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-row55.log
+      - name: Reject forbidden proof escapes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE '\b(sorry|admit|axiom)\b|sorryAx|False\.elim' GSTFourPowerDirectFiftyFifthRow.lean
+      - name: Axiom audit direct row55 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/Audit.lean <<'EOF'
+          import GSTFourPowerDirectFiftyFifthRow
+          #print axioms GSTFourPowerDirectFiftyFifthRow.commonTwo_of_mod174449211009120179071170507_85117
+          #print axioms GSTFourPowerDirectFiftyFifthRow.physical_happy_of_mod174449211009120179071170507_85117
+          EOF
+          lake env lean /tmp/Audit.lean 2>&1 | tee audit.log
+          ! grep -E 'sorryAx' audit.log
+      - name: Direct physical-row marker
+        run: echo DIRECT_ROW55_RELOCATED_HAPPY_KERNEL_GREEN
