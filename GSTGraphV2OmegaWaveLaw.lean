@@ -100,16 +100,15 @@ the visible output digit emitted as remainder. -/
 theorem omegaWaveStep_u_multiply (D X : Nat) :
     D + 4 * originTrit X =
       3 * (omegaWaveStep D X).1 + ((D + 4 * originTrit X) % 3) := by
-  unfold omegaWaveStep
-  exact Nat.div_add_mod (D + 4 * originTrit X) 3
+  unfold omegaWaveStep originTrit
+  omega
 
 /-- Mass conservation of one transfusion: seed plus quadrupled trit is
 exactly the tripled new seed plus the visible output. -/
 theorem omegaWaveStep_mass (D X : Nat) :
     3 * (omegaWaveStep D X).1 ≤ D + 4 * originTrit X ∧
       D + 4 * originTrit X < 3 * ((omegaWaveStep D X).1 + 1) := by
-  unfold omegaWaveStep
-  have h := Nat.div_add_mod (D + 4 * originTrit X) 3
+  unfold omegaWaveStep originTrit
   constructor <;> omega
 
 /-- **The worldtrace orbit law.**  The vertical step of the exact carry
