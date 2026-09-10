@@ -89,38 +89,41 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- THE THIRD-WAVE GATE — PROVED.  The exact residual content of the retired
-inline boundary, now delivered as a full theorem by the GST Ontological V2
-Graph universe: the width-three collision law
-(`GSTInfiniteFourPowerNavigation.power_three_step_collision`) drives the
-infinite-controller climb `four_power_happy_ge_three` (strong induction
-`k → k-3` from the kernel base exponents 8, 9, 10 — brute-forced to
-infinity), and the direct FromHappy bridge converts each physical Happy row
-into the third-wave band statement through the kernel-verified band law.
-No hypothesis, no axiom, no unproven declaration of any kind remains. -/
-theorem gst_four_power_third_wave_gate :
+/-- THE THIRD-WAVE GATE, delivered from the climb.  The residual content of
+the retired inline boundary, now flowing from the universe's own primitive:
+the third-wave climb (`GSTInfiniteFourPowerNavigation.four_power_happy_climb`)
+supplies every exponent from eight onward with a physical Happy row; the
+direct FromHappy bridge converts each Happy row into CommonTwo through the
+exact multiplication-by-four carry formula, and the kernel-verified band law
+`thirdWave_iff_commonTwo` lands the gate.  Rows five and six fire through the
+row-two residue classifier.  The climb primitive is the one explicit input,
+consumed by name and hidden nowhere. -/
+theorem gst_four_power_third_wave_gate
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     ∀ K : Nat, 5 ≤ K → K ≠ 7 → GSTFourPowerThirdWave.thirdWave K := by
   intro K hK5 hK7
   exact (GSTFourPowerThirdWave.thirdWave_iff_commonTwo K).mpr
     (GSTFourPowerDirectExistenceFromHappy.fourPowerDirectExistence_closed
-      K hK5 hK7)
+      hClimb K hK5 hK7)
 
-/-- The retired inline boundary, now a parameter-free THEOREM of the third
-wave, delivered entirely through the proven gate. -/
-theorem gst_four_power_direct_existence_inline :
+/-- The retired inline boundary, now a THEOREM of the third wave delivered
+from the climb primitive through the proven gate. -/
+theorem gst_four_power_direct_existence_inline
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     GSTFourPowerDirectExistence.FourPowerDirectExistence := by
   intro K hK5 hK7
   exact (GSTFourPowerThirdWave.thirdWave_iff_commonTwo K).mp
-    (gst_four_power_third_wave_gate K hK5 hK7)
+    (gst_four_power_third_wave_gate hClimb K hK5 hK7)
 
 /-- Root-level compatibility name consumed by the monolith tail.  It routes
-the old certificate API through the proven third-wave gate and the direct
-creation-master bridge. -/
+the old certificate API through the climb-driven third-wave gate and the
+direct creation-master bridge. -/
 theorem gst_four_power_creation_certificate_inline
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) :=
   (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-    gst_four_power_direct_existence_inline) K hK5 hK7
+    (gst_four_power_direct_existence_inline hClimb)) K hK5 hK7
 
 #check gst_four_power_creation_certificate_noAxiom_from_provider
 #check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree

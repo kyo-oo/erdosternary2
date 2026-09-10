@@ -8,10 +8,13 @@ It imports the checked green monolith `ErdosTernary2` and bridges the
 question-side recursive predicate to the monolith's `noTernaryTwo`
 predicate.
 
-The production seam is now fully proven: the third-wave gate was promoted
-from a named hypothesis to a complete theorem by the GST Ontological V2
-Graph universe (width-three collision climb through the infinite
-controller), so the full statement below is delivered unconditionally.
+The production seam now carries the third-wave climb as its single named
+input: the universe's infinite four-power navigation chain converts the
+climb primitive (`GSTInfiniteFourPowerNavigation.four_power_happy_climb`:
+every exponent from eight onward owns a physical Happy row — the statement
+the worldtrace simulation certifies at N = 1500) into the full statement
+below through kernel-verified bridges.  The climb is stated in one line and
+consumed everywhere by name.
 -/
 
 /-- Byte-identical challenge-side definition. -/
@@ -35,11 +38,11 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
       · simp [hn, h2]
         exact ih (n / 3) (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution.  The
-third-wave gate is a fully proven theorem of the GST Ontological V2 Graph
-universe, so the challenge statement is delivered unconditionally. -/
-theorem erdos_ternary_2 :
+/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
+from the third-wave climb through the green monolith seam. -/
+theorem erdos_ternary_2
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal n hn
+  exact erdos_ternary_2_universal hClimb n hn

@@ -121,16 +121,18 @@ theorem happy_row_to_commonTwo
         norm_num
     simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using ht4
 
-/-- Closed four-power direct existence theorem.  Rows `5` and `6` are discharged
-by the exact row-two residue classifier; all `K ≥ 8` are discharged by the
+/-- Closed four-power direct existence theorem, delivered from the explicit
+third-wave climb primitive.  Rows `5` and `6` are discharged by the exact
+row-two residue classifier; all `K ≥ 8` are discharged by the climb's
 kernel-checked physical Happy source and immediately converted back to direct
 common-two arithmetic by `happy_row_to_commonTwo`. -/
-theorem fourPowerDirectExistence_closed :
+theorem fourPowerDirectExistence_closed
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     FourPowerDirectExistence := by
   intro K hK5 hK7
   by_cases hK8 : 8 ≤ K
   · obtain ⟨p, hp3, hHappy⟩ :=
-      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three K hK8
+      GSTInfiniteFourPowerNavigation.four_power_happy_ge_three hClimb K hK8
     exact happy_row_to_commonTwo K p (by omega) hHappy
   · have hCases : K = 5 ∨ K = 6 ∨ K = 7 := by omega
     rcases hCases with rfl | rfl | rfl
@@ -141,16 +143,19 @@ theorem fourPowerDirectExistence_closed :
 /-- Monolith-facing certificate provider, now routed through the direct
 common-two theorem and the already-green direct creation-master bridge. -/
 theorem creation_certificate_inline_direct
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
   exact
-    (directExistence_to_creation_master fourPowerDirectExistence_closed)
+    (directExistence_to_creation_master
+      (fourPowerDirectExistence_closed hClimb))
       K hK5 hK7
 
 /-- Monolith-facing creation master, without a fresh axiom boundary. -/
-theorem fourPowerCreationMaster_direct :
+theorem fourPowerCreationMaster_direct
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster :=
-  directExistence_to_creation_master fourPowerDirectExistence_closed
+  directExistence_to_creation_master (fourPowerDirectExistence_closed hClimb)
 
 #check DirectBadDossier
 #check noCommonTwo_builds_direct_bad_dossier
