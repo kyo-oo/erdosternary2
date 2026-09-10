@@ -1,7 +1,6 @@
 import GSTInfiniteFourPowerNavigation
 import GSTGraphV2HandwrittenOmegaUBlock
 import GSTGraphV2InfiniteControllerBridge
-import GSTGraphV2Ontological
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -12,7 +11,6 @@ open GSTCanonicalSevenAxisBridge
 open GSTFourPowerDirectResidue
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenOmegaUBlock
-open GSTGraphV2Ontological
 open GST2DMixedEmergence
 open GSTU2DEventTransport
 
