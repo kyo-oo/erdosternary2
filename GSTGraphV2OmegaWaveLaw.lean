@@ -1,4 +1,5 @@
 import GSTInfiniteFourPowerNavigation
+import GSTFourPowerDirectResidue
 import GSTGraphV2HandwrittenOmegaUBlock
 import GSTGraphV2InfiniteControllerBridge
 
@@ -121,8 +122,7 @@ theorem omegaWaveStep_worldtrace (R p : Nat) :
 theorem omegaWaveStep_tail (R p : Nat) :
     (omegaWaveStep (carry4 R p) (R / 3^p)).2 = R / 3^(p+1) := by
   unfold omegaWaveStep
-  rw [← Nat.div_div_eq_div_mul]
-  rfl
+  rw [Nat.div_div_eq_div_mul, Nat.pow_succ]
 
 /-! ## §2 The Ω-cut tower (the LTE trail) -/
 
@@ -252,17 +252,15 @@ theorem omega_lteCoeff_mod9 (a : Nat) (ha : 1 ≤ a) :
             rw [← Nat.pow_add]
             congr 1
             omega
-          have hmod : (3^2 * 3^(a+1-2)) % 3^2 = 0 := Nat.mul_mod_left _ _
           rw [hsplit]
-          exact hmod
+          omega
         have h2 : 3^(2*a+1) % 9 = 0 := by
           have hsplit : 3^(2*a+1) = 3^2 * 3^(2*a+1-2) := by
             rw [← Nat.pow_add]
             congr 1
             omega
-          have hmod : (3^2 * 3^(2*a+1-2)) % 3^2 = 0 := Nat.mul_mod_left _ _
           rw [hsplit]
-          exact hmod
+          omega
         have hA : (3^(a+1) * (lteCoeff a)^2) % 9 = 0 := by
           rw [Nat.mul_mod, h1, Nat.zero_mul]
         have hB : (3^(2*a+1) * (lteCoeff a)^3) % 9 = 0 := by
@@ -286,7 +284,6 @@ theorem omega_base_mod9 (a : Nat) (ha : 1 ≤ a) :
       · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
           rw [Nat.pow_succ, Nat.pow_mul]
         rw [hstep, Nat.pow_mod, ih hpos]
-        norm_num
 
 /-- The geometric mean is the core mass modulo nine from sheet level one
 onward. -/
@@ -342,13 +339,10 @@ theorem omega_level2_digit_two (a core : Nat) (ha : 1 ≤ a)
   rcases hcore with h1 | h5 | h6
   · have hval : (7 * core) % 9 = 7 := by omega
     rw [hval]
-    norm_num
   · have hval : (7 * core) % 9 = 8 := by omega
     rw [hval]
-    norm_num
   · have hval : (7 * core) % 9 = 6 := by omega
     rw [hval]
-    norm_num
 
 /-! ## §4 The tower stabilization — the controller's "depth is arbitrary" -/
 
@@ -361,13 +355,13 @@ theorem omega_lteCoeff_mod_step (a L : Nat) (ha : L ≤ a + 1) :
       rw [← Nat.pow_add]
       congr 1
       omega
-    rw [hsplit, Nat.mul_mod_left]
+    rw [hsplit, Nat.mul_mod, Nat.mod_self, Nat.zero_mul, Nat.zero_mod]
   have h2 : 3^(2*a+1) % 3^L = 0 := by
     have hsplit : 3^(2*a+1) = 3^L * 3^(2*a+1-L) := by
       rw [← Nat.pow_add]
       congr 1
       omega
-    rw [hsplit, Nat.mul_mod_left]
+    rw [hsplit, Nat.mul_mod, Nat.mod_self, Nat.zero_mul, Nat.zero_mod]
   have hA : (3^(a+1) * (lteCoeff a)^2) % 3^L = 0 := by
     rw [Nat.mul_mod, h1, Nat.zero_mul]
   have hB : (3^(2*a+1) * (lteCoeff a)^3) % 3^L = 0 := by
