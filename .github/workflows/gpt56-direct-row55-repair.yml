@@ -33,6 +33,7 @@ jobs:
             GSTFourPowerDirectExistence
             GSTFourPowerDirectAdditionCarry
             GSTFourPowerDirectHappyBridge
+            GSTFourPowerAffineOrbit
             GSTFourPowerAffinePrefixIsometry
           )
           for module in "${modules[@]}"; do
