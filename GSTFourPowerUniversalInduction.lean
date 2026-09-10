@@ -1,5 +1,4 @@
 import GSTFourPowerDirectExistenceInline
-import GSTFourPowerDirectChat2Application
 import GSTFourPowerAffineRenormalizedOrbit
 
 set_option maxRecDepth 1000000
@@ -9,9 +8,9 @@ namespace GSTFourPowerUniversalInduction
 
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectResidue
-open GSTFourPowerDirectChat2Application
 open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineChannelAutomaton
+open GSTFourPowerAffineClassifierBridge
 open GSTFourPowerAffineRenormalizedOrbit
 
 /-- The exact remaining branch descent package for the minimal-counterexample
@@ -72,7 +71,7 @@ private theorem no_bad_channel_one_of_commonTwo
     (K : Nat) (hCommon : CommonTwo K) :
     ¬ BadChannel 1 (affineOrbit K) := by
   intro hBad
-  exact ((chat2_noCommonTwo_iff_bad_channel_one K).2 hBad) hCommon
+  exact ((noCommonTwo_iff_badChannel_one K).2 hBad) hCommon
 
 private theorem no_bad_channel_one_finite_base
     (K : Nat) (hK5 : 5 ≤ K) (hK15 : K < 15) (hK7 : K ≠ 7) :
@@ -138,7 +137,7 @@ theorem no_bad_affine_channel_one_of_branch_bad_descent
         · have hParentNoBad : ¬ BadChannel 1 (affineOrbit q) :=
             ih q hqLt hq5 hq7
           have hNoK : ¬ CommonTwo K :=
-            (chat2_noCommonTwo_iff_bad_channel_one K).2 hBad
+            (noCommonTwo_iff_badChannel_one K).2 hBad
           interval_cases r
           · have hKshape : K = 3*q := by omega
             have hNo3 : ¬ CommonTwo (3*q) := by
@@ -163,8 +162,11 @@ theorem no_bad_affine_channel_one_of_branch_bad_descent
 theorem fourPowerDirectExistence_of_branch_bad_descent
     (hDesc : BranchBadDescent) :
     FourPowerDirectExistence := by
-  exact (chat2_fourPowerDirectExistence_iff_no_bad_affine_channel_one).2
-    (no_bad_affine_channel_one_of_branch_bad_descent hDesc)
+  intro K hK5 hK7
+  by_contra hNo
+  exact
+    (no_bad_affine_channel_one_of_branch_bad_descent hDesc K hK5 hK7)
+      ((noCommonTwo_iff_badChannel_one K).1 hNo)
 
 #check BranchBadDescent
 #check no_bad_affine_channel_one_of_branch_bad_descent
