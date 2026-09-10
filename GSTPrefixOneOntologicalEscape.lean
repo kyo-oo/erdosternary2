@@ -7,6 +7,7 @@ import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
 import GSTFourPowerDirectExistenceFromHappy
 import GSTFourPowerThirdWave
+import GSTGraphV2OmegaWaveLaw
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -89,6 +90,20 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
+/-- Monolith transplant entrypoint from the Ω-Wave Law's LTE-cut gate.  The
+class-two family — every exponent `K = 3^a * core` with `a ≥ 1` and
+`core ≡ 2 (mod 3)`, an infinite arithmetic family previously held only by
+the third-wave climb hypothesis — now delivers its creation certificate
+unconditionally through the genuine new Ω-wave transfusion operator, the
+omega handwritten LTE tower, and the infinite controller puncture. -/
+theorem gst_four_power_creation_certificate_noAxiom_from_omegaCut
+    (K : Nat) (hK : GSTGraphV2OmegaWaveLaw.omegaClassTwo K) :
+    ∃ p : Nat, 1 ≤ p ∧ (4^K) / 3^p % 3 = 2 ∧
+      ((4 * ((4^K) % 3^p)) / 3^p % 3 = 0 ∨
+       ((4 * ((4^K) % 3^p)) / 3^p % 3 = 1 ∧
+        (4^K) / 3^(p+1) % 3 = 2)) :=
+  gst_four_power_creation_certificate_of_omega_cut K hK
+
 /-- THE THIRD-WAVE GATE, delivered from the climb.  The residual content of
 the retired inline boundary, now flowing from the universe's own primitive:
 the third-wave climb (`GSTInfiniteFourPowerNavigation.four_power_happy_climb`)
@@ -97,7 +112,9 @@ direct FromHappy bridge converts each Happy row into CommonTwo through the
 exact multiplication-by-four carry formula, and the kernel-verified band law
 `thirdWave_iff_commonTwo` lands the gate.  Rows five and six fire through the
 row-two residue classifier.  The climb primitive is the one explicit input,
-consumed by name and hidden nowhere. -/
+consumed by name and hidden nowhere.  For the Ω-class-two family the gate is
+now delivered with no input at all: the LTE-cut gate of the Ω-Wave Law
+(`GSTGraphV2OmegaWaveLaw.omega_cut_happy_gate`) fires it directly. -/
 theorem gst_four_power_third_wave_gate
     (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     ∀ K : Nat, 5 ≤ K → K ≠ 7 → GSTFourPowerThirdWave.thirdWave K := by
@@ -129,10 +146,12 @@ theorem gst_four_power_creation_certificate_inline
 #check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
 #check gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
+#check gst_four_power_creation_certificate_noAxiom_from_omegaCut
 #print axioms gst_four_power_creation_certificate_noAxiom_from_provider
 #print axioms gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_prefixHitGeThree
 #print axioms gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_one
+#print axioms gst_four_power_creation_certificate_noAxiom_from_omegaCut
 #print axioms gst_four_power_third_wave_gate
 #print axioms gst_four_power_direct_existence_inline
 #print axioms gst_four_power_creation_certificate_inline
