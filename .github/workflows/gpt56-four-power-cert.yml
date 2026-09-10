@@ -15,6 +15,7 @@ on:
       - 'GSTFourPowerThreeStepQuotientChannel.lean'
       - 'GSTFourPowerAffineRenormalizedOrbit.lean'
       - 'GSTFourPowerDirectChat2Application.lean'
+      - 'GSTInfiniteFourPowerNavigation.lean'
   workflow_dispatch:
 
 concurrency:
@@ -57,6 +58,7 @@ jobs:
             Path('GSTFourPowerThirdWaveBranchReactor.lean'),
             Path('GSTFourPowerThirdWaveResidueBarriers.lean'),
             Path('GSTFourPowerBranchDescentProbe.lean'),
+            Path('GSTInfiniteFourPowerNavigation.lean'),
           ]
           BUILD = Path('.lake/build/lib/lean')
           import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
@@ -90,6 +92,13 @@ jobs:
               subprocess.run(['lake','env','lean','-o',str(out),str(path)],check=True)
           print('DIRECT_IMPORT_CLOSURE_GREEN=1')
           PY
+      - name: Compile four-power navigation collision seam
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTInfiniteFourPowerNavigation.lean 2>&1 | tee four-power-navigation.log
+
       - name: Compile standalone direct replacement bridge
         shell: bash
         run: |
