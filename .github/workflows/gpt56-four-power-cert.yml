@@ -8,6 +8,7 @@ on:
       - '.github/workflows/gpt56-four-power-cert.yml'
       - 'GSTFourPowerDirectExistenceInline.lean'
       - 'GSTFourPowerUniversalInduction.lean'
+      - 'GSTFourPowerThirdWaveBranchReactor.lean'
       - 'GSTFourPowerBranchDescentProbe.lean'
       - 'GSTFourPowerThreeStepBadnessDescent.lean'
       - 'GSTFourPowerThreeStepQuotientChannel.lean'
@@ -52,6 +53,7 @@ jobs:
           ROOTS = [
             Path('GSTFourPowerDirectExistenceInline.lean'),
             Path('GSTFourPowerUniversalInduction.lean'),
+            Path('GSTFourPowerThirdWaveBranchReactor.lean'),
             Path('GSTFourPowerBranchDescentProbe.lean'),
           ]
           BUILD = Path('.lake/build/lib/lean')
@@ -102,15 +104,22 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTFourPowerUniversalInduction.olean GSTFourPowerUniversalInduction.lean 2>&1 | tee universal-induction.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' universal-induction.log
           echo 'UNIVERSAL_INDUCTION_BRIDGE_COMPILED=1'
-      - name: Compile branch descent probe
+      - name: Compile third-wave branch reactor
         shell: bash
         run: |
-          set +e
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerThirdWaveBranchReactor.olean GSTFourPowerThirdWaveBranchReactor.lean 2>&1 | tee third-wave-reactor.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' third-wave-reactor.log
+          echo 'THIRD_WAVE_BRANCH_REACTOR_COMPILED=1'
+      - name: Compile branch descent proof target
+        shell: bash
+        run: |
+          set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean GSTFourPowerBranchDescentProbe.lean 2>&1 | tee branch-descent-probe.log
-          status=$?
-          echo "BRANCH_DESCENT_PROBE_EXIT=$status"
-          exit 0
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' branch-descent-probe.log
+          echo 'BRANCH_DESCENT_PROOF_GREEN=1'
       - name: Axiom audit
         shell: bash
         run: |
@@ -119,12 +128,15 @@ jobs:
           cat > GPT56FourPowerDirectAudit.lean <<'EOF'
           import GSTFourPowerDirectExistenceInline
           import GSTFourPowerUniversalInduction
+          import GSTFourPowerThirdWaveBranchReactor
           #print axioms GSTFourPowerDirectExistenceInline.gst_three_step_badness_descent_of_canonical_channel_descent
           #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_happy_ge_three_of_canonical_channel_descent
           #print axioms GSTFourPowerDirectExistenceInline.happy_row_to_commonTwo_inline
           #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_direct_existence_of_canonical_channel_descent
           #print axioms GSTFourPowerUniversalInduction.no_bad_affine_channel_one_of_branch_bad_descent
           #print axioms GSTFourPowerUniversalInduction.fourPowerDirectExistence_of_branch_bad_descent
+          #print axioms GSTFourPowerThirdWaveBranchReactor.branchBadDescent_iff_thirdWaveNoCommonDescent
+          #print axioms GSTFourPowerThirdWaveBranchReactor.fourPowerDirectExistence_of_thirdWaveNoCommonDescent
           EOF
           lake env lean GPT56FourPowerDirectAudit.lean 2>&1 | tee direct-replacement-axioms.log
           if grep -Fq 'sorryAx' direct-replacement-axioms.log; then
