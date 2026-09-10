@@ -385,12 +385,7 @@ theorem omega_lteCoeff_mod_step (a L : Nat) (ha : L ≤ a + 1) :
   have hunfold : lteCoeff (a+1)
       = lteCoeff a + 3^(a+1) * (lteCoeff a)^2
         + 3^(2*a+1) * (lteCoeff a)^3 := rfl
-  rw [hunfold, hA0]
-  rw [show lteCoeff a + 3^L * ((3^(a+1) * (lteCoeff a)^2) / 3^L)
-        + 3^(2*a+1) * (lteCoeff a)^3
-        = (lteCoeff a + 3^L * ((3^(a+1) * (lteCoeff a)^2) / 3^L))
-          + 3^L * ((3^(2*a+1) * (lteCoeff a)^3) / 3^L) from by
-      rw [hB0]]
+  rw [hunfold, hA0, hB0]
   rw [Nat.add_mul_mod_self_left, Nat.add_mul_mod_self_left]
 
 /-- **THE TOWER STABILIZATION LAW** — the arithmetic form of the infinite
