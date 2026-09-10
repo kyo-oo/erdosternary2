@@ -1,5 +1,6 @@
 import GSTFourPowerAffinePrefixIsometry
 import GSTFourPowerDirectHappyBridge
+import GSTFourPowerDirectFiftyFifthResidueClosed
 
 namespace GSTFourPowerDirectFiftyFifthRow
 
@@ -7,10 +8,11 @@ open GSTFourPowerDirectResidue
 open GSTFourPowerDirectExistence
 open GSTFourPowerAffinePrefixIsometry
 open GSTFourPowerDirectHappyBridge
+open GSTFourPowerDirectFiftyFifthResidueClosed
 
 private theorem row55_reference :
     digit3 (4 ^ 85117) 55 = 2 ∧ digit3 (4 ^ 85118) 55 = 2 := by
-  norm_num [digit3]
+  exact row55_reference_closed
 
 theorem commonTwo_of_mod174449211009120179071170507_85117
     (N : Nat) (hN : N % 174449211009120179071170507 = 85117) : CommonTwo N := by
