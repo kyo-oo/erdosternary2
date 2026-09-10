@@ -94,7 +94,6 @@ theorem digit3_four_mul_of_ge (R p : Nat)
   have hslt : 4 * (R % 3^p) - 3 * 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 3 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
-    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
   have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
@@ -114,7 +113,6 @@ theorem digit3_four_mul_of_mid1 (R p : Nat)
   have hslt : 4 * (R % 3^p) - 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 1 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
-    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
   have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
@@ -134,7 +132,6 @@ theorem digit3_four_mul_of_mid2 (R p : Nat)
   have hslt : 4 * (R % 3^p) - 2 * 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 2 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
-    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
   have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
