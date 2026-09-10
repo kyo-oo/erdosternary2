@@ -9,9 +9,11 @@ set_option maxHeartbeats 20000000
 namespace GSTGraphV2OmegaWaveLaw
 
 open GSTCanonicalSevenAxisBridge
-open GSTFourPowerDirectResidue
+open GSTFourPowerDirectResidue (lteCoeff lteCoeff_mod3_one
+  pow4_three_power_lte_exact pow4_mod3_one pow4_scaled_mod_next)
 open GSTGraphV2InfiniteControl
 open GSTGraphV2HandwrittenOmegaUBlock
+open GSTGraphV2InfiniteControllerBridge
 open GST2DMixedEmergence
 open GSTU2DEventTransport
 
@@ -150,10 +152,8 @@ theorem omega_cut_factor (a core : Nat) :
       simp [omegaGeoSum, omegaCutWord]
   | succ core ih =>
       have hbase := pow4_three_power_lte_exact a
-      have hstep : 4^(3^a * (core+1)) = 4^(3^a * core) * 4^(3^a) := by
-        rw [← Nat.pow_add]
-        congr 1
-        ring
+      have hstep : 4^(3^a * (core+1)) = 4^(3^a * core) * 4^(3^a) :=
+        Nat.pow_add 4 (3^a * core) (3^a)
       have hterm : (4^(3^a))^core = 4^(3^a * core) := by
         rw [Nat.pow_mul]
       have hgeoW : omegaCutWord a (core+1)
@@ -363,9 +363,9 @@ theorem omega_lteCoeff_mod_step (a L : Nat) (ha : L ≤ a + 1) :
       omega
     rw [hsplit, Nat.mul_mod, Nat.mod_self, Nat.zero_mul, Nat.zero_mod]
   have hA : (3^(a+1) * (lteCoeff a)^2) % 3^L = 0 := by
-    rw [Nat.mul_mod, h1, Nat.zero_mul]
+    rw [Nat.mul_mod, h1, Nat.zero_mul, Nat.zero_mod]
   have hB : (3^(2*a+1) * (lteCoeff a)^3) % 3^L = 0 := by
-    rw [Nat.mul_mod, h2, Nat.zero_mul]
+    rw [Nat.mul_mod, h2, Nat.zero_mul, Nat.zero_mod]
   have hA0 : 3^(a+1) * (lteCoeff a)^2
       = 3^L * ((3^(a+1) * (lteCoeff a)^2) / 3^L) := by
     have hdiv : (3^(a+1) * (lteCoeff a)^2) % 3^L
