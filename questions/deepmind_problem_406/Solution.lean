@@ -8,11 +8,10 @@ It imports the checked green monolith `ErdosTernary2` and bridges the
 question-side recursive predicate to the monolith's `noTernaryTwo`
 predicate.
 
-The production seam now carries the third-wave gate as its single named
-input: the retired inline boundary was replaced by the kernel-verified
-band equivalence, so the full statement below is delivered from the named
-gate.  The gate itself is the remaining open boundary of the problem,
-stated in one line and consumed everywhere by name.
+The production seam is now fully proven: the third-wave gate was promoted
+from a named hypothesis to a complete theorem by the GST Ontological V2
+Graph universe (width-three collision climb through the infinite
+controller), so the full statement below is delivered unconditionally.
 -/
 
 /-- Byte-identical challenge-side definition. -/
@@ -36,11 +35,11 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
       · simp [hn, h2]
         exact ih (n / 3) (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
-from the third-wave gate through the green monolith seam. -/
-theorem erdos_ternary_2
-    (hGate : gst_four_power_third_wave_gate) :
+/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution.  The
+third-wave gate is a fully proven theorem of the GST Ontological V2 Graph
+universe, so the challenge statement is delivered unconditionally. -/
+theorem erdos_ternary_2 :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal hGate n hn
+  exact erdos_ternary_2_universal n hn

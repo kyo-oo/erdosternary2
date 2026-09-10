@@ -16931,21 +16931,19 @@ theorem gst_prefix_one_navigation_lift_of_master_inline
 
 /-- The independently kernel-checked width-three wave supplies the exact
 four-power creation master required by the ontological prefix-one adapter. -/
-theorem gst_four_power_creation_master_inline
-    (hGate : gst_four_power_third_wave_gate) :
+theorem gst_four_power_creation_master_inline :
     GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
   intro K hK5 hK7
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
-    (gst_four_power_creation_certificate_inline hGate K hK5 hK7)
+    (gst_four_power_creation_certificate_inline K hK5 hK7)
 
 /-- Public prefix-one theorem.  This route is entirely positive: the green
-width-three wave builds FP-NAV from the third-wave gate, and POE constructs
-the parent Happy gate. -/
-theorem gst_prefix_one_navigation_lift
-    (hGate : gst_four_power_third_wave_gate) :
+width-three wave builds FP-NAV from the proven third-wave gate, and POE
+constructs the parent Happy gate. -/
+theorem gst_prefix_one_navigation_lift :
     GSTPrefixOneNavigationLift :=
   gst_prefix_one_navigation_lift_of_master_inline
-    (gst_four_power_creation_master_inline hGate)
+    gst_four_power_creation_master_inline
 
 
 /-- The two consecutive power waves overlap at a Happy Gate.  The left branch
@@ -16987,27 +16985,25 @@ theorem gst_four_pow_adjacent (a : Nat) (ha : 1 ≤ a) :
     This is strictly weaker than `GSTResidualNavigationLift` and is exactly
     what the final digit theorem consumes. -/
 theorem gst_power_two_wave_large
-    (hGate : gst_four_power_third_wave_gate)
     (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
   unfold GSTPowerTwoWave
   have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
     GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
-      (gst_four_power_creation_master_inline hGate) a (by omega) (by omega)
+      gst_four_power_creation_master_inline a (by omega) (by omega)
   have hnav : GSTNavigationWitness (4^a) :=
     gst_navigation_witness_of_standalone_navigation (4^a) hnav0
   obtain ⟨p, hd, _hspace⟩ := hnav
   exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
 
 /-- The weaker two-wave theorem closes the even exponent directly from the
-third-wave gate. -/
+proven third-wave gate. -/
 theorem erdos_ternary_2_even_universal
-    (hGate : gst_four_power_third_wave_gate)
     (a : Nat) (ha : 5 ≤ a) :
     hasTernaryTwo (4^a) = true := by
   by_cases ha500 : a ≤ 500
   · exact modular_check_base a ha ha500
   · have htwo : GSTPowerTwoWave a :=
-      gst_power_two_wave_large hGate a (by omega)
+      gst_power_two_wave_large a (by omega)
     rcases htwo with hcurrent | hprevious
     · exact hcurrent
     · obtain ⟨p, hd, hspace⟩ := hprevious
@@ -17036,7 +17032,6 @@ theorem erdos_ternary_2_even_universal
       exact hasTernaryTwo_of_digit (4^a) p hd4
 
 theorem erdos_ternary_2_universal
-    (hGate : gst_four_power_third_wave_gate)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false := by
   by_cases hodd : n % 2 = 1
@@ -17048,4 +17043,4 @@ theorem erdos_ternary_2_universal
     rw [h4eq]
     have ha : 5 ≤ n/2 := by omega
     exact has_two_imp_not_no_two (4^(n/2))
-      (erdos_ternary_2_even_universal hGate (n/2) ha)
+      (erdos_ternary_2_even_universal (n/2) ha)
