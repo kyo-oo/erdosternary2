@@ -7,8 +7,11 @@ on:
     paths:
       - '.github/workflows/gpt56-four-power-cert.yml'
       - 'GSTFourPowerDirectExistenceInline.lean'
+      - 'GSTFourPowerUniversalInduction.lean'
       - 'GSTFourPowerThreeStepBadnessDescent.lean'
       - 'GSTFourPowerThreeStepQuotientChannel.lean'
+      - 'GSTFourPowerAffineRenormalizedOrbit.lean'
+      - 'GSTFourPowerDirectChat2Application.lean'
   workflow_dispatch:
 
 concurrency:
@@ -45,7 +48,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re, subprocess
-          ROOT = Path('GSTFourPowerDirectExistenceInline.lean')
+          ROOTS = [Path('GSTFourPowerDirectExistenceInline.lean'), Path('GSTFourPowerUniversalInduction.lean')]
           BUILD = Path('.lake/build/lib/lean')
           import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
           def local_path(module): return Path(*module.split('.')).with_suffix('.lean')
@@ -65,7 +68,8 @@ jobs:
               temp.append(module)
               for dep in imports_of(path): visit(dep)
               temp.pop(); done.add(module); order.append((module,path))
-          for module in imports_of(ROOT): visit(module)
+          for root in ROOTS:
+              for module in imports_of(root): visit(module)
           print(f'DIRECT_IMPORT_CLOSURE_COUNT={len(order)}')
           BUILD.mkdir(parents=True, exist_ok=True)
           for module,path in order:
@@ -84,6 +88,14 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectExistenceInline.olean GSTFourPowerDirectExistenceInline.lean 2>&1 | tee direct-replacement.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-replacement.log
           echo 'DIRECT_REPLACEMENT_BRIDGE_COMPILED=1'
+      - name: Compile universal induction bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerUniversalInduction.olean GSTFourPowerUniversalInduction.lean 2>&1 | tee universal-induction.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' universal-induction.log
+          echo 'UNIVERSAL_INDUCTION_BRIDGE_COMPILED=1'
       - name: Axiom audit
         shell: bash
         run: |
@@ -91,10 +103,13 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > GPT56FourPowerDirectAudit.lean <<'EOF'
           import GSTFourPowerDirectExistenceInline
+          import GSTFourPowerUniversalInduction
           #print axioms GSTFourPowerDirectExistenceInline.gst_three_step_badness_descent_of_canonical_channel_descent
           #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_happy_ge_three_of_canonical_channel_descent
           #print axioms GSTFourPowerDirectExistenceInline.happy_row_to_commonTwo_inline
           #print axioms GSTFourPowerDirectExistenceInline.gst_four_power_direct_existence_of_canonical_channel_descent
+          #print axioms GSTFourPowerUniversalInduction.no_bad_affine_channel_one_of_branch_bad_descent
+          #print axioms GSTFourPowerUniversalInduction.fourPowerDirectExistence_of_branch_bad_descent
           EOF
           lake env lean GPT56FourPowerDirectAudit.lean 2>&1 | tee direct-replacement-axioms.log
           if grep -Fq 'sorryAx' direct-replacement-axioms.log; then
