@@ -202,7 +202,7 @@ end GSTInfiniteFourPowerNavigation
 /-- Legacy infinite-route compatibility export, intentionally not using the
 monolith-facing direct-closure name. -/
 theorem gst_four_power_creation_certificate_inline_infinite_route
-    (hClimb : four_power_happy_climb)
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
   simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
