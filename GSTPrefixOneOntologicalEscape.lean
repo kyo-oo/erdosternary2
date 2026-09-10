@@ -5,6 +5,7 @@ import GSTFourPowerDirectCreationMaster
 import GSTFourPowerDirectHappyBridge
 import GSTFourPowerDirectFailedRelocationState
 import GSTFourPowerDirectExistenceProviderPipeline
+import GSTFourPowerThirdWave
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 10000000
@@ -87,21 +88,37 @@ theorem gst_four_power_creation_certificate_noAxiom_from_no_bad_affine_channel_o
     GSTFourPowerDirectExistenceProviderPipeline.fourPowerCreationCertificate_noAxiom_from_no_bad_affine_channel_one
       hNoBad K hK5 hK7
 
-/-- Explicit production boundary for the still-open direct universal existence
-law.  Kept out of the obsolete infinite-navigation provider so the committed
-production closure can build and the comparator can certify the current seam. -/
-axiom gst_four_power_direct_existence_inline :
-    GSTFourPowerDirectExistence.FourPowerDirectExistence
+/-- THE THIRD-WAVE GATE.  The exact residual content of the retired inline
+boundary, isolated by the kernel-verified band equivalence
+`GSTFourPowerThirdWave.fourPowerDirectExistence_iff_thirdWave`: for every
+exponent `K ≥ 5` with `K ≠ 7`, some row gate fires — a row-`p` digit two of
+`4^K` whose prefix lies in the outer quarter band.  This single named
+statement is the complete remaining mathematical input of the historical
+production seam; every other component of the old inline boundary is covered
+by checked theorems. -/
+def gst_four_power_third_wave_gate : Prop :=
+  ∀ K : Nat, 5 ≤ K → K ≠ 7 → GSTFourPowerThirdWave.thirdWave K
 
-/-- Root-level compatibility name consumed by the monolith tail.  It no longer
-imports or compiles the experimental infinite-navigation/collision route; it
-routes the old certificate API through the direct creation-master bridge. -/
+/-- The retired inline boundary, now a THEOREM of the third wave.  The
+historical statement is equivalent to the named gate by the kernel-verified
+band law, so it flows from the gate with no unproven declaration of any
+kind. -/
+theorem gst_four_power_direct_existence_inline
+    (hGate : gst_four_power_third_wave_gate) :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence := by
+  intro K hK5 hK7
+  exact (GSTFourPowerThirdWave.thirdWave_iff_commonTwo K).mp (hGate K hK5 hK7)
+
+/-- Root-level compatibility name consumed by the monolith tail.  It routes
+the old certificate API through the third-wave gate and the direct
+creation-master bridge. -/
 theorem gst_four_power_creation_certificate_inline
+    (hGate : gst_four_power_third_wave_gate)
     (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
   exact
     (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-      gst_four_power_direct_existence_inline) K hK5 hK7
+      (gst_four_power_direct_existence_inline hGate)) K hK5 hK7
 
 #check gst_four_power_creation_certificate_noAxiom_from_provider
 #check gst_four_power_creation_certificate_noAxiom_from_commonTwoGeThree
