@@ -116,9 +116,7 @@ theorem happy_row_to_commonTwo
       rw [digit3_four_mul, hd]
       rcases hcarryCases with h0 | h3
       · rw [h0]
-        norm_num
       · rw [h3]
-        norm_num
     simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using ht4
 
 /-- Closed four-power direct existence theorem, delivered from the explicit
