@@ -39,6 +39,7 @@ import GSTGraphV2InfiniteControllerBridge
 import GSTGraphV2PerfectPowerBlockProbe
 import GSTU2DSharpCrossingBlock
 import GSTFinalPurePowerResidueTransplant
+import GSTFourPowerThirdWave
 -- SOL56 CANONICAL TAIL SURGERY: stale prefix-one incidence imports removed
 -- SOL56 CANONICAL TAIL SURGERY: direct *Scratch imports neutralized because their declarations are inlined
 

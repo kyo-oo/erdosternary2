@@ -23,6 +23,7 @@ roots = [
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
+  "GSTFourPowerThirdWave",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
   "GSTFourPowerAffineClassifierBridge",
