@@ -5,6 +5,7 @@ on:
     branches:
       - sol/gpt56-four-power-relocation-prod-20260903
     paths:
+      - GSTFourPowerDirectFiftyFifthResidueClosed.lean
       - GSTFourPowerDirectFiftyFifthRow.lean
       - .github/workflows/gpt56-direct-row55-repair.yml
   workflow_dispatch:
@@ -35,6 +36,7 @@ jobs:
             GSTFourPowerDirectHappyBridge
             GSTFourPowerAffineOrbit
             GSTFourPowerAffinePrefixIsometry
+            GSTFourPowerDirectFiftyFifthResidueClosed
           )
           for module in "${modules[@]}"; do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
@@ -51,13 +53,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -nE '\b(sorry|admit|axiom)\b|sorryAx|False\.elim' GSTFourPowerDirectFiftyFifthRow.lean
+          ! grep -nE '\b(sorry|admit|axiom)\b|sorryAx|False\.elim' GSTFourPowerDirectFiftyFifthResidueClosed.lean GSTFourPowerDirectFiftyFifthRow.lean
       - name: Axiom audit direct row55 theorem
         shell: bash
         run: |
           set -euo pipefail
           cat > /tmp/Audit.lean <<'EOF'
           import GSTFourPowerDirectFiftyFifthRow
+          #print axioms GSTFourPowerDirectFiftyFifthResidueClosed.row55_reference_closed
           #print axioms GSTFourPowerDirectFiftyFifthRow.commonTwo_of_mod174449211009120179071170507_85117
           #print axioms GSTFourPowerDirectFiftyFifthRow.physical_happy_of_mod174449211009120179071170507_85117
           EOF
