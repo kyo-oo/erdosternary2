@@ -17035,17 +17035,60 @@ theorem erdos_ternary_2_even_universal
       rw [gst_four_pow_adjacent a (by omega)] at hd4
       exact hasTernaryTwo_of_digit (4^a) p hd4
 
-theorem erdos_ternary_2_universal
-    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
-    (n : Nat) (hn : 9 ≤ n) :
+/-- THE OMEGA EVEN ROUTE.  The even case delivered from the Ω-Wave Law's
+coverage: below the kernel-checked base the modular check carries it; above
+the base the Law's Ω-cut tower and the elementary rows one and two carry
+every exponent outside the Ω-shadow residue, and the Ω-shadow wave input
+carries the residue.  No Happy cell, no climb: the digit two itself. -/
+theorem erdos_ternary_2_even_universal_omega
+    (hShadow : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave)
+    (a : Nat) (ha : 5 ≤ a) :
+    hasTernaryTwo (4^a) = true := by
+  by_cases ha500 : a ≤ 500
+  · exact modular_check_base a ha ha500
+  · obtain ⟨p, hp⟩ := GSTGraphV2OmegaWaveLaw.omega_digit_two_coverage hShadow a
+      (by omega)
+    exact hasTernaryTwo_of_digit (4^a) p hp
+
+/-- **The unconditional core of the final theorem.**  Every `n ≥ 9` outside
+the Ω-shadow of its half-exponent — and every odd `n` — is carried with no
+input at all: the odd wing by the elementary mod-three law, the even wing
+by the kernel-checked base and the Ω-Wave Law's own coverage. -/
+theorem erdos_ternary_2_unconditional_except_shadow (n : Nat) (hn : 9 ≤ n)
+    (hcov : n % 2 = 1 ∨ ¬ GSTGraphV2OmegaWaveLaw.omegaShadow (n / 2)) :
     noTernaryTwo (2^n) = false := by
   by_cases hodd : n % 2 = 1
   · exact erdos_ternary_2_odd_universal n hn hodd
-  · have heven : n % 2 = 0 := by omega
+  · have hNS : ¬ GSTGraphV2OmegaWaveLaw.omegaShadow (n / 2) := by
+      rcases hcov with h | h
+      · exact absurd h hodd
+      · exact h
     have h4eq : 2^n = 4^(n/2) := by
       have hn_eq : n = 2 * (n/2) := by omega
       rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
     rw [h4eq]
-    have ha : 5 ≤ n/2 := by omega
+    refine has_two_imp_not_no_two (4^(n/2)) ?_
+    by_cases ha500 : n / 2 ≤ 500
+    · exact modular_check_base (n/2) (by omega) ha500
+    · obtain ⟨p, hp⟩ := GSTGraphV2OmegaWaveLaw.omega_digit_two_of_not_shadow
+        (n/2) (by omega) hNS
+      exact hasTernaryTwo_of_digit (4^(n/2)) p hp
+
+/-- **THE FINAL THEOREM, Ω-ROUTE.**  The single input is the Ω-shadow wave:
+every shadow exponent still owns its ternary digit two.  This is strictly
+weaker than the retired third-wave climb (a digit, not a Happy cell; the
+shadow residue only, not every exponent from eight onward).  Everything
+else is carried unconditionally: odd `n` by the elementary mod-three law,
+the kernel-checked base up to 500, and the Ω-Wave Law's cut tower above it. -/
+theorem erdos_ternary_2_universal
+    (hShadow : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false := by
+  by_cases hodd : n % 2 = 1
+  · exact erdos_ternary_2_odd_universal n hn hodd
+  · have h4eq : 2^n = 4^(n/2) := by
+      have hn_eq : n = 2 * (n/2) := by omega
+      rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+    rw [h4eq]
     exact has_two_imp_not_no_two (4^(n/2))
-      (erdos_ternary_2_even_universal hClimb (n/2) ha)
+      (erdos_ternary_2_even_universal_omega hShadow (n/2) (by omega))

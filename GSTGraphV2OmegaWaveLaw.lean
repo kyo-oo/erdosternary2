@@ -547,6 +547,142 @@ theorem omega_cut_certificate (a core : Nat) (ha : 1 ≤ a)
 #print axioms omega_wave_digit_two_class_level_two
 #print axioms omega_cut_certificate
 
+/-! ## §7 The Ω-shadow residue — the Law replaces the climb
+
+The final stroke of the application: the production seam's hypothesis,
+stated until now as the full third-wave climb (every exponent from eight
+onward owns a physical Happy row), is replaced by the Law's own coverage.
+The Ω-cut tower plus two elementary row lemmas delivers the ternary digit
+two unconditionally for every exponent outside a sharply defined residue —
+the **Ω-shadow**: the exponents whose canonical 3-free core sits in the
+tower's uncovered classes (`core ≡ 4 (mod 9)` at any sheet level,
+`core ≡ 1 (mod 9)` at sheet zero, or `core ≡ 7 (mod 9)` above sheet zero).
+For the shadow itself the seam takes one residual input — the Ω-shadow
+wave: every shadow exponent still owns its digit two.  The input is
+strictly weaker than the climb: it asks only for a digit (not a Happy
+cell) and only on the shadow residue (not on every exponent). -/
+
+/-- The ternary digit at row two of any number congruent to twenty-two
+modulo twenty-seven: the prefix split hands the digit directly. -/
+theorem omega_digit_row_two_of_mod_27 (R : Nat) (hR : R % 27 = 22) :
+    digit3 R 2 = 2 := by
+  have hdm27 : 27 * (R / 27) + R % 27 = R := Nat.div_add_mod R 27
+  rw [hR] at hdm27
+  have hdm9 : 9 * (R / 9) + R % 9 = R := Nat.div_add_mod R 9
+  have hmod9 : R % 9 = 4 := by omega
+  rw [hmod9] at hdm9
+  unfold digit3
+  rw [show (3^2 : Nat) = 9 from by decide]
+  omega
+
+/-- **The elementary row-two law.**  Every exponent congruent to seven
+modulo nine owns its ternary digit two at row two: the base four has order
+nine modulo twenty-seven, so `4^K` rides the period to the residue
+twenty-two. -/
+theorem omega_row2_digit_two (K : Nat) (hK : K % 9 = 7) :
+    digit3 (4^K) 2 = 2 := by
+  have hdm : K = 9 * (K / 9) + 7 := by omega
+  have hpow : (4^9)^(K / 9) * 4^7 = 4^K := by
+    rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+  have h49 : (4^9) % 27 = 1 := by decide
+  have h47 : (4^7) % 27 = 22 := by decide
+  have h1 : ((4^9)^(K / 9)) % 27 = 1 := by
+    rw [Nat.pow_mod, h49, Nat.one_pow]
+    omega
+  have hmod : (4^K) % 27 = 22 := by
+    rw [← hpow, Nat.mul_mod, h1, h47]
+    norm_num
+  exact omega_digit_row_two_of_mod_27 (4^K) hmod
+
+/-- Every positive number splits as a pure power of three times a
+three-free core — the canonical decomposition the residue classes read
+from. -/
+theorem omega_three_free_decomposition (K : Nat) :
+    0 < K → ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core := by
+  induction K using Nat.strongRecOn with
+  | ind K ih =>
+    intro hK
+    by_cases h3 : 3 ∣ K
+    · obtain ⟨q, hq⟩ := h3
+      have hq0 : 0 < q := by omega
+      obtain ⟨s, core, hs, hc⟩ := ih q (by omega) hq0
+      exact ⟨s+1, core, by rw [hq, hs, Nat.pow_succ]; ring, hc⟩
+    · exact ⟨0, K, by simp, h3⟩
+
+/-- **The Ω-shadow residue.**  The exponents whose canonical 3-free core
+sits in the tower's uncovered classes: `core ≡ 4 (mod 9)` at any sheet
+level, `core ≡ 1 (mod 9)` at sheet zero, or `core ≡ 7 (mod 9)` above sheet
+zero.  Every other exponent is carried unconditionally by the Law's cut
+tower (core `≡ 2 (mod 3)`: row `s+1`; core `≡ 1, 5 (mod 9)` above sheet
+zero: row `s+2`) or by the elementary rows (exponent `≡ 2 (mod 3)`: row
+one; exponent `≡ 7 (mod 9)`: row two). -/
+def omegaShadow (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7))
+
+/-- **THE Ω-SHADOW WAVE** — the single residual input of the final
+theorem: every shadow exponent still owns its ternary digit two.
+Strictly weaker than the third-wave climb: a digit, not a Happy cell; the
+shadow residue only, not every exponent from eight onward. -/
+def four_power_omega_shadow_wave : Prop :=
+  ∀ K : Nat, 8 ≤ K → omegaShadow K → ∃ p : Nat, digit3 (4^K) p = 2
+
+/-- **THE Ω-COVERAGE CASE SPLIT.**  Every exponent from eight onward
+either lies in the Ω-shadow residue or owns its ternary digit two
+outright: the split is exhaustive over the canonical core classes. -/
+theorem omega_digit_two_cases (K : Nat) (hK : 8 ≤ K) :
+    omegaShadow K ∨ ∃ p : Nat, digit3 (4^K) p = 2 := by
+  obtain ⟨s, core, hsc, hc3⟩ := omega_three_free_decomposition K (by omega)
+  have h4 : (4^K) = 4^(3^s * core) := by rw [hsc]
+  by_cases hcone : core % 3 = 2
+  · refine Or.inr ⟨s+1, ?_⟩
+    rw [h4, omega_cut_digit s core]
+    exact hcone
+  · have hcases : core % 9 = 1 ∨ core % 9 = 4 ∨ core % 9 = 7 := by omega
+    rcases hcases with h1 | h4c | h7
+    · rcases Nat.eq_zero_or_pos s with s0 | spos
+      · rw [s0] at hsc
+        exact Or.inl ⟨0, core, hsc, hc3, Or.inr (Or.inl ⟨rfl, h1⟩)⟩
+      · refine Or.inr ⟨s+2, ?_⟩
+        rw [h4]
+        exact omega_level2_digit_two s core (by omega) (Or.inl h1)
+    · exact Or.inl ⟨s, core, hsc, hc3, Or.inl h4c⟩
+    · rcases Nat.eq_zero_or_pos s with s0 | spos
+      · rw [s0] at hsc
+        refine Or.inr ⟨2, ?_⟩
+        have hK9 : K % 9 = 7 := by
+          rw [hsc]
+          simpa using h7
+        exact omega_row2_digit_two K hK9
+      · exact Or.inl ⟨s, core, hsc, hc3, Or.inr (Or.inr ⟨by omega, h7⟩)⟩
+
+/-- **The climb, replaced.**  Every exponent outside the shadow owns its
+digit two outright — no Happy cell, no climb hypothesis. -/
+theorem omega_digit_two_of_not_shadow (K : Nat) (hK : 8 ≤ K)
+    (hNS : ¬ omegaShadow K) :
+    ∃ p : Nat, digit3 (4^K) p = 2 :=
+  (omega_digit_two_cases K hK).resolve_left hNS
+
+/-- **THE Ω-WAVE COVERAGE.**  Under the Ω-shadow wave input, every
+exponent from eight onward owns its ternary digit two. -/
+theorem omega_digit_two_coverage (hShadow : four_power_omega_shadow_wave)
+    (K : Nat) (hK : 8 ≤ K) :
+    ∃ p : Nat, digit3 (4^K) p = 2 :=
+  (omega_digit_two_cases K hK).elim (fun hsh => hShadow K hK hsh) id
+
+#check omegaShadow
+#check four_power_omega_shadow_wave
+#check omega_row2_digit_two
+#check omega_three_free_decomposition
+#check omega_digit_two_cases
+#check omega_digit_two_of_not_shadow
+#check omega_digit_two_coverage
+#print axioms omega_row2_digit_two
+#print axioms omega_three_free_decomposition
+#print axioms omega_digit_two_cases
+#print axioms omega_digit_two_of_not_shadow
+#print axioms omega_digit_two_coverage
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,
