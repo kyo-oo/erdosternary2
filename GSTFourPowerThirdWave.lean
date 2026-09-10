@@ -76,34 +76,33 @@ theorem digit3_four_mul_of_lt (R p : Nat)
     digit3 (4 * R) p = (4 * (R / 3^p)) % 3 := by
   have hpow : 0 < 3^p := Nat.pow_pos (by decide)
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
-  have h4R : 4 * R = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by
+  have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
       4 * R = 4 * (R % 3^p + 3^p * (R / 3^p)) := by rw [hR]
-      _ = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by ring
+      _ = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
   unfold digit3
   rw [h4R, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hband]
-  simp
+  omega
 
 /-- Row law, high band: prefix in the top quarter (carry `c = 3`). -/
 theorem digit3_four_mul_of_ge (R p : Nat)
     (hband : 3 * 3^p ≤ 4 * (R % 3^p)) :
     digit3 (4 * R) p = (4 * (R / 3^p) + 3) % 3 := by
   have hpow : 0 < 3^p := Nat.pow_pos (by decide)
-  have h4lt : 4 * (R % 3^p) < 4 * 3^p := by
-    have hb : R % 3^p < 3^p := Nat.mod_lt _ hpow
-    omega
   have hs : 4 * (R % 3^p) =
-      3 * 3^p + (4 * (R % 3^p) - 3 * 3^p) := by omega
+      (4 * (R % 3^p) - 3 * 3^p) + 3^p * 3 := by omega
   have hslt : 4 * (R % 3^p) - 3 * 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 3 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
+    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
-  have h4R : 4 * R = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by
+  have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
       4 * R = 4 * (R % 3^p + 3^p * (R / 3^p)) := by rw [hR]
-      _ = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by ring
+      _ = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
   unfold digit3
   rw [h4R, Nat.add_mul_div_left _ _ hpow, hdiv]
+  omega
 
 /-- Row law, low-middle band: prefix in the second quarter (carry `c = 1`). -/
 theorem digit3_four_mul_of_mid1 (R p : Nat)
@@ -111,17 +110,19 @@ theorem digit3_four_mul_of_mid1 (R p : Nat)
     digit3 (4 * R) p = (4 * (R / 3^p) + 1) % 3 := by
   have hpow : 0 < 3^p := Nat.pow_pos (by decide)
   have hs : 4 * (R % 3^p) =
-      1 * 3^p + (4 * (R % 3^p) - 3^p) := by omega
+      (4 * (R % 3^p) - 3^p) + 3^p * 1 := by omega
   have hslt : 4 * (R % 3^p) - 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 1 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
+    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
-  have h4R : 4 * R = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by
+  have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
       4 * R = 4 * (R % 3^p + 3^p * (R / 3^p)) := by rw [hR]
-      _ = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by ring
+      _ = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
   unfold digit3
   rw [h4R, Nat.add_mul_div_left _ _ hpow, hdiv]
+  omega
 
 /-- Row law, high-middle band: prefix in the third quarter (carry `c = 2`). -/
 theorem digit3_four_mul_of_mid2 (R p : Nat)
@@ -129,17 +130,19 @@ theorem digit3_four_mul_of_mid2 (R p : Nat)
     digit3 (4 * R) p = (4 * (R / 3^p) + 2) % 3 := by
   have hpow : 0 < 3^p := Nat.pow_pos (by decide)
   have hs : 4 * (R % 3^p) =
-      2 * 3^p + (4 * (R % 3^p) - 2 * 3^p) := by omega
+      (4 * (R % 3^p) - 2 * 3^p) + 3^p * 2 := by omega
   have hslt : 4 * (R % 3^p) - 2 * 3^p < 3^p := by omega
   have hdiv : 4 * (R % 3^p) / 3^p = 2 := by
     rw [hs, Nat.add_mul_div_left _ _ hpow, Nat.div_eq_of_lt hslt]
+    omega
   have hR : R % 3^p + 3^p * (R / 3^p) = R := Nat.mod_add_div R (3^p)
-  have h4R : 4 * R = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by
+  have h4R : 4 * R = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by
     calc
       4 * R = 4 * (R % 3^p + 3^p * (R / 3^p)) := by rw [hR]
-      _ = (4 * (R / 3^p)) * 3^p + 4 * (R % 3^p) := by ring
+      _ = 4 * (R % 3^p) + 3^p * (4 * (R / 3^p)) := by ring
   unfold digit3
   rw [h4R, Nat.add_mul_div_left _ _ hpow, hdiv]
+  omega
 
 /-! ## The gate equivalence -/
 
@@ -164,11 +167,11 @@ theorem row_pair_iff_band (K p : Nat) :
     · by_cases h3 : 3 * 3^p ≤ 4 * (4^K % 3^p)
       · exact Or.inr h3
       · by_cases h2 : 4 * (4^K % 3^p) < 2 * 3^p
-        · rw [digit3_four_mul_of_mid1 4^K p (by omega) h2] at hd2
+        · rw [digit3_four_mul_of_mid1 (4^K) p (by omega) h2] at hd2
           exfalso
           unfold digit3 at hd
           omega
-        · rw [digit3_four_mul_of_mid2 4^K p (by omega) (by omega)] at hd2
+        · rw [digit3_four_mul_of_mid2 (4^K) p (by omega) (by omega)] at hd2
           exfalso
           unfold digit3 at hd
           omega
@@ -176,10 +179,10 @@ theorem row_pair_iff_band (K p : Nat) :
     refine ⟨hd, ?_⟩
     rw [hpow4]
     rcases hband with hlow | hhigh
-    · rw [digit3_four_mul_of_lt 4^K p hlow]
+    · rw [digit3_four_mul_of_lt (4^K) p hlow]
       unfold digit3 at hd
       omega
-    · rw [digit3_four_mul_of_ge 4^K p hhigh]
+    · rw [digit3_four_mul_of_ge (4^K) p hhigh]
       unfold digit3 at hd
       omega
 
@@ -197,9 +200,9 @@ theorem fourPowerDirectExistence_iff_thirdWave :
     FourPowerDirectExistence ↔ ∀ K : Nat, 5 ≤ K → K ≠ 7 → thirdWave K := by
   constructor
   · intro h K hK5 hK7
-    exact (thirdWave_iff_commonTwo K).mp (h K hK5 hK7)
-  · intro h K hK5 hK7
     exact (thirdWave_iff_commonTwo K).mpr (h K hK5 hK7)
+  · intro h K hK5 hK7
+    exact (thirdWave_iff_commonTwo K).mp (h K hK5 hK7)
 
 /-- Every established row overlap class fires the third wave. -/
 theorem thirdWave_of_mod9_five_or_six (K : Nat)
