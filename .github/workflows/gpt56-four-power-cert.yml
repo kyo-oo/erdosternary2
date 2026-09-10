@@ -8,6 +8,7 @@ on:
       - '.github/workflows/gpt56-four-power-cert.yml'
       - 'GSTFourPowerDirectExistenceInline.lean'
       - 'GSTFourPowerUniversalInduction.lean'
+      - 'GSTFourPowerBranchDescentProbe.lean'
       - 'GSTFourPowerThreeStepBadnessDescent.lean'
       - 'GSTFourPowerThreeStepQuotientChannel.lean'
       - 'GSTFourPowerAffineRenormalizedOrbit.lean'
@@ -48,7 +49,11 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re, subprocess
-          ROOTS = [Path('GSTFourPowerDirectExistenceInline.lean'), Path('GSTFourPowerUniversalInduction.lean')]
+          ROOTS = [
+            Path('GSTFourPowerDirectExistenceInline.lean'),
+            Path('GSTFourPowerUniversalInduction.lean'),
+            Path('GSTFourPowerBranchDescentProbe.lean'),
+          ]
           BUILD = Path('.lake/build/lib/lean')
           import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
           def local_path(module): return Path(*module.split('.')).with_suffix('.lean')
@@ -69,7 +74,8 @@ jobs:
               for dep in imports_of(path): visit(dep)
               temp.pop(); done.add(module); order.append((module,path))
           for root in ROOTS:
-              for module in imports_of(root): visit(module)
+              if root.exists():
+                  for module in imports_of(root): visit(module)
           print(f'DIRECT_IMPORT_CLOSURE_COUNT={len(order)}')
           BUILD.mkdir(parents=True, exist_ok=True)
           for module,path in order:
@@ -96,6 +102,15 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GSTFourPowerUniversalInduction.olean GSTFourPowerUniversalInduction.lean 2>&1 | tee universal-induction.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' universal-induction.log
           echo 'UNIVERSAL_INDUCTION_BRIDGE_COMPILED=1'
+      - name: Compile branch descent probe
+        shell: bash
+        run: |
+          set +e
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFourPowerBranchDescentProbe.lean 2>&1 | tee branch-descent-probe.log
+          status=$?
+          echo "BRANCH_DESCENT_PROBE_EXIT=$status"
+          exit 0
       - name: Axiom audit
         shell: bash
         run: |
