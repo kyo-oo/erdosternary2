@@ -1860,6 +1860,318 @@ theorem omega_expcycle_row5_digit_two_four (K : Nat)
 
 #check omega_expcycle_row5_digit_two_four
 
+/-- The base's residue modulo two-thousand-one-hundred-eighty-seven at the
+quarter-period split: the first cross-sheet atom of the row-six cycle. -/
+theorem omega_four_pow_243_mod_2187 : (4^243) % 2187 = 730 := by
+  have h481 : (4^81) % 2187 = 1702 := by decide
+  have hsplit : 4^243 = 4^81 * 4^81 * 4^81 := by
+    rw [show (243:Nat) = 81 + 81 + 81 from by decide, Nat.pow_add, Nat.pow_add]
+  have hmul1 : 4^81 * 4^81 % 2187 = 1216 := by
+    rw [Nat.mul_mod, h481]
+  rw [hsplit, Nat.mul_mod, hmul1, h481]
+
+#check omega_four_pow_243_mod_2187
+
+/-- The base's full period modulo two-thousand-one-hundred-eighty-seven:
+the order of four is seven-hundred-twenty-nine, and the cube of the
+quarter-period atom lands exactly on one. -/
+theorem omega_four_pow_729_mod_2187 : (4^729) % 2187 = 1 := by
+  have h7243 : (4^243) % 2187 = 730 := omega_four_pow_243_mod_2187
+  have hsplit : 4^729 = 4^243 * 4^243 * 4^243 := by
+    rw [show (729:Nat) = 243 + 243 + 243 from by decide, Nat.pow_add, Nat.pow_add]
+  have hmul1 : 4^243 * 4^243 % 2187 = 1459 := by
+    rw [Nat.mul_mod, h7243]
+  rw [hsplit, Nat.mul_mod, hmul1, h7243]
+
+#check omega_four_pow_729_mod_2187
+
+/-- The base's period modulo two-thousand-one-hundred-eighty-seven: the
+order of four is seven-hundred-twenty-nine. -/
+theorem omega_expcycle_period2187 (j : Nat) :
+    ((4^729)^j) % 2187 = 1 := by
+  rw [Nat.pow_mod, omega_four_pow_729_mod_2187, Nat.one_pow]
+
+#check omega_expcycle_period2187
+
+/-- The LTE mean is constantly six hundred sixty-four modulo
+two-thousand-one-hundred-eighty-seven from sheet level six onward. -/
+theorem omega_lteCoeff_mod2187 (a : Nat) (ha : 6 ≤ a) :
+    lteCoeff a % 2187 = 664 := by
+  have h2187 : (3:Nat)^7 = 2187 := by decide
+  have hstable := omega_lteCoeff_stable 7 (a-6)
+  have hidx : (7-1) + (a-6) = a := by omega
+  rw [hidx, h2187] at hstable
+  rw [hstable]
+  decide
+
+/-- The base of the geometric mean is one modulo
+two-thousand-one-hundred-eighty-seven from sheet level six onward. -/
+theorem omega_base_mod2187 : ∀ a : Nat, 6 ≤ a → (4^(3^a)) % 2187 = 1 := by
+  intro a
+  induction a with
+  | zero => intro h; omega
+  | succ a ih =>
+      intro h
+      rcases Nat.lt_or_ge a 6 with hlt | hge
+      · have ha5 : a = 5 := by omega
+        rw [ha5]
+        have hidx : (3:Nat)^(5+1) = 729 := by decide
+        rw [hidx]
+        exact omega_four_pow_729_mod_2187
+      · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
+          rw [Nat.pow_succ, Nat.pow_mul]
+        rw [hstep, Nat.pow_mod, ih hge, Nat.one_pow]
+
+/-- The geometric mean is the core mass modulo
+two-thousand-one-hundred-eighty-seven from sheet level six onward. -/
+theorem omega_geo_mod2187 (a core : Nat) (ha : 6 ≤ a) :
+    omegaGeoSum a core % 2187 = core % 2187 := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 2187 = 1 := by
+    intro j
+    rw [Nat.pow_mod, omega_base_mod2187 a ha, Nat.one_pow]
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- **The level-seven cut word law.**  From sheet level six onward the
+cut word is `664 * core` modulo two-thousand-one-hundred-eighty-seven. -/
+theorem omega_cut_word_mod2187 (a core : Nat) (ha : 6 ≤ a) :
+    omegaCutWord a core % 2187 = (664 * core) % 2187 := by
+  unfold omegaCutWord
+  rw [Nat.mul_mod, omega_lteCoeff_mod2187 a ha, omega_geo_mod2187 a core ha]
+  omega
+
+/-- **THE LEVEL-SEVEN DIGIT LAW.**  The ternary digit of `4^(3^a * core)`
+at row `a+7` is the top trit of the cut word modulo
+two-thousand-one-hundred-eighty-seven. -/
+theorem omega_level7_digit (a core : Nat) :
+    digit3 (4^(3^a * core)) (a+7) = (omegaCutWord a core % 2187) / 729 := by
+  have hf := omega_cut_factor a core
+  have h1 : (1:Nat) < 3^(a+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(a+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ a+1)
+    omega
+  have hslice := prefix_slice_digit_exact (a+1) 1 (omegaCutWord a core) 6 h1
+  rw [show a+7 = (a+1)+6 from by omega, hf, hslice]
+  unfold digit3
+  rw [show (3:Nat)^6 = 729 from by decide]
+  omega
+
+/-- **THE LEVEL-SEVEN GATE CLASSES.**  For every core whose stabilized cut
+word reaches the top third of the residue window modulo
+two-thousand-one-hundred-eighty-seven, the power `4^(3^a * core)` owns a
+ternary digit two at row `a+7` — the seventh infinite family of the
+tower, at every sheet level six and above. -/
+theorem omega_level7_digit_two (a core : Nat) (ha : 6 ≤ a)
+    (hgate : 1458 ≤ (664 * core) % 2187) :
+    digit3 (4^(3^a * core)) (a+7) = 2 := by
+  rw [omega_level7_digit, omega_cut_word_mod2187 a core ha]
+  have hlt : (664 * core) % 2187 < 2187 := Nat.mod_lt _ (by decide)
+  omega
+
+#check omega_lteCoeff_mod2187
+#check omega_base_mod2187
+#check omega_geo_mod2187
+#check omega_cut_word_mod2187
+#check omega_level7_digit
+#check omega_level7_digit_two
+
+/-- **THE EXPONENT-CYCLE ROW-SIX GATE (one-sheet).**  Every three-free
+exponent congruent to thirty-seven, one hundred seventy-two, two hundred
+fifty-three, two hundred seventy-one, three hundred fifty-two, four
+hundred eighty-seven, five hundred sixty-eight, or six hundred
+eighty-five modulo seven-hundred-twenty-nine rides the base's period into
+the top third of the two-thousand-one-hundred-eighty-seven window: the
+digit two at row six. -/
+theorem omega_expcycle_row6_digit_two_one (K : Nat)
+    (hK : K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 271
+      ∨ K % 729 = 352 ∨ K % 729 = 487 ∨ K % 729 = 568 ∨ K % 729 = 685) :
+    digit3 (4^K) 6 = 2 := by
+  rcases hK with h37 | h172 | h253 | h271 | h352 | h487 | h568 | h685
+  · have hdm : K = 729 * (K / 729) + 37 := by omega
+    have hpow : (4^729)^(K / 729) * 4^37 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^37) % 2187 = 1813 := by decide
+    have hmod : (4^K) % 2187 = 1813 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 172 := by omega
+    have hpow : (4^729)^(K / 729) * 4^172 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^172) % 2187 = 1489 := by decide
+    have hmod : (4^K) % 2187 = 1489 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 253 := by omega
+    have hpow : (4^729)^(K / 729) * 4^253 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^253) % 2187 = 1732 := by decide
+    have hmod : (4^K) % 2187 = 1732 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 271 := by omega
+    have hpow : (4^729)^(K / 729) * 4^271 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^271) % 2187 = 1543 := by decide
+    have hmod : (4^K) % 2187 = 1543 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 352 := by omega
+    have hpow : (4^729)^(K / 729) * 4^352 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^352) % 2187 = 1786 := by decide
+    have hmod : (4^K) % 2187 = 1786 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 487 := by omega
+    have hpow : (4^729)^(K / 729) * 4^487 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^487) % 2187 = 1462 := by decide
+    have hmod : (4^K) % 2187 = 1462 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 568 := by omega
+    have hpow : (4^729)^(K / 729) * 4^568 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^568) % 2187 = 1705 := by decide
+    have hmod : (4^K) % 2187 = 1705 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 685 := by omega
+    have hpow : (4^729)^(K / 729) * 4^685 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^685) % 2187 = 1570 := by decide
+    have hmod : (4^K) % 2187 = 1570 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+
+#check omega_expcycle_row6_digit_two_one
+
+/-- **THE EXPONENT-CYCLE ROW-SIX GATE (four-sheet).**  Every three-free
+exponent congruent to thirty-one, two hundred fifty-six, three hundred
+thirty-seven, four hundred nine, four hundred ninety, five hundred
+twenty-six, six hundred seven, or six hundred seventy-nine modulo
+seven-hundred-twenty-nine rides the base's period into the top third of
+the two-thousand-one-hundred-eighty-seven window: the digit two at row
+six. -/
+theorem omega_expcycle_row6_digit_two_four (K : Nat)
+    (hK : K % 729 = 31 ∨ K % 729 = 256 ∨ K % 729 = 337 ∨ K % 729 = 409
+      ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 607 ∨ K % 729 = 679) :
+    digit3 (4^K) 6 = 2 := by
+  rcases hK with h31 | h256 | h337 | h409 | h490 | h526 | h607 | h679
+  · have hdm : K = 729 * (K / 729) + 31 := by omega
+    have hpow : (4^729)^(K / 729) * 4^31 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^31) % 2187 = 1795 := by decide
+    have hmod : (4^K) % 2187 = 1795 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 256 := by omega
+    have hpow : (4^729)^(K / 729) * 4^256 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^256) % 2187 = 1498 := by decide
+    have hmod : (4^K) % 2187 = 1498 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 337 := by omega
+    have hpow : (4^729)^(K / 729) * 4^337 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^337) % 2187 = 1741 := by decide
+    have hmod : (4^K) % 2187 = 1741 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 409 := by omega
+    have hpow : (4^729)^(K / 729) * 4^409 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^409) % 2187 = 1471 := by decide
+    have hmod : (4^K) % 2187 = 1471 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 490 := by omega
+    have hpow : (4^729)^(K / 729) * 4^490 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^490) % 2187 = 1714 := by decide
+    have hmod : (4^K) % 2187 = 1714 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 526 := by omega
+    have hpow : (4^729)^(K / 729) * 4^526 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^526) % 2187 = 1579 := by decide
+    have hmod : (4^K) % 2187 = 1579 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 607 := by omega
+    have hpow : (4^729)^(K / 729) * 4^607 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^607) % 2187 = 1822 := by decide
+    have hmod : (4^K) % 2187 = 1822 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+  · have hdm : K = 729 * (K / 729) + 679 := by omega
+    have hpow : (4^729)^(K / 729) * 4^679 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h4v : (4^679) % 2187 = 1552 := by decide
+    have hmod : (4^K) % 2187 = 1552 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period2187 (K / 729), h4v]
+    unfold digit3
+    rw [digit3_window, show 6 + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide,
+      show (3:Nat)^6 = 729 from by decide, hmod]
+
+#check omega_expcycle_row6_digit_two_four
+
 end
 
 /-- **The Ω-shadow tail after the sheet gate.**  The shadow residue after
@@ -1959,6 +2271,48 @@ both sheet gates, and the sheet-zero exponent-cycle gates through row
 five. -/
 def four_power_omega_shadow_wave_tail4 : Prop :=
   ∀ K : Nat, 500 < K → omegaShadowTail4 K → ∃ p : Nat, digit3 (4^K) p = 2
+
+/-- **The Ω-shadow tail after the sixth weakening.**  The shadow residue
+after the kernel-checked base, the third through seventh tower levels,
+both sheet gates, and the sheet-zero exponent-cycle gates through row
+six: every shadow exponent above the kernel base whose core dodges every
+proven gate — the tower classes at levels three through seven, both sheet
+gates, and the base's own period classes at rows three through six —
+remains. -/
+def omegaShadowTail5 (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    (2 ≤ s → core % 27 ≠ 13 ∧ core % 27 ≠ 25) ∧
+    (3 ≤ s → (16 * core) % 81 < 54) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) ∧
+    (1 ≤ s → (core % 9 = 4 →
+      3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))) ∧
+    (1 ≤ s → (core % 9 = 7 →
+      ((lteCoeff s * core) % 3^(s+3) < 3^(s+2)
+        ∨ 2 * 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3)))) ∧
+    (s = 0 → (core % 9 = 1 → core % 27 ≠ 19 ∧ core % 81 ≠ 55
+      ∧ core % 81 ≠ 64 ∧ core % 81 ≠ 73)) ∧
+    (s = 0 → (core % 9 = 4 → core % 27 ≠ 22 ∧ core % 81 ≠ 58
+      ∧ core % 81 ≠ 67 ∧ core % 81 ≠ 76)) ∧
+    (4 ≤ s → (178 * core) % 243 < 162) ∧
+    (5 ≤ s → (664 * core) % 729 < 486) ∧
+    (s = 0 → (core % 243 ≠ 85 ∧ core % 243 ≠ 91 ∧ core % 243 ≠ 112
+      ∧ core % 243 ≠ 118 ∧ core % 243 ≠ 163 ∧ core % 243 ≠ 175
+      ∧ core % 243 ≠ 190 ∧ core % 243 ≠ 202)) ∧
+    (6 ≤ s → (664 * core) % 2187 < 1458) ∧
+    (s = 0 → (core % 729 ≠ 31 ∧ core % 729 ≠ 37 ∧ core % 729 ≠ 172
+      ∧ core % 729 ≠ 253 ∧ core % 729 ≠ 256 ∧ core % 729 ≠ 271
+      ∧ core % 729 ≠ 337 ∧ core % 729 ≠ 352 ∧ core % 729 ≠ 409
+      ∧ core % 729 ≠ 487 ∧ core % 729 ≠ 490 ∧ core % 729 ≠ 526
+      ∧ core % 729 ≠ 568 ∧ core % 729 ≠ 607 ∧ core % 729 ≠ 679
+      ∧ core % 729 ≠ 685))
+
+/-- **THE Ω-SHADOW WAVE TAIL (SIXTH WEAKENING)** — the residual input
+after the kernel-checked base, the third through seventh tower levels,
+both sheet gates, and the sheet-zero exponent-cycle gates through row
+six. -/
+def four_power_omega_shadow_wave_tail5 : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTail5 K → ∃ p : Nat, digit3 (4^K) p = 2
 
 /-- **THE Ω-SHADOW WAVE, CLOSED FORM — the zero-input statement.**  The
 shadow wave with no tail bound and no kernel cut: every shadow exponent

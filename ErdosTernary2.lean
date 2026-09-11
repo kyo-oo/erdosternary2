@@ -17488,6 +17488,334 @@ theorem four_power_omega_shadow_wave_of_tail4
                                   · intro h202
                                     exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h202))))))⟩ hR5
 
+/-- **THE Ω-SHADOW WAVE, DISCHARGED FROM THE SIXTH WEAKENING.**  The
+kernel-checked modular base carries every shadow exponent up to five
+hundred; the Ω-cut tower's third through seventh levels carry their gate
+classes (thirteen and twenty-five modulo twenty-seven; the top third
+modulo eighty-one; the top third modulo two-hundred-forty-three at sheet
+level four and above; the top third modulo seven-hundred-twenty-nine at
+sheet level five and above; the top third modulo
+two-thousand-one-hundred-eighty-seven at sheet level six and above); the
+Ω-sheet gate carries every dodger whose sheet-local cut word has top
+trit two modulo the squared cut modulus; the Ω-second-sheet gate carries
+the four-sheet's lowest-third and the seven-sheet's middle-third sheet
+words; the sheet-zero exponent-cycle gates carry the base's own period
+classes at rows three through six — the row-six gate alone carries
+sixteen of the forty-eight surviving sheet-zero period subclasses.  Only
+the six-times-dodging tail remains as input. -/
+theorem four_power_omega_shadow_wave_of_tail5
+    (hTail5 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave := by
+  intro K hK hShadow
+  by_cases h500 : K ≤ 500
+  · have h5 : 5 ≤ K := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4^K) (modular_check_base K h5 h500)
+    exact ⟨q, hq⟩
+  · obtain ⟨s, core, hsc, hc3, hsheet⟩ := hShadow
+    by_cases hL3 : 2 ≤ s ∧ (core % 27 = 13 ∨ core % 27 = 25)
+    · obtain ⟨hs, hcl⟩ := hL3
+      refine ⟨s+3, ?_⟩
+      rw [hsc]
+      exact GSTGraphV2OmegaWaveLaw.omega_level3_digit_two s core hs hcl
+    · by_cases hL4 : 3 ≤ s ∧ 54 ≤ (16 * core) % 81
+      · obtain ⟨hs4, hgate⟩ := hL4
+        refine ⟨s+4, ?_⟩
+        rw [hsc]
+        exact GSTGraphV2OmegaWaveLaw.omega_level4_digit_two s core hs4 hgate
+      · by_cases hSG :
+          2 * 3^(s+1) ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
+        · have hc1 : core % 3 = 1 := by
+            rcases hsheet with h4 | ⟨_, h1⟩ | ⟨_, h7⟩ <;> omega
+          rw [hsc]
+          exact ⟨2*s+2,
+            GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc1 hSG⟩
+        · by_cases hS2 : 1 ≤ s ∧
+              ((core % 9 = 4 ∧ (GSTFourPowerDirectResidue.lteCoeff s * core)
+                  % 3^(s+3) < 3^(s+2))
+              ∨ (core % 9 = 7 ∧ 3^(s+2)
+                  ≤ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+                ∧ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+                  < 2 * 3^(s+2)))
+          · obtain ⟨hs1, hclass⟩ := hS2
+            rcases hclass with ⟨h4c, hq4⟩ | ⟨h7c, hq7, hq7'⟩
+            · rw [hsc]
+              exact ⟨2*s+3,
+                GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_four s core hs1 h4c hq4⟩
+            · rw [hsc]
+              exact ⟨2*s+3,
+                GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_seven s core hs1 h7c
+                  hq7 hq7'⟩
+          · by_cases hEC : s = 0 ∧
+              ((core % 9 = 1 ∧ (core % 27 = 19 ∨ core % 81 = 55
+                  ∨ core % 81 = 64 ∨ core % 81 = 73))
+              ∨ (core % 9 = 4 ∧ (core % 27 = 22 ∨ core % 81 = 58
+                  ∨ core % 81 = 67 ∨ core % 81 = 76)))
+            · obtain ⟨hs0, hclass⟩ := hEC
+              have hKc : K = core := by
+                rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
+              rcases hclass with ⟨h1c, hres⟩ | ⟨h4c, hres⟩
+              · rcases hres with h19 | h55 | h64 | h73
+                · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+                    (Or.inl (by rw [hKc]; exact h19))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inl (by rw [hKc]; exact h55))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inr (Or.inl (by rw [hKc]; exact h64)))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inr (Or.inr (by rw [hKc]; exact h73)))⟩
+              · rcases hres with h22 | h58 | h67 | h76
+                · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+                    (Or.inr (by rw [hKc]; exact h22))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inl (by rw [hKc]; exact h58))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inr (Or.inl (by rw [hKc]; exact h67)))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inr (Or.inr (by rw [hKc]; exact h76)))⟩
+            · by_cases hL5 : 4 ≤ s ∧ 162 ≤ (178 * core) % 243
+              · obtain ⟨hs5, hgate5⟩ := hL5
+                refine ⟨s+5, ?_⟩
+                rw [hsc]
+                exact GSTGraphV2OmegaWaveLaw.omega_level5_digit_two s core hs5 hgate5
+              · by_cases hL6 : 5 ≤ s ∧ 486 ≤ (664 * core) % 729
+                · obtain ⟨hs6, hgate6⟩ := hL6
+                  refine ⟨s+6, ?_⟩
+                  rw [hsc]
+                  exact GSTGraphV2OmegaWaveLaw.omega_level6_digit_two s core hs6 hgate6
+                · by_cases hR5 : s = 0 ∧
+                    (core % 243 = 85 ∨ core % 243 = 91 ∨ core % 243 = 112
+                      ∨ core % 243 = 118 ∨ core % 243 = 163 ∨ core % 243 = 175
+                      ∨ core % 243 = 190 ∨ core % 243 = 202)
+                  · obtain ⟨hs0, hres⟩ := hR5
+                    have hKc : K = core := by
+                      rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
+                    rcases hres with h85 | h91 | h112 | h118 | h163 | h175
+                      | h190 | h202
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_four K
+                        (Or.inl (by rw [hKc]; exact h85))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_one K
+                        (Or.inl (by rw [hKc]; exact h91))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_four K
+                        (Or.inr (Or.inl (by rw [hKc]; exact h112)))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_one K
+                        (Or.inr (Or.inl (by rw [hKc]; exact h118)))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_one K
+                        (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h163))))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_four K
+                        (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h175))))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_one K
+                        (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h190))))⟩
+                    · exact ⟨5, GSTGraphV2OmegaWaveLaw.omega_expcycle_row5_digit_two_four K
+                        (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h202))))⟩
+                  · by_cases hL7 : 6 ≤ s ∧ 1458 ≤ (664 * core) % 2187
+                    · obtain ⟨hs7, hgate7⟩ := hL7
+                      refine ⟨s+7, ?_⟩
+                      rw [hsc]
+                      exact GSTGraphV2OmegaWaveLaw.omega_level7_digit_two s core hs7 hgate7
+                    · by_cases hR6 : s = 0 ∧
+                        (core % 729 = 31 ∨ core % 729 = 37 ∨ core % 729 = 172
+                          ∨ core % 729 = 253 ∨ core % 729 = 256 ∨ core % 729 = 271
+                          ∨ core % 729 = 337 ∨ core % 729 = 352 ∨ core % 729 = 409
+                          ∨ core % 729 = 487 ∨ core % 729 = 490 ∨ core % 729 = 526
+                          ∨ core % 729 = 568 ∨ core % 729 = 607 ∨ core % 729 = 679
+                          ∨ core % 729 = 685)
+                      · obtain ⟨hs0, hres⟩ := hR6
+                        have hKc : K = core := by
+                          rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
+                        rcases hres with h31 | h37 | h172 | h253 | h256 | h271
+                          | h337 | h352 | h409 | h487 | h490 | h526 | h568
+                          | h607 | h679 | h685
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inl (by rw [hKc]; exact h31))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inl (by rw [hKc]; exact h37))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inl (by rw [hKc]; exact h172)))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h253))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inl (by rw [hKc]; exact h256)))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h271)))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h337))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h352))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h409)))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h487)))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h490))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h526)))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h568))))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h607))))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h679)))))))))⟩
+                        · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h685)))))))))⟩
+                      · refine hTail5 K (by omega)
+                          ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_, ?_, ?_, ?_,
+                            ?_, ?_, ?_, ?_, ?_, ?_⟩
+                        · intro hs
+                          constructor
+                          · intro h13; exact absurd ⟨hs, Or.inl h13⟩ hL3
+                          · intro h25; exact absurd ⟨hs, Or.inr h25⟩ hL3
+                        · intro hs4
+                          have hng : ¬ 54 ≤ (16 * core) % 81 := by
+                            intro hg; exact absurd ⟨hs4, hg⟩ hL4
+                          omega
+                        · omega
+                        · intro hs1 h4c
+                          rcases Nat.lt_or_ge
+                              (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                              (3^(s+2)) with hlt | hge
+                          · exact absurd ⟨hs1, Or.inl ⟨h4c, hlt⟩⟩ hS2
+                          · exact hge
+                        · intro hs1 h7c
+                          rcases Nat.lt_or_ge
+                              (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                              (3^(s+2)) with hlt | hge
+                          · exact Or.inl hlt
+                          · refine Or.inr ?_
+                            by_cases hlt2 :
+                                (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                                  < 2 * 3^(s+2)
+                            · exact absurd ⟨hs1, Or.inr ⟨h7c, hge, hlt2⟩⟩ hS2
+                            · omega
+                        · intro hs0 h1c
+                          constructor
+                          · intro h19
+                            exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inl h19⟩⟩ hEC
+                          · constructor
+                            · intro h55
+                              exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inl h55)⟩⟩ hEC
+                            · constructor
+                              · intro h64
+                                exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inl h64))⟩⟩ hEC
+                              · intro h73
+                                exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inr h73))⟩⟩ hEC
+                        · intro hs0 h4c
+                          constructor
+                          · intro h22
+                            exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inl h22⟩⟩ hEC
+                          · constructor
+                            · intro h58
+                              exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inl h58)⟩⟩ hEC
+                            · constructor
+                              · intro h67
+                                exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inl h67))⟩⟩ hEC
+                              · intro h76
+                                exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inr h76))⟩⟩ hEC
+                        · intro hs5
+                          have hng5 : ¬ 162 ≤ (178 * core) % 243 := by
+                            intro hg5; exact absurd ⟨hs5, hg5⟩ hL5
+                          omega
+                        · intro hs6
+                          have hng6 : ¬ 486 ≤ (664 * core) % 729 := by
+                            intro hg6; exact absurd ⟨hs6, hg6⟩ hL6
+                          omega
+                        · intro hs0
+                          constructor
+                          · intro h85
+                            exact absurd ⟨hs0, Or.inl h85⟩ hR5
+                          · constructor
+                            · intro h91
+                              exact absurd ⟨hs0, Or.inr (Or.inl h91)⟩ hR5
+                            · constructor
+                              · intro h112
+                                exact absurd ⟨hs0, Or.inr (Or.inr (Or.inl h112))⟩ hR5
+                              · constructor
+                                · intro h118
+                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inl h118)))⟩ hR5
+                                · constructor
+                                  · intro h163
+                                    exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h163))))⟩ hR5
+                                  · constructor
+                                    · intro h175
+                                      exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h175)))))⟩ hR5
+                                    · constructor
+                                      · intro h190
+                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h190))))))⟩ hR5
+                                      · intro h202
+                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h202))))))⟩ hR5
+                        · intro hs7
+                          have hng7 : ¬ 1458 ≤ (664 * core) % 2187 := by
+                            intro hg7; exact absurd ⟨hs7, hg7⟩ hL7
+                          omega
+                        · intro hs0
+                          constructor
+                          · intro h31
+                            exact absurd ⟨hs0, Or.inl h31⟩ hR6
+                          · constructor
+                            · intro h37
+                              exact absurd ⟨hs0, Or.inr (Or.inl h37)⟩ hR6
+                            · constructor
+                              · intro h172
+                                exact absurd ⟨hs0, Or.inr (Or.inr (Or.inl h172))⟩ hR6
+                              · constructor
+                                · intro h253
+                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inl h253)))⟩ hR6
+                                · constructor
+                                  · intro h256
+                                    exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h256))))⟩ hR6
+                                  · constructor
+                                    · intro h271
+                                      exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h271)))))⟩ hR6
+                                    · constructor
+                                      · intro h337
+                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h337))))))⟩ hR6
+                                      · constructor
+                                        · intro h352
+                                          exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h352)))))))⟩ hR6
+                                        · constructor
+                                          · intro h409
+                                            exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h409))))))))⟩ hR6
+                                          · constructor
+                                            · intro h487
+                                              exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h487)))))))))⟩ hR6
+                                            · constructor
+                                              · intro h490
+                                                exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h490))))))))))⟩ hR6
+                                              · constructor
+                                                · intro h526
+                                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h526)))))))))))⟩ hR6
+                                                · constructor
+                                                  · intro h568
+                                                    exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h568))))))))))))⟩ hR6
+                                                  · constructor
+                                                    · intro h607
+                                                      exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h607)))))))))))))⟩ hR6
+                                                    · constructor
+                                                      · intro h679
+                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h679))))))))))))))⟩ hR6
+                                                      · intro h685
+                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h685)))))))))))))⟩ hR6
+
+/-- **THE CLOSED WAVE, DISCHARGED FROM THE SIXTH WEAKENING.**  The
+zero-input statement follows from the sixth-weakened tail: strictly
+stronger than the `tail4` discharge. -/
+theorem four_power_omega_shadow_wave_closed_of_tail5
+    (hTail5 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed :=
+  four_power_omega_shadow_wave_of_tail5 hTail5
+
+/-- **THE CLOSED-WAVE RECEIPT (SIXTH WEAKENING).**  The closed zero-input
+statement and the sixth-weakened tail input are equivalent. -/
+theorem four_power_omega_shadow_wave_closed_iff_tail5 :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed
+      ↔ GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5 := by
+  constructor
+  · intro hClosed K hK hTail5
+    obtain ⟨s, core, hsc, hc3, hsheet, _⟩ := hTail5
+    exact hClosed K (by omega) ⟨s, core, hsc, hc3, hsheet⟩
+  · intro hTail5
+    exact four_power_omega_shadow_wave_of_tail5 hTail5
+
 /-- **THE CLOSED WAVE, DISCHARGED FROM THE SEALED TAIL INPUT.**  The
 zero-input statement — every shadow exponent from eight onward owning its
 digit two — follows from the sealed second-sheet tail: the kernel-checked
@@ -17595,27 +17923,41 @@ theorem erdos_ternary_2_universal_tail3
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail3 hTail3) n hn
 
-/-- **THE FINAL THEOREM, Ω-ROUTE — FIFTH WEAKENING.**  The single input is
-now the Ω-shadow wave tail after the kernel-checked base, six tower
-levels, both sheet gates, and the sheet-zero exponent-cycle gates
-through row five: the kernel-checked modular base carries every shadow
-half-exponent up to five hundred, the Ω-cut tower's third through sixth
-levels carry their gate classes (thirteen and twenty-five modulo
-twenty-seven; the top third modulo eighty-one; the top third modulo
-two-hundred-forty-three at sheet level four and above; the top third
-modulo seven-hundred-twenty-nine at sheet level five and above), the
-Ω-sheet gate carries every dodger whose sheet-local cut word has top
-trit two modulo the squared cut modulus, the Ω-second-sheet gate carries
-the four-sheet's lowest-third and the seven-sheet's middle-third sheet
-words, and the sheet-zero exponent-cycle gates carry the base's own
-period classes at rows three through five.  Strictly stronger than the
-second-sheet seal at `0066657`: weaker input, same conclusion. -/
-theorem erdos_ternary_2_universal
+/-- **THE FINAL THEOREM, Ω-ROUTE — FIFTH WEAKENING (sealed alternate).**
+The fifth-weakened form, kept green as the sealed alternate of the
+sixth-weakening route below. -/
+theorem erdos_ternary_2_universal_tail4
     (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail4 hTail4) n hn
+
+/-- **THE FINAL THEOREM, Ω-ROUTE — SIXTH WEAKENING.**  The single input is
+now the Ω-shadow wave tail after the kernel-checked base, seven tower
+levels, both sheet gates, and the sheet-zero exponent-cycle gates
+through row six: the kernel-checked modular base carries every shadow
+half-exponent up to five hundred, the Ω-cut tower's third through
+seventh levels carry their gate classes (thirteen and twenty-five
+modulo twenty-seven; the top third modulo eighty-one; the top third
+modulo two-hundred-forty-three at sheet level four and above; the top
+third modulo seven-hundred-twenty-nine at sheet level five and above;
+the top third modulo two-thousand-one-hundred-eighty-seven at sheet
+level six and above), the Ω-sheet gate carries every dodger whose
+sheet-local cut word has top trit two modulo the squared cut modulus,
+the Ω-second-sheet gate carries the four-sheet's lowest-third and the
+seven-sheet's middle-third sheet words, and the sheet-zero
+exponent-cycle gates carry the base's own period classes at rows three
+through six — the row-six gate alone carries sixteen of the
+forty-eight surviving sheet-zero period subclasses.  Strictly stronger
+than the fifth-weakening seal at `c0418d2`: weaker input, same
+conclusion. -/
+theorem erdos_ternary_2_universal
+    (hTail5 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow
+    (four_power_omega_shadow_wave_of_tail5 hTail5) n hn
 
 /-- **WITNESS EXTRACTION.**  A false `noTernaryTwo` verdict hands over the
 digit-two witness position: the boolean scan and the digit statement are
@@ -17649,16 +17991,16 @@ both parities at once through the parity column `graph (1 + n % 2)
 (n / 2)` — the graph shows the ternary two somewhere in its column.
 This is the Ω-wave law fused with the infinite-controller bridge: the
 output channel is the graph's own digit cell, the input is the theorem's
-own residual (`hTail4`), and every cell of the column is pinned by the
+own input (`hTail5`), and every cell of the column is pinned by the
 exact lattice law `graph_cell_exact`. -/
 theorem infinite_controller_ternary_two_chokehold
-    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4)
+    (hTail5 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5)
     (n : Nat) (hn : 9 ≤ n) :
     ∃ p : Nat,
       (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
         = 2 :=
   GSTGraphV2OmegaWaveLaw.infinite_graph_ternary_two_chokehold
-    (four_power_omega_shadow_wave_closed_of_tail4 hTail4) n hn
+    (four_power_omega_shadow_wave_closed_of_tail5 hTail5) n hn
 
 /-- **THE CHOKEHOLD THROUGH THE THEOREM'S OWN OUTPUT CHANNEL.**  The same
 graph-column statement, extracted directly from the main theorem's
@@ -17666,13 +18008,13 @@ graph-column statement, extracted directly from the main theorem's
 lemma: the boolean verdict and the infinite graph's digit-two cell are
 one observable. -/
 theorem infinite_controller_chokehold_of_universal
-    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4)
+    (hTail5 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail5)
     (n : Nat) (hn : 9 ≤ n) :
     ∃ p : Nat,
       (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
         = 2 := by
   obtain ⟨p, hp⟩ := no_two_false_digit_witness (2^n)
-    (erdos_ternary_2_universal hTail4 n hn)
+    (erdos_ternary_2_universal hTail5 n hn)
   refine ⟨p, ?_⟩
   rw [GSTGraphV2OmegaWaveLaw.graph_column_digit_exact,
     GSTGraphV2OmegaWaveLaw.graph_column_parity_energy]
@@ -17683,15 +18025,19 @@ theorem infinite_controller_chokehold_of_universal
 #print axioms erdos_ternary_2_universal_tail
 #print axioms erdos_ternary_2_universal_tail2
 #print axioms erdos_ternary_2_universal_tail3
+#print axioms erdos_ternary_2_universal_tail4
 #print axioms erdos_ternary_2_universal_shadow
 #print axioms four_power_omega_shadow_wave_closed_of_tail3
 #print axioms four_power_omega_shadow_wave_closed_iff_tail3
 #print axioms four_power_omega_shadow_wave_closed_of_tail4
 #print axioms four_power_omega_shadow_wave_closed_iff_tail4
+#print axioms four_power_omega_shadow_wave_closed_of_tail5
+#print axioms four_power_omega_shadow_wave_closed_iff_tail5
 #print axioms four_power_omega_shadow_wave_of_tail
 #print axioms four_power_omega_shadow_wave_of_tail2
 #print axioms four_power_omega_shadow_wave_of_tail3
 #print axioms four_power_omega_shadow_wave_of_tail4
+#print axioms four_power_omega_shadow_wave_of_tail5
 #print axioms no_two_false_digit_witness
 #print axioms infinite_controller_ternary_two_chokehold
 #print axioms infinite_controller_chokehold_of_universal
