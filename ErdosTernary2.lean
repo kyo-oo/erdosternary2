@@ -17625,8 +17625,9 @@ theorem erdos_ternary_2_universal
 digit-two witness position: the boolean scan and the digit statement are
 one object. -/
 theorem no_two_false_digit_witness (n : Nat) (h : noTernaryTwo n = false) :
-    ∃ p : Nat, gstDigit n p = 2 :=
-  Nat.strongRecOn n (fun n ih h => by
+    ∃ p : Nat, gstDigit n p = 2 := by
+  revert h
+  exact Nat.strongRecOn n (fun n ih h => by
     by_cases hn : n = 0
     · subst hn
       rw [noTernaryTwo.eq_def 0, if_pos (by decide : (0:Nat) = 0)] at h
