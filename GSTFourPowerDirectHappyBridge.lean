@@ -86,6 +86,23 @@ theorem affine_two_one_forces_relocated_physical_happy
   rw [hExp]
   exact affine_two_one_to_physical_happy u hu
 
+/-- Consolidated fresh-production affine relocation constructor.  Either of the
+two currently certified two-trit kill sectors for the next exponent produces
+an actual physical Happy row `q ≥ 1` on `4^(K+1)`.  The proof is entirely
+through direct `CommonTwo` arithmetic and contains no navigation transport. -/
+theorem affine_two_trit_sector_forces_relocated_physical_happy
+    (K u : Nat)
+    (hsector :
+      (K+1 = 3*u ∧ u % 3 = 2) ∨
+      (K+1 = 3*u+2 ∧ u % 3 = 1)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  rcases hsector with h0 | h2
+  · exact affine_zero_two_forces_relocated_physical_happy K u h0.1 h0.2
+  · exact affine_two_one_forces_relocated_physical_happy K u h2.1 h2.2
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -141,6 +158,7 @@ theorem four_power_happy_propagates
 #check affine_two_one_to_physical_happy
 #check affine_zero_two_forces_relocated_physical_happy
 #check affine_two_one_forces_relocated_physical_happy
+#check affine_two_trit_sector_forces_relocated_physical_happy
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
@@ -149,6 +167,7 @@ theorem four_power_happy_propagates
 #print axioms affine_two_one_to_physical_happy
 #print axioms affine_zero_two_forces_relocated_physical_happy
 #print axioms affine_two_one_forces_relocated_physical_happy
+#print axioms affine_two_trit_sector_forces_relocated_physical_happy
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
