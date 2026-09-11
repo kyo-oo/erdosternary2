@@ -17247,13 +17247,13 @@ theorem four_power_omega_shadow_wave_of_tail3
               · intro hs1 h4c
                 rcases Nat.lt_or_ge
                     (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
-                    3^(s+2) with hlt | hge
+                    (3^(s+2)) with hlt | hge
                 · exact absurd ⟨hs1, Or.inl ⟨h4c, hlt⟩⟩ hS2
                 · exact hge
               · intro hs1 h7c
                 rcases Nat.lt_or_ge
                     (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
-                    3^(s+2) with hlt | hge
+                    (3^(s+2)) with hlt | hge
                 · exact Or.inl hlt
                 · refine Or.inr ?_
                   by_cases hlt2 :
