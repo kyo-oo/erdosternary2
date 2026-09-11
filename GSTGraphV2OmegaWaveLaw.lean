@@ -1594,6 +1594,20 @@ sheet gates, and the sheet-zero exponent-cycle gates. -/
 def four_power_omega_shadow_wave_tail3 : Prop :=
   ∀ K : Nat, 500 < K → omegaShadowTail3 K → ∃ p : Nat, digit3 (4^K) p = 2
 
+/-- **THE Ω-SHADOW WAVE, CLOSED FORM — the zero-input statement.**  The
+shadow wave with no tail bound and no kernel cut: every shadow exponent
+from eight onward owns its ternary digit two outright.  This is the
+closed target of the campaign — the exact statement the final theorem
+consumes once every gate family has been paid for unconditionally.  Its
+remaining content is the all-depths digit statement for the stabilized
+sheet word `lteCoeff s * core`: the intersection of the no-two Cantor
+set with the LTE-mean rotation of the shadow core classes, a set that is
+provably nonempty at every sheet depth (multiplication by the LTE mean
+is a bijection on residues, so the pure-sheet dodgers number two to the
+sheet depth at every level). -/
+def four_power_omega_shadow_wave_closed : Prop :=
+  ∀ K : Nat, 8 ≤ K → omegaShadow K → ∃ p : Nat, digit3 (4^K) p = 2
+
 #check omega_binom_two_mul
 #check omega_half_mod9_of_mod9_three
 #check omega_half_mod9_of_mod9_six
@@ -1613,6 +1627,7 @@ def four_power_omega_shadow_wave_tail3 : Prop :=
 #check omega_expcycle_row4_digit_two_four
 #check omegaShadowTail3
 #check four_power_omega_shadow_wave_tail3
+#check four_power_omega_shadow_wave_closed
 #print axioms omega_cut_word_full3
 #print axioms omega_sheet2_digit
 #print axioms omega_sheet2_gate_four
@@ -1625,6 +1640,7 @@ def four_power_omega_shadow_wave_tail3 : Prop :=
 
 #check omegaShadow
 #check four_power_omega_shadow_wave
+#check four_power_omega_shadow_wave_closed
 #check omega_row2_digit_two
 #check omega_three_free_decomposition
 #check omega_digit_two_cases

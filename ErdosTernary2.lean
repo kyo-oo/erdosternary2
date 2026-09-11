@@ -17286,6 +17286,34 @@ theorem four_power_omega_shadow_wave_of_tail3
                     · intro h76
                       exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inr h76))⟩⟩ hEC
 
+/-- **THE CLOSED WAVE, DISCHARGED FROM THE SEALED TAIL INPUT.**  The
+zero-input statement — every shadow exponent from eight onward owning its
+digit two — follows from the sealed second-sheet tail: the kernel-checked
+base carries every exponent up to five hundred and the eight gate
+families of the dispatch carry every gate class above it.  The closed
+form is the campaign's target statement; this bridge pays for it down to
+the exact residual the tail still speaks for. -/
+theorem four_power_omega_shadow_wave_closed_of_tail3
+    (hTail3 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail3) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed :=
+  four_power_omega_shadow_wave_of_tail3 hTail3
+
+/-- **THE CLOSED-WAVE RECEIPT.**  The closed zero-input statement and the
+sealed tail input are equivalent: the tail is exactly the closed wave
+with the kernel-checked base and the eight proven gate families paid
+for.  Whatever separates the repository from the unconditional closed
+wave is precisely — and only — the tail's residual: shadow exponents
+above the kernel base dodging every gate class. -/
+theorem four_power_omega_shadow_wave_closed_iff_tail3 :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed
+      ↔ GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail3 := by
+  constructor
+  · intro hClosed K hK hTail3
+    obtain ⟨s, core, hsc, hc3, hsheet, _⟩ := hTail3
+    exact hClosed K (by omega) ⟨s, core, hsc, hc3, hsheet⟩
+  · intro hTail3
+    exact four_power_omega_shadow_wave_of_tail3 hTail3
+
 /-- **THE FINAL THEOREM, Ω-ROUTE — SHADOW INPUT (sealed alternate).**  The
 full shadow-wave input version of the Ω-route final theorem, kept green
 as the parameterized alternate of the tail route below. -/
@@ -17301,6 +17329,17 @@ theorem erdos_ternary_2_universal_shadow
     rw [h4eq]
     exact has_two_imp_not_no_two (4^(n/2))
       (erdos_ternary_2_even_universal_omega hShadow (n/2) (by omega))
+
+/-- **THE FINAL THEOREM, Ω-ROUTE — CLOSED INPUT.**  The final theorem
+consumed in its closed form: the single input is the zero-input statement
+itself — every shadow exponent from eight onward owning its digit two —
+discharged by `four_power_omega_shadow_wave_closed_of_tail3` from the
+sealed tail, and equivalent to it by the closed-wave receipt. -/
+theorem erdos_ternary_2_universal_closed
+    (hClosed : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow hClosed n hn
 
 /-- **THE FINAL THEOREM, Ω-ROUTE — TAIL INPUT (level-three seal).**  The
 level-three-sealed form: the single input is the Ω-shadow wave tail after
@@ -17345,9 +17384,12 @@ theorem erdos_ternary_2_universal
     (four_power_omega_shadow_wave_of_tail3 hTail3) n hn
 
 #print axioms erdos_ternary_2_universal
+#print axioms erdos_ternary_2_universal_closed
 #print axioms erdos_ternary_2_universal_tail
 #print axioms erdos_ternary_2_universal_tail2
 #print axioms erdos_ternary_2_universal_shadow
+#print axioms four_power_omega_shadow_wave_closed_of_tail3
+#print axioms four_power_omega_shadow_wave_closed_iff_tail3
 #print axioms four_power_omega_shadow_wave_of_tail
 #print axioms four_power_omega_shadow_wave_of_tail2
 #print axioms four_power_omega_shadow_wave_of_tail3
