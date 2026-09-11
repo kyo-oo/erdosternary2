@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy-bridge.log
+          lake build GSTFourPowerDirectHappyBridge 2>&1 | tee direct-happy-bridge.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' direct-happy-bridge.log
       - name: Reject forbidden proof routes
         shell: bash
