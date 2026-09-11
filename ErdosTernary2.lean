@@ -17857,24 +17857,24 @@ theorem four_power_omega_shadow_wave_of_tailE
           have hKc : K = core := by
             rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
           rcases hclass with ⟨h1c, hres⟩ | ⟨h4c, hres⟩
-            · rcases hres with h19 | h55 | h64 | h73
-              · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
-                (Or.inl (by rw [hKc]; exact h19))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
-                (Or.inl (by rw [hKc]; exact h55))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
-                (Or.inr (Or.inl (by rw [hKc]; exact h64)))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
-                (Or.inr (Or.inr ((by rw [hKc]; exact h73))))⟩
-            · rcases hres with h22 | h58 | h67 | h76
-              · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
-                (Or.inr (by rw [hKc]; exact h22))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
-                (Or.inl (by rw [hKc]; exact h58))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
-                (Or.inr (Or.inl (by rw [hKc]; exact h67)))⟩
-              · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
-                (Or.inr (Or.inr ((by rw [hKc]; exact h76))))⟩
+          · rcases hres with h19 | h55 | h64 | h73
+            · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+              (Or.inl (by rw [hKc]; exact h19))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+              (Or.inl (by rw [hKc]; exact h55))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+              (Or.inr (Or.inl (by rw [hKc]; exact h64)))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+              (Or.inr (Or.inr ((by rw [hKc]; exact h73))))⟩
+          · rcases hres with h22 | h58 | h67 | h76
+            · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+              (Or.inr (by rw [hKc]; exact h22))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+              (Or.inl (by rw [hKc]; exact h58))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+              (Or.inr (Or.inl (by rw [hKc]; exact h67)))⟩
+            · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+              (Or.inr (Or.inr ((by rw [hKc]; exact h76))))⟩
         · by_cases hR5 : s = 0 ∧
             (core % 243 = 85 ∨ core % 243 = 91 ∨ core % 243 = 112
               ∨ core % 243 = 118 ∨ core % 243 = 163 ∨ core % 243 = 175
