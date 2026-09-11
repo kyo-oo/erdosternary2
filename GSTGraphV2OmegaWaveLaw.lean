@@ -2238,7 +2238,6 @@ theorem graph_column_parity_energy (n : Nat) :
   · rw [h1, hcore]
     rw [show 2^n = 2^(2 * (n / 2) + 1) from by congr 1; omega,
         Nat.pow_add]
-    rw [show (1:Nat) + 1 = 2 from rfl, Nat.pow_one]
 
 /-- The three sub-wave even exponents: `4^5`, `4^6` and `4^7` own their
 ternary digit two by direct computation (`1024 = 1101221₃`,
@@ -2262,26 +2261,23 @@ theorem infinite_graph_ternary_two_chokehold
     (hClosed : four_power_omega_shadow_wave_closed)
     (n : Nat) (hn : 9 ≤ n) :
     ∃ p : Nat, (graph (1 + n % 2) (n / 2) p).seven.digit = 2 := by
-  have hcol : ∀ p : Nat,
-      (graph (1 + n % 2) (n / 2) p).seven.digit = digit3 (2^n) p := by
-    intro p
-    rw [graph_column_digit_exact, graph_column_parity_energy]
   rcases Nat.mod_two_eq_zero_or_one n with heven | hodd
-  · have hK5 : 5 ≤ n / 2 := by omega
+  · have hcolEv : ∀ p : Nat,
+      (graph (1 + n % 2) (n / 2) p).seven.digit = digit3 (4^(n / 2)) p := by
+      intro p
+      rw [graph_column_digit_exact, heven, Nat.add_zero, Nat.mul_one]
+    have hK5 : 5 ≤ n / 2 := by omega
     rcases Nat.lt_or_ge (n / 2) 8 with hK8 | hK8
     · obtain ⟨p, hp⟩ := omega_small_digit_two (n / 2) hK5 (by omega)
-      exact ⟨p, (hcol p).trans hp⟩
+      exact ⟨p, (hcolEv p).trans hp⟩
     · rcases omega_digit_two_cases (n / 2) hK8 with hS | ⟨p, hp⟩
       · obtain ⟨p, hp2⟩ := hClosed (n / 2) hK8 hS
-        exact ⟨p, (hcol p).trans hp2⟩
-      · exact ⟨p, (hcol p).trans hp⟩
+        exact ⟨p, (hcolEv p).trans hp2⟩
+      · exact ⟨p, (hcolEv p).trans hp⟩
   · refine ⟨0, ?_⟩
-    rw [hcol]
-    show (2^n) / 3^0 % 3 = 2
-    rw [Nat.pow_zero, Nat.div_one]
-    have hexp := (graph_column_parity_energy n).symm
-    rw [hodd] at hexp
-    rw [hexp, Nat.mul_mod, pow4_mod3_one]
+    rw [hodd, graph_column_digit_exact]
+    show (4^(n/2) * (1 + 1)) / 3^0 % 3 = 2
+    rw [Nat.pow_zero, Nat.div_one, Nat.mul_mod, pow4_mod3_one]
 
 /-- **THE FULL OUTPUT ENVELOPE OF THE CHOKEHOLD COLUMN.**  For every
 input exponent from nine onward, every output cell of the parity column
