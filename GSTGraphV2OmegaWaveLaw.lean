@@ -2765,6 +2765,176 @@ theorem infinite_graph_chokehold_envelope
 #print axioms omega_level3_digit
 #print axioms omega_level3_digit_two
 
+/-! ## §7.13 The observer layer — one law, all generations
+
+The tower gates of the earlier sections each read one fixed trit of the
+sheet word at one fixed tower level: level three through level seven, one
+theorem per level, one numeral per level.  The observer layer collapses
+the ENTIRE tower into a single law.  The instrument is the linearity of
+the cut word: modulo its own cut modulus, the cut word of every core is
+the unit-core cut word times the core — the binomial truncation of the LTE
+factorization, since the square of the unit sheet's cut modulus already
+divides every higher binomial term.  Consequently every tower digit of
+every generation `s` at every level `k ≤ s+1` is read off ONE object: the
+mean rotation `omegaCutWord s 1 * core`.  The per-level gates — level
+three, level four, level five, level six, level seven, and every level
+beyond — are all instances of one theorem, and the generation ladder on
+the tower axis terminates here. -/
+
+/-- **THE CUT-WORD LINEARITY LAW.**  The sheet word is the mean rotation of
+the core: the cut word of `core` sheets equals the unit-core cut word
+times the core, modulo the next cut modulus.  The proof is the binomial
+truncation of the LTE factorization — `(1 + 3^(s+1) λ)^core` agrees with
+`1 + core · 3^(s+1) λ` below the squared cut modulus. -/
+theorem omega_cut_word_linear (s core : Nat) :
+    ∃ t : Nat, omegaCutWord s core
+      = omegaCutWord s 1 * core + 3^(s+1) * t := by
+  have hpow : (4^(3^s * 1))^core = 4^(3^s * core) := by
+    rw [Nat.mul_one]
+    exact (Nat.pow_mul 4 (3^s) core).symm
+  have hf1 : 4^(3^s * 1) = 1 + 3^(s+1) * omegaCutWord s 1 :=
+    omega_cut_factor s 1
+  have hfc : 4^(3^s * core) = 1 + 3^(s+1) * omegaCutWord s core :=
+    omega_cut_factor s core
+  have hbinom : ∀ c : Nat, ∃ t : Nat,
+      (1 + 3^(s+1) * omegaCutWord s 1)^c
+        = 1 + 3^(s+1) * (omegaCutWord s 1 * c)
+          + 3^(s+1) * (3^(s+1) * t) := by
+    intro c
+    induction c with
+    | zero => exact ⟨0, by rw [Nat.pow_zero]; ring⟩
+    | succ c ih =>
+        obtain ⟨t, ht⟩ := ih
+        refine ⟨omegaCutWord s 1 * omegaCutWord s 1 * c + t
+          + t * 3^(s+1) * omegaCutWord s 1, ?_⟩
+        rw [Nat.pow_succ, ht]
+        ring
+  obtain ⟨t, ht⟩ := hbinom core
+  have hkey : 1 + 3^(s+1) * omegaCutWord s core
+      = 1 + 3^(s+1) * (omegaCutWord s 1 * core)
+        + 3^(s+1) * (3^(s+1) * t) := by
+    rw [← hfc, ← hpow, ← hf1]
+    exact ht
+  refine ⟨t, ?_⟩
+  have hm : 0 < 3^(s+1) := Nat.pow_pos (by decide)
+  refine Nat.eq_of_mul_eq_mul_left hm ?_
+  rw [Nat.mul_add]
+  omega
+
+/-- **THE OBSERVER LAW — one object, all generations, all tower levels.**
+For every sheet level `s`, every core, and every tower level `k` with
+`1 ≤ k ≤ s+1`: the ternary digit of the power `4^(3^s * core)` at tower
+row `s+k` is the `(k-1)`-th trit of the single mean rotation
+`omegaCutWord s 1 * core`.  No per-level numeral, no per-level gate
+theorem: the whole tower is this one identity. -/
+theorem omega_observed_digit (s core k : Nat) (hk : 1 ≤ k) (hks : k ≤ s+1) :
+    digit3 (4^(3^s * core)) (s + k)
+      = ((omegaCutWord s 1 * core) % 3^k) / 3^(k-1) := by
+  have hf := omega_cut_factor s core
+  have h1 : (1:Nat) < 3^(s+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(s+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ s+1)
+    omega
+  have hslice := prefix_slice_digit_exact (s+1) 1 (omegaCutWord s core) (k-1) h1
+  rw [show s+k = (s+1)+(k-1) from by omega, hf, hslice]
+  obtain ⟨t, ht⟩ := omega_cut_word_linear s core
+  have hsplit : 3^(s+1) = 3^(k-1) * 3^(s+2-k) := by
+    rw [show s+1 = (k-1) + (s+2-k) from by omega, Nat.pow_add]
+  have hz0 : 3^(s+2-k) % 3 = 0 := by
+    obtain ⟨u, hu⟩ : ∃ u, s+2-k = u+1 := ⟨s+1-k, by omega⟩
+    rw [hu, Nat.pow_succ]
+    omega
+  have hz : (3^(s+2-k) * t) % 3 = 0 := by
+    rw [Nat.mul_mod, hz0, Nat.zero_mul]
+  unfold digit3
+  rw [ht, hsplit, Nat.mul_assoc,
+    Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide) : (0:Nat) < 3^(k-1))]
+  have hwindow := digit3_window (omegaCutWord s 1 * core) (k-1)
+  rw [show (k-1)+1 = k from by omega] at hwindow
+  omega
+
+/-- **THE UNIFORM TOWER GATE — all levels, all generations, one law.**
+For every sheet level `s`, every core, and EVERY tower level `k ≥ 3`
+inside the sheet's window (`k ≤ s+1`): whenever the mean rotation's trit
+at position `k-1` is two — the top third of the residue window modulo
+`3^k` — the power `4^(3^s * core)` owns its ternary digit two at row
+`s+k`.  Level three through level seven and every level beyond are all
+instances; the tower's generation ladder ends here. -/
+theorem omega_tower_level_digit_two (s core k : Nat) (hk : 3 ≤ k)
+    (hks : k ≤ s+1)
+    (hg : 2 * 3^(k-1) ≤ (omegaCutWord s 1 * core) % 3^k) :
+    digit3 (4^(3^s * core)) (s + k) = 2 := by
+  rw [omega_observed_digit s core k (by omega) hks]
+  have hlt : (omegaCutWord s 1 * core) % 3^k < 3^k :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
+  have h3 : 3^k = 3 * 3^(k-1) := by
+    rw [show k = (k-1)+1 from by omega, Nat.pow_add, Nat.pow_one]
+    ring
+  have hlt2 : (omegaCutWord s 1 * core) % 3^k < 3 * 3^(k-1) := by omega
+  obtain ⟨d, hd⟩ : ∃ d, (omegaCutWord s 1 * core) % 3^k
+      = 2 * 3^(k-1) + d :=
+    ⟨(omegaCutWord s 1 * core) % 3^k - 2 * 3^(k-1), by omega⟩
+  have hdlt : d < 3^(k-1) := by omega
+  rw [hd, Nat.add_comm, show 2 * 3^(k-1) = 3^(k-1) * 2 from by ring,
+    Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide) : (0:Nat) < 3^(k-1)),
+    Nat.div_eq_of_lt hdlt]
+
+/-- **THE OBSERVER TAIL — the residual after the whole tower.**  The
+shadow exponent whose `(s, core)` dodges the kernel base, the Ω-sheet
+gate, the Ω-second-sheet gate, the sheet-zero exponent-cycle gates through
+row six — and EVERY tower level at once: the mean rotation
+`omegaCutWord s 1 * core` keeps its trit below the top third of the
+residue window at every depth `k` from three to the sheet's own window
+top.  The per-level tower gates — levels three through seven and beyond —
+are all paid by the uniform observer law; the residual speaks only in the
+single all-depths object. -/
+def omegaShadowTailE (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) ∧
+    (1 ≤ s → (core % 9 = 4 →
+      3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))) ∧
+    (1 ≤ s → (core % 9 = 7 →
+      ((lteCoeff s * core) % 3^(s+3) < 3^(s+2)
+        ∨ 2 * 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3)))) ∧
+    (s = 0 → (core % 9 = 1 → core % 27 ≠ 19 ∧ core % 81 ≠ 55
+      ∧ core % 81 ≠ 64 ∧ core % 81 ≠ 73)) ∧
+    (s = 0 → (core % 9 = 4 → core % 27 ≠ 22 ∧ core % 81 ≠ 58
+      ∧ core % 81 ≠ 67 ∧ core % 81 ≠ 76)) ∧
+    (s = 0 → (core % 243 ≠ 85 ∧ core % 243 ≠ 91 ∧ core % 243 ≠ 112
+      ∧ core % 243 ≠ 118 ∧ core % 243 ≠ 163 ∧ core % 243 ≠ 175
+      ∧ core % 243 ≠ 190 ∧ core % 243 ≠ 202)) ∧
+    (s = 0 → (core % 729 ≠ 31 ∧ core % 729 ≠ 37 ∧ core % 729 ≠ 172
+      ∧ core % 729 ≠ 253 ∧ core % 729 ≠ 256 ∧ core % 729 ≠ 271
+      ∧ core % 729 ≠ 337 ∧ core % 729 ≠ 352 ∧ core % 729 ≠ 409
+      ∧ core % 729 ≠ 487 ∧ core % 729 ≠ 490 ∧ core % 729 ≠ 526
+      ∧ core % 729 ≠ 568 ∧ core % 729 ≠ 607 ∧ core % 729 ≠ 679
+      ∧ core % 729 ≠ 685)) ∧
+    (∀ k : Nat, 3 ≤ k → k ≤ s+1 →
+      (omegaCutWord s 1 * core) % 3^k < 2 * 3^(k-1))
+
+/-- **THE Ω-SHADOW WAVE TAIL (OBSERVER FORM)** — the residual input after
+the kernel-checked base, the Ω-sheet gate, the Ω-second-sheet gate, the
+sheet-zero exponent-cycle gates through row six, and the ENTIRE Ω-cut
+tower — every level at once — paid unconditionally by the uniform
+observer law.  A strictly weaker hypothesis than the sixth weakening: the
+observer dodge implies every per-level tower dodge of `tail5`, and asks
+for all depths in one object. -/
+def four_power_omega_shadow_wave_tailE : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTailE K → ∃ p : Nat, digit3 (4^K) p = 2
+
+#check omega_cut_word_linear
+#check omega_observed_digit
+#check omega_tower_level_digit_two
+#check omegaShadowTailE
+#check four_power_omega_shadow_wave_tailE
+#print axioms omega_cut_word_linear
+#print axioms omega_observed_digit
+#print axioms omega_tower_level_digit_two
+#print axioms omegaShadowTailE
+#print axioms four_power_omega_shadow_wave_tailE
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,
