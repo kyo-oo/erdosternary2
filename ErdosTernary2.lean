@@ -17074,13 +17074,37 @@ theorem erdos_ternary_2_unconditional_except_shadow (n : Nat) (hn : 9 ≤ n)
         (n/2) (by omega) hNS
       exact hasTernaryTwo_of_digit (4^(n/2)) p hp
 
-/-- **THE FINAL THEOREM, Ω-ROUTE.**  The single input is the Ω-shadow wave:
-every shadow exponent still owns its ternary digit two.  This is strictly
-weaker than the retired third-wave climb (a digit, not a Happy cell; the
-shadow residue only, not every exponent from eight onward).  Everything
-else is carried unconditionally: odd `n` by the elementary mod-three law,
-the kernel-checked base up to 500, and the Ω-Wave Law's cut tower above it. -/
-theorem erdos_ternary_2_universal
+/-- **The Ω-shadow wave, closed on the kernel base and the third tower
+level.**  The residual input, shrunk twice in one stroke: the
+kernel-checked modular base carries every shadow exponent up to five
+hundred unconditionally, and the Ω-cut tower's level-three gate classes
+carry every core congruent to thirteen or twenty-five modulo twenty-seven
+at sheet level two and above.  Only the tail remains as input. -/
+theorem four_power_omega_shadow_wave_of_tail
+    (hTail : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave := by
+  intro K hK hShadow
+  by_cases h500 : K ≤ 500
+  · have h5 : 5 ≤ K := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4^K) (modular_check_base K h5 h500)
+    exact ⟨q, hq⟩
+  · obtain ⟨s, core, hsc, hc3, hsheet⟩ := hShadow
+    by_cases hL3 : 2 ≤ s ∧ (core % 27 = 13 ∨ core % 27 = 25)
+    · obtain ⟨hs, hcl⟩ := hL3
+      refine ⟨s+3, ?_⟩
+      rw [hsc]
+      exact GSTGraphV2OmegaWaveLaw.omega_level3_digit_two s core hs hcl
+    · refine hTail K (by omega) ⟨s, core, hsc, hc3, hsheet, ?_⟩
+      intro hs
+      constructor
+      · intro h13; exact absurd ⟨hs, Or.inl h13⟩ hL3
+      · intro h25; exact absurd ⟨hs, Or.inr h25⟩ hL3
+
+/-- **THE FINAL THEOREM, Ω-ROUTE — SHADOW INPUT (sealed alternate).**  The
+full shadow-wave input version of the Ω-route final theorem, kept green
+as the parameterized alternate of the tail route below. -/
+theorem erdos_ternary_2_universal_shadow
     (hShadow : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false := by
@@ -17092,3 +17116,22 @@ theorem erdos_ternary_2_universal
     rw [h4eq]
     exact has_two_imp_not_no_two (4^(n/2))
       (erdos_ternary_2_even_universal_omega hShadow (n/2) (by omega))
+
+/-- **THE FINAL THEOREM, Ω-ROUTE — TAIL INPUT.**  The single input is now
+the Ω-shadow wave tail: the kernel-checked modular base carries every
+shadow half-exponent up to five hundred, and the Ω-cut tower's third
+level carries the thirteen and twenty-five modulo twenty-seven gate
+classes, so the input only speaks for shadow exponents above the kernel
+base that dodge every proven level of the tower.  Strictly stronger than
+the shadow-wave statement sealed at `99afe3b`: weaker input, same
+conclusion. -/
+theorem erdos_ternary_2_universal
+    (hTail : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow
+    (four_power_omega_shadow_wave_of_tail hTail) n hn
+
+#print axioms erdos_ternary_2_universal
+#print axioms erdos_ternary_2_universal_shadow
+#print axioms four_power_omega_shadow_wave_of_tail

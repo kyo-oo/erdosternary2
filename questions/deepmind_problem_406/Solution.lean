@@ -8,14 +8,17 @@ It imports the checked green monolith `ErdosTernary2` and bridges the
 question-side recursive predicate to the monolith's `noTernaryTwo`
 predicate.
 
-The production seam now carries the Ω-shadow wave as its single named
-input: the Ω-Wave Law (`GSTGraphV2OmegaWaveLaw`) delivers the ternary
-digit two unconditionally for every exponent outside the Ω-shadow residue
-(the canonical 3-free-core classes the tower's proven levels do not reach),
-the kernel-checked modular base carries every half-exponent up to 500, and
-the odd wing is elementary.  The input is strictly weaker than the retired
-third-wave climb: a digit, not a Happy cell; the shadow residue only, not
-every exponent from eight onward.
+The production seam now carries the Ω-shadow wave tail as its single
+named input: the Ω-Wave Law (`GSTGraphV2OmegaWaveLaw`) delivers the
+ternary digit two unconditionally for every exponent outside the Ω-shadow
+residue (the canonical 3-free-core classes the tower's proven levels do
+not reach), the kernel-checked modular base carries every half-exponent
+up to five hundred — shadow members included — and the tower's new third
+level carries the thirteen and twenty-five modulo twenty-seven gate
+classes at sheet level two and above.  The input speaks only for shadow
+exponents above the kernel base that dodge every proven gate class:
+weaker than the sealed shadow wave, and strictly weaker than the retired
+third-wave climb.
 -/
 
 /-- Byte-identical challenge-side definition. -/
@@ -42,8 +45,8 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
 /-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
 from the Ω-Wave Law through the green monolith seam. -/
 theorem erdos_ternary_2
-    (hShadow : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave) :
+    (hTail : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail) :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal hShadow n hn
+  exact erdos_ternary_2_universal hTail n hn

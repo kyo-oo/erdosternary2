@@ -668,6 +668,107 @@ theorem omega_digit_two_coverage (hShadow : four_power_omega_shadow_wave)
     ∃ p : Nat, digit3 (4^K) p = 2 :=
   (omega_digit_two_cases K hK).elim (fun hsh => hShadow K hK hsh) id
 
+/-! ## §7.5 Level three of the tower — the next sheet of the cut word -/
+
+/-- The LTE mean is constantly sixteen modulo twenty-seven from sheet
+level two onward. -/
+theorem omega_lteCoeff_mod27 (a : Nat) (ha : 2 ≤ a) :
+    lteCoeff a % 27 = 16 := by
+  have h27 : (3:Nat)^3 = 27 := by decide
+  have hstable := omega_lteCoeff_stable 3 (a-2)
+  have hidx : (3-1) + (a-2) = a := by omega
+  rw [hidx, h27] at hstable
+  rw [hstable]
+  decide
+
+/-- The base of the geometric mean is one modulo twenty-seven from sheet
+level two onward. -/
+theorem omega_base_mod27 : ∀ a : Nat, 2 ≤ a → (4^(3^a)) % 27 = 1 := by
+  intro a
+  induction a with
+  | zero => intro h; omega
+  | succ a ih =>
+      intro h
+      rcases Nat.lt_or_ge a 2 with hlt | hge
+      · have ha1 : a = 1 := by omega
+        rw [ha1]
+        decide
+      · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
+          rw [Nat.pow_succ, Nat.pow_mul]
+        rw [hstep, Nat.pow_mod, ih hge, Nat.one_pow]
+
+/-- The geometric mean is the core mass modulo twenty-seven from sheet
+level two onward. -/
+theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
+    omegaGeoSum a core % 27 = core % 27 := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 27 = 1 := by
+    intro j
+    rw [Nat.pow_mod, omega_base_mod27 a ha, Nat.one_pow] <;> omega
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- **The level-three cut word law.**  From sheet level two onward the cut
+word is `16 * core` modulo twenty-seven. -/
+theorem omega_cut_word_mod27 (a core : Nat) (ha : 2 ≤ a) :
+    omegaCutWord a core % 27 = (16 * core) % 27 := by
+  unfold omegaCutWord
+  rw [Nat.mul_mod, omega_lteCoeff_mod27 a ha, omega_geo_mod27 a core ha]
+  omega
+
+/-- **THE LEVEL-THREE DIGIT LAW.**  The ternary digit of `4^(3^a * core)`
+at row `a+3` is the top trit of the cut word modulo twenty-seven — the
+same certified prefix-slice socket as level two, one row deeper. -/
+theorem omega_level3_digit (a core : Nat) :
+    digit3 (4^(3^a * core)) (a+3) = (omegaCutWord a core % 27) / 9 := by
+  have hf := omega_cut_factor a core
+  have h1 : (1:Nat) < 3^(a+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(a+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ a+1)
+    omega
+  have hslice := prefix_slice_digit_exact (a+1) 1 (omegaCutWord a core) 2 h1
+  rw [show a+3 = (a+1)+2 from by omega, hf, hslice]
+  unfold digit3
+  rw [show (3:Nat)^2 = 9 from by decide]
+  omega
+
+/-- **THE LEVEL-THREE GATE CLASSES.**  For every core congruent to thirteen
+or twenty-five modulo twenty-seven, the power `4^(3^a * core)` owns a
+ternary digit two at row `a+3` — the third infinite family of the Law,
+reaching one subclass of each shadow sheet at every sheet level two and
+above. -/
+theorem omega_level3_digit_two (a core : Nat) (ha : 2 ≤ a)
+    (hcore : core % 27 = 13 ∨ core % 27 = 25) :
+    digit3 (4^(3^a * core)) (a+3) = 2 := by
+  rw [omega_level3_digit, omega_cut_word_mod27 a core ha]
+  rcases hcore with h13 | h25
+  · have hval : (16 * core) % 27 = 19 := by omega
+    rw [hval]
+  · have hval : (16 * core) % 27 = 22 := by omega
+    rw [hval]
+
+/-- **The Ω-shadow tail.**  The shadow residue after the kernel-checked
+base and the level-three gate classes: every shadow exponent above the
+kernel base whose core dodges the level-three classes at sheet level two
+and above. -/
+def omegaShadowTail (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    (2 ≤ s → core % 27 ≠ 13 ∧ core % 27 ≠ 25)
+
+/-- **THE Ω-SHADOW WAVE TAIL** — the residual input after the
+kernel-checked base and the third level of the Ω-cut tower: only shadow
+exponents above the kernel base whose cores dodge every proven gate
+class remain. -/
+def four_power_omega_shadow_wave_tail : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTail K → ∃ p : Nat, digit3 (4^K) p = 2
+
 #check omegaShadow
 #check four_power_omega_shadow_wave
 #check omega_row2_digit_two
@@ -675,11 +776,25 @@ theorem omega_digit_two_coverage (hShadow : four_power_omega_shadow_wave)
 #check omega_digit_two_cases
 #check omega_digit_two_of_not_shadow
 #check omega_digit_two_coverage
+#check omega_lteCoeff_mod27
+#check omega_base_mod27
+#check omega_geo_mod27
+#check omega_cut_word_mod27
+#check omega_level3_digit
+#check omega_level3_digit_two
+#check omegaShadowTail
+#check four_power_omega_shadow_wave_tail
 #print axioms omega_row2_digit_two
 #print axioms omega_three_free_decomposition
 #print axioms omega_digit_two_cases
 #print axioms omega_digit_two_of_not_shadow
 #print axioms omega_digit_two_coverage
+#print axioms omega_lteCoeff_mod27
+#print axioms omega_base_mod27
+#print axioms omega_geo_mod27
+#print axioms omega_cut_word_mod27
+#print axioms omega_level3_digit
+#print axioms omega_level3_digit_two
 
 end GSTGraphV2OmegaWaveLaw
 
