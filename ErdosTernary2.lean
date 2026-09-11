@@ -17151,6 +17151,141 @@ theorem four_power_omega_shadow_wave_of_tail2
             omega
           · omega
 
+/-- **The Ω-shadow wave, closed on the kernel base, both tower levels,
+both sheet gates, and the sheet-zero exponent-cycle gates.**  The residual
+input, shrunk a fourth time: the kernel-checked modular base carries
+every shadow exponent up to five hundred unconditionally; the Ω-cut
+tower's third and fourth levels carry their gate classes; the Ω-sheet gate
+carries every dodger whose sheet-local cut word has top trit two modulo
+the squared cut modulus; the new Ω-second-sheet gate — the binomial
+correction's own trit at row `2s+3`, where the wave word's second order
+first touches — carries the four-sheet's lowest-third and the seven-sheet's
+middle-third sheet words; and the sheet-zero exponent-cycle gates carry
+the base's own period classes at rows three and four.  Only the
+thrice-dodging tail remains as input. -/
+theorem four_power_omega_shadow_wave_of_tail3
+    (hTail3 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail3) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave := by
+  intro K hK hShadow
+  by_cases h500 : K ≤ 500
+  · have h5 : 5 ≤ K := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4^K) (modular_check_base K h5 h500)
+    exact ⟨q, hq⟩
+  · obtain ⟨s, core, hsc, hc3, hsheet⟩ := hShadow
+    by_cases hL3 : 2 ≤ s ∧ (core % 27 = 13 ∨ core % 27 = 25)
+    · obtain ⟨hs, hcl⟩ := hL3
+      refine ⟨s+3, ?_⟩
+      rw [hsc]
+      exact GSTGraphV2OmegaWaveLaw.omega_level3_digit_two s core hs hcl
+    · by_cases hL4 : 3 ≤ s ∧ 54 ≤ (16 * core) % 81
+      · obtain ⟨hs4, hgate⟩ := hL4
+        refine ⟨s+4, ?_⟩
+        rw [hsc]
+        exact GSTGraphV2OmegaWaveLaw.omega_level4_digit_two s core hs4 hgate
+      · by_cases hSG :
+          2 * 3^(s+1) ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
+        · have hc1 : core % 3 = 1 := by
+            rcases hsheet with h4 | ⟨_, h1⟩ | ⟨_, h7⟩ <;> omega
+          rw [hsc]
+          exact ⟨2*s+2,
+            GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc1 hSG⟩
+        · by_cases hS2 : 1 ≤ s ∧
+              ((core % 9 = 4 ∧ (GSTFourPowerDirectResidue.lteCoeff s * core)
+                  % 3^(s+3) < 3^(s+2))
+              ∨ (core % 9 = 7 ∧ 3^(s+2)
+                  ≤ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+                ∧ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+                  < 2 * 3^(s+2)))
+          · obtain ⟨hs1, hclass⟩ := hS2
+            rcases hclass with ⟨h4c, hq4⟩ | ⟨h7c, hq7, hq7'⟩
+            · rw [hsc]
+              exact ⟨2*s+3,
+                GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_four s core hs1 h4c hq4⟩
+            · rw [hsc]
+              exact ⟨2*s+3,
+                GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_seven s core hs1 h7c
+                  hq7 hq7'⟩
+          · by_cases hEC : s = 0 ∧
+              ((core % 9 = 1 ∧ (core % 27 = 19 ∨ core % 81 = 55
+                  ∨ core % 81 = 64 ∨ core % 81 = 73))
+              ∨ (core % 9 = 4 ∧ (core % 27 = 22 ∨ core % 81 = 58
+                  ∨ core % 81 = 67 ∨ core % 81 = 76)))
+            · obtain ⟨hs0, hclass⟩ := hEC
+              have hKc : K = core := by
+                rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
+              rcases hclass with ⟨h1c, hres⟩ | ⟨h4c, hres⟩
+              · rcases hres with h19 | h55 | h64 | h73
+                · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+                    (Or.inl (by rw [hKc]; exact h19))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inl (by rw [hKc]; exact h55))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inr (Or.inl (by rw [hKc]; exact h64)))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_one K
+                    (Or.inr (Or.inr (by rw [hKc]; exact h73)))⟩
+              · rcases hres with h22 | h58 | h67 | h76
+                · exact ⟨3, GSTGraphV2OmegaWaveLaw.omega_expcycle_row3_digit_two K
+                    (Or.inr (by rw [hKc]; exact h22))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inl (by rw [hKc]; exact h58))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inr (Or.inl (by rw [hKc]; exact h67)))⟩
+                · exact ⟨4, GSTGraphV2OmegaWaveLaw.omega_expcycle_row4_digit_two_four K
+                    (Or.inr (Or.inr (by rw [hKc]; exact h76)))⟩
+            · refine hTail3 K (by omega)
+                ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+              · intro hs
+                constructor
+                · intro h13; exact absurd ⟨hs, Or.inl h13⟩ hL3
+                · intro h25; exact absurd ⟨hs, Or.inr h25⟩ hL3
+              · intro hs4
+                have hng : ¬ 54 ≤ (16 * core) % 81 := by
+                  intro hg; exact absurd ⟨hs4, hg⟩ hL4
+                omega
+              · omega
+              · intro hs1 h4c
+                rcases Nat.lt_or_ge
+                    (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                    3^(s+2) with hlt | hge
+                · exact absurd ⟨hs1, Or.inl ⟨h4c, hlt⟩⟩ hS2
+                · exact hge
+              · intro hs1 h7c
+                rcases Nat.lt_or_ge
+                    (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                    3^(s+2) with hlt | hge
+                · exact Or.inl hlt
+                · refine Or.inr ?_
+                  by_cases hlt2 :
+                      (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                        < 2 * 3^(s+2)
+                  · exact absurd ⟨hs1, Or.inr ⟨h7c, hge, hlt2⟩⟩ hS2
+                  · omega
+              · intro hs0 h1c
+                constructor
+                · intro h19
+                  exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inl h19⟩⟩ hEC
+                · constructor
+                  · intro h55
+                    exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inl h55)⟩⟩ hEC
+                  · constructor
+                    · intro h64
+                      exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inl h64))⟩⟩ hEC
+                    · intro h73
+                      exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inr h73))⟩⟩ hEC
+              · intro hs0 h4c
+                constructor
+                · intro h22
+                  exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inl h22⟩⟩ hEC
+                · constructor
+                  · intro h58
+                    exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inl h58)⟩⟩ hEC
+                  · constructor
+                    · intro h67
+                      exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inl h67))⟩⟩ hEC
+                    · intro h76
+                      exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inr h76))⟩⟩ hEC
+
 /-- **THE FINAL THEOREM, Ω-ROUTE — SHADOW INPUT (sealed alternate).**  The
 full shadow-wave input version of the Ω-route final theorem, kept green
 as the parameterized alternate of the tail route below. -/
@@ -17178,24 +17313,41 @@ theorem erdos_ternary_2_universal_tail
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail hTail) n hn
 
-/-- **THE FINAL THEOREM, Ω-ROUTE — SHEET-GATE TAIL INPUT.**  The single
-input is now the Ω-shadow wave tail after the kernel base, the fourth
-tower level, and the Ω-sheet gate: the kernel-checked modular base
-carries every shadow half-exponent up to five hundred, the Ω-cut tower's
-third and fourth levels carry their gate classes, and the Ω-sheet gate —
-the wave word one digit beyond the stabilization window — carries every
-dodger whose sheet-local cut word has top trit two modulo the squared
-cut modulus.  Strictly stronger than the tail seal at `f5d9dc1`: weaker
-input, same conclusion. -/
-theorem erdos_ternary_2_universal
+/-- **THE FINAL THEOREM, Ω-ROUTE — SHEET-GATE TAIL INPUT (sealed
+alternate).**  The sheet-gate-sealed form: the single input is the Ω-shadow
+wave tail after the kernel base, the fourth tower level, and the Ω-sheet
+gate, kept green as the sealed alternate of the second-sheet route below. -/
+theorem erdos_ternary_2_universal_tail2
     (hTail2 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail2)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail2 hTail2) n hn
 
+/-- **THE FINAL THEOREM, Ω-ROUTE — SECOND-SHEET TAIL INPUT.**  The single
+input is now the Ω-shadow wave tail after the kernel base, both tower
+levels, both sheet gates, and the sheet-zero exponent-cycle gates: the
+kernel-checked modular base carries every shadow half-exponent up to five
+hundred, the Ω-cut tower's third and fourth levels carry their gate
+classes, the Ω-sheet gate carries every dodger whose sheet-local cut word
+has top trit two modulo the squared cut modulus, the Ω-second-sheet gate —
+the binomial correction's own trit at row `2s+3`, where the wave word's
+second order first touches — carries the four-sheet's lowest-third and the
+seven-sheet's middle-third sheet words, and the sheet-zero exponent-cycle
+gates carry the base's own period classes at rows three and four.
+Strictly stronger than the sheet-gate seal at `31dbf57`: weaker input,
+same conclusion. -/
+theorem erdos_ternary_2_universal
+    (hTail3 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail3)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow
+    (four_power_omega_shadow_wave_of_tail3 hTail3) n hn
+
 #print axioms erdos_ternary_2_universal
 #print axioms erdos_ternary_2_universal_tail
+#print axioms erdos_ternary_2_universal_tail2
 #print axioms erdos_ternary_2_universal_shadow
 #print axioms four_power_omega_shadow_wave_of_tail
 #print axioms four_power_omega_shadow_wave_of_tail2
+#print axioms four_power_omega_shadow_wave_of_tail3

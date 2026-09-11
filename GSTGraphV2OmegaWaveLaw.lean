@@ -1051,6 +1051,401 @@ theorem omega_level4_digit_two (a core : Nat) (ha : 3 ≤ a)
   have hlt : (16 * core) % 81 < 81 := Nat.mod_lt _ (by decide)
   omega
 
+/-! ## §7.7 The Ω-second-sheet gate — the binomial trit at row `2s+3`
+
+The Ω-sheet gate reads the wave word one digit beyond the stabilization
+window (row `2s+2`, the top trit of the sheet-local word modulo the squared
+cut modulus).  This section opens the window ONE MORE DIGIT: the full cut
+word modulo the cubed cut modulus `3^(s+3)` is the sheet-local word plus
+the binomial correction carried to its second order, and for every shadow
+core (core congruent to one modulo three) the correction's first trit
+lands EXACTLY at row `2s+3`.  That trit is the binomial coefficient's own
+third divide: zero for cores congruent to one modulo nine, two for the
+four-sheet, one for the seven-sheet.  The digit at row `2s+3` is the sheet
+word's trit plus the binomial trit — the **Ω-second-sheet gate**: the +2
+shift of the four-sheet converts a lowest-third sheet word into digit two,
+the +1 shift of the seven-sheet converts a middle-third sheet word into
+digit two. -/
+
+/-- The binomial coefficient of the cut word's second order is exact: the
+halving witness. -/
+theorem omega_binom_two_mul (core : Nat) :
+    2 * (core * (core - 1) / 2) = core * (core - 1) := by
+  rw [Nat.mul_div_cancel' (by
+    rcases Nat.even_or_odd core with ⟨k, hk⟩ | ⟨k, hk⟩
+    · rw [hk]
+      exact ⟨k * (2 * k - 1), by ring⟩
+    · rw [hk]
+      have hsub : (2 * k + 1) - 1 = 2 * k := by omega
+      rw [hsub]
+      exact ⟨(2 * k + 1) * k, by ring⟩)]
+
+/-- Halving a number that is three modulo nine: the half is six modulo
+nine. -/
+theorem omega_half_mod9_of_mod9_three (P : Nat) (hP : P % 9 = 3)
+    (hE : 2 * (P / 2) = P) :
+    (P / 2) % 9 = 6 := by
+  have hlt : (P / 2) % 9 < 9 := Nat.mod_lt _ (by decide)
+  omega
+
+/-- Halving a number that is six modulo nine: the half is three modulo
+nine. -/
+theorem omega_half_mod9_of_mod9_six (P : Nat) (hP : P % 9 = 6)
+    (hE : 2 * (P / 2) = P) :
+    (P / 2) % 9 = 3 := by
+  have hlt : (P / 2) % 9 < 9 := Nat.mod_lt _ (by decide)
+  omega
+
+/-- **The binomial trit of the four-sheet.**  For every core congruent to
+four modulo nine the binomial coefficient `core * (core - 1) / 2` is six
+modulo nine: its third divide is the trit two. -/
+theorem omega_binom_mod9_four (core : Nat) (hcore : core % 9 = 4) :
+    (core * (core - 1) / 2) % 9 = 6 := by
+  have h2 : (core - 1) % 9 = 3 := by omega
+  have hP : (core * (core - 1)) % 9 = 3 := by
+    rw [Nat.mul_mod, hcore, h2]
+  exact omega_half_mod9_of_mod9_three (core * (core - 1)) hP
+    (omega_binom_two_mul core)
+
+/-- **The binomial trit of the seven-sheet.**  For every core congruent to
+seven modulo nine the binomial coefficient is three modulo nine: its third
+divide is the trit one. -/
+theorem omega_binom_mod9_seven (core : Nat) (hcore : core % 9 = 7) :
+    (core * (core - 1) / 2) % 9 = 3 := by
+  have h2 : (core - 1) % 9 = 6 := by omega
+  have hP : (core * (core - 1)) % 9 = 6 := by
+    rw [Nat.mul_mod, hcore, h2]
+  exact omega_half_mod9_of_mod9_six (core * (core - 1)) hP
+    (omega_binom_two_mul core)
+
+/-- A unit times a six-window number: the product is six modulo nine. -/
+theorem omega_mul_mod9_six (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 6) :
+    (X * Y) % 9 = 6 := by
+  have hX3 : X = 3 * (X / 3) + 1 := by omega
+  have hY9 : Y = 9 * (Y / 9) + 6 := by omega
+  have hE : (3 * (X / 3) + 1) * (9 * (Y / 9) + 6)
+      = 6 + 9 * (3 * (X / 3) * (Y / 9) + 2 * (X / 3) + (Y / 9)) := by ring
+  rw [hX3, hY9, hE, Nat.add_mul_mod_self_left]
+
+/-- A unit times a three-window number: the product is three modulo nine. -/
+theorem omega_mul_mod9_three (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 3) :
+    (X * Y) % 9 = 3 := by
+  have hX3 : X = 3 * (X / 3) + 1 := by omega
+  have hY9 : Y = 9 * (Y / 9) + 3 := by omega
+  have hE : (3 * (X / 3) + 1) * (9 * (Y / 9) + 3)
+      = 3 + 9 * (3 * (X / 3) * (Y / 9) + (X / 3) + (Y / 9)) := by ring
+  rw [hX3, hY9, hE, Nat.add_mul_mod_self_left]
+
+/-- The sheet power absorbs the factor's own nine-window: modulo the cubed
+cut modulus, only the factor modulo nine survives. -/
+theorem omega_powmul_mod_cubed (s X : Nat) :
+    (3^(s+1) * X) % 3^(s+3) = (3^(s+1) * (X % 9)) % 3^(s+3) := by
+  have h39 : (3:Nat)^(s+1) * 9 = 3^(s+3) := by
+    rw [show (9:Nat) = 3^2 from by decide, ← Nat.pow_add,
+      show (s:Nat) + 1 + 2 = s + 3 from by omega]
+  have hd : 9 * (X / 9) + X % 9 = X := Nat.div_add_mod X 9
+  have hexp : 3^(s+1) * X
+      = 3^(s+1) * (X % 9) + 3^(s+3) * (X / 9) := by
+    conv_lhs => rw [← hd]
+    rw [Nat.mul_add, ← Nat.mul_assoc, h39]
+    ring
+  rw [hexp, Nat.add_mul_mod_self_left]
+
+/-- **THE SECOND-ORDER CUT WORD LAW.**  At sheet `s` (sheet level one and
+above) the cut word of `4^(3^s * core)` agrees, modulo the cubed cut
+modulus `3^(s+3)`, with the sheet-local word `lteCoeff s * core` plus the
+binomial correction carried to its second order — the same telescoping
+identity as the squared law, one modulus deeper. -/
+theorem omega_cut_word_full3 (s core : Nat) (hs : 1 ≤ s) :
+    omegaCutWord s core % 3^(s+3)
+      = (lteCoeff s * core
+          + 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3^(s+3) := by
+  induction core with
+  | zero =>
+      have h0 : omegaCutWord s 0 = 0 := by simp [omegaCutWord, omegaGeoSum]
+      rw [h0]
+      simp
+  | succ c ih =>
+      rw [show (c+1) - 1 = c from by omega]
+      have hstepW : omegaCutWord s (c+1)
+          = omegaCutWord s c + lteCoeff s * 4^(3^s * c) := by
+        unfold omegaCutWord omegaGeoSum
+        simp only [Finset.sum_range_succ]
+        have hterm : (4^(3^s))^c = 4^(3^s * c) := by rw [Nat.pow_mul]
+        rw [hterm]
+        ring
+      have hf : 4^(3^s * c) = 1 + 3^(s+1) * omegaCutWord s c :=
+        omega_cut_factor s c
+      have h2 : omegaCutWord s (c+1)
+          = omegaCutWord s c + lteCoeff s
+            + 3^(s+1) * lteCoeff s * omegaCutWord s c := by
+        rw [hstepW, hf]; ring
+      have hbinom : (c+1) * c / 2 = c * (c - 1) / 2 + c := by
+        have hE : (c+1) * c = c * (c - 1) + 2 * c := by
+          rcases c with _ | c'
+          · simp
+          · have hsub : (c'+1) - 1 = c' := by omega
+            rw [hsub]
+            ring
+        rw [hE]
+        exact Nat.add_mul_div_left _ _ (by decide)
+      have hp3 : (3:Nat)^(s+1) * 3^(s+1) = 3^(s+3) * 3^(s-1) := by
+        rw [← Nat.pow_add, ← Nat.pow_add]; congr 1; omega
+      rw [h2, ← omega_sum_mod_lift, ih, omega_sum_mod_lift]
+      have hfinal : lteCoeff s * c
+            + 3^(s+1) * lteCoeff s * lteCoeff s * (c * (c - 1) / 2)
+            + lteCoeff s
+            + 3^(s+1) * lteCoeff s * (lteCoeff s * c
+                + 3^(s+1) * lteCoeff s * lteCoeff s * (c * (c - 1) / 2))
+          = lteCoeff s * (c+1)
+            + 3^(s+1) * lteCoeff s * lteCoeff s * ((c+1) * c / 2)
+            + 3^(s+1) * 3^(s+1) * lteCoeff s * lteCoeff s * lteCoeff s
+                * (c * (c - 1) / 2) := by
+        rw [hbinom]
+        ring
+      rw [hfinal]
+      rw [show 3^(s+1) * 3^(s+1) * lteCoeff s * lteCoeff s * lteCoeff s
+            * (c * (c - 1) / 2)
+          = 3^(s+3) * (3^(s-1) * lteCoeff s * lteCoeff s * lteCoeff s
+              * (c * (c - 1) / 2)) from by rw [hp3]; ring,
+        Nat.add_mul_mod_self_left]
+
+/-- **THE Ω-SECOND-SHEET DIGIT.**  The ternary digit of `4^(3^s * core)` at
+row `2s+3` — two digits beyond the tower's stabilization window — is the
+second-from-top trit of the cut word read through the cubed cut modulus. -/
+theorem omega_sheet2_digit (s core : Nat) :
+    digit3 (4^(3^s * core)) (2*s+3)
+      = ((omegaCutWord s core) % 3^(s+3)) / 3^(s+2) := by
+  have hf := omega_cut_factor s core
+  have h1 : (1:Nat) < 3^(s+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(s+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ s+1)
+    omega
+  have hslice := prefix_slice_digit_exact (s+1) 1 (omegaCutWord s core) (s+2) h1
+  rw [show 2*s+3 = (s+1)+(s+2) from by omega, hf, hslice]
+  unfold digit3
+  rw [digit3_window, show s + 2 + 1 = s + 3 from by omega]
+
+/-- **THE Ω-SECOND-SHEET GATE — THE FOUR-SHEET (+2 SHIFT).**  For every
+core congruent to four modulo nine at sheet level one and above whose
+sheet-local word `lteCoeff s * core` sits in the lowest third of the cubed
+cut modulus window, the binomial correction's own trit adds exactly two at
+row `2s+3`: the power `4^(3^s * core)` owns its ternary digit two there. -/
+theorem omega_sheet2_gate_four (s core : Nat) (hs : 1 ≤ s) (hcore : core % 9 = 4)
+    (hq : (lteCoeff s * core) % 3^(s+3) < 3^(s+2)) :
+    digit3 (4^(3^s * core)) (2*s+3) = 2 := by
+  have hu3 : (lteCoeff s) % 3 = 1 := lteCoeff_mod3_one s
+  have hll : (lteCoeff s * lteCoeff s) % 3 = 1 := by
+    rw [Nat.mul_mod, hu3]
+  have hb : (core * (core - 1) / 2) % 9 = 6 :=
+    omega_binom_mod9_four core hcore
+  have hB : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 9 = 6 :=
+    omega_mul_mod9_six (lteCoeff s * lteCoeff s) (core * (core - 1) / 2) hll hb
+  have habs : (3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+      % 3^(s+3)
+      = (3^(s+1) * 6) % 3^(s+3) := by
+    rw [show 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)
+        = 3^(s+1) * (lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+        from by ring,
+      omega_powmul_mod_cubed s
+        (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)),
+      hB]
+  have h32 : (3:Nat)^(s+1) * 3 = 3^(s+2) := by
+    rw [show s + 2 = s + 1 + 1 from by omega, Nat.pow_add, Nat.pow_one]
+  have h6 : (3:Nat)^(s+1) * 6 = 2 * 3^(s+2) := by
+    rw [show (6:Nat) = 3 * 2 from by decide, ← Nat.mul_assoc, h32]
+    ring
+  have h33 : (3:Nat)^(s+3) = 3 * 3^(s+2) := by
+    rw [show s + 3 = s + 2 + 1 from by omega, Nat.pow_add, Nat.pow_one]
+    ring
+  have hlt23 : 2 * 3^(s+2) < 3^(s+3) := by
+    have h0 : 0 < 3^(s+2) := Nat.pow_pos (by decide)
+    omega
+  have hcorr : (3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+      % 3^(s+3) = 2 * 3^(s+2) := by
+    rw [habs, h6]
+    exact Nat.mod_eq_of_lt hlt23
+  have hsumlt : (lteCoeff s * core) % 3^(s+3) + 2 * 3^(s+2) < 3^(s+3) := by
+    omega
+  rw [omega_sheet2_digit s core, omega_cut_word_full3 s core hs,
+    Nat.add_mod, hcorr, Nat.mod_eq_of_lt hsumlt]
+  rw [show 2 * 3^(s+2) = 3^(s+2) * 2 from by ring,
+    Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+    Nat.div_eq_of_lt hq]
+
+/-- **THE Ω-SECOND-SHEET GATE — THE SEVEN-SHEET (+1 SHIFT).**  For every
+core congruent to seven modulo nine at sheet level one and above whose
+sheet-local word sits in the middle third of the cubed cut modulus window,
+the binomial correction's own trit adds exactly one at row `2s+3`: the
+power `4^(3^s * core)` owns its ternary digit two there. -/
+theorem omega_sheet2_gate_seven (s core : Nat) (hs : 1 ≤ s) (hcore : core % 9 = 7)
+    (hq : 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))
+    (hq2 : (lteCoeff s * core) % 3^(s+3) < 2 * 3^(s+2)) :
+    digit3 (4^(3^s * core)) (2*s+3) = 2 := by
+  have hu3 : (lteCoeff s) % 3 = 1 := lteCoeff_mod3_one s
+  have hll : (lteCoeff s * lteCoeff s) % 3 = 1 := by
+    rw [Nat.mul_mod, hu3]
+  have hb : (core * (core - 1) / 2) % 9 = 3 :=
+    omega_binom_mod9_seven core hcore
+  have hB : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 9 = 3 :=
+    omega_mul_mod9_three (lteCoeff s * lteCoeff s) (core * (core - 1) / 2) hll hb
+  have habs : (3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+      % 3^(s+3)
+      = (3^(s+1) * 3) % 3^(s+3) := by
+    rw [show 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)
+        = 3^(s+1) * (lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+        from by ring,
+      omega_powmul_mod_cubed s
+        (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)),
+      hB]
+  have h32 : (3:Nat)^(s+1) * 3 = 3^(s+2) := by
+    rw [show s + 2 = s + 1 + 1 from by omega, Nat.pow_add, Nat.pow_one]
+  have h33 : (3:Nat)^(s+3) = 3 * 3^(s+2) := by
+    rw [show s + 3 = s + 2 + 1 from by omega, Nat.pow_add, Nat.pow_one]
+    ring
+  have hlt13 : 3^(s+2) < 3^(s+3) := by
+    have h0 : 0 < 3^(s+2) := Nat.pow_pos (by decide)
+    omega
+  have hcorr : (3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2))
+      % 3^(s+3) = 3^(s+2) := by
+    rw [habs, h32]
+    exact Nat.mod_eq_of_lt hlt13
+  have hsumlt : (lteCoeff s * core) % 3^(s+3) + 3^(s+2) < 3^(s+3) := by
+    omega
+  rw [omega_sheet2_digit s core, omega_cut_word_full3 s core hs,
+    Nat.add_mod, hcorr, Nat.mod_eq_of_lt hsumlt]
+  obtain ⟨d, hd⟩ : ∃ d, (lteCoeff s * core) % 3^(s+3) = 3^(s+2) + d :=
+    ⟨(lteCoeff s * core) % 3^(s+3) - 3^(s+2), by omega⟩
+  have hdlt : d < 3^(s+2) := by omega
+  rw [hd]
+  rw [show 3^(s+2) + d + 3^(s+2) = d + 3^(s+2) * 2 from by ring,
+    Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+    Nat.div_eq_of_lt hdlt]
+
+/-! ## §7.8 The exponent-cycle gates — sheet zero rides the base's period
+
+At sheet zero the exponent is its own three-free core, and the power's
+residues ride the base's multiplicative period: the order of four modulo
+`3^m` is `3^(m-2)` from `m = 3` onward, so the ternary digits at rows
+three and four of `4^K` are pure functions of `K` modulo twenty-seven and
+eighty-one.  The gate classes below kill five of the nine residue classes
+of each unguarded sheet-zero shadow family (the cores congruent to one and
+to four modulo nine): the residue rides the period into the top third of
+the window, and the digit two is direct. -/
+
+/-- The base's period modulo eighty-one: the order of four is twenty-seven. -/
+theorem omega_expcycle_period81 (j : Nat) :
+    ((4^27)^j) % 81 = 1 := by
+  have h427 : (4^27) % 81 = 1 := by decide
+  rw [Nat.pow_mod, h427, Nat.one_pow]
+
+/-- The base's period modulo two-hundred-forty-three: the order of four is
+eighty-one. -/
+theorem omega_expcycle_period243 (j : Nat) :
+    ((4^81)^j) % 243 = 1 := by
+  have h481 : (4^81) % 243 = 1 := by decide
+  rw [Nat.pow_mod, h481, Nat.one_pow]
+
+/-- **THE EXPONENT-CYCLE ROW-THREE GATES.**  Every three-free exponent
+congruent to nineteen or twenty-two modulo twenty-seven rides the base's
+period into the top third of the eighty-one window: the digit two at row
+three. -/
+theorem omega_expcycle_row3_digit_two (K : Nat)
+    (hK : K % 27 = 19 ∨ K % 27 = 22) :
+    digit3 (4^K) 3 = 2 := by
+  rcases hK with h19 | h22
+  · have hdm : K = 27 * (K / 27) + 19 := by omega
+    have hpow : (4^27)^(K / 27) * 4^19 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h419 : (4^19) % 81 = 58 := by decide
+    have hmod : (4^K) % 81 = 58 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period81 (K / 27), h419]
+    unfold digit3
+    rw [show (3:Nat)^3 = 27 from by decide]
+    omega
+  · have hdm : K = 27 * (K / 27) + 22 := by omega
+    have hpow : (4^27)^(K / 27) * 4^22 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h422 : (4^22) % 81 = 67 := by decide
+    have hmod : (4^K) % 81 = 67 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period81 (K / 27), h422]
+    unfold digit3
+    rw [show (3:Nat)^3 = 27 from by decide]
+    omega
+
+/-- **THE EXPONENT-CYCLE ROW-FOUR GATE (one-sheet).**  Every three-free
+exponent congruent to fifty-five, sixty-four, or seventy-three modulo
+eighty-one rides the period into the top third of the two-hundred-forty-three
+window: the digit two at row four. -/
+theorem omega_expcycle_row4_digit_two_one (K : Nat)
+    (hK : K % 81 = 55 ∨ K % 81 = 64 ∨ K % 81 = 73) :
+    digit3 (4^K) 4 = 2 := by
+  rcases hK with h55 | h64 | h73
+  · have hdm : K = 81 * (K / 81) + 55 := by omega
+    have hpow : (4^81)^(K / 81) * 4^55 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h455 : (4^55) % 243 = 166 := by decide
+    have hmod : (4^K) % 243 = 166 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h455]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+  · have hdm : K = 81 * (K / 81) + 64 := by omega
+    have hpow : (4^81)^(K / 81) * 4^64 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h464 : (4^64) % 243 = 193 := by decide
+    have hmod : (4^K) % 243 = 193 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h464]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+  · have hdm : K = 81 * (K / 81) + 73 := by omega
+    have hpow : (4^81)^(K / 81) * 4^73 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h473 : (4^73) % 243 = 220 := by decide
+    have hmod : (4^K) % 243 = 220 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h473]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+
+/-- **THE EXPONENT-CYCLE ROW-FOUR GATE (four-sheet).**  Every three-free
+exponent congruent to fifty-eight, sixty-seven, or seventy-six modulo
+eighty-one rides the period into the top third of the window: the digit
+two at row four. -/
+theorem omega_expcycle_row4_digit_two_four (K : Nat)
+    (hK : K % 81 = 58 ∨ K % 81 = 67 ∨ K % 81 = 76) :
+    digit3 (4^K) 4 = 2 := by
+  rcases hK with h58 | h67 | h76
+  · have hdm : K = 81 * (K / 81) + 58 := by omega
+    have hpow : (4^81)^(K / 81) * 4^58 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h458 : (4^58) % 243 = 175 := by decide
+    have hmod : (4^K) % 243 = 175 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h458]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+  · have hdm : K = 81 * (K / 81) + 67 := by omega
+    have hpow : (4^81)^(K / 81) * 4^67 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h467 : (4^67) % 243 = 202 := by decide
+    have hmod : (4^K) % 243 = 202 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h467]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+  · have hdm : K = 81 * (K / 81) + 76 := by omega
+    have hpow : (4^81)^(K / 81) * 4^76 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have h476 : (4^76) % 243 = 229 := by decide
+    have hmod : (4^K) % 243 = 229 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h476]
+    unfold digit3
+    rw [show (3:Nat)^4 = 81 from by decide]
+    omega
+
 /-- **The Ω-shadow tail after the sheet gate.**  The shadow residue after
 the kernel-checked base, the third and fourth tower levels, and the
 Ω-sheet gate: every shadow exponent above the kernel base whose core
@@ -1085,6 +1480,63 @@ exponents above the kernel base whose cores dodge every proven gate
 class remain. -/
 def four_power_omega_shadow_wave_tail : Prop :=
   ∀ K : Nat, 500 < K → omegaShadowTail K → ∃ p : Nat, digit3 (4^K) p = 2
+
+/-- **The Ω-shadow tail after the second sheet gate and the exponent-cycle
+gates.**  The shadow residue after the kernel-checked base, the third and
+fourth tower levels, the Ω-sheet gate, the Ω-second-sheet gate, and the
+sheet-zero exponent-cycle gates: every shadow exponent above the kernel
+base whose core dodges every proven gate — the tower classes, both sheet
+gates, and the base's own period classes at sheet zero — remains. -/
+def omegaShadowTail3 (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    (2 ≤ s → core % 27 ≠ 13 ∧ core % 27 ≠ 25) ∧
+    (3 ≤ s → (16 * core) % 81 < 54) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) ∧
+    (1 ≤ s → (core % 9 = 4 →
+      3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))) ∧
+    (1 ≤ s → (core % 9 = 7 →
+      ((lteCoeff s * core) % 3^(s+3) < 3^(s+2)
+        ∨ 2 * 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3)))) ∧
+    (s = 0 → (core % 9 = 1 → core % 27 ≠ 19 ∧ core % 81 ≠ 55
+      ∧ core % 81 ≠ 64 ∧ core % 81 ≠ 73)) ∧
+    (s = 0 → (core % 9 = 4 → core % 27 ≠ 22 ∧ core % 81 ≠ 58
+      ∧ core % 81 ≠ 67 ∧ core % 81 ≠ 76))
+
+/-- **THE Ω-SHADOW WAVE TAIL (SECOND-SHEET FORM)** — the residual input
+after the kernel-checked base, the third and fourth tower levels, both
+sheet gates, and the sheet-zero exponent-cycle gates. -/
+def four_power_omega_shadow_wave_tail3 : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTail3 K → ∃ p : Nat, digit3 (4^K) p = 2
+
+#check omega_binom_two_mul
+#check omega_half_mod9_of_mod9_three
+#check omega_half_mod9_of_mod9_six
+#check omega_mul_mod9_three
+#check omega_mul_mod9_six
+#check omega_powmul_mod_cubed
+#check omega_binom_mod9_four
+#check omega_binom_mod9_seven
+#check omega_cut_word_full3
+#check omega_sheet2_digit
+#check omega_sheet2_gate_four
+#check omega_sheet2_gate_seven
+#check omega_expcycle_period81
+#check omega_expcycle_period243
+#check omega_expcycle_row3_digit_two
+#check omega_expcycle_row4_digit_two_one
+#check omega_expcycle_row4_digit_two_four
+#check omegaShadowTail3
+#check four_power_omega_shadow_wave_tail3
+#print axioms omega_cut_word_full3
+#print axioms omega_sheet2_digit
+#print axioms omega_sheet2_gate_four
+#print axioms omega_sheet2_gate_seven
+#print axioms omega_expcycle_row3_digit_two
+#print axioms omega_expcycle_row4_digit_two_one
+#print axioms omega_expcycle_row4_digit_two_four
+#print axioms omegaShadowTail3
+#print axioms four_power_omega_shadow_wave_tail3
 
 #check omegaShadow
 #check four_power_omega_shadow_wave
