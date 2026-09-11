@@ -2813,7 +2813,7 @@ theorem omega_cut_word_linear (s core : Nat) :
   have hkey : 1 + 3^(s+1) * omegaCutWord s core
       = 1 + 3^(s+1) * (omegaCutWord s 1 * core)
         + 3^(s+1) * (3^(s+1) * t) := by
-    rw [← hfc, ← hpow, ← hf1]
+    rw [← hfc, ← hpow, hf1]
     exact ht
   refine ⟨t, ?_⟩
   have hm : 0 < 3^(s+1) := Nat.pow_pos (by decide)
@@ -2869,7 +2869,10 @@ theorem omega_tower_level_digit_two (s core k : Nat) (hk : 3 ≤ k)
   have hlt : (omegaCutWord s 1 * core) % 3^k < 3^k :=
     Nat.mod_lt _ (Nat.pow_pos (by decide))
   have h3 : 3^k = 3 * 3^(k-1) := by
-    rw [show k = (k-1)+1 from by omega, Nat.pow_add, Nat.pow_one]
+    have hps := Nat.pow_succ (3:Nat) (k-1)
+    have hk' : (k-1)+1 = k := by omega
+    rw [hk'] at hps
+    rw [hps]
     ring
   have hlt2 : (omegaCutWord s 1 * core) % 3^k < 3 * 3^(k-1) := by omega
   obtain ⟨d, hd⟩ : ∃ d, (omegaCutWord s 1 * core) % 3^k
