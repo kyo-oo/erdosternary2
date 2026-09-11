@@ -1083,6 +1083,10 @@ theorem omega_binom_two_mul (core : Nat) :
       rw [hsub]
       exact ⟨(2 * k + 1) * k, by ring⟩)]
 
+#check omega_binom_two_mul
+
+#check omega_binom_two_mul
+
 /-- Halving a number that is three modulo nine: the half is six modulo
 nine. -/
 theorem omega_half_mod9_of_mod9_three (P : Nat) (hP : P % 9 = 3)
@@ -1091,6 +1095,10 @@ theorem omega_half_mod9_of_mod9_three (P : Nat) (hP : P % 9 = 3)
   have hlt : (P / 2) % 9 < 9 := Nat.mod_lt _ (by decide)
   omega
 
+#check omega_half_mod9_of_mod9_three
+
+#check omega_half_mod9_of_mod9_three
+
 /-- Halving a number that is six modulo nine: the half is three modulo
 nine. -/
 theorem omega_half_mod9_of_mod9_six (P : Nat) (hP : P % 9 = 6)
@@ -1098,6 +1106,10 @@ theorem omega_half_mod9_of_mod9_six (P : Nat) (hP : P % 9 = 6)
     (P / 2) % 9 = 3 := by
   have hlt : (P / 2) % 9 < 9 := Nat.mod_lt _ (by decide)
   omega
+
+#check omega_half_mod9_of_mod9_six
+
+#check omega_half_mod9_of_mod9_six
 
 /-- **The binomial trit of the four-sheet.**  For every core congruent to
 four modulo nine the binomial coefficient `core * (core - 1) / 2` is six
@@ -1110,6 +1122,10 @@ theorem omega_binom_mod9_four (core : Nat) (hcore : core % 9 = 4) :
   exact omega_half_mod9_of_mod9_three (core * (core - 1)) hP
     (omega_binom_two_mul core)
 
+#check omega_binom_mod9_four
+
+#check omega_binom_mod9_four
+
 /-- **The binomial trit of the seven-sheet.**  For every core congruent to
 seven modulo nine the binomial coefficient is three modulo nine: its third
 divide is the trit one. -/
@@ -1121,6 +1137,10 @@ theorem omega_binom_mod9_seven (core : Nat) (hcore : core % 9 = 7) :
   exact omega_half_mod9_of_mod9_six (core * (core - 1)) hP
     (omega_binom_two_mul core)
 
+#check omega_binom_mod9_seven
+
+#check omega_binom_mod9_seven
+
 /-- A unit times a six-window number: the product is six modulo nine. -/
 theorem omega_mul_mod9_six (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 6) :
     (X * Y) % 9 = 6 := by
@@ -1130,6 +1150,10 @@ theorem omega_mul_mod9_six (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 6) :
       = 6 + 9 * (3 * (X / 3) * (Y / 9) + 2 * (X / 3) + (Y / 9)) := by ring
   rw [hX3, hY9, hE, Nat.add_mul_mod_self_left]
 
+#check omega_mul_mod9_six
+
+#check omega_mul_mod9_six
+
 /-- A unit times a three-window number: the product is three modulo nine. -/
 theorem omega_mul_mod9_three (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 3) :
     (X * Y) % 9 = 3 := by
@@ -1138,6 +1162,10 @@ theorem omega_mul_mod9_three (X Y : Nat) (hX : X % 3 = 1) (hY : Y % 9 = 3) :
   have hE : (3 * (X / 3) + 1) * (9 * (Y / 9) + 3)
       = 3 + 9 * (3 * (X / 3) * (Y / 9) + (X / 3) + (Y / 9)) := by ring
   rw [hX3, hY9, hE, Nat.add_mul_mod_self_left]
+
+#check omega_mul_mod9_three
+
+#check omega_mul_mod9_three
 
 /-- The sheet power absorbs the factor's own nine-window: modulo the cubed
 cut modulus, only the factor modulo nine survives. -/
@@ -1153,6 +1181,10 @@ theorem omega_powmul_mod_cubed (s X : Nat) :
     rw [Nat.mul_add, ← Nat.mul_assoc, h39]
     ring
   rw [hexp, Nat.add_mul_mod_self_left]
+
+#check omega_powmul_mod_cubed
+
+#check omega_powmul_mod_cubed
 
 /-- **THE SECOND-ORDER CUT WORD LAW.**  At sheet `s` (sheet level one and
 above) the cut word of `4^(3^s * core)` agrees, modulo the cubed cut
@@ -1213,6 +1245,10 @@ theorem omega_cut_word_full3 (s core : Nat) (hs : 1 ≤ s) :
               * (c * (c - 1) / 2)) from by rw [hp3]; ring,
         Nat.add_mul_mod_self_left]
 
+#check omega_cut_word_full3
+
+#check omega_cut_word_full3
+
 /-- **THE Ω-SECOND-SHEET DIGIT.**  The ternary digit of `4^(3^s * core)` at
 row `2s+3` — two digits beyond the tower's stabilization window — is the
 second-from-top trit of the cut word read through the cubed cut modulus. -/
@@ -1229,6 +1265,10 @@ theorem omega_sheet2_digit (s core : Nat) :
   rw [show 2*s+3 = (s+1)+(s+2) from by omega, hf, hslice]
   unfold digit3
   rw [digit3_window, show s + 2 + 1 = s + 3 from by omega]
+
+#check omega_sheet2_digit
+
+#check omega_sheet2_digit
 
 /-- **THE Ω-SECOND-SHEET GATE — THE FOUR-SHEET (+2 SHIFT).**  For every
 core congruent to four modulo nine at sheet level one and above whose
@@ -1276,6 +1316,10 @@ theorem omega_sheet2_gate_four (s core : Nat) (hs : 1 ≤ s) (hcore : core % 9 =
   rw [show 2 * 3^(s+2) = 3^(s+2) * 2 from by ring,
     Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
     Nat.div_eq_of_lt hq]
+
+#check omega_sheet2_gate_four
+
+#check omega_sheet2_gate_four
 
 /-- **THE Ω-SECOND-SHEET GATE — THE SEVEN-SHEET (+1 SHIFT).**  For every
 core congruent to seven modulo nine at sheet level one and above whose
@@ -1326,6 +1370,10 @@ theorem omega_sheet2_gate_seven (s core : Nat) (hs : 1 ≤ s) (hcore : core % 9 
     Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
     Nat.div_eq_of_lt hdlt]
 
+#check omega_sheet2_gate_seven
+
+#check omega_sheet2_gate_seven
+
 /-! ## §7.8 The exponent-cycle gates — sheet zero rides the base's period
 
 At sheet zero the exponent is its own three-free core, and the power's
@@ -1343,12 +1391,20 @@ theorem omega_expcycle_period81 (j : Nat) :
   have h427 : (4^27) % 81 = 1 := by decide
   rw [Nat.pow_mod, h427, Nat.one_pow]
 
+#check omega_expcycle_period81
+
+#check omega_expcycle_period81
+
 /-- The base's period modulo two-hundred-forty-three: the order of four is
 eighty-one. -/
 theorem omega_expcycle_period243 (j : Nat) :
     ((4^81)^j) % 243 = 1 := by
   have h481 : (4^81) % 243 = 1 := by decide
   rw [Nat.pow_mod, h481, Nat.one_pow]
+
+#check omega_expcycle_period243
+
+#check omega_expcycle_period243
 
 /-- **THE EXPONENT-CYCLE ROW-THREE GATES.**  Every three-free exponent
 congruent to nineteen or twenty-two modulo twenty-seven rides the base's
@@ -1376,6 +1432,8 @@ theorem omega_expcycle_row3_digit_two (K : Nat)
     unfold digit3
     rw [show (3:Nat)^3 = 27 from by decide]
     omega
+
+#check omega_expcycle_row3_digit_two
 
 /-- **THE EXPONENT-CYCLE ROW-FOUR GATE (one-sheet).**  Every three-free
 exponent congruent to fifty-five, sixty-four, or seventy-three modulo
@@ -1413,6 +1471,8 @@ theorem omega_expcycle_row4_digit_two_one (K : Nat)
     rw [show (3:Nat)^4 = 81 from by decide]
     omega
 
+#check omega_expcycle_row4_digit_two_one
+
 /-- **THE EXPONENT-CYCLE ROW-FOUR GATE (four-sheet).**  Every three-free
 exponent congruent to fifty-eight, sixty-seven, or seventy-six modulo
 eighty-one rides the period into the top third of the window: the digit
@@ -1448,6 +1508,8 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
     unfold digit3
     rw [show (3:Nat)^4 = 81 from by decide]
     omega
+
+#check omega_expcycle_row4_digit_two_four
 
 end
 

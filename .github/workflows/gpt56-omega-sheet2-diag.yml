@@ -1,6 +1,8 @@
 name: GPT56 Omega Sheet2 Diagnostic
 
 on:
+  push:
+    branches: ['sol/kyo-gate-universe-wire']
   workflow_dispatch:
 
 permissions:
