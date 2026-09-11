@@ -17655,9 +17655,9 @@ theorem four_power_omega_shadow_wave_of_tail5
                         · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
                             (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by rw [hKc]; exact h607))))))))⟩
                         · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_four K
-                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h679)))))))))⟩
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ((by rw [hKc]; exact h679)))))))))⟩
                         · exact ⟨6, GSTGraphV2OmegaWaveLaw.omega_expcycle_row6_digit_two_one K
-                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (by rw [hKc]; exact h685)))))))))⟩
+                            (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ((by rw [hKc]; exact h685)))))))))⟩
                       · refine hTail5 K (by omega)
                           ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_, ?_, ?_, ?_,
                             ?_, ?_, ?_, ?_, ?_, ?_⟩
@@ -17783,18 +17783,18 @@ theorem four_power_omega_shadow_wave_of_tail5
                                                 exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h490))))))))))⟩ hR6
                                               · constructor
                                                 · intro h526
-                                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h526)))))))))))⟩ hR6
+                                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h526)))))))))))⟩ hR6
                                                 · constructor
                                                   · intro h568
-                                                    exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h568))))))))))))⟩ hR6
+                                                    exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h568))))))))))))⟩ hR6
                                                   · constructor
                                                     · intro h607
-                                                      exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h607)))))))))))))⟩ hR6
+                                                      exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h607)))))))))))))⟩ hR6
                                                     · constructor
                                                       · intro h679
-                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h679))))))))))))))⟩ hR6
+                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h679))))))))))))))⟩ hR6
                                                       · intro h685
-                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h685)))))))))))))⟩ hR6
+                                                        exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h685)))))))))))))))⟩ hR6
 
 /-- **THE CLOSED WAVE, DISCHARGED FROM THE SIXTH WEAKENING.**  The
 zero-input statement follows from the sixth-weakened tail: strictly
