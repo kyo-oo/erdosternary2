@@ -153,12 +153,12 @@ theorem four_lt_three_pow_succ
         norm_num
       · have hp' : 1 ≤ p := by omega
         have hprev : 4 < 3^(p+1) := ih hp'
+        have hstep : 3^(p+1) ≤ 3^(p+1) * 3 := by omega
         calc
           4 < 3^(p+1) := hprev
-          _ ≤ 3^(Nat.succ p + 1) := by
-            rw [show Nat.succ p + 1 = (p+1)+1 by omega, Nat.pow_succ]
-            have hpos : 0 < 3^(p+1) := by positivity
-            nlinarith
+          _ ≤ 3^(p+1) * 3 := hstep
+          _ = 3^((p+1)+1) := by rw [Nat.pow_succ]
+          _ = 3^(Nat.succ p + 1) := by congr 1 <;> omega
 
 /-- Infinite parametric success family.  If the low `p` exponent trits are all
 zero and the next exponent trit is `2`, then row `p+1` is automatically a
