@@ -874,7 +874,7 @@ theorem omega_cut_word_mod_pow2 (s core : Nat) (hcore : core % 3 = 1) :
     omega_half_of_mod3 (core * (core - 1)) hcm h2m
   have hX3 : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3 = 0 := by
     rw [Nat.mul_mod (lteCoeff s * lteCoeff s) (core * (core - 1) / 2) 3,
-      Nat.mul_mod (lteCoeff s) (lteCoeff s) 3, hu3, hu3, hq3]
+      Nat.mul_mod (lteCoeff s) (lteCoeff s) 3, hu3, hq3]
     decide
   obtain ⟨Y, hY⟩ : ∃ Y : Nat,
       lteCoeff s * lteCoeff s * (core * (core - 1) / 2) = 3 * Y := by
@@ -965,12 +965,12 @@ theorem omega_sheet_gate_digit_two (s core : Nat) (hcore : core % 3 = 1)
     ring
   have hlt2 : (lteCoeff s * core) % 3^(s+2) < 3 * 3^(s+1) := by omega
   obtain ⟨d, hd⟩ : ∃ d, (lteCoeff s * core) % 3^(s+2)
-      = 2 * 3^(s+1) + d := ⟨_, by omega⟩
+      = 2 * 3^(s+1) + d :=
+    ⟨(lteCoeff s * core) % 3^(s+2) - 2 * 3^(s+1), by omega⟩
   have hdlt : d < 3^(s+1) := by omega
   rw [hd, Nat.add_comm, show 2 * 3^(s+1) = 3^(s+1) * 2 from by ring,
     Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
     Nat.div_eq_of_lt hdlt]
-  omega
 
 /-- The LTE mean is constantly sixteen modulo eighty-one from sheet
 level three onward. -/
@@ -1005,7 +1005,7 @@ theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
     omegaGeoSum a core % 81 = core % 81 := by
   have hterm : ∀ j : Nat, ((4^(3^a))^j) % 81 = 1 := by
     intro j
-    rw [Nat.pow_mod, omega_base_mod81 a ha, Nat.one_pow] <;> omega
+    rw [Nat.pow_mod, omega_base_mod81 a ha, Nat.one_pow]
   induction core with
   | zero => simp [omegaGeoSum]
   | succ core ih =>
