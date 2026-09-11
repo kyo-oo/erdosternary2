@@ -875,7 +875,6 @@ theorem omega_cut_word_mod_pow2 (s core : Nat) (hcore : core % 3 = 1) :
   have hX3 : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3 = 0 := by
     rw [Nat.mul_mod (lteCoeff s * lteCoeff s) (core * (core - 1) / 2) 3,
       Nat.mul_mod (lteCoeff s) (lteCoeff s) 3, hu3, hq3]
-    decide
   obtain ⟨Y, hY⟩ : ∃ Y : Nat,
       lteCoeff s * lteCoeff s * (core * (core - 1) / 2) = 3 * Y := by
     refine ⟨(lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) / 3, ?_⟩
