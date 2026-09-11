@@ -1378,10 +1378,8 @@ theorem omega_expcycle_period243 (j : Nat) :
     rw [show (81:Nat) = 27 + 27 + 27 from by decide, Nat.pow_add, Nat.pow_add]
   have hmul1 : 4^27 * 4^27 % 243 = 163 := by
     rw [Nat.mul_mod, h427]
-    decide
   have hmul2 : 4^27 * 4^27 * 4^27 % 243 = 1 := by
     rw [Nat.mul_mod, hmul1, h427]
-    decide
   have h481 : (4^81) % 243 = 1 := by
     rw [hsplit, hmul2]
   rw [Nat.pow_mod, h481, Nat.one_pow]
