@@ -2124,7 +2124,6 @@ theorem omega_tripling_gate (s core : Nat) (hs : 1 ≤ s) (hcore : core % 3 = 1)
     (hparent : digit3 (4^(3^s * core)) (2*s+2) = 1) :
     digit3 (4^(3^(s+1) * core)) (2*s+3) = 2 := by
   rw [omega_tripling_digit_transfer s core hs hcore, hparent]
-  omega
 
 /-- **THE TRIPLING-CUBE KILL (existence form).**  Every one-mod-three
 core whose parent sheet-gate row reads one hands the next sheet's shadow
