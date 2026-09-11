@@ -11,6 +11,7 @@ namespace GSTFourPowerDirectHappyBridge
 open GSTFourPowerDirectResidue
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectAdditionCarry
+open GSTFourPowerExponentTritObstruction
 
 /-- A direct common-two witness is already a physical Happy row on the source
 power.  No navigation or witness transport is involved: the same row is used.
@@ -127,6 +128,26 @@ theorem low_row_sector_forces_relocated_physical_happy
     · exact commonTwo_to_physical_happy_row (K+1)
         (commonTwo_of_mod81_row_four (K+1) h4)
 
+/-- Parametric fresh-production relocation constructor.  At any exponent scale
+`p`, equality of the consecutive low-prefix digits together with the actual
+killing trit for `K+1` produces `CommonTwo (K+1)` at row `p+1`, hence an actual
+physical Happy row on the next four-power sheet.  This is the non-table,
+exponent-prefix route and uses no navigation transport. -/
+theorem prefix_killing_trit_forces_relocated_physical_happy
+    (K p : Nat)
+    (heq :
+      digit3 (4^(exponentPrefix (K+1) p)) (p+1) =
+      digit3 (4^((exponentPrefix (K+1) p)+1)) (p+1))
+    (hkill :
+      exponentTrit (K+1) p =
+        2 - digit3 (4^(exponentPrefix (K+1) p)) (p+1)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact commonTwo_to_physical_happy_row (K+1)
+    (commonTwo_of_prefix_killing_trit (K+1) p heq hkill)
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -184,6 +205,7 @@ theorem four_power_happy_propagates
 #check affine_two_one_forces_relocated_physical_happy
 #check affine_two_trit_sector_forces_relocated_physical_happy
 #check low_row_sector_forces_relocated_physical_happy
+#check prefix_killing_trit_forces_relocated_physical_happy
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
@@ -194,6 +216,7 @@ theorem four_power_happy_propagates
 #print axioms affine_two_one_forces_relocated_physical_happy
 #print axioms affine_two_trit_sector_forces_relocated_physical_happy
 #print axioms low_row_sector_forces_relocated_physical_happy
+#print axioms prefix_killing_trit_forces_relocated_physical_happy
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
