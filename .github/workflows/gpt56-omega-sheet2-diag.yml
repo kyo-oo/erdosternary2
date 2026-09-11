@@ -1,0 +1,58 @@
+name: GPT56 Omega Sheet2 Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Install exact Lean RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Mathlib and the Law file's direct imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTInfiniteFourPowerNavigation GSTFourPowerDirectResidue GSTGraphV2HandwrittenOmegaUBlock GSTGraphV2InfiniteControllerBridge
+          echo 'DIAG_DEPS_GREEN=1'
+
+      - name: Compile the Omega Wave Law file under a timeout guard
+        shell: bash
+        run: |
+          set -uo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f omega-diag.log
+          timeout 300 lake env lean GSTGraphV2OmegaWaveLaw.lean 2>&1 | tee omega-diag.log
+          rc=${PIPESTATUS[0]}
+          echo "DIAG_LAW_EXIT=$rc"
+          if [ "$rc" = "124" ]; then echo 'DIAG_LAW_TIMEOUT=1'; fi
+          if grep -qE 'error|warning' omega-diag.log; then
+            echo 'DIAG_LAW_DIAGNOSTICS_PRESENT=1'
+            grep -nE 'error|warning' omega-diag.log | head -40
+          fi
+          echo '=== last 40 lines of the diagnostic log ==='
+          tail -40 omega-diag.log
+          exit 0
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-sheet2-diag
+          path: omega-diag.log
+          if-no-files-found: ignore

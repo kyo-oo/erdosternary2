@@ -1067,6 +1067,9 @@ shift of the four-sheet converts a lowest-third sheet word into digit two,
 the +1 shift of the seven-sheet converts a middle-third sheet word into
 digit two. -/
 
+section
+set_option maxHeartbeats 4000000
+
 /-- The binomial coefficient of the cut word's second order is exact: the
 halving witness. -/
 theorem omega_binom_two_mul (core : Nat) :
@@ -1445,6 +1448,8 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
     unfold digit3
     rw [show (3:Nat)^4 = 81 from by decide]
     omega
+
+end
 
 /-- **The Ω-shadow tail after the sheet gate.**  The shadow residue after
 the kernel-checked base, the third and fourth tower levels, and the
