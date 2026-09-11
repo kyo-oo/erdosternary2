@@ -157,7 +157,7 @@ theorem four_lt_three_pow_succ
         calc
           4 < 3^(p+1) := hprev
           _ ≤ 3^(p+1) * 3 := hstep
-          _ = 3^((p+1)+1) := by rw [Nat.pow_succ]
+          _ = 3^((p+1)+1) := (Nat.pow_succ 3 (p+1)).symm
           _ = 3^(Nat.succ p + 1) := by congr 1 <;> omega
 
 /-- Infinite parametric success family.  If the low `p` exponent trits are all
