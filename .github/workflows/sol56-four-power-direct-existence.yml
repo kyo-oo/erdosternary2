@@ -7,6 +7,7 @@ on:
     paths:
       - GSTFourPowerDirectResidue.lean
       - GSTFourPowerDirectResidue27.lean
+      - GSTFourPowerDirectResidue81.lean
       - GSTFourPowerDirectAdditionCarry.lean
       - GSTFourPowerDirectNo22.lean
       - GSTFourPowerExponentTritObstruction.lean
@@ -38,6 +39,7 @@ jobs:
           for module in \
             GSTFourPowerDirectResidue \
             GSTFourPowerDirectResidue27 \
+            GSTFourPowerDirectResidue81 \
             GSTFourPowerDirectAdditionCarry \
             GSTFourPowerDirectNo22 \
             GSTFourPowerExponentTritObstruction; do
@@ -48,6 +50,7 @@ jobs:
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             GSTFourPowerDirectResidue.log \
             GSTFourPowerDirectResidue27.log \
+            GSTFourPowerDirectResidue81.log \
             GSTFourPowerDirectAdditionCarry.log \
             GSTFourPowerDirectNo22.log \
             GSTFourPowerExponentTritObstruction.log
