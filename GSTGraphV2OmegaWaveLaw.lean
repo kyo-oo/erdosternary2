@@ -2014,7 +2014,6 @@ theorem omega_tripling_cut_word (s core : Nat) :
     have h3 : (3:Nat)^(3*s+3) = 3^(s+1) * 3^(s+1) * 3^(s+1) := by
       rw [show (3*s+3) = (s+1)+(s+1)+(s+1) from by omega, Nat.pow_add,
         Nat.pow_add]
-      ring
     rw [h1, h2, h3]
     ring
   rw [hA] at hcube
@@ -2062,33 +2061,32 @@ theorem omega_tripling_digit_transfer (s core : Nat) (hs : 1 ≤ s)
     rw [Nat.mul_mod, lteCoeff_mod3_one, omega_geo_mod3, Nat.one_mul]
     omega
   -- parent: digit at row 2s+2 is (W / 3^(s+1)) % 3
+  have hp1 : (0:Nat) < 3^(s+1) := Nat.pow_pos (by decide)
   have hqP : 4^(3^s * core) / 3^(2*s+2)
       = (omegaCutWord s core) / 3^(s+1) := by
     rw [omega_cut_factor s core,
       show (3:Nat)^(2*s+2) = 3^(s+1) * 3^(s+1) from by
         rw [show (2*s+2) = (s+1)+(s+1) from by omega, Nat.pow_add],
       ← Nat.div_div_eq_div_mul,
-      show 1 + 3^(s+1) * omegaCutWord s core
-          = 3^(s+1) * omegaCutWord s core + 1 from by ring,
-      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+      Nat.add_mul_div_left _ _ hp1,
       Nat.div_eq_of_lt h1lt, Nat.zero_add]
   -- child: digit at row 2s+3 is (W' / 3^(s+1)) % 3
+  have hp2 : (0:Nat) < 3^(s+2) := Nat.pow_pos (by decide)
+  have h1lt2 : (1:Nat) < 3^(s+2) := by
+    have h3 : (3:Nat)^1 ≤ 3^(s+2) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ s+2)
+    omega
   have hqC : 4^(3^(s+1) * core) / 3^(2*s+3)
       = (omegaCutWord (s+1) core) / 3^(s+1) := by
     rw [omega_cut_factor (s+1) core,
       show (3:Nat)^(2*s+3) = 3^(s+2) * 3^(s+1) from by
         rw [show (2*s+3) = (s+2)+(s+1) from by omega, Nat.pow_add],
       ← Nat.div_div_eq_div_mul,
-      show 1 + 3^(s+2) * omegaCutWord (s+1) core
-          = 3^(s+2) * omegaCutWord (s+1) core + 1 from by ring,
-      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
-      Nat.div_eq_of_lt (by
-        have h3 : (3:Nat)^1 ≤ 3^(s+2) := by
-          simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
-            (by omega : 1 ≤ s+2)
-        omega),
-      Nat.zero_add]
+      Nat.add_mul_div_left _ _ hp2,
+      Nat.div_eq_of_lt h1lt2, Nat.zero_add]
   -- the cube recurrence inside the child divisor
+  have hp3 : (0:Nat) < 3^(s+1) := Nat.pow_pos (by decide)
   have hW' : (omegaCutWord (s+1) core) / 3^(s+1)
       = (omegaCutWord s core) / 3^(s+1)
         + (omegaCutWord s core)^2 + 3^s * (omegaCutWord s core)^3 := by
@@ -2096,13 +2094,13 @@ theorem omega_tripling_digit_transfer (s core : Nat) (hs : 1 ≤ s)
       show omegaCutWord s core
           + 3^(s+1) * (omegaCutWord s core)^2
           + 3^(2*s+1) * (omegaCutWord s core)^3
-          = 3^(s+1) * ((omegaCutWord s core)^2
-              + 3^s * (omegaCutWord s core)^3)
-            + omegaCutWord s core from by
+          = omegaCutWord s core
+            + 3^(s+1) * ((omegaCutWord s core)^2
+              + 3^s * (omegaCutWord s core)^3) from by
         rw [show (3:Nat)^(2*s+1) = 3^(s+1) * 3^s from by
           rw [show (2*s+1) = (s+1)+s from by omega, Nat.pow_add]]
         ring,
-      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide))]
+      Nat.add_mul_div_left _ _ hp3]
     omega
   -- the square term carries the plus-one trit; the cube term is zero mod 3
   have hs0 : 3^s % 3 = 0 := by
