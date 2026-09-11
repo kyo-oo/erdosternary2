@@ -103,6 +103,44 @@ theorem commonTwo_of_prefix_killing_trit
   refine ⟨p+1, by omega, ?_⟩
   exact (row_common_two_iff_prefix_killing_trit K p).2 ⟨heq, hkill⟩
 
+/-- Any number strictly below the ternary scale `3^p` has zero digit at row
+`p`.  This tiny arithmetic lemma lets the prefix-killing construction become
+automatic once both low-prefix powers lie below the target row. -/
+theorem digit3_eq_zero_of_lt_row
+    (R p : Nat) (hR : R < 3^p) :
+    digit3 R p = 0 := by
+  unfold digit3
+  rw [Nat.div_eq_of_lt hR]
+  simp
+
+/-- Parametric non-table success sector.  If the `p`-th exponent trit is `2`
+and the next low-prefix power is still strictly below row `p+1`, then both
+low-prefix row digits are zero.  Thus trit `2` is exactly the killing trit and
+`p+1` is a direct common-two row for `4^K,4^(K+1)`.
+
+This is a genuine scale-dependent constructor rather than another fixed
+`mod 3^n` classification. -/
+theorem commonTwo_of_leading_two_small_prefix
+    (K p : Nat)
+    (htrit : exponentTrit K p = 2)
+    (hsmall : 4^((exponentPrefix K p)+1) < 3^(p+1)) :
+    CommonTwo K := by
+  have hpref_lt : 4^(exponentPrefix K p) < 3^(p+1) := by
+    have hs := hsmall
+    rw [Nat.pow_succ] at hs
+    have hpos : 0 < 4^(exponentPrefix K p) := by positivity
+    omega
+  have hd0 :
+      digit3 (4^(exponentPrefix K p)) (p+1) = 0 :=
+    digit3_eq_zero_of_lt_row _ _ hpref_lt
+  have hd1 :
+      digit3 (4^((exponentPrefix K p)+1)) (p+1) = 0 :=
+    digit3_eq_zero_of_lt_row _ _ hsmall
+  apply commonTwo_of_prefix_killing_trit K p
+  · exact hd0.trans hd1.symm
+  · rw [hd0]
+    simpa using htrit
+
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
 the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
@@ -150,6 +188,8 @@ theorem directExistence_implies_source_two
 #check commonTwo_of_mod81_row_four
 #check noCommonTwo_excludes_mod81_row_four
 #check commonTwo_of_prefix_killing_trit
+#check digit3_eq_zero_of_lt_row
+#check commonTwo_of_leading_two_small_prefix
 #check noCommonTwo_exponent_trit_law
 #check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
@@ -162,6 +202,8 @@ theorem directExistence_implies_source_two
 #print axioms commonTwo_of_mod81_row_four
 #print axioms noCommonTwo_excludes_mod81_row_four
 #print axioms commonTwo_of_prefix_killing_trit
+#print axioms digit3_eq_zero_of_lt_row
+#print axioms commonTwo_of_leading_two_small_prefix
 #print axioms noCommonTwo_exponent_trit_law
 #print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
