@@ -1401,12 +1401,9 @@ theorem omega_expcycle_row3_digit_two (K : Nat)
     have hmod : (4^K) % 81 = 58 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period81 (K / 27), h419]
     unfold digit3
-    rw [show (3:Nat)^3 = 27 from by decide]
-    have hE : 4^K = 27 * (3 * (4^K / 81) + 2) + 4 := by omega
-    rw [hE]
-    have hdiv : (27 * (3 * (4^K / 81) + 2) + 4) / 27
-        = 3 * (4^K / 81) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 3 + 1 = 4 from by decide,
+      show (3:Nat)^4 = 81 from by decide,
+      show (3:Nat)^3 = 27 from by decide, hmod]
   · have hdm : K = 27 * (K / 27) + 22 := by omega
     have hpow : (4^27)^(K / 27) * 4^22 = 4^K := by
       rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
@@ -1414,12 +1411,9 @@ theorem omega_expcycle_row3_digit_two (K : Nat)
     have hmod : (4^K) % 81 = 67 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period81 (K / 27), h422]
     unfold digit3
-    rw [show (3:Nat)^3 = 27 from by decide]
-    have hE : 4^K = 27 * (3 * (4^K / 81) + 2) + 13 := by omega
-    rw [hE]
-    have hdiv : (27 * (3 * (4^K / 81) + 2) + 13) / 27
-        = 3 * (4^K / 81) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 3 + 1 = 4 from by decide,
+      show (3:Nat)^4 = 81 from by decide,
+      show (3:Nat)^3 = 27 from by decide, hmod]
 
 #check omega_expcycle_row3_digit_two
 
@@ -1442,16 +1436,12 @@ theorem omega_expcycle_row4_digit_two_one (K : Nat)
       rw [show (55:Nat) = 27 + 27 + 1 from by decide, Nat.pow_add, Nat.pow_add]
     have h455 : (4^55) % 243 = 166 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 166 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h455]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 4 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 4) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
   · have hdm : K = 81 * (K / 81) + 64 := by omega
     have hpow : (4^81)^(K / 81) * 4^64 = 4^K := by
       rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
@@ -1459,16 +1449,12 @@ theorem omega_expcycle_row4_digit_two_one (K : Nat)
       rw [show (64:Nat) = 27 + 27 + 10 from by decide, Nat.pow_add, Nat.pow_add]
     have h464 : (4^64) % 243 = 193 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 193 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h464]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 31 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 31) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
   · have hdm : K = 81 * (K / 81) + 73 := by omega
     have hpow : (4^81)^(K / 81) * 4^73 = 4^K := by
       rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
@@ -1476,16 +1462,12 @@ theorem omega_expcycle_row4_digit_two_one (K : Nat)
       rw [show (73:Nat) = 27 + 27 + 19 from by decide, Nat.pow_add, Nat.pow_add]
     have h473 : (4^73) % 243 = 220 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 220 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h473]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 58 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 58) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
 
 #check omega_expcycle_row4_digit_two_one
 
@@ -1508,16 +1490,12 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
       rw [show (58:Nat) = 27 + 27 + 4 from by decide, Nat.pow_add, Nat.pow_add]
     have h458 : (4^58) % 243 = 175 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 175 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h458]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 13 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 13) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
   · have hdm : K = 81 * (K / 81) + 67 := by omega
     have hpow : (4^81)^(K / 81) * 4^67 = 4^K := by
       rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
@@ -1525,16 +1503,12 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
       rw [show (67:Nat) = 27 + 27 + 13 from by decide, Nat.pow_add, Nat.pow_add]
     have h467 : (4^67) % 243 = 202 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 202 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h467]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 40 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 40) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
   · have hdm : K = 81 * (K / 81) + 76 := by omega
     have hpow : (4^81)^(K / 81) * 4^76 = 4^K := by
       rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
@@ -1542,16 +1516,12 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
       rw [show (76:Nat) = 27 + 27 + 22 from by decide, Nat.pow_add, Nat.pow_add]
     have h476 : (4^76) % 243 = 229 := by
       rw [hsplit, Nat.mul_mod, hmul1]
-      decide
     have hmod : (4^K) % 243 = 229 := by
       rw [← hpow, Nat.mul_mod, omega_expcycle_period243 (K / 81), h476]
     unfold digit3
-    rw [show (3:Nat)^4 = 81 from by decide]
-    have hE : 4^K = 81 * (3 * (4^K / 243) + 2) + 67 := by omega
-    rw [hE]
-    have hdiv : (81 * (3 * (4^K / 243) + 2) + 67) / 81
-        = 3 * (4^K / 243) + 2 := by omega
-    rw [hdiv, Nat.add_comm, Nat.add_mul_mod_self_left]
+    rw [digit3_window, show 4 + 1 = 5 from by decide,
+      show (3:Nat)^5 = 243 from by decide,
+      show (3:Nat)^4 = 81 from by decide, hmod]
 
 #check omega_expcycle_row4_digit_two_four
 
