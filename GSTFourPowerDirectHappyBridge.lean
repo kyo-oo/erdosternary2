@@ -103,6 +103,30 @@ theorem affine_two_trit_sector_forces_relocated_physical_happy
   · exact affine_zero_two_forces_relocated_physical_happy K u h0.1 h0.2
   · exact affine_two_one_forces_relocated_physical_happy K u h2.1 h2.2
 
+/-- The complete currently-certified low-row direct sector.  A next exponent
+caught by row two, row three, or row four produces an actual physical Happy row
+on `4^(K+1)`.  This packages the exact residue classifiers without introducing
+any navigation or propagation hypothesis. -/
+theorem low_row_sector_forces_relocated_physical_happy
+    (K : Nat)
+    (hsector :
+      ((K+1) % 9 = 5 ∨ (K+1) % 9 = 6) ∨
+      (((K+1) % 27 = 14 ∨ (K+1) % 27 = 18 ∨
+        (K+1) % 27 = 19 ∨ (K+1) % 27 = 25)) ∨
+      RowFourClass ((K+1) % 81)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  rcases hsector with h2 | h34
+  · exact commonTwo_to_physical_happy_row (K+1)
+      (commonTwo_of_mod9_five_or_six (K+1) h2)
+  · rcases h34 with h3 | h4
+    · exact commonTwo_to_physical_happy_row (K+1)
+        (commonTwo_of_mod27_row_three (K+1) h3)
+    · exact commonTwo_to_physical_happy_row (K+1)
+        (commonTwo_of_mod81_row_four (K+1) h4)
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -159,6 +183,7 @@ theorem four_power_happy_propagates
 #check affine_zero_two_forces_relocated_physical_happy
 #check affine_two_one_forces_relocated_physical_happy
 #check affine_two_trit_sector_forces_relocated_physical_happy
+#check low_row_sector_forces_relocated_physical_happy
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
@@ -168,6 +193,7 @@ theorem four_power_happy_propagates
 #print axioms affine_zero_two_forces_relocated_physical_happy
 #print axioms affine_two_one_forces_relocated_physical_happy
 #print axioms affine_two_trit_sector_forces_relocated_physical_happy
+#print axioms low_row_sector_forces_relocated_physical_happy
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
