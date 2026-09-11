@@ -6,6 +6,10 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - GSTFourPowerDirectResidue.lean
+      - GSTFourPowerDirectResidue27.lean
+      - GSTFourPowerDirectResidue81.lean
+      - GSTFourPowerDirectAdditionCarry.lean
+      - GSTFourPowerDirectNo22.lean
       - GSTFourPowerExponentTritObstruction.lean
       - GSTFourPowerDirectExistence.lean
       - .github/workflows/sol56-task33-fresh-propagation.yml
@@ -27,30 +31,37 @@ jobs:
       - name: Prepare direct arithmetic output directory
         shell: bash
         run: mkdir -p .lake/build/lib/lean
-      - name: Compile and axiom-audit pure residue arithmetic
+      - name: Compile fresh direct arithmetic dependency closure
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean \
-            -o .lake/build/lib/lean/GSTFourPowerDirectResidue.olean \
-            GSTFourPowerDirectResidue.lean 2>&1 | tee direct-residue.log
+          for module in \
+            GSTFourPowerDirectResidue \
+            GSTFourPowerDirectResidue27 \
+            GSTFourPowerDirectResidue81 \
+            GSTFourPowerDirectAdditionCarry \
+            GSTFourPowerDirectNo22 \
+            GSTFourPowerExponentTritObstruction; do
+            lake env lean \
+              -o ".lake/build/lib/lean/${module}.olean" \
+              "${module}.lean" 2>&1 | tee "${module}.log"
+          done
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            direct-residue.log
-      - name: Compile and axiom-audit exponent-trit obstruction
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake env lean \
-            -o .lake/build/lib/lean/GSTFourPowerExponentTritObstruction.olean \
-            GSTFourPowerExponentTritObstruction.lean 2>&1 | tee direct-trit.log
-          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            direct-trit.log
+            GSTFourPowerDirectResidue.log \
+            GSTFourPowerDirectResidue27.log \
+            GSTFourPowerDirectResidue81.log \
+            GSTFourPowerDirectAdditionCarry.log \
+            GSTFourPowerDirectNo22.log \
+            GSTFourPowerExponentTritObstruction.log
       - name: Compile and axiom-audit direct existence spine
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerDirectExistence.olean \
+            GSTFourPowerDirectExistence.lean 2>&1 | tee direct-existence.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             direct-existence.log
+          grep -F '#print axioms' GSTFourPowerDirectExistence.lean >/dev/null
 
-# Direct arithmetic verification trigger: 2026-09-02
+# Direct arithmetic verification trigger: 2026-09-11
