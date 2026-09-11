@@ -510,7 +510,7 @@ theorem cascade_universal
 
 
 -- cascade_universal_mod9: Q%9 = (b * c(s))%9 when s ≥ 1
-theorem cascade_universal_mod9 (s b : Nat) (hs : 1 ≤ s) (hb : 1 ≤ b) (hb3 : b % 3 ≠ 0) :
+theorem cascade_universal_mod9 (s b : Nat) (hs : 1 ≤ s) (_hb : 1 ≤ b) (_hb3 : b % 3 ≠ 0) :
     ((4^(3^s * b) - 1) / 3^(s+1)) % 9 = (b * c s) % 9 := by
   have hlte : 4^(3^s) = 1 + 3^(s+1) * c s := lte_identity s (by omega)
   have h4sb : 4^(3^s * b) = (1 + 3^(s+1) * c s)^b := by
@@ -6164,10 +6164,7 @@ theorem gst_navigation_graph_b2 (s b : Nat) (hs : 1 ≤ s) (hb : 1 ≤ b)
 -- For full closure, needs strong induction (future work).
 
 theorem gst_oscillation_first_witness (R : Nat) (N : Nat)
-    (h_bridge : (4 * (R % 3^N)) / 3^N = 0)
-    (hR_lt : R < 3^N) (hR_mod3 : R % 3 ≠ 2)
     (start : Nat) (hstart_pos : 1 ≤ start) (hstart_lt : start < N)
-    (hC_lt : (4 * (R % 3^start)) / 3^start < 4)
     (hd_start : R / 3^start % 3 = 2)
     (hcm : (4 * (R % 3^start)) / 3^start % 3 = 0) :
     ∃ p, 1 ≤ p ∧ p < N ∧ R / 3^p % 3 = 2 ∧
@@ -6180,12 +6177,12 @@ theorem gst_oscillation_first_witness (R : Nat) (N : Nat)
     statement is false (for example `R = 7`, `N = 4`, `start = 1`).  The
     power-specific Navigation theorem must provide the witness explicitly. -/
 theorem gst_oscillation_from_navigation (R : Nat) (N : Nat)
-    (h_bridge : (4 * (R % 3^N)) / 3^N = 0)
-    (hR_lt : R < 3^N) (hR_mod3 : R % 3 ≠ 2)
-    (start : Nat) (hstart_pos : 1 ≤ start) (hstart_lt : start < N)
-    (hC_lt : (4 * (R % 3^start)) / 3^start < 4)
-    (h_has : hasTernaryTwo R = true)
-    (hd_start : R / 3^start % 3 = 2)
+    (_h_bridge : (4 * (R % 3^N)) / 3^N = 0)
+    (_hR_lt : R < 3^N) (_hR_mod3 : R % 3 ≠ 2)
+    (_start : Nat) (_hstart_pos : 1 ≤ _start) (_hstart_lt : _start < N)
+    (_hC_lt : (4 * (R % 3^_start)) / 3^_start < 4)
+    (_h_has : hasTernaryTwo R = true)
+    (_hd_start : R / 3^_start % 3 = 2)
     (hnav : ∃ p, 1 ≤ p ∧ p < N ∧ R / 3^p % 3 = 2 ∧
         (4 * (R % 3^p)) / 3^p % 3 = 0) :
     ∃ p, 1 ≤ p ∧ p < N ∧ R / 3^p % 3 = 2 ∧
@@ -9989,7 +9986,7 @@ theorem gst_shared_information_bottom_coordinatesS
 /-- The child carry is the top base-4 coordinate of the same information word. -/
 theorem gst_shared_information_top_coordinateS
     (A z T q N : Nat)
-    (hA : A = 4^N)
+    (_hA : A = 4^N)
     (hApos : 0 < A)
     (hz1 : 1 + 4*z < A) :
     let S := gstAffineMulCarryS (4*A) (1 + 4*z) T q
@@ -11418,7 +11415,6 @@ by `A`, and phase one -> phase two is another multiplication by the same `A`.
 This is the horizontal GST spacetime axis; no finite endpoint is introduced. -/
 theorem gst_three_phase_energy_orbitS
     (A D c z T H2 n : Nat)
-    (hDN : ∃ N, D = 3*N)
     (hA : A = 1 + D*c)
     (hc : c = 1 + 3*z)
     (h0 : A^(3*n) = 1 + 3*D*T)
@@ -16640,7 +16636,7 @@ The theorem is stated existentially to avoid building subtraction into the
 state definition. -/
 theorem gst_shared_x4_binary_factorS
     (A D Z W C : Nat)
-    (hA : 0 < A)
+    (_hA : 0 < A)
     (hD : D < 4)
     (hC : C < 4)
     (hW : W < A)
