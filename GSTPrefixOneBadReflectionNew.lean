@@ -9,8 +9,8 @@ Unconditional prefix-one bad reflection.
 The proof factors the finite natural origin exactly as
 `1 + 3*n = 1 + 3^k*m` with `m % 3 ≠ 0`, transports a hypothetical
 child Navigation witness through the forced zero prefix, and closes the
-remaining residual Ω bad branch with the exact residual termination theorem.
-No four-power creation master is used.
+remaining residual Ω bad branch directly through the pre-master residual
+boundary termination sectors.  No four-power creation master is used.
 -/
 theorem gst_prefix_one_bad_reflection_new :
     GSTPrefixOneBadReflection := by
@@ -52,11 +52,18 @@ theorem gst_prefix_one_bad_reflection_new :
     simp at hm3
 
   have hkshape : k = (k - 1) + 1 := by omega
+  have hpowstep : 3^k = 3^((k-1)+1) :=
+    congrArg (fun t : Nat => 3^t) hkshape
   have hpow : 3^k = 3^(k-1) * 3 := by
-    rw [hkshape, Nat.pow_succ]
+    calc
+      3^k = 3^((k-1)+1) := hpowstep
+      _ = 3^(k-1) * 3 := by rw [Nat.pow_succ]
   have hnmul : n = 3^(k-1) * m := by
     dsimp [b] at hbeq
     rw [hpow] at hbeq
+    have hfactor : (3^(k-1) * 3) * m = 3 * (3^(k-1) * m) := by
+      ac_rfl
+    rw [hfactor] at hbeq
     omega
 
   have hChildScaled :
@@ -116,9 +123,19 @@ theorem gst_prefix_one_bad_reflection_new :
         s k m (m % 3) hs hm hm3 rfl hclosed
     exact hNoParentResidual hParentNav
 
-  have htermination : ¬ GSTOmegaInfiniteBadTrace s k m :=
-    gst_residual_omega_termination
-      s k m hs hk hm hm3 hclosed hChildResidual
+  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
+    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
+    omega
+  have hboundary := gst_origin_not_closed_boundary
+    s k (m % 3) hs hk hrange hclosed
+  have htermination : ¬ GSTOmegaInfiniteBadTrace s k m := by
+    rcases hboundary with ⟨rfl, hcase⟩ | ⟨rfl, hcase⟩ | hstable
+    · exact gst_omega_termination_s1 k m hk hm hm3
+        (Or.inl ⟨rfl, hcase⟩) hChildResidual
+    · exact gst_omega_termination_s3 k m hk hm hm3
+        (Or.inr (Or.inl ⟨rfl, hcase⟩)) hChildResidual
+    · exact gst_omega_termination_stable s k m hstable.1 hstable.2.1
+        hk hm hm3 (Or.inr (Or.inr hstable)) hChildResidual
   exact htermination hOmega
 
 #print axioms gst_prefix_one_bad_reflection_new
