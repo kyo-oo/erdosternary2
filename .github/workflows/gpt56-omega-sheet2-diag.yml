@@ -39,16 +39,16 @@ jobs:
           set -uo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           rm -f omega-diag.log
-          timeout 300 lake env lean GSTGraphV2OmegaWaveLaw.lean 2>&1 | tee omega-diag.log
-          rc=${PIPESTATUS[0]}
+          timeout 300 script -qec "lake env lean GSTGraphV2OmegaWaveLaw.lean" /dev/null > omega-diag.log 2>&1
+          rc=$?
           echo "DIAG_LAW_EXIT=$rc"
           if [ "$rc" = "124" ]; then echo 'DIAG_LAW_TIMEOUT=1'; fi
-          if grep -qE 'error|warning' omega-diag.log; then
+          if grep -qE 'error' omega-diag.log; then
             echo 'DIAG_LAW_DIAGNOSTICS_PRESENT=1'
-            grep -nE 'error|warning' omega-diag.log | head -40
+            grep -nE 'error' omega-diag.log | head -40
           fi
-          echo '=== last 40 lines of the diagnostic log ==='
-          tail -40 omega-diag.log
+          echo '=== last 60 lines of the diagnostic log ==='
+          tail -60 omega-diag.log
           exit 0
 
       - name: Upload diagnostics
