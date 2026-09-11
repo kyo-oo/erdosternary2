@@ -1,6 +1,6 @@
 import ErdosTernary2
 
-set_option maxRecDepth 10000000
+set_option maxRecDepth 1000000
 set_option maxHeartbeats 100000000
 
 /--
@@ -8,9 +8,9 @@ Unconditional prefix-one bad reflection.
 
 The proof factors the finite natural origin exactly as
 `1 + 3*n = 1 + 3^k*m` with `m % 3 ≠ 0`, transports a hypothetical
-child Navigation witness through the forced zero prefix, and then closes the
-remaining residual Ω bad branch using the finite-origin boundary equations
-already proved in the monolith.  No four-power creation master is used.
+child Navigation witness through the forced zero prefix, and closes the
+remaining residual Ω bad branch with the exact residual termination theorem.
+No four-power creation master is used.
 -/
 theorem gst_prefix_one_bad_reflection_new :
     GSTPrefixOneBadReflection := by
@@ -116,75 +116,9 @@ theorem gst_prefix_one_bad_reflection_new :
         s k m (m % 3) hs hm hm3 rfl hclosed
     exact hNoParentResidual hParentNav
 
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
-    omega
-  have hboundary :=
-    gst_origin_not_closed_boundary s k (m % 3) hs hk hrange hclosed
-
-  rcases hboundary with ⟨rfl, hcase⟩ | ⟨rfl, hcase⟩ | hstable
-  · obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness
-        1 k m hChildResidual
-    have hbadChild := hOmega j
-    have horigin := gst_omega_origin_exact 1 k m j (by decide)
-    have hstep := gst_omega_universal_equation 1 k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      1 k m (by decide) hk hm
-    have hseeded :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hOmega
-    have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
-    have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
-      gst_omega_infiniteBadTrace_blocks 1 k m hOmega
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    simp_all (config := { maxSteps := 1000000 }) only
-      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
-       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-      <;> (first
-        | contradiction
-        | omega
-        | aesop (config := { maxRuleApplications := 10000 }))
-  · obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness
-        3 k m hChildResidual
-    have hbadChild := hOmega j
-    have horigin := gst_omega_origin_exact 3 k m j (by decide)
-    have hstep := gst_omega_universal_equation 3 k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      3 k m (by decide) hk hm
-    have hseeded :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine 3 k m).1 hOmega
-    have heecho := gst_omega_affine_tail_block_echo 3 k m (by decide)
-    have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
-      gst_omega_infiniteBadTrace_blocks 3 k m hOmega
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    simp_all (config := { maxSteps := 1000000 }) only
-      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
-       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-      <;> (first
-        | contradiction
-        | omega
-        | aesop (config := { maxRuleApplications := 10000 }))
-  · obtain ⟨j, hj⟩ :=
-      gst_omega_childZeroSet_nonempty_of_navigation_witness
-        s k m hChildResidual
-    have hbadChild := hOmega j
-    have horigin := gst_omega_origin_exact s k m j (by omega)
-    have hstep := gst_omega_universal_equation s k m j
-    have hdescent := gst_residual_origin_descent_certificate
-      s k m (by omega) hk hm
-    have hseeded :=
-      (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hOmega
-    have heecho := gst_omega_affine_tail_block_echo s k m (by omega)
-    have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-      gst_omega_infiniteBadTrace_blocks s k m hOmega
-    simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-    simp_all (config := { maxSteps := 1000000 }) only
-      [GSTResidualBoundary, GSTOmegaChildZeroSet, GSTOmegaBadSet,
-       GSTOmegaBadBlock, GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-      <;> (first
-        | contradiction
-        | omega
-        | aesop (config := { maxRuleApplications := 10000 }))
+  have htermination : ¬ GSTOmegaInfiniteBadTrace s k m :=
+    gst_residual_omega_termination
+      s k m hs hk hm hm3 hclosed hChildResidual
+  exact htermination hOmega
 
 #print axioms gst_prefix_one_bad_reflection_new
