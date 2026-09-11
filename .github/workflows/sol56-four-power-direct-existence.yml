@@ -13,6 +13,13 @@ on:
       - GSTFourPowerExponentTritObstruction.lean
       - GSTFourPowerDirectExistence.lean
       - GSTCanonicalTailStateIso.lean
+      - GSTFourPowerAffineOrbit.lean
+      - GSTFourPowerAffineExponentPeel.lean
+      - GSTFourPowerAffineBadState.lean
+      - GSTFourPowerAffineChannelAutomaton.lean
+      - GSTFourPowerAffineClassifierBridge.lean
+      - GSTFourPowerAffinePeelClassifier.lean
+      - GSTFourPowerAffineTwoTritClassifier.lean
       - GSTFourPowerDirectHappyBridge.lean
       - .github/workflows/sol56-four-power-direct-existence.yml
   workflow_dispatch:
@@ -66,16 +73,42 @@ jobs:
             direct-existence.log
           grep -F '#print axioms' GSTFourPowerDirectExistence.lean >/dev/null
 
-      - name: Compile physical Happy endpoint
+      - name: Compile fresh affine constructor dependency closure
         shell: bash
         run: |
           set -euo pipefail
           lake env lean \
             -o .lake/build/lib/lean/GSTCanonicalTailStateIso.olean \
-            GSTCanonicalTailStateIso.lean 2>&1 | tee canonical-tail-state.log
+            GSTCanonicalTailStateIso.lean 2>&1 | tee GSTCanonicalTailStateIso.log
+          for module in \
+            GSTFourPowerAffineOrbit \
+            GSTFourPowerAffineExponentPeel \
+            GSTFourPowerAffineBadState \
+            GSTFourPowerAffineChannelAutomaton \
+            GSTFourPowerAffineClassifierBridge \
+            GSTFourPowerAffinePeelClassifier \
+            GSTFourPowerAffineTwoTritClassifier; do
+            lake env lean \
+              -o ".lake/build/lib/lean/${module}.olean" \
+              "${module}.lean" 2>&1 | tee "${module}.log"
+          done
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            GSTCanonicalTailStateIso.log \
+            GSTFourPowerAffineOrbit.log \
+            GSTFourPowerAffineExponentPeel.log \
+            GSTFourPowerAffineBadState.log \
+            GSTFourPowerAffineChannelAutomaton.log \
+            GSTFourPowerAffineClassifierBridge.log \
+            GSTFourPowerAffinePeelClassifier.log \
+            GSTFourPowerAffineTwoTritClassifier.log
+
+      - name: Compile physical Happy endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
           lake env lean \
             -o .lake/build/lib/lean/GSTFourPowerDirectHappyBridge.olean \
             GSTFourPowerDirectHappyBridge.lean 2>&1 | tee direct-happy.log
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
-            canonical-tail-state.log direct-happy.log
+            direct-happy.log
           grep -F '#print axioms' GSTFourPowerDirectHappyBridge.lean >/dev/null
