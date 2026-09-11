@@ -63,5 +63,16 @@ jobs:
           ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
             direct-existence.log
           grep -F '#print axioms' GSTFourPowerDirectExistence.lean >/dev/null
+      - name: Compile prefix-one direct-construction regression probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/Task33PrefixOneProbe.lean <<'EOF'
+          import GSTFourPowerDirectExistence
+          #check GSTFourPowerDirectExistence.commonTwo_of_one_prefix_two_trit
+          EOF
+          lake env lean /tmp/Task33PrefixOneProbe.lean 2>&1 | tee prefix-one-probe.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' \
+            prefix-one-probe.log
 
 # Direct arithmetic verification trigger: 2026-09-11
