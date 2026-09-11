@@ -807,6 +807,7 @@ theorem omega_cut_word_full (s core : Nat) :
       rw [h0]
       simp
   | succ c ih =>
+      rw [show (c+1) - 1 = c from by omega]
       have hstepW : omegaCutWord s (c+1)
           = omegaCutWord s c + lteCoeff s * 4^(3^s * c) := by
         unfold omegaCutWord omegaGeoSum
@@ -821,7 +822,12 @@ theorem omega_cut_word_full (s core : Nat) :
             + 3^(s+1) * lteCoeff s * omegaCutWord s c := by
         rw [hstepW, hf]; ring
       have hbinom : (c+1) * c / 2 = c * (c - 1) / 2 + c := by
-        have hE : (c+1) * c = c * (c - 1) + 2 * c := by ring
+        have hE : (c+1) * c = c * (c - 1) + 2 * c := by
+          rcases c with _ | c'
+          · simp
+          · have hs : (c'+1) - 1 = c' := by omega
+            rw [hs]
+            ring
         rw [hE]
         exact Nat.add_mul_div_left _ _ (by decide)
       have hp2 : (3:Nat)^(s+1) * 3^(s+1) = 3^(s+2) * 3^s := by
@@ -855,16 +861,20 @@ theorem omega_cut_word_mod_pow2 (s core : Nat) (hcore : core % 3 = 1) :
   have hcm : core * (core - 1) % 3 = 0 := by
     have h2 : (core - 1) % 3 = 0 := by omega
     rw [Nat.mul_mod, hcore, h2]
-    decide
   have h2m : 2 * (core * (core - 1) / 2) = core * (core - 1) := by
     rw [Nat.mul_div_cancel' (by
       rcases Nat.even_or_odd core with ⟨k, hk⟩ | ⟨k, hk⟩
-      · rw [hk]; exact ⟨k * (2 * k - 1), by ring⟩
-      · rw [hk]; exact ⟨(2 * k + 1) * k, by ring⟩)]
+      · rw [hk]
+        exact ⟨k * (2 * k - 1), by ring⟩
+      · rw [hk]
+        have hsub : (2 * k + 1) - 1 = 2 * k := by omega
+        rw [hsub]
+        exact ⟨(2 * k + 1) * k, by ring⟩)]
   have hq3 : (core * (core - 1) / 2) % 3 = 0 :=
     omega_half_of_mod3 (core * (core - 1)) hcm h2m
   have hX3 : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3 = 0 := by
-    rw [Nat.mul_mod, Nat.mul_mod, hu3, hu3, hq3]
+    rw [Nat.mul_mod (lteCoeff s * lteCoeff s) (core * (core - 1) / 2) 3,
+      Nat.mul_mod (lteCoeff s) (lteCoeff s) 3, hu3, hu3, hq3]
     decide
   obtain ⟨Y, hY⟩ : ∃ Y : Nat,
       lteCoeff s * lteCoeff s * (core * (core - 1) / 2) = 3 * Y := by
@@ -876,11 +886,12 @@ theorem omega_cut_word_mod_pow2 (s core : Nat) (hcore : core % 3 = 1) :
   have hcorr : 3^(s+2)
       ∣ 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2) := by
     refine ⟨Y, ?_⟩
+    have hp3 : (3:Nat)^(s+2) = 3 * 3^(s+1) := by
+      rw [show s + 2 = (s+1) + 1 from by omega, Nat.pow_add, Nat.pow_one]
+      ring
     rw [show 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)
         = 3^(s+1) * (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) from by ring,
-      hY,
-      show (3:Nat)^(s+2) = 3 * 3^(s+1) from by
-        rw [show s + 2 = (s+1) + 1 from by omega, Nat.pow_add, Nat.pow_one]]
+      hY, hp3]
     ring
   rw [omega_cut_word_full s core, Nat.add_mod, Nat.mod_eq_zero_of_dvd hcorr,
     Nat.add_zero, Nat.mod_mod]
@@ -895,7 +906,7 @@ theorem digit3_window (X j : Nat) :
   have hX : X = 3^(j+1) * (X / 3^(j+1)) + X % 3^(j+1) := by
     have h := Nat.mod_add_div X (3^(j+1))
     rw [Nat.add_comm] at h
-    exact h
+    exact h.symm
   have hdiv : X / 3^j
       = (X % 3^(j+1)) / 3^j + 3 * (X / 3^(j+1)) := by
     calc X / 3^j
@@ -907,7 +918,7 @@ theorem digit3_window (X j : Nat) :
       _ = (X % 3^(j+1)) / 3^j + 3 * (X / 3^(j+1)) :=
           Nat.add_mul_div_left _ _ hp
   have hmodlt : X % 3^(j+1) < 3 * 3^j := by
-    have h := Nat.mod_lt X (3^(j+1)) (Nat.pow_pos (by decide))
+    have h : X % 3^(j+1) < 3^(j+1) := Nat.mod_lt X (Nat.pow_pos (by decide))
     rw [show 3^(j+1) = 3 * 3^j from by rw [hpow, Nat.mul_comm]] at h ⊢
     exact h
   have hlt : (X % 3^(j+1)) / 3^j < 3 :=
@@ -951,11 +962,13 @@ theorem omega_sheet_gate_digit_two (s core : Nat) (hcore : core % 3 = 1)
     Nat.mod_lt _ (Nat.pow_pos (by decide))
   have h3 : 3^(s+2) = 3 * 3^(s+1) := by
     rw [show s + 2 = (s+1) + 1 from by omega, Nat.pow_add, Nat.pow_one]
-  rw [h3] at hlt
+    ring
+  have hlt2 : (lteCoeff s * core) % 3^(s+2) < 3 * 3^(s+1) := by omega
   obtain ⟨d, hd⟩ : ∃ d, (lteCoeff s * core) % 3^(s+2)
       = 2 * 3^(s+1) + d := ⟨_, by omega⟩
   have hdlt : d < 3^(s+1) := by omega
-  rw [hd, Nat.add_comm, Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+  rw [hd, Nat.add_comm, show 2 * 3^(s+1) = 3^(s+1) * 2 from by ring,
+    Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
     Nat.div_eq_of_lt hdlt]
   omega
 
