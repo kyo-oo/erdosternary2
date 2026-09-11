@@ -6,6 +6,7 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTFourPowerDirectHappyBridge.lean'
+      - 'GSTFourPowerExactRowRelocation.lean'
       - 'GSTFourPowerDirectExistence.lean'
       - 'GSTFourPowerAffineTwoTritClassifier.lean'
       - '.github/workflows/gpt56-direct-happy-bridge.yml'
@@ -33,11 +34,18 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake build GSTFourPowerDirectHappyBridge 2>&1 | tee direct-happy-bridge.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' direct-happy-bridge.log
+      - name: Compile exact-row relocation constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFourPowerExactRowRelocation.lean 2>&1 | tee exact-row-relocation.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' exact-row-relocation.log
       - name: Reject forbidden proof routes
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean
+          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean GSTFourPowerExactRowRelocation.lean
       - name: Axiom audit direct relocation constructor
         shell: bash
         run: |
@@ -45,8 +53,10 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > GSTFourPowerDirectHappyBridgeAudit.lean <<'LEAN'
           import GSTFourPowerDirectHappyBridge
+          import GSTFourPowerExactRowRelocation
           #print axioms GSTFourPowerDirectHappyBridge.affine_two_trit_sector_forces_relocated_physical_happy
           #print axioms GSTFourPowerDirectHappyBridge.four_power_happy_propagates
+          #print axioms GSTFourPowerExactRowRelocation.prefix_killing_trit_constructs_exact_relocated_row
           LEAN
           lake env lean GSTFourPowerDirectHappyBridgeAudit.lean 2>&1 | tee direct-happy-bridge-axioms.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|error:' direct-happy-bridge-axioms.log
