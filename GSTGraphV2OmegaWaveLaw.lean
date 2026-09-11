@@ -1974,6 +1974,178 @@ sheet depth at every level). -/
 def four_power_omega_shadow_wave_closed : Prop :=
   ∀ K : Nat, 8 ≤ K → omegaShadow K → ∃ p : Nat, digit3 (4^K) p = 2
 
+/-! ## §7.10 The tripling-cube law (the cross-sheet digit transfer)
+
+The shadow residue is closed under the exponent tripling `K ↦ 3 * K` for
+its class-one core classes: the core is untouched and the sheet level
+advances by one.  Cubing the sheet-s power therefore transfers the cut
+word to the next sheet by an exact cube recurrence, and the transfer
+moves the sheet-gate row `2s+2` of the parent to the row `2s+3` of the
+child with a fixed increment of one.  This is the first Law statement
+that reads one sheet's digit structure from another sheet's — the
+cross-sheet instrument. -/
+
+/-- **THE TRIPLING-CUBE WORD LAW.**  The cut word of the next sheet is the
+cube recurrence of this sheet's cut word: the sheet-`(s+1)` word is the
+sheet-`s` word plus its own square scaled by the cut modulus plus its own
+cube scaled by the double cut modulus.  Exact identity, no hypothesis. -/
+theorem omega_tripling_cut_word (s core : Nat) :
+    omegaCutWord (s+1) core
+      = omegaCutWord s core
+        + 3^(s+1) * (omegaCutWord s core)^2
+        + 3^(2*s+1) * (omegaCutWord s core)^3 := by
+  have hexp : 4^(3^(s+1) * core) = (4^(3^s * core))^3 := by
+    rw [show 3^(s+1) * core = (3^s * core) * 3 from by
+          rw [Nat.pow_succ]; ring,
+      Nat.pow_mul]
+  have hA : (1 + 3^(s+1) * omegaCutWord s core)^3
+      = 1 + 3^(s+2) * omegaCutWord (s+1) core := by
+    rw [← omega_cut_factor (s+1) core, hexp, omega_cut_factor s core]
+  have hcube : (1 + 3^(s+1) * omegaCutWord s core)^3
+      = 1 + 3^(s+2) * omegaCutWord s core
+        + 3^(2*s+3) * (omegaCutWord s core)^2
+        + 3^(3*s+3) * (omegaCutWord s core)^3 := by
+    have h1 : (3:Nat)^(s+2) = 3 * 3^(s+1) := by
+      rw [Nat.pow_succ]; ring
+    have h2 : (3:Nat)^(2*s+3) = 3 * 3^(s+1) * 3^(s+1) := by
+      rw [show (2*s+3) = (s+1)+(s+1)+1 from by omega, Nat.pow_add,
+        Nat.pow_add, Nat.pow_one]
+      ring
+    have h3 : (3:Nat)^(3*s+3) = 3^(s+1) * 3^(s+1) * 3^(s+1) := by
+      rw [show (3*s+3) = (s+1)+(s+1)+(s+1) from by omega, Nat.pow_add,
+        Nat.pow_add]
+      ring
+    rw [h1, h2, h3]
+    ring
+  rw [hA] at hcube
+  have hsub : 3^(s+2) * omegaCutWord (s+1) core
+      = 3^(s+2) * omegaCutWord s core
+        + 3^(2*s+3) * (omegaCutWord s core)^2
+        + 3^(3*s+3) * (omegaCutWord s core)^3 := by
+    omega
+  have hexpand : 3^(s+2) * (omegaCutWord s core
+      + 3^(s+1) * (omegaCutWord s core)^2
+      + 3^(2*s+1) * (omegaCutWord s core)^3)
+      = 3^(s+2) * omegaCutWord s core
+        + 3^(2*s+3) * (omegaCutWord s core)^2
+        + 3^(3*s+3) * (omegaCutWord s core)^3 := by
+    have hA1 : (3:Nat)^(2*s+3) = 3^(s+2) * 3^(s+1) := by
+      rw [show (2*s+3) = (s+2)+(s+1) from by omega, Nat.pow_add]
+    have hA2 : (3:Nat)^(3*s+3) = 3^(s+2) * 3^(2*s+1) := by
+      rw [show (3*s+3) = (s+2)+(2*s+1) from by omega, Nat.pow_add]
+    rw [hA1, hA2]
+    ring
+  have hmul : 3^(s+2) * omegaCutWord (s+1) core
+      = 3^(s+2) * (omegaCutWord s core
+        + 3^(s+1) * (omegaCutWord s core)^2
+        + 3^(2*s+1) * (omegaCutWord s core)^3) := by
+    omega
+  exact Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (by decide)) hmul
+
+/-- **THE TRIPLING-CUBE DIGIT TRANSFER.**  For every one-mod-three core at
+sheet level one and above, the ternary digit of the child power
+`4^(3^(s+1) * core)` at row `2s+3` is the digit of the parent power
+`4^(3^s * core)` at row `2s+2` incremented by one.  The parent's
+sheet-gate row is the child's window-top row: the cube recurrence's
+square term carries a fixed plus-one trit into exactly that position. -/
+theorem omega_tripling_digit_transfer (s core : Nat) (hs : 1 ≤ s)
+    (hcore : core % 3 = 1) :
+    digit3 (4^(3^(s+1) * core)) (2*s+3)
+      = (digit3 (4^(3^s * core)) (2*s+2) + 1) % 3 := by
+  have h1lt : (1:Nat) < 3^(s+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(s+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ s+1)
+    omega
+  have hwmod3 : omegaCutWord s core % 3 = 1 := by
+    unfold omegaCutWord
+    rw [Nat.mul_mod, lteCoeff_mod3_one, omega_geo_mod3, Nat.one_mul]
+    omega
+  -- parent: digit at row 2s+2 is (W / 3^(s+1)) % 3
+  have hqP : 4^(3^s * core) / 3^(2*s+2)
+      = (omegaCutWord s core) / 3^(s+1) := by
+    rw [omega_cut_factor s core,
+      show (3:Nat)^(2*s+2) = 3^(s+1) * 3^(s+1) from by
+        rw [show (2*s+2) = (s+1)+(s+1) from by omega, Nat.pow_add],
+      ← Nat.div_div_eq_div_mul,
+      show 1 + 3^(s+1) * omegaCutWord s core
+          = 3^(s+1) * omegaCutWord s core + 1 from by ring,
+      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+      Nat.div_eq_of_lt h1lt, Nat.zero_add]
+  -- child: digit at row 2s+3 is (W' / 3^(s+1)) % 3
+  have hqC : 4^(3^(s+1) * core) / 3^(2*s+3)
+      = (omegaCutWord (s+1) core) / 3^(s+1) := by
+    rw [omega_cut_factor (s+1) core,
+      show (3:Nat)^(2*s+3) = 3^(s+2) * 3^(s+1) from by
+        rw [show (2*s+3) = (s+2)+(s+1) from by omega, Nat.pow_add],
+      ← Nat.div_div_eq_div_mul,
+      show 1 + 3^(s+2) * omegaCutWord (s+1) core
+          = 3^(s+2) * omegaCutWord (s+1) core + 1 from by ring,
+      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+      Nat.div_eq_of_lt (by
+        have h3 : (3:Nat)^1 ≤ 3^(s+2) := by
+          simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+            (by omega : 1 ≤ s+2)
+        omega),
+      Nat.zero_add]
+  -- the cube recurrence inside the child divisor
+  have hW' : (omegaCutWord (s+1) core) / 3^(s+1)
+      = (omegaCutWord s core) / 3^(s+1)
+        + (omegaCutWord s core)^2 + 3^s * (omegaCutWord s core)^3 := by
+    rw [omega_tripling_cut_word s core,
+      show omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core)^2
+          + 3^(2*s+1) * (omegaCutWord s core)^3
+          = 3^(s+1) * ((omegaCutWord s core)^2
+              + 3^s * (omegaCutWord s core)^3)
+            + omegaCutWord s core from by
+        rw [show (3:Nat)^(2*s+1) = 3^(s+1) * 3^s from by
+          rw [show (2*s+1) = (s+1)+s from by omega, Nat.pow_add]]
+        ring,
+      Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide))]
+    omega
+  -- the square term carries the plus-one trit; the cube term is zero mod 3
+  have hs0 : 3^s % 3 = 0 := by
+    obtain ⟨t, ht⟩ : ∃ t, s = t + 1 := ⟨s - 1, by omega⟩
+    rw [ht, Nat.pow_succ]
+    omega
+  have hsq : (omegaCutWord s core)^2 % 3 = 1 := by
+    rw [Nat.pow_mod, hwmod3, Nat.one_pow]
+  have hcu : (3^s * (omegaCutWord s core)^3) % 3 = 0 := by
+    rw [Nat.mul_mod, hs0, Nat.zero_mul]
+  unfold digit3
+  rw [hqP, hqC, hW']
+  omega
+
+/-- **THE TRIPLING-CUBE GATE.**  If the parent's sheet-gate row carries
+the trit one, the child power owns its ternary digit two at row `2s+3`:
+the cube transfer increments the parent trit into the kill zone.  The
+first cross-sheet kill: the child's digit is read off the parent's sheet
+structure through the exact cube recurrence. -/
+theorem omega_tripling_gate (s core : Nat) (hs : 1 ≤ s) (hcore : core % 3 = 1)
+    (hparent : digit3 (4^(3^s * core)) (2*s+2) = 1) :
+    digit3 (4^(3^(s+1) * core)) (2*s+3) = 2 := by
+  rw [omega_tripling_digit_transfer s core hs hcore, hparent]
+  omega
+
+/-- **THE TRIPLING-CUBE KILL (existence form).**  Every one-mod-three
+core whose parent sheet-gate row reads one hands the next sheet's shadow
+exponent its digit two outright at row `2s+3`. -/
+theorem omega_tripling_child_digit_two (s core : Nat) (hs : 1 ≤ s)
+    (hcore : core % 3 = 1)
+    (hparent : digit3 (4^(3^s * core)) (2*s+2) = 1) :
+    ∃ p : Nat, digit3 (4^(3^(s+1) * core)) p = 2 :=
+  ⟨2*s+3, omega_tripling_gate s core hs hcore hparent⟩
+
+#check omega_tripling_cut_word
+#check omega_tripling_digit_transfer
+#check omega_tripling_gate
+#check omega_tripling_child_digit_two
+#print axioms omega_tripling_cut_word
+#print axioms omega_tripling_digit_transfer
+#print axioms omega_tripling_gate
+#print axioms omega_tripling_child_digit_two
+
 #check omega_binom_two_mul
 #check omega_half_mod9_of_mod9_three
 #check omega_half_mod9_of_mod9_six
