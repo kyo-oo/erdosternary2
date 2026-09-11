@@ -2869,7 +2869,7 @@ theorem omega_tower_level_digit_two (s core k : Nat) (hk : 3 ≤ k)
   have hlt : (omegaCutWord s 1 * core) % 3^k < 3^k :=
     Nat.mod_lt _ (Nat.pow_pos (by decide))
   have h3 : 3^k = 3 * 3^(k-1) := by
-    have hps := Nat.pow_succ (3:Nat) (k-1)
+    have hps : 3^((k-1)+1) = 3^(k-1) * 3 := Nat.pow_succ (3:Nat) (k-1)
     have hk' : (k-1)+1 = k := by omega
     rw [hk'] at hps
     rw [hps]
