@@ -17980,9 +17980,8 @@ theorem four_power_omega_shadow_wave_of_tailE
                     · constructor
                       · intro h64
                         exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inl h64))⟩⟩ hEC
-                      · constructor
-                        · intro h73
-                          exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inr (h73)))⟩⟩ hEC
+                      · intro h73
+                        exact absurd ⟨hs0, Or.inl ⟨h1c, Or.inr (Or.inr (Or.inr (h73)))⟩⟩ hEC
                 · intro hs0 h4c
                   constructor
                   · intro h22
@@ -17993,9 +17992,8 @@ theorem four_power_omega_shadow_wave_of_tailE
                     · constructor
                       · intro h67
                         exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inl h67))⟩⟩ hEC
-                      · constructor
-                        · intro h76
-                          exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inr (h76)))⟩⟩ hEC
+                      · intro h76
+                        exact absurd ⟨hs0, Or.inr ⟨h4c, Or.inr (Or.inr (Or.inr (h76)))⟩⟩ hEC
                 · intro hs0
                   constructor
                   · intro h85
@@ -18018,9 +18016,8 @@ theorem four_power_omega_shadow_wave_of_tailE
                             · constructor
                               · intro h190
                                 exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h190))))))⟩ hR5
-                              · constructor
-                                · intro h202
-                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h202)))))))⟩ hR5
+                              · intro h202
+                                exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h202)))))))⟩ hR5
                 · intro hs0
                   constructor
                   · intro h31
@@ -18067,9 +18064,8 @@ theorem four_power_omega_shadow_wave_of_tailE
                                             · constructor
                                               · intro h679
                                                 exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h679))))))))))))))⟩ hR6
-                                              · constructor
-                                                · intro h685
-                                                  exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h685)))))))))))))))⟩ hR6
+                                              · intro h685
+                                                exact absurd ⟨hs0, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h685)))))))))))))))⟩ hR6
                 · intro k hk3 hks
                   exact Nat.lt_of_not_ge (fun hge =>
                     hTower ⟨k, hk3, hks, hge⟩)
