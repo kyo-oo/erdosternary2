@@ -172,6 +172,40 @@ theorem commonTwo_of_zero_prefix_two_trit
   apply commonTwo_of_leading_two_small_prefix K p htrit
   simpa [hpref] using four_lt_three_pow_succ p hp
 
+/-- Starting at ternary scale two, the fixed low-prefix successor `4^(1+1)=16`
+lies below row `p+1`.  This is the size input for the next parametric success
+sector after the zero-prefix family. -/
+theorem sixteen_lt_three_pow_succ
+    (p : Nat) (hp : 2 ≤ p) :
+    16 < 3^(p+1) := by
+  induction p with
+  | zero => omega
+  | succ p ih =>
+      by_cases h1 : p = 1
+      · subst p
+        norm_num
+      · have hp' : 2 ≤ p := by omega
+        have hprev : 16 < 3^(p+1) := ih hp'
+        have hstep : 3^(p+1) ≤ 3^(p+1) * 3 := by omega
+        calc
+          16 < 3^(p+1) := hprev
+          _ ≤ 3^(p+1) * 3 := hstep
+          _ = 3^((p+1)+1) := (Nat.pow_succ 3 (p+1)).symm
+          _ = 3^(Nat.succ p + 1) := by congr 1 <;> omega
+
+/-- Second infinite parametric success family.  If the low `p` exponent prefix
+is exactly one and the `p`-th exponent trit is `2`, then for every `p ≥ 2` the
+next low-prefix power is only `16`, hence both prefix digits vanish at row
+`p+1`.  The direct common-two witness is again the actual row `q = p+1`.
+Equivalently this covers `K ≡ 1 + 2*3^p (mod 3^(p+1))` uniformly in `p`. -/
+theorem commonTwo_of_one_prefix_two_trit
+    (K p : Nat) (hp : 2 ≤ p)
+    (hpref : exponentPrefix K p = 1)
+    (htrit : exponentTrit K p = 2) :
+    CommonTwo K := by
+  apply commonTwo_of_leading_two_small_prefix K p htrit
+  simpa [hpref] using sixteen_lt_three_pow_succ p hp
+
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
 the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
@@ -223,6 +257,8 @@ theorem directExistence_implies_source_two
 #check commonTwo_of_leading_two_small_prefix
 #check four_lt_three_pow_succ
 #check commonTwo_of_zero_prefix_two_trit
+#check sixteen_lt_three_pow_succ
+#check commonTwo_of_one_prefix_two_trit
 #check noCommonTwo_exponent_trit_law
 #check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
@@ -239,6 +275,8 @@ theorem directExistence_implies_source_two
 #print axioms commonTwo_of_leading_two_small_prefix
 #print axioms four_lt_three_pow_succ
 #print axioms commonTwo_of_zero_prefix_two_trit
+#print axioms sixteen_lt_three_pow_succ
+#print axioms commonTwo_of_one_prefix_two_trit
 #print axioms noCommonTwo_exponent_trit_law
 #print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
