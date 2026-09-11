@@ -110,8 +110,7 @@ theorem digit3_eq_zero_of_lt_row
     (R p : Nat) (hR : R < 3^p) :
     digit3 R p = 0 := by
   unfold digit3
-  rw [Nat.div_eq_of_lt hR]
-  simp
+  simp [Nat.div_eq_of_lt hR]
 
 /-- Parametric non-table success sector.  If the `p`-th exponent trit is `2`
 and the next low-prefix power is still strictly below row `p+1`, then both
@@ -138,8 +137,7 @@ theorem commonTwo_of_leading_two_small_prefix
     digit3_eq_zero_of_lt_row _ _ hsmall
   apply commonTwo_of_prefix_killing_trit K p
   · exact hd0.trans hd1.symm
-  · rw [hd0]
-    simpa using htrit
+  · simpa [hd0] using htrit
 
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
