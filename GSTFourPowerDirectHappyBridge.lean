@@ -148,6 +148,22 @@ theorem prefix_killing_trit_forces_relocated_physical_happy
   exact commonTwo_to_physical_happy_row (K+1)
     (commonTwo_of_prefix_killing_trit (K+1) p heq hkill)
 
+/-- Parametric small-prefix relocation sector.  If the next exponent has trit
+`2` at scale `p` and the consecutive low-prefix power still lies below ternary
+row `p+1`, then row `p+1` itself becomes a direct common-two row and hence a
+real physical Happy row on `4^(K+1)`.  No residue table or navigation is used. -/
+theorem leading_two_small_prefix_forces_relocated_physical_happy
+    (K p : Nat)
+    (htrit : exponentTrit (K+1) p = 2)
+    (hsmall :
+      4^((exponentPrefix (K+1) p)+1) < 3^(p+1)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact commonTwo_to_physical_happy_row (K+1)
+    (commonTwo_of_leading_two_small_prefix (K+1) p htrit hsmall)
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -206,6 +222,7 @@ theorem four_power_happy_propagates
 #check affine_two_trit_sector_forces_relocated_physical_happy
 #check low_row_sector_forces_relocated_physical_happy
 #check prefix_killing_trit_forces_relocated_physical_happy
+#check leading_two_small_prefix_forces_relocated_physical_happy
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
@@ -217,6 +234,7 @@ theorem four_power_happy_propagates
 #print axioms affine_two_trit_sector_forces_relocated_physical_happy
 #print axioms low_row_sector_forces_relocated_physical_happy
 #print axioms prefix_killing_trit_forces_relocated_physical_happy
+#print axioms leading_two_small_prefix_forces_relocated_physical_happy
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
