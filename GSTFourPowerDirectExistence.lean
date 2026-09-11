@@ -86,6 +86,23 @@ theorem noCommonTwo_excludes_mod81_row_four
     ¬ RowFourClass (K % 81) := by
   exact no_common_two_forbids_mod81_classes K hNo
 
+/-- Parametric direct constructor from the exponent-prefix law.  At any scale
+`p`, if the consecutive low-prefix powers agree at row `p+1` and the actual
+`p`-th ternary exponent trit is the unique killing trit, then the current
+exponent itself has a common-two row.  The witness is explicitly `p+1`; no
+finite residue table or navigation route is used. -/
+theorem commonTwo_of_prefix_killing_trit
+    (K p : Nat)
+    (heq :
+      digit3 (4^(exponentPrefix K p)) (p+1) =
+      digit3 (4^((exponentPrefix K p)+1)) (p+1))
+    (hkill :
+      exponentTrit K p =
+        2 - digit3 (4^(exponentPrefix K p)) (p+1)) :
+    CommonTwo K := by
+  refine ⟨p+1, by omega, ?_⟩
+  exact (row_common_two_iff_prefix_killing_trit K p).2 ⟨heq, hkill⟩
+
 /-- Every hypothetical direct counterexample obeys the parametric exponent-trit
 obstruction at every scale.  If the two low-prefix values agree at row `p+1`,
 the actual `p`-th ternary trit of `K` cannot equal the canonical killing trit.
@@ -132,6 +149,7 @@ theorem directExistence_implies_source_two
 #check noCommonTwo_excludes_mod27_row_three
 #check commonTwo_of_mod81_row_four
 #check noCommonTwo_excludes_mod81_row_four
+#check commonTwo_of_prefix_killing_trit
 #check noCommonTwo_exponent_trit_law
 #check noCommonTwo_all_exponent_trit_laws
 #check directExistence_implies_source_two
@@ -143,6 +161,7 @@ theorem directExistence_implies_source_two
 #print axioms noCommonTwo_excludes_mod27_row_three
 #print axioms commonTwo_of_mod81_row_four
 #print axioms noCommonTwo_excludes_mod81_row_four
+#print axioms commonTwo_of_prefix_killing_trit
 #print axioms noCommonTwo_exponent_trit_law
 #print axioms noCommonTwo_all_exponent_trit_laws
 #print axioms directExistence_implies_source_two
