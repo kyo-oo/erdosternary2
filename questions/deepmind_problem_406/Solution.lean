@@ -27,7 +27,11 @@ exponent-cycle gates carry the base's own period classes at rows three
 and four.  The input speaks only for shadow exponents above the kernel
 base that dodge every proven gate, both sheet gates, and the period
 classes: weaker than the sealed shadow wave, and strictly weaker than the
-retired third-wave climb.
+retired third-wave climb.  The repository also carries the campaign's
+zero-input target `four_power_omega_shadow_wave_closed` together with
+the receipt theorem `four_power_omega_shadow_wave_closed_iff_tail4`:
+the closed statement is equivalent to the fifth-weakening tail input,
+so the tail's residual is exactly the closed wave's remaining content.
 -/
 
 /-- Byte-identical challenge-side definition. -/
@@ -54,8 +58,8 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
 /-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
 from the Ω-Wave Law through the green monolith seam. -/
 theorem erdos_ternary_2
-    (hTail3 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail3) :
+    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4) :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal hTail3 n hn
+  exact erdos_ternary_2_universal hTail4 n hn

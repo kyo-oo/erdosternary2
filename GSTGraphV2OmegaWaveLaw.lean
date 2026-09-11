@@ -1529,6 +1529,337 @@ theorem omega_expcycle_row4_digit_two_four (K : Nat)
 
 #check omega_expcycle_row4_digit_two_four
 
+/-! ## §7.9 The fifth weakening — levels five and six of the tower and the
+row-five exponent-cycle gate
+
+The tower climbs two more levels: the LTE mean is constantly one hundred
+seventy-eight modulo two hundred forty-three from sheet level four onward
+and constantly six hundred sixty-four modulo seven hundred twenty-nine
+from sheet level five onward, so the stabilized cut word hands over two
+more infinite gate families (the top third of the residue windows modulo
+two hundred forty-three and modulo seven hundred twenty-nine).  At sheet
+zero the base's own period climbs one row deeper: the order of four
+modulo seven hundred twenty-nine is two hundred forty-three, and eight
+of the twenty-four surviving period subclasses ride it into the top third
+of the window — the digit two at row five. -/
+
+/-- The LTE mean is constantly one hundred seventy-eight modulo
+two-hundred-forty-three from sheet level four onward. -/
+theorem omega_lteCoeff_mod243 (a : Nat) (ha : 4 ≤ a) :
+    lteCoeff a % 243 = 178 := by
+  have h243 : (3:Nat)^5 = 243 := by decide
+  have hstable := omega_lteCoeff_stable 5 (a-4)
+  have hidx : (5-1) + (a-4) = a := by omega
+  rw [hidx, h243] at hstable
+  rw [hstable]
+  decide
+
+/-- The base of the geometric mean is one modulo two-hundred-forty-three
+from sheet level four onward. -/
+theorem omega_base_mod243 : ∀ a : Nat, 4 ≤ a → (4^(3^a)) % 243 = 1 := by
+  intro a
+  induction a with
+  | zero => intro h; omega
+  | succ a ih =>
+      intro h
+      rcases Nat.lt_or_ge a 4 with hlt | hge
+      · have ha3 : a = 3 := by omega
+        rw [ha3]
+        decide
+      · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
+          rw [Nat.pow_succ, Nat.pow_mul]
+        rw [hstep, Nat.pow_mod, ih hge, Nat.one_pow]
+
+/-- The geometric mean is the core mass modulo two-hundred-forty-three
+from sheet level four onward. -/
+theorem omega_geo_mod243 (a core : Nat) (ha : 4 ≤ a) :
+    omegaGeoSum a core % 243 = core % 243 := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 243 = 1 := by
+    intro j
+    rw [Nat.pow_mod, omega_base_mod243 a ha, Nat.one_pow]
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- **The level-five cut word law.**  From sheet level four onward the
+cut word is `178 * core` modulo two-hundred-forty-three. -/
+theorem omega_cut_word_mod243 (a core : Nat) (ha : 4 ≤ a) :
+    omegaCutWord a core % 243 = (178 * core) % 243 := by
+  unfold omegaCutWord
+  rw [Nat.mul_mod, omega_lteCoeff_mod243 a ha, omega_geo_mod243 a core ha]
+  omega
+
+/-- **THE LEVEL-FIVE DIGIT LAW.**  The ternary digit of `4^(3^a * core)`
+at row `a+5` is the top trit of the cut word modulo two-hundred-forty-three. -/
+theorem omega_level5_digit (a core : Nat) :
+    digit3 (4^(3^a * core)) (a+5) = (omegaCutWord a core % 243) / 81 := by
+  have hf := omega_cut_factor a core
+  have h1 : (1:Nat) < 3^(a+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(a+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ a+1)
+    omega
+  have hslice := prefix_slice_digit_exact (a+1) 1 (omegaCutWord a core) 4 h1
+  rw [show a+5 = (a+1)+4 from by omega, hf, hslice]
+  unfold digit3
+  rw [show (3:Nat)^4 = 81 from by decide]
+  omega
+
+/-- **THE LEVEL-FIVE GATE CLASSES.**  For every core whose stabilized cut
+word reaches the top third of the residue window modulo
+two-hundred-forty-three, the power `4^(3^a * core)` owns a ternary digit
+two at row `a+5` — the fifth infinite family of the tower, eighteen
+residue classes at every sheet level four and above. -/
+theorem omega_level5_digit_two (a core : Nat) (ha : 4 ≤ a)
+    (hgate : 162 ≤ (178 * core) % 243) :
+    digit3 (4^(3^a * core)) (a+5) = 2 := by
+  rw [omega_level5_digit, omega_cut_word_mod243 a core ha]
+  have hlt : (178 * core) % 243 < 243 := Nat.mod_lt _ (by decide)
+  omega
+
+/-- The LTE mean is constantly six hundred sixty-four modulo
+seven-hundred-twenty-nine from sheet level five onward. -/
+theorem omega_lteCoeff_mod729 (a : Nat) (ha : 5 ≤ a) :
+    lteCoeff a % 729 = 664 := by
+  have h729 : (3:Nat)^6 = 729 := by decide
+  have hstable := omega_lteCoeff_stable 6 (a-5)
+  have hidx : (6-1) + (a-5) = a := by omega
+  rw [hidx, h729] at hstable
+  rw [hstable]
+  decide
+
+/-- The base of the geometric mean is one modulo seven-hundred-twenty-nine
+from sheet level five onward. -/
+theorem omega_base_mod729 : ∀ a : Nat, 5 ≤ a → (4^(3^a)) % 729 = 1 := by
+  intro a
+  induction a with
+  | zero => intro h; omega
+  | succ a ih =>
+      intro h
+      rcases Nat.lt_or_ge a 5 with hlt | hge
+      · have ha4 : a = 4 := by omega
+        rw [ha4]
+        decide
+      · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
+          rw [Nat.pow_succ, Nat.pow_mul]
+        rw [hstep, Nat.pow_mod, ih hge, Nat.one_pow]
+
+/-- The geometric mean is the core mass modulo seven-hundred-twenty-nine
+from sheet level five onward. -/
+theorem omega_geo_mod729 (a core : Nat) (ha : 5 ≤ a) :
+    omegaGeoSum a core % 729 = core % 729 := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 729 = 1 := by
+    intro j
+    rw [Nat.pow_mod, omega_base_mod729 a ha, Nat.one_pow]
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- **The level-six cut word law.**  From sheet level five onward the
+cut word is `664 * core` modulo seven-hundred-twenty-nine. -/
+theorem omega_cut_word_mod729 (a core : Nat) (ha : 5 ≤ a) :
+    omegaCutWord a core % 729 = (664 * core) % 729 := by
+  unfold omegaCutWord
+  rw [Nat.mul_mod, omega_lteCoeff_mod729 a ha, omega_geo_mod729 a core ha]
+  omega
+
+/-- **THE LEVEL-SIX DIGIT LAW.**  The ternary digit of `4^(3^a * core)`
+at row `a+6` is the top trit of the cut word modulo seven-hundred-twenty-nine. -/
+theorem omega_level6_digit (a core : Nat) :
+    digit3 (4^(3^a * core)) (a+6) = (omegaCutWord a core % 729) / 243 := by
+  have hf := omega_cut_factor a core
+  have h1 : (1:Nat) < 3^(a+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(a+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ a+1)
+    omega
+  have hslice := prefix_slice_digit_exact (a+1) 1 (omegaCutWord a core) 5 h1
+  rw [show a+6 = (a+1)+5 from by omega, hf, hslice]
+  unfold digit3
+  rw [show (3:Nat)^5 = 243 from by decide]
+  omega
+
+/-- **THE LEVEL-SIX GATE CLASSES.**  For every core whose stabilized cut
+word reaches the top third of the residue window modulo
+seven-hundred-twenty-nine, the power `4^(3^a * core)` owns a ternary digit
+two at row `a+6` — the sixth infinite family of the tower, at every sheet
+level five and above. -/
+theorem omega_level6_digit_two (a core : Nat) (ha : 5 ≤ a)
+    (hgate : 486 ≤ (664 * core) % 729) :
+    digit3 (4^(3^a * core)) (a+6) = 2 := by
+  rw [omega_level6_digit, omega_cut_word_mod729 a core ha]
+  have hlt : (664 * core) % 729 < 729 := Nat.mod_lt _ (by decide)
+  omega
+
+/-- The base's period modulo seven-hundred-twenty-nine: the order of four
+is two-hundred-forty-three. -/
+theorem omega_expcycle_period729 (j : Nat) :
+    ((4^243)^j) % 729 = 1 := by
+  have h481 : (4^81) % 729 = 244 := by decide
+  have hsplit : 4^243 = 4^81 * 4^81 * 4^81 := by
+    rw [show (243:Nat) = 81 + 81 + 81 from by decide, Nat.pow_add, Nat.pow_add]
+  have hmul1 : 4^81 * 4^81 % 729 = 487 := by
+    rw [Nat.mul_mod, h481]
+  have hmul2 : 4^81 * 4^81 * 4^81 % 729 = 1 := by
+    rw [Nat.mul_mod, hmul1, h481]
+  have h4243 : (4^243) % 729 = 1 := by
+    rw [hsplit, hmul2]
+  rw [Nat.pow_mod, h4243, Nat.one_pow]
+
+#check omega_expcycle_period729
+
+/-- **THE EXPONENT-CYCLE ROW-FIVE GATE (one-sheet).**  Every three-free
+exponent congruent to ninety-one, one hundred eighteen, one hundred
+sixty-three, or one hundred ninety modulo two-hundred-forty-three rides
+the base's period into the top third of the seven-hundred-twenty-nine
+window: the digit two at row five. -/
+theorem omega_expcycle_row5_digit_two_one (K : Nat)
+    (hK : K % 243 = 91 ∨ K % 243 = 118 ∨ K % 243 = 163 ∨ K % 243 = 190) :
+    digit3 (4^K) 5 = 2 := by
+  have h481 : (4^81) % 729 = 244 := by decide
+  have hmul1 : 4^81 * 4^81 % 729 = 487 := by
+    rw [Nat.mul_mod, h481]
+  rcases hK with h91 | h118 | h163 | h190
+  · have hdm : K = 243 * (K / 243) + 91 := by omega
+    have hpow : (4^243)^(K / 243) * 4^91 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^91 = 4^81 * 4^10 := by
+      rw [show (91:Nat) = 81 + 10 from by decide, Nat.pow_add]
+    have h491 : (4^91) % 729 = 517 := by
+      rw [hsplit, Nat.mul_mod, h481]
+      decide
+    have hmod : (4^K) % 729 = 517 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h491]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 118 := by omega
+    have hpow : (4^243)^(K / 243) * 4^118 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^118 = 4^81 * 4^37 := by
+      rw [show (118:Nat) = 81 + 37 from by decide, Nat.pow_add]
+    have h4118 : (4^118) % 729 = 598 := by
+      rw [hsplit, Nat.mul_mod, h481]
+      decide
+    have hmod : (4^K) % 729 = 598 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4118]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 163 := by omega
+    have hpow : (4^243)^(K / 243) * 4^163 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^163 = 4^81 * 4^81 * 4^1 := by
+      rw [show (163:Nat) = 81 + 81 + 1 from by decide, Nat.pow_add, Nat.pow_add]
+    have h4163 : (4^163) % 729 = 490 := by
+      rw [hsplit, Nat.mul_mod, hmul1]
+      decide
+    have hmod : (4^K) % 729 = 490 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4163]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 190 := by omega
+    have hpow : (4^243)^(K / 243) * 4^190 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^190 = 4^81 * 4^81 * 4^28 := by
+      rw [show (190:Nat) = 81 + 81 + 28 from by decide, Nat.pow_add, Nat.pow_add]
+    have h4190 : (4^190) % 729 = 571 := by
+      rw [hsplit, Nat.mul_mod, hmul1]
+      decide
+    have hmod : (4^K) % 729 = 571 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4190]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+
+#check omega_expcycle_row5_digit_two_one
+
+/-- **THE EXPONENT-CYCLE ROW-FIVE GATE (four-sheet).**  Every three-free
+exponent congruent to eighty-five, one hundred twelve, one hundred
+seventy-five, or two hundred two modulo two-hundred-forty-three rides
+the base's period into the top third of the seven-hundred-twenty-nine
+window: the digit two at row five. -/
+theorem omega_expcycle_row5_digit_two_four (K : Nat)
+    (hK : K % 243 = 85 ∨ K % 243 = 112 ∨ K % 243 = 175 ∨ K % 243 = 202) :
+    digit3 (4^K) 5 = 2 := by
+  have h481 : (4^81) % 729 = 244 := by decide
+  have hmul1 : 4^81 * 4^81 % 729 = 487 := by
+    rw [Nat.mul_mod, h481]
+  rcases hK with h85 | h112 | h175 | h202
+  · have hdm : K = 243 * (K / 243) + 85 := by omega
+    have hpow : (4^243)^(K / 243) * 4^85 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^85 = 4^81 * 4^4 := by
+      rw [show (85:Nat) = 81 + 4 from by decide, Nat.pow_add]
+    have h485 : (4^85) % 729 = 499 := by
+      rw [hsplit, Nat.mul_mod, h481]
+      decide
+    have hmod : (4^K) % 729 = 499 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h485]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 112 := by omega
+    have hpow : (4^243)^(K / 243) * 4^112 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^112 = 4^81 * 4^31 := by
+      rw [show (112:Nat) = 81 + 31 from by decide, Nat.pow_add]
+    have h4112 : (4^112) % 729 = 580 := by
+      rw [hsplit, Nat.mul_mod, h481]
+      decide
+    have hmod : (4^K) % 729 = 580 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4112]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 175 := by omega
+    have hpow : (4^243)^(K / 243) * 4^175 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^175 = 4^81 * 4^81 * 4^13 := by
+      rw [show (175:Nat) = 81 + 81 + 13 from by decide, Nat.pow_add, Nat.pow_add]
+    have h4175 : (4^175) % 729 = 526 := by
+      rw [hsplit, Nat.mul_mod, hmul1]
+      decide
+    have hmod : (4^K) % 729 = 526 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4175]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+  · have hdm : K = 243 * (K / 243) + 202 := by omega
+    have hpow : (4^243)^(K / 243) * 4^202 = 4^K := by
+      rw [← Nat.pow_mul, ← Nat.pow_add, ← hdm]
+    have hsplit : 4^202 = 4^81 * 4^81 * 4^40 := by
+      rw [show (202:Nat) = 81 + 81 + 40 from by decide, Nat.pow_add, Nat.pow_add]
+    have h4202 : (4^202) % 729 = 607 := by
+      rw [hsplit, Nat.mul_mod, hmul1]
+      decide
+    have hmod : (4^K) % 729 = 607 := by
+      rw [← hpow, Nat.mul_mod, omega_expcycle_period729 (K / 243), h4202]
+    unfold digit3
+    rw [digit3_window, show 5 + 1 = 6 from by decide,
+      show (3:Nat)^6 = 729 from by decide,
+      show (3:Nat)^5 = 243 from by decide, hmod]
+
+#check omega_expcycle_row5_digit_two_four
+
 end
 
 /-- **The Ω-shadow tail after the sheet gate.**  The shadow residue after
@@ -1594,6 +1925,41 @@ sheet gates, and the sheet-zero exponent-cycle gates. -/
 def four_power_omega_shadow_wave_tail3 : Prop :=
   ∀ K : Nat, 500 < K → omegaShadowTail3 K → ∃ p : Nat, digit3 (4^K) p = 2
 
+/-- **The Ω-shadow tail after the fifth weakening.**  The shadow residue
+after the kernel-checked base, the third through sixth tower levels, both
+sheet gates, and the sheet-zero exponent-cycle gates through row five:
+every shadow exponent above the kernel base whose core dodges every
+proven gate — the tower classes at levels three through six, both sheet
+gates, and the base's own period classes at rows three through five —
+remains. -/
+def omegaShadowTail4 (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    (2 ≤ s → core % 27 ≠ 13 ∧ core % 27 ≠ 25) ∧
+    (3 ≤ s → (16 * core) % 81 < 54) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) ∧
+    (1 ≤ s → (core % 9 = 4 →
+      3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))) ∧
+    (1 ≤ s → (core % 9 = 7 →
+      ((lteCoeff s * core) % 3^(s+3) < 3^(s+2)
+        ∨ 2 * 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3)))) ∧
+    (s = 0 → (core % 9 = 1 → core % 27 ≠ 19 ∧ core % 81 ≠ 55
+      ∧ core % 81 ≠ 64 ∧ core % 81 ≠ 73)) ∧
+    (s = 0 → (core % 9 = 4 → core % 27 ≠ 22 ∧ core % 81 ≠ 58
+      ∧ core % 81 ≠ 67 ∧ core % 81 ≠ 76)) ∧
+    (4 ≤ s → (178 * core) % 243 < 162) ∧
+    (5 ≤ s → (664 * core) % 729 < 486) ∧
+    (s = 0 → (core % 243 ≠ 85 ∧ core % 243 ≠ 91 ∧ core % 243 ≠ 112
+      ∧ core % 243 ≠ 118 ∧ core % 243 ≠ 163 ∧ core % 243 ≠ 175
+      ∧ core % 243 ≠ 190 ∧ core % 243 ≠ 202))
+
+/-- **THE Ω-SHADOW WAVE TAIL (FIFTH WEAKENING)** — the residual input
+after the kernel-checked base, the third through sixth tower levels,
+both sheet gates, and the sheet-zero exponent-cycle gates through row
+five. -/
+def four_power_omega_shadow_wave_tail4 : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTail4 K → ∃ p : Nat, digit3 (4^K) p = 2
+
 /-- **THE Ω-SHADOW WAVE, CLOSED FORM — the zero-input statement.**  The
 shadow wave with no tail bound and no kernel cut: every shadow exponent
 from eight onward owns its ternary digit two outright.  This is the
@@ -1625,8 +1991,17 @@ def four_power_omega_shadow_wave_closed : Prop :=
 #check omega_expcycle_row3_digit_two
 #check omega_expcycle_row4_digit_two_one
 #check omega_expcycle_row4_digit_two_four
+#check omega_expcycle_period729
+#check omega_expcycle_row5_digit_two_one
+#check omega_expcycle_row5_digit_two_four
+#check omega_lteCoeff_mod243
+#check omega_level5_digit_two
+#check omega_lteCoeff_mod729
+#check omega_level6_digit_two
 #check omegaShadowTail3
 #check four_power_omega_shadow_wave_tail3
+#check omegaShadowTail4
+#check four_power_omega_shadow_wave_tail4
 #check four_power_omega_shadow_wave_closed
 #print axioms omega_cut_word_full3
 #print axioms omega_sheet2_digit
@@ -1635,8 +2010,19 @@ def four_power_omega_shadow_wave_closed : Prop :=
 #print axioms omega_expcycle_row3_digit_two
 #print axioms omega_expcycle_row4_digit_two_one
 #print axioms omega_expcycle_row4_digit_two_four
+#print axioms omega_expcycle_period729
+#print axioms omega_expcycle_row5_digit_two_one
+#print axioms omega_expcycle_row5_digit_two_four
+#print axioms omega_lteCoeff_mod243
+#print axioms omega_cut_word_mod243
+#print axioms omega_level5_digit_two
+#print axioms omega_lteCoeff_mod729
+#print axioms omega_cut_word_mod729
+#print axioms omega_level6_digit_two
 #print axioms omegaShadowTail3
 #print axioms four_power_omega_shadow_wave_tail3
+#print axioms omegaShadowTail4
+#print axioms four_power_omega_shadow_wave_tail4
 
 #check omegaShadow
 #check four_power_omega_shadow_wave
