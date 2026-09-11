@@ -62,4 +62,4 @@ theorem erdos_ternary_2
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal hTail4 n hn
+  exact erdos_ternary_2_universal_tail4 hTail4 n hn
