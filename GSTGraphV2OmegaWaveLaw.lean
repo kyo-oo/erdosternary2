@@ -2143,6 +2143,189 @@ theorem omega_tripling_child_digit_two (s core : Nat) (hs : 1 ≤ s)
 #print axioms omega_tripling_gate
 #print axioms omega_tripling_child_digit_two
 
+/-! ## §7.11 The infinite-controller chokehold (all inputs, all outputs)
+
+The Law descends to the main infinite GST-V2 control graph — the one
+infinite object `GSTGraphV2InfiniteControl.graph` of which every finite
+rectangle is an observation.  The pure-power column `graph 1 K ·` is the
+wave's own digit tape; the parity column `graph (1 + n % 2) (n / 2) ·` is
+every exponent `2^n` at once (both parities, one object); and the
+transplanted all-Nat controller state `graphCoupledState 1 K ·` reads
+the same wave through the controller's own parent-digit output channel.
+The chokehold: for every exponent from nine onward — every input, both
+parities — the one infinite graph shows the ternary two somewhere in its
+column, and every output cell of that column is pinned by the exact
+lattice law `graph_cell_exact`. -/
+
+/-- Every output digit of the main infinite graph is the exact ternary
+digit of the horizontal full energy: the graph IS the digit tape of
+`4^t * E` for every input pair. -/
+theorem graph_column_digit_exact (E t p : Nat) :
+    (graph E t p).seven.digit = digit3 (4^t * E) p := rfl
+
+/-- Every output carry of the main infinite graph is the exact x4 carry
+of the horizontal full energy. -/
+theorem graph_column_carry_exact (E t p : Nat) :
+    (graph E t p).seven.carry = carry4 (4^t * E) p := rfl
+
+/-- The pure-power column of the main infinite graph is the wave's own
+digit tape. -/
+theorem graph_pure_power_digit_exact (K p : Nat) :
+    (graph 1 K p).seven.digit = digit3 (4^K) p := by
+  rw [graph_column_digit_exact, Nat.mul_one]
+
+/-- The pure-power column's carries are the exact x4 carries of `4^K`. -/
+theorem graph_pure_power_carry_exact (K p : Nat) :
+    (graph 1 K p).seven.carry = carry4 (4^K) p := by
+  rw [graph_column_carry_exact, Nat.mul_one]
+
+/-- **THE CLOSED WAVE ON THE INFINITE GRAPH.**  The zero-input closed
+statement, read as a statement about the one infinite control graph
+itself: every shadow exponent's digit two is an output cell of the
+pure-power column. -/
+theorem omega_shadow_wave_graph
+    (hClosed : four_power_omega_shadow_wave_closed)
+    (K : Nat) (hK : 8 ≤ K) (hS : omegaShadow K) :
+    ∃ p : Nat, (graph 1 K p).seven.digit = 2 := by
+  obtain ⟨p, hp⟩ := hClosed K hK hS
+  exact ⟨p, (graph_pure_power_digit_exact K p).trans hp⟩
+
+/-- **THE EXHAUSTIVE GRAPH SPLIT — zero inputs.**  Every exponent from
+eight onward either lies in the Ω-shadow residue or the one infinite
+graph's pure-power column shows its ternary two outright. -/
+theorem omega_digit_two_cases_graph (K : Nat) (hK : 8 ≤ K) :
+    omegaShadow K ∨ ∃ p : Nat, (graph 1 K p).seven.digit = 2 := by
+  rcases omega_digit_two_cases K hK with hS | ⟨p, hp⟩
+  · exact Or.inl hS
+  · exact Or.inr ⟨p, (graph_pure_power_digit_exact K p).trans hp⟩
+
+/-- **THE WAVE THROUGH THE CONTROLLER'S OUTPUT CHANNEL.**  The transplanted
+all-Nat controller's parent-digit output — the channel the bridge's own
+`graphCoupledState_parentDigit_exact` observes — shows the shadow
+exponent's two at the wave depth. -/
+theorem controller_parent_digit_wave
+    (hClosed : four_power_omega_shadow_wave_closed)
+    (K : Nat) (hK : 8 ≤ K) (hS : omegaShadow K) :
+    ∃ q : Nat,
+      ((graphCoupledState 1 K q).parentOffset +
+        4^K * ((graphCoupledState 1 K q).childTail % 3)) % 3 = 2 := by
+  obtain ⟨p, hp⟩ := omega_shadow_wave_graph hClosed K hK hS
+  exact ⟨p, (graphCoupledState_parentDigit_exact 1 K p).trans hp⟩
+
+/-- **THE TRIPLING LAW IN GRAPH COORDINATES.**  The cross-sheet digit
+transfer, read on the one infinite graph: the sheet-`s+1` column's row
+`2s+3` output is the sheet-`s` column's row `2s+2` output plus one,
+modulo three. -/
+theorem omega_tripling_graph_digit_transfer (s core : Nat) (hs : 1 ≤ s)
+    (hcore : core % 3 = 1) :
+    (graph 1 (3^(s+1) * core) (2*s+3)).seven.digit =
+      ((graph 1 (3^s * core) (2*s+2)).seven.digit + 1) % 3 := by
+  rw [graph_pure_power_digit_exact (3^(s+1) * core) (2*s+3),
+      graph_pure_power_digit_exact (3^s * core) (2*s+2)]
+  exact omega_tripling_digit_transfer s core hs hcore
+
+/-- The parity column identity: one column index per exponent, both
+parities at once — `4^(n/2) * (1 + n % 2)` is literally `2^n`. -/
+theorem graph_column_parity_energy (n : Nat) :
+    4^(n/2) * (1 + n % 2) = 2^n := by
+  have hcore : 4^(n/2) = 2^(2 * (n / 2)) := by
+    rw [show (4:Nat) = 2^2 from by decide]
+    rw [Nat.pow_mul]
+  rcases Nat.mod_two_eq_zero_or_one n with h0 | h1
+  · rw [h0, Nat.add_zero, Nat.mul_one, hcore]
+    congr 1
+    omega
+  · rw [h1, hcore]
+    rw [show 2^n = 2^(2 * (n / 2) + 1) from by congr 1; omega,
+        Nat.pow_add]
+    rw [show (1:Nat) + 1 = 2 from rfl, Nat.pow_one]
+
+/-- The three sub-wave even exponents: `4^5`, `4^6` and `4^7` own their
+ternary digit two by direct computation (`1024 = 1101221₃`,
+`4096 = 12121201₃`, `16384 = 211110211₃`). -/
+theorem omega_small_digit_two (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≤ 7) :
+    ∃ p : Nat, digit3 (4^K) p = 2 := by
+  interval_cases K
+  · exact ⟨1, by decide⟩
+  · exact ⟨2, by decide⟩
+  · exact ⟨2, by decide⟩
+
+/-- **THE INFINITE-CONTROLLER CHOKEHOLD — all inputs, all outputs.**
+For every exponent from nine onward — both parities, one theorem — the
+one infinite control graph's parity column `graph (1 + n % 2) (n / 2)`
+shows the ternary two: the odd wing by the elementary mod-three law at
+row zero, the even wing by the Law's own coverage (the three sub-wave
+exponents by direct computation, the Ω-shadow wave input everywhere
+else).  Every output cell of the column is pinned by the exact lattice
+law `graph_cell_exact`; the two is among them. -/
+theorem infinite_graph_ternary_two_chokehold
+    (hClosed : four_power_omega_shadow_wave_closed)
+    (n : Nat) (hn : 9 ≤ n) :
+    ∃ p : Nat, (graph (1 + n % 2) (n / 2) p).seven.digit = 2 := by
+  have hcol : ∀ p : Nat,
+      (graph (1 + n % 2) (n / 2) p).seven.digit = digit3 (2^n) p := by
+    intro p
+    rw [graph_column_digit_exact, graph_column_parity_energy]
+  rcases Nat.mod_two_eq_zero_or_one n with heven | hodd
+  · have hK5 : 5 ≤ n / 2 := by omega
+    rcases Nat.lt_or_ge (n / 2) 8 with hK8 | hK8
+    · obtain ⟨p, hp⟩ := omega_small_digit_two (n / 2) hK5 (by omega)
+      exact ⟨p, (hcol p).trans hp⟩
+    · rcases omega_digit_two_cases (n / 2) hK8 with hS | ⟨p, hp⟩
+      · obtain ⟨p, hp2⟩ := hClosed (n / 2) hK8 hS
+        exact ⟨p, (hcol p).trans hp2⟩
+      · exact ⟨p, (hcol p).trans hp⟩
+  · refine ⟨0, ?_⟩
+    rw [hcol]
+    show (2^n) / 3^0 % 3 = 2
+    rw [Nat.pow_zero, Nat.div_one]
+    have hexp := (graph_column_parity_energy n).symm
+    rw [hodd] at hexp
+    rw [hexp, Nat.mul_mod, pow4_mod3_one]
+
+/-- **THE FULL OUTPUT ENVELOPE OF THE CHOKEHOLD COLUMN.**  For every
+input exponent from nine onward, every output cell of the parity column
+obeys the exact lattice law (the x4/base3 digit and carry recurrence)
+AND the column contains the ternary two. -/
+theorem infinite_graph_chokehold_envelope
+    (hClosed : four_power_omega_shadow_wave_closed)
+    (n : Nat) (hn : 9 ≤ n) :
+    (∀ p : Nat,
+      outDigit (graph (1 + n % 2) (n / 2) p).seven.carry
+        (graph (1 + n % 2) (n / 2) p).seven.digit =
+        (graph (1 + n % 2) (n / 2 + 1) p).seven.digit ∧
+      nextCarry (graph (1 + n % 2) (n / 2) p).seven.carry
+        (graph (1 + n % 2) (n / 2) p).seven.digit =
+        (graph (1 + n % 2) (n / 2) (p+1)).seven.carry) ∧
+    ∃ p : Nat, (graph (1 + n % 2) (n / 2) p).seven.digit = 2 :=
+  ⟨fun p => graph_cell_exact (1 + n % 2) (n / 2) p,
+    infinite_graph_ternary_two_chokehold hClosed n hn⟩
+
+#check graph_column_digit_exact
+#check graph_column_carry_exact
+#check graph_pure_power_digit_exact
+#check graph_pure_power_carry_exact
+#check omega_shadow_wave_graph
+#check omega_digit_two_cases_graph
+#check controller_parent_digit_wave
+#check omega_tripling_graph_digit_transfer
+#check graph_column_parity_energy
+#check omega_small_digit_two
+#check infinite_graph_ternary_two_chokehold
+#check infinite_graph_chokehold_envelope
+#print axioms graph_column_digit_exact
+#print axioms graph_column_carry_exact
+#print axioms graph_pure_power_digit_exact
+#print axioms graph_pure_power_carry_exact
+#print axioms omega_shadow_wave_graph
+#print axioms omega_digit_two_cases_graph
+#print axioms controller_parent_digit_wave
+#print axioms omega_tripling_graph_digit_transfer
+#print axioms graph_column_parity_energy
+#print axioms omega_small_digit_two
+#print axioms infinite_graph_ternary_two_chokehold
+#print axioms infinite_graph_chokehold_envelope
+
 #check omega_binom_two_mul
 #check omega_half_mod9_of_mod9_three
 #check omega_half_mod9_of_mod9_six

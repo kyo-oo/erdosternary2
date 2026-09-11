@@ -17621,6 +17621,66 @@ theorem erdos_ternary_2_universal
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail4 hTail4) n hn
 
+/-- **WITNESS EXTRACTION.**  A false `noTernaryTwo` verdict hands over the
+digit-two witness position: the boolean scan and the digit statement are
+one object. -/
+theorem no_two_false_digit_witness (n : Nat) (h : noTernaryTwo n = false) :
+    ∃ p : Nat, gstDigit n p = 2 :=
+  Nat.strongRecOn n (fun n ih h => by
+    by_cases hn : n = 0
+    · subst hn
+      rw [noTernaryTwo.eq_def 0, if_pos (by decide : (0:Nat) = 0)] at h
+      exact absurd h (by decide)
+    · rw [noTernaryTwo.eq_def n, if_neg hn] at h
+      by_cases h2 : n % 3 = 2
+      · refine ⟨0, ?_⟩
+        show n / 3^0 % 3 = 2
+        rw [Nat.pow_zero, Nat.div_one]
+        exact h2
+      · rw [if_neg h2] at h
+        obtain ⟨p, hp⟩ := ih (n / 3)
+          (Nat.div_lt_self (by omega : 0 < n) (by decide : 1 < 3)) h
+        refine ⟨p + 1, ?_⟩
+        show n / 3^(p+1) % 3 = 2
+        rw [Nat.pow_succ, Nat.mul_comm, ← Nat.div_div_eq_div_mul]
+        exact hp)
+
+/-- **THE INFINITE-CONTROLLER CHOKEHOLD — ALL INPUTS, ALL OUTPUTS.**
+The main theorem's verdict, read as a statement about the one infinite
+GST-V2 control graph: for every exponent from nine onward — every input,
+both parities at once through the parity column `graph (1 + n % 2)
+(n / 2)` — the graph shows the ternary two somewhere in its column.
+This is the Ω-wave law fused with the infinite-controller bridge: the
+output channel is the graph's own digit cell, the input is the theorem's
+own residual (`hTail4`), and every cell of the column is pinned by the
+exact lattice law `graph_cell_exact`. -/
+theorem infinite_controller_ternary_two_chokehold
+    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4)
+    (n : Nat) (hn : 9 ≤ n) :
+    ∃ p : Nat,
+      (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
+        = 2 :=
+  GSTGraphV2OmegaWaveLaw.infinite_graph_ternary_two_chokehold
+    (four_power_omega_shadow_wave_closed_of_tail4 hTail4) n hn
+
+/-- **THE CHOKEHOLD THROUGH THE THEOREM'S OWN OUTPUT CHANNEL.**  The same
+graph-column statement, extracted directly from the main theorem's
+`noTernaryTwo (2^n) = false` verdict through the witness-extraction
+lemma: the boolean verdict and the infinite graph's digit-two cell are
+one observable. -/
+theorem infinite_controller_chokehold_of_universal
+    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4)
+    (n : Nat) (hn : 9 ≤ n) :
+    ∃ p : Nat,
+      (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
+        = 2 := by
+  obtain ⟨p, hp⟩ := no_two_false_digit_witness (2^n)
+    (erdos_ternary_2_universal hTail4 n hn)
+  refine ⟨p, ?_⟩
+  rw [GSTGraphV2OmegaWaveLaw.graph_column_digit_exact,
+    GSTGraphV2OmegaWaveLaw.graph_column_parity_energy]
+  exact hp
+
 #print axioms erdos_ternary_2_universal
 #print axioms erdos_ternary_2_universal_closed
 #print axioms erdos_ternary_2_universal_tail
@@ -17635,3 +17695,6 @@ theorem erdos_ternary_2_universal
 #print axioms four_power_omega_shadow_wave_of_tail2
 #print axioms four_power_omega_shadow_wave_of_tail3
 #print axioms four_power_omega_shadow_wave_of_tail4
+#print axioms no_two_false_digit_witness
+#print axioms infinite_controller_ternary_two_chokehold
+#print axioms infinite_controller_chokehold_of_universal
