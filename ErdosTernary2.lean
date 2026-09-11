@@ -17135,8 +17135,11 @@ theorem four_power_omega_shadow_wave_of_tail2
         exact GSTGraphV2OmegaWaveLaw.omega_level4_digit_two s core hs4 hgate
       · by_cases hSG :
           2 * 3^(s+1) ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
-        · rw [hsc]
-          exact ⟨2*s+2, GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc3 hSG⟩
+        · have hc1 : core % 3 = 1 := by
+            rcases hsheet with h4 | ⟨_, h1⟩ | ⟨_, h7⟩ <;> omega
+          rw [hsc]
+          exact ⟨2*s+2,
+            GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc1 hSG⟩
         · refine hTail2 K (by omega) ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_⟩
           · intro hs
             constructor
