@@ -753,6 +753,311 @@ theorem omega_level3_digit_two (a core : Nat) (ha : 2 ≤ a)
   · have hval : (16 * core) % 27 = 22 := by omega
     rw [hval]
 
+/-! ## §7.6 The Ω-sheet gate — the wave word beyond the tower
+
+The cut tower reads the wave word `omegaCutWord s core` only inside its
+stabilization window (rows `s+1` through `2s+1`).  This section opens the
+window one digit further: the full cut word modulo the squared cut modulus
+`3^(s+2)` is the sheet-local word `lteCoeff s * core` plus an explicit
+binomial correction that vanishes for every shadow core (core congruent to
+one modulo three).  The digit at row `2s+2` is therefore the top trit of
+`lteCoeff s * core` modulo `3^(s+2)` — the **Ω-sheet gate**, the Law's own
+kill of every dodger whose wave word has residue zero at the first digit
+beyond the tower.  Together with a fourth tower level (mod eighty-one),
+this shrinks the residual input a third time. -/
+
+/-- Multiplication absorbs the residue: reducing the factor before the
+multiplication does not change the product's residue. -/
+theorem omega_mul_mod_absorb (M k x : Nat) :
+    (k * (x % M)) % M = (k * x) % M := by
+  have hq : x % M + M * (x / M) = x := Nat.mod_add_div x M
+  have hkr : k * x = k * (x % M) + M * (k * (x / M)) := by
+    conv_lhs => rw [← hq]
+    ring
+  rw [hkr, Nat.add_mul_mod_self_left]
+
+/-- The residue of a sum whose head is given by its residue: both the head
+and the fixed multiple of the head's residue lift back to the full values
+without changing the sum's residue. -/
+theorem omega_sum_mod_lift (M k a y : Nat) :
+    (a % M + y + k * (a % M)) % M = (a + y + k * a) % M := by
+  have hq : a % M + M * (a / M) = a := Nat.mod_add_div a M
+  have hchain : a + y + k * a
+      = (a % M + y + k * (a % M)) + M * (a / M + k * (a / M)) := by
+    conv_lhs => rw [← hq]
+    ring
+  rw [hchain, Nat.add_mul_mod_self_left]
+
+/-- Halving preserves vanishing modulo three. -/
+theorem omega_half_of_mod3 (A : Nat) (hA : A % 3 = 0) (hE : 2 * (A / 2) = A) :
+    (A / 2) % 3 = 0 := by omega
+
+/-- **THE FULL-DEPTH CUT WORD LAW.**  At sheet `s` the cut word of
+`4^(3^s * core)` agrees, modulo the squared cut modulus `3^(s+2)`, with
+the sheet-local word `lteCoeff s * core` plus the explicit binomial
+correction `3^(s+1) * (lteCoeff s)^2 * (core * (core - 1) / 2)` carried
+by the geometric mean's own telescoping. -/
+theorem omega_cut_word_full (s core : Nat) :
+    omegaCutWord s core % 3^(s+2)
+      = (lteCoeff s * core
+          + 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3^(s+2) := by
+  induction core with
+  | zero =>
+      have h0 : omegaCutWord s 0 = 0 := by simp [omegaCutWord, omegaGeoSum]
+      rw [h0]
+      simp
+  | succ c ih =>
+      have hstepW : omegaCutWord s (c+1)
+          = omegaCutWord s c + lteCoeff s * 4^(3^s * c) := by
+        unfold omegaCutWord omegaGeoSum
+        simp only [Finset.sum_range_succ]
+        have hterm : (4^(3^s))^c = 4^(3^s * c) := by rw [Nat.pow_mul]
+        rw [hterm]
+        ring
+      have hf : 4^(3^s * c) = 1 + 3^(s+1) * omegaCutWord s c :=
+        omega_cut_factor s c
+      have h2 : omegaCutWord s (c+1)
+          = omegaCutWord s c + lteCoeff s
+            + 3^(s+1) * lteCoeff s * omegaCutWord s c := by
+        rw [hstepW, hf]; ring
+      have hbinom : (c+1) * c / 2 = c * (c - 1) / 2 + c := by
+        have hE : (c+1) * c = c * (c - 1) + 2 * c := by ring
+        rw [hE]
+        exact Nat.add_mul_div_left _ _ (by decide)
+      have hp2 : (3:Nat)^(s+1) * 3^(s+1) = 3^(s+2) * 3^s := by
+        rw [← Nat.pow_add, ← Nat.pow_add]; congr 1; omega
+      rw [h2, ← omega_sum_mod_lift, ih, omega_sum_mod_lift]
+      have hfinal : lteCoeff s * c
+            + 3^(s+1) * lteCoeff s * lteCoeff s * (c * (c - 1) / 2)
+            + lteCoeff s
+            + 3^(s+1) * lteCoeff s * (lteCoeff s * c
+                + 3^(s+1) * lteCoeff s * lteCoeff s * (c * (c - 1) / 2))
+          = lteCoeff s * (c+1)
+            + 3^(s+1) * lteCoeff s * lteCoeff s * ((c+1) * c / 2)
+            + 3^(s+1) * 3^(s+1) * lteCoeff s * lteCoeff s * lteCoeff s
+                * (c * (c - 1) / 2) := by
+        rw [hbinom]
+        ring
+      rw [hfinal]
+      rw [show 3^(s+1) * 3^(s+1) * lteCoeff s * lteCoeff s * lteCoeff s
+            * (c * (c - 1) / 2)
+          = 3^(s+2) * (3^s * lteCoeff s * lteCoeff s * lteCoeff s
+              * (c * (c - 1) / 2)) from by rw [hp2]; ring,
+        Nat.add_mul_mod_self_left]
+
+/-- **THE Ω-SHEET CUT WORD.**  For every core congruent to one modulo
+three the binomial correction is a multiple of three, so modulo the
+squared cut modulus the cut word is the sheet-local word `lteCoeff s *
+core` exactly. -/
+theorem omega_cut_word_mod_pow2 (s core : Nat) (hcore : core % 3 = 1) :
+    omegaCutWord s core % 3^(s+2) = (lteCoeff s * core) % 3^(s+2) := by
+  have hu3 : (lteCoeff s) % 3 = 1 := lteCoeff_mod3_one s
+  have hcm : core * (core - 1) % 3 = 0 := by
+    have h2 : (core - 1) % 3 = 0 := by omega
+    rw [Nat.mul_mod, hcore, h2]
+    decide
+  have h2m : 2 * (core * (core - 1) / 2) = core * (core - 1) := by
+    rw [Nat.mul_div_cancel' (by
+      rcases Nat.even_or_odd core with ⟨k, hk⟩ | ⟨k, hk⟩
+      · rw [hk]; exact ⟨k * (2 * k - 1), by ring⟩
+      · rw [hk]; exact ⟨(2 * k + 1) * k, by ring⟩)]
+  have hq3 : (core * (core - 1) / 2) % 3 = 0 :=
+    omega_half_of_mod3 (core * (core - 1)) hcm h2m
+  have hX3 : (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) % 3 = 0 := by
+    rw [Nat.mul_mod, Nat.mul_mod, hu3, hu3, hq3]
+    decide
+  obtain ⟨Y, hY⟩ : ∃ Y : Nat,
+      lteCoeff s * lteCoeff s * (core * (core - 1) / 2) = 3 * Y := by
+    refine ⟨(lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) / 3, ?_⟩
+    have h := Nat.mod_add_div
+      (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) 3
+    rw [hX3, Nat.zero_add] at h
+    exact h.symm
+  have hcorr : 3^(s+2)
+      ∣ 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2) := by
+    refine ⟨Y, ?_⟩
+    rw [show 3^(s+1) * lteCoeff s * lteCoeff s * (core * (core - 1) / 2)
+        = 3^(s+1) * (lteCoeff s * lteCoeff s * (core * (core - 1) / 2)) from by ring,
+      hY,
+      show (3:Nat)^(s+2) = 3 * 3^(s+1) from by
+        rw [show s + 2 = (s+1) + 1 from by omega, Nat.pow_add, Nat.pow_one]]
+    ring
+  rw [omega_cut_word_full s core, Nat.add_mod, Nat.mod_eq_zero_of_dvd hcorr,
+    Nat.add_zero, Nat.mod_mod]
+
+/-- The ternary digit at position `j` is the top trit of the residue
+modulo `3^(j+1)` — the general window law behind every level of the
+tower's digit reading. -/
+theorem digit3_window (X j : Nat) :
+    (X / 3^j) % 3 = (X % 3^(j+1)) / 3^j := by
+  have hp : 0 < 3^j := Nat.pow_pos (by decide)
+  have hpow : 3^(j+1) = 3^j * 3 := by rw [Nat.pow_add, Nat.pow_one]
+  have hX : X = 3^(j+1) * (X / 3^(j+1)) + X % 3^(j+1) := by
+    have h := Nat.mod_add_div X (3^(j+1))
+    rw [Nat.add_comm] at h
+    exact h
+  have hdiv : X / 3^j
+      = (X % 3^(j+1)) / 3^j + 3 * (X / 3^(j+1)) := by
+    calc X / 3^j
+        = (3^(j+1) * (X / 3^(j+1)) + X % 3^(j+1)) / 3^j := by rw [← hX]
+      _ = (X % 3^(j+1) + 3^(j+1) * (X / 3^(j+1))) / 3^j := by rw [Nat.add_comm]
+      _ = (X % 3^(j+1) + 3^j * 3 * (X / 3^(j+1))) / 3^j := by rw [hpow]
+      _ = (X % 3^(j+1) + 3^j * (3 * (X / 3^(j+1)))) / 3^j := by
+          rw [show 3^j * 3 * (X / 3^(j+1)) = 3^j * (3 * (X / 3^(j+1))) from by ring]
+      _ = (X % 3^(j+1)) / 3^j + 3 * (X / 3^(j+1)) :=
+          Nat.add_mul_div_left _ _ hp
+  have hmodlt : X % 3^(j+1) < 3 * 3^j := by
+    have h := Nat.mod_lt X (3^(j+1)) (Nat.pow_pos (by decide))
+    rw [show 3^(j+1) = 3 * 3^j from by rw [hpow, Nat.mul_comm]] at h ⊢
+    exact h
+  have hlt : (X % 3^(j+1)) / 3^j < 3 :=
+    (Nat.div_lt_iff_lt_mul hp).mpr hmodlt
+  rw [hdiv, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt hlt]
+
+/-- **THE Ω-SHEET GATE DIGIT.**  The ternary digit of `4^(3^s * core)` at
+row `2s+2` — one row beyond the tower's stabilization window — is the top
+trit of the sheet-local cut word `lteCoeff s * core` modulo `3^(s+2)`,
+for every core congruent to one modulo three. -/
+theorem omega_sheet_digit (s core : Nat) (hcore : core % 3 = 1) :
+    digit3 (4^(3^s * core)) (2*s+2)
+      = ((lteCoeff s * core) % 3^(s+2)) / 3^(s+1) := by
+  have hf := omega_cut_factor s core
+  have h1 : (1:Nat) < 3^(s+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(s+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ s+1)
+    omega
+  have hslice := prefix_slice_digit_exact (s+1) 1 (omegaCutWord s core) (s+1) h1
+  rw [show 2*s+2 = (s+1)+(s+1) from by omega, hf, hslice]
+  unfold digit3
+  rw [digit3_window, show s + 1 + 1 = s + 2 from by omega,
+    omega_cut_word_mod_pow2 s core hcore]
+
+/-- **THE Ω-SHEET GATE (the wave law beyond the tower).**  For every core
+congruent to one modulo three, if the sheet-local cut word `omegaCutWord s
+core` has top trit two modulo the squared cut modulus, then `4^(3^s *
+core)` owns its ternary digit two at row `2s+2`.  This is the Law's own
+kill of every tower-dodger whose wave word has residue zero at the first
+digit beyond the stabilization window: the binomial correction adds two
+there. -/
+theorem omega_sheet_gate_digit_two (s core : Nat) (hcore : core % 3 = 1)
+    (hgate : 2 * 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)) :
+    digit3 (4^(3^s * core)) (2*s+2) = 2 := by
+  have hg' : 2 * 3^(s+1) ≤ (lteCoeff s * core) % 3^(s+2) := by
+    rw [← omega_cut_word_mod_pow2 s core hcore]
+    exact hgate
+  rw [omega_sheet_digit s core hcore]
+  have hlt : (lteCoeff s * core) % 3^(s+2) < 3^(s+2) :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
+  have h3 : 3^(s+2) = 3 * 3^(s+1) := by
+    rw [show s + 2 = (s+1) + 1 from by omega, Nat.pow_add, Nat.pow_one]
+  rw [h3] at hlt
+  obtain ⟨d, hd⟩ : ∃ d, (lteCoeff s * core) % 3^(s+2)
+      = 2 * 3^(s+1) + d := ⟨_, by omega⟩
+  have hdlt : d < 3^(s+1) := by omega
+  rw [hd, Nat.add_comm, Nat.add_mul_div_left _ _ (Nat.pow_pos (by decide)),
+    Nat.div_eq_of_lt hdlt]
+  omega
+
+/-- The LTE mean is constantly sixteen modulo eighty-one from sheet
+level three onward. -/
+theorem omega_lteCoeff_mod81 (a : Nat) (ha : 3 ≤ a) :
+    lteCoeff a % 81 = 16 := by
+  have h81 : (3:Nat)^4 = 81 := by decide
+  have hstable := omega_lteCoeff_stable 4 (a-3)
+  have hidx : (4-1) + (a-3) = a := by omega
+  rw [hidx, h81] at hstable
+  rw [hstable]
+  decide
+
+/-- The base of the geometric mean is one modulo eighty-one from sheet
+level three onward. -/
+theorem omega_base_mod81 : ∀ a : Nat, 3 ≤ a → (4^(3^a)) % 81 = 1 := by
+  intro a
+  induction a with
+  | zero => intro h; omega
+  | succ a ih =>
+      intro h
+      rcases Nat.lt_or_ge a 3 with hlt | hge
+      · have ha2 : a = 2 := by omega
+        rw [ha2]
+        decide
+      · have hstep : 4^(3^(a+1)) = (4^(3^a))^3 := by
+          rw [Nat.pow_succ, Nat.pow_mul]
+        rw [hstep, Nat.pow_mod, ih hge, Nat.one_pow]
+
+/-- The geometric mean is the core mass modulo eighty-one from sheet
+level three onward. -/
+theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
+    omegaGeoSum a core % 81 = core % 81 := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 81 = 1 := by
+    intro j
+    rw [Nat.pow_mod, omega_base_mod81 a ha, Nat.one_pow] <;> omega
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- **The level-four cut word law.**  From sheet level three onward the
+cut word is `16 * core` modulo eighty-one. -/
+theorem omega_cut_word_mod81 (a core : Nat) (ha : 3 ≤ a) :
+    omegaCutWord a core % 81 = (16 * core) % 81 := by
+  unfold omegaCutWord
+  rw [Nat.mul_mod, omega_lteCoeff_mod81 a ha, omega_geo_mod81 a core ha]
+  omega
+
+/-- **THE LEVEL-FOUR DIGIT LAW.**  The ternary digit of `4^(3^a * core)`
+at row `a+4` is the top trit of the cut word modulo eighty-one — the same
+certified prefix-slice socket as levels two and three, one row deeper. -/
+theorem omega_level4_digit (a core : Nat) :
+    digit3 (4^(3^a * core)) (a+4) = (omegaCutWord a core % 81) / 27 := by
+  have hf := omega_cut_factor a core
+  have h1 : (1:Nat) < 3^(a+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(a+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ a+1)
+    omega
+  have hslice := prefix_slice_digit_exact (a+1) 1 (omegaCutWord a core) 3 h1
+  rw [show a+4 = (a+1)+3 from by omega, hf, hslice]
+  unfold digit3
+  rw [show (3:Nat)^3 = 27 from by decide]
+  omega
+
+/-- **THE LEVEL-FOUR GATE CLASSES.**  For every core whose stabilized cut
+word reaches the top third of the residue window modulo eighty-one, the
+power `4^(3^a * core)` owns a ternary digit two at row `a+4` — the
+fourth infinite family of the Law, twenty-seven residue classes at every
+sheet level three and above. -/
+theorem omega_level4_digit_two (a core : Nat) (ha : 3 ≤ a)
+    (hgate : 54 ≤ (16 * core) % 81) :
+    digit3 (4^(3^a * core)) (a+4) = 2 := by
+  rw [omega_level4_digit, omega_cut_word_mod81 a core ha]
+  have hlt : (16 * core) % 81 < 81 := Nat.mod_lt _ (by decide)
+  omega
+
+/-- **The Ω-shadow tail after the sheet gate.**  The shadow residue after
+the kernel-checked base, the third and fourth tower levels, and the
+Ω-sheet gate: every shadow exponent above the kernel base whose core
+dodges every proven gate of the tower and whose sheet-local cut word
+dodges the squared-modulus top trit. -/
+def omegaShadowTail2 (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    (2 ≤ s → core % 27 ≠ 13 ∧ core % 27 ≠ 25) ∧
+    (3 ≤ s → (16 * core) % 81 < 54) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1))
+
+/-- **THE Ω-SHADOW WAVE TAIL (SHEET-GATE FORM)** — the residual input after
+the kernel-checked base, the third and fourth levels of the Ω-cut tower,
+and the Ω-sheet gate: only shadow exponents above the kernel base whose
+cores dodge every proven gate remain. -/
+def four_power_omega_shadow_wave_tail2 : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTail2 K → ∃ p : Nat, digit3 (4^K) p = 2
+
 /-- **The Ω-shadow tail.**  The shadow residue after the kernel-checked
 base and the level-three gate classes: every shadow exponent above the
 kernel base whose core dodges the level-three classes at sheet level two
@@ -784,9 +1089,20 @@ def four_power_omega_shadow_wave_tail : Prop :=
 #check omega_level3_digit_two
 #check omegaShadowTail
 #check four_power_omega_shadow_wave_tail
-#print axioms omega_row2_digit_two
-#print axioms omega_three_free_decomposition
-#print axioms omega_digit_two_cases
+#check omegaShadowTail2
+#check four_power_omega_shadow_wave_tail2
+#check omega_cut_word_full
+#check omega_cut_word_mod_pow2
+#check omega_sheet_digit
+#check omega_sheet_gate_digit_two
+#check omega_level4_digit_two
+#print axioms omegaShadowTail
+#print axioms four_power_omega_shadow_wave_tail
+#print axioms omega_cut_word_full
+#print axioms omega_cut_word_mod_pow2
+#print axioms omega_sheet_digit
+#print axioms omega_sheet_gate_digit_two
+#print axioms omega_level4_digit_two
 #print axioms omega_digit_two_of_not_shadow
 #print axioms omega_digit_two_coverage
 #print axioms omega_lteCoeff_mod27

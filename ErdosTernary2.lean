@@ -17101,6 +17101,53 @@ theorem four_power_omega_shadow_wave_of_tail
       · intro h13; exact absurd ⟨hs, Or.inl h13⟩ hL3
       · intro h25; exact absurd ⟨hs, Or.inr h25⟩ hL3
 
+/-- **The Ω-shadow wave, closed on the kernel base, the third and fourth
+tower levels, and the Ω-sheet gate.**  The residual input, shrunk a third
+time: the kernel-checked modular base carries every shadow exponent up
+to five hundred unconditionally; the Ω-cut tower's level-three gate
+classes carry every core congruent to thirteen or twenty-five modulo
+twenty-seven at sheet level two and above; the new level-four gate
+classes carry every core whose stabilized cut word reaches the top third
+of the residue window modulo eighty-one at sheet level three and above;
+and the Ω-sheet gate — the Law's own wave-word law one digit beyond the
+stabilization window — carries every shadow exponent whose sheet-local
+cut word has top trit two modulo the squared cut modulus.  Only the
+twice-dodging tail remains as input. -/
+theorem four_power_omega_shadow_wave_of_tail2
+    (hTail2 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail2) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave := by
+  intro K hK hShadow
+  by_cases h500 : K ≤ 500
+  · have h5 : 5 ≤ K := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4^K) (modular_check_base K h5 h500)
+    exact ⟨q, hq⟩
+  · obtain ⟨s, core, hsc, hc3, hsheet⟩ := hShadow
+    by_cases hL3 : 2 ≤ s ∧ (core % 27 = 13 ∨ core % 27 = 25)
+    · obtain ⟨hs, hcl⟩ := hL3
+      refine ⟨s+3, ?_⟩
+      rw [hsc]
+      exact GSTGraphV2OmegaWaveLaw.omega_level3_digit_two s core hs hcl
+    · by_cases hL4 : 3 ≤ s ∧ 54 ≤ (16 * core) % 81
+      · obtain ⟨hs4, hgate⟩ := hL4
+        refine ⟨s+4, ?_⟩
+        rw [hsc]
+        exact GSTGraphV2OmegaWaveLaw.omega_level4_digit_two s core hs4 hgate
+      · by_cases hSG :
+          2 * 3^(s+1) ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
+        · rw [hsc]
+          exact ⟨2*s+2, GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc3 hSG⟩
+        · refine hTail2 K (by omega) ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_⟩
+          · intro hs
+            constructor
+            · intro h13; exact absurd ⟨hs, Or.inl h13⟩ hL3
+            · intro h25; exact absurd ⟨hs, Or.inr h25⟩ hL3
+          · intro hs4
+            have hng : ¬ 54 ≤ (16 * core) % 81 := by
+              intro hg; exact absurd ⟨hs4, hg⟩ hL4
+            omega
+          · omega
+
 /-- **THE FINAL THEOREM, Ω-ROUTE — SHADOW INPUT (sealed alternate).**  The
 full shadow-wave input version of the Ω-route final theorem, kept green
 as the parameterized alternate of the tail route below. -/
@@ -17117,21 +17164,35 @@ theorem erdos_ternary_2_universal_shadow
     exact has_two_imp_not_no_two (4^(n/2))
       (erdos_ternary_2_even_universal_omega hShadow (n/2) (by omega))
 
-/-- **THE FINAL THEOREM, Ω-ROUTE — TAIL INPUT.**  The single input is now
-the Ω-shadow wave tail: the kernel-checked modular base carries every
-shadow half-exponent up to five hundred, and the Ω-cut tower's third
-level carries the thirteen and twenty-five modulo twenty-seven gate
-classes, so the input only speaks for shadow exponents above the kernel
-base that dodge every proven level of the tower.  Strictly stronger than
-the shadow-wave statement sealed at `99afe3b`: weaker input, same
-conclusion. -/
-theorem erdos_ternary_2_universal
+/-- **THE FINAL THEOREM, Ω-ROUTE — TAIL INPUT (level-three seal).**  The
+level-three-sealed form: the single input is the Ω-shadow wave tail after
+the kernel base and the third tower level, kept green as the sealed
+alternate of the sheet-gate route below. -/
+theorem erdos_ternary_2_universal_tail
     (hTail : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail hTail) n hn
 
+/-- **THE FINAL THEOREM, Ω-ROUTE — SHEET-GATE TAIL INPUT.**  The single
+input is now the Ω-shadow wave tail after the kernel base, the fourth
+tower level, and the Ω-sheet gate: the kernel-checked modular base
+carries every shadow half-exponent up to five hundred, the Ω-cut tower's
+third and fourth levels carry their gate classes, and the Ω-sheet gate —
+the wave word one digit beyond the stabilization window — carries every
+dodger whose sheet-local cut word has top trit two modulo the squared
+cut modulus.  Strictly stronger than the tail seal at `f5d9dc1`: weaker
+input, same conclusion. -/
+theorem erdos_ternary_2_universal
+    (hTail2 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail2)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow
+    (four_power_omega_shadow_wave_of_tail2 hTail2) n hn
+
 #print axioms erdos_ternary_2_universal
+#print axioms erdos_ternary_2_universal_tail
 #print axioms erdos_ternary_2_universal_shadow
 #print axioms four_power_omega_shadow_wave_of_tail
+#print axioms four_power_omega_shadow_wave_of_tail2
