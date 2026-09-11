@@ -113,7 +113,7 @@ theorem low_row_sector_forces_relocated_physical_happy
       ((K+1) % 9 = 5 ∨ (K+1) % 9 = 6) ∨
       (((K+1) % 27 = 14 ∨ (K+1) % 27 = 18 ∨
         (K+1) % 27 = 19 ∨ (K+1) % 27 = 25)) ∨
-      RowFourClass ((K+1) % 81)) :
+      GSTFourPowerDirectResidue81.RowFourClass ((K+1) % 81)) :
     ∃ q : Nat, 1 ≤ q ∧
       GSTCanonicalTailStateIso.HappyCell
         (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
