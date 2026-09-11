@@ -164,6 +164,22 @@ theorem leading_two_small_prefix_forces_relocated_physical_happy
   exact commonTwo_to_physical_happy_row (K+1)
     (commonTwo_of_leading_two_small_prefix (K+1) p htrit hsmall)
 
+/-- Prefix-one parametric relocation sector.  For every scale `p ≥ 2`, if the
+next exponent has low ternary prefix exactly one and its `p`-th exponent trit
+is two, the direct prefix theorem produces `CommonTwo (K+1)` at the explicit
+row `q = p+1`.  The same row is therefore a genuine physical Happy row on the
+next four-power sheet, with no navigation or witness transport. -/
+theorem one_prefix_two_trit_forces_relocated_physical_happy
+    (K p : Nat) (hp : 2 ≤ p)
+    (hpref : exponentPrefix (K+1) p = 1)
+    (htrit : exponentTrit (K+1) p = 2) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  exact commonTwo_to_physical_happy_row (K+1)
+    (commonTwo_of_one_prefix_two_trit (K+1) p hp hpref htrit)
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -223,6 +239,7 @@ theorem four_power_happy_propagates
 #check low_row_sector_forces_relocated_physical_happy
 #check prefix_killing_trit_forces_relocated_physical_happy
 #check leading_two_small_prefix_forces_relocated_physical_happy
+#check one_prefix_two_trit_forces_relocated_physical_happy
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
@@ -235,6 +252,7 @@ theorem four_power_happy_propagates
 #print axioms low_row_sector_forces_relocated_physical_happy
 #print axioms prefix_killing_trit_forces_relocated_physical_happy
 #print axioms leading_two_small_prefix_forces_relocated_physical_happy
+#print axioms one_prefix_two_trit_forces_relocated_physical_happy
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
