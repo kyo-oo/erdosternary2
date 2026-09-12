@@ -39,7 +39,10 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTFourPowerExactRowRelocation.lean 2>&1 | tee exact-row-relocation.log
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerExactRowRelocation.olean \
+            GSTFourPowerExactRowRelocation.lean 2>&1 | tee exact-row-relocation.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' exact-row-relocation.log
       - name: Reject forbidden proof routes
         shell: bash
@@ -59,4 +62,4 @@ jobs:
           #print axioms GSTFourPowerExactRowRelocation.prefix_killing_trit_constructs_exact_relocated_row
           LEAN
           lake env lean GSTFourPowerDirectHappyBridgeAudit.lean 2>&1 | tee direct-happy-bridge-axioms.log
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|error:' direct-happy-bridge-axioms.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|unknown module prefix|error:' direct-happy-bridge-axioms.log
