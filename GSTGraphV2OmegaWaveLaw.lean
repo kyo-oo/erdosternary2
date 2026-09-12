@@ -3084,7 +3084,7 @@ theorem omega_tower_word_mod_stable (s core k : Nat) (hk : k ≤ s+1) :
   have hdistr : (omegaCutWord s 1 + 3^(s+1) * t) * core
       = omegaCutWord s 1 * core + 3^(s+1) * (t * core) := by
     ring
-  rw [ht, hdistr, Nat.add_mod, hz, Nat.add_zero]
+  rw [ht, hdistr, Nat.add_mod, hz, Nat.add_zero, Nat.mod_mod]
 
 /-- **THE TOWER WINDOW DESCENDS TO THE PRIMITIVE — part three.**  For
 every sheet level `s` at or above `k-1`, the tower word at modulus
