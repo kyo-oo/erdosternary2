@@ -3127,6 +3127,102 @@ theorem omega_tower_kill_of_diagonal_two (core k S : Nat)
 #print axioms omega_tower_word_mod_chain
 #print axioms omega_tower_kill_of_diagonal_two
 
+/-! ## The diagonal ignition laws
+
+The descent blade transmits ONE primitive diagonal trit two to every
+tower level at once.  The ignition laws below read the diagonal at its
+first two indices as explicit residue conditions on the core: which
+cores fire, at which index, with no hypothesis beyond the residue
+class.  Composed with the blade, each law kills an entire tower family
+by a single residue test on the core. -/
+
+/-- **THE CLASS-ONE IGNITION.**  Every class-one core — `core ≡ 1 (mod 9)` —
+fires the primitive diagonal at index two: the power `4^(3·core)` owns
+its ternary digit two at row three.  The whole class, one trit, read
+once: the tower word of level one is `7`, and `7 * core ≡ 7 (mod 9)`. -/
+theorem omega_diagonal_two_of_mod_nine_one (core : Nat) (h : core % 9 = 1) :
+    digit3 (4^(3^(2-1) * core)) (2*2 - 1) = 2 := by
+  have hw : omegaCutWord 1 1 = 7 := by
+    have h2 := omega_cut_factor 1 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 1 core 2 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (7 * core) % 3^2 / 3^(2-1) = 2 := by
+    have h9 : (3:Nat)^2 = 9 := by norm_num
+    have h3 : (3:Nat)^(2-1) = 3 := by norm_num
+    rw [h9, h3]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-27 THIRTEEN IGNITION.**  Every core `≡ 13 (mod 27)` — the
+class-four band's first firing subclass — fires the primitive diagonal
+at index three: the tower word of level two is `9709 ≡ 16 (mod 27)`,
+and `16 * 13 ≡ 19 (mod 27)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod27_thirteen (core : Nat) (h : core % 27 = 13) :
+    digit3 (4^(3^(3-1) * core)) (2*3 - 1) = 2 := by
+  have hw : omegaCutWord 2 1 = 9709 := by
+    have h2 := omega_cut_factor 2 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 2 core 3 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (9709 * core) % 3^3 / 3^(3-1) = 2 := by
+    have h27 : (3:Nat)^3 = 27 := by norm_num
+    have h9 : (3:Nat)^(3-1) = 9 := by norm_num
+    rw [h27, h9]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-27 TWENTY-FIVE IGNITION.**  Every core `≡ 25 (mod 27)` — the
+class-seven band's first firing subclass — fires the primitive diagonal
+at index three: `16 * 25 ≡ 22 (mod 27)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod27_twentyfive (core : Nat) (h : core % 27 = 25) :
+    digit3 (4^(3^(3-1) * core)) (2*3 - 1) = 2 := by
+  have hw : omegaCutWord 2 1 = 9709 := by
+    have h2 := omega_cut_factor 2 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 2 core 3 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (9709 * core) % 3^3 / 3^(3-1) = 2 := by
+    have h27 : (3:Nat)^3 = 27 := by norm_num
+    have h9 : (3:Nat)^(3-1) = 9 := by norm_num
+    rw [h27, h9]
+    omega
+  exact hobs.trans hev
+
+/-- **THE CLASS-ONE TOWER KILL — the blade, drawn.**  One residue test on
+the core (`core ≡ 1 (mod 9)`) and the entire tower dies: for every
+sheet level `S ≥ 1`, the power `4^(3^S·core)` owns its ternary digit
+two at row `S + 2`.  The class-one ignition read once, applied at every
+depth by the descent blade. -/
+theorem omega_tower_digit_two_of_mod_nine_one (core : Nat) (h : core % 9 = 1) :
+    ∀ S : Nat, 1 ≤ S → digit3 (4^(3^S * core)) (S + 2) = 2 := by
+  intro S hS
+  exact omega_tower_kill_of_diagonal_two core 2 S (by decide) (by omega)
+    (omega_diagonal_two_of_mod_nine_one core h)
+
+/-- **THE MOD-27 BAND TOWER KILL.**  Every core in the mod-27 firing band
+(`13` or `25`) kills its whole tower from level two upward: the power
+`4^(3^S·core)` owns its ternary digit two at row `S + 3` for every
+sheet level `S ≥ 2`. -/
+theorem omega_tower_digit_two_of_mod27_band (core : Nat)
+    (h : core % 27 = 13 ∨ core % 27 = 25) :
+    ∀ S : Nat, 2 ≤ S → digit3 (4^(3^S * core)) (S + 3) = 2 := by
+  intro S hS
+  rcases h with h13 | h25
+  · exact omega_tower_kill_of_diagonal_two core 3 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod27_thirteen core h13)
+  · exact omega_tower_kill_of_diagonal_two core 3 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod27_twentyfive core h25)
+
+#print axioms omega_diagonal_two_of_mod_nine_one
+#print axioms omega_diagonal_two_of_mod27_thirteen
+#print axioms omega_diagonal_two_of_mod27_twentyfive
+#print axioms omega_tower_digit_two_of_mod_nine_one
+#print axioms omega_tower_digit_two_of_mod27_band
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,
