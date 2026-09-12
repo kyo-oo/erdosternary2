@@ -8,6 +8,7 @@ on:
       - 'GSTFourPowerDirectHappyBridge.lean'
       - 'GSTFourPowerExactRowRelocation.lean'
       - 'GSTFourPowerPrefixLeTwoRelocation.lean'
+      - 'GSTFourPowerAffineIteratedRelocation.lean'
       - 'GSTFourPowerDirectExistence.lean'
       - 'GSTFourPowerAffineTwoTritClassifier.lean'
       - '.github/workflows/gpt56-direct-happy-bridge.yml'
@@ -55,11 +56,21 @@ jobs:
             -o .lake/build/lib/lean/GSTFourPowerPrefixLeTwoRelocation.olean \
             GSTFourPowerPrefixLeTwoRelocation.lean 2>&1 | tee prefix-le-two-relocation.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' prefix-le-two-relocation.log
+      - name: Compile arbitrary-depth affine relocation constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerAffineIteratedRelocation.olean \
+            GSTFourPowerAffineIteratedRelocation.lean 2>&1 | tee affine-iterated-relocation.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' affine-iterated-relocation.log
       - name: Reject forbidden proof routes
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean GSTFourPowerExactRowRelocation.lean GSTFourPowerPrefixLeTwoRelocation.lean
+          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean GSTFourPowerExactRowRelocation.lean GSTFourPowerPrefixLeTwoRelocation.lean GSTFourPowerAffineIteratedRelocation.lean
       - name: Axiom audit direct relocation constructor
         shell: bash
         run: |
@@ -69,10 +80,12 @@ jobs:
           import GSTFourPowerDirectHappyBridge
           import GSTFourPowerExactRowRelocation
           import GSTFourPowerPrefixLeTwoRelocation
+          import GSTFourPowerAffineIteratedRelocation
           #print axioms GSTFourPowerDirectHappyBridge.affine_two_trit_sector_forces_relocated_physical_happy
           #print axioms GSTFourPowerDirectHappyBridge.four_power_happy_propagates
           #print axioms GSTFourPowerExactRowRelocation.prefix_killing_trit_constructs_exact_relocated_row
           #print axioms GSTFourPowerPrefixLeTwoRelocation.prefix_le_two_two_trit_constructs_exact_relocated_row
+          #print axioms GSTFourPowerAffineIteratedRelocation.iterated_affine_low_success_constructs_relocated_physical_happy
           LEAN
           lake env lean GSTFourPowerDirectHappyBridgeAudit.lean 2>&1 | tee direct-happy-bridge-axioms.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|unknown module prefix|error:' direct-happy-bridge-axioms.log
