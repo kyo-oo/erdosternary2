@@ -3223,6 +3223,599 @@ theorem omega_tower_digit_two_of_mod27_band (core : Nat)
 #print axioms omega_tower_digit_two_of_mod_nine_one
 #print axioms omega_tower_digit_two_of_mod27_band
 
+/-! ## The shadow wave expansion — the carry half of the cell
+
+The observation law reads the tower window's digits; the descent blade
+transmits one primitive trit to every tower level at once.  The expansion
+below supplies the carry half of every cell — the half the certificate
+route consumes and the digit route never touched:
+
+* **THE EXTENDED OBSERVATION LAW** (`omega_shadow_digit`): EVERY tower row
+  `S+1+j`, with no window bound, is the `j`-th trit of the cut word
+  `omegaCutWord S core` itself.  The window restriction `k ≤ S+1` of the
+  observer law is gone: the whole power reads its trits off one object at
+  every depth.
+* **THE WAVE EQUATIONS** (`omega_shadow_window`, `omega_shadow_carry`): the
+  exact sub-window below any tower row, and the exact carry `carry4` at
+  that row, as equations on the new constant `omegaShadowWave` — the
+  quadrupled frozen sub-window.
+* **THE QUARTER LAWS** (`omega_shadow_carry_zero`, `omega_shadow_carry_three`):
+  a wave cell in the bottom quarter of its modulus carries zero; a wave
+  cell in the top quarter carries three.  These are the exact carry-zero
+  and carry-three certificates of a physical Happy row.
+* **THE HAPPY IGNITION BANDS**: nine residue classes on the core —
+  `10, 13 (mod 27)`, `25, 34, 49 (mod 81)`, `4, 19, 217, 232 (mod 243)` —
+  fire a FULL physical Happy row (digit two AND carry in `{0, 3}`) at a
+  fixed tower row, unconditionally, with the wave quarter as the explicit
+  carry witness.  The provider `omega_tower_happy_row_of_band` assembles
+  them with the class-two gate into the climb primitive's own statement,
+  delivered with an explicit witness row. -/
+
+/-- THE SHADOW WAVE CELL — the quadrupled frozen sub-window below tower row
+`S+1+j`.  The wave value whose size against `3^j` decides the carry at the
+row above it: bottom quarter carries zero, top quarter carries three. -/
+def omegaShadowWave (S core j : Nat) : Nat :=
+  4 * (omegaCutWord S core % 3^j)
+
+/-- **THE EXTENDED OBSERVATION LAW.**  The ternary digit of `4^(3^S·core)`
+at row `S+1+j` is the `j`-th trit of the cut word itself, for EVERY `j`
+with no depth restriction: the window bound of the observer law is gone,
+and the whole tower of rows reads off one object. -/
+theorem omega_shadow_digit (S core j : Nat) :
+    digit3 (4^(3^S * core)) (S+1+j) = omegaCutWord S core / 3^j % 3 := by
+  have hf := omega_cut_factor S core
+  have hp : 0 < 3^(S+1) := Nat.pow_pos (by decide)
+  have h1 : (1:Nat) < 3^(S+1) := by
+    have h3 : (3:Nat)^1 ≤ 3^(S+1) := by
+      simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+        (by omega : 1 ≤ S+1)
+    omega
+  have hdiv : (1 + 3^(S+1) * omegaCutWord S core) / 3^(S+1)
+      = omegaCutWord S core := by
+    rw [Nat.add_mul_div_left _ _ hp, Nat.div_eq_of_lt h1, Nat.zero_add]
+  unfold digit3
+  rw [hf, show 3^(S+1+j) = 3^(S+1) * 3^j from by rw [Nat.pow_add],
+      ← Nat.div_div_eq_div_mul, hdiv]
+
+/-- **THE WINDOW EQUATION.**  The sub-window of the power below tower row
+`S+1+j` is exactly one plus the cut modulus times the frozen cut-word
+sub-window: the full row inventory under the digit. -/
+theorem omega_shadow_window (S core j : Nat) :
+    4^(3^S * core) % 3^(S+1+j)
+      = 1 + 3^(S+1) * (omegaCutWord S core % 3^j) := by
+  have hf := omega_cut_factor S core
+  have hsplit : 3^(S+1+j) = 3^(S+1) * 3^j := by rw [Nat.pow_add]
+  have hE : 3^(S+1) * omegaCutWord S core
+      = 3^(S+1) * 3^j * (omegaCutWord S core / 3^j)
+        + 3^(S+1) * (omegaCutWord S core % 3^j) := by
+    conv_lhs => rw [← Nat.mod_add_div (omegaCutWord S core) (3^j)]
+    ring
+  rw [hf, hsplit, hE]
+  rw [show 1 + (3^(S+1) * 3^j * (omegaCutWord S core / 3^j)
+          + 3^(S+1) * (omegaCutWord S core % 3^j))
+      = (1 + 3^(S+1) * (omegaCutWord S core % 3^j))
+          + 3^(S+1) * 3^j * (omegaCutWord S core / 3^j) from by ring]
+  rw [Nat.add_mod, Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, by ring⟩,
+    Nat.add_zero, Nat.mod_mod]
+  refine Nat.mod_eq_of_lt ?_
+  have hr : omegaCutWord S core % 3^j < 3^j :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide) : (0:Nat) < 3^j)
+  have h3 : (3:Nat)^1 ≤ 3^(S+1) := by
+    simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+      (by omega : 1 ≤ S+1)
+  norm_num at h3
+  calc 1 + 3^(S+1) * (omegaCutWord S core % 3^j)
+      < 3^(S+1) + 3^(S+1) * (omegaCutWord S core % 3^j) := by omega
+    _ = 3^(S+1) * (omegaCutWord S core % 3^j + 1) := by ring
+    _ ≤ 3^(S+1) * 3^j := Nat.mul_le_mul (Nat.le_refl _) (by omega)
+
+/-- **THE WAVE-CARRY EQUATION.**  The exact carry at tower row `S+1+j`:
+the quadrupled window plus four, divided by the row modulus.  The carry
+half of the cell, as one equation on the shadow wave constant. -/
+theorem omega_shadow_carry (S core j : Nat) :
+    carry4 (4^(3^S * core)) (S+1+j)
+      = (4 + 3^(S+1) * omegaShadowWave S core j) / 3^(S+1+j) := by
+  have hw := omega_shadow_window S core j
+  unfold carry4 omegaShadowWave
+  rw [hw]
+  rw [show 4 * (1 + 3^(S+1) * (omegaCutWord S core % 3^j))
+      = 4 + 3^(S+1) * (4 * (omegaCutWord S core % 3^j)) from by ring]
+
+/-- **THE BOTTOM-QUARTER CARRY LAW.**  A wave cell strictly below its own
+modulus — the bottom quarter of the sub-window — makes the carry at the
+row above it exactly zero. -/
+theorem omega_shadow_carry_zero (S core j : Nat) (hS : 1 ≤ S)
+    (hw : omegaShadowWave S core j < 3^j) :
+    carry4 (4^(3^S * core)) (S+1+j) = 0 := by
+  rw [omega_shadow_carry S core j]
+  refine Nat.div_eq_of_lt ?_
+  have h3 : (3:Nat)^1 ≤ 3^(S+1) := by
+    simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+      (by omega : 1 ≤ S+1)
+  norm_num at h3
+  calc 4 + 3^(S+1) * omegaShadowWave S core j
+      < 3^(S+1) + 3^(S+1) * omegaShadowWave S core j := by omega
+    _ = 3^(S+1) * (omegaShadowWave S core j + 1) := by ring
+    _ ≤ 3^(S+1) * 3^j := Nat.mul_le_mul (Nat.le_refl _) (by omega)
+    _ = 3^(S+1+j) := by rw [Nat.pow_add]
+
+/-- **THE TOP-QUARTER CARRY LAW.**  A wave cell in the closed top quarter —
+between three and four times its own modulus — makes the carry at the row
+above it exactly three. -/
+theorem omega_shadow_carry_three (S core j : Nat) (hS : 1 ≤ S)
+    (hw1 : 3^(j+1) ≤ omegaShadowWave S core j)
+    (hw2 : omegaShadowWave S core j < 4 * 3^j) :
+    carry4 (4^(3^S * core)) (S+1+j) = 3 := by
+  rw [omega_shadow_carry S core j]
+  have hpM : (0:Nat) < 3^(S+1+j) := Nat.pow_pos (by decide)
+  have hsplit : 3^(S+1) * 3^j = 3^(S+1+j) := by rw [Nat.pow_add]
+  have h9 : (3:Nat)^2 ≤ 3^(S+1) := by
+    simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
+      (by omega : 2 ≤ S+1)
+  norm_num at h9
+  have hsplit2 : 3^(S+1) * 3^(j+1) = 3 * 3^(S+1+j) := by
+    have e1 : 3^(S+1) * 3^(j+1) = 3^(S+j+2) := by
+      rw [show S+j+2 = (S+1)+(j+1) from by omega, Nat.pow_add]
+    have e2 : 3 * 3^(S+1+j) = 3^(S+j+2) := by
+      rw [show S+j+2 = (S+1+j)+1 from by omega, Nat.pow_succ]
+    rw [e1, e2]
+  have hlo : 3 * 3^(S+1+j) ≤ 4 + 3^(S+1) * omegaShadowWave S core j := by
+    have hmul : 3^(S+1) * 3^(j+1) ≤ 3^(S+1) * omegaShadowWave S core j :=
+      Nat.mul_le_mul (Nat.le_refl _) hw1
+    rw [hsplit2] at hmul
+    omega
+  have hhi : 4 + 3^(S+1) * omegaShadowWave S core j < 4 * 3^(S+1+j) := by
+    have hmul2 : 3^(S+1) * omegaShadowWave S core j + 3^(S+1)
+        ≤ 3^(S+1) * (4 * 3^j) := by
+      calc 3^(S+1) * omegaShadowWave S core j + 3^(S+1)
+          = 3^(S+1) * (omegaShadowWave S core j + 1) := by ring
+        _ ≤ 3^(S+1) * (4 * 3^j) := Nat.mul_le_mul (Nat.le_refl _) (by omega)
+    rw [show 3^(S+1) * (4 * 3^j) = 4 * 3^(S+1+j) from by rw [hsplit]; ring] at hmul2
+    omega
+  have hde : 4 + 3^(S+1) * omegaShadowWave S core j
+      = (4 + 3^(S+1) * omegaShadowWave S core j - 3 * 3^(S+1+j))
+        + 3 * 3^(S+1+j) := by omega
+  rw [hde, Nat.add_mul_div_left _ _ hpM, Nat.div_eq_of_lt (by omega)]
+  omega
+
+/-- **THE LOW HAPPY CELL LAW.**  A tower row whose digit is two and whose
+wave cell sits in the bottom quarter is a physical Happy row: digit two
+with carry zero, the first branch of the creation certificate. -/
+theorem omega_shadow_happy_of_low (S core j : Nat) (hS : 1 ≤ S)
+    (hd : omegaCutWord S core / 3^j % 3 = 2)
+    (hw : omegaShadowWave S core j < 3^j) :
+    HappyCell (carry4 (4^(3^S * core)) (S+1+j))
+      (digit3 (4^(3^S * core)) (S+1+j)) := by
+  refine ⟨?_, Or.inl ?_⟩
+  · rw [omega_shadow_digit]; exact hd
+  · exact omega_shadow_carry_zero S core j hS hw
+
+/-- **THE HIGH HAPPY CELL LAW.**  A tower row whose digit is two and whose
+wave cell sits in the top quarter is a physical Happy row: digit two with
+carry three, the second carry branch of the creation certificate. -/
+theorem omega_shadow_happy_of_high (S core j : Nat) (hS : 1 ≤ S)
+    (hd : omegaCutWord S core / 3^j % 3 = 2)
+    (hw1 : 3^(j+1) ≤ omegaShadowWave S core j)
+    (hw2 : omegaShadowWave S core j < 4 * 3^j) :
+    HappyCell (carry4 (4^(3^S * core)) (S+1+j))
+      (digit3 (4^(3^S * core)) (S+1+j)) := by
+  refine ⟨?_, Or.inr ?_⟩
+  · rw [omega_shadow_digit]; exact hd
+  · exact omega_shadow_carry_three S core j hS hw1 hw2
+
+/-- The base of the geometric mean is one modulo any divisor of the cut
+modulus: the prefix law cast into the division cascade. -/
+theorem omega_pow4_mod_of_dvd (a m k : Nat) (hm : 1 < m)
+    (hk : m * k = 3^(a+1)) :
+    (4^(3^a)) % m = 1 := by
+  have hp := omega_cut_prefix_one a 1
+  rw [Nat.mul_one] at hp
+  have hE := Nat.mod_add_div (4^(3^a)) (3^(a+1))
+  rw [hp] at hE
+  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = 1 + 3^(a+1) * q := ⟨_, by omega⟩
+  rw [hq, ← hk]
+  rw [Nat.add_mod, Nat.mod_eq_zero_of_dvd ⟨k * q, by ring⟩,
+    Nat.add_zero, Nat.mod_mod]
+  exact Nat.mod_eq_of_lt hm
+
+/-- The geometric mean is the core mass modulo any modulus against which
+the tower base is one. -/
+theorem omega_geo_mod_of_base (a core m : Nat) (hm : 1 < m)
+    (hbase : (4^(3^a)) % m = 1) :
+    omegaGeoSum a core % m = core % m := by
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % m = 1 := by
+    intro j
+    rw [Nat.pow_mod, hbase, Nat.one_pow]
+    exact Nat.mod_eq_of_lt hm
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
+
+/-- The geometric mean is the core mass modulo twenty-seven from sheet
+level two onward. -/
+theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
+    omegaGeoSum a core % 27 = core % 27 :=
+  omega_geo_mod_of_base a core 27 (by norm_num)
+    (omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num)
+      (by rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add]
+        congr 1; omega))
+
+/-- The geometric mean is the core mass modulo eighty-one from sheet
+level three onward. -/
+theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
+    omegaGeoSum a core % 81 = core % 81 :=
+  omega_geo_mod_of_base a core 81 (by norm_num)
+    (omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num)
+      (by rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add]
+        congr 1; omega))
+
+/-- The geometric mean is the core mass modulo two hundred forty-three
+from sheet level four onward. -/
+theorem omega_geo_mod243 (a core : Nat) (ha : 4 ≤ a) :
+    omegaGeoSum a core % 243 = core % 243 :=
+  omega_geo_mod_of_base a core 243 (by norm_num)
+    (omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num)
+      (by rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add]
+        congr 1; omega))
+
+/-- The LTE mean is sixteen modulo twenty-seven from sheet level two
+onward — the stabilized tower word's third window. -/
+theorem omega_lteCoeff_mod27 (a : Nat) (ha : 2 ≤ a) : lteCoeff a % 27 = 16 := by
+  have hA : omegaCutWord a 1 = lteCoeff a := by
+    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
+  have hA2 : omegaCutWord 2 1 = 9709 := by
+    have h2 := omega_cut_factor 2 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hchain := omega_tower_word_mod_chain 1 3 a (by omega)
+  rw [show (3:Nat)^3 = 27 from by norm_num, show 3-1 = 2 from by norm_num,
+      Nat.mul_one, Nat.mul_one, hA, hA2] at hchain
+  rw [hchain]
+  decide
+
+/-- The LTE mean is sixteen modulo eighty-one from sheet level three
+onward — the stabilized tower word's fourth window. -/
+theorem omega_lteCoeff_mod81 (a : Nat) (ha : 3 ≤ a) : lteCoeff a % 81 = 16 := by
+  have hA : omegaCutWord a 1 = lteCoeff a := by
+    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
+  have hA3 : omegaCutWord 3 1 = 222399981598543 := by
+    have h3 := omega_cut_factor 3 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h3
+    omega
+  have hchain := omega_tower_word_mod_chain 1 4 a (by omega)
+  rw [show (3:Nat)^4 = 81 from by norm_num, show 4-1 = 3 from by norm_num,
+      Nat.mul_one, Nat.mul_one, hA, hA3] at hchain
+  rw [hchain]
+  decide
+
+/-- The LTE mean is one hundred seventy-eight modulo two hundred
+forty-three from sheet level four onward — the stabilized tower word's
+fifth window. -/
+theorem omega_lteCoeff_mod243 (a : Nat) (ha : 4 ≤ a) : lteCoeff a % 243 = 178 := by
+  have hA : omegaCutWord a 1 = lteCoeff a := by
+    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
+  have hA4 : omegaCutWord 4 1 = 24057640120673299065081231814259802792690247621 := by
+    have h4 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h4
+    omega
+  have hchain := omega_tower_word_mod_chain 1 5 a (by omega)
+  rw [show (3:Nat)^5 = 243 from by norm_num, show 5-1 = 4 from by norm_num,
+      Nat.mul_one, Nat.mul_one, hA, hA4] at hchain
+  rw [hchain]
+  decide
+
+/-- **THE CUT WORD MOD-27 LAW.**  From sheet level two onward the cut word
+of the tower is `16 * core` modulo twenty-seven. -/
+theorem omega_cut_word_mod27 (a core : Nat) (ha : 2 ≤ a) :
+    omegaCutWord a core % 27 = (16 * core) % 27 := by
+  have hlt := omega_lteCoeff_mod27 a ha
+  have hgeo := omega_geo_mod27 a core ha
+  unfold omegaCutWord
+  rw [Nat.mul_mod, hlt, hgeo]
+  omega
+
+/-- **THE CUT WORD MOD-81 LAW.**  From sheet level three onward the cut
+word of the tower is `16 * core` modulo eighty-one. -/
+theorem omega_cut_word_mod81 (a core : Nat) (ha : 3 ≤ a) :
+    omegaCutWord a core % 81 = (16 * core) % 81 := by
+  have hlt := omega_lteCoeff_mod81 a ha
+  have hgeo := omega_geo_mod81 a core ha
+  unfold omegaCutWord
+  rw [Nat.mul_mod, hlt, hgeo]
+  omega
+
+/-- **THE CUT WORD MOD-243 LAW.**  From sheet level four onward the cut
+word of the tower is `178 * core` modulo two hundred forty-three. -/
+theorem omega_cut_word_mod243 (a core : Nat) (ha : 4 ≤ a) :
+    omegaCutWord a core % 243 = (178 * core) % 243 := by
+  have hlt := omega_lteCoeff_mod243 a ha
+  have hgeo := omega_geo_mod243 a core ha
+  unfold omegaCutWord
+  rw [Nat.mul_mod, hlt, hgeo]
+  omega
+
+/-- **THE MOD-27 TEN HAPPY IGNITION.**  Every core congruent to ten modulo
+twenty-seven owns a physical Happy row at tower row `S+3` for every sheet
+level `S ≥ 2`: the cut word is `25` mod `27` (digit two at the row), and
+the wave cell is `28`, the top quarter of nine, carry three. -/
+theorem omega_tower_happy_of_mod27_ten (S core : Nat) (hS : 2 ≤ S)
+    (h : core % 27 = 10) :
+    HappyCell (carry4 (4^(3^S * core)) (S+3))
+      (digit3 (4^(3^S * core)) (S+3)) := by
+  have hW27 := omega_cut_word_mod27 S core (by omega)
+  have hW9 := omega_cut_word_mod9 S core (by omega)
+  have hd : omegaCutWord S core / 3^2 % 3 = 2 := by
+    rw [digit3_window, show 3^(2+1) = 27 from by norm_num,
+        show 3^2 = 9 from by norm_num, hW27]
+    omega
+  have hwave : omegaShadowWave S core 2 = 28 := by
+    unfold omegaShadowWave
+    rw [show 3^2 = 9 from by norm_num, hW9]
+    omega
+  exact omega_shadow_happy_of_high S core 2 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE MOD-27 THIRTEEN HAPPY IGNITION.**  Every core congruent to
+thirteen modulo twenty-seven owns a physical Happy row at tower row `S+3`
+for every sheet level `S ≥ 2`: the cut word is `19` mod `27` (digit two at
+the row), and the wave cell is `4`, the bottom quarter of nine, carry
+zero. -/
+theorem omega_tower_happy_of_mod27_thirteen (S core : Nat) (hS : 2 ≤ S)
+    (h : core % 27 = 13) :
+    HappyCell (carry4 (4^(3^S * core)) (S+3))
+      (digit3 (4^(3^S * core)) (S+3)) := by
+  have hW27 := omega_cut_word_mod27 S core (by omega)
+  have hW9 := omega_cut_word_mod9 S core (by omega)
+  have hd : omegaCutWord S core / 3^2 % 3 = 2 := by
+    rw [digit3_window, show 3^(2+1) = 27 from by norm_num,
+        show 3^2 = 9 from by norm_num, hW27]
+    omega
+  have hwave : omegaShadowWave S core 2 = 4 := by
+    unfold omegaShadowWave
+    rw [show 3^2 = 9 from by norm_num, hW9]
+    omega
+  exact omega_shadow_happy_of_low S core 2 (by omega) hd
+    (by rw [hwave]; norm_num)
+
+/-- **THE MOD-81 TWENTY-FIVE HAPPY IGNITION.**  Every core congruent to
+twenty-five modulo eighty-one owns a physical Happy row at tower row
+`S+4` for every sheet level `S ≥ 3`: the cut word is `76` mod `81` (digit
+two at the row), and the wave cell is `88`, the top quarter of
+twenty-seven, carry three. -/
+theorem omega_tower_happy_of_mod81_twentyfive (S core : Nat) (hS : 3 ≤ S)
+    (h : core % 81 = 25) :
+    HappyCell (carry4 (4^(3^S * core)) (S+4))
+      (digit3 (4^(3^S * core)) (S+4)) := by
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hW27 := omega_cut_word_mod27 S core (by omega)
+  have hd : omegaCutWord S core / 3^3 % 3 = 2 := by
+    rw [digit3_window, show 3^(3+1) = 81 from by norm_num,
+        show 3^3 = 27 from by norm_num, hW81]
+    omega
+  have hwave : omegaShadowWave S core 3 = 88 := by
+    unfold omegaShadowWave
+    rw [show 3^3 = 27 from by norm_num, hW27]
+    omega
+  exact omega_shadow_happy_of_high S core 3 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE MOD-81 THIRTY-FOUR HAPPY IGNITION.**  Every core congruent to
+thirty-four modulo eighty-one owns a physical Happy row at tower row `S+4`
+for every sheet level `S ≥ 3`: the cut word is `58` mod `81` (digit two at
+the row), and the wave cell is `16`, the bottom quarter of twenty-seven,
+carry zero. -/
+theorem omega_tower_happy_of_mod81_thirtyfour (S core : Nat) (hS : 3 ≤ S)
+    (h : core % 81 = 34) :
+    HappyCell (carry4 (4^(3^S * core)) (S+4))
+      (digit3 (4^(3^S * core)) (S+4)) := by
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hW27 := omega_cut_word_mod27 S core (by omega)
+  have hd : omegaCutWord S core / 3^3 % 3 = 2 := by
+    rw [digit3_window, show 3^(3+1) = 81 from by norm_num,
+        show 3^3 = 27 from by norm_num, hW81]
+    omega
+  have hwave : omegaShadowWave S core 3 = 16 := by
+    unfold omegaShadowWave
+    rw [show 3^3 = 27 from by norm_num, hW27]
+    omega
+  exact omega_shadow_happy_of_low S core 3 (by omega) hd
+    (by rw [hwave]; norm_num)
+
+/-- **THE MOD-81 FORTY-NINE HAPPY IGNITION.**  Every core congruent to
+forty-nine modulo eighty-one owns a physical Happy row at tower row `S+4`
+for every sheet level `S ≥ 3`: the cut word is `55` mod `81` (digit two at
+the row), and the wave cell is `4`, the bottom quarter of twenty-seven,
+carry zero. -/
+theorem omega_tower_happy_of_mod81_fortynine (S core : Nat) (hS : 3 ≤ S)
+    (h : core % 81 = 49) :
+    HappyCell (carry4 (4^(3^S * core)) (S+4))
+      (digit3 (4^(3^S * core)) (S+4)) := by
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hW27 := omega_cut_word_mod27 S core (by omega)
+  have hd : omegaCutWord S core / 3^3 % 3 = 2 := by
+    rw [digit3_window, show 3^(3+1) = 81 from by norm_num,
+        show 3^3 = 27 from by norm_num, hW81]
+    omega
+  have hwave : omegaShadowWave S core 3 = 4 := by
+    unfold omegaShadowWave
+    rw [show 3^3 = 27 from by norm_num, hW27]
+    omega
+  exact omega_shadow_happy_of_low S core 3 (by omega) hd
+    (by rw [hwave]; norm_num)
+
+/-- **THE MOD-243 FOUR HAPPY IGNITION.**  Every core congruent to four
+modulo two hundred forty-three owns a physical Happy row at tower row
+`S+5` for every sheet level `S ≥ 4`: the cut word is `226` mod `243`
+(digit two at the row), and the wave cell is `256`, the top quarter of
+eighty-one, carry three. -/
+theorem omega_tower_happy_of_mod243_four (S core : Nat) (hS : 4 ≤ S)
+    (h : core % 243 = 4) :
+    HappyCell (carry4 (4^(3^S * core)) (S+5))
+      (digit3 (4^(3^S * core)) (S+5)) := by
+  have hW243 := omega_cut_word_mod243 S core (by omega)
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hd : omegaCutWord S core / 3^4 % 3 = 2 := by
+    rw [digit3_window, show 3^(4+1) = 243 from by norm_num,
+        show 3^4 = 81 from by norm_num, hW243]
+    omega
+  have hwave : omegaShadowWave S core 4 = 256 := by
+    unfold omegaShadowWave
+    rw [show 3^4 = 81 from by norm_num, hW81]
+    omega
+  exact omega_shadow_happy_of_high S core 4 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE MOD-243 NINETEEN HAPPY IGNITION.**  Every core congruent to
+nineteen modulo two hundred forty-three owns a physical Happy row at tower
+row `S+5` for every sheet level `S ≥ 4`: the cut word is `223` mod `243`
+(digit two at the row), and the wave cell is `244`, the top quarter of
+eighty-one, carry three. -/
+theorem omega_tower_happy_of_mod243_nineteen (S core : Nat) (hS : 4 ≤ S)
+    (h : core % 243 = 19) :
+    HappyCell (carry4 (4^(3^S * core)) (S+5))
+      (digit3 (4^(3^S * core)) (S+5)) := by
+  have hW243 := omega_cut_word_mod243 S core (by omega)
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hd : omegaCutWord S core / 3^4 % 3 = 2 := by
+    rw [digit3_window, show 3^(4+1) = 243 from by norm_num,
+        show 3^4 = 81 from by norm_num, hW243]
+    omega
+  have hwave : omegaShadowWave S core 4 = 244 := by
+    unfold omegaShadowWave
+    rw [show 3^4 = 81 from by norm_num, hW81]
+    omega
+  exact omega_shadow_happy_of_high S core 4 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE MOD-243 TWO-HUNDRED-SEVENTEEN HAPPY IGNITION.**  Every core
+congruent to two hundred seventeen modulo two hundred forty-three owns a
+physical Happy row at tower row `S+5` for every sheet level `S ≥ 4`: the
+cut word is `232` mod `243` (digit two at the row), and the wave cell is
+`280`, the top quarter of eighty-one, carry three. -/
+theorem omega_tower_happy_of_mod243_twohundredseventeen (S core : Nat)
+    (hS : 4 ≤ S) (h : core % 243 = 217) :
+    HappyCell (carry4 (4^(3^S * core)) (S+5))
+      (digit3 (4^(3^S * core)) (S+5)) := by
+  have hW243 := omega_cut_word_mod243 S core (by omega)
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hd : omegaCutWord S core / 3^4 % 3 = 2 := by
+    rw [digit3_window, show 3^(4+1) = 243 from by norm_num,
+        show 3^4 = 81 from by norm_num, hW243]
+    omega
+  have hwave : omegaShadowWave S core 4 = 280 := by
+    unfold omegaShadowWave
+    rw [show 3^4 = 81 from by norm_num, hW81]
+    omega
+  exact omega_shadow_happy_of_high S core 4 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE MOD-243 TWO-HUNDRED-THIRTY-TWO HAPPY IGNITION.**  Every core
+congruent to two hundred thirty-two modulo two hundred forty-three owns a
+physical Happy row at tower row `S+5` for every sheet level `S ≥ 4`: the
+cut word is `229` mod `243` (digit two at the row), and the wave cell is
+`268`, the top quarter of eighty-one, carry three. -/
+theorem omega_tower_happy_of_mod243_twohundredthirtytwo (S core : Nat)
+    (hS : 4 ≤ S) (h : core % 243 = 232) :
+    HappyCell (carry4 (4^(3^S * core)) (S+5))
+      (digit3 (4^(3^S * core)) (S+5)) := by
+  have hW243 := omega_cut_word_mod243 S core (by omega)
+  have hW81 := omega_cut_word_mod81 S core (by omega)
+  have hd : omegaCutWord S core / 3^4 % 3 = 2 := by
+    rw [digit3_window, show 3^(4+1) = 243 from by norm_num,
+        show 3^4 = 81 from by norm_num, hW243]
+    omega
+  have hwave : omegaShadowWave S core 4 = 268 := by
+    unfold omegaShadowWave
+    rw [show 3^4 = 81 from by norm_num, hW81]
+    omega
+  exact omega_shadow_happy_of_high S core 4 (by omega) hd
+    (by rw [hwave]; norm_num) (by rw [hwave]; norm_num)
+
+/-- **THE TOWER-BAND CLIMB PROVIDER.**  Every member of the covered tower
+bands owns its climb row with an explicit witness: the class-two family
+(`core ≡ 2 mod 3`, row `S+1`), the mod-27 happy bands (row `S+3`), the
+mod-81 happy bands (row `S+4`), and the mod-243 happy bands (row `S+5`).
+This is the climb primitive's own statement — `∃ p ≥ 3, HappyCell` —
+delivered unconditionally for these families, with no climb hypothesis of
+any kind. -/
+theorem omega_tower_happy_row_of_band (S core : Nat)
+    (hband : (2 ≤ S ∧ (core % 3 = 2 ∨ core % 27 = 10 ∨ core % 27 = 13))
+      ∨ (3 ≤ S ∧ (core % 81 = 25 ∨ core % 81 = 34 ∨ core % 81 = 49))
+      ∨ (4 ≤ S ∧ (core % 243 = 4 ∨ core % 243 = 19
+        ∨ core % 243 = 217 ∨ core % 243 = 232))) :
+    ∃ p : Nat, 3 ≤ p ∧
+      HappyCell (carry4 (4^(3^S * core)) p) (digit3 (4^(3^S * core)) p) := by
+  rcases hband with ⟨hS, h⟩ | ⟨hS, h⟩ | ⟨hS, h⟩
+  · rcases h with h2 | h10 | h13
+    · exact ⟨S+1, by omega, omega_cut_happy_gate S core (by omega) h2⟩
+    · exact ⟨S+3, by omega, omega_tower_happy_of_mod27_ten S core hS h10⟩
+    · exact ⟨S+3, by omega, omega_tower_happy_of_mod27_thirteen S core hS h13⟩
+  · rcases h with h25 | h34 | h49
+    · exact ⟨S+4, by omega,
+        omega_tower_happy_of_mod81_twentyfive S core hS h25⟩
+    · exact ⟨S+4, by omega,
+        omega_tower_happy_of_mod81_thirtyfour S core hS h34⟩
+    · exact ⟨S+4, by omega,
+        omega_tower_happy_of_mod81_fortynine S core hS h49⟩
+  · rcases h with h4 | h19 | h217 | h232
+    · exact ⟨S+5, by omega, omega_tower_happy_of_mod243_four S core hS h4⟩
+    · exact ⟨S+5, by omega, omega_tower_happy_of_mod243_nineteen S core hS h19⟩
+    · exact ⟨S+5, by omega,
+        omega_tower_happy_of_mod243_twohundredseventeen S core hS h217⟩
+    · exact ⟨S+5, by omega,
+        omega_tower_happy_of_mod243_twohundredthirtytwo S core hS h232⟩
+
+/-- **THE CLIMB ROW ON THE EXPONENT ITSELF.**  Every exponent whose
+tower decomposition lands in a covered band owns its climb row: the
+statement of the third-wave climb primitive, delivered by the tower-band
+provider with the explicit witness row. -/
+theorem four_power_happy_row_of_tower_band (K : Nat)
+    (hdecomp : ∃ S core, K = 3^S * core ∧
+      ((2 ≤ S ∧ (core % 3 = 2 ∨ core % 27 = 10 ∨ core % 27 = 13))
+      ∨ (3 ≤ S ∧ (core % 81 = 25 ∨ core % 81 = 34 ∨ core % 81 = 49))
+      ∨ (4 ≤ S ∧ (core % 243 = 4 ∨ core % 243 = 19
+        ∨ core % 243 = 217 ∨ core % 243 = 232)))) :
+    ∃ p : Nat, 3 ≤ p ∧
+      HappyCell (carry4 (4^K) p) (digit3 (4^K) p) := by
+  obtain ⟨S, core, hK, hband⟩ := hdecomp
+  rw [hK]
+  exact omega_tower_happy_row_of_band S core hband
+
+#print axioms omega_shadow_digit
+#print axioms omega_shadow_window
+#print axioms omega_shadow_carry
+#print axioms omega_shadow_carry_zero
+#print axioms omega_shadow_carry_three
+#print axioms omega_shadow_happy_of_low
+#print axioms omega_shadow_happy_of_high
+#print axioms omega_pow4_mod_of_dvd
+#print axioms omega_geo_mod_of_base
+#print axioms omega_geo_mod27
+#print axioms omega_geo_mod81
+#print axioms omega_geo_mod243
+#print axioms omega_lteCoeff_mod27
+#print axioms omega_lteCoeff_mod81
+#print axioms omega_lteCoeff_mod243
+#print axioms omega_cut_word_mod27
+#print axioms omega_cut_word_mod81
+#print axioms omega_cut_word_mod243
+#print axioms omega_tower_happy_of_mod27_ten
+#print axioms omega_tower_happy_of_mod27_thirteen
+#print axioms omega_tower_happy_of_mod81_twentyfive
+#print axioms omega_tower_happy_of_mod81_thirtyfour
+#print axioms omega_tower_happy_of_mod81_fortynine
+#print axioms omega_tower_happy_of_mod243_four
+#print axioms omega_tower_happy_of_mod243_nineteen
+#print axioms omega_tower_happy_of_mod243_twohundredseventeen
+#print axioms omega_tower_happy_of_mod243_twohundredthirtytwo
+#print axioms omega_tower_happy_row_of_band
+#print axioms four_power_happy_row_of_tower_band
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,
