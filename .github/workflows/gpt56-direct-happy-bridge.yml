@@ -85,6 +85,8 @@ jobs:
           #print axioms GSTFourPowerDirectHappyBridge.four_power_happy_propagates
           #print axioms GSTFourPowerExactRowRelocation.prefix_killing_trit_constructs_exact_relocated_row
           #print axioms GSTFourPowerPrefixLeTwoRelocation.prefix_le_two_two_trit_constructs_exact_relocated_row
+          #print axioms GSTFourPowerAffineIteratedRelocation.iterated_affine_low_success_constructs_commonTwo
+          #print axioms GSTFourPowerAffineIteratedRelocation.directExistence_of_iterated_affine_low_success
           #print axioms GSTFourPowerAffineIteratedRelocation.iterated_affine_low_success_constructs_relocated_physical_happy
           LEAN
           lake env lean GSTFourPowerDirectHappyBridgeAudit.lean 2>&1 | tee direct-happy-bridge-axioms.log
