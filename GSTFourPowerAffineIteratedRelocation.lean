@@ -36,7 +36,11 @@ theorem iterated_lowSuccess_pair_at_exact_row
     digit3 x n = 2 ∧ digit3 (4*x+c) n = 2 := by
   induction n generalizing c x with
   | zero =>
-      simpa [iterSource, iterChannel, lowSuccess] using h
+      constructor
+      · rw [digit3_zero_source]
+        exact h.1
+      · rw [digit3_zero_channel]
+        exact h.2
   | succ n ih =>
       have ht := ih
         (c := channelNext c (lowDigit x))
