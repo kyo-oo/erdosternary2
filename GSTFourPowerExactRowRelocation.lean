@@ -70,11 +70,54 @@ theorem prefix_killing_trit_constructs_exact_relocated_row
   refine ⟨p+1, rfl, by omega, ?_⟩
   exact prefix_killing_trit_forces_relocated_happy_at_exact_row K p heq hkill
 
+/-- Exact-row specialization of the scale-dependent small-prefix sector.  The
+size inequality forces both low-prefix row digits to zero, so trit two is the
+killing trit and the physical relocated row is exactly `p+1`. -/
+theorem leading_two_small_prefix_forces_relocated_happy_at_exact_row
+    (K p : Nat)
+    (htrit : exponentTrit (K+1) p = 2)
+    (hsmall : 4^((exponentPrefix (K+1) p)+1) < 3^(p+1)) :
+    GSTCanonicalTailStateIso.HappyCell
+      (GSTCanonicalTailStateIso.carry4 (4^(K+1)) (p+1))
+      (GSTCanonicalTailStateIso.digit3 (4^(K+1)) (p+1)) := by
+  have hpref_lt : 4^(exponentPrefix (K+1) p) < 3^(p+1) := by
+    have hs := hsmall
+    rw [Nat.pow_succ] at hs
+    have hpos : 0 < 4^(exponentPrefix (K+1) p) := by positivity
+    omega
+  have hd0 :
+      digit3 (4^(exponentPrefix (K+1) p)) (p+1) = 0 :=
+    digit3_eq_zero_of_lt_row _ _ hpref_lt
+  have hd1 :
+      digit3 (4^((exponentPrefix (K+1) p)+1)) (p+1) = 0 :=
+    digit3_eq_zero_of_lt_row _ _ hsmall
+  apply prefix_killing_trit_forces_relocated_happy_at_exact_row K p
+  · exact hd0.trans hd1.symm
+  · simpa [hd0] using htrit
+
+/-- Witness-bearing form of the small-prefix exact-row constructor.  It returns
+the concrete relocated row rather than re-selecting an existential witness. -/
+theorem leading_two_small_prefix_constructs_exact_relocated_row
+    (K p : Nat)
+    (htrit : exponentTrit (K+1) p = 2)
+    (hsmall : 4^((exponentPrefix (K+1) p)+1) < 3^(p+1)) :
+    ∃ q : Nat, q = p+1 ∧ 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  refine ⟨p+1, rfl, by omega, ?_⟩
+  exact leading_two_small_prefix_forces_relocated_happy_at_exact_row
+    K p htrit hsmall
+
 #check commonTwo_exact_row_to_physical_happy
 #check prefix_killing_trit_forces_relocated_happy_at_exact_row
 #check prefix_killing_trit_constructs_exact_relocated_row
+#check leading_two_small_prefix_forces_relocated_happy_at_exact_row
+#check leading_two_small_prefix_constructs_exact_relocated_row
 #print axioms commonTwo_exact_row_to_physical_happy
 #print axioms prefix_killing_trit_forces_relocated_happy_at_exact_row
 #print axioms prefix_killing_trit_constructs_exact_relocated_row
+#print axioms leading_two_small_prefix_forces_relocated_happy_at_exact_row
+#print axioms leading_two_small_prefix_constructs_exact_relocated_row
 
 end GSTFourPowerExactRowRelocation
