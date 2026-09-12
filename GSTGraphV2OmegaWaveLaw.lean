@@ -2978,7 +2978,9 @@ theorem omega_row_level_digit_two (core : Nat) (j : Nat)
   have hpos : 0 < 3^j := Nat.pow_pos (by decide)
   have hlt : (omegaCutWord 0 core) % 3^(j+1) < 3^(j+1) :=
     Nat.mod_lt _ (Nat.pow_pos (by decide))
-  have hpow : 3^(j+1) = 3 * 3^j := by rw [Nat.pow_succ]
+  have hpow : 3^(j+1) = 3 * 3^j := by
+    rw [Nat.pow_add, Nat.pow_one]
+    ring
   rw [hpow] at hlt
   obtain ⟨d, hd⟩ : ∃ d, (omegaCutWord 0 core) % 3^(j+1) = 2 * 3^j + d :=
     ⟨(omegaCutWord 0 core) % 3^(j+1) - 2 * 3^j, by omega⟩
