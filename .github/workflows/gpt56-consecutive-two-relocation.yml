@@ -1,0 +1,60 @@
+name: GPT56 Consecutive Two Relocation Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-canonical-tail-escape-20260827
+    paths:
+      - 'GSTFourPowerAffineConsecutiveTwoRelocation.lean'
+      - '.github/workflows/gpt56-consecutive-two-relocation.yml'
+  workflow_dispatch:
+
+jobs:
+  certify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install exact Lean RC2 and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          rm -f lake-manifest.json
+          lake update
+          lake exe cache get
+      - name: Compile consecutive-two direct relocation constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerAffineConsecutiveTwoRelocation.olean \
+            GSTFourPowerAffineConsecutiveTwoRelocation.lean 2>&1 | tee consecutive-two-relocation.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' consecutive-two-relocation.log
+      - name: Reject forbidden proof routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerAffineConsecutiveTwoRelocation.lean
+      - name: Axiom audit consecutive-two relocation constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cat > GSTFourPowerAffineConsecutiveTwoRelocationAudit.lean <<'LEAN'
+          import GSTFourPowerAffineConsecutiveTwoRelocation
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.channelNext_le_three_of_le_three
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.iterSource_succ
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.iterChannel_succ
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.iterChannel_le_three
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.noCommonTwo_digit_two_forces_state_one_or_two
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.noCommonTwo_digit_two_forces_next_state_three
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.noCommonTwo_forces_no_consecutive_source_twos
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.consecutive_source_twos_construct_commonTwo
+          #print axioms GSTFourPowerAffineConsecutiveTwoRelocation.consecutive_source_twos_construct_exact_relocated_row
+          LEAN
+          lake env lean GSTFourPowerAffineConsecutiveTwoRelocationAudit.lean 2>&1 | tee consecutive-two-relocation-axioms.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|unknown module prefix|error:' consecutive-two-relocation-axioms.log
