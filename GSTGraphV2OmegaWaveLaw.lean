@@ -3291,9 +3291,10 @@ theorem omega_shadow_window (S core j : Nat) :
     rw [hf, show 3^(S+1+j) = 3^(S+1) * 3^j from Nat.pow_add 3 (S+1) j]
     conv_lhs => rw [← hdm]
     ring
-  rw [hEq, Nat.add_mod,
-      Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, by ring⟩,
-      Nat.zero_add]
+  have hdvd : (3^(S+1+j) * (omegaCutWord S core / 3^j)) % 3^(S+1+j) = 0 := by
+    refine Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, ?_⟩
+    ring
+  rw [hEq, Nat.add_mod, hdvd, Nat.zero_add]
   refine Nat.mod_eq_of_lt ?_
   have hr : omegaCutWord S core % 3^j < 3^j :=
     Nat.mod_lt _ (Nat.pow_pos (by decide) : (0:Nat) < 3^j)
@@ -3358,7 +3359,6 @@ theorem omega_shadow_carry_three (S core j : Nat) (hS : 1 ≤ S)
     rw [show 3 * 3^(S+1+j) = 3^(S+1+j) * 3 from by ring,
         ← Nat.pow_succ, ← Nat.pow_add]
     congr 1
-    omega
   have hlo : 3 * 3^(S+1+j) ≤ 4 + 3^(S+1) * omegaShadowWave S core j := by
     have hmul : 3^(S+1) * 3^(j+1) ≤ 3^(S+1) * omegaShadowWave S core j :=
       Nat.mul_le_mul (Nat.le_refl _) hw1
@@ -3377,7 +3377,6 @@ theorem omega_shadow_carry_three (S core j : Nat) (hS : 1 ≤ S)
       = (4 + 3^(S+1) * omegaShadowWave S core j - 3 * 3^(S+1+j))
         + 3^(S+1+j) * 3 := by omega
   rw [hde, Nat.add_mul_div_left _ _ hpM, Nat.div_eq_of_lt (by omega)]
-  omega
 
 /-- **THE LOW HAPPY CELL LAW.**  A tower row whose digit is two and whose
 wave cell sits in the bottom quarter is a physical Happy row: digit two
@@ -3413,20 +3412,26 @@ theorem omega_pow4_mod_of_dvd (a m k : Nat) (hm : 1 < m)
   rw [Nat.mul_one] at hp
   have hdm := Nat.mod_add_div (4^(3^a)) (3^(a+1))
   rw [hp] at hdm
-  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = 3^(a+1) * q + 1 :=
-    ⟨4^(3^a) / 3^(a+1), by omega⟩
-  rw [hq, ← hk, Nat.add_mod,
-      Nat.mod_eq_zero_of_dvd ⟨k * q, by ring⟩, Nat.zero_add]
+  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = m * k * q + 1 := by
+    refine ⟨4^(3^a) / 3^(a+1), ?_⟩
+    rw [hk]
+    omega
+  rw [hq, Nat.add_mod]
+  have hdvd : (m * k * q) % m = 0 := by
+    refine Nat.mod_eq_zero_of_dvd ⟨k * q, ?_⟩
+    ring
+  rw [hdvd, Nat.zero_add]
   exact Nat.mod_eq_of_lt hm
 
 /-- The geometric mean is the core mass modulo twenty-seven from sheet
 level two onward. -/
 theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
     omegaGeoSum a core % 27 = core % 27 := by
-  have hbase : (4^(3^a)) % 27 = 1 :=
-    omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num)
-      (by rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add];
-        congr 1; omega)
+  have hbase : (4^(3^a)) % 27 = 1 := by
+    refine omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num) ?_
+    rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add]
+    congr 1
+    omega
   have hterm : ∀ j : Nat, ((4^(3^a))^j) % 27 = 1 := by
     intro j
     rw [Nat.pow_mod, hbase, Nat.one_pow]
@@ -3444,10 +3449,11 @@ theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
 level three onward. -/
 theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
     omegaGeoSum a core % 81 = core % 81 := by
-  have hbase : (4^(3^a)) % 81 = 1 :=
-    omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num)
-      (by rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add];
-        congr 1; omega)
+  have hbase : (4^(3^a)) % 81 = 1 := by
+    refine omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num) ?_
+    rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add]
+    congr 1
+    omega
   have hterm : ∀ j : Nat, ((4^(3^a))^j) % 81 = 1 := by
     intro j
     rw [Nat.pow_mod, hbase, Nat.one_pow]
@@ -3465,10 +3471,11 @@ theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
 from sheet level four onward. -/
 theorem omega_geo_mod243 (a core : Nat) (ha : 4 ≤ a) :
     omegaGeoSum a core % 243 = core % 243 := by
-  have hbase : (4^(3^a)) % 243 = 1 :=
-    omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num)
-      (by rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add];
-        congr 1; omega)
+  have hbase : (4^(3^a)) % 243 = 1 := by
+    refine omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num) ?_
+    rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add]
+    congr 1
+    omega
   have hterm : ∀ j : Nat, ((4^(3^a))^j) % 243 = 1 := by
     intro j
     rw [Nat.pow_mod, hbase, Nat.one_pow]
