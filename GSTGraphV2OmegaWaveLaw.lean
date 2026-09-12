@@ -2938,6 +2938,91 @@ def four_power_omega_shadow_wave_tailE : Prop :=
 #print axioms omegaShadowTailE
 #print axioms four_power_omega_shadow_wave_tailE
 
+/-! ## §7.14 The second observer layer — one law, all rows
+
+The ROW axis of the weakening chain dies here, exactly as the tower
+axis died in §7.13.  The sheet-zero exponent-cycle rows — row three,
+row four, row five, row six, and every row beyond, at every depth,
+forever, each row doubling its exclusion list (eight classes, sixteen,
+thirty-two, sixty-four...) — are the trits of ONE object: the ROW WORD,
+which is the cut word at sheet zero.  The uniform row law reads the
+kill trit off that one object at ANY depth: there is no row seven, no
+row eight, no next row — every row is already inside the one law, as
+instances at `j = 2, 3, 4, 5, ...`.  The observer tail's sheet-zero
+exclusion lists were the finite shadows of this single all-depths
+clause. -/
+
+/-- **THE UNIFORM ROW LAW** — the row-axis twin of the tower observer
+`omega_tower_level_digit_two`.  For every core and every depth `j`, if
+the row word — the cut word at sheet zero, `omegaCutWord 0 core`, which
+is exactly the mean row word `(4^core - 1)/3` — has its top trit two in
+the window modulo `3^(j+1)`, then `4^core` owns its ternary digit two
+at position `1 + j`.  Rows three through six and every row beyond are
+instances at `j = 2, 3, 4, 5, ...`.  The proof is the prefix-slice law
+at sheet zero: `4^core = 1 + 3^1 * omegaCutWord 0 core`, so the digit
+at position `1 + j` is the row word's own digit at `j`. -/
+theorem omega_row_level_digit_two (core : Nat) (j : Nat)
+    (hkill : 2 * 3^j ≤ (omegaCutWord 0 core) % 3^(j+1)) :
+    digit3 (4^core) (1 + j) = 2 := by
+  have h1 : (1:Nat) < 3^1 := by decide
+  have hslice := prefix_slice_digit_exact 1 1 (omegaCutWord 0 core) j h1
+  have hf : 4^core = 1 + 3^1 * omegaCutWord 0 core := by
+    have h := omega_cut_factor 0 core
+    have h0 : (3:Nat)^0 * core = core := by
+      rw [Nat.pow_zero, Nat.one_mul]
+    rw [h0] at h
+    exact h
+  rw [hf, hslice]
+  unfold digit3
+  rw [digit3_window]
+  have hpos : 0 < 3^j := Nat.pow_pos (by decide)
+  have hlt : (omegaCutWord 0 core) % 3^(j+1) < 3^(j+1) :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
+  have hpow : 3^(j+1) = 3 * 3^j := by rw [Nat.pow_succ]
+  rw [hpow] at hlt
+  obtain ⟨d, hd⟩ : ∃ d, (omegaCutWord 0 core) % 3^(j+1) = 2 * 3^j + d :=
+    ⟨(omegaCutWord 0 core) % 3^(j+1) - 2 * 3^j, by omega⟩
+  have hdlt : d < 3^j := by omega
+  rw [hd, Nat.add_comm, show 2 * 3^j = 3^j * 2 from by ring,
+    Nat.add_mul_div_left _ _ hpos, Nat.div_eq_of_lt hdlt]
+
+/-- **THE Ω-SHADOW TAIL (SECOND OBSERVER FORM)** — the residual input
+after the kernel-checked base, the Ω-sheet gate, the Ω-second-sheet
+gates, and BOTH observers: the tower observer of §7.13 (every tower
+level of every generation at once) and the row observer of §7.14
+(every sheet-zero exponent-cycle row at once).  A strictly weaker
+hypothesis than the observer form: the sheet-zero exclusion lists of
+`tailE` — rows three through six — are subsumed by the single
+all-depths row clause, and every row beyond is inside it too.  The
+sheet-zero residual is ONE 3-adic object: the row word of the core,
+every trit from depth two upward below the top third. -/
+def omegaShadowTailF (K : Nat) : Prop :=
+  ∃ s core : Nat, K = 3^s * core ∧ ¬ 3 ∣ core ∧
+    (core % 9 = 4 ∨ (s = 0 ∧ core % 9 = 1) ∨ (1 ≤ s ∧ core % 9 = 7)) ∧
+    ((omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) ∧
+    (1 ≤ s → (core % 9 = 4 →
+      3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3))) ∧
+    (1 ≤ s → (core % 9 = 7 →
+      ((lteCoeff s * core) % 3^(s+3) < 3^(s+2)
+        ∨ 2 * 3^(s+2) ≤ (lteCoeff s * core) % 3^(s+3)))) ∧
+    (s = 0 → ∀ j : Nat, 2 ≤ j →
+      (omegaCutWord 0 core) % 3^(j+1) < 2 * 3^j) ∧
+    (∀ k : Nat, 3 ≤ k → k ≤ s+1 →
+      (omegaCutWord s 1 * core) % 3^k < 2 * 3^(k-1))
+
+/-- **THE Ω-SHADOW WAVE TAIL (SECOND OBSERVER FORM)** — the residual
+input after both observers: the entire tower AND the entire
+sheet-zero row cycle, each collapsed to one all-depths clause. -/
+def four_power_omega_shadow_wave_tailF : Prop :=
+  ∀ K : Nat, 500 < K → omegaShadowTailF K → ∃ p : Nat, digit3 (4^K) p = 2
+
+#check omega_row_level_digit_two
+#check omegaShadowTailF
+#check four_power_omega_shadow_wave_tailF
+#print axioms omega_row_level_digit_two
+#print axioms omegaShadowTailF
+#print axioms four_power_omega_shadow_wave_tailF
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,

@@ -18159,6 +18159,120 @@ theorem four_power_omega_shadow_wave_closed_iff_tail4 :
   · intro hTail4
     exact four_power_omega_shadow_wave_of_tail4 hTail4
 
+/-- **THE Ω-SHADOW WAVE FROM THE SECOND-OBSERVER TAIL.**  The dispatch
+of the second observer: the kernel-checked modular base carries every
+shadow exponent up to five hundred; the Ω-sheet gate and the
+Ω-second-sheet gates carry their window classes; THE ENTIRE SHEET-ZERO
+EXPONENT-CYCLE — row three, row four, row five, row six, and every row
+beyond, at every depth — is carried by the single uniform row law
+`GSTGraphV2OmegaWaveLaw.omega_row_level_digit_two`, which reads the
+kill trit straight off the one row word `omegaCutWord 0 core`; and THE
+ENTIRE Ω-CUT TOWER — every level, every generation — is carried by the
+uniform observer law `omega_tower_level_digit_two`.  The dispatch
+case-splits ONCE on the row axis: either SOME depth shows the top-third
+trit and the uniform row law fires, or NO depth does and the residual
+satisfies the second-observer tail's all-depths row clause.  Only the
+second-observer tail remains as input, and its row content is one
+all-depths object — the row axis of the weakening chain is closed,
+exactly as the tower axis closed before it. -/
+theorem four_power_omega_shadow_wave_of_tailF
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave := by
+  intro K hK hShadow
+  by_cases h500 : K ≤ 500
+  · have h5 : 5 ≤ K := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4^K) (modular_check_base K h5 h500)
+    exact ⟨q, hq⟩
+  · obtain ⟨s, core, hsc, hc3, hsheet⟩ := hShadow
+    by_cases hSG :
+        2 * 3^(s+1) ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
+    · have hc1 : core % 3 = 1 := by
+        rcases hsheet with h4 | ⟨_, h1⟩ | ⟨_, h7⟩ <;> omega
+      rw [hsc]
+      exact ⟨2*s+2,
+        GSTGraphV2OmegaWaveLaw.omega_sheet_gate_digit_two s core hc1 hSG⟩
+    · by_cases hS2 : 1 ≤ s ∧
+          ((core % 9 = 4 ∧ (GSTFourPowerDirectResidue.lteCoeff s * core)
+              % 3^(s+3) < 3^(s+2))
+          ∨ (core % 9 = 7 ∧ 3^(s+2)
+              ≤ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+            ∧ (GSTFourPowerDirectResidue.lteCoeff s * core) % 3^(s+3)
+              < 2 * 3^(s+2)))
+      · obtain ⟨hs1, hclass⟩ := hS2
+        rcases hclass with ⟨h4c, hq4⟩ | ⟨h7c, hq7, hq7'⟩
+        · rw [hsc]
+          exact ⟨2*s+3,
+            GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_four s core hs1 h4c hq4⟩
+        · rw [hsc]
+          exact ⟨2*s+3,
+            GSTGraphV2OmegaWaveLaw.omega_sheet2_gate_seven s core hs1 h7c
+              hq7 hq7'⟩
+      · by_cases hRow : s = 0 ∧ ∃ j : Nat, 2 ≤ j ∧
+            2 * 3^j ≤ (GSTGraphV2OmegaWaveLaw.omegaCutWord 0 core) % 3^(j+1)
+        · obtain ⟨hs0, j, hj, hkill⟩ := hRow
+          have hKc : K = core := by
+            rw [hsc, hs0, Nat.pow_zero, Nat.one_mul]
+          rw [hKc]
+          exact ⟨1 + j, GSTGraphV2OmegaWaveLaw.omega_row_level_digit_two
+            core j hkill⟩
+        · by_cases hTower : ∃ k : Nat, 3 ≤ k ∧ k ≤ s + 1 ∧
+            2 * 3^(k-1) ≤
+              (GSTGraphV2OmegaWaveLaw.omegaCutWord s 1 * core) % 3^k
+          · obtain ⟨k, hk3, hks, hkg⟩ := hTower
+            refine ⟨s + k, ?_⟩
+            rw [hsc]
+            exact GSTGraphV2OmegaWaveLaw.omega_tower_level_digit_two
+              s core k hk3 hks hkg
+          · refine hTailF K (by omega)
+              ⟨s, core, hsc, hc3, hsheet, ?_, ?_, ?_, ?_, ?_⟩
+            · omega
+            · intro hs1 h4c
+              rcases Nat.lt_or_ge
+                  (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                  (3^(s+2)) with hlt | hge
+              · exact absurd ⟨hs1, Or.inl ⟨h4c, hlt⟩⟩ hS2
+              · exact hge
+            · intro hs1 h7c
+              rcases Nat.lt_or_ge
+                  (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                  (3^(s+2)) with hlt | hge
+              · exact Or.inl hlt
+              · refine Or.inr ?_
+                by_cases hlt2 :
+                    (GSTFourPowerDirectResidue.lteCoeff s * core % 3^(s+3))
+                      < 2 * 3^(s+2)
+                · exact absurd ⟨hs1, Or.inr ⟨h7c, hge, hlt2⟩⟩ hS2
+                · omega
+            · intro hs0 j hj
+              by_contra hge
+              exact absurd ⟨hs0, j, hj, by omega⟩ hRow
+            · intro k hk3 hks
+              exact Nat.lt_of_not_ge (fun hge =>
+                hTower ⟨k, hk3, hks, hge⟩)
+
+/-- **THE CLOSED WAVE, DISCHARGED FROM THE SECOND-OBSERVER TAIL.**  The
+zero-input statement follows from the second-observer tail: strictly
+stronger than the observer discharge — the entire sheet-zero row cycle
+is paid at once by the uniform row law. -/
+theorem four_power_omega_shadow_wave_closed_of_tailF
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed :=
+  four_power_omega_shadow_wave_of_tailF hTailF
+
+/-- **THE CLOSED-WAVE RECEIPT (SECOND-OBSERVER FORM).**  The closed
+zero-input statement and the second-observer tail input are
+equivalent. -/
+theorem four_power_omega_shadow_wave_closed_iff_tailF :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed
+      ↔ GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF := by
+  constructor
+  · intro hClosed K hK hTailF
+    obtain ⟨s, core, hsc, hc3, hsheet, _⟩ := hTailF
+    exact hClosed K (by omega) ⟨s, core, hsc, hc3, hsheet⟩
+  · intro hTailF
+    exact four_power_omega_shadow_wave_of_tailF hTailF
+
 /-- **THE FINAL THEOREM, Ω-ROUTE — SHADOW INPUT (sealed alternate).**  The
 full shadow-wave input version of the Ω-route final theorem, kept green
 as the parameterized alternate of the tail route below. -/
@@ -18238,22 +18352,37 @@ theorem erdos_ternary_2_universal_tail5
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tail5 hTail5) n hn
 
-/-- **THE FINAL THEOREM, Ω-ROUTE — THE OBSERVER INPUT.**  The single input
-is now the observer tail: the Ω-shadow wave tail after the kernel-checked
-base, the Ω-sheet gate, the Ω-second-sheet gate, the sheet-zero
-exponent-cycle gates through row six, and the ENTIRE Ω-cut tower — every
-level, every generation — paid at once by the uniform observer law
-`omega_tower_level_digit_two`.  The tower axis of the weakening chain is
-CLOSED: level three, level four, level five, level six, level seven and
-every level beyond are one law, and the residual's tower content is the
-single all-depths no-two window of the mean rotation
-`omegaCutWord s 1 * core`.  Weaker input, same conclusion. -/
-theorem erdos_ternary_2_universal
+/-- **THE FINAL THEOREM, Ω-ROUTE — THE OBSERVER INPUT (sealed
+alternate).**  The observer-tail form, kept green as the sealed
+alternate of the second-observer route below: the tower axis closed by
+the uniform tower law, the sheet-zero rows still enumerated as finite
+exclusion lists. -/
+theorem erdos_ternary_2_universal_tailE
     (hTailE : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailE)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
   erdos_ternary_2_universal_shadow
     (four_power_omega_shadow_wave_of_tailE hTailE) n hn
+
+/-- **THE FINAL THEOREM, Ω-ROUTE — THE SECOND-OBSERVER INPUT.**  The
+single input is now the second-observer tail: the Ω-shadow wave tail
+after the kernel-checked base, the Ω-sheet gate, the Ω-second-sheet
+gate, the ENTIRE Ω-cut tower — every level, every generation — paid at
+once by the uniform tower law, AND the ENTIRE sheet-zero exponent-cycle
+— every row, every depth — paid at once by the uniform row law.  BOTH
+axes of the weakening chain are CLOSED: no level-eight, no row-seven,
+no next generation on either axis — every level and every row is
+already inside one of the two observer laws.  The residual is two
+all-depths objects: the no-two window of the mean rotation
+`omegaCutWord s 1 * core` on the tower, and the no-two window of the
+row word `omegaCutWord 0 core` on the sheet-zero cycle.  Weaker input,
+same conclusion. -/
+theorem erdos_ternary_2_universal
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_shadow
+    (four_power_omega_shadow_wave_of_tailF hTailF) n hn
 
 /-- **WITNESS EXTRACTION.**  A false `noTernaryTwo` verdict hands over the
 digit-two witness position: the boolean scan and the digit statement are
@@ -18287,16 +18416,16 @@ both parities at once through the parity column `graph (1 + n % 2)
 (n / 2)` — the graph shows the ternary two somewhere in its column.
 This is the Ω-wave law fused with the infinite-controller bridge: the
 output channel is the graph's own digit cell, the input is the theorem's
-own input (`hTailE`), and every cell of the column is pinned by the
+own input (`hTailF`), and every cell of the column is pinned by the
 exact lattice law `graph_cell_exact`. -/
 theorem infinite_controller_ternary_two_chokehold
-    (hTailE : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailE)
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF)
     (n : Nat) (hn : 9 ≤ n) :
     ∃ p : Nat,
       (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
         = 2 :=
   GSTGraphV2OmegaWaveLaw.infinite_graph_ternary_two_chokehold
-    (four_power_omega_shadow_wave_closed_of_tailE hTailE) n hn
+    (four_power_omega_shadow_wave_closed_of_tailF hTailF) n hn
 
 /-- **THE CHOKEHOLD THROUGH THE THEOREM'S OWN OUTPUT CHANNEL.**  The same
 graph-column statement, extracted directly from the main theorem's
@@ -18304,13 +18433,13 @@ graph-column statement, extracted directly from the main theorem's
 lemma: the boolean verdict and the infinite graph's digit-two cell are
 one observable. -/
 theorem infinite_controller_chokehold_of_universal
-    (hTailE : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailE)
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF)
     (n : Nat) (hn : 9 ≤ n) :
     ∃ p : Nat,
       (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
         = 2 := by
   obtain ⟨p, hp⟩ := no_two_false_digit_witness (2^n)
-    (erdos_ternary_2_universal hTailE n hn)
+    (erdos_ternary_2_universal hTailF n hn)
   refine ⟨p, ?_⟩
   rw [GSTGraphV2OmegaWaveLaw.graph_column_digit_exact,
     GSTGraphV2OmegaWaveLaw.graph_column_parity_energy]
@@ -18337,7 +18466,11 @@ theorem infinite_controller_chokehold_of_universal
 #print axioms four_power_omega_shadow_wave_of_tail4
 #print axioms four_power_omega_shadow_wave_of_tail5
 #print axioms four_power_omega_shadow_wave_of_tailE
+#print axioms four_power_omega_shadow_wave_of_tailF
+#print axioms four_power_omega_shadow_wave_closed_of_tailF
+#print axioms four_power_omega_shadow_wave_closed_iff_tailF
 #print axioms erdos_ternary_2_universal_tail5
+#print axioms erdos_ternary_2_universal_tailE
 #print axioms no_two_false_digit_witness
 #print axioms infinite_controller_ternary_two_chokehold
 #print axioms infinite_controller_chokehold_of_universal
