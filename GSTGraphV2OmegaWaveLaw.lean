@@ -3022,6 +3022,111 @@ def four_power_omega_shadow_wave_tailF : Prop :=
 #print axioms omegaShadowTailF
 #print axioms four_power_omega_shadow_wave_tailF
 
+/-- **THE TOWER WORD STABILIZES — the descent blade, part one.**  The
+cube-lift identity: the cut word of sheet level `s+1` is the cut word of
+level `s` plus a multiple of `3^(s+1)`.  Every trit of the tower word
+below position `s+1` is therefore FROZEN as the sheet level grows: the
+entire tower of cut words is one stabilizing 3-adic object, and the
+level-`s` tower window reads the same trits at every deeper level. -/
+theorem omega_cut_word_stabilizes (s core : Nat) :
+    ∃ t : Nat, omegaCutWord (s+1) core
+      = omegaCutWord s core + 3^(s+1) * t := by
+  have hf0 := omega_cut_factor s core
+  have hf1 := omega_cut_factor (s+1) core
+  have hpow : 4^(3^(s+1) * core) = (4^(3^s * core))^3 := by
+    rw [show 3^(s+1) * core = (3^s * core) * 3 from by
+          rw [Nat.pow_succ]; ring,
+        Nat.pow_mul]
+  have hcube : (1 + 3^(s+1) * omegaCutWord s core)^3
+      = 1 + 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) := by
+    rw [show 3^(s+2) = 9 * 3^s from by
+          rw [show s+2 = (s+1)+1 from by omega, Nat.pow_succ, Nat.pow_succ]
+          ring,
+        show 3^(s+1) = 3 * 3^s from by rw [Nat.pow_succ]; ring]
+    ring
+  have hE : 4^(3^(s+1) * core)
+      = 1 + 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) := by
+    rw [hpow, hf0]
+    exact hcube
+  have hAB : 3^(s+2) * omegaCutWord (s+1) core
+      = 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) :=
+    Nat.add_left_cancel (hf1.symm.trans hE)
+  refine ⟨omegaCutWord s core * omegaCutWord s core
+      + 3^s * (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core), ?_⟩
+  exact Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (by decide)) hAB
+
+/-- **THE TOWER WORD'S WINDOW IS FROZEN BELOW THE LIFT — part two.**
+For every tower level `k ≤ s+1`, the level-`s` and level-`s+1` tower
+words agree modulo `3^k`: no sheet lift can move a trit that the window
+already fixed. -/
+theorem omega_tower_word_mod_stable (s core k : Nat) (hk : k ≤ s+1) :
+    (omegaCutWord (s+1) 1 * core) % 3^k
+      = (omegaCutWord s 1 * core) % 3^k := by
+  obtain ⟨t, ht⟩ := omega_cut_word_stabilizes s 1
+  have hsplit : 3^(s+1) = 3^k * 3^(s+1-k) := by
+    rw [← Nat.pow_add]
+    congr 1
+    omega
+  have hz : 3^(s+1) * (t * core) % 3^k = 0 := by
+    refine Nat.mod_eq_zero_of_dvd ⟨3^(s+1-k) * (t * core), ?_⟩
+    rw [hsplit]
+    ring
+  have hdistr : (omegaCutWord s 1 + 3^(s+1) * t) * core
+      = omegaCutWord s 1 * core + 3^(s+1) * (t * core) := by
+    ring
+  rw [ht, hdistr, Nat.add_mod, hz, Nat.zero_add]
+
+/-- **THE TOWER WINDOW DESCENDS TO THE PRIMITIVE — part three.**  For
+every sheet level `s` at or above `k-1`, the tower word at modulus
+`3^k` is the PRIMITIVE level-`(k-1)` word at modulus `3^k`: the whole
+tower's window-`k` content is one primitive object. -/
+theorem omega_tower_word_mod_chain (core k : Nat) :
+    ∀ s : Nat, k-1 ≤ s → (omegaCutWord s 1 * core) % 3^k
+      = (omegaCutWord (k-1) 1 * core) % 3^k := by
+  intro s
+  induction s with
+  | zero =>
+    intro hsk
+    rw [show k-1 = 0 from by omega]
+  | succ s ih =>
+    intro hsk
+    rcases Nat.lt_or_ge k (s+2) with hlt | hge
+    · rw [omega_tower_word_mod_stable s core k (by omega), ih (by omega)]
+    · rw [show k-1 = s+1 from by omega]
+
+/-- **THE DIAGONAL KILL — the descent blade, drawn.**  One ternary
+digit two on the primitive diagonal at level `k-1` — the digit of the
+primitive power `4^(3^(k-1) * core)` at row `2*k - 1` — kills the tower
+dodge at EVERY sheet level `S ≥ k-1` at once: the power `4^(3^S * core)`
+owns its ternary digit two at row `S + k`.  The entire tower's gate
+search collapses to a single primitive trit, read once, applied at every
+depth: the non-local argument as a one-line blade. -/
+theorem omega_tower_kill_of_diagonal_two (core k S : Nat)
+    (hk1 : 1 ≤ k) (hkS : k ≤ S+1)
+    (hTwo : digit3 (4^(3^(k-1) * core)) (2*k - 1) = 2) :
+    digit3 (4^(3^S * core)) (S + k) = 2 := by
+  have hobs := omega_observed_digit (k-1) core k (by omega) (by omega)
+  rw [show (k-1) + k = 2*k - 1 from by omega] at hobs
+  rw [hobs] at hTwo
+  rw [omega_observed_digit S core k (by omega) hkS,
+      omega_tower_word_mod_chain core k S (by omega)]
+  exact hTwo
+
+#print axioms omega_cut_word_stabilizes
+#print axioms omega_tower_word_mod_stable
+#print axioms omega_tower_word_mod_chain
+#print axioms omega_tower_kill_of_diagonal_two
+
 end GSTGraphV2OmegaWaveLaw
 
 /-- Monolith transplant route: the class-two family's creation certificate,
