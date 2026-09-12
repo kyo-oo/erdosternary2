@@ -6,6 +6,10 @@ on:
       - sol/gpt56-canonical-tail-escape-20260827
     paths:
       - 'GSTFourPowerAffineConsecutiveTwoRelocation.lean'
+      - 'GSTFourPowerAffineTerminalCollision.lean'
+      - 'GSTFourPowerAffineSuccessEquivalence.lean'
+      - 'GSTFourPowerAffineIteratedRelocation.lean'
+      - 'GSTFourPowerDirectHappyBridge.lean'
       - '.github/workflows/gpt56-consecutive-two-relocation.yml'
   workflow_dispatch:
 
@@ -24,6 +28,13 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
+      - name: Compile fresh dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTFourPowerAffineTerminalCollision 2>&1 | tee consecutive-two-deps.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' consecutive-two-deps.log
       - name: Compile consecutive-two direct relocation constructor
         shell: bash
         run: |
