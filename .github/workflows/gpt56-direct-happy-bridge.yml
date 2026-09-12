@@ -10,6 +10,7 @@ on:
       - 'GSTFourPowerPrefixLeTwoRelocation.lean'
       - 'GSTFourPowerAffineIteratedRelocation.lean'
       - 'GSTFourPowerAffineSuccessEquivalence.lean'
+      - 'GSTFourPowerAffineTerminalCollision.lean'
       - 'GSTFourPowerDirectExistence.lean'
       - 'GSTFourPowerAffineTwoTritClassifier.lean'
       - '.github/workflows/gpt56-direct-happy-bridge.yml'
@@ -77,11 +78,21 @@ jobs:
             -o .lake/build/lib/lean/GSTFourPowerAffineSuccessEquivalence.olean \
             GSTFourPowerAffineSuccessEquivalence.lean 2>&1 | tee affine-success-equivalence.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' affine-success-equivalence.log
+      - name: Compile terminal-state exact relocation constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .lake/build/lib/lean
+          lake env lean \
+            -o .lake/build/lib/lean/GSTFourPowerAffineTerminalCollision.olean \
+            GSTFourPowerAffineTerminalCollision.lean 2>&1 | tee affine-terminal-collision.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' affine-terminal-collision.log
       - name: Reject forbidden proof routes
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean GSTFourPowerExactRowRelocation.lean GSTFourPowerPrefixLeTwoRelocation.lean GSTFourPowerAffineIteratedRelocation.lean GSTFourPowerAffineSuccessEquivalence.lean
+          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|gst_residual_omega_termination|gst_omega_termination_s1|gst_omega_termination_s3|gst_omega_termination_stable' GSTFourPowerDirectHappyBridge.lean GSTFourPowerExactRowRelocation.lean GSTFourPowerPrefixLeTwoRelocation.lean GSTFourPowerAffineIteratedRelocation.lean GSTFourPowerAffineSuccessEquivalence.lean GSTFourPowerAffineTerminalCollision.lean
       - name: Axiom audit direct relocation constructor
         shell: bash
         run: |
@@ -93,6 +104,7 @@ jobs:
           import GSTFourPowerPrefixLeTwoRelocation
           import GSTFourPowerAffineIteratedRelocation
           import GSTFourPowerAffineSuccessEquivalence
+          import GSTFourPowerAffineTerminalCollision
           #print axioms GSTFourPowerDirectHappyBridge.affine_two_trit_sector_forces_relocated_physical_happy
           #print axioms GSTFourPowerDirectHappyBridge.four_power_happy_propagates
           #print axioms GSTFourPowerExactRowRelocation.prefix_killing_trit_constructs_exact_relocated_row
@@ -105,6 +117,11 @@ jobs:
           #print axioms GSTFourPowerAffineSuccessEquivalence.commonTwo_iff_exists_iterated_affine_low_success
           #print axioms GSTFourPowerAffineSuccessEquivalence.directExistence_iff_iterated_affine_low_success
           #print axioms GSTFourPowerAffineSuccessEquivalence.commonTwo_constructs_channel_exact_relocated_row
+          #print axioms GSTFourPowerAffineTerminalCollision.lowSuccess_of_state_zero_digit_two
+          #print axioms GSTFourPowerAffineTerminalCollision.lowSuccess_of_state_three_digit_two
+          #print axioms GSTFourPowerAffineTerminalCollision.terminal_collision_constructs_commonTwo
+          #print axioms GSTFourPowerAffineTerminalCollision.terminal_collision_constructs_exact_relocated_row
+          #print axioms GSTFourPowerAffineTerminalCollision.noCommonTwo_forces_terminal_collision_avoidance
           LEAN
           lake env lean GSTFourPowerDirectHappyBridgeAudit.lean 2>&1 | tee direct-happy-bridge-axioms.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown constant|unknown module prefix|error:' direct-happy-bridge-axioms.log
