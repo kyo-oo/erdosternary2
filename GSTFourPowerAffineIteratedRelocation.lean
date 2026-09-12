@@ -60,6 +60,41 @@ theorem iterated_lowSuccess_constructs_pair_common_two
   have hr := iterated_lowSuccess_pair_at_exact_row c x n h
   exact ⟨n, hr.1, hr.2⟩
 
+/-- Any finite success in the channel-one affine orbit of exponent `N`
+constructs a direct common-two row for the consecutive powers `4^N,4^(N+1)`.
+The witness is explicitly `n+1`; this is the arithmetic endpoint needed by
+`FourPowerDirectExistence`, with no navigation or witness transport. -/
+theorem iterated_affine_low_success_constructs_commonTwo
+    (N n : Nat)
+    (h : lowSuccess
+      (iterChannel n 1 (affineOrbit N))
+      (iterSource n (affineOrbit N))) :
+    CommonTwo N := by
+  have hr := iterated_lowSuccess_pair_at_exact_row
+    1 (affineOrbit N) n h
+  refine ⟨n+1, by omega, ?_, ?_⟩
+  · rw [four_pow_digit_affine_shift N n]
+    exact hr.1
+  · rw [four_pow_digit_affine_shift (N+1) n]
+    rw [affineOrbit_forward N]
+    exact hr.2
+
+/-- The universal four-power existence problem is reduced exactly to finite
+success of the fresh affine channel.  Proving the premise for every admissible
+exponent immediately yields `FourPowerDirectExistence`; no quarantined route
+is involved. -/
+theorem directExistence_of_iterated_affine_low_success
+    (hforce :
+      ∀ N : Nat, 5 ≤ N → N ≠ 7 →
+        ∃ n : Nat,
+          lowSuccess
+            (iterChannel n 1 (affineOrbit N))
+            (iterSource n (affineOrbit N))) :
+    FourPowerDirectExistence := by
+  intro N hN h7
+  rcases hforce N hN h7 with ⟨n, hn⟩
+  exact iterated_affine_low_success_constructs_commonTwo N n hn
+
 /-- Row-preserving four-power form of the arbitrary-depth channel lift.
 A success after `n` affine reads is not merely existential: after restoring the
 consumed low four-power trit, the physical relocated row is exactly `n+1`. -/
@@ -121,11 +156,15 @@ theorem iterated_affine_low_success_constructs_relocated_physical_happy
 #check iterChannel
 #check iterated_lowSuccess_pair_at_exact_row
 #check iterated_lowSuccess_constructs_pair_common_two
+#check iterated_affine_low_success_constructs_commonTwo
+#check directExistence_of_iterated_affine_low_success
 #check iterated_affine_low_success_forces_happy_at_exact_row
 #check iterated_affine_low_success_constructs_exact_relocated_row
 #check iterated_affine_low_success_constructs_relocated_physical_happy
 #print axioms iterated_lowSuccess_pair_at_exact_row
 #print axioms iterated_lowSuccess_constructs_pair_common_two
+#print axioms iterated_affine_low_success_constructs_commonTwo
+#print axioms directExistence_of_iterated_affine_low_success
 #print axioms iterated_affine_low_success_forces_happy_at_exact_row
 #print axioms iterated_affine_low_success_constructs_exact_relocated_row
 #print axioms iterated_affine_low_success_constructs_relocated_physical_happy
