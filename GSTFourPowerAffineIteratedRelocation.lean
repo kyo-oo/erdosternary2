@@ -5,6 +5,7 @@ set_option maxHeartbeats 20000000
 
 namespace GSTFourPowerAffineIteratedRelocation
 
+open GSTFourPowerDirectResidue
 open GSTFourPowerDirectExistence
 open GSTFourPowerDirectHappyBridge
 open GSTFourPowerExactRowRelocation
