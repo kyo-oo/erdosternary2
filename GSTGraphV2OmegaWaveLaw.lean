@@ -3284,19 +3284,16 @@ theorem omega_shadow_window (S core j : Nat) :
     4^(3^S * core) % 3^(S+1+j)
       = 1 + 3^(S+1) * (omegaCutWord S core % 3^j) := by
   have hf := omega_cut_factor S core
-  have hsplit : 3^(S+1+j) = 3^(S+1) * 3^j := by rw [Nat.pow_add]
-  have hE : 3^(S+1) * omegaCutWord S core
-      = 3^(S+1) * 3^j * (omegaCutWord S core / 3^j)
-        + 3^(S+1) * (omegaCutWord S core % 3^j) := by
-    conv_lhs => rw [← Nat.mod_add_div (omegaCutWord S core) (3^j)]
+  have hdm := Nat.mod_add_div (omegaCutWord S core) (3^j)
+  have hEq : 4^(3^S * core)
+      = 3^(S+1+j) * (omegaCutWord S core / 3^j)
+        + (1 + 3^(S+1) * (omegaCutWord S core % 3^j)) := by
+    rw [hf, show 3^(S+1+j) = 3^(S+1) * 3^j from Nat.pow_add 3 (S+1) j]
+    conv_lhs => rw [← hdm]
     ring
-  rw [hf, hsplit, hE]
-  rw [show 1 + (3^(S+1) * 3^j * (omegaCutWord S core / 3^j)
-          + 3^(S+1) * (omegaCutWord S core % 3^j))
-      = (1 + 3^(S+1) * (omegaCutWord S core % 3^j))
-          + 3^(S+1) * 3^j * (omegaCutWord S core / 3^j) from by ring]
-  rw [Nat.add_mod, Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, by ring⟩,
-    Nat.add_zero, Nat.mod_mod]
+  rw [hEq, Nat.add_mod,
+      Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, by ring⟩,
+      Nat.zero_add]
   refine Nat.mod_eq_of_lt ?_
   have hr : omegaCutWord S core % 3^j < 3^j :=
     Nat.mod_lt _ (Nat.pow_pos (by decide) : (0:Nat) < 3^j)
@@ -3308,6 +3305,8 @@ theorem omega_shadow_window (S core j : Nat) :
       < 3^(S+1) + 3^(S+1) * (omegaCutWord S core % 3^j) := by omega
     _ = 3^(S+1) * (omegaCutWord S core % 3^j + 1) := by ring
     _ ≤ 3^(S+1) * 3^j := Nat.mul_le_mul (Nat.le_refl _) (by omega)
+    _ = 3^(S+1+j) := by
+        rw [show 3^(S+1+j) = 3^(S+1) * 3^j from Nat.pow_add 3 (S+1) j]
 
 /-- **THE WAVE-CARRY EQUATION.**  The exact carry at tower row `S+1+j`:
 the quadrupled window plus four, divided by the row modulus.  The carry
@@ -3329,15 +3328,16 @@ theorem omega_shadow_carry_zero (S core j : Nat) (hS : 1 ≤ S)
     carry4 (4^(3^S * core)) (S+1+j) = 0 := by
   rw [omega_shadow_carry S core j]
   refine Nat.div_eq_of_lt ?_
-  have h3 : (3:Nat)^1 ≤ 3^(S+1) := by
+  have h9 : (3:Nat)^2 ≤ 3^(S+1) := by
     simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
-      (by omega : 1 ≤ S+1)
-  norm_num at h3
+      (by omega : 2 ≤ S+1)
+  norm_num at h9
   calc 4 + 3^(S+1) * omegaShadowWave S core j
       < 3^(S+1) + 3^(S+1) * omegaShadowWave S core j := by omega
     _ = 3^(S+1) * (omegaShadowWave S core j + 1) := by ring
     _ ≤ 3^(S+1) * 3^j := Nat.mul_le_mul (Nat.le_refl _) (by omega)
-    _ = 3^(S+1+j) := by rw [Nat.pow_add]
+    _ = 3^(S+1+j) := by
+        rw [show 3^(S+1+j) = 3^(S+1) * 3^j from Nat.pow_add 3 (S+1) j]
 
 /-- **THE TOP-QUARTER CARRY LAW.**  A wave cell in the closed top quarter —
 between three and four times its own modulus — makes the carry at the row
@@ -3348,17 +3348,17 @@ theorem omega_shadow_carry_three (S core j : Nat) (hS : 1 ≤ S)
     carry4 (4^(3^S * core)) (S+1+j) = 3 := by
   rw [omega_shadow_carry S core j]
   have hpM : (0:Nat) < 3^(S+1+j) := Nat.pow_pos (by decide)
-  have hsplit : 3^(S+1) * 3^j = 3^(S+1+j) := by rw [Nat.pow_add]
+  have hsplit : 3^(S+1) * 3^j = 3^(S+1+j) :=
+    (Nat.pow_add 3 (S+1) j).symm
   have h9 : (3:Nat)^2 ≤ 3^(S+1) := by
     simpa using Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat))
       (by omega : 2 ≤ S+1)
   norm_num at h9
   have hsplit2 : 3^(S+1) * 3^(j+1) = 3 * 3^(S+1+j) := by
-    have e1 : 3^(S+1) * 3^(j+1) = 3^(S+j+2) := by
-      rw [show S+j+2 = (S+1)+(j+1) from by omega, Nat.pow_add]
-    have e2 : 3 * 3^(S+1+j) = 3^(S+j+2) := by
-      rw [show S+j+2 = (S+1+j)+1 from by omega, Nat.pow_succ]
-    rw [e1, e2]
+    rw [show 3 * 3^(S+1+j) = 3^(S+1+j) * 3 from by ring,
+        ← Nat.pow_succ, ← Nat.pow_add]
+    congr 1
+    omega
   have hlo : 3 * 3^(S+1+j) ≤ 4 + 3^(S+1) * omegaShadowWave S core j := by
     have hmul : 3^(S+1) * 3^(j+1) ≤ 3^(S+1) * omegaShadowWave S core j :=
       Nat.mul_le_mul (Nat.le_refl _) hw1
@@ -3370,11 +3370,12 @@ theorem omega_shadow_carry_three (S core j : Nat) (hS : 1 ≤ S)
       calc 3^(S+1) * omegaShadowWave S core j + 3^(S+1)
           = 3^(S+1) * (omegaShadowWave S core j + 1) := by ring
         _ ≤ 3^(S+1) * (4 * 3^j) := Nat.mul_le_mul (Nat.le_refl _) (by omega)
-    rw [show 3^(S+1) * (4 * 3^j) = 4 * 3^(S+1+j) from by rw [hsplit]; ring] at hmul2
+    rw [show 3^(S+1) * (4 * 3^j) = 4 * 3^(S+1+j) from by rw [← hsplit]; ring]
+      at hmul2
     omega
   have hde : 4 + 3^(S+1) * omegaShadowWave S core j
       = (4 + 3^(S+1) * omegaShadowWave S core j - 3 * 3^(S+1+j))
-        + 3 * 3^(S+1+j) := by omega
+        + 3^(S+1+j) * 3 := by omega
   rw [hde, Nat.add_mul_div_left _ _ hpM, Nat.div_eq_of_lt (by omega)]
   omega
 
@@ -3410,23 +3411,26 @@ theorem omega_pow4_mod_of_dvd (a m k : Nat) (hm : 1 < m)
     (4^(3^a)) % m = 1 := by
   have hp := omega_cut_prefix_one a 1
   rw [Nat.mul_one] at hp
-  have hE := Nat.mod_add_div (4^(3^a)) (3^(a+1))
-  rw [hp] at hE
-  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = 1 + 3^(a+1) * q := ⟨_, by omega⟩
-  rw [hq, ← hk]
-  rw [Nat.add_mod, Nat.mod_eq_zero_of_dvd ⟨k * q, by ring⟩,
-    Nat.add_zero, Nat.mod_mod]
+  have hdm := Nat.mod_add_div (4^(3^a)) (3^(a+1))
+  rw [hp] at hdm
+  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = 3^(a+1) * q + 1 :=
+    ⟨4^(3^a) / 3^(a+1), by omega⟩
+  rw [hq, ← hk, Nat.add_mod,
+      Nat.mod_eq_zero_of_dvd ⟨k * q, by ring⟩, Nat.zero_add]
   exact Nat.mod_eq_of_lt hm
 
-/-- The geometric mean is the core mass modulo any modulus against which
-the tower base is one. -/
-theorem omega_geo_mod_of_base (a core m : Nat) (hm : 1 < m)
-    (hbase : (4^(3^a)) % m = 1) :
-    omegaGeoSum a core % m = core % m := by
-  have hterm : ∀ j : Nat, ((4^(3^a))^j) % m = 1 := by
+/-- The geometric mean is the core mass modulo twenty-seven from sheet
+level two onward. -/
+theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
+    omegaGeoSum a core % 27 = core % 27 := by
+  have hbase : (4^(3^a)) % 27 = 1 :=
+    omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num)
+      (by rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add];
+        congr 1; omega)
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 27 = 1 := by
     intro j
     rw [Nat.pow_mod, hbase, Nat.one_pow]
-    exact Nat.mod_eq_of_lt hm
+    omega
   induction core with
   | zero => simp [omegaGeoSum]
   | succ core ih =>
@@ -3436,32 +3440,47 @@ theorem omega_geo_mod_of_base (a core m : Nat) (hm : 1 < m)
       rw [hgeo, Nat.add_mod, hterm core, ih]
       omega
 
-/-- The geometric mean is the core mass modulo twenty-seven from sheet
-level two onward. -/
-theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
-    omegaGeoSum a core % 27 = core % 27 :=
-  omega_geo_mod_of_base a core 27 (by norm_num)
-    (omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num)
-      (by rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add]
-        congr 1; omega))
-
 /-- The geometric mean is the core mass modulo eighty-one from sheet
 level three onward. -/
 theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
-    omegaGeoSum a core % 81 = core % 81 :=
-  omega_geo_mod_of_base a core 81 (by norm_num)
-    (omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num)
-      (by rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add]
-        congr 1; omega))
+    omegaGeoSum a core % 81 = core % 81 := by
+  have hbase : (4^(3^a)) % 81 = 1 :=
+    omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num)
+      (by rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add];
+        congr 1; omega)
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 81 = 1 := by
+    intro j
+    rw [Nat.pow_mod, hbase, Nat.one_pow]
+    omega
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
 
 /-- The geometric mean is the core mass modulo two hundred forty-three
 from sheet level four onward. -/
 theorem omega_geo_mod243 (a core : Nat) (ha : 4 ≤ a) :
-    omegaGeoSum a core % 243 = core % 243 :=
-  omega_geo_mod_of_base a core 243 (by norm_num)
-    (omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num)
-      (by rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add]
-        congr 1; omega))
+    omegaGeoSum a core % 243 = core % 243 := by
+  have hbase : (4^(3^a)) % 243 = 1 :=
+    omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num)
+      (by rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add];
+        congr 1; omega)
+  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 243 = 1 := by
+    intro j
+    rw [Nat.pow_mod, hbase, Nat.one_pow]
+    omega
+  induction core with
+  | zero => simp [omegaGeoSum]
+  | succ core ih =>
+      have hgeo : omegaGeoSum a (core+1)
+          = omegaGeoSum a core + (4^(3^a))^core := by
+        simp [omegaGeoSum, Finset.sum_range_succ]
+      rw [hgeo, Nat.add_mod, hterm core, ih]
+      omega
 
 /-- The LTE mean is sixteen modulo twenty-seven from sheet level two
 onward — the stabilized tower word's third window. -/
@@ -3794,7 +3813,6 @@ theorem four_power_happy_row_of_tower_band (K : Nat)
 #print axioms omega_shadow_happy_of_low
 #print axioms omega_shadow_happy_of_high
 #print axioms omega_pow4_mod_of_dvd
-#print axioms omega_geo_mod_of_base
 #print axioms omega_geo_mod27
 #print axioms omega_geo_mod81
 #print axioms omega_geo_mod243
