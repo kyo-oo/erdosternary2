@@ -2314,19 +2314,16 @@ six. -/
 def four_power_omega_shadow_wave_tail5 : Prop :=
   ∀ K : Nat, 500 < K → omegaShadowTail5 K → ∃ p : Nat, digit3 (4^K) p = 2
 
-/-- **THE Ω-SHADOW WAVE, CLOSED FORM — the zero-input statement.**  The
-shadow wave with no tail bound and no kernel cut: every shadow exponent
-from eight onward owns its ternary digit two outright.  This is the
-closed target of the campaign — the exact statement the final theorem
-consumes once every gate family has been paid for unconditionally.  Its
-remaining content is the all-depths digit statement for the stabilized
-sheet word `lteCoeff s * core`: the intersection of the no-two Cantor
-set with the LTE-mean rotation of the shadow core classes, a set that is
-provably nonempty at every sheet depth (multiplication by the LTE mean
-is a bijection on residues, so the pure-sheet dodgers number two to the
-sheet depth at every level). -/
+/-- **THE Ω-SHADOW WAVE, CLOSED FORM — the campaign's name for the
+wave.**  An explicit alias: the closed target IS the Ω-shadow wave of
+§7.5 — one Prop, one body, two names, the name "closed" marking its
+role as the campaign target.  Every shadow exponent from eight onward
+owns its ternary digit two outright; the final theorem consumes it once
+every gate family has been paid for unconditionally.  The wave of §7.5
+never carried a tail bound or a kernel cut, so the closed form adds
+nothing and subtracts nothing: both names denote the one statement. -/
 def four_power_omega_shadow_wave_closed : Prop :=
-  ∀ K : Nat, 8 ≤ K → omegaShadow K → ∃ p : Nat, digit3 (4^K) p = 2
+  four_power_omega_shadow_wave
 
 /-! ## §7.10 The tripling-cube law (the cross-sheet digit transfer)
 

@@ -133,7 +133,7 @@ jobs:
           import ErdosTernary2
           set_option maxHeartbeats 0
           set_option maxRecDepth 1000000
-          #print axioms erdos_ternary_2_universal
+          #print axioms erdos_ternary_2_universal_of_tailF
           EOF
           lake env lean Problem406SolutionAxiomReport.lean 2>&1 | tee problem406-solution-axioms.log
           if grep -Fq 'sorryAx' problem406-solution-axioms.log; then

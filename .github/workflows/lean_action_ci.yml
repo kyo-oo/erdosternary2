@@ -80,7 +80,7 @@ jobs:
           #print axioms gst_four_power_creation_master_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms gst_power_two_wave_large
-          #print axioms erdos_ternary_2_universal
+          #print axioms erdos_ternary_2_universal_of_tailF
           LEAN
           lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
           rm -f MultiNukeAxiomAudit.lean

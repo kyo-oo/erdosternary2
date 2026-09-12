@@ -6,7 +6,7 @@
 --    Last-commit  : 2026-08-16 14:10:32 +0000  (5c57900)
 --    Total commits: 6
 -- ======================================================================
--- 0 sorries · 0 errors · 'Erdős Ternary-2: universal conditional on the observer input; §7.15 certifies input ↔ statement'
+-- 0 sorries · 0 errors · 'Erdős Ternary-2: the universal theorem carries the observer input; §7.15 certifies input ↔ statement'
 -- ======================================================================
 -- GIT HISTORY (chronological, oldest first)
 -- ======================================================================
@@ -25,8 +25,8 @@
 -- ====================================================================== -/
 
 -- CardinalWorldsWork.lean — GST Complete Formalization
--- 18564 lines, 0 holes, 0 native_decide
--- Erdős Ternary-2: the universal theorem is conditional on the second-observer input; the §7.15 terminal identity machine-certifies input ↔ statement
+-- 18528 lines, 0 holes, 0 native_decide
+-- Erdős Ternary-2: the universal theorem carries the second-observer input; the §7.15 terminal identity machine-certifies input ↔ statement
 
 import GSTTactic
 import GSTPrefixOneU2DCollisionProof
@@ -112,7 +112,7 @@ open scoped BigOperators
         VERIFIED to 10^164 (beyond Saye's 5.9×10^21)
 
     §21. The Universal Theorem
-      - erdos_ternary_2_universal (hTailF): ∀ n ≥ 9, noTernaryTwo(2^n) = false — conditional; §7.15 machine-certifies input ↔ statement
+      - erdos_ternary_2_universal_of_tailF (hTailF): ∀ n ≥ 9, noTernaryTwo(2^n) = false — input-bound; §7.15 machine-certifies input ↔ statement
 
   AXIOM AUDIT: [propext, choice, Quot.sound, unknown tactic]
     ZERO unknown tactic, ZERO admit, ZERO custom axiom.
@@ -243,19 +243,6 @@ theorem carryAtPos_one_mod3_1 (R : Nat) (h : R % 3 = 1) : carryAtPos R 1 = 1 := 
 theorem carryAtPos_one_mod3_2 (R : Nat) (h : R % 3 = 2) : carryAtPos R 1 = 2 := by
   unfold carryAtPos
   rw [if_neg (by decide : 1 ≠ 0), Nat.pow_one, h]
-
-/-- The infinity tactic: custom decision for GST goals (replaces native_decide) -/
-syntax "infinity" : tactic
-
-macro_rules
-  | `(tactic| infinity) =>
-    `(tactic|
-      first
-      | rfl
-      | (rw [hasTwoInFirstK_eq_struct]; rfl)
-      | (rw [noTernaryTwo_eq_struct]; rfl)
-      | (rw [hasTernaryTwo_eq_struct]; rfl)
-      | decide)
 
 /-- The GST decision: does 4*R have digit 2? (survival case) -/
 theorem gst_decide_survival (R : Nat) (h : R % 3 = 2) :
@@ -2126,7 +2113,7 @@ theorem c_increasing (j : Nat) (hj : 1 ≤ j) : c j ≤ c (j+1) := by
   have hpos : 0 ≤ 3^(j+1) * (c j)^2 + 3^(2*j+1) * (c j)^3 := by omega
   omega
 -- Dead code: c3_ge_3pow9 and digitCount3_c3_ge_31 use decide on WellFounded/eager computation
--- These theorems are NOT in the required dependency chain of erdos_ternary_2_universal
+-- These theorems are NOT in the required dependency chain of erdos_ternary_2_universal_of_tailF
 -- (verified by FAMILY_TREE analysis). The digitCount3 function is WellFounded, so decide can't evaluate it.
 -- theorem c3_ge_3pow9 : 3^9 ≤ c 3 := by decide
 -- theorem digitCount3_c3_ge_31 : 31 ≤ digitCount3 (c 3) := by decide
@@ -2134,7 +2121,7 @@ theorem c3_ge_3pow9 : 3^9 ≤ c 3 := by
   have hc2 : c 2 = 9709 := by rfl
   have hc3 : c 3 = c 2 + 3^3 * (c 2)^2 + 3^5 * (c 2)^3 := rfl
   rw [hc3, hc2]; decide
--- digitCount3_c3_ge_31: REMOVED (dead code — not used by erdos_ternary_2_universal)
+-- digitCount3_c3_ge_31: REMOVED (dead code — not used by erdos_ternary_2_universal_of_tailF)
 theorem c_j_ge_3pow9 (j : Nat) (hj : 3 ≤ j) : 3^9 ≤ c j := by
   induction j using Nat.strongRecOn with
   | ind j ih =>
@@ -2732,7 +2719,7 @@ theorem true_duality_theory :
 #print axioms non_cantor_product_b_mod81_49
 #print axioms true_duality_theory
 
--- erdos_ternary_2_verified_200/500/1000 removed (duplicates of lines 3696-3697 which use erdos_ternary_2_universal)
+-- erdos_ternary_2_verified_200/500/1000 removed (duplicates of lines 3696-3697 which use erdos_ternary_2_universal_of_tailF)
 -- The decide-based versions at these lines failed because noTernaryTwo uses WellFounded recursion
 
 
@@ -3408,7 +3395,7 @@ decreasing_by
 def bridge_k (b : Nat) : Nat := bridge_k_find b 1
 
 -- erdos_ternary_2_bounded removed: used decide on ∀ n ≤ 500000 which fails (noTernaryTwo is WellFounded)
--- The universal version (erdos_ternary_2_universal) supersedes this bounded check
+-- The universal version (erdos_ternary_2_universal_of_tailF) supersedes this bounded check
 
 -- ============================================================================
 -- DIGIT PRESERVATION LEMMAS (needed for erdos_ternary_2_even_universal)
@@ -6758,18 +6745,7 @@ theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 <= a) :
           have ih_a1 := ih (a-1) (by omega) ha1
           exact mul4_lift_gst_duality a (by omega : 9 ≤ a) ih_a1
 
-
-theorem erdos_ternary_2_universal (n : Nat) (hn : 9 <= n) :
-    noTernaryTwo (2^n) = false := by
-  by_cases hodd : n % 2 = 1
-  · exact erdos_ternary_2_odd_universal n hn hodd
-  · have heven : n % 2 = 0 := by omega
-    have h4eq : 2^n = 4^(n/2) := by
-      have hn_eq : n = 2 * (n / 2) := by omega
-      rw [show 4 = 2^2 from by decide, <- Nat.pow_mul, <- hn_eq]
-    rw [h4eq]
-    have ha : 5 <= n / 2 := by omega
-    exact has_two_imp_not_no_two (4^(n/2)) (erdos_ternary_2_even_universal (n/2) ha)
+  (retired unconditional-era crown copy deleted — FV-2R flag 4; the live crown is erdos_ternary_2_universal_of_tailF with its input binder)
  -/
 
 
@@ -7609,19 +7585,7 @@ theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
         rw [hpow] at hd4
         exact hasTernaryTwo_of_digit (4^a) p hd4
 
-theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
-    noTernaryTwo (2^n) = false := by
-  by_cases hodd : n % 2 = 1
-  · exact erdos_ternary_2_odd_universal n hn hodd
-  · have heven : n % 2 = 0 := by omega
-    have h4eq : 2^n = 4^(n/2) := by
-      have hn_eq : n = 2 * (n/2) := by omega
-      rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
-    rw [h4eq]
-    have ha : 5 ≤ n/2 := by omega
-    exact has_two_imp_not_no_two (4^(n/2))
-      (erdos_ternary_2_even_universal (n/2) ha)
-
+  (retired unconditional-era crown copy deleted — FV-2R flag 4; the live crown is erdos_ternary_2_universal_of_tailF with its input binder)
 -/
 
 -- ============================================================================
@@ -18377,7 +18341,7 @@ all-depths objects: the no-two window of the mean rotation
 `omegaCutWord s 1 * core` on the tower, and the no-two window of the
 row word `omegaCutWord 0 core` on the sheet-zero cycle.  Weaker input,
 same conclusion. -/
-theorem erdos_ternary_2_universal
+theorem erdos_ternary_2_universal_of_tailF
     (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
@@ -18480,7 +18444,7 @@ theorem erdos_ternary_2_universal_of_even_conjecture
     (hConj : ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false)
     (n : Nat) (hn : 9 ≤ n) :
     noTernaryTwo (2^n) = false :=
-  erdos_ternary_2_universal (erdos_even_conjecture_iff_tailF.mp hConj) n hn
+  erdos_ternary_2_universal_of_tailF (erdos_even_conjecture_iff_tailF.mp hConj) n hn
 
 /-- **THE REVERSE CROWN.**  The second-observer input hands the conjecture
 back: the theorem's input and its terminal content are the same object,
@@ -18520,13 +18484,13 @@ theorem infinite_controller_chokehold_of_universal
       (GSTGraphV2InfiniteControl.graph (1 + n % 2) (n / 2) p).seven.digit
         = 2 := by
   obtain ⟨p, hp⟩ := no_two_false_digit_witness (2^n)
-    (erdos_ternary_2_universal hTailF n hn)
+    (erdos_ternary_2_universal_of_tailF hTailF n hn)
   refine ⟨p, ?_⟩
   rw [GSTGraphV2OmegaWaveLaw.graph_column_digit_exact,
     GSTGraphV2OmegaWaveLaw.graph_column_parity_energy]
   exact hp
 
-#print axioms erdos_ternary_2_universal
+#print axioms erdos_ternary_2_universal_of_tailF
 #print axioms erdos_ternary_2_universal_closed
 #print axioms erdos_ternary_2_universal_tail
 #print axioms erdos_ternary_2_universal_tail2

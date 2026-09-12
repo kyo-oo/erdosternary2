@@ -60,7 +60,7 @@ jobs:
               'theorem gst_prefix_one_u2d_atomic_collision_inline',
               'theorem gst_prefix_one_information_bad_descends_inline',
               'theorem gst_prefix_one_navigation_lift',
-              'theorem erdos_ternary_2_universal',
+              'theorem erdos_ternary_2_universal_of_tailF',
           ]
           for marker in required:
               if marker not in s:
@@ -187,7 +187,7 @@ jobs:
           #print axioms gst_prefix_one_u2d_atomic_collision_inline
           #print axioms gst_prefix_one_information_bad_descends_inline
           #print axioms gst_prefix_one_navigation_lift
-          #print axioms erdos_ternary_2_universal
+          #print axioms erdos_ternary_2_universal_of_tailF
           EOF
           lake env lean FinalComparatorAudit.lean | tee final-comparator-axioms.log
           if grep -Fq 'sorryAx' final-comparator-axioms.log; then

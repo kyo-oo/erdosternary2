@@ -73,7 +73,7 @@ jobs:
             '#print axioms gst_prefix_one_information_bad_descends_inline' \
             '#print axioms gst_prefix_one_child_gate_contradicts_parent_bad_inline' \
             '#print axioms gst_prefix_one_navigation_lift' \
-            '#print axioms erdos_ternary_2_universal' \
+            '#print axioms erdos_ternary_2_universal_of_tailF' \
             > ProductionStep6Audit.lean
           lake env lean ProductionStep6Audit.lean 2>&1 | tee production-step6-axioms.log
           if grep -Fq sorryAx production-step6-axioms.log; then
