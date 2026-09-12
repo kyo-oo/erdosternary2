@@ -3247,9 +3247,11 @@ route consumes and the digit route never touched:
   `10, 13 (mod 27)`, `25, 34, 49 (mod 81)`, `4, 19, 217, 232 (mod 243)` —
   fire a FULL physical Happy row (digit two AND carry in `{0, 3}`) at a
   fixed tower row, unconditionally, with the wave quarter as the explicit
-  carry witness.  The provider `omega_tower_happy_row_of_band` assembles
-  them with the class-two gate into the climb primitive's own statement,
-  delivered with an explicit witness row. -/
+  carry witness.  They compose the repo's own level-three/four/five cut
+  word laws with the quarter laws above.  The provider
+  `omega_tower_happy_row_of_band` assembles them with the class-two gate
+  into the climb primitive's own statement, delivered with an explicit
+  witness row. -/
 
 /-- THE SHADOW WAVE CELL — the quadrupled frozen sub-window below tower row
 `S+1+j`.  The wave value whose size against `3^j` decides the carry at the
@@ -3294,7 +3296,7 @@ theorem omega_shadow_window (S core j : Nat) :
   have hdvd : (3^(S+1+j) * (omegaCutWord S core / 3^j)) % 3^(S+1+j) = 0 := by
     refine Nat.mod_eq_zero_of_dvd ⟨omegaCutWord S core / 3^j, ?_⟩
     ring
-  rw [hEq, Nat.add_mod, hdvd, Nat.zero_add]
+  rw [hEq, Nat.add_mod, hdvd, Nat.zero_add, Nat.mod_mod]
   refine Nat.mod_eq_of_lt ?_
   have hr : omegaCutWord S core % 3^j < 3^j :=
     Nat.mod_lt _ (Nat.pow_pos (by decide) : (0:Nat) < 3^j)
@@ -3402,168 +3404,6 @@ theorem omega_shadow_happy_of_high (S core j : Nat) (hS : 1 ≤ S)
   refine ⟨?_, Or.inr ?_⟩
   · rw [omega_shadow_digit]; exact hd
   · exact omega_shadow_carry_three S core j hS hw1 hw2
-
-/-- The base of the geometric mean is one modulo any divisor of the cut
-modulus: the prefix law cast into the division cascade. -/
-theorem omega_pow4_mod_of_dvd (a m k : Nat) (hm : 1 < m)
-    (hk : m * k = 3^(a+1)) :
-    (4^(3^a)) % m = 1 := by
-  have hp := omega_cut_prefix_one a 1
-  rw [Nat.mul_one] at hp
-  have hdm := Nat.mod_add_div (4^(3^a)) (3^(a+1))
-  rw [hp] at hdm
-  obtain ⟨q, hq⟩ : ∃ q, 4^(3^a) = m * k * q + 1 := by
-    refine ⟨4^(3^a) / 3^(a+1), ?_⟩
-    rw [hk]
-    omega
-  rw [hq, Nat.add_mod]
-  have hdvd : (m * k * q) % m = 0 := by
-    refine Nat.mod_eq_zero_of_dvd ⟨k * q, ?_⟩
-    ring
-  rw [hdvd, Nat.zero_add]
-  exact Nat.mod_eq_of_lt hm
-
-/-- The geometric mean is the core mass modulo twenty-seven from sheet
-level two onward. -/
-theorem omega_geo_mod27 (a core : Nat) (ha : 2 ≤ a) :
-    omegaGeoSum a core % 27 = core % 27 := by
-  have hbase : (4^(3^a)) % 27 = 1 := by
-    refine omega_pow4_mod_of_dvd a 27 (3^(a+1-3)) (by norm_num) ?_
-    rw [show 27 = 3^3 from by norm_num, ← Nat.pow_add]
-    congr 1
-    omega
-  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 27 = 1 := by
-    intro j
-    rw [Nat.pow_mod, hbase, Nat.one_pow]
-    omega
-  induction core with
-  | zero => simp [omegaGeoSum]
-  | succ core ih =>
-      have hgeo : omegaGeoSum a (core+1)
-          = omegaGeoSum a core + (4^(3^a))^core := by
-        simp [omegaGeoSum, Finset.sum_range_succ]
-      rw [hgeo, Nat.add_mod, hterm core, ih]
-      omega
-
-/-- The geometric mean is the core mass modulo eighty-one from sheet
-level three onward. -/
-theorem omega_geo_mod81 (a core : Nat) (ha : 3 ≤ a) :
-    omegaGeoSum a core % 81 = core % 81 := by
-  have hbase : (4^(3^a)) % 81 = 1 := by
-    refine omega_pow4_mod_of_dvd a 81 (3^(a+1-4)) (by norm_num) ?_
-    rw [show 81 = 3^4 from by norm_num, ← Nat.pow_add]
-    congr 1
-    omega
-  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 81 = 1 := by
-    intro j
-    rw [Nat.pow_mod, hbase, Nat.one_pow]
-    omega
-  induction core with
-  | zero => simp [omegaGeoSum]
-  | succ core ih =>
-      have hgeo : omegaGeoSum a (core+1)
-          = omegaGeoSum a core + (4^(3^a))^core := by
-        simp [omegaGeoSum, Finset.sum_range_succ]
-      rw [hgeo, Nat.add_mod, hterm core, ih]
-      omega
-
-/-- The geometric mean is the core mass modulo two hundred forty-three
-from sheet level four onward. -/
-theorem omega_geo_mod243 (a core : Nat) (ha : 4 ≤ a) :
-    omegaGeoSum a core % 243 = core % 243 := by
-  have hbase : (4^(3^a)) % 243 = 1 := by
-    refine omega_pow4_mod_of_dvd a 243 (3^(a+1-5)) (by norm_num) ?_
-    rw [show 243 = 3^5 from by norm_num, ← Nat.pow_add]
-    congr 1
-    omega
-  have hterm : ∀ j : Nat, ((4^(3^a))^j) % 243 = 1 := by
-    intro j
-    rw [Nat.pow_mod, hbase, Nat.one_pow]
-    omega
-  induction core with
-  | zero => simp [omegaGeoSum]
-  | succ core ih =>
-      have hgeo : omegaGeoSum a (core+1)
-          = omegaGeoSum a core + (4^(3^a))^core := by
-        simp [omegaGeoSum, Finset.sum_range_succ]
-      rw [hgeo, Nat.add_mod, hterm core, ih]
-      omega
-
-/-- The LTE mean is sixteen modulo twenty-seven from sheet level two
-onward — the stabilized tower word's third window. -/
-theorem omega_lteCoeff_mod27 (a : Nat) (ha : 2 ≤ a) : lteCoeff a % 27 = 16 := by
-  have hA : omegaCutWord a 1 = lteCoeff a := by
-    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
-  have hA2 : omegaCutWord 2 1 = 9709 := by
-    have h2 := omega_cut_factor 2 1
-    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
-    omega
-  have hchain := omega_tower_word_mod_chain 1 3 a (by omega)
-  rw [show (3:Nat)^3 = 27 from by norm_num, show 3-1 = 2 from by norm_num,
-      Nat.mul_one, Nat.mul_one, hA, hA2] at hchain
-  rw [hchain]
-  decide
-
-/-- The LTE mean is sixteen modulo eighty-one from sheet level three
-onward — the stabilized tower word's fourth window. -/
-theorem omega_lteCoeff_mod81 (a : Nat) (ha : 3 ≤ a) : lteCoeff a % 81 = 16 := by
-  have hA : omegaCutWord a 1 = lteCoeff a := by
-    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
-  have hA3 : omegaCutWord 3 1 = 222399981598543 := by
-    have h3 := omega_cut_factor 3 1
-    norm_num [Nat.pow_succ, Nat.pow_zero] at h3
-    omega
-  have hchain := omega_tower_word_mod_chain 1 4 a (by omega)
-  rw [show (3:Nat)^4 = 81 from by norm_num, show 4-1 = 3 from by norm_num,
-      Nat.mul_one, Nat.mul_one, hA, hA3] at hchain
-  rw [hchain]
-  decide
-
-/-- The LTE mean is one hundred seventy-eight modulo two hundred
-forty-three from sheet level four onward — the stabilized tower word's
-fifth window. -/
-theorem omega_lteCoeff_mod243 (a : Nat) (ha : 4 ≤ a) : lteCoeff a % 243 = 178 := by
-  have hA : omegaCutWord a 1 = lteCoeff a := by
-    simp [omegaCutWord, omegaGeoSum, Finset.sum_range_one, Nat.pow_zero]
-  have hA4 : omegaCutWord 4 1 = 24057640120673299065081231814259802792690247621 := by
-    have h4 := omega_cut_factor 4 1
-    norm_num [Nat.pow_succ, Nat.pow_zero] at h4
-    omega
-  have hchain := omega_tower_word_mod_chain 1 5 a (by omega)
-  rw [show (3:Nat)^5 = 243 from by norm_num, show 5-1 = 4 from by norm_num,
-      Nat.mul_one, Nat.mul_one, hA, hA4] at hchain
-  rw [hchain]
-  decide
-
-/-- **THE CUT WORD MOD-27 LAW.**  From sheet level two onward the cut word
-of the tower is `16 * core` modulo twenty-seven. -/
-theorem omega_cut_word_mod27 (a core : Nat) (ha : 2 ≤ a) :
-    omegaCutWord a core % 27 = (16 * core) % 27 := by
-  have hlt := omega_lteCoeff_mod27 a ha
-  have hgeo := omega_geo_mod27 a core ha
-  unfold omegaCutWord
-  rw [Nat.mul_mod, hlt, hgeo]
-  omega
-
-/-- **THE CUT WORD MOD-81 LAW.**  From sheet level three onward the cut
-word of the tower is `16 * core` modulo eighty-one. -/
-theorem omega_cut_word_mod81 (a core : Nat) (ha : 3 ≤ a) :
-    omegaCutWord a core % 81 = (16 * core) % 81 := by
-  have hlt := omega_lteCoeff_mod81 a ha
-  have hgeo := omega_geo_mod81 a core ha
-  unfold omegaCutWord
-  rw [Nat.mul_mod, hlt, hgeo]
-  omega
-
-/-- **THE CUT WORD MOD-243 LAW.**  From sheet level four onward the cut
-word of the tower is `178 * core` modulo two hundred forty-three. -/
-theorem omega_cut_word_mod243 (a core : Nat) (ha : 4 ≤ a) :
-    omegaCutWord a core % 243 = (178 * core) % 243 := by
-  have hlt := omega_lteCoeff_mod243 a ha
-  have hgeo := omega_geo_mod243 a core ha
-  unfold omegaCutWord
-  rw [Nat.mul_mod, hlt, hgeo]
-  omega
 
 /-- **THE MOD-27 TEN HAPPY IGNITION.**  Every core congruent to ten modulo
 twenty-seven owns a physical Happy row at tower row `S+3` for every sheet
@@ -3819,16 +3659,6 @@ theorem four_power_happy_row_of_tower_band (K : Nat)
 #print axioms omega_shadow_carry_three
 #print axioms omega_shadow_happy_of_low
 #print axioms omega_shadow_happy_of_high
-#print axioms omega_pow4_mod_of_dvd
-#print axioms omega_geo_mod27
-#print axioms omega_geo_mod81
-#print axioms omega_geo_mod243
-#print axioms omega_lteCoeff_mod27
-#print axioms omega_lteCoeff_mod81
-#print axioms omega_lteCoeff_mod243
-#print axioms omega_cut_word_mod27
-#print axioms omega_cut_word_mod81
-#print axioms omega_cut_word_mod243
 #print axioms omega_tower_happy_of_mod27_ten
 #print axioms omega_tower_happy_of_mod27_thirteen
 #print axioms omega_tower_happy_of_mod81_twentyfive
