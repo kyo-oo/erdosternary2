@@ -9,6 +9,7 @@ on:
       - 'GSTFourPowerAffineTerminalCollision.lean'
       - 'GSTFourPowerAffineSuccessEquivalence.lean'
       - 'GSTFourPowerAffineIteratedRelocation.lean'
+      - 'GSTFourPowerExactRowRelocation.lean'
       - 'GSTFourPowerDirectHappyBridge.lean'
       - '.github/workflows/gpt56-consecutive-two-relocation.yml'
   workflow_dispatch:
@@ -33,7 +34,13 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTFourPowerAffineTerminalCollision 2>&1 | tee consecutive-two-deps.log
+          mkdir -p .lake/build/lib/lean
+          lake build GSTFourPowerDirectHappyBridge 2>&1 | tee consecutive-two-base.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' consecutive-two-base.log
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerExactRowRelocation.olean GSTFourPowerExactRowRelocation.lean 2>&1 | tee -a consecutive-two-deps.log
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineIteratedRelocation.olean GSTFourPowerAffineIteratedRelocation.lean 2>&1 | tee -a consecutive-two-deps.log
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineSuccessEquivalence.olean GSTFourPowerAffineSuccessEquivalence.lean 2>&1 | tee -a consecutive-two-deps.log
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineTerminalCollision.olean GSTFourPowerAffineTerminalCollision.lean 2>&1 | tee -a consecutive-two-deps.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' consecutive-two-deps.log
       - name: Compile consecutive-two direct relocation constructor
         shell: bash
