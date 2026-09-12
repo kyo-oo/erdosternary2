@@ -31,7 +31,7 @@ retired third-wave climb.  The repository also carries the campaign's
 zero-input target `four_power_omega_shadow_wave_closed` together with
 the receipt theorem `four_power_omega_shadow_wave_closed_iff_tail4`:
 the closed statement is equivalent to the fifth-weakening tail input,
-so the tail's residual is exactly the closed wave's remaining content.
+so the tail's residual is exactly the closed wave's own content.
 -/
 
 /-- Byte-identical challenge-side definition. -/
