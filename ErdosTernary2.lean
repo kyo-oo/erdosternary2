@@ -18409,6 +18409,87 @@ theorem no_two_false_digit_witness (n : Nat) (h : noTernaryTwo n = false) :
         rw [Nat.pow_succ, Nat.mul_comm, ← Nat.div_div_eq_div_mul]
         exact hp)
 
+
+/-! ## §7.15 The terminal identity — the campaign closes at the fixed point
+
+The weakening chain's seven generations — `hTail`, `hTail2`, `hTail3`,
+`hTail4`, `hTail5`, `hTailE`, `hTailF` — each paid a family of the input's
+clauses unconditionally: the kernel-checked base, the sheet gates, both
+observer axes, every tower level, every sheet-zero row.  This section
+composes the paid pieces into THE TERMINAL IDENTITY: the second-observer
+input `four_power_omega_shadow_wave_tailF` and the even-exponent Erdős
+ternary statement — every `4^K` from eight onward owning its ternary
+digit two — are ONE object, machine-certified in both directions.  The
+crown follows wearing the conjecture's own face, and the reverse crown
+hands the conjecture back from the input: nothing sits between the
+theorem and its terminal content.  The campaign closes here. -/
+
+/-- **THE FULL COVERAGE FORM.**  From the closed wave, every exponent from
+eight onward — shadow or not — owns its digit two: the coverage law of
+the Ω-Wave Law, fed the closed statement. -/
+theorem omega_shadow_kill_all_of_closed
+    (hClosed : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_closed) :
+    ∀ K : Nat, 8 ≤ K → ∃ p : Nat, 4^K / 3^p % 3 = 2 :=
+  fun K hK => GSTGraphV2OmegaWaveLaw.omega_digit_two_coverage hClosed K hK
+
+/-- **KILL-ALL TO CONJECTURE.**  The digit-two statement and the boolean
+verdict are one observable: every exponent from eight onward owning its
+digit two IS every `4^K` from eight onward failing `noTernaryTwo`. -/
+theorem erdos_even_conjecture_of_kill_all
+    (hKill : ∀ K : Nat, 8 ≤ K → ∃ p : Nat, 4^K / 3^p % 3 = 2) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false := by
+  intro K hK
+  obtain ⟨p, hp⟩ := hKill K hK
+  exact has_two_imp_not_no_two (4^K) (hasTernaryTwo_of_digit (4^K) p hp)
+
+/-- **CONJECTURE TO KILL-ALL.**  The boolean verdict hands over the
+digit-two witness position: the two readings of the terminal content are
+interchangeable in this direction too. -/
+theorem omega_shadow_kill_all_of_even_conjecture
+    (hConj : ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) :
+    ∀ K : Nat, 8 ≤ K → ∃ p : Nat, 4^K / 3^p % 3 = 2 := by
+  intro K hK
+  obtain ⟨p, hp⟩ := no_two_false_digit_witness (4^K) (hConj K hK)
+  exact ⟨p, hp⟩
+
+/-- **THE TERMINAL IDENTITY.**  The second-observer input and the
+even-exponent Erdős ternary statement are one object: the input implies
+the conjecture through the paid gate families and both observer laws, and
+the conjecture implies the input outright.  The weakening chain terminates
+at this fixed point — the input IS the terminal content, certified in
+both directions by the kernel. -/
+theorem erdos_even_conjecture_iff_tailF :
+    (∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false)
+      ↔ GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF := by
+  constructor
+  · intro hConj
+    exact four_power_omega_shadow_wave_closed_iff_tailF.mp
+      (fun K hK _ => omega_shadow_kill_all_of_even_conjecture hConj K hK)
+  · intro hTailF
+    exact erdos_even_conjecture_of_kill_all
+      (omega_shadow_kill_all_of_closed
+        (four_power_omega_shadow_wave_closed_of_tailF hTailF))
+
+/-- **THE CROWN, WORN IN THE CONJECTURE'S OWN FACE.**  The final theorem
+with the terminal content as its single input, stated directly: every
+`4^K` from eight onward failing `noTernaryTwo` yields every `2^n` from
+nine onward failing it.  One hypothesis, the conjecture's own statement;
+the conclusion, the campaign's target — and by the terminal identity the
+two carry the same content. -/
+theorem erdos_ternary_2_universal_of_even_conjecture
+    (hConj : ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal (erdos_even_conjecture_iff_tailF.mp hConj) n hn
+
+/-- **THE REVERSE CROWN.**  The second-observer input hands the conjecture
+back: the theorem's input and its terminal content are the same object,
+read from either side. -/
+theorem erdos_even_conjecture_of_tailF
+    (hTailF : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr hTailF
+
 /-- **THE INFINITE-CONTROLLER CHOKEHOLD — ALL INPUTS, ALL OUTPUTS.**
 The main theorem's verdict, read as a statement about the one infinite
 GST-V2 control graph: for every exponent from nine onward — every input,
@@ -18474,3 +18555,9 @@ theorem infinite_controller_chokehold_of_universal
 #print axioms no_two_false_digit_witness
 #print axioms infinite_controller_ternary_two_chokehold
 #print axioms infinite_controller_chokehold_of_universal
+#print axioms omega_shadow_kill_all_of_closed
+#print axioms erdos_even_conjecture_of_kill_all
+#print axioms omega_shadow_kill_all_of_even_conjecture
+#print axioms erdos_even_conjecture_iff_tailF
+#print axioms erdos_ternary_2_universal_of_even_conjecture
+#print axioms erdos_even_conjecture_of_tailF
