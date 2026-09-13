@@ -105,8 +105,8 @@ theorem observation_law_wave :
       (∀ j : Nat, ¬ GSTU2DEventTransport.HappyCell
         (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.carry
         (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+j)).seven.digit) →
-      0 < GSTGraphV2PerfectPowerBlockProbe.graphPhaseWindow (4^K) 0 3 (q+1) ∧
-        GSTGraphV2PerfectPowerBlockProbe.graphPhaseWindow (4^K) 3 3 (q+1) ≤ 0 ∧
+      0 < GSTGraphV2PerfectPowerBlock.graphPhaseWindow (4^K) 0 3 (q+1) ∧
+        GSTGraphV2PerfectPowerBlock.graphPhaseWindow (4^K) 3 3 (q+1) ≤ 0 ∧
         64 * (GSTGraphV2InfiniteControl.graph (4^K) 0 (3+q)).seven.digit +
             GSTFinalPurePowerResidueTransplant.wideCarry 64 (4^K) (3+q) =
           (GSTGraphV2InfiniteControl.graph (4^K) 3 (3+q)).seven.digit +
