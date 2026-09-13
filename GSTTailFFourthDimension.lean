@@ -405,6 +405,321 @@ theorem tower_dodge_dead_of_mod27_band (s core : Nat) (hs : 2 ≤ s)
   rw [h27, h9] at hkill hdodge
   omega
 
+/-! ## §6 The row lattice — the sheet-zero residual, fired three levels deep
+
+The row half of the carried input, attacked directly on the powers.  The
+hard family of the sheet-zero decomposition is `core % 9 ∈ {1, 4}` (3-free,
+above the kernel base); the residue class of the core modulo `3^m` pins the
+ternary digits of `4 ^ core` up to position `m` through the cycle laws —
+the monolith's own `four_pow_mod81` at level 27, and the two new cycle laws
+of this section at levels 81 and 243.  Three lattice levels, thirteen fired
+classes:
+
+* level 27, digit position 3: classes `19` and `22` mod 27 —
+  `4 ^ core % 81 = 58` and `67`;
+* level 81, digit position 4: classes `55, 58, 64, 67` mod 81 —
+  `4 ^ core % 243 = 166, 175, 193, 202`;
+* level 243, digit position 5: classes `85, 91, 112, 163, 175, 190, 202`
+  mod 243 — `4 ^ core % 729 = 499, 517, 580, 490, 526, 571, 607`.
+
+Every fired class owns its digit two UNCONDITIONALLY — no package, no
+input, no gates.  The carried row input of §4 shrinks to the seventeen
+survivors of the mod-243 level (§7): the replacement of the input's row
+half. -/
+
+/-- The cycle law of level 81: the modulus-243 residue of `4 ^ m` is pinned
+by the class of `m` modulo 81. -/
+theorem four_pow_mod243 (m : Nat) : (4^m) % 243 = (4^(m % 81)) % 243 := by
+  have h81 : (4^81) % 243 = 1 := by decide
+  have h481q : ∀ q : Nat, (4^81)^q % 243 = 1 := by
+    intro q
+    induction q with
+    | zero => decide
+    | succ q' ih =>
+      have hsucc : (4^81)^(Nat.succ q') = (4^81)^(q' + 1) := rfl
+      rw [hsucc, Nat.pow_succ, Nat.mul_mod, h81, ih]
+  have hmd : m = 81 * (m / 81) + m % 81 := (Nat.div_add_mod m 81).symm
+  have h4m : 4^m = (4^81)^(m/81) * 4^(m%81) := by
+    have h1 : 4^m = 4^(81*(m/81) + m%81) := congrArg (fun x => 4^x) hmd
+    have h2 : 4^(81*(m/81) + m%81) = (4^81)^(m/81) * 4^(m%81) := by
+      rw [Nat.pow_add, Nat.pow_mul]
+    exact h1.trans h2
+  rw [h4m, Nat.mul_mod, h481q, Nat.one_mul, Nat.mod_mod]
+
+/-- The cycle law of level 243: the modulus-729 residue of `4 ^ m` is pinned
+by the class of `m` modulo 243. -/
+theorem four_pow_mod729 (m : Nat) : (4^m) % 729 = (4^(m % 243)) % 729 := by
+  have h243 : (4^243) % 729 = 1 := by
+    have hsplit : (243 : Nat) = 128 + 115 := by omega
+    rw [hsplit, Nat.pow_add]
+    decide
+  have h4243q : ∀ q : Nat, (4^243)^q % 729 = 1 := by
+    intro q
+    induction q with
+    | zero => decide
+    | succ q' ih =>
+      have hsucc : (4^243)^(Nat.succ q') = (4^243)^(q' + 1) := rfl
+      rw [hsucc, Nat.pow_succ, Nat.mul_mod, h243, ih]
+  have hmd : m = 243 * (m / 243) + m % 243 := (Nat.div_add_mod m 243).symm
+  have h4m : 4^m = (4^243)^(m/243) * 4^(m%243) := by
+    have h1 : 4^m = 4^(243*(m/243) + m%243) := congrArg (fun x => 4^x) hmd
+    have h2 : 4^(243*(m/243) + m%243) = (4^243)^(m/243) * 4^(m%243) := by
+      rw [Nat.pow_add, Nat.pow_mul]
+    exact h1.trans h2
+  rw [h4m, Nat.mul_mod, h4243q, Nat.one_mul, Nat.mod_mod]
+
+/-- The thirteen fired classes' level values, computed at their levels. -/
+theorem four_pow_19_mod81 : (4^19) % 81 = 58 := by decide
+theorem four_pow_22_mod81 : (4^22) % 81 = 67 := by decide
+theorem four_pow_55_mod243 : (4^55) % 243 = 166 := by decide
+theorem four_pow_58_mod243 : (4^58) % 243 = 175 := by decide
+theorem four_pow_64_mod243 : (4^64) % 243 = 193 := by decide
+theorem four_pow_67_mod243 : (4^67) % 243 = 202 := by decide
+theorem four_pow_85_mod729 : (4^85) % 729 = 499 := by decide
+theorem four_pow_91_mod729 : (4^91) % 729 = 517 := by decide
+theorem four_pow_112_mod729 : (4^112) % 729 = 580 := by decide
+theorem four_pow_163_mod729 : (4^163) % 729 = 490 := by
+  have hsplit : (163 : Nat) = 128 + 35 := by omega
+  rw [hsplit, Nat.pow_add]; decide
+theorem four_pow_175_mod729 : (4^175) % 729 = 526 := by
+  have hsplit : (175 : Nat) = 128 + 47 := by omega
+  rw [hsplit, Nat.pow_add]; decide
+theorem four_pow_190_mod729 : (4^190) % 729 = 571 := by
+  have hsplit : (190 : Nat) = 128 + 62 := by omega
+  rw [hsplit, Nat.pow_add]; decide
+theorem four_pow_202_mod729 : (4^202) % 729 = 607 := by
+  have hsplit : (202 : Nat) = 128 + 74 := by omega
+  rw [hsplit, Nat.pow_add]; decide
+
+/-- The generic level-27 fire: a core in class `c` mod 27 whose level value
+`4 ^ c % 81 = v` sits in the top third (`v / 27 = 2`) owns digit position
+3 of `4 ^ core` outright. -/
+theorem digit3_pow4_pos3_of_class (core c v : Nat)
+    (h : core % 27 = c) (hv : (4^c) % 81 = v) (hv2 : v / 27 = 2) :
+    digit3 (4^core) 3 = 2 := by
+  have hm : (4^core) % 81 = v := by rw [four_pow_mod81, h]; exact hv
+  show (4^core) / 3^3 % 3 = 2
+  have h33 : (3 : Nat)^3 = 27 := by norm_num
+  rw [h33]
+  have hbridge : (4^core / 27) % 3 = ((4^core) % 81) / 27 := by omega
+  rw [hbridge, hm, hv2]
+
+/-- The generic level-81 fire: a core in class `c` mod 81 whose level value
+`4 ^ c % 243 = v` sits in the top third (`v / 81 = 2`) owns digit position
+4 of `4 ^ core` outright. -/
+theorem digit3_pow4_pos4_of_class (core c v : Nat)
+    (h : core % 81 = c) (hv : (4^c) % 243 = v) (hv2 : v / 81 = 2) :
+    digit3 (4^core) 4 = 2 := by
+  have hm : (4^core) % 243 = v := by rw [four_pow_mod243, h]; exact hv
+  show (4^core) / 3^4 % 3 = 2
+  have h34 : (3 : Nat)^4 = 81 := by norm_num
+  rw [h34]
+  have hbridge : (4^core / 81) % 3 = ((4^core) % 243) / 81 := by omega
+  rw [hbridge, hm, hv2]
+
+/-- The generic level-243 fire: a core in class `c` mod 243 whose level
+value `4 ^ c % 729 = v` sits in the top third (`v / 243 = 2`) owns digit
+position 5 of `4 ^ core` outright. -/
+theorem digit3_pow4_pos5_of_class (core c v : Nat)
+    (h : core % 243 = c) (hv : (4^c) % 729 = v) (hv2 : v / 243 = 2) :
+    digit3 (4^core) 5 = 2 := by
+  have hm : (4^core) % 729 = v := by rw [four_pow_mod729, h]; exact hv
+  show (4^core) / 3^5 % 3 = 2
+  have h35 : (3 : Nat)^5 = 243 := by norm_num
+  rw [h35]
+  have hbridge : (4^core / 243) % 3 = ((4^core) % 729) / 243 := by omega
+  rw [hbridge, hm, hv2]
+
+/-! ## §7 The replacement input — the shrunk row half, linked with the
+universe -/
+
+/-- **THE THIRTEEN FIRED CLASSES.**  The lattice's fired classes of the hard
+family, at their three levels: every core in one of these classes owns its
+digit two outright. -/
+def s0_lattice_fire_class (core : Nat) : Prop :=
+  core % 27 = 19 ∨ core % 27 = 22 ∨
+  core % 81 = 55 ∨ core % 81 = 58 ∨ core % 81 = 64 ∨ core % 81 = 67 ∨
+  core % 243 = 85 ∨ core % 243 = 91 ∨ core % 243 = 112 ∨ core % 243 = 163 ∨
+  core % 243 = 175 ∨ core % 243 = 190 ∨ core % 243 = 202
+
+/-- **THE LATTICE FIRE.**  Every one of the thirteen fired classes owns its
+digit two unconditionally — no package, no input, no gates. -/
+theorem s0_lattice_fire (core : Nat) (h : s0_lattice_fire_class core) :
+    ∃ p : Nat, digit3 (4^core) p = 2 := by
+  unfold s0_lattice_fire_class at h
+  rcases h with h | h | h | h | h | h | h | h | h | h | h | h | h
+  · exact ⟨3, digit3_pow4_pos3_of_class core 19 h four_pow_19_mod81 (by decide)⟩
+  · exact ⟨3, digit3_pow4_pos3_of_class core 22 h four_pow_22_mod81 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 55 h four_pow_55_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 58 h four_pow_58_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 64 h four_pow_64_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 67 h four_pow_67_mod243 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 85 h four_pow_85_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 91 h four_pow_91_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 112 h four_pow_112_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 163 h four_pow_163_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 175 h four_pow_175_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 190 h four_pow_190_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 202 h four_pow_202_mod729 (by decide)⟩
+
+/-- **THE SEVENTEEN SURVIVORS.**  The hard family's residue classes that no
+lattice level has fired: the carried row input shrinks to exactly these. -/
+def tailF_row_survivor_class (core : Nat) : Prop :=
+  core % 243 = 1 ∨ core % 243 = 4 ∨ core % 243 = 10 ∨ core % 243 = 13 ∨
+  core % 243 = 28 ∨ core % 243 = 31 ∨ core % 243 = 37 ∨ core % 243 = 40 ∨
+  core % 243 = 82 ∨ core % 243 = 94 ∨ core % 243 = 109 ∨ core % 243 = 118 ∨
+  core % 243 = 121 ∨ core % 243 = 166 ∨ core % 243 = 172 ∨ core % 243 = 193 ∨
+  core % 243 = 199
+
+/-- **THE BRIDGE.**  Every hard-family core that no lattice level has fired
+is one of the seventeen survivors: the case tree 6 → 12 → 24 closes the
+thirteen fired leaves by contradiction and lands the seventeen survivors
+by arithmetic. -/
+theorem tailF_row_survivor_of_hard_nonfire (core : Nat)
+    (hc14 : core % 9 = 1 ∨ core % 9 = 4)
+    (hf : ¬ s0_lattice_fire_class core) :
+    tailF_row_survivor_class core := by
+  unfold tailF_row_survivor_class
+  unfold s0_lattice_fire_class at hf
+  push_neg at hf
+  obtain ⟨n19, n22, n55, n58, n64, n67, n85, n91, n112, n163, n175, n190, n202⟩ := hf
+  rcases hc14 with h1 | h4
+  · have h27 : core % 27 = 1 ∨ core % 27 = 10 ∨ core % 27 = 19 := by omega
+    rcases h27 with c1 | c10 | c19
+    · have h81 : core % 81 = 1 ∨ core % 81 = 28 ∨ core % 81 = 55 := by omega
+      rcases h81 with d1 | d28 | d55
+      · have h243 : core % 243 = 1 ∨ core % 243 = 82 ∨ core % 243 = 163 := by omega
+        rcases h243 with e1 | e82 | e163
+        · omega
+        · omega
+        · exact absurd e163 n163
+      · have h243 : core % 243 = 28 ∨ core % 243 = 109 ∨ core % 243 = 190 := by omega
+        rcases h243 with e28 | e109 | e190
+        · omega
+        · omega
+        · exact absurd e190 n190
+      · exact absurd d55 n55
+    · have h81 : core % 81 = 10 ∨ core % 81 = 37 ∨ core % 81 = 64 := by omega
+      rcases h81 with d10 | d37 | d64
+      · have h243 : core % 243 = 10 ∨ core % 243 = 91 ∨ core % 243 = 172 := by omega
+        rcases h243 with e10 | e91 | e172
+        · omega
+        · exact absurd e91 n91
+        · omega
+      · have h243 : core % 243 = 37 ∨ core % 243 = 118 ∨ core % 243 = 199 := by omega
+        rcases h243 with e37 | e118 | e199
+        · omega
+        · omega
+        · omega
+      · exact absurd d64 n64
+    · exact absurd c19 n19
+  · have h27 : core % 27 = 4 ∨ core % 27 = 13 ∨ core % 27 = 22 := by omega
+    rcases h27 with c4 | c13 | c22
+    · have h81 : core % 81 = 4 ∨ core % 81 = 31 ∨ core % 81 = 58 := by omega
+      rcases h81 with d4 | d31 | d58
+      · have h243 : core % 243 = 4 ∨ core % 243 = 85 ∨ core % 243 = 166 := by omega
+        rcases h243 with e4 | e85 | e166
+        · omega
+        · exact absurd e85 n85
+        · omega
+      · have h243 : core % 243 = 31 ∨ core % 243 = 112 ∨ core % 243 = 193 := by omega
+        rcases h243 with e31 | e112 | e193
+        · omega
+        · exact absurd e112 n112
+        · omega
+      · exact absurd d58 n58
+    · have h81 : core % 81 = 13 ∨ core % 81 = 40 ∨ core % 81 = 67 := by omega
+      rcases h81 with d13 | d40 | d67
+      · have h243 : core % 243 = 13 ∨ core % 243 = 94 ∨ core % 243 = 175 := by omega
+        rcases h243 with e13 | e94 | e175
+        · omega
+        · omega
+        · exact absurd e175 n175
+      · have h243 : core % 243 = 40 ∨ core % 243 = 121 ∨ core % 243 = 202 := by omega
+        rcases h243 with e40 | e121 | e202
+        · omega
+        · omega
+        · exact absurd e202 n202
+      · exact absurd d67 n67
+    · exact absurd c22 n22
+
+/-- **THE SHRUNK ROW INPUT.**  The row primitive with all thirteen fired
+classes removed: the residue clause now demands one of the seventeen
+mod-243 survivors, and the fire at every other class of the hard family is
+unconditional (§6). -/
+def tailF_row_primitive_mod243 : Prop :=
+  ∀ core : Nat, 500 < core → ¬ 3 ∣ core →
+    tailF_row_survivor_class core →
+      ∃ j : Nat, 2 * 3^j ≤ (omegaCutWord 0 core) % 3^(j+1)
+
+/-- **THE WEAKNESS RECEIPT.**  The shrunk row input is strictly weaker than
+the row primitive: every survivor class is a class of the hard family. -/
+theorem tailF_row_primitive_mod243_of_row (hRow : tailF_row_primitive) :
+    tailF_row_primitive_mod243 := by
+  intro core hK hfree hclass
+  refine hRow core hK hfree ?_
+  unfold tailF_row_survivor_class at hclass
+  rcases hclass with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h <;> omega
+
+/-- **THE REPLACEMENT OF THE INPUT'S ROW HALF.**  The tower primitive plus
+the seventeen-survivor row primitive compose into the full second-observer
+input: the sheet-zero family's fired classes close by the lattice outright,
+the survivors go through the shrunk row input and the uniform row law, and
+the tower family rides the tower primitive unchanged. -/
+theorem tailF_of_tower_and_row_mod243
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod243) :
+    four_power_omega_shadow_wave_tailF := by
+  intro K hK hshadow
+  obtain ⟨s, core, hKsc, hfree, hres, hA, hB1, hB2, hC, hD⟩ := hshadow
+  rcases Nat.eq_zero_or_pos s with rfl | hs1
+  · have hc14 : core % 9 = 1 ∨ core % 9 = 4 := by
+      rcases hres with h4 | ⟨_, h1⟩ | ⟨h1s, h7⟩
+      · exact Or.inr h4
+      · exact Or.inl h1
+      · exact absurd h1s (by omega)
+    rw [Nat.pow_zero, Nat.one_mul] at hKsc
+    have hKc : 500 < core := by rw [← hKsc]; exact hK
+    by_cases hf : s0_lattice_fire_class core
+    · obtain ⟨p, hp⟩ := s0_lattice_fire core hf
+      rw [hKsc]
+      exact ⟨p, hp⟩
+    · obtain ⟨j, hj⟩ := hRowMod core hKc hfree
+        (tailF_row_survivor_of_hard_nonfire core hc14 hf)
+      refine ⟨1+j, ?_⟩
+      rw [hKsc]
+      exact omega_row_level_digit_two core j hj
+  · have hc47 : core % 9 = 4 ∨ core % 9 = 7 := by
+      rcases hres with h4 | ⟨hs0, h1⟩ | ⟨hs1', h7⟩
+      · exact Or.inl h4
+      · exact absurd hs0 (by omega)
+      · exact Or.inr h7
+    obtain ⟨i, _, hfire⟩ := hTower s core hs1 hfree hc47 hD
+    refine ⟨s+1+i, ?_⟩
+    rw [hKsc]
+    exact tower_observation_digit_two s core i hfire
+
+/-- **THE EVEN STATEMENT ON THE REPLACEMENT INPUT.**  Through the
+monolith's own terminal identity, the tower primitive plus the
+seventeen-survivor row primitive carry the whole even-exponent statement. -/
+theorem even_conjecture_of_tower_and_row_mod243
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod243) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr
+    (tailF_of_tower_and_row_mod243 hTower hRowMod)
+
+/-- **THE CROWN ON THE REPLACEMENT INPUT.**  The monolith's universal
+theorem with its input slot filled by the replacement pair: the tower
+primitive and the seventeen-survivor row primitive. -/
+theorem erdos_ternary_2_universal_of_tower_and_row_mod243
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod243)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_of_tailF
+    (tailF_of_tower_and_row_mod243 hTower hRowMod) n hn
+
 #print axioms tower_observation_digit_two
 #print axioms omega_cut_word_stabilizes
 #print axioms omega_tower_word_mod_stable
@@ -419,5 +734,16 @@ theorem tower_dodge_dead_of_mod27_band (s core : Nat) (hs : 2 ≤ s)
 #print axioms even_conjecture_of_row_and_tower
 #print axioms erdos_ternary_2_universal_of_row_and_tower
 #print axioms tower_dodge_dead_of_mod27_band
+#print axioms four_pow_mod243
+#print axioms four_pow_mod729
+#print axioms digit3_pow4_pos3_of_class
+#print axioms digit3_pow4_pos4_of_class
+#print axioms digit3_pow4_pos5_of_class
+#print axioms s0_lattice_fire
+#print axioms tailF_row_survivor_of_hard_nonfire
+#print axioms tailF_row_primitive_mod243_of_row
+#print axioms tailF_of_tower_and_row_mod243
+#print axioms even_conjecture_of_tower_and_row_mod243
+#print axioms erdos_ternary_2_universal_of_tower_and_row_mod243
 
 end GSTTailFFourthDimension
