@@ -738,8 +738,8 @@ family closed outright:
 by the class of `m` modulo 729. -/
 theorem four_pow_mod2187 (m : Nat) : (4^m) % 2187 = (4^(m % 729)) % 2187 := by
   have h729 : (4^729) % 2187 = 1 := by
-    have hsplit : (729 : Nat) = 128 + 601 := by omega
-    rw [hsplit, Nat.pow_add]
+    have hsplit : (729 : Nat) = 243 + 243 + 243 := by omega
+    rw [hsplit, Nat.pow_add, Nat.pow_add]
   have h4729q : ∀ q : Nat, (4^729)^q % 2187 = 1 := by
     intro q
     induction q with
@@ -778,29 +778,29 @@ theorem four_pow_352_mod2187 : (4^352) % 2187 = 1786 := by
   have hsplit : (352 : Nat) = 128 + 224 := by omega
   rw [hsplit, Nat.pow_add]
 theorem four_pow_409_mod2187 : (4^409) % 2187 = 1471 := by
-  have hsplit : (409 : Nat) = 128 + 281 := by omega
+  have hsplit : (409 : Nat) = 200 + 209 := by omega
   rw [hsplit, Nat.pow_add]
 theorem four_pow_487_mod2187 : (4^487) % 2187 = 1462 := by
-  have hsplit : (487 : Nat) = 128 + 359 := by omega
+  have hsplit : (487 : Nat) = 240 + 247 := by omega
   rw [hsplit, Nat.pow_add]
 theorem four_pow_490_mod2187 : (4^490) % 2187 = 1714 := by
-  have hsplit : (490 : Nat) = 128 + 362 := by omega
+  have hsplit : (490 : Nat) = 245 + 245 := by omega
   rw [hsplit, Nat.pow_add]
 theorem four_pow_526_mod2187 : (4^526) % 2187 = 1579 := by
-  have hsplit : (526 : Nat) = 128 + 398 := by omega
-  rw [hsplit, Nat.pow_add]
+  have hsplit : (526 : Nat) = 256 + 256 + 14 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
 theorem four_pow_568_mod2187 : (4^568) % 2187 = 1705 := by
-  have hsplit : (568 : Nat) = 128 + 440 := by omega
-  rw [hsplit, Nat.pow_add]
+  have hsplit : (568 : Nat) = 256 + 256 + 56 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
 theorem four_pow_607_mod2187 : (4^607) % 2187 = 1822 := by
-  have hsplit : (607 : Nat) = 128 + 479 := by omega
-  rw [hsplit, Nat.pow_add]
+  have hsplit : (607 : Nat) = 256 + 256 + 95 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
 theorem four_pow_679_mod2187 : (4^679) % 2187 = 1552 := by
-  have hsplit : (679 : Nat) = 128 + 551 := by omega
-  rw [hsplit, Nat.pow_add]
+  have hsplit : (679 : Nat) = 256 + 256 + 167 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
 theorem four_pow_685_mod2187 : (4^685) % 2187 = 1570 := by
-  have hsplit : (685 : Nat) = 128 + 557 := by omega
-  rw [hsplit, Nat.pow_add]
+  have hsplit : (685 : Nat) = 256 + 256 + 173 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
 
 /-- The generic level-729 fire: a core in class `c` mod 729 whose level value
 `4 ^ c % 2187 = v` sits in the top third (`v / 729 = 2`) owns digit position
