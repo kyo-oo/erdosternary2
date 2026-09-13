@@ -374,7 +374,10 @@ theorem reverseOntRectangle_exact
         (fun t ht => (hcell t p ht hpK).2.2.2)
       dsimp [g]
       rw [hrow]
-      ring
+      first
+        | ring
+        | ring_nf
+        | (push_cast <;> ring_nf)
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
@@ -419,6 +422,23 @@ theorem graphOntWindow_positive_of_happy
     exact graph_digit_lt_three E t (b+p)
   · simpa [Nat.add_assoc] using hHappy
 
+/-- The recursive weighted prefix IS the literal base-three weighted sum of
+the row codes — the bridge the exact window identity needs: the accumulated
+column mass and the explicit sum are one object. -/
+theorem weightedOntPrefix_eq_sum (C d : Nat → Nat → Nat) (N : Nat) :
+    ∀ K : Nat,
+    weightedOntPrefix C d N K =
+      Finset.sum (Finset.range K) (fun p =>
+        (((3^p : Nat) : Int)) *
+          reverseOntCode (fun t => C t p) (fun t => d t p) N) := by
+  intro K
+  induction K with
+  | zero => simp [weightedOntPrefix]
+  | succ K ih =>
+      simp only [weightedOntPrefix, Finset.sum_range_succ]
+      rw [ih]
+      ring
+
 /-- Exact pure rectangle identity on a shifted observation window of Graph V2. -/
 theorem graphOntWindow_exact
     (E N b K : Nat) :
@@ -431,13 +451,19 @@ theorem graphOntWindow_exact
       reverseOntCarryCode (fun t => (graph E t b).seven.carry) N -
         (((3^K : Nat) : Int)) *
           reverseOntCarryCode (fun t => (graph E t (b+K)).seven.carry) N := by
+  have hsum := weightedOntPrefix_eq_sum
+    (fun t j => (graph E t (b+j)).seven.carry)
+    (fun t j => (graph E t (b+j)).seven.digit) N K
+  have hrect := reverseOntRectangle_exact
+    (fun t j => (graph E t (b+j)).seven.carry)
+    (fun t j => (graph E t (b+j)).seven.digit) N K
+    (fun t j ht hj =>
+      ⟨graph_carry_lt_four E t (b+j),
+        graph_digit_lt_three E t (b+j),
+        (graph_cell_exact E t (b+j)).1,
+        by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩)
   unfold graphOntWindow
-  apply reverseOntRectangle_exact
-  intro t j ht hj
-  exact ⟨graph_carry_lt_four E t (b+j),
-    graph_digit_lt_three E t (b+j),
-    (graph_cell_exact E t (b+j)).1,
-    by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩
+  rw [hsum, hrect, Nat.add_zero b]
 
 #check ontDensity_physical_table
 #check happy_iff_ontDensity_positive
