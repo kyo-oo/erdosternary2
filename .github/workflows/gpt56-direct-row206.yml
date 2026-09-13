@@ -1,0 +1,68 @@
+name: GPT56 Direct Row206 Verify
+
+on:
+  push:
+    branches:
+      - sol/gpt56-four-power-relocation-prod-20260903
+    paths:
+      - GSTFourPowerDirectTwoHundredSixthRow.lean
+      - .github/workflows/gpt56-direct-row206.yml
+  workflow_dispatch:
+
+jobs:
+  direct-row206-kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+      - name: Compile exact fresh-production dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/build/lib/lean
+          modules=(
+            GSTCanonicalTailStateIso
+            GSTFourPowerDirectResidue
+            GSTFourPowerDirectResidue27
+            GSTFourPowerDirectResidue81
+            GSTFourPowerExponentTritObstruction
+            GSTFourPowerExactExponentPeriod
+            GSTFourPowerDirectExistence
+            GSTFourPowerDirectAdditionCarry
+            GSTFourPowerDirectHappyBridge
+            GSTFourPowerAffineOrbit
+            GSTFourPowerAffinePrefixIsometry
+          )
+          for module in "${modules[@]}"; do
+            lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
+            ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
+          done
+      - name: Compile direct row206 physical constructor
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -s 65536
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectTwoHundredSixthRow.olean GSTFourPowerDirectTwoHundredSixthRow.lean 2>&1 | tee direct-row206.log
+          ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' direct-row206.log
+      - name: Reject forbidden proof escapes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -nE '\b(sorry|admit|axiom)\b|sorryAx|False\.elim' GSTFourPowerDirectTwoHundredSixthRow.lean
+      - name: Axiom audit direct row206 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/Audit.lean <<'EOF'
+          import GSTFourPowerDirectTwoHundredSixthRow
+          #print axioms GSTFourPowerDirectTwoHundredSixthRow.commonTwo_of_mod193632597890512706847971583764083347958511186984324587565465147107798425867049291402906445603076729_207
+          #print axioms GSTFourPowerDirectTwoHundredSixthRow.physical_happy_of_mod193632597890512706847971583764083347958511186984324587565465147107798425867049291402906445603076729_207
+          #print axioms GSTFourPowerDirectTwoHundredSixthRow.four_power_happy_propagates_of_next_mod193632597890512706847971583764083347958511186984324587565465147107798425867049291402906445603076729_207
+          EOF
+          lake env lean /tmp/Audit.lean 2>&1 | tee audit.log
+          ! grep -E 'sorryAx' audit.log
+      - name: Direct physical-row marker
+        run: echo DIRECT_ROW206_RELOCATED_HAPPY_KERNEL_GREEN
