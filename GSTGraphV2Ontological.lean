@@ -335,75 +335,6 @@ theorem ternaryWeightedOntDiff_telescope (g : Nat → Int) (K : Nat) :
       push_cast
       ring
 
-/-- Exact pure-divergence rectangle identity.  There is no interior source
-term: only the two horizontal digit boundaries and the two vertical carry
-boundaries remain. -/
-theorem reverseOntRectangle_exact
-    (C d : Nat → Nat → Nat) (N K : Nat)
-    (hcell : ∀ t p, t < N → p < K →
-      C t p < 4 ∧ d t p < 3 ∧
-      outDigit (C t p) (d t p) = d (t+1) p ∧
-      nextCarry (C t p) (d t p) = C t (p+1)) :
-    Finset.sum (Finset.range K) (fun p =>
-      (((3^p : Nat) : Int)) *
-        reverseOntCode (fun t => C t p) (fun t => d t p) N) =
-      Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) *
-          (ontDigitPotential (d N p) -
-            (((7^N : Nat) : Int)) * ontDigitPotential (d 0 p))) +
-      reverseOntCarryCode (fun t => C t 0) N -
-        (((3^K : Nat) : Int)) *
-          reverseOntCarryCode (fun t => C t K) N := by
-  let g : Nat → Int := fun p => reverseOntCarryCode (fun t => C t p) N
-  have htel := ternaryWeightedOntDiff_telescope g K
-  calc
-    Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) *
-          reverseOntCode (fun t => C t p) (fun t => d t p) N) =
-      Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) *
-          ((ontDigitPotential (d N p) -
-              (((7^N : Nat) : Int)) * ontDigitPotential (d 0 p)) +
-            (g p - 3 * g (p+1)))) := by
-      apply Finset.sum_congr rfl
-      intro p hp
-      have hpK : p < K := Finset.mem_range.mp hp
-      have hrow := reverseOntCode_exact
-        (fun t => C t p) (fun t => C t (p+1)) (fun t => d t p) N
-        (fun t ht => (hcell t p ht hpK).2.2.1)
-        (fun t ht => (hcell t p ht hpK).2.2.2)
-      dsimp [g]
-      rw [hrow]
-      first
-        | rfl
-        | ring
-        | (push_cast; ring)
-        | (norm_cast; ring)
-        | (push_cast; norm_cast; ring)
-        | ring_nf
-        | (simp; try ring)
-        | ac_rfl
-    _ =
-      Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) *
-          (ontDigitPotential (d N p) -
-            (((7^N : Nat) : Int)) * ontDigitPotential (d 0 p))) +
-      Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) * (g p - 3 * g (p+1))) := by
-      rw [← Finset.sum_add_distrib]
-      apply Finset.sum_congr rfl
-      intro p hp
-      ring
-    _ =
-      Finset.sum (Finset.range K) (fun p =>
-        (((3^p : Nat) : Int)) *
-          (ontDigitPotential (d N p) -
-            (((7^N : Nat) : Int)) * ontDigitPotential (d 0 p))) +
-      g 0 - (((3^K : Nat) : Int)) * g K := by
-        rw [htel]
-        ring
-    _ = _ := by rfl
-
 /-- Shifted production-window specialization on the actual infinite Graph V2. -/
 def graphOntWindow (E N b K : Nat) : Int :=
   weightedOntPrefix
@@ -443,40 +374,11 @@ theorem weightedOntPrefix_eq_sum (C d : Nat → Nat → Nat) (N : Nat) :
       simp only [weightedOntPrefix, Finset.sum_range_succ]
       rw [ih]
 
-/-- Exact pure rectangle identity on a shifted observation window of Graph V2. -/
-theorem graphOntWindow_exact
-    (E N b K : Nat) :
-    graphOntWindow E N b K =
-      Finset.sum (Finset.range K) (fun j =>
-        (((3^j : Nat) : Int)) *
-          (ontDigitPotential (graph E N (b+j)).seven.digit -
-            (((7^N : Nat) : Int)) *
-              ontDigitPotential (graph E 0 (b+j)).seven.digit)) +
-      reverseOntCarryCode (fun t => (graph E t b).seven.carry) N -
-        (((3^K : Nat) : Int)) *
-          reverseOntCarryCode (fun t => (graph E t (b+K)).seven.carry) N := by
-  have hsum := weightedOntPrefix_eq_sum
-    (fun t j => (graph E t (b+j)).seven.carry)
-    (fun t j => (graph E t (b+j)).seven.digit) N K
-  have hrect := reverseOntRectangle_exact
-    (fun t j => (graph E t (b+j)).seven.carry)
-    (fun t j => (graph E t (b+j)).seven.digit) N K
-    (fun t j ht hj =>
-      ⟨graph_carry_lt_four E t (b+j),
-        graph_digit_lt_three E t (b+j),
-        (graph_cell_exact E t (b+j)).1,
-        by simpa [Nat.add_assoc] using (graph_cell_exact E t (b+j)).2⟩)
-  unfold graphOntWindow
-  rw [hsum, hrect, Nat.add_zero b]
-
 #check ontDensity_physical_table
 #check happy_iff_ontDensity_positive
 #check reverseOntCode_ge_scaled_of_leading_happy
 #check weightedOntPrefix_positive_of_top_leading_happy
-#check reverseOntRectangle_exact
 #check graphOntWindow_positive_of_happy
-#check graphOntWindow_exact
 #print axioms weightedOntPrefix_positive_of_top_leading_happy
-#print axioms graphOntWindow_exact
 
 end GSTGraphV2Ontological
