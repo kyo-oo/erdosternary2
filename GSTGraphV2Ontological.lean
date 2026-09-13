@@ -375,9 +375,14 @@ theorem reverseOntRectangle_exact
       dsimp [g]
       rw [hrow]
       first
+        | rfl
         | ring
+        | (push_cast; ring)
+        | (norm_cast; ring)
+        | (push_cast; norm_cast; ring)
         | ring_nf
-        | (push_cast <;> ring_nf)
+        | (simp; try ring)
+        | ac_rfl
     _ =
       Finset.sum (Finset.range K) (fun p =>
         (((3^p : Nat) : Int)) *
@@ -437,7 +442,6 @@ theorem weightedOntPrefix_eq_sum (C d : Nat → Nat → Nat) (N : Nat) :
   | succ K ih =>
       simp only [weightedOntPrefix, Finset.sum_range_succ]
       rw [ih]
-      ring
 
 /-- Exact pure rectangle identity on a shifted observation window of Graph V2. -/
 theorem graphOntWindow_exact
