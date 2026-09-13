@@ -104,6 +104,7 @@ roots = [
   "GSTU2DSharpCrossingBlock",
   "GSTV2InfiniteCore",
   "GSTTailFFourthDimension",
+  "GSTTailFProof",
 ]
 
 [[lean_exe]]
