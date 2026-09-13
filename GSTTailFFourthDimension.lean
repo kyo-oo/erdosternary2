@@ -1525,12 +1525,12 @@ theorem tailF_tower_primitive_iff_diagonal :
     refine h s core hs hfree hres ?_
     intro k hk3 hks
     rw [omega_tower_word_mod_chain core k s (by omega)]
-    exact hDdiag k hk3
+    exact hDdiag k hk3 hks
   · intro h s core hs hfree hres hDwin
     refine h s core hs hfree hres ?_
     intro k hk3 hks
     rw [← omega_tower_word_mod_chain core k s (by omega)]
-    exact hDwin k hk3
+    exact hDwin k hk3 hks
 
 /-- **SUBSUMPTION RECEIPT, LEVEL TWO.**  The class-one ignition of §3 is
 one instance of the uniform law: the residue test delivers the band
