@@ -452,7 +452,6 @@ theorem four_pow_mod729 (m : Nat) : (4^m) % 729 = (4^(m % 243)) % 729 := by
   have h243 : (4^243) % 729 = 1 := by
     have hsplit : (243 : Nat) = 128 + 115 := by omega
     rw [hsplit, Nat.pow_add]
-    decide
   have h4243q : ∀ q : Nat, (4^243)^q % 729 = 1 := by
     intro q
     induction q with
@@ -480,16 +479,16 @@ theorem four_pow_91_mod729 : (4^91) % 729 = 517 := by decide
 theorem four_pow_112_mod729 : (4^112) % 729 = 580 := by decide
 theorem four_pow_163_mod729 : (4^163) % 729 = 490 := by
   have hsplit : (163 : Nat) = 128 + 35 := by omega
-  rw [hsplit, Nat.pow_add]; decide
+  rw [hsplit, Nat.pow_add]
 theorem four_pow_175_mod729 : (4^175) % 729 = 526 := by
   have hsplit : (175 : Nat) = 128 + 47 := by omega
-  rw [hsplit, Nat.pow_add]; decide
+  rw [hsplit, Nat.pow_add]
 theorem four_pow_190_mod729 : (4^190) % 729 = 571 := by
   have hsplit : (190 : Nat) = 128 + 62 := by omega
-  rw [hsplit, Nat.pow_add]; decide
+  rw [hsplit, Nat.pow_add]
 theorem four_pow_202_mod729 : (4^202) % 729 = 607 := by
   have hsplit : (202 : Nat) = 128 + 74 := by omega
-  rw [hsplit, Nat.pow_add]; decide
+  rw [hsplit, Nat.pow_add]
 
 /-- The generic level-27 fire: a core in class `c` mod 27 whose level value
 `4 ^ c % 81 = v` sits in the top third (`v / 27 = 2`) owns digit position
@@ -548,19 +547,19 @@ theorem s0_lattice_fire (core : Nat) (h : s0_lattice_fire_class core) :
     ∃ p : Nat, digit3 (4^core) p = 2 := by
   unfold s0_lattice_fire_class at h
   rcases h with h | h | h | h | h | h | h | h | h | h | h | h | h
-  · exact ⟨3, digit3_pow4_pos3_of_class core 19 h four_pow_19_mod81 (by decide)⟩
-  · exact ⟨3, digit3_pow4_pos3_of_class core 22 h four_pow_22_mod81 (by decide)⟩
-  · exact ⟨4, digit3_pow4_pos4_of_class core 55 h four_pow_55_mod243 (by decide)⟩
-  · exact ⟨4, digit3_pow4_pos4_of_class core 58 h four_pow_58_mod243 (by decide)⟩
-  · exact ⟨4, digit3_pow4_pos4_of_class core 64 h four_pow_64_mod243 (by decide)⟩
-  · exact ⟨4, digit3_pow4_pos4_of_class core 67 h four_pow_67_mod243 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 85 h four_pow_85_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 91 h four_pow_91_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 112 h four_pow_112_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 163 h four_pow_163_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 175 h four_pow_175_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 190 h four_pow_190_mod729 (by decide)⟩
-  · exact ⟨5, digit3_pow4_pos5_of_class core 202 h four_pow_202_mod729 (by decide)⟩
+  · exact ⟨3, digit3_pow4_pos3_of_class core 19 58 h four_pow_19_mod81 (by decide)⟩
+  · exact ⟨3, digit3_pow4_pos3_of_class core 22 67 h four_pow_22_mod81 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 55 166 h four_pow_55_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 58 175 h four_pow_58_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 64 193 h four_pow_64_mod243 (by decide)⟩
+  · exact ⟨4, digit3_pow4_pos4_of_class core 67 202 h four_pow_67_mod243 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 85 499 h four_pow_85_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 91 517 h four_pow_91_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 112 580 h four_pow_112_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 163 490 h four_pow_163_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 175 526 h four_pow_175_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 190 571 h four_pow_190_mod729 (by decide)⟩
+  · exact ⟨5, digit3_pow4_pos5_of_class core 202 607 h four_pow_202_mod729 (by decide)⟩
 
 /-- **THE SEVENTEEN SURVIVORS.**  The hard family's residue classes that no
 lattice level has fired: the carried row input shrinks to exactly these. -/
