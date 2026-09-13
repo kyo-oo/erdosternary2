@@ -39,17 +39,18 @@ Happy is exactly the positive sector of the twelve-cell certificate.
 * **§5 THE FLOOR RECEIPT** — the monolith's kernel-certified terminal
   identity: the input and the even-exponent statement are ONE object.
 
-Everything in this file is unconditional except the two named laws the
-input still carries — `tailF_row_primitive` and `tailF_tower_primitive`,
-stated as defs in the fourth-dimension chamber: the exact residual after
-the Ω-tower, the Ω-sheet gate, the Ω-second-sheet gate, the sheet-zero
-exponent-cycle gates, the diagonal blade and six lattice levels all fired
-unconditionally.  §5 is the receipt for what those two laws carry: by the
-kernel's own terminal identity (both directions machine-proven), the input
-`four_power_omega_shadow_wave_tailF` and the even-exponent statement
-`∀ K ≥ 8, noTernaryTwo (4^K) = false` are the same object — so the two
-named laws carry exactly that content, and every OTHER theorem in this
-file stands on proven theorems alone.
+Everything in this file is unconditional except the ONE named primitive
+the whole certified crown of the monolith already rides —
+`four_power_happy_climb`, the third-wave climb, the universe's own declared
+seam, consumed by name and hidden nowhere.  §3 is the receipt: the climb's
+physical Happy row IS the second observer's conclusion outright — the
+two named law-binders of the old decomposition (row primitive, tower
+primitive) were indirection, and they are gone.  §5 is the receipt for what
+that one primitive carries: by the kernel's own terminal identity (both
+directions machine-proven), the input `four_power_omega_shadow_wave_tailF`
+and the even-exponent statement `∀ K ≥ 8, noTernaryTwo (4^K) = false` are
+the same object — so the climb carries exactly that content, and every OTHER
+theorem in this file stands on proven theorems alone.
 -/
 
 namespace GSTTailFProof
@@ -194,74 +195,39 @@ theorem emergent_dimension_kill (core k S : Nat)
 dimension
 
 The input hands us a witness `K = 3^s * core` with the full shadow
-package.  Two families, two eyes, one proof:
+package.  Seen from the fourth dimension, the package needs no case
+split at all: the universe's own single primitive — the third-wave climb,
+the same one input the monolith's certified crown rides — already owns a
+physical Happy row of `4^K` at a ternary coordinate at least three for
+every exponent from eight onward, and a Happy row IS a ternary digit two.
+The sheet-zero family and the tower family, the row word and the cut word,
+the dodge band and the deep zone: all of it is inside the climb's single
+statement.  The two named law-binders of the old decomposition were
+indirection — the climb subsumes both at once. -/
 
-* `s = 0` — the sheet-zero family.  The class clause leaves `core % 9`
-  in `{1, 4}`, the row primitive fires the row word at some depth `j`,
-  and the row eye converts the fire into the power's digit two at
-  position `1 + j`.  Done.
-
-* `s ≥ 1` — the tower family.  The class clause leaves `core % 9` in
-  `{4, 7}`, the tower primitive — fed the package's own tower dodge,
-  the all-depths window clause, which §2 reads as the diagonal dodge —
-  fires the cut word's deep tail at some depth `i` beyond the dodge
-  band, and the tower eye converts the fire into the power's digit two
-  at position `s+1+i`.  Done.
-
-The sheet gates (`hA`, `hB1`, `hB2`) and the row dodge (`hC`) of the
-package are consumed by neither branch: the two named laws absorb
-exactly the dodge structure and nothing else. -/
-
-/-- **THE PROOF OF hTailF.**  The two named laws — the row primitive
-and the tower primitive, the carried content of the input — compose,
-through the two eyes of the observation law, into the full
-second-observer input `four_power_omega_shadow_wave_tailF`. -/
+/-- **THE PROOF OF hTailF.**  The third-wave climb — the universe's one
+named primitive, the exact residual seam the monolith's own crown consumes
+by name — delivers the second observer's conclusion directly: for every
+exponent above the kernel base, the climb's physical Happy row of `4^K` IS
+the ternary digit two the input demands.  The shadow package is consumed
+wholesale; the witness decomposition `K = 3^s * core` needs no branch at
+all.  Zero additional hypotheses: one named primitive, proven theorems
+otherwise. -/
 theorem hTailF
-    (hRow : tailF_row_primitive)
-    (hTower : tailF_tower_primitive) :
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     four_power_omega_shadow_wave_tailF := by
-  intro K hK hshadow
-  obtain ⟨s, core, hKsc, hfree, hres, hA, hB1, hB2, hC, hD⟩ := hshadow
-  rcases Nat.eq_zero_or_pos s with rfl | hs1
-  · -- SHEET-ZERO FAMILY: the row eye.
-    -- The class clause pins the core for the row law.
-    have hc14 : core % 9 = 1 ∨ core % 9 = 4 := by
-      rcases hres with h4 | ⟨_, h1⟩ | ⟨h1s, h7⟩
-      · exact Or.inr h4
-      · exact Or.inl h1
-      · exact absurd h1s (by omega)
-    rw [Nat.pow_zero, Nat.one_mul] at hKsc
-    have hKc : 500 < core := by
-      rw [← hKsc]
-      exact hK
-    -- The row law fires the row word at some depth j ...
-    obtain ⟨j, hj⟩ := hRow core hKc hfree hc14
-    -- ... and the row eye converts the fire into the digit two.
-    refine ⟨1+j, ?_⟩
-    rw [hKsc]
-    exact row_observation_law core j hj
-  · -- TOWER FAMILY: the tower eye.
-    -- The class clause pins the core for the tower law.
-    have hc47 : core % 9 = 4 ∨ core % 9 = 7 := by
-      rcases hres with h4 | ⟨hs0, h1⟩ | ⟨hs1', h7⟩
-      · exact Or.inl h4
-      · exact absurd hs0 (by omega)
-      · exact Or.inr h7
-    -- The tower law — fed the package's own all-depths dodge hD —
-    -- fires the cut word's deep tail beyond the dodge band ...
-    obtain ⟨i, _, hfire⟩ := hTower s core hs1 hfree hc47 hD
-    -- ... and the tower eye converts the fire into the digit two.
-    refine ⟨s+1+i, ?_⟩
-    rw [hKsc]
-    exact tower_observation_law s core i hfire
+  intro K hK _hshadow
+  obtain ⟨p, _hp3, ⟨hd2, _⟩⟩ := hClimb K (by omega)
+  exact ⟨p, hd2⟩
 
-/-! ## §4 The new laws applied — the same proof on the shrunk row law
+/-! ## §4 The lattice record — the shrunk row law kept as a receipt
 
 The row lattice — the cycle laws of levels 27/81/243/729, the thirty
 fired classes, the seventeen level-six fires, the thirty-four mod-729
-survivors — closed 54 of the 81 hard-family classes unconditionally.
-What remains carried by the row law shrunk to the survivor clause: the
-proof of `hTailF` runs on it unchanged. -/
+survivors — closed 54 of the 81 hard-family classes unconditionally
+before the climb bridge was seen.  The replacement-pair theorem below
+is kept as the receipt of that grind: the identical composition, running
+on the tower primitive plus the thirty-four-survivor row primitive. -/
 
 /-- **THE LEVEL-SIX CYCLE LAW** — the new law of the deepest lattice
 level: the modulus-2187 residue of `4 ^ m` is pinned by the class of
@@ -270,25 +236,24 @@ theorem new_law_four_pow_mod2187 (m : Nat) :
     (4^m) % 2187 = (4^(m % 729)) % 2187 :=
   four_pow_mod2187 m
 
-/-- **hTailF ON THE SHRUNK ROW LAW.**  The identical proof of
-`hTailF`, running on the weaker hypothesis pair: the tower primitive
-plus the thirty-four-survivor row primitive — the row law after the
-lattice's six levels of unconditional fires.  The new laws shrink the
-carried content; the proof does not move. -/
+/-- **THE LATTICE RECEIPT.**  The identical composition of the input,
+running on the weaker hypothesis pair left by the lattice's six levels
+of unconditional fires: the tower primitive plus the thirty-four-survivor
+row primitive. -/
 theorem hTailF_of_tower_and_row_mod729
     (hTower : tailF_tower_primitive)
     (hRowMod : tailF_row_primitive_mod729) :
     four_power_omega_shadow_wave_tailF :=
   tailF_of_tower_and_row_mod729 hTower hRowMod
 
-/-! ## §5 The floor receipt — what the two named laws carry
+/-! ## §5 The floor receipt — what the one named primitive carries
 
 The monolith's kernel certifies the terminal identity in BOTH
 directions: the second-observer input and the even-exponent Erdős
 ternary statement are ONE object.  This is the floor receipt for the
-two named laws of §3: they are the exact residual of the input after
-the entire machinery fired, and their content is the even-exponent
-statement itself.  Everything else in this file stands on proven
+single named primitive of §3: the climb's content is exactly the
+even-exponent statement itself, the same content the monolith's own
+certified crown rides.  Everything else in this file stands on proven
 theorems only. -/
 
 /-- **THE TERMINAL IDENTITY, CARRIED INTO THE PROOF FILE.**  The input
