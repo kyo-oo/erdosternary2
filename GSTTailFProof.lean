@@ -265,6 +265,45 @@ theorem hTailF_iff_even_conjecture :
       ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
   erdos_even_conjecture_iff_tailF.symm
 
+/-! ## §6 The meta-view — every class, every case, every level, one receipt
+
+The whole case structure of the input, assembled as ONE machine-certified
+conjunction: the family-uniform observation law (every sheet — sheet zero
+is the row family, the deep sheets are the tower family — every core,
+every depth), the uniform ignition blade (every level, every core, every
+sheet: one band test kills a core's whole tower from its level upward),
+the survivor-dust boundary (every core outside the dust is dead by
+machine; the dust is the exact complement of the entire ignition ladder,
+one predicate on the core), and the floor identity (the input and the
+even-exponent statement are one object).  All classes and all cases at
+the same time, on one screen. -/
+
+/-- **THE META-VIEW RECEIPT.**  One theorem, four faces: (1) the
+observation law, uniform over every family; (2) the uniform ignition
+blade, uniform over every level; (3) the dust boundary — the exact
+complement of the whole ladder; (4) the floor identity. -/
+theorem meta_view_all_classes_all_levels :
+    (∀ s core j : Nat, 2 * 3^j ≤ (omegaCutWord s core) % 3^(j+1) →
+        digit3 (4^(3^s * core)) (s+1+j) = 2) ∧
+    (∀ k core S : Nat, 1 ≤ k → k ≤ S+1 →
+        2 * 3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k →
+        digit3 (4^(3^S * core)) (S + k) = 2) ∧
+    (∀ core : Nat, ¬ omega_diagonal_survivor_dust core →
+        ∃ k : Nat, 3 ≤ k ∧ ∀ S : Nat, k-1 ≤ S →
+          digit3 (4^(3^S * core)) (S + k) = 2) ∧
+    (four_power_omega_shadow_wave_tailF ↔
+        ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) :=
+  ⟨tower_observation_digit_two, omega_tower_digit_two_universal,
+    omega_tower_dies_of_not_dust, erdos_even_conjecture_iff_tailF.symm⟩
+
+/-- **THE CLIMB'S OWN FACE OF THE META-VIEW.**  The single named primitive
+composed with the floor identity: the climb carries the even-exponent
+statement outright — one line, machine-certified. -/
+theorem even_conjecture_of_climb
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr (hTailF hClimb)
+
 #print axioms row_observation_law
 #print axioms tower_observation_law
 #print axioms observation_law_wave
@@ -278,5 +317,7 @@ theorem hTailF_iff_even_conjecture :
 #print axioms new_law_four_pow_mod2187
 #print axioms hTailF_of_tower_and_row_mod729
 #print axioms hTailF_iff_even_conjecture
+#print axioms meta_view_all_classes_all_levels
+#print axioms even_conjecture_of_climb
 
 end GSTTailFProof

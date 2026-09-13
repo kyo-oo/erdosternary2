@@ -1409,4 +1409,174 @@ theorem erdos_ternary_2_universal_of_tower_and_row_mod729
 #print axioms even_conjecture_of_tower_and_row_mod729
 #print axioms erdos_ternary_2_universal_of_tower_and_row_mod729
 
+/-! ## §9 The meta-view — every class, every case, every level, one law
+
+The fourth dimension's own vantage point, assembled: the ignition
+machinery of §3, §3b, and every deeper level of the ladder is ONE law,
+uniform in the level index.  The fire predicate — the tower word of the
+core sitting in the top third of its window at level `k` — is a single
+decidable test on `(k, core)`; the uniform law converts it into the
+primitive diagonal trit two at EVERY level; the descent blade then kills
+the core's ENTIRE tower from that level upward.  The level-by-level grind
+— the fourteen fire laws of §3 and §3b, the lattice levels of §§6-8, and
+every level beyond them — is the INSIDE of this one law: each is an
+instance, obtained by feeding the law one residue certificate.
+
+The exact complement is the SURVIVOR DUST: the cores whose tower word
+dodges the top third at every level from three upward — one predicate,
+the whole dodge set of the cascade seen at once.  Every core outside the
+dust is dead by machine: a fire exists, and the blade kills every sheet
+from its level upward, in one statement.  The dust's own members are the
+tower primitive's exact residual — §4's decomposition, the diagonal
+restatement below, and the floor receipt of the proof file carry the full
+map. -/
+
+/-- **THE UNIFORM IGNITION — every level, every core, one law.**  Whenever
+the level-`k` tower word of `core` — `omegaCutWord (k-1) 1 * core` — sits
+in the top third of its window modulo `3^k`, the primitive diagonal fires:
+`4^(3^(k-1) * core)` owns its ternary digit two at index `2k - 1`.
+Unconditional and uniform in `k` and `core`: every fire law of §3, §3b,
+and every deeper level of the ladder is an instance of this single
+theorem. -/
+theorem omega_diagonal_two_universal (k core : Nat) (hk : 1 ≤ k)
+    (hfire : 2 * 3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k) :
+    digit3 (4^(3^(k-1) * core)) (2*k - 1) = 2 := by
+  have hobs := omega_observed_digit (k-1) core k (by omega) (by omega)
+  rw [show (k-1) + k = 2*k - 1 from by omega] at hobs
+  rw [hobs]
+  have hpos : 0 < 3^(k-1) := Nat.pow_pos (by decide)
+  have hlt : (omegaCutWord (k-1) 1 * core) % 3^k < 3^k :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
+  have h3 : 3^k = 3 * 3^(k-1) := by
+    obtain ⟨k', hk'⟩ : ∃ k', k = k' + 1 := ⟨k-1, by omega⟩
+    subst hk'
+    have hidx : k' + 1 - 1 = k' := by omega
+    rw [hidx, Nat.pow_add, Nat.pow_one]
+    ring
+  obtain ⟨d, hd⟩ : ∃ d, (omegaCutWord (k-1) 1 * core) % 3^k
+      = 2 * 3^(k-1) + d :=
+    ⟨(omegaCutWord (k-1) 1 * core) % 3^k - 2 * 3^(k-1), by omega⟩
+  have hdlt : d < 3^(k-1) := by omega
+  rw [hd, Nat.add_comm, show 2 * 3^(k-1) = 3^(k-1) * 2 from by ring,
+    Nat.add_mul_div_left _ _ hpos, Nat.div_eq_of_lt hdlt]
+
+/-- **THE UNIFORM BLADE — one band test kills a whole tower.**  The
+uniform ignition composed with the descent blade: for every level `k`,
+every core, and every sheet `S` at or above `k-1`, the single band test
+on the tower word delivers the power's ternary digit two at position
+`S + k`.  All levels, all classes, all sheets — one law. -/
+theorem omega_tower_digit_two_universal (k core S : Nat) (hk : 1 ≤ k)
+    (hkS : k ≤ S+1)
+    (hfire : 2 * 3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k) :
+    digit3 (4^(3^S * core)) (S + k) = 2 :=
+  omega_tower_kill_of_diagonal_two core k S hk hkS
+    (omega_diagonal_two_universal k core hk hfire)
+
+/-- **THE SURVIVOR DUST.**  The exact complement of the entire ignition
+ladder, stated as one predicate on the core: the cores whose tower word
+dodges the top third at EVERY level from three upward.  This is the dodge
+set of the whole cascade — all classes and all levels — seen at once. -/
+def omega_diagonal_survivor_dust (core : Nat) : Prop :=
+  ∀ k : Nat, 3 ≤ k →
+    (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)
+
+/-- **THE DUST BOUNDARY, FIRE SIDE.**  Every core outside the dust fires
+the primitive diagonal at some level: the uniform law's instance,
+delivered by one decidable test. -/
+theorem omega_diagonal_fire_of_not_dust (core : Nat)
+    (h : ¬ omega_diagonal_survivor_dust core) :
+    ∃ k : Nat, 3 ≤ k ∧
+      digit3 (4^(3^(k-1) * core)) (2*k - 1) = 2 := by
+  unfold omega_diagonal_survivor_dust at h
+  push_neg at h
+  obtain ⟨k, hk3, hfire⟩ := h
+  exact ⟨k, hk3, omega_diagonal_two_universal k core (by omega) hfire⟩
+
+/-- **THE DUST BOUNDARY, TOWER SIDE.**  Every core outside the dust has
+its WHOLE tower dead by machine: every sheet from its first fire's level
+upward owns the digit two, in one statement. -/
+theorem omega_tower_dies_of_not_dust (core : Nat)
+    (h : ¬ omega_diagonal_survivor_dust core) :
+    ∃ k : Nat, 3 ≤ k ∧ ∀ S : Nat, k-1 ≤ S →
+      digit3 (4^(3^S * core)) (S + k) = 2 := by
+  obtain ⟨k, hk3, hfire⟩ := omega_diagonal_fire_of_not_dust core h
+  refine ⟨k, hk3, ?_⟩
+  intro S hS
+  exact omega_tower_kill_of_diagonal_two core k S (by omega) (by omega)
+    hfire
+
+/-- **THE TOWER PRIMITIVE, READ AS THE DIAGONAL.**  Through the descent
+chain, the tower primitive's window dodge IS the all-window diagonal
+dodge of the core: the tower family's entire carried content, restated as
+one statement about the emergent axis.  The two named primitives of §4 —
+the whole carried content of the input — now read: the row family's word
+fires, and every diagonal-dodging tower's own word fires in its deep
+tail. -/
+theorem tailF_tower_primitive_iff_diagonal :
+    tailF_tower_primitive ↔
+      ∀ s core : Nat, 1 ≤ s → ¬ 3 ∣ core →
+        (core % 9 = 4 ∨ core % 9 = 7) →
+        (∀ k : Nat, 3 ≤ k → k ≤ s+1 →
+          (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) →
+          ∃ i : Nat, s+2 ≤ i ∧
+            2 * 3^i ≤ (omegaCutWord s core) % 3^(i+1) := by
+  constructor
+  · intro h s core hs hfree hres hDdiag
+    refine h s core hs hfree hres ?_
+    intro k hk3 hks
+    rw [omega_tower_word_mod_chain core k s (by omega)]
+    exact hDdiag k hk3
+  · intro h s core hs hfree hres hDwin
+    refine h s core hs hfree hres ?_
+    intro k hk3 hks
+    rw [← omega_tower_word_mod_chain core k s (by omega)]
+    exact hDwin k hk3
+
+/-- **SUBSUMPTION RECEIPT, LEVEL TWO.**  The class-one ignition of §3 is
+one instance of the uniform law: the residue test delivers the band
+condition, the uniform law delivers the fire. -/
+theorem omega_diagonal_two_of_mod_nine_one_from_universal (core : Nat)
+    (h : core % 9 = 1) :
+    digit3 (4^(3^(2-1) * core)) (2*2 - 1) = 2 :=
+  omega_diagonal_two_universal 2 core (by decide)
+    (by
+      have hw : omegaCutWord 1 1 = 7 := by
+        have h2 := omega_cut_factor 1 1
+        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+        omega
+      have hidx : (2:Nat) - 1 = 1 := by omega
+      rw [hidx, hw]
+      have h9 : (3:Nat)^2 = 9 := by norm_num
+      have h31 : (3:Nat)^1 = 3 := by norm_num
+      rw [h9, h31]
+      omega)
+
+/-- **SUBSUMPTION RECEIPT, LEVEL FOUR.**  The mod-81 four ignition of §3b
+is one instance of the same uniform law — the deep bands are inside it
+too. -/
+theorem omega_diagonal_two_of_mod81_four_from_universal (core : Nat)
+    (h : core % 81 = 4) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 :=
+  omega_diagonal_two_universal 4 core (by decide)
+    (by
+      have hw : omegaCutWord 3 1 = 222399981598543 := by
+        have h2 := omega_cut_factor 3 1
+        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+        omega
+      have hidx : (4:Nat) - 1 = 3 := by omega
+      rw [hidx, hw]
+      have h81 : (3:Nat)^4 = 81 := by norm_num
+      have h27 : (3:Nat)^3 = 27 := by norm_num
+      rw [h81, h27]
+      omega)
+
+#print axioms omega_diagonal_two_universal
+#print axioms omega_tower_digit_two_universal
+#print axioms omega_diagonal_survivor_dust
+#print axioms omega_diagonal_fire_of_not_dust
+#print axioms omega_tower_dies_of_not_dust
+#print axioms tailF_tower_primitive_iff_diagonal
+#print axioms omega_diagonal_two_of_mod_nine_one_from_universal
+#print axioms omega_diagonal_two_of_mod81_four_from_universal
+
 end GSTTailFFourthDimension
