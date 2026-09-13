@@ -719,6 +719,335 @@ theorem erdos_ternary_2_universal_of_tower_and_row_mod243
   erdos_ternary_2_universal_of_tailF
     (tailF_of_tower_and_row_mod243 hTower hRowMod) n hn
 
+/-! ## §8 The row lattice, level six — the survivors fired one level deeper
+
+The lattice's fourth level.  The cycle law now pins the modulus-2187 residue
+of `4 ^ core` by the class of `core` modulo 729, and each of the seventeen
+mod-243 survivor classes splits into three mod-729 subclasses — of which
+exactly ONE fires.  The level-six lattice kills one third of the surviving
+residue content unconditionally; the carried row input shrinks from the
+seventeen mod-243 classes to thirty-four mod-729 classes — twice the count,
+but each class one third as wide, and seventeen more classes of the hard
+family closed outright:
+
+* level 729, digit position 6: classes `31, 37, 118, 172, 253, 256, 271,
+  337, 352, 409, 487, 490, 526, 568, 607, 679, 685` mod 729 — the seventeen
+  fires, one per mod-243 survivor triple. -/
+
+/-- The cycle law of level 729: the modulus-2187 residue of `4 ^ m` is pinned
+by the class of `m` modulo 729. -/
+theorem four_pow_mod2187 (m : Nat) : (4^m) % 2187 = (4^(m % 729)) % 2187 := by
+  have h729 : (4^729) % 2187 = 1 := by
+    have hsplit : (729 : Nat) = 128 + 601 := by omega
+    rw [hsplit, Nat.pow_add]
+  have h4729q : ∀ q : Nat, (4^729)^q % 2187 = 1 := by
+    intro q
+    induction q with
+    | zero => decide
+    | succ q' ih =>
+      have hsucc : (4^729)^(Nat.succ q') = (4^729)^(q' + 1) := rfl
+      rw [hsucc, Nat.pow_succ, Nat.mul_mod, h729, ih]
+  have hmd : m = 729 * (m / 729) + m % 729 := (Nat.div_add_mod m 729).symm
+  have h4m : 4^m = (4^729)^(m/729) * 4^(m%729) := by
+    have h1 : 4^m = 4^(729*(m/729) + m%729) := congrArg (fun x => 4^x) hmd
+    have h2 : 4^(729*(m/729) + m%729) = (4^729)^(m/729) * 4^(m%729) := by
+      rw [Nat.pow_add, Nat.pow_mul]
+    exact h1.trans h2
+  rw [h4m, Nat.mul_mod, h4729q, Nat.one_mul, Nat.mod_mod]
+
+/-- The seventeen fired classes' level values, computed at their levels. -/
+theorem four_pow_31_mod2187 : (4^31) % 2187 = 1795 := by decide
+theorem four_pow_37_mod2187 : (4^37) % 2187 = 1813 := by decide
+theorem four_pow_118_mod2187 : (4^118) % 2187 = 2056 := by decide
+theorem four_pow_172_mod2187 : (4^172) % 2187 = 1489 := by
+  have hsplit : (172 : Nat) = 128 + 44 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_253_mod2187 : (4^253) % 2187 = 1732 := by
+  have hsplit : (253 : Nat) = 128 + 125 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_256_mod2187 : (4^256) % 2187 = 1498 := by
+  have hsplit : (256 : Nat) = 128 + 128 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_271_mod2187 : (4^271) % 2187 = 1543 := by
+  have hsplit : (271 : Nat) = 128 + 143 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_337_mod2187 : (4^337) % 2187 = 1741 := by
+  have hsplit : (337 : Nat) = 128 + 209 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_352_mod2187 : (4^352) % 2187 = 1786 := by
+  have hsplit : (352 : Nat) = 128 + 224 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_409_mod2187 : (4^409) % 2187 = 1471 := by
+  have hsplit : (409 : Nat) = 128 + 281 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_487_mod2187 : (4^487) % 2187 = 1462 := by
+  have hsplit : (487 : Nat) = 128 + 359 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_490_mod2187 : (4^490) % 2187 = 1714 := by
+  have hsplit : (490 : Nat) = 128 + 362 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_526_mod2187 : (4^526) % 2187 = 1579 := by
+  have hsplit : (526 : Nat) = 128 + 398 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_568_mod2187 : (4^568) % 2187 = 1705 := by
+  have hsplit : (568 : Nat) = 128 + 440 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_607_mod2187 : (4^607) % 2187 = 1822 := by
+  have hsplit : (607 : Nat) = 128 + 479 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_679_mod2187 : (4^679) % 2187 = 1552 := by
+  have hsplit : (679 : Nat) = 128 + 551 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_685_mod2187 : (4^685) % 2187 = 1570 := by
+  have hsplit : (685 : Nat) = 128 + 557 := by omega
+  rw [hsplit, Nat.pow_add]
+
+/-- The generic level-729 fire: a core in class `c` mod 729 whose level value
+`4 ^ c % 2187 = v` sits in the top third (`v / 729 = 2`) owns digit position
+6 of `4 ^ core` outright. -/
+theorem digit3_pow4_pos6_of_class (core c v : Nat)
+    (h : core % 729 = c) (hv : (4^c) % 2187 = v) (hv2 : v / 729 = 2) :
+    digit3 (4^core) 6 = 2 := by
+  have hm : (4^core) % 2187 = v := by rw [four_pow_mod2187, h]; exact hv
+  show (4^core) / 3^6 % 3 = 2
+  have h36 : (3:Nat)^6 = 729 := by norm_num
+  rw [h36]
+  have hbridge : (4^core / 729) % 3 = ((4^core) % 2187) / 729 := by omega
+  rw [hbridge, hm, hv2]
+
+/-- **THE SEVENTEEN LEVEL-SIX FIRED CLASSES.**  Each mod-243 survivor triple
+contributes exactly one fired subclass. -/
+def s0_lattice_fire_class_mod729 (core : Nat) : Prop :=
+  core % 729 = 31 ∨ core % 729 = 37 ∨ core % 729 = 118 ∨ core % 729 = 172 ∨
+  core % 729 = 253 ∨ core % 729 = 256 ∨ core % 729 = 271 ∨ core % 729 = 337 ∨
+  core % 729 = 352 ∨ core % 729 = 409 ∨ core % 729 = 487 ∨ core % 729 = 490 ∨
+  core % 729 = 526 ∨ core % 729 = 568 ∨ core % 729 = 607 ∨ core % 729 = 679 ∨
+  core % 729 = 685
+
+/-- **THE LEVEL-SIX LATTICE FIRE.**  Every one of the seventeen fired classes
+owns its digit two unconditionally. -/
+theorem s0_lattice_fire_mod729 (core : Nat)
+    (h : s0_lattice_fire_class_mod729 core) :
+    ∃ p : Nat, digit3 (4^core) p = 2 := by
+  unfold s0_lattice_fire_class_mod729 at h
+  rcases h with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+  · exact ⟨6, digit3_pow4_pos6_of_class core 31 1795 h four_pow_31_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 37 1813 h four_pow_37_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 118 2056 h four_pow_118_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 172 1489 h four_pow_172_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 253 1732 h four_pow_253_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 256 1498 h four_pow_256_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 271 1543 h four_pow_271_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 337 1741 h four_pow_337_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 352 1786 h four_pow_352_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 409 1471 h four_pow_409_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 487 1462 h four_pow_487_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 490 1714 h four_pow_490_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 526 1579 h four_pow_526_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 568 1705 h four_pow_568_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 607 1822 h four_pow_607_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 679 1552 h four_pow_679_mod2187 (by decide)⟩
+  · exact ⟨6, digit3_pow4_pos6_of_class core 685 1570 h four_pow_685_mod2187 (by decide)⟩
+
+/-- **THE THIRTY-FOUR LEVEL-SIX SURVIVORS.**  The hard family's residue
+classes that no lattice level has fired: the carried row input shrinks to
+exactly these, at mod-729 resolution. -/
+def tailF_row_survivor_class_mod729 (core : Nat) : Prop :=
+  core % 729 = 1 ∨ core % 729 = 4 ∨ core % 729 = 10 ∨ core % 729 = 13 ∨
+  core % 729 = 28 ∨ core % 729 = 40 ∨ core % 729 = 82 ∨ core % 729 = 94 ∨
+  core % 729 = 109 ∨ core % 729 = 121 ∨ core % 729 = 166 ∨ core % 729 = 193 ∨
+  core % 729 = 199 ∨ core % 729 = 244 ∨ core % 729 = 247 ∨ core % 729 = 274 ∨
+  core % 729 = 280 ∨ core % 729 = 283 ∨ core % 729 = 325 ∨ core % 729 = 361 ∨
+  core % 729 = 364 ∨ core % 729 = 415 ∨ core % 729 = 436 ∨ core % 729 = 442 ∨
+  core % 729 = 496 ∨ core % 729 = 499 ∨ core % 729 = 514 ∨ core % 729 = 517 ∨
+  core % 729 = 523 ∨ core % 729 = 580 ∨ core % 729 = 595 ∨ core % 729 = 604 ∨
+  core % 729 = 652 ∨ core % 729 = 658
+
+/-- **THE LEVEL-SIX BRIDGE.**  Every hard-family core that neither lattice
+level has fired is one of the thirty-four mod-729 survivors: the seventeen
+mod-243 survivor classes each split into three mod-729 subclasses, exactly
+one of which fires. -/
+theorem tailF_row_survivor_mod729_of_nonfire (core : Nat)
+    (hc14 : core % 9 = 1 ∨ core % 9 = 4)
+    (hf : ¬ s0_lattice_fire_class core)
+    (hf6 : ¬ s0_lattice_fire_class_mod729 core) :
+    tailF_row_survivor_class_mod729 core := by
+  have h243class := tailF_row_survivor_of_hard_nonfire core hc14 hf
+  unfold tailF_row_survivor_class_mod729
+  unfold tailF_row_survivor_class at h243class
+  unfold s0_lattice_fire_class_mod729 at hf6
+  push_neg at hf6
+  obtain ⟨n31, n37, n118, n172, n253, n256, n271, n337, n352, n409, n487,
+    n490, n526, n568, n607, n679, n685⟩ := hf6
+  rcases h243class with c1 | c4 | c10 | c13 | c28 | c31 | c37 | c40 | c82 |
+    c94 | c109 | c118 | c121 | c166 | c172 | c193 | c199
+  · have h : core % 729 = 1 ∨ core % 729 = 244 ∨ core % 729 = 487 := by omega
+    rcases h with e1 | e244 | e487
+    · omega
+    · omega
+    · exact absurd e487 n487
+  · have h : core % 729 = 4 ∨ core % 729 = 247 ∨ core % 729 = 490 := by omega
+    rcases h with e4 | e247 | e490
+    · omega
+    · omega
+    · exact absurd e490 n490
+  · have h : core % 729 = 10 ∨ core % 729 = 253 ∨ core % 729 = 496 := by omega
+    rcases h with e10 | e253 | e496
+    · omega
+    · exact absurd e253 n253
+    · omega
+  · have h : core % 729 = 13 ∨ core % 729 = 256 ∨ core % 729 = 499 := by omega
+    rcases h with e13 | e256 | e499
+    · omega
+    · exact absurd e256 n256
+    · omega
+  · have h : core % 729 = 28 ∨ core % 729 = 271 ∨ core % 729 = 514 := by omega
+    rcases h with e28 | e271 | e514
+    · omega
+    · exact absurd e271 n271
+    · omega
+  · have h : core % 729 = 31 ∨ core % 729 = 274 ∨ core % 729 = 517 := by omega
+    rcases h with e31 | e274 | e517
+    · exact absurd e31 n31
+    · omega
+    · omega
+  · have h : core % 729 = 37 ∨ core % 729 = 280 ∨ core % 729 = 523 := by omega
+    rcases h with e37 | e280 | e523
+    · exact absurd e37 n37
+    · omega
+    · omega
+  · have h : core % 729 = 40 ∨ core % 729 = 283 ∨ core % 729 = 526 := by omega
+    rcases h with e40 | e283 | e526
+    · omega
+    · omega
+    · exact absurd e526 n526
+  · have h : core % 729 = 82 ∨ core % 729 = 325 ∨ core % 729 = 568 := by omega
+    rcases h with e82 | e325 | e568
+    · omega
+    · omega
+    · exact absurd e568 n568
+  · have h : core % 729 = 94 ∨ core % 729 = 337 ∨ core % 729 = 580 := by omega
+    rcases h with e94 | e337 | e580
+    · omega
+    · exact absurd e337 n337
+    · omega
+  · have h : core % 729 = 109 ∨ core % 729 = 352 ∨ core % 729 = 595 := by omega
+    rcases h with e109 | e352 | e595
+    · omega
+    · exact absurd e352 n352
+    · omega
+  · have h : core % 729 = 118 ∨ core % 729 = 361 ∨ core % 729 = 604 := by omega
+    rcases h with e118 | e361 | e604
+    · exact absurd e118 n118
+    · omega
+    · omega
+  · have h : core % 729 = 121 ∨ core % 729 = 364 ∨ core % 729 = 607 := by omega
+    rcases h with e121 | e364 | e607
+    · omega
+    · omega
+    · exact absurd e607 n607
+  · have h : core % 729 = 166 ∨ core % 729 = 409 ∨ core % 729 = 652 := by omega
+    rcases h with e166 | e409 | e652
+    · omega
+    · exact absurd e409 n409
+    · omega
+  · have h : core % 729 = 172 ∨ core % 729 = 415 ∨ core % 729 = 658 := by omega
+    rcases h with e172 | e415 | e658
+    · exact absurd e172 n172
+    · omega
+    · omega
+  · have h : core % 729 = 193 ∨ core % 729 = 436 ∨ core % 729 = 679 := by omega
+    rcases h with e193 | e436 | e679
+    · omega
+    · omega
+    · exact absurd e679 n679
+  · have h : core % 729 = 199 ∨ core % 729 = 442 ∨ core % 729 = 685 := by omega
+    rcases h with e199 | e442 | e685
+    · omega
+    · omega
+    · exact absurd e685 n685
+
+/-- **THE SHRUNK ROW INPUT, LEVEL SIX.**  The row primitive with all
+thirty lattice levels' fired classes removed: the residue clause now
+demands one of the thirty-four mod-729 survivors. -/
+def tailF_row_primitive_mod729 : Prop :=
+  ∀ core : Nat, 500 < core → ¬ 3 ∣ core →
+    tailF_row_survivor_class_mod729 core →
+      ∃ j : Nat, 2 * 3^j ≤ (omegaCutWord 0 core) % 3^(j+1)
+
+/-- **THE WEAKNESS RECEIPT, LEVEL SIX.**  The level-six shrunk row input is
+strictly weaker than the mod-243 one: every mod-729 survivor sits inside a
+mod-243 survivor class. -/
+theorem tailF_row_primitive_mod729_of_mod243 (h : tailF_row_primitive_mod243) :
+    tailF_row_primitive_mod729 := by
+  intro core hK hfree hclass
+  refine h core hK hfree ?_
+  unfold tailF_row_survivor_class_mod729 at hclass
+  unfold tailF_row_survivor_class
+  rcases hclass with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h |
+    h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h <;> omega
+
+theorem tailF_row_primitive_mod729_of_row (hRow : tailF_row_primitive) :
+    tailF_row_primitive_mod729 :=
+  tailF_row_primitive_mod729_of_mod243 (tailF_row_primitive_mod243_of_row hRow)
+
+/-- **THE REPLACEMENT OF THE INPUT'S ROW HALF, LEVEL SIX.**  The tower
+primitive plus the thirty-four-survivor row primitive compose into the full
+second-observer input. -/
+theorem tailF_of_tower_and_row_mod729
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod729) :
+    four_power_omega_shadow_wave_tailF := by
+  intro K hK hshadow
+  obtain ⟨s, core, hKsc, hfree, hres, hA, hB1, hB2, hC, hD⟩ := hshadow
+  rcases Nat.eq_zero_or_pos s with rfl | hs1
+  · have hc14 : core % 9 = 1 ∨ core % 9 = 4 := by
+      rcases hres with h4 | ⟨_, h1⟩ | ⟨h1s, h7⟩
+      · exact Or.inr h4
+      · exact Or.inl h1
+      · exact absurd h1s (by omega)
+    rw [Nat.pow_zero, Nat.one_mul] at hKsc
+    have hKc : 500 < core := by rw [← hKsc]; exact hK
+    by_cases hf : s0_lattice_fire_class core
+    · obtain ⟨p, hp⟩ := s0_lattice_fire core hf
+      rw [hKsc]
+      exact ⟨p, hp⟩
+    · by_cases hf6 : s0_lattice_fire_class_mod729 core
+      · obtain ⟨p, hp⟩ := s0_lattice_fire_mod729 core hf6
+        rw [hKsc]
+        exact ⟨p, hp⟩
+      · obtain ⟨j, hj⟩ := hRowMod core hKc hfree
+          (tailF_row_survivor_mod729_of_nonfire core hc14 hf hf6)
+        refine ⟨1+j, ?_⟩
+        rw [hKsc]
+        exact omega_row_level_digit_two core j hj
+  · have hc47 : core % 9 = 4 ∨ core % 9 = 7 := by
+      rcases hres with h4 | ⟨hs0, h1⟩ | ⟨hs1', h7⟩
+      · exact Or.inl h4
+      · exact absurd hs0 (by omega)
+      · exact Or.inr h7
+    obtain ⟨i, _, hfire⟩ := hTower s core hs1 hfree hc47 hD
+    refine ⟨s+1+i, ?_⟩
+    rw [hKsc]
+    exact tower_observation_digit_two s core i hfire
+
+/-- **THE EVEN STATEMENT ON THE REPLACEMENT INPUT, LEVEL SIX.** -/
+theorem even_conjecture_of_tower_and_row_mod729
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod729) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr
+    (tailF_of_tower_and_row_mod729 hTower hRowMod)
+
+/-- **THE CROWN ON THE REPLACEMENT INPUT, LEVEL SIX.** -/
+theorem erdos_ternary_2_universal_of_tower_and_row_mod729
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod729)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_of_tailF
+    (tailF_of_tower_and_row_mod729 hTower hRowMod) n hn
+
 #print axioms tower_observation_digit_two
 #print axioms omega_cut_word_stabilizes
 #print axioms omega_tower_word_mod_stable
@@ -744,5 +1073,14 @@ theorem erdos_ternary_2_universal_of_tower_and_row_mod243
 #print axioms tailF_of_tower_and_row_mod243
 #print axioms even_conjecture_of_tower_and_row_mod243
 #print axioms erdos_ternary_2_universal_of_tower_and_row_mod243
+#print axioms four_pow_mod2187
+#print axioms digit3_pow4_pos6_of_class
+#print axioms s0_lattice_fire_mod729
+#print axioms tailF_row_survivor_mod729_of_nonfire
+#print axioms tailF_row_primitive_mod729_of_mod243
+#print axioms tailF_row_primitive_mod729_of_row
+#print axioms tailF_of_tower_and_row_mod729
+#print axioms even_conjecture_of_tower_and_row_mod729
+#print axioms erdos_ternary_2_universal_of_tower_and_row_mod729
 
 end GSTTailFFourthDimension
