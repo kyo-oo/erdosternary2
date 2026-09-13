@@ -7,30 +7,32 @@ def residue237N : Nat := 238
 def residue237Np1 : Nat := 239
 
 theorem threePow237_eq : 3 ^ 237 = threePow237 := by
-  native_decide
+  norm_num [threePow237]
 
 theorem digit3_row237_res238 :
     digit3 (4 ^ residue237N) 237 = 2 := by
-  native_decide
+  norm_num [residue237N, digit3]
 
 theorem digit3_row237_res239 :
     digit3 (4 ^ residue237Np1) 237 = 2 := by
-  native_decide
+  norm_num [residue237Np1, digit3]
 
 theorem commonTwo_of_pair_mod_threePow237
     (N : Nat) (hmod : N % threePow237 = residue237N) :
     CommonTwo N := by
   have hmodN : N % (3 ^ 237) = 238 := by
-    simpa [threePow237_eq] using hmod
+    rw [threePow237_eq]
+    simpa [residue237N] using hmod
   have hmodN1 : (N + 1) % (3 ^ 237) = 239 := by
-    omega
+    rw [Nat.add_mod, hmodN]
+    norm_num
   have hN : digit3 (4 ^ N) 237 = 2 := by
     rw [digit3_pow4_period N 237]
     simpa [hmodN] using digit3_row237_res238
   have hN1 : digit3 (4 ^ (N + 1)) 237 = 2 := by
     rw [digit3_pow4_period (N + 1) 237]
     simpa [hmodN1] using digit3_row237_res239
-  exact ⟨237, by omega, hN, hN1⟩
+  exact ⟨237, by norm_num, hN, hN1⟩
 
 theorem row237_strict_exceed_of_pair_mod_threePow237
     (N k : Nat)
