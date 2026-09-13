@@ -63,6 +63,13 @@ jobs:
           lake build 2>&1 | tee hard-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' hard-build.log
 
+      - name: Fourth-dimension tailF module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTailFFourthDimension 2>&1 | tee tailf-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail

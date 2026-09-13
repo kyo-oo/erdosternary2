@@ -103,6 +103,7 @@ roots = [
   "GSTU2DPureDivergence83",
   "GSTU2DSharpCrossingBlock",
   "GSTV2InfiniteCore",
+  "GSTTailFFourthDimension",
 ]
 
 [[lean_exe]]
