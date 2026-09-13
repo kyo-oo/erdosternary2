@@ -24,8 +24,11 @@ What this chamber delivers, machine-certified:
 * **THE DESCENT BLADE** (§2, four theorems): the cut-word tower is one
   stabilizing 3-adic object; ONE primitive diagonal trit two kills the
   tower dodge at every level at once.
-* **THE DIAGONAL IGNITION** (§3, five theorems): the first firing bands as
-  unconditional residue tests on the core.
+* **THE DIAGONAL IGNITION** (§3 + §3b, nineteen theorems): the firing
+  bands as unconditional residue tests on the core — the first bands
+  (levels two and three) and the deep bands (levels four and five), every
+  band's domain reaching infinity: one residue test kills the whole tower
+  from its level upward.
 * **THE DECOMPOSITION** (§4): the input `four_power_omega_shadow_wave_tailF`
   is EXACTLY two named 3-adic trit statements — the row primitive (the
   sheet-zero family: the row word of every 3-free class-one core fires) and
@@ -274,6 +277,315 @@ theorem omega_tower_digit_two_of_mod27_band (core : Nat)
       (omega_diagonal_two_of_mod27_thirteen core h13)
   · exact omega_tower_kill_of_diagonal_two core 3 S (by decide) (by omega)
       (omega_diagonal_two_of_mod27_twentyfive core h25)
+
+/-! ## §3b The deep ignition — levels four and five, domains to infinity
+
+The ignition machinery of §3 reads the primitive diagonal at ANY index,
+not only the first two: the level-three tower word is
+`222399981598543 ≡ 16 (mod 81)`, the level-four tower word is
+`24057640120673299065081231814259802792690247621 ≡ 178 (mod 243)` — each
+a fixed certificate of the same stabilized Ω-word — and every hard-family
+residue class whose product with the word lands in the top third of its
+window fires the diagonal at that index. The descent blade then kills the
+WHOLE tower of that class from the level upward: the class's domain
+reaches infinity in one residue test.
+
+Level four fires the four classes `4, 34, 49, 70 (mod 81)`; level five
+fires the eight classes `16, 31, 61, 76, 124, 139, 169, 184 (mod 243)`.
+Twelve hard-family classes die wholesale here — on top of the two of §3 —
+and the survivor measure of the hard family shrinks from the eight
+mod-81 classes to sixteen mod-243 classes: exactly one third of each
+level's survivors fire, the Cantor arithmetic of the dodge set, now
+formalized two levels deeper than the chamber's first ignition. -/
+
+/-- **THE MOD-81 FOUR IGNITION.**  Every core `≡ 4 (mod 81)` — the
+class-four band's second firing subclass — fires the primitive diagonal
+at index four: the level-three tower word is `222399981598543 ≡ 16
+(mod 81)`, and `16 * 4 ≡ 64 (mod 81)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod81_four (core : Nat)
+    (h : core % 81 = 4) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 := by
+  have hw : omegaCutWord 3 1 = 222399981598543 := by
+    have h2 := omega_cut_factor 3 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 3 core 4 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (222399981598543 * core) % 3^4 / 3^(4-1) = 2 := by
+    have h81 : (3:Nat)^4 = 81 := by norm_num
+    have h27 : (3:Nat)^(4-1) = 27 := by norm_num
+    rw [h81, h27]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-81 THIRTY-FOUR IGNITION.**  Every core `≡ 34 (mod 81)` fires
+the primitive diagonal at index four: `16 * 34 ≡ 58 (mod 81)` lands in
+the top third. -/
+theorem omega_diagonal_two_of_mod81_thirtyfour (core : Nat)
+    (h : core % 81 = 34) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 := by
+  have hw : omegaCutWord 3 1 = 222399981598543 := by
+    have h2 := omega_cut_factor 3 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 3 core 4 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (222399981598543 * core) % 3^4 / 3^(4-1) = 2 := by
+    have h81 : (3:Nat)^4 = 81 := by norm_num
+    have h27 : (3:Nat)^(4-1) = 27 := by norm_num
+    rw [h81, h27]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-81 FORTY-NINE IGNITION.**  Every core `≡ 49 (mod 81)` fires
+the primitive diagonal at index four: `16 * 49 ≡ 55 (mod 81)` lands in
+the top third. -/
+theorem omega_diagonal_two_of_mod81_fortynine (core : Nat)
+    (h : core % 81 = 49) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 := by
+  have hw : omegaCutWord 3 1 = 222399981598543 := by
+    have h2 := omega_cut_factor 3 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 3 core 4 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (222399981598543 * core) % 3^4 / 3^(4-1) = 2 := by
+    have h81 : (3:Nat)^4 = 81 := by norm_num
+    have h27 : (3:Nat)^(4-1) = 27 := by norm_num
+    rw [h81, h27]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-81 SEVENTY IGNITION.**  Every core `≡ 70 (mod 81)` fires the
+primitive diagonal at index four: `16 * 70 ≡ 67 (mod 81)` lands in the
+top third. -/
+theorem omega_diagonal_two_of_mod81_seventy (core : Nat)
+    (h : core % 81 = 70) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 := by
+  have hw : omegaCutWord 3 1 = 222399981598543 := by
+    have h2 := omega_cut_factor 3 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 3 core 4 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (222399981598543 * core) % 3^4 / 3^(4-1) = 2 := by
+    have h81 : (3:Nat)^4 = 81 := by norm_num
+    have h27 : (3:Nat)^(4-1) = 27 := by norm_num
+    rw [h81, h27]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 SIXTEEN IGNITION.**  Every core `≡ 16 (mod 243)` fires
+the primitive diagonal at index five: the level-four tower word is
+`24057640120673299065081231814259802792690247621 ≡ 178 (mod 243)`, and
+`178 * 16 ≡ 175 (mod 243)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_sixteen (core : Nat)
+    (h : core % 243 = 16) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 THIRTY-ONE IGNITION.**  Every core `≡ 31 (mod 243)`
+fires the primitive diagonal at index five: `178 * 31 ≡ 172 (mod 243)`
+lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_thirtyone (core : Nat)
+    (h : core % 243 = 31) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 SIXTY-ONE IGNITION.**  Every core `≡ 61 (mod 243)` fires
+the primitive diagonal at index five: `178 * 61 ≡ 166 (mod 243)` lands in
+the top third. -/
+theorem omega_diagonal_two_of_mod243_sixtyone (core : Nat)
+    (h : core % 243 = 61) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 SEVENTY-SIX IGNITION.**  Every core `≡ 76 (mod 243)`
+fires the primitive diagonal at index five: `178 * 76 ≡ 163 (mod 243)`
+lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_seventysix (core : Nat)
+    (h : core % 243 = 76) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 ONE HUNDRED TWENTY-FOUR IGNITION.**  Every core
+`≡ 124 (mod 243)` fires the primitive diagonal at index five:
+`178 * 124 ≡ 202 (mod 243)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_onehundredtwentyfour (core : Nat)
+    (h : core % 243 = 124) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 ONE HUNDRED THIRTY-NINE IGNITION.**  Every core
+`≡ 139 (mod 243)` fires the primitive diagonal at index five:
+`178 * 139 ≡ 199 (mod 243)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_onehundredthirtynine (core : Nat)
+    (h : core % 243 = 139) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 ONE HUNDRED SIXTY-NINE IGNITION.**  Every core
+`≡ 169 (mod 243)` fires the primitive diagonal at index five:
+`178 * 169 ≡ 193 (mod 243)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_onehundredsixtynine (core : Nat)
+    (h : core % 243 = 169) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-243 ONE HUNDRED EIGHTY-FOUR IGNITION.**  Every core
+`≡ 184 (mod 243)` fires the primitive diagonal at index five:
+`178 * 184 ≡ 190 (mod 243)` lands in the top third. -/
+theorem omega_diagonal_two_of_mod243_onehundredeightyfour (core : Nat)
+    (h : core % 243 = 184) :
+    digit3 (4^(3^(5-1) * core)) (2*5 - 1) = 2 := by
+  have hw : omegaCutWord 4 1 =
+      24057640120673299065081231814259802792690247621 := by
+    have h2 := omega_cut_factor 4 1
+    norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+    omega
+  have hobs := omega_observed_digit 4 core 5 (by decide) (by decide)
+  rw [hw] at hobs
+  have hev : (24057640120673299065081231814259802792690247621 * core) %
+      3^5 / 3^(5-1) = 2 := by
+    have h243 : (3:Nat)^5 = 243 := by norm_num
+    have h81 : (3:Nat)^(5-1) = 81 := by norm_num
+    rw [h243, h81]
+    omega
+  exact hobs.trans hev
+
+/-- **THE MOD-81 BAND TOWER KILL.**  Every core in the mod-81 firing band
+(`4`, `34`, `49` or `70`) kills its whole tower from level three upward. -/
+theorem omega_tower_digit_two_of_mod81_band (core : Nat)
+    (h : core % 81 = 4 ∨ core % 81 = 34 ∨ core % 81 = 49 ∨ core % 81 = 70) :
+    ∀ S : Nat, 3 ≤ S → digit3 (4^(3^S * core)) (S + 4) = 2 := by
+  intro S hS
+  rcases h with h4 | h34 | h49 | h70
+  · exact omega_tower_kill_of_diagonal_two core 4 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod81_four core h4)
+  · exact omega_tower_kill_of_diagonal_two core 4 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod81_thirtyfour core h34)
+  · exact omega_tower_kill_of_diagonal_two core 4 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod81_fortynine core h49)
+  · exact omega_tower_kill_of_diagonal_two core 4 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod81_seventy core h70)
+
+/-- **THE MOD-243 BAND TOWER KILL.**  Every core in the mod-243 firing band
+(`16`, `31`, `61`, `76`, `124`, `139`, `169` or `184`) kills its whole
+tower from level four upward. -/
+theorem omega_tower_digit_two_of_mod243_band (core : Nat)
+    (h : core % 243 = 16 ∨ core % 243 = 31 ∨ core % 243 = 61 ∨
+      core % 243 = 76 ∨ core % 243 = 124 ∨ core % 243 = 139 ∨
+      core % 243 = 169 ∨ core % 243 = 184) :
+    ∀ S : Nat, 4 ≤ S → digit3 (4^(3^S * core)) (S + 5) = 2 := by
+  intro S hS
+  rcases h with h16 | h31 | h61 | h76 | h124 | h139 | h169 | h184
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_sixteen core h16)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_thirtyone core h31)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_sixtyone core h61)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_seventysix core h76)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_onehundredtwentyfour core h124)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_onehundredthirtynine core h139)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_onehundredsixtynine core h169)
+  · exact omega_tower_kill_of_diagonal_two core 5 S (by decide) (by omega)
+      (omega_diagonal_two_of_mod243_onehundredeightyfour core h184)
 
 /-! ## §4 The two named primitives — the decomposition of the input
 
@@ -1058,6 +1370,20 @@ theorem erdos_ternary_2_universal_of_tower_and_row_mod729
 #print axioms omega_diagonal_two_of_mod27_twentyfive
 #print axioms omega_tower_digit_two_of_mod_nine_one
 #print axioms omega_tower_digit_two_of_mod27_band
+#print axioms omega_diagonal_two_of_mod81_four
+#print axioms omega_diagonal_two_of_mod81_thirtyfour
+#print axioms omega_diagonal_two_of_mod81_fortynine
+#print axioms omega_diagonal_two_of_mod81_seventy
+#print axioms omega_tower_digit_two_of_mod81_band
+#print axioms omega_diagonal_two_of_mod243_sixteen
+#print axioms omega_diagonal_two_of_mod243_thirtyone
+#print axioms omega_diagonal_two_of_mod243_sixtyone
+#print axioms omega_diagonal_two_of_mod243_seventysix
+#print axioms omega_diagonal_two_of_mod243_onehundredtwentyfour
+#print axioms omega_diagonal_two_of_mod243_onehundredthirtynine
+#print axioms omega_diagonal_two_of_mod243_onehundredsixtynine
+#print axioms omega_diagonal_two_of_mod243_onehundredeightyfour
+#print axioms omega_tower_digit_two_of_mod243_band
 #print axioms tailF_of_row_and_tower
 #print axioms even_conjecture_of_row_and_tower
 #print axioms erdos_ternary_2_universal_of_row_and_tower
