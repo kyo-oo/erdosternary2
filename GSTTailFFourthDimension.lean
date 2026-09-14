@@ -2175,19 +2175,40 @@ theorem omega_cut_word_lift_one (s core : Nat) (hs : 1 ≤ s)
       omegaCutWord s core * omegaCutWord s core = 1 + 3 * u := by
     refine ⟨(omegaCutWord s core * omegaCutWord s core - 1) / 3, ?_⟩
     omega
-  have hsm : 3^s = 3 * 3^(s-1) := by
-    obtain ⟨t, ht⟩ : ∃ t : Nat, s = t + 1 := ⟨s-1, by omega⟩
-    rw [ht]
-    exact Nat.pow_succ 3 t
   have heng := omega_cut_word_cube_lift_exact s core
-  have hp2 : 3^(s+2) = 3^(s+1) * 3 := by
+  have hp1 : 3^(s+1) * 3^s = 3^(s+2) * 3^(s-1) := by
+    rw [← Nat.pow_add, ← Nat.pow_add]
+    have he : (s+1) + s = (s+2) + (s-1) := by omega
+    rw [he]
+  have hp2 : 3^(s+2) = 3 * 3^(s+1) := by
     rw [show s+2 = (s+1)+1 from by omega, Nat.pow_succ]
+    ring
+  have hAB2 : 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+      + 3^s * (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core))
+      = 3^(s+1) + 3^(s+2) * (u + 3^(s-1)
+        * (omegaCutWord s core * omegaCutWord s core
+          * omegaCutWord s core)) := by
+    have hA : 3^(s+1) * (omegaCutWord s core * omegaCutWord s core)
+        = 3^(s+1) + 3^(s+2) * u := by
+      rw [hu, hp2]
+      ring
+    have hB : 3^(s+1) * (3^s * (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core))
+        = 3^(s+2) * (3^(s-1) * (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core)) := by
+      rw [Nat.mul_assoc 3^(s+1) 3^s (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core),
+        Nat.mul_assoc 3^(s+2) 3^(s-1) (omegaCutWord s core * omegaCutWord s core
+        * omegaCutWord s core),
+        hp1]
+    rw [Nat.add_mul, hA, hB]
     ring
   obtain ⟨v, hv⟩ : ∃ v : Nat, omegaCutWord (s+1) core
       = omegaCutWord s core + 3^(s+1) + 3^(s+2) * v := by
     refine ⟨u + 3^(s-1) * (omegaCutWord s core * omegaCutWord s core
       * omegaCutWord s core), ?_⟩
-    rw [heng, hu, hsm, hp2]
+    rw [heng, hAB2]
     ring
   rw [hv]
   have hz : (3^(s+2) * v) % 3^(s+2) = 0 := Nat.mod_eq_zero_of_dvd ⟨v, rfl⟩
@@ -2269,7 +2290,8 @@ theorem omega_window_dodge_escalates (core : Nat)
   obtain ⟨t, ht⟩ := omega_cut_word_linear (k-1) core
   rw [show (k-1)+1 = k from by omega] at ht
   have hp3 : 3^k = 3 * 3^(k-1) := by
-    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]
+    obtain ⟨t, ht⟩ : ∃ t : Nat, k = t + 1 := ⟨k-1, by omega⟩
+    rw [ht, show t+1-1 = t from by omega, Nat.pow_succ]
     ring
   have h3lt : 3^(k-1) < 3^k := by
     have hpos : 0 < 3^(k-1) := Nat.pow_pos (by decide)
