@@ -89,7 +89,8 @@ theorem erdos_ternary_full_of_climb
     ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false := by
   intro n hn
   rcases Nat.even_or_odd n with ⟨K, hK⟩ | ⟨k, hk⟩
-  · rw [hK, two_pow_two_mul]
+  · have hK2 : n = 2 * K := by omega
+    rw [hK2, two_pow_two_mul]
     rcases Nat.lt_or_ge K 8 with hK8 | hK8
     · have hK5 : 5 ≤ K := by omega
       interval_cases K
