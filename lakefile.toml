@@ -111,6 +111,7 @@ roots = [
   "GSTTailFInfiniteRead",
   "GSTClimbTruthValue",
   "GSTClimbInfiniteFamily",
+  "GSTDiagonalRead",
 ]
 
 [[lean_exe]]

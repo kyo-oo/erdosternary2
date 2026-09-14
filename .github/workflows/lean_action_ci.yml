@@ -105,6 +105,13 @@ jobs:
           lake build GSTClimbInfiniteFamily 2>&1 | tee climbfamily-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' climbfamily-build.log
 
+      - name: Diagonal-read separate proof module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTDiagonalRead 2>&1 | tee diagonalread-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' diagonalread-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail
