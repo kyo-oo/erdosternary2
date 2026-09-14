@@ -316,6 +316,21 @@ theorem even_conjecture_of_climb
 #print axioms hTailF
 #print axioms new_law_four_pow_mod2187
 #print axioms hTailF_of_tower_and_row_mod729
+theorem hTailF_of_tower_and_row_mod2187
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod2187) :
+    four_power_omega_shadow_wave_tailF :=
+  tailF_of_tower_and_row_mod2187 hTower hRowMod
+
+/-- **THE LEVEL-SEVEN CYCLE LAW** — the new law of the seventh lattice
+level: the modulus-6561 residue of `4 ^ m` is pinned by the class of
+`m` modulo 2187. -/
+theorem new_law_four_pow_mod6561 (m : Nat) :
+    (4^m) % 6561 = (4^(m % 2187)) % 6561 :=
+  four_pow_mod6561 m
+
+#print axioms hTailF_of_tower_and_row_mod2187
+#print axioms new_law_four_pow_mod6561
 #print axioms hTailF_iff_even_conjecture
 #print axioms meta_view_all_classes_all_levels
 #print axioms even_conjecture_of_climb

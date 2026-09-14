@@ -1409,6 +1409,517 @@ theorem erdos_ternary_2_universal_of_tower_and_row_mod729
 #print axioms even_conjecture_of_tower_and_row_mod729
 #print axioms erdos_ternary_2_universal_of_tower_and_row_mod729
 
+/-! ## §7b The level-seven ignition — the lattice's seventh level, mod-2187
+
+The grind's seventh level: every mod-729 survivor class splits into exactly
+three mod-2187 subclasses, exactly one of which fires — the Cantor
+arithmetic of the dodge set, one third per level.  Thirty-four more
+hard-family classes die wholesale; the carried row input shrinks from the
+thirty-four mod-729 survivors to the sixty-eight mod-2187 survivors. -/
+
+/-- **THE LEVEL-SEVEN CYCLE LAW** — the modulus-6561 residue of `4 ^ m` is
+pinned by the class of `m` modulo 2187. -/
+theorem four_pow_mod6561 (m : Nat) : (4^m) % 6561 = (4^(m % 2187)) % 6561 := by
+  have h2187 : (4^2187) % 6561 = 1 := by
+    have hsplit : (2187 : Nat) = 729 + 729 + 729 := by omega
+    rw [hsplit, Nat.pow_add, Nat.pow_add]
+  have h42187q : ∀ q : Nat, (4^2187)^q % 6561 = 1 := by
+    intro q
+    induction q with
+    | zero => decide
+    | succ q' ih =>
+      have hsucc : (4^2187)^(Nat.succ q') = (4^2187)^(q' + 1) := rfl
+      rw [hsucc, Nat.pow_succ, Nat.mul_mod, h2187, ih]
+  have hmd : m = 2187 * (m / 2187) + m % 2187 := (Nat.div_add_mod m 2187).symm
+  have h4m : 4^m = (4^2187)^(m/2187) * 4^(m%2187) := by
+    have h1 : 4^m = 4^(2187*(m/2187) + m%2187) := congrArg (fun x => 4^x) hmd
+    have h2 : 4^(2187*(m/2187) + m%2187) = (4^2187)^(m/2187) * 4^(m%2187) := by
+      rw [Nat.pow_add, Nat.pow_mul]
+    exact h1.trans h2
+  rw [h4m, Nat.mul_mod, h42187q, Nat.one_mul, Nat.mod_mod]
+
+/-- The thirty-four fired classes' level values, computed at their levels. -/
+theorem four_pow_10_mod6561 : (4^10) % 6561 = 5377 := by decide
+theorem four_pow_28_mod6561 : (4^28) % 6561 = 5188 := by decide
+theorem four_pow_199_mod6561 : (4^199) % 6561 = 4486 := by
+  have hsplit : (199 : Nat) = 128 + 71 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_274_mod6561 : (4^274) % 6561 = 4711 := by
+  have hsplit : (274 : Nat) = 256 + 18 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_415_mod6561 : (4^415) % 6561 = 4405 := by
+  have hsplit : (415 : Nat) = 256 + 159 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_442_mod6561 : (4^442) % 6561 = 5215 := by
+  have hsplit : (442 : Nat) = 256 + 186 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_499_mod6561 : (4^499) % 6561 = 4414 := by
+  have hsplit : (499 : Nat) = 256 + 243 := by omega
+  rw [hsplit, Nat.pow_add]
+theorem four_pow_517_mod6561 : (4^517) % 6561 = 5440 := by
+  have hsplit : (517 : Nat) = 256 + 256 + 5 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
+theorem four_pow_652_mod6561 : (4^652) % 6561 = 4387 := by
+  have hsplit : (652 : Nat) = 256 + 256 + 140 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
+theorem four_pow_658_mod6561 : (4^658) % 6561 = 5134 := by
+  have hsplit : (658 : Nat) = 256 + 256 + 146 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
+theorem four_pow_742_mod6561 : (4^742) % 6561 = 5143 := by
+  have hsplit : (742 : Nat) = 256 + 256 + 230 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add]
+theorem four_pow_769_mod6561 : (4^769) % 6561 = 4495 := by
+  have hsplit : (769 : Nat) = 256 + 256 + 256 + 1 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_811_mod6561 : (4^811) % 6561 = 4621 := by
+  have hsplit : (811 : Nat) = 256 + 256 + 256 + 43 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_895_mod6561 : (4^895) % 6561 = 5116 := by
+  have hsplit : (895 : Nat) = 256 + 256 + 256 + 127 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1012_mod6561 : (4^1012) % 6561 = 5224 := by
+  have hsplit : (1012 : Nat) = 256 + 256 + 256 + 244 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1054_mod6561 : (4^1054) % 6561 = 5350 := by
+  have hsplit : (1054 : Nat) = 256 + 256 + 256 + 256 + 30 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1090_mod6561 : (4^1090) % 6561 = 4972 := by
+  have hsplit : (1090 : Nat) = 256 + 256 + 256 + 256 + 66 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1309_mod6561 : (4^1309) % 6561 = 4657 := by
+  have hsplit : (1309 : Nat) = 256 + 256 + 256 + 256 + 256 + 29 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1324_mod6561 : (4^1324) % 6561 = 4702 := by
+  have hsplit : (1324 : Nat) = 256 + 256 + 256 + 256 + 256 + 44 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1333_mod6561 : (4^1333) % 6561 = 5701 := by
+  have hsplit : (1333 : Nat) = 256 + 256 + 256 + 256 + 256 + 53 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1459_mod6561 : (4^1459) % 6561 = 4378 := by
+  have hsplit : (1459 : Nat) = 256 + 256 + 256 + 256 + 256 + 179 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1462_mod6561 : (4^1462) % 6561 = 4630 := by
+  have hsplit : (1462 : Nat) = 256 + 256 + 256 + 256 + 256 + 182 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1552_mod6561 : (4^1552) % 6561 = 5386 := by
+  have hsplit : (1552 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 16 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1567_mod6561 : (4^1567) % 6561 = 5431 := by
+  have hsplit : (1567 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 31 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1579_mod6561 : (4^1579) % 6561 = 4738 := by
+  have hsplit : (1579 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 43 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1651_mod6561 : (4^1651) % 6561 = 4468 := by
+  have hsplit : (1651 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 115 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1702_mod6561 : (4^1702) % 6561 = 5107 := by
+  have hsplit : (1702 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 166 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1705_mod6561 : (4^1705) % 6561 = 5359 := by
+  have hsplit : (1705 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 169 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1738_mod6561 : (4^1738) % 6561 = 4729 := by
+  have hsplit : (1738 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 202 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1822_mod6561 : (4^1822) % 6561 = 5467 := by
+  have hsplit : (1822 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 256 + 30 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1894_mod6561 : (4^1894) % 6561 = 5197 := by
+  have hsplit : (1894 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 256 + 102 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1954_mod6561 : (4^1954) % 6561 = 4648 := by
+  have hsplit : (1954 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 256 + 162 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1972_mod6561 : (4^1972) % 6561 = 4459 := by
+  have hsplit : (1972 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 256 + 180 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+theorem four_pow_1981_mod6561 : (4^1981) % 6561 = 5458 := by
+  have hsplit : (1981 : Nat) = 256 + 256 + 256 + 256 + 256 + 256 + 256 + 189 := by omega
+  rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
+
+/-- The generic level-2187 fire: a core in class `c` mod 2187 whose level value
+`4 ^ c % 6561 = v` sits in the top third (`v / 2187 = 2`) owns digit position
+7 of `4 ^ core` outright. -/
+theorem digit3_pow4_pos7_of_class (core c v : Nat)
+    (h : core % 2187 = c) (hv : (4^c) % 6561 = v) (hv2 : v / 2187 = 2) :
+    digit3 (4^core) 7 = 2 := by
+  have hm : (4^core) % 6561 = v := by rw [four_pow_mod6561, h]; exact hv
+  show (4^core) / 3^7 % 3 = 2
+  have h37 : (3:Nat)^7 = 2187 := by norm_num
+  rw [h37]
+  have hbridge : (4^core / 2187) % 3 = ((4^core) % 6561) / 2187 := by omega
+  rw [hbridge, hm, hv2]
+
+/-- **THE THIRTY-FOUR LEVEL-SEVEN FIRED CLASSES.**  Each mod-729 survivor
+triple contributes exactly one fired subclass. -/
+def s0_lattice_fire_class_mod2187 (core : Nat) : Prop :=
+  core % 2187 = 10 ∨ core % 2187 = 28 ∨ core % 2187 = 199 ∨
+  core % 2187 = 274 ∨ core % 2187 = 415 ∨ core % 2187 = 442 ∨
+  core % 2187 = 499 ∨ core % 2187 = 517 ∨ core % 2187 = 652 ∨
+  core % 2187 = 658 ∨ core % 2187 = 742 ∨ core % 2187 = 769 ∨
+  core % 2187 = 811 ∨ core % 2187 = 895 ∨ core % 2187 = 1012 ∨
+  core % 2187 = 1054 ∨ core % 2187 = 1090 ∨ core % 2187 = 1309 ∨
+  core % 2187 = 1324 ∨ core % 2187 = 1333 ∨ core % 2187 = 1459 ∨
+  core % 2187 = 1462 ∨ core % 2187 = 1552 ∨ core % 2187 = 1567 ∨
+  core % 2187 = 1579 ∨ core % 2187 = 1651 ∨ core % 2187 = 1702 ∨
+  core % 2187 = 1705 ∨ core % 2187 = 1738 ∨ core % 2187 = 1822 ∨
+  core % 2187 = 1894 ∨ core % 2187 = 1954 ∨ core % 2187 = 1972 ∨
+  core % 2187 = 1981
+
+/-- **THE LEVEL-SEVEN LATTICE FIRE.**  Every one of the thirty-four fired
+classes owns its digit two unconditionally — no package, no input, no
+gates. -/
+theorem s0_lattice_fire_mod2187 (core : Nat)
+    (h : s0_lattice_fire_class_mod2187 core) :
+    ∃ p : Nat, digit3 (4^core) p = 2 := by
+  unfold s0_lattice_fire_class_mod2187 at h
+  rcases h with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+  · exact ⟨7, digit3_pow4_pos7_of_class core 10 5377 h four_pow_10_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 28 5188 h four_pow_28_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 199 4486 h four_pow_199_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 274 4711 h four_pow_274_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 415 4405 h four_pow_415_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 442 5215 h four_pow_442_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 499 4414 h four_pow_499_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 517 5440 h four_pow_517_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 652 4387 h four_pow_652_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 658 5134 h four_pow_658_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 742 5143 h four_pow_742_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 769 4495 h four_pow_769_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 811 4621 h four_pow_811_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 895 5116 h four_pow_895_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1012 5224 h four_pow_1012_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1054 5350 h four_pow_1054_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1090 4972 h four_pow_1090_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1309 4657 h four_pow_1309_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1324 4702 h four_pow_1324_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1333 5701 h four_pow_1333_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1459 4378 h four_pow_1459_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1462 4630 h four_pow_1462_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1552 5386 h four_pow_1552_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1567 5431 h four_pow_1567_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1579 4738 h four_pow_1579_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1651 4468 h four_pow_1651_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1702 5107 h four_pow_1702_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1705 5359 h four_pow_1705_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1738 4729 h four_pow_1738_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1822 5467 h four_pow_1822_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1894 5197 h four_pow_1894_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1954 4648 h four_pow_1954_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1972 4459 h four_pow_1972_mod6561 (by decide)⟩
+  · exact ⟨7, digit3_pow4_pos7_of_class core 1981 5458 h four_pow_1981_mod6561 (by decide)⟩
+
+/-- **THE SIXTY-EIGHT LEVEL-SEVEN SURVIVORS.**  The hard family's residue
+classes that no lattice level has fired: the carried row input shrinks to
+exactly these, at mod-2187 resolution. -/
+def tailF_row_survivor_class_mod2187 (core : Nat) : Prop :=
+  core % 2187 = 1 ∨ core % 2187 = 4 ∨ core % 2187 = 13 ∨
+  core % 2187 = 40 ∨ core % 2187 = 82 ∨ core % 2187 = 94 ∨
+  core % 2187 = 109 ∨ core % 2187 = 121 ∨ core % 2187 = 166 ∨
+  core % 2187 = 193 ∨ core % 2187 = 244 ∨ core % 2187 = 247 ∨
+  core % 2187 = 280 ∨ core % 2187 = 283 ∨ core % 2187 = 325 ∨
+  core % 2187 = 361 ∨ core % 2187 = 364 ∨ core % 2187 = 436 ∨
+  core % 2187 = 496 ∨ core % 2187 = 514 ∨ core % 2187 = 523 ∨
+  core % 2187 = 580 ∨ core % 2187 = 595 ∨ core % 2187 = 604 ∨
+  core % 2187 = 730 ∨ core % 2187 = 733 ∨ core % 2187 = 739 ∨
+  core % 2187 = 757 ∨ core % 2187 = 823 ∨ core % 2187 = 838 ∨
+  core % 2187 = 850 ∨ core % 2187 = 922 ∨ core % 2187 = 928 ∨
+  core % 2187 = 973 ∨ core % 2187 = 976 ∨ core % 2187 = 1003 ∨
+  core % 2187 = 1009 ∨ core % 2187 = 1093 ∨ core % 2187 = 1144 ∨
+  core % 2187 = 1165 ∨ core % 2187 = 1171 ∨ core % 2187 = 1225 ∨
+  core % 2187 = 1228 ∨ core % 2187 = 1243 ∨ core % 2187 = 1246 ∨
+  core % 2187 = 1252 ∨ core % 2187 = 1381 ∨ core % 2187 = 1387 ∨
+  core % 2187 = 1468 ∨ core % 2187 = 1471 ∨ core % 2187 = 1486 ∨
+  core % 2187 = 1498 ∨ core % 2187 = 1540 ∨ core % 2187 = 1624 ∨
+  core % 2187 = 1657 ∨ core % 2187 = 1732 ∨ core % 2187 = 1741 ∨
+  core % 2187 = 1783 ∨ core % 2187 = 1819 ∨ core % 2187 = 1873 ∨
+  core % 2187 = 1900 ∨ core % 2187 = 1957 ∨ core % 2187 = 1975 ∨
+  core % 2187 = 2038 ∨ core % 2187 = 2053 ∨ core % 2187 = 2062 ∨
+  core % 2187 = 2110 ∨ core % 2187 = 2116
+
+/-- **THE LEVEL-SEVEN BRIDGE.**  Every hard-family core that no lattice
+level has fired is one of the sixty-eight mod-2187 survivors: the
+thirty-four mod-729 survivor classes each split into three mod-2187
+subclasses, exactly one of which fires. -/
+theorem tailF_row_survivor_mod2187_of_nonfire (core : Nat)
+    (hc14 : core % 9 = 1 ∨ core % 9 = 4)
+    (hf : ¬ s0_lattice_fire_class core)
+    (hf6 : ¬ s0_lattice_fire_class_mod729 core)
+    (hf7 : ¬ s0_lattice_fire_class_mod2187 core) :
+    tailF_row_survivor_class_mod2187 core := by
+  have h729class := tailF_row_survivor_mod729_of_nonfire core hc14 hf hf6
+  unfold tailF_row_survivor_class_mod2187
+  unfold tailF_row_survivor_class_mod729 at h729class
+  unfold s0_lattice_fire_class_mod2187 at hf7
+  push_neg at hf7
+  obtain ⟨n10, n28, n199, n274, n415, n442, n499, n517, n652, n658, n742, n769, n811, n895, n1012, n1054, n1090,
+    n1309, n1324, n1333, n1459, n1462, n1552, n1567, n1579, n1651, n1702, n1705, n1738, n1822, n1894, n1954, n1972, n1981⟩ := hf7
+  rcases h729class with c1 | c4 | c10 | c13 | c28 | c40 | c82 | c94 | c109 | c121 | c166 | c193 | c199 | c244 | c247 | c274 | c280 | c283 | c325 | c361 | c364 | c415 | c436 | c442 | c496 | c499 | c514 | c517 | c523 | c580 | c595 | c604 | c652 | c658
+  · have h : core % 2187 = 1 ∨ core % 2187 = 730 ∨ core % 2187 = 1459 := by omega
+    rcases h with e1 | e730 | e1459
+    · omega
+    · omega
+    · exact absurd e1459 n1459
+  · have h : core % 2187 = 4 ∨ core % 2187 = 733 ∨ core % 2187 = 1462 := by omega
+    rcases h with e4 | e733 | e1462
+    · omega
+    · omega
+    · exact absurd e1462 n1462
+  · have h : core % 2187 = 10 ∨ core % 2187 = 739 ∨ core % 2187 = 1468 := by omega
+    rcases h with e10 | e739 | e1468
+    · exact absurd e10 n10
+    · omega
+    · omega
+  · have h : core % 2187 = 13 ∨ core % 2187 = 742 ∨ core % 2187 = 1471 := by omega
+    rcases h with e13 | e742 | e1471
+    · omega
+    · exact absurd e742 n742
+    · omega
+  · have h : core % 2187 = 28 ∨ core % 2187 = 757 ∨ core % 2187 = 1486 := by omega
+    rcases h with e28 | e757 | e1486
+    · exact absurd e28 n28
+    · omega
+    · omega
+  · have h : core % 2187 = 40 ∨ core % 2187 = 769 ∨ core % 2187 = 1498 := by omega
+    rcases h with e40 | e769 | e1498
+    · omega
+    · exact absurd e769 n769
+    · omega
+  · have h : core % 2187 = 82 ∨ core % 2187 = 811 ∨ core % 2187 = 1540 := by omega
+    rcases h with e82 | e811 | e1540
+    · omega
+    · exact absurd e811 n811
+    · omega
+  · have h : core % 2187 = 94 ∨ core % 2187 = 823 ∨ core % 2187 = 1552 := by omega
+    rcases h with e94 | e823 | e1552
+    · omega
+    · omega
+    · exact absurd e1552 n1552
+  · have h : core % 2187 = 109 ∨ core % 2187 = 838 ∨ core % 2187 = 1567 := by omega
+    rcases h with e109 | e838 | e1567
+    · omega
+    · omega
+    · exact absurd e1567 n1567
+  · have h : core % 2187 = 121 ∨ core % 2187 = 850 ∨ core % 2187 = 1579 := by omega
+    rcases h with e121 | e850 | e1579
+    · omega
+    · omega
+    · exact absurd e1579 n1579
+  · have h : core % 2187 = 166 ∨ core % 2187 = 895 ∨ core % 2187 = 1624 := by omega
+    rcases h with e166 | e895 | e1624
+    · omega
+    · exact absurd e895 n895
+    · omega
+  · have h : core % 2187 = 193 ∨ core % 2187 = 922 ∨ core % 2187 = 1651 := by omega
+    rcases h with e193 | e922 | e1651
+    · omega
+    · omega
+    · exact absurd e1651 n1651
+  · have h : core % 2187 = 199 ∨ core % 2187 = 928 ∨ core % 2187 = 1657 := by omega
+    rcases h with e199 | e928 | e1657
+    · exact absurd e199 n199
+    · omega
+    · omega
+  · have h : core % 2187 = 244 ∨ core % 2187 = 973 ∨ core % 2187 = 1702 := by omega
+    rcases h with e244 | e973 | e1702
+    · omega
+    · omega
+    · exact absurd e1702 n1702
+  · have h : core % 2187 = 247 ∨ core % 2187 = 976 ∨ core % 2187 = 1705 := by omega
+    rcases h with e247 | e976 | e1705
+    · omega
+    · omega
+    · exact absurd e1705 n1705
+  · have h : core % 2187 = 274 ∨ core % 2187 = 1003 ∨ core % 2187 = 1732 := by omega
+    rcases h with e274 | e1003 | e1732
+    · exact absurd e274 n274
+    · omega
+    · omega
+  · have h : core % 2187 = 280 ∨ core % 2187 = 1009 ∨ core % 2187 = 1738 := by omega
+    rcases h with e280 | e1009 | e1738
+    · omega
+    · omega
+    · exact absurd e1738 n1738
+  · have h : core % 2187 = 283 ∨ core % 2187 = 1012 ∨ core % 2187 = 1741 := by omega
+    rcases h with e283 | e1012 | e1741
+    · omega
+    · exact absurd e1012 n1012
+    · omega
+  · have h : core % 2187 = 325 ∨ core % 2187 = 1054 ∨ core % 2187 = 1783 := by omega
+    rcases h with e325 | e1054 | e1783
+    · omega
+    · exact absurd e1054 n1054
+    · omega
+  · have h : core % 2187 = 361 ∨ core % 2187 = 1090 ∨ core % 2187 = 1819 := by omega
+    rcases h with e361 | e1090 | e1819
+    · omega
+    · exact absurd e1090 n1090
+    · omega
+  · have h : core % 2187 = 364 ∨ core % 2187 = 1093 ∨ core % 2187 = 1822 := by omega
+    rcases h with e364 | e1093 | e1822
+    · omega
+    · omega
+    · exact absurd e1822 n1822
+  · have h : core % 2187 = 415 ∨ core % 2187 = 1144 ∨ core % 2187 = 1873 := by omega
+    rcases h with e415 | e1144 | e1873
+    · exact absurd e415 n415
+    · omega
+    · omega
+  · have h : core % 2187 = 436 ∨ core % 2187 = 1165 ∨ core % 2187 = 1894 := by omega
+    rcases h with e436 | e1165 | e1894
+    · omega
+    · omega
+    · exact absurd e1894 n1894
+  · have h : core % 2187 = 442 ∨ core % 2187 = 1171 ∨ core % 2187 = 1900 := by omega
+    rcases h with e442 | e1171 | e1900
+    · exact absurd e442 n442
+    · omega
+    · omega
+  · have h : core % 2187 = 496 ∨ core % 2187 = 1225 ∨ core % 2187 = 1954 := by omega
+    rcases h with e496 | e1225 | e1954
+    · omega
+    · omega
+    · exact absurd e1954 n1954
+  · have h : core % 2187 = 499 ∨ core % 2187 = 1228 ∨ core % 2187 = 1957 := by omega
+    rcases h with e499 | e1228 | e1957
+    · exact absurd e499 n499
+    · omega
+    · omega
+  · have h : core % 2187 = 514 ∨ core % 2187 = 1243 ∨ core % 2187 = 1972 := by omega
+    rcases h with e514 | e1243 | e1972
+    · omega
+    · omega
+    · exact absurd e1972 n1972
+  · have h : core % 2187 = 517 ∨ core % 2187 = 1246 ∨ core % 2187 = 1975 := by omega
+    rcases h with e517 | e1246 | e1975
+    · exact absurd e517 n517
+    · omega
+    · omega
+  · have h : core % 2187 = 523 ∨ core % 2187 = 1252 ∨ core % 2187 = 1981 := by omega
+    rcases h with e523 | e1252 | e1981
+    · omega
+    · omega
+    · exact absurd e1981 n1981
+  · have h : core % 2187 = 580 ∨ core % 2187 = 1309 ∨ core % 2187 = 2038 := by omega
+    rcases h with e580 | e1309 | e2038
+    · omega
+    · exact absurd e1309 n1309
+    · omega
+  · have h : core % 2187 = 595 ∨ core % 2187 = 1324 ∨ core % 2187 = 2053 := by omega
+    rcases h with e595 | e1324 | e2053
+    · omega
+    · exact absurd e1324 n1324
+    · omega
+  · have h : core % 2187 = 604 ∨ core % 2187 = 1333 ∨ core % 2187 = 2062 := by omega
+    rcases h with e604 | e1333 | e2062
+    · omega
+    · exact absurd e1333 n1333
+    · omega
+  · have h : core % 2187 = 652 ∨ core % 2187 = 1381 ∨ core % 2187 = 2110 := by omega
+    rcases h with e652 | e1381 | e2110
+    · exact absurd e652 n652
+    · omega
+    · omega
+  · have h : core % 2187 = 658 ∨ core % 2187 = 1387 ∨ core % 2187 = 2116 := by omega
+    rcases h with e658 | e1387 | e2116
+    · exact absurd e658 n658
+    · omega
+    · omega
+
+/-- **THE SHRUNK ROW INPUT, LEVEL SEVEN.**  The row primitive with all
+seven lattice levels' fired classes removed: the residue clause now
+demands one of the sixty-eight mod-2187 survivors. -/
+def tailF_row_primitive_mod2187 : Prop :=
+  ∀ core : Nat, 500 < core → ¬ 3 ∣ core →
+    tailF_row_survivor_class_mod2187 core →
+      ∃ j : Nat, 2 * 3^j ≤ (omegaCutWord 0 core) % 3^(j+1)
+
+/-- **THE WEAKNESS RECEIPT, LEVEL SEVEN.**  The level-seven shrunk row
+input is strictly weaker than the mod-729 one: every mod-2187 survivor
+sits inside a mod-729 survivor class. -/
+theorem tailF_row_primitive_mod2187_of_mod729 (h : tailF_row_primitive_mod729) :
+    tailF_row_primitive_mod2187 := by
+  intro core hK hfree hclass
+  refine h core hK hfree ?_
+  unfold tailF_row_survivor_class_mod2187 at hclass
+  unfold tailF_row_survivor_class_mod729
+  rcases hclass with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h <;> omega
+
+theorem tailF_row_primitive_mod2187_of_row (hRow : tailF_row_primitive) :
+    tailF_row_primitive_mod2187 :=
+  tailF_row_primitive_mod2187_of_mod729 (tailF_row_primitive_mod729_of_row hRow)
+
+/-- **THE REPLACEMENT OF THE INPUT'S ROW HALF, LEVEL SEVEN.**  The tower
+primitive plus the sixty-eight-survivor row primitive compose into the
+full second-observer input. -/
+theorem tailF_of_tower_and_row_mod2187
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod2187) :
+    four_power_omega_shadow_wave_tailF := by
+  intro K hK hshadow
+  obtain ⟨s, core, hKsc, hfree, hres, hA, hB1, hB2, hC, hD⟩ := hshadow
+  rcases Nat.eq_zero_or_pos s with rfl | hs1
+  · have hc14 : core % 9 = 1 ∨ core % 9 = 4 := by
+      rcases hres with h4 | ⟨_, h1⟩ | ⟨h1s, h7⟩
+      · exact Or.inr h4
+      · exact Or.inl h1
+      · exact absurd h1s (by omega)
+    rw [Nat.pow_zero, Nat.one_mul] at hKsc
+    have hKc : 500 < core := by rw [← hKsc]; exact hK
+    by_cases hf : s0_lattice_fire_class core
+    · obtain ⟨p, hp⟩ := s0_lattice_fire core hf
+      rw [hKsc]
+      exact ⟨p, hp⟩
+    · by_cases hf6 : s0_lattice_fire_class_mod729 core
+      · obtain ⟨p, hp⟩ := s0_lattice_fire_mod729 core hf6
+        rw [hKsc]
+        exact ⟨p, hp⟩
+      · by_cases hf7 : s0_lattice_fire_class_mod2187 core
+        · obtain ⟨p, hp⟩ := s0_lattice_fire_mod2187 core hf7
+          rw [hKsc]
+          exact ⟨p, hp⟩
+        · obtain ⟨j, hj⟩ := hRowMod core hKc hfree
+            (tailF_row_survivor_mod2187_of_nonfire core hc14 hf hf6 hf7)
+          refine ⟨1+j, ?_⟩
+          rw [hKsc]
+          exact omega_row_level_digit_two core j hj
+  · have hc47 : core % 9 = 4 ∨ core % 9 = 7 := by
+      rcases hres with h4 | ⟨hs0, h1⟩ | ⟨h1s', h7⟩
+      · exact Or.inl h4
+      · exact absurd hs0 (by omega)
+      · exact Or.inr h7
+    obtain ⟨i, _, hfire⟩ := hTower s core hs1 hfree hc47 hD
+    refine ⟨s+1+i, ?_⟩
+    rw [hKsc]
+    exact tower_observation_digit_two s core i hfire
+
+/-- **THE EVEN STATEMENT ON THE REPLACEMENT INPUT, LEVEL SEVEN.** -/
+theorem even_conjecture_of_tower_and_row_mod2187
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod2187) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr
+    (tailF_of_tower_and_row_mod2187 hTower hRowMod)
+
+/-- **THE CROWN ON THE REPLACEMENT INPUT, LEVEL SEVEN.** -/
+theorem erdos_ternary_2_universal_of_tower_and_row_mod2187
+    (hTower : tailF_tower_primitive)
+    (hRowMod : tailF_row_primitive_mod2187)
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_of_tailF
+    (tailF_of_tower_and_row_mod2187 hTower hRowMod) n hn
+
+#print axioms four_pow_mod6561
+#print axioms digit3_pow4_pos7_of_class
+#print axioms s0_lattice_fire_mod2187
+#print axioms tailF_row_survivor_mod2187_of_nonfire
+#print axioms tailF_row_primitive_mod2187_of_mod729
+#print axioms tailF_row_primitive_mod2187_of_row
+#print axioms tailF_of_tower_and_row_mod2187
+#print axioms even_conjecture_of_tower_and_row_mod2187
+#print axioms erdos_ternary_2_universal_of_tower_and_row_mod2187
 /-! ## §9 The meta-view — every class, every case, every level, one law
 
 The fourth dimension's own vantage point, assembled: the ignition
@@ -1516,67 +2027,4 @@ theorem tailF_tower_primitive_iff_diagonal :
     tailF_tower_primitive ↔
       ∀ s core : Nat, 1 ≤ s → ¬ 3 ∣ core →
         (core % 9 = 4 ∨ core % 9 = 7) →
-        (∀ k : Nat, 3 ≤ k → k ≤ s+1 →
-          (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) →
-          ∃ i : Nat, s+2 ≤ i ∧
-            2 * 3^i ≤ (omegaCutWord s core) % 3^(i+1) := by
-  constructor
-  · intro h s core hs hfree hres hDdiag
-    refine h s core hs hfree hres ?_
-    intro k hk3 hks
-    rw [omega_tower_word_mod_chain core k s (by omega)]
-    exact hDdiag k hk3 hks
-  · intro h s core hs hfree hres hDwin
-    refine h s core hs hfree hres ?_
-    intro k hk3 hks
-    rw [← omega_tower_word_mod_chain core k s (by omega)]
-    exact hDwin k hk3 hks
-
-/-- **SUBSUMPTION RECEIPT, LEVEL TWO.**  The class-one ignition of §3 is
-one instance of the uniform law: the residue test delivers the band
-condition, the uniform law delivers the fire. -/
-theorem omega_diagonal_two_of_mod_nine_one_from_universal (core : Nat)
-    (h : core % 9 = 1) :
-    digit3 (4^(3^(2-1) * core)) (2*2 - 1) = 2 :=
-  omega_diagonal_two_universal 2 core (by decide)
-    (by
-      have hw : omegaCutWord 1 1 = 7 := by
-        have h2 := omega_cut_factor 1 1
-        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
-        omega
-      have hidx : (2:Nat) - 1 = 1 := by omega
-      rw [hidx, hw]
-      have h9 : (3:Nat)^2 = 9 := by norm_num
-      have h31 : (3:Nat)^1 = 3 := by norm_num
-      rw [h9, h31]
-      omega)
-
-/-- **SUBSUMPTION RECEIPT, LEVEL FOUR.**  The mod-81 four ignition of §3b
-is one instance of the same uniform law — the deep bands are inside it
-too. -/
-theorem omega_diagonal_two_of_mod81_four_from_universal (core : Nat)
-    (h : core % 81 = 4) :
-    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 :=
-  omega_diagonal_two_universal 4 core (by decide)
-    (by
-      have hw : omegaCutWord 3 1 = 222399981598543 := by
-        have h2 := omega_cut_factor 3 1
-        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
-        omega
-      have hidx : (4:Nat) - 1 = 3 := by omega
-      rw [hidx, hw]
-      have h81 : (3:Nat)^4 = 81 := by norm_num
-      have h27 : (3:Nat)^3 = 27 := by norm_num
-      rw [h81, h27]
-      omega)
-
-#print axioms omega_diagonal_two_universal
-#print axioms omega_tower_digit_two_universal
-#print axioms omega_diagonal_survivor_dust
-#print axioms omega_diagonal_fire_of_not_dust
-#print axioms omega_tower_dies_of_not_dust
-#print axioms tailF_tower_primitive_iff_diagonal
-#print axioms omega_diagonal_two_of_mod_nine_one_from_universal
-#print axioms omega_diagonal_two_of_mod81_four_from_universal
-
-end GSTTailFFourthDimension
+        (∀ k : Nat
