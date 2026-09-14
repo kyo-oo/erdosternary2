@@ -107,6 +107,7 @@ roots = [
   "GSTV2InfiniteCore",
   "GSTTailFFourthDimension",
   "GSTTailFProof",
+  "GSTTailFOneLane",
 ]
 
 [[lean_exe]]

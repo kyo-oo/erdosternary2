@@ -66,7 +66,7 @@ word is the LTE mean itself.  Two small laws, both unconditional. -/
 tower-core pair `M = 3^s * core` with `core` three-free. -/
 theorem one_lane_three_free_decomposition (M : Nat) : 0 < M →
     ∃ s core : Nat, M = 3^s * core ∧ ¬ 3 ∣ core := by
-  exact Nat.strongRecOn M (fun _ ih hN => by
+  exact Nat.strongRecOn M (fun N ih hN => by
     by_cases h3 : 3 ∣ N
     · obtain ⟨m, hm⟩ := h3
       have hm1 : 1 ≤ m := by omega
