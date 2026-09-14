@@ -84,6 +84,13 @@ jobs:
           lake build GSTTailFOneLane 2>&1 | tee onelane-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' onelane-build.log
 
+      - name: Infinite-read separate proof module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTailFInfiniteRead 2>&1 | tee infiniteread-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' infiniteread-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail

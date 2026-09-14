@@ -108,6 +108,7 @@ roots = [
   "GSTTailFFourthDimension",
   "GSTTailFProof",
   "GSTTailFOneLane",
+  "GSTTailFInfiniteRead",
 ]
 
 [[lean_exe]]
