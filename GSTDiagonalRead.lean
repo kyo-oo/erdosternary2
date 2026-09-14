@@ -332,12 +332,10 @@ theorem valuation_decomp (K : Nat) :
         obtain ⟨v, u, hKu, hu⟩ :=
           ih (K / 3) (Nat.div_lt_self hK (by decide : 1 < 3)) hKd
         refine ⟨v + 1, u, ?_, hu⟩
-        calc K = 3 * (K / 3) := by
-            have hdm := Nat.div_add_mod K 3
-            rw [h3, Nat.add_zero] at hdm
-            omega
-          _ = 3 * (3^v * u) := by rw [hKu]
-          _ = 3^(v+1) * u := by rw [Nat.pow_succ]; ring
+        have hdm : 3 * (K / 3) + K % 3 = K := Nat.div_add_mod K 3
+        rw [h3, Nat.add_zero] at hdm
+        rw [← hdm, hKu, Nat.pow_succ]
+        ring
       · exact ⟨0, K, by ring, h3⟩
 
 /-- **THE WINDOW-CLEAN DUST.**  The read's exact residual: exponents
