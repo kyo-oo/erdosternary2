@@ -100,7 +100,7 @@ theorem dust_child_anatomy (m c : Nat) :
     have h := Nat.div_add_mod r (3^m)
     rw [Nat.mul_comm (3^m)] at h
     exact h
-  have h31 : 3^(m+1) = 3 * 3^m := by rw [Nat.pow_succ]
+  have h31 : 3^(m+1) = 3 * 3^m := by rw [Nat.pow_succ]; ring
   refine ⟨r / 3^m, r % 3^m, hu, ?_, ?_⟩
   · rw [hr]
     exact hdec.symm
@@ -111,7 +111,6 @@ theorem dust_child_anatomy (m c : Nat) :
       have hdm := Nat.div_add_mod (omegaCutWord m 1) 3
       have hm3 : omegaCutWord m 1 % 3 = 1 := by
         rw [omega_cut_word_mod3]
-        omega
       rw [hm3] at hdm
       exact hdm.symm
     -- the shift: the child's residue is the parent's residue plus j sheets
