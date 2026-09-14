@@ -150,18 +150,16 @@ theorem one_lane_complete (K : Nat) :
           omega
         rcases h91 with h91 | h94 | h97
         · rcases Nat.eq_zero_or_pos s with rfl | hs1
-          · exact Or.inl ⟨rfl, Or.inl h91⟩
+          · exact Or.inr (Or.inl ⟨rfl, h91⟩)
           · exact absurd ⟨s+2, by
               rw [hK]
               exact omega_level2_digit_two s core hs1 (Or.inl h91)⟩ hfire
-        · rcases Nat.eq_zero_or_pos s with rfl | hs1
-          · exact Or.inl ⟨rfl, Or.inr h94⟩
-          · exact Or.inr ⟨hs1, Or.inl h94⟩
+        · exact Or.inl h94
         · rcases Nat.eq_zero_or_pos s with rfl | hs1
           · rw [Nat.pow_zero, Nat.one_mul] at hK
             have hK9 : (K+1) % 9 = 7 := by rw [hK]; exact h97
             exact absurd ⟨2, omega_row2_digit_two (K+1) hK9⟩ hfire
-          · exact Or.inr ⟨hs1, Or.inr h97⟩
+          · exact Or.inr (Or.inr ⟨hs1, h97⟩)
       · exact absurd ⟨s+1, by
           rw [hK, omega_cut_digit s core]
           exact hc2⟩ hfire
