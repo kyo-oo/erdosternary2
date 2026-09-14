@@ -2197,12 +2197,12 @@ theorem omega_cut_word_lift_one (s core : Nat) (hs : 1 ≤ s)
         * omegaCutWord s core))
         = 3^(s+2) * (3^(s-1) * (omegaCutWord s core * omegaCutWord s core
         * omegaCutWord s core)) := by
-      rw [Nat.mul_assoc 3^(s+1) 3^s (omegaCutWord s core * omegaCutWord s core
+      rw [Nat.mul_assoc (3^(s+1)) (3^s) (omegaCutWord s core * omegaCutWord s core
         * omegaCutWord s core),
-        Nat.mul_assoc 3^(s+2) 3^(s-1) (omegaCutWord s core * omegaCutWord s core
+        Nat.mul_assoc (3^(s+2)) (3^(s-1)) (omegaCutWord s core * omegaCutWord s core
         * omegaCutWord s core),
         hp1]
-    rw [Nat.add_mul, hA, hB]
+    rw [Nat.mul_add, hA, hB]
     ring
   obtain ⟨v, hv⟩ : ∃ v : Nat, omegaCutWord (s+1) core
       = omegaCutWord s core + 3^(s+1) + 3^(s+2) * v := by
