@@ -78,7 +78,7 @@ theorem add_mod_of_dvd (a b m : Nat) (hdvd : m ∣ b) :
 theorem div_pow_add (q r p : Nat) :
     (3^p * 3 * q + r) / 3^p = 3 * q + r / 3^p := by
   have hp : 0 < 3^p := Nat.pow_pos (by decide)
-  rw [show 3^p * 3 * q + r = r + (3 * q) * 3^p from by ring]
+  rw [show 3^p * 3 * q + r = r + 3^p * (3 * q) from by ring]
   rw [Nat.add_mul_div_left _ _ hp]
   omega
 
@@ -128,8 +128,9 @@ theorem diagonal_window_law (v u j : Nat) (hj : j ≤ v) :
   have hcorr : 3^(v+2+j) ∣ (3^(v+1) * GSTCanonicalTailLTE.lteCoeff v) *
       (3^(v+1) * GSTCanonicalTailLTE.lteCoeff v) * s :=
     pow_cut_dvd v j (GSTCanonicalTailLTE.lteCoeff v) s hj
-  have hcongr : 4^(3^v * u) % 3^(v+2+j) =
-      (1 + 3^(v+1) * (u * GSTCanonicalTailLTE.lteCoeff v)) % 3^(v+2+j) := by
+  have hcongr : 4^(3^v * u) % 3^((v+1+j)+1) =
+      (1 + 3^(v+1) * (u * GSTCanonicalTailLTE.lteCoeff v)) % 3^((v+1+j)+1) := by
+    rw [show 3^((v+1+j)+1) = 3^(v+2+j) from by congr 1; omega]
     rw [hK, hLTE, hs, hu]
     exact add_mod_of_dvd _ _ _ hcorr
   have hdig := digit3_mod_congr (4^(3^v * u))
@@ -150,7 +151,8 @@ theorem diagonal_window_law (v u j : Nat) (hj : j ≤ v) :
 reads `u % 3` directly. -/
 theorem window_subsumes_front (u : Nat) :
     digit3 (4^(3^0 * u)) (0 + 1 + 0) = u % 3 := by
-  simpa using diagonal_window_law 0 u 0 (by omega)
+  simpa [digit3, GSTCanonicalTailLTE.lteCoeff] using
+    diagonal_window_law 0 u 0 (by omega)
 
 /-! ## §2 THE FROZEN DIAGONAL — the coefficient's trits stabilize -/
 
@@ -240,7 +242,6 @@ theorem window_fire_level1 (v : Nat) (hv : 1 ≤ v) (u : Nat) (hu : u % 9 = 1) :
   have hc := lteCoeff_mod9 v hv
   have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 9 = 7 := by
     rw [Nat.mul_mod, hu, hc]
-    norm_num
   have hd : digit3 (u * GSTCanonicalTailLTE.lteCoeff v) 1 = 2 := by
     unfold digit3
     omega
@@ -259,11 +260,9 @@ theorem window_fire_level2 (v : Nat) (hv : 2 ≤ v) (u : Nat)
     rcases hu with h13 | h25
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 27 = 19 := by
         rw [Nat.mul_mod, h13, hc]
-        norm_num
       omega
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 27 = 22 := by
         rw [Nat.mul_mod, h25, hc]
-        norm_num
       omega
   rw [show v + 3 = v + 1 + 2 from rfl, hw]
   exact hd
@@ -280,19 +279,15 @@ theorem window_fire_level3 (v : Nat) (hv : 3 ≤ v) (u : Nat)
     rcases hu with h4 | h34 | h49 | h70
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 81 = 64 := by
         rw [Nat.mul_mod, h4, hc]
-        norm_num
       omega
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 81 = 58 := by
         rw [Nat.mul_mod, h34, hc]
-        norm_num
       omega
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 81 = 55 := by
         rw [Nat.mul_mod, h49, hc]
-        norm_num
       omega
     · have humod : (u * GSTCanonicalTailLTE.lteCoeff v) % 81 = 67 := by
         rw [Nat.mul_mod, h70, hc]
-        norm_num
       omega
   rw [show v + 4 = v + 1 + 3 from rfl, hw]
   exact hd
@@ -337,8 +332,12 @@ theorem valuation_decomp (K : Nat) :
         obtain ⟨v, u, hKu, hu⟩ :=
           ih (K / 3) (Nat.div_lt_self hK (by decide : 1 < 3)) hKd
         refine ⟨v + 1, u, ?_, hu⟩
-        rw [hKu, Nat.pow_succ]
-        ring
+        calc K = 3 * (K / 3) := by
+            have hdm := Nat.div_add_mod K 3
+            rw [h3, Nat.add_zero] at hdm
+            omega
+          _ = 3 * (3^v * u) := by rw [hKu]
+          _ = 3^(v+1) * u := by rw [Nat.pow_succ]; ring
       · exact ⟨0, K, by ring, h3⟩
 
 /-- **THE WINDOW-CLEAN DUST.**  The read's exact residual: exponents
