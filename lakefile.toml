@@ -109,6 +109,7 @@ roots = [
   "GSTTailFProof",
   "GSTTailFOneLane",
   "GSTTailFInfiniteRead",
+  "GSTClimbTruthValue",
 ]
 
 [[lean_exe]]
