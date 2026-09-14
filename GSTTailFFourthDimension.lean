@@ -2090,4 +2090,227 @@ theorem omega_diagonal_two_of_mod81_four_from_universal (core : Nat)
 #print axioms omega_diagonal_two_of_mod_nine_one_from_universal
 #print axioms omega_diagonal_two_of_mod81_four_from_universal
 
+/-! ## §7c The wave engine — the cube lift, exact — one lane, all sheets
+
+The engine of the whole cascade, exposed as a named law: the cut word of
+sheet level `s+1` is the cut word of level `s` plus `3^(s+1)` times
+`(W^2 + 3^s · W^3)` — the EXACT cube lift, no existential remainder.  The
+stabilization law of §2 said `∃ t`; the engine names `t`.  From it: the
+**+1 lift law** — for every three-free core, whenever the sheet's own
+window trit is `w`, the next frozen diagonal trit is `w + 1` — and its two
+children: the **three-window dichotomy** (every sheet of every three-free
+core either FIRES its own digit two at position `2s+2`, or DODGES with
+window trit zero, or ESCALATES — window trit one, and the descent blade
+kills every sheet above at once), and the **escalation law** (a core whose
+windows all dodge can never park its diagonal in the bottom third — with
+the dust hypothesis, the dust's exact shape is the MIDDLE THIRD at every
+level from three upward).  All sheets, all rows, all towers: one lane. -/
+
+/-- The cut word's zeroth trit is the core's residue: the LTE mean is one
+modulo three and the geometric mean is the core modulo three. -/
+theorem omega_cut_word_mod3 (s core : Nat) :
+    omegaCutWord s core % 3 = core % 3 := by
+  rw [omegaCutWord, Nat.mul_mod, lteCoeff_mod3_one, omega_geo_mod3,
+    Nat.one_mul]
+  omega
+
+/-- **THE WAVE ENGINE — the exact cube lift.**  For every sheet level `s`
+and every core, the cut word of the next sheet is the cut word of this
+sheet plus exactly `3^(s+1)` times `(W^2 + 3^s · W^3)` where `W` is this
+sheet's own cut word.  No existential remainder: the whole cascade of
+sheets is this one recursion, seen at once. -/
+theorem omega_cut_word_cube_lift_exact (s core : Nat) :
+    omegaCutWord (s+1) core
+      = omegaCutWord s core
+        + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+          + 3^s * (omegaCutWord s core * omegaCutWord s core
+            * omegaCutWord s core)) := by
+  have hf0 := omega_cut_factor s core
+  have hf1 := omega_cut_factor (s+1) core
+  have hpow : 4^(3^(s+1) * core) = (4^(3^s * core))^3 := by
+    rw [show 3^(s+1) * core = (3^s * core) * 3 from by
+          rw [Nat.pow_succ]; ring,
+        Nat.pow_mul]
+  have hcube : (1 + 3^(s+1) * omegaCutWord s core)^3
+      = 1 + 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) := by
+    rw [show 3^(s+2) = 9 * 3^s from by
+          rw [show s+2 = (s+1)+1 from by omega, Nat.pow_succ, Nat.pow_succ]
+          ring,
+        show 3^(s+1) = 3 * 3^s from by rw [Nat.pow_succ]; ring]
+    ring
+  have hE : 4^(3^(s+1) * core)
+      = 1 + 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) := by
+    rw [hpow, hf0]
+    exact hcube
+  have hAB : 3^(s+2) * omegaCutWord (s+1) core
+      = 3^(s+2) * (omegaCutWord s core
+          + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+            + 3^s * (omegaCutWord s core * omegaCutWord s core
+              * omegaCutWord s core))) :=
+    Nat.add_left_cancel (hf1.symm.trans hE)
+  exact Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (by decide)) hAB
+
+/-- **THE +1 LIFT LAW — the diagonal's advance.**  For every sheet from
+one onward and every three-free core, the next sheet's cut word is this
+sheet's cut word plus exactly ONE unit of the sheet's own modulus,
+modulo `3^(s+2)`: the square of a three-free word is one modulo three,
+so the engine's increment is exactly `3^(s+1)`.  The frozen diagonal
+trit at depth `s+1` is the sheet's own window trit plus one. -/
+theorem omega_cut_word_lift_one (s core : Nat) (hs : 1 ≤ s)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2) :
+    omegaCutWord (s+1) core % 3^(s+2)
+      = (omegaCutWord s core + 3^(s+1)) % 3^(s+2) := by
+  have hmod3 : omegaCutWord s core % 3 = 1 ∨ omegaCutWord s core % 3 = 2 := by
+    rw [omega_cut_word_mod3]
+    exact hfree
+  have hsq : (omegaCutWord s core * omegaCutWord s core) % 3 = 1 := by
+    rcases hmod3 with h | h <;> rw [Nat.mul_mod, h] <;> norm_num
+  obtain ⟨u, hu⟩ : ∃ u : Nat,
+      omegaCutWord s core * omegaCutWord s core = 1 + 3 * u := by
+    refine ⟨(omegaCutWord s core * omegaCutWord s core - 1) / 3, ?_⟩
+    omega
+  have hsm : 3^s = 3 * 3^(s-1) := by
+    obtain ⟨t, ht⟩ : ∃ t : Nat, s = t + 1 := ⟨s-1, by omega⟩
+    rw [ht]
+    exact Nat.pow_succ 3 t
+  have heng := omega_cut_word_cube_lift_exact s core
+  have hp2 : 3^(s+2) = 3^(s+1) * 3 := by
+    rw [show s+2 = (s+1)+1 from by omega, Nat.pow_succ]
+    ring
+  obtain ⟨v, hv⟩ : ∃ v : Nat, omegaCutWord (s+1) core
+      = omegaCutWord s core + 3^(s+1) + 3^(s+2) * v := by
+    refine ⟨u + 3^(s-1) * (omegaCutWord s core * omegaCutWord s core
+      * omegaCutWord s core), ?_⟩
+    rw [heng, hu, hsm, hp2]
+    ring
+  rw [hv]
+  have hz : (3^(s+2) * v) % 3^(s+2) = 0 := Nat.mod_eq_zero_of_dvd ⟨v, rfl⟩
+  rw [Nat.add_mod, hz, Nat.add_zero, Nat.mod_mod]
+
+/-- **THE THREE-WINDOW DICHOTOMY — fire, dodge, or escalate.**  Every
+sheet `s ≥ 1` of every three-free core, read through its own window
+`omegaCutWord s core % 3^(s+2)`: either the window sits in the TOP third
+and the power `4^(3^s * core)` owns its ternary digit two at position
+`2*s+2` outright; or the window sits in the BOTTOM third (the dodge,
+window trit zero); or the window sits in the MIDDLE third — window trit
+one — and then the `+1` lift makes the next diagonal trit two, and the
+descent blade kills EVERY sheet `S ≥ s+1` at once.  All sheets, all
+cores: three windows, one law. -/
+theorem omega_sheet_window_dichotomy (s core : Nat) (hs : 1 ≤ s)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2) :
+    (2 * 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+      ∧ digit3 (4^(3^s * core)) (2*s+2) = 2)
+    ∨ (omegaCutWord s core) % 3^(s+2) < 3^(s+1)
+    ∨ (3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+      ∧ (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)
+      ∧ ∀ S : Nat, s+1 ≤ S → digit3 (4^(3^S * core)) (S + (s+2)) = 2) := by
+  have hp3 : 3^(s+2) = 3 * 3^(s+1) := by
+    rw [show s+2 = (s+1)+1 from by omega, Nat.pow_succ]
+    ring
+  have hpos : 0 < 3^(s+1) := Nat.pow_pos (by decide)
+  have h3lt : 3^(s+1) < 3^(s+2) := by omega
+  by_cases h1 : 2 * 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+  · refine Or.inl ⟨h1, ?_⟩
+    have hobs := tower_observation_digit_two s core (s+1) h1
+    have hidx : s+1+(s+1) = 2*s+2 := by omega
+    rw [hidx] at hobs
+    exact hobs
+  · push_neg at h1
+    by_cases h2 : 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+    · have hlift := omega_cut_word_lift_one s core hs hfree
+      have hmodsum : (omegaCutWord s core) % 3^(s+2) + 3^(s+1) < 3^(s+2) := by
+        omega
+      have hmod : (omegaCutWord s core + 3^(s+1)) % 3^(s+2)
+          = (omegaCutWord s core) % 3^(s+2) + 3^(s+1) := by
+        rw [Nat.add_mod, Nat.mod_eq_of_lt h3lt]
+        exact Nat.mod_eq_of_lt hmodsum
+      have hkill' : 2 * 3^(s+1) ≤ (omegaCutWord (s+1) core) % 3^(s+2) := by
+        rw [hlift, hmod]
+        omega
+      have hobs := tower_observation_digit_two (s+1) core (s+1) hkill'
+      have hidx : (s+1)+1+(s+1) = 2*(s+2)-1 := by omega
+      rw [hidx] at hobs
+      refine Or.inr (Or.inr ⟨h2, ?_, ?_⟩)
+      · omega
+      · intro S hS
+        exact omega_tower_kill_of_diagonal_two core (s+2) S
+          (by omega) (by omega) hobs
+    · push_neg at h2
+      exact Or.inr (Or.inl h2)
+
+/-- **THE ESCALATION LAW — a dodging core never parks its diagonal in the
+bottom third.**  If every sheet `s ≥ 1` of a three-free core dodges its
+own window (the shadow package's clause A, all sheets at once), then at
+every level `k ≥ 3` the scaled diagonal `omegaCutWord (k-1) 1 * core`
+sits at or above the middle of its window: the `+1` lift advances the
+frozen diagonal one full trit per sheet, and a window-dodging sheet
+advances from zero, one, never from minus one.  The window dodge feeds
+the diagonal; the diagonal cannot hide low. -/
+theorem omega_window_dodge_escalates (core : Nat)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2)
+    (hwin : ∀ s : Nat, 1 ≤ s →
+      (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) :
+    ∀ k : Nat, 3 ≤ k →
+      3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k := by
+  intro k hk
+  have hk2 : 1 ≤ k-2 := by omega
+  have hwin' := hwin (k-2) hk2
+  rw [show (k-2)+2 = k from by omega,
+      show (k-2)+1 = k-1 from by omega] at hwin'
+  have hlift := omega_cut_word_lift_one (k-2) core hk2 hfree
+  rw [show (k-2)+1 = k-1 from by omega,
+      show (k-2)+2 = k from by omega] at hlift
+  obtain ⟨t, ht⟩ := omega_cut_word_linear (k-1) core
+  rw [show (k-1)+1 = k from by omega] at ht
+  have hp3 : 3^k = 3 * 3^(k-1) := by
+    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]
+    ring
+  have h3lt : 3^(k-1) < 3^k := by
+    have hpos : 0 < 3^(k-1) := Nat.pow_pos (by decide)
+    omega
+  have hmod : (omegaCutWord (k-2) core + 3^(k-1)) % 3^k
+      = (omegaCutWord (k-2) core) % 3^k + 3^(k-1) := by
+    rw [Nat.add_mod, Nat.mod_eq_of_lt h3lt]
+    have hsum : (omegaCutWord (k-2) core) % 3^k + 3^(k-1) < 3^k := by omega
+    exact Nat.mod_eq_of_lt hsum
+  have hmods : (omegaCutWord (k-1) 1 * core) % 3^k
+      = (omegaCutWord (k-1) core) % 3^k := by
+    rw [ht, Nat.add_mod]
+    have hz : (3^k * t) % 3^k = 0 := Nat.mod_eq_zero_of_dvd ⟨t, rfl⟩
+    rw [hz, Nat.add_zero, Nat.mod_mod]
+  rw [hmods, hlift, hmod]
+  omega
+
+/-- **THE DUST'S SHAPE.**  A three-free core whose sheets all dodge their
+windows AND whose diagonal dodges the fire band at every level from three
+upward (the survivor dust) parks its scaled diagonal in the EXACT middle
+third of every window: never the bottom third (the escalation law), never
+the top third (the dust).  The dust is not a fog — it is a sharply pinned
+configuration: window trit zero at every sheet, diagonal trit one at
+every level. -/
+theorem omega_dust_shape_middle_third (core : Nat)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2)
+    (hwin : ∀ s : Nat, 1 ≤ s →
+      (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1))
+    (hdust : ∀ k : Nat, 3 ≤ k →
+      (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) :
+    ∀ k : Nat, 3 ≤ k →
+      3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k
+        ∧ (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1) := by
+  intro k hk
+  exact ⟨omega_window_dodge_escalates core hfree hwin k hk, hdust k hk⟩
+
+#print axioms omega_cut_word_mod3
+#print axioms omega_cut_word_cube_lift_exact
+#print axioms omega_cut_word_lift_one
+#print axioms omega_sheet_window_dichotomy
+#print axioms omega_window_dodge_escalates
+#print axioms omega_dust_shape_middle_third
+
 end GSTTailFFourthDimension

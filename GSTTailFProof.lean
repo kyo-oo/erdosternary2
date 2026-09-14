@@ -335,4 +335,99 @@ theorem new_law_four_pow_mod6561 (m : Nat) :
 #print axioms meta_view_all_classes_all_levels
 #print axioms even_conjecture_of_climb
 
+/-! ## §7c The wave engine — the receipts, one lane
+
+THE ENGINE of the fourth dimension, carried into the proof file as three
+named laws, each unconditional: the exact cube lift (the recursion that
+generates every sheet of every tower from the one before it — the whole
+cascade as ONE object), the +1 lift law (the frozen diagonal's advance
+per sheet), the three-window dichotomy (every sheet of every three-free
+core: fire, dodge, or escalate to the blade), and the dust's shape (the
+window-dodging survivor dust is pinned to the exact middle third of every
+level).  The one-lane receipt assembles all of them into a single
+theorem: every case, every row, every tower, every sheet, infinity at
+one single time. -/
+
+/-- **THE WAVE ENGINE, RECEIPT FORM — the exact cube lift.**  The cut
+word of the next sheet is the cut word of this sheet plus `3^(s+1)`
+times `(W^2 + 3^s · W^3)`: the recursion that generates the entire
+tower cascade, every core, every sheet, at once. -/
+theorem wave_engine_cube_lift_law (s core : Nat) :
+    omegaCutWord (s+1) core
+      = omegaCutWord s core
+        + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+          + 3^s * (omegaCutWord s core * omegaCutWord s core
+            * omegaCutWord s core)) :=
+  omega_cut_word_cube_lift_exact s core
+
+/-- **THE THREE-WINDOW DICHOTOMY, RECEIPT FORM.**  Every sheet `s ≥ 1` of
+every three-free core: top-third window fires the power's own digit two
+at position `2*s+2`; bottom-third window dodges (window trit zero);
+middle-third window escalates — the next diagonal trit is two and the
+descent blade kills every sheet `S ≥ s+1` at once. -/
+theorem wave_engine_sheet_dichotomy_law (s core : Nat) (hs : 1 ≤ s)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2) :
+    (2 * 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+      ∧ digit3 (4^(3^s * core)) (2*s+2) = 2)
+    ∨ (omegaCutWord s core) % 3^(s+2) < 3^(s+1)
+    ∨ (3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+      ∧ (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)
+      ∧ ∀ S : Nat, s+1 ≤ S → digit3 (4^(3^S * core)) (S + (s+2)) = 2) :=
+  omega_sheet_window_dichotomy s core hs hfree
+
+/-- **THE DUST'S SHAPE, RECEIPT FORM.**  A three-free core whose sheets
+all dodge their windows and whose diagonal stays below the fire band at
+every level `k ≥ 3` parks its scaled diagonal in the EXACT middle third
+of every level: never the bottom third (the escalation law), never the
+top third (the dust itself). -/
+theorem wave_engine_dust_shape_law (core : Nat)
+    (hfree : core % 3 = 1 ∨ core % 3 = 2)
+    (hwin : ∀ s : Nat, 1 ≤ s →
+      (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1))
+    (hdust : ∀ k : Nat, 3 ≤ k →
+      (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) :
+    ∀ k : Nat, 3 ≤ k →
+      3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k
+        ∧ (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1) :=
+  omega_dust_shape_middle_third core hfree hwin hdust
+
+/-- **THE ONE-LANE RECEIPT — every case, every row, every tower, every
+sheet, infinity at one single time.**  One theorem, three faces: the
+exact engine (the cascade's generating recursion), the three-window
+dichotomy (every sheet's own reading: fire, dodge, or escalate to the
+blade), and the dust's shape (the surviving configuration pinned to the
+exact middle third).  No per-level numeral, no per-class gate: the whole
+lattice and the whole cascade are the inside of these three laws. -/
+theorem wave_engine_all_sheets_one_lane :
+    (∀ s core : Nat, omegaCutWord (s+1) core
+      = omegaCutWord s core
+        + 3^(s+1) * (omegaCutWord s core * omegaCutWord s core
+          + 3^s * (omegaCutWord s core * omegaCutWord s core
+            * omegaCutWord s core))) ∧
+    (∀ s core : Nat, 1 ≤ s → core % 3 = 1 ∨ core % 3 = 2 →
+      (2 * 3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+        ∧ digit3 (4^(3^s * core)) (2*s+2) = 2)
+      ∨ (omegaCutWord s core) % 3^(s+2) < 3^(s+1)
+      ∨ (3^(s+1) ≤ (omegaCutWord s core) % 3^(s+2)
+        ∧ (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)
+        ∧ ∀ S : Nat, s+1 ≤ S →
+          digit3 (4^(3^S * core)) (S + (s+2)) = 2)) ∧
+    (∀ core : Nat, core % 3 = 1 ∨ core % 3 = 2 →
+      (∀ s : Nat, 1 ≤ s →
+        (omegaCutWord s core) % 3^(s+2) < 2 * 3^(s+1)) →
+      (∀ k : Nat, 3 ≤ k →
+        (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) →
+      ∀ k : Nat, 3 ≤ k →
+        3^(k-1) ≤ (omegaCutWord (k-1) 1 * core) % 3^k
+          ∧ (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) :=
+  ⟨fun s core => omega_cut_word_cube_lift_exact s core,
+    fun s core hs hfree => omega_sheet_window_dichotomy s core hs hfree,
+    fun core hfree hwin hdust =>
+      omega_dust_shape_middle_third core hfree hwin hdust⟩
+
+#print axioms wave_engine_cube_lift_law
+#print axioms wave_engine_sheet_dichotomy_law
+#print axioms wave_engine_dust_shape_law
+#print axioms wave_engine_all_sheets_one_lane
+
 end GSTTailFProof
