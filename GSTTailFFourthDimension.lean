@@ -1421,8 +1421,8 @@ thirty-four mod-729 survivors to the sixty-eight mod-2187 survivors. -/
 pinned by the class of `m` modulo 2187. -/
 theorem four_pow_mod6561 (m : Nat) : (4^m) % 6561 = (4^(m % 2187)) % 6561 := by
   have h2187 : (4^2187) % 6561 = 1 := by
-    have hsplit : (2187 : Nat) = 729 + 729 + 729 := by omega
-    rw [hsplit, Nat.pow_add, Nat.pow_add]
+    have hsplit : (2187 : Nat) = 243 + 243 + 243 + 243 + 243 + 243 + 243 + 243 + 243 := by omega
+    rw [hsplit, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add, Nat.pow_add]
   have h42187q : ∀ q : Nat, (4^2187)^q % 6561 = 1 := by
     intro q
     induction q with
@@ -2027,4 +2027,67 @@ theorem tailF_tower_primitive_iff_diagonal :
     tailF_tower_primitive ↔
       ∀ s core : Nat, 1 ≤ s → ¬ 3 ∣ core →
         (core % 9 = 4 ∨ core % 9 = 7) →
-        (∀ k : Nat
+        (∀ k : Nat, 3 ≤ k → k ≤ s+1 →
+          (omegaCutWord (k-1) 1 * core) % 3^k < 2 * 3^(k-1)) →
+          ∃ i : Nat, s+2 ≤ i ∧
+            2 * 3^i ≤ (omegaCutWord s core) % 3^(i+1) := by
+  constructor
+  · intro h s core hs hfree hres hDdiag
+    refine h s core hs hfree hres ?_
+    intro k hk3 hks
+    rw [omega_tower_word_mod_chain core k s (by omega)]
+    exact hDdiag k hk3 hks
+  · intro h s core hs hfree hres hDwin
+    refine h s core hs hfree hres ?_
+    intro k hk3 hks
+    rw [← omega_tower_word_mod_chain core k s (by omega)]
+    exact hDwin k hk3 hks
+
+/-- **SUBSUMPTION RECEIPT, LEVEL TWO.**  The class-one ignition of §3 is
+one instance of the uniform law: the residue test delivers the band
+condition, the uniform law delivers the fire. -/
+theorem omega_diagonal_two_of_mod_nine_one_from_universal (core : Nat)
+    (h : core % 9 = 1) :
+    digit3 (4^(3^(2-1) * core)) (2*2 - 1) = 2 :=
+  omega_diagonal_two_universal 2 core (by decide)
+    (by
+      have hw : omegaCutWord 1 1 = 7 := by
+        have h2 := omega_cut_factor 1 1
+        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+        omega
+      have hidx : (2:Nat) - 1 = 1 := by omega
+      rw [hidx, hw]
+      have h9 : (3:Nat)^2 = 9 := by norm_num
+      have h31 : (3:Nat)^1 = 3 := by norm_num
+      rw [h9, h31]
+      omega)
+
+/-- **SUBSUMPTION RECEIPT, LEVEL FOUR.**  The mod-81 four ignition of §3b
+is one instance of the same uniform law — the deep bands are inside it
+too. -/
+theorem omega_diagonal_two_of_mod81_four_from_universal (core : Nat)
+    (h : core % 81 = 4) :
+    digit3 (4^(3^(4-1) * core)) (2*4 - 1) = 2 :=
+  omega_diagonal_two_universal 4 core (by decide)
+    (by
+      have hw : omegaCutWord 3 1 = 222399981598543 := by
+        have h2 := omega_cut_factor 3 1
+        norm_num [Nat.pow_succ, Nat.pow_zero] at h2
+        omega
+      have hidx : (4:Nat) - 1 = 3 := by omega
+      rw [hidx, hw]
+      have h81 : (3:Nat)^4 = 81 := by norm_num
+      have h27 : (3:Nat)^3 = 27 := by norm_num
+      rw [h81, h27]
+      omega)
+
+#print axioms omega_diagonal_two_universal
+#print axioms omega_tower_digit_two_universal
+#print axioms omega_diagonal_survivor_dust
+#print axioms omega_diagonal_fire_of_not_dust
+#print axioms omega_tower_dies_of_not_dust
+#print axioms tailF_tower_primitive_iff_diagonal
+#print axioms omega_diagonal_two_of_mod_nine_one_from_universal
+#print axioms omega_diagonal_two_of_mod81_four_from_universal
+
+end GSTTailFFourthDimension
