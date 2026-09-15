@@ -1,4 +1,3 @@
-import GSTTheActConstruction
 import GSTTailFFourthDimension
 
 set_option maxRecDepth 1000000
@@ -11,8 +10,7 @@ open GSTGraphV2OmegaWaveLaw
 open GSTTailFFourthDimension
 
 /-- A TailF observer dodge at a legal tower level really means that the
-corresponding power digit is not two.  This is the contrapositive-facing
-form needed by the cross-sheet cube law. -/
+corresponding power digit is not two. -/
 theorem observer_dodge_digit_ne_two
     (S core k : Nat)
     (hk3 : 3 ≤ k) (hkS : k ≤ S + 1)
@@ -28,8 +26,7 @@ theorem observer_dodge_digit_ne_two
   omega
 
 /-- The child sheet's maximum observer dodge forbids a parent sheet-gate
-trit one.  The cube law increments that parent trit by one, so a one would
-become a forbidden two on the child. -/
+trit one. -/
 theorem child_observer_forces_parent_gate_ne_one
     (s core : Nat) (hs : 1 ≤ s) (hcore : core % 3 = 1)
     (hD : ∀ q : Nat, 3 ≤ q → q ≤ (s+1) + 1 →
@@ -45,9 +42,7 @@ theorem child_observer_forces_parent_gate_ne_one
   exact hnot hchild
 
 /-- One TailF tower observer at sheet `S` projects backwards to every
-earlier parent gate: every parent gate in sheets `1 .. S-1` is forbidden
-from carrying trit one.  This is the finite backward-pressure law missing
-from the previous wiring. -/
+earlier parent gate. -/
 theorem tailF_observer_backward_pressure
     (S core r : Nat)
     (hr1 : 1 ≤ r) (hrS : r + 1 ≤ S)
@@ -58,13 +53,13 @@ theorem tailF_observer_backward_pressure
   intro hparent
   have hchild : digit3 (4^(3^(r+1) * core)) (2*r+3) = 2 :=
     omega_tripling_gate r core hr1 hcore hparent
-  have hchain := omega_tower_word_mod_chain core (r+2) S (by omega)
   have hcur := hD (r+2) (by omega) (by omega)
+  have hchain := omega_tower_word_mod_chain core (r+2) S (by omega)
   have hprim :
       (omegaCutWord (r+1) 1 * core) % 3^(r+2) < 2 * 3^((r+2)-1) := by
-    rw [← show r+1 = (r+2)-1 from by omega]
-    rw [← hchain]
-    exact hcur
+    have hcur' := hcur
+    rw [hchain] at hcur'
+    simpa using hcur'
   have hobs := omega_observed_digit (r+1) core (r+2) (by omega) (by omega)
   have hp : 0 < 3^((r+2)-1) := Nat.pow_pos (by decide)
   have hlt : ((omegaCutWord (r+1) 1 * core) % 3^(r+2)) /
