@@ -640,9 +640,9 @@ theorem omegaCutWord_one (a : Nat) :
     GSTGraphV2OmegaWaveLaw.omegaCutWord a 1
       = GSTCanonicalTailLTE.lteCoeff a := by
   have h1 := GSTGraphV2OmegaWaveLaw.omega_cut_factor a 1
+  rw [Nat.mul_one] at h1
   have h2 := GSTCanonicalTailLTE.pow4_three_power_lte_exact a
-  rw [show 3^a * 1 = 3^a from Nat.mul_one] at h1
-  rw [← h2] at h1
+  rw [h2] at h1
   exact Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (by decide))
     (Nat.add_left_cancel h1)
 
@@ -650,7 +650,7 @@ theorem omegaCutWord_one (a : Nat) :
 `X` is the quotient of `X`'s residue mod `3^(p+1)` by `3^p`. -/
 theorem digit3_eq_mod_slice (X p : Nat) :
     digit3 X p = (X % 3^(p+1)) / 3^p := by
-  have hdp : 3^(p+1) = 3^p * 3 := by rw [Nat.pow_succ]; ring
+  have hdp : 3^(p+1) = 3^p * 3 := by rw [Nat.pow_succ]
   have hdm : 3^p * 3 * (X / 3^(p+1)) + X % 3^(p+1) = X := by
     rw [← hdp]; exact Nat.div_add_mod X (3^(p+1))
   have h2 := GSTDiagonalRead.div_pow_add (X / 3^(p+1)) (X % 3^(p+1)) p
@@ -661,17 +661,23 @@ theorem digit3_eq_mod_slice (X p : Nat) :
     rw [Nat.mul_mod]; norm_num
   rw [h3, Nat.zero_add]
   have hp : 0 < 3^p := Nat.pow_pos (by decide)
-  have hlt : X % 3^(p+1) < 3 * 3^p := by
-    rw [← hdp]; exact Nat.mod_lt _ (by norm_num : 1 < 3^(p+1))
+  have hlt : X % 3^(p+1) < 3^p * 3 := by
+    rw [← hdp]; exact Nat.mod_lt X (Nat.pow_pos (by decide))
   have hq : (X % 3^(p+1)) / 3^p < 3 := by
     rw [Nat.div_lt_iff_lt_mul hp]
     omega
-  exact (Nat.mod_eq_of_lt hq)
+  rw [Nat.mod_mod_of_dvd _ (Nat.dvd_refl 3)]
+  exact Nat.mod_eq_of_lt hq
 
 /-- A top-third residue reads as digit two. -/
 theorem digit3_of_top_third (X p : Nat)
     (h : 2 * 3^p ≤ X % 3^(p+1)) : digit3 X p = 2 := by
   have hp3 : 3^(p+1) = 3 * 3^p := by rw [Nat.pow_succ]; ring
+  have hlt : X % 3^(p+1) < 3^(p+1) :=
+    Nat.mod_lt X (Nat.pow_pos (by decide))
+  have hdm := Nat.div_add_mod (X % 3^(p+1)) (3^p)
+  have hmod : X % 3^(p+1) % 3^p < 3^p :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
   rw [digit3_eq_mod_slice]
   omega
 
@@ -680,6 +686,11 @@ theorem digit3_of_mid_range (X p : Nat)
     (h1 : 3^p ≤ X % 3^(p+1)) (h2 : X % 3^(p+1) < 2 * 3^p) :
     digit3 X p = 1 := by
   have hp3 : 3^(p+1) = 3 * 3^p := by rw [Nat.pow_succ]; ring
+  have hlt : X % 3^(p+1) < 3^(p+1) :=
+    Nat.mod_lt X (Nat.pow_pos (by decide))
+  have hdm := Nat.div_add_mod (X % 3^(p+1)) (3^p)
+  have hmod : X % 3^(p+1) % 3^p < 3^p :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
   rw [digit3_eq_mod_slice]
   omega
 
@@ -694,7 +705,9 @@ theorem hwin_of_never_firing {core : Nat} (h : NeverFiringTower core) :
     ∀ s : Nat, 1 ≤ s →
       (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
         < 2 * 3^(s+1) := by
-  intro s hs hge
+  intro s hs
+  by_contra hge
+  push_neg at hge
   have hfire := GSTTailFFourthDimension.tower_observation_digit_two
     s core (s+1) hge
   exact h s (s+1) hfire
@@ -706,7 +719,9 @@ theorem hdust_of_never_firing {core : Nat} (h : NeverFiringTower core) :
     ∀ k : Nat, 3 ≤ k →
       (GSTGraphV2OmegaWaveLaw.omegaCutWord (k-1) 1 * core) % 3^k
         < 2 * 3^(k-1) := by
-  intro k hk hge
+  intro k hk
+  by_contra hge
+  push_neg at hge
   have hw := GSTDiagonalRead.diagonal_window_law (k-1) core (k-1)
     (by omega)
   have hconv : GSTGraphV2OmegaWaveLaw.omegaCutWord (k-1) 1 * core
@@ -742,7 +757,6 @@ theorem mod_slice_up (X j : Nat) :
   have hdvd : 3^j ∣ 3^(j+1) := by
     refine ⟨3, ?_⟩
     rw [Nat.pow_succ]
-    ring
   have hmod : X % 3^(j+1) % 3^j = X % 3^j :=
     Nat.mod_mod_of_dvd X hdvd
   have hslice : digit3 X j = X % 3^(j+1) / 3^j :=
@@ -755,12 +769,30 @@ theorem mod_slice_up (X j : Nat) :
 /-- Multiplicative congruence transfer. -/
 theorem mul_congr_mod (a b c m : Nat) (h : a % m = b % m) :
     (a * c) % m = (b * c) % m := by
-  rw [Nat.mul_mod, Nat.mul_mod, h]
+  obtain ⟨qa, ha⟩ : ∃ q, a = m * q + a % m :=
+    ⟨a / m, (Nat.div_add_mod a m).symm⟩
+  obtain ⟨qb, hb⟩ : ∃ q, b = m * q + b % m :=
+    ⟨b / m, (Nat.div_add_mod b m).symm⟩
+  rw [ha, hb, h]
+  have e1 : (m * qa + b % m) * c = b % m * c + m * (qa * c) := by ring
+  have e2 : (m * qb + b % m) * c = b % m * c + m * (qb * c) := by ring
+  rw [e1, e2]
+  rw [GSTDiagonalRead.add_mod_of_dvd _ _ _ ⟨qa * c, by ring⟩,
+    GSTDiagonalRead.add_mod_of_dvd _ _ _ ⟨qb * c, by ring⟩]
 
 /-- Additive congruence transfer. -/
 theorem add_congr_mod (a b c m : Nat) (h : a % m = b % m) :
     (a + c) % m = (b + c) % m := by
-  rw [Nat.add_mod, Nat.add_mod, h]
+  obtain ⟨qa, ha⟩ : ∃ q, a = m * q + a % m :=
+    ⟨a / m, (Nat.div_add_mod a m).symm⟩
+  obtain ⟨qb, hb⟩ : ∃ q, b = m * q + b % m :=
+    ⟨b / m, (Nat.div_add_mod b m).symm⟩
+  rw [ha, hb, h]
+  have e1 : m * qa + b % m + c = (b % m + c) + m * qa := by ring
+  have e2 : m * qb + b % m + c = (b % m + c) + m * qb := by ring
+  rw [e1, e2]
+  rw [GSTDiagonalRead.add_mod_of_dvd _ _ _ ⟨qa, rfl⟩,
+    GSTDiagonalRead.add_mod_of_dvd _ _ _ ⟨qb, rfl⟩]
 
 /-- **THE LEVEL-FIVE PIN.**  A never-firing three-free core satisfies
 `(2 · L(4) · core + 9) % 243 = 2·t₀ + 6·t₁` where `t₀ = core % 3` is the
@@ -780,12 +812,14 @@ theorem never_firing_level5_pin {core : Nat}
     omega
   have hd1 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 1
       = digit3 (7 * core) 1 := by
+    have h9 : (3:Nat)^(1+1) = 9 := by norm_num
     apply GSTDiagonalRead.digit3_mod_congr
-    rw [Nat.mul_mod, Nat.mul_mod, hL4m9]
-    norm_num
+    rw [h9]
+    exact mul_congr_mod _ 7 core 9
+      (hL4m9.trans (by norm_num : (7:Nat) % 9 = 7).symm)
   have hd2 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 2 = 1 := by
     have h1 := hall 2 (by omega)
-    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 2] at h1
+    rw [omegaCutWord_one 2] at h1
     rw [GSTDiagonalRead.digit3_mod_congr
       (GSTCanonicalTailLTE.lteCoeff 4 * core)
       (GSTCanonicalTailLTE.lteCoeff 2 * core) 2
@@ -794,7 +828,7 @@ theorem never_firing_level5_pin {core : Nat}
     exact h1
   have hd3 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 3 = 1 := by
     have h1 := hall 3 (by omega)
-    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 3] at h1
+    rw [omegaCutWord_one 3] at h1
     rw [GSTDiagonalRead.digit3_mod_congr
       (GSTCanonicalTailLTE.lteCoeff 4 * core)
       (GSTCanonicalTailLTE.lteCoeff 3 * core) 3
@@ -803,14 +837,17 @@ theorem never_firing_level5_pin {core : Nat}
     exact h1
   have hd4 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 4 = 1 := by
     have h1 := hall 4 (by omega)
-    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 4] at h1
+    rw [omegaCutWord_one 4] at h1
     exact h1
   have hs1 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 1
   have hs2 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 2
   have hs3 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 3
   have hs4 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 4
   norm_num at hs1 hs2 hs3 hs4
-  rw [hd1, hd2, hd3, hd4] at hs1 hs2 hs3 hs4
+  rw [hd1] at hs1
+  rw [hd2] at hs2
+  rw [hd3] at hs3
+  rw [hd4] at hs4
   have hbound : digit3 (7 * core) 1 < 3 := by
     rw [digit3_eq_mod_slice]
     have h9 : (3:Nat)^(1+1) = 9 := by norm_num
@@ -823,21 +860,9 @@ theorem never_firing_level5_pin {core : Nat}
     have hlt : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 < 243 :=
       Nat.mod_lt _ (by norm_num)
     omega
-  have hlt243 : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 < 243 :=
-    Nat.mod_lt _ (by norm_num)
-  have hinner : ((GSTCanonicalTailLTE.lteCoeff 4 * core) % 243) % 243
-      = (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 :=
-    Nat.mod_eq_of_lt hlt243
-  have hA : (2 * (GSTCanonicalTailLTE.lteCoeff 4 * core)) % 243
-      = (2 * ((GSTCanonicalTailLTE.lteCoeff 4 * core) % 243)) % 243 := by
-    rw [Nat.mul_mod, Nat.mul_mod, hinner]
   rw [show 2 * GSTCanonicalTailLTE.lteCoeff 4 * core + 9
-        = 2 * (GSTCanonicalTailLTE.lteCoeff 4 * core) + 9 from by ring,
-    add_congr_mod _ _ 9 _ hA, hval]
-  have hsm : 2 * (core % 3 + 3 * digit3 (7 * core) 1 + 117) + 9
-      = 2 * (core % 3) + 6 * digit3 (7 * core) 1 + 243 := by ring
-  rw [hsm, add_mod_of_dvd _ _ _ (Nat.dvd_refl 243)]
-  exact Nat.mod_eq_of_lt (by omega)
+        = 2 * (GSTCanonicalTailLTE.lteCoeff 4 * core) + 9 from by ring]
+  omega
 
 /-! ### The Bezout pins and the kernel-checked numerals -/
 
@@ -897,7 +922,7 @@ theorem never_firing_fire_frozen {core : Nat} (h : NeverFiringTower core)
   rw [lteCoeff_one] at hw
   have hd : digit3 (core * 7) 1 = 2 := by
     have h7m : (core * 7) % 9 = 7 := by
-      rw [Nat.mul_mod, h1]; norm_num
+      rw [Nat.mul_mod, h1]
     unfold digit3
     have h31 : (3:Nat)^1 = 3 := by norm_num
     rw [h31]
@@ -916,7 +941,7 @@ theorem never_firing_fire_deepA {core : Nat} (h : NeverFiringTower core)
   have ht0 : core % 3 = 1 := by omega
   have ht1 : digit3 (7 * core) 1 = 0 := by
     have h7m : (7 * core) % 9 = 1 := by
-      rw [Nat.mul_mod, h4]; norm_num
+      rw [Nat.mul_mod, h4]
     rw [digit3_eq_mod_slice]
     have h9 : (3:Nat)^(1+1) = 9 := by norm_num
     rw [h9]
@@ -924,7 +949,8 @@ theorem never_firing_fire_deepA {core : Nat} (h : NeverFiringTower core)
   rw [ht0, ht1] at hpin
   have hL4m : GSTCanonicalTailLTE.lteCoeff 4 % 243 = 178 := lteCoeff_four_mod
   have h113c : (2 * GSTCanonicalTailLTE.lteCoeff 4) % 243 = 113 := by
-    rw [Nat.mul_mod, hL4m]; norm_num
+    rw [Nat.mul_mod, hL4m]
+    norm_num
   have hme : (2 * GSTCanonicalTailLTE.lteCoeff 4 * core) % 243
       = (113 * core) % 243 :=
     mul_congr_mod _ _ core _ h113c
@@ -955,7 +981,8 @@ theorem never_firing_fire_deepA {core : Nat} (h : NeverFiringTower core)
             * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) * s :=
         ⟨729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)
             * (3 * GSTCanonicalTailLTE.lteCoeff 6) * s, by ring⟩
-      rw [add_mod_of_dvd _ _ _ hd2, add_mod_of_dvd _ _ _ hd1]
+      rw [GSTDiagonalRead.add_mod_of_dvd _ _ _ hd2,
+        GSTDiagonalRead.add_mod_of_dvd _ _ _ hd1]
       exact Nat.mod_eq_of_lt (by norm_num)
     rw [h1, Nat.one_mul, four_pow_174_mod]
     exact Nat.mod_eq_of_lt (by norm_num)
@@ -966,8 +993,8 @@ theorem never_firing_fire_deepA {core : Nat} (h : NeverFiringTower core)
     have hW : 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core
         = 729 * ((4:Nat)^(3^1 * core) / 729) + 495 := by omega
     unfold digit3
-    have h31 : (3:Nat)^1 = 3 := by norm_num
-    rw [h31]
+    have h33 : (3:Nat)^(3:Nat) = 27 := by norm_num
+    rw [h33]
     omega
   have hs : digit3 (1 + 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core)
         (1+1+3)
@@ -989,7 +1016,7 @@ theorem never_firing_fire_deepB {core : Nat} (h : NeverFiringTower core)
   have ht0 : core % 3 = 1 := by omega
   have ht1 : digit3 (7 * core) 1 = 1 := by
     have h7m : (7 * core) % 9 = 4 := by
-      rw [Nat.mul_mod, h7]; norm_num
+      rw [Nat.mul_mod, h7]
     rw [digit3_eq_mod_slice]
     have h9 : (3:Nat)^(1+1) = 9 := by norm_num
     rw [h9]
@@ -997,7 +1024,8 @@ theorem never_firing_fire_deepB {core : Nat} (h : NeverFiringTower core)
   rw [ht0, ht1] at hpin
   have hL4m : GSTCanonicalTailLTE.lteCoeff 4 % 243 = 178 := lteCoeff_four_mod
   have h113c : (2 * GSTCanonicalTailLTE.lteCoeff 4) % 243 = 113 := by
-    rw [Nat.mul_mod, hL4m]; norm_num
+    rw [Nat.mul_mod, hL4m]
+    norm_num
   have hme : (2 * GSTCanonicalTailLTE.lteCoeff 4 * core) % 243
       = (113 * core) % 243 :=
     mul_congr_mod _ _ core _ h113c
@@ -1028,7 +1056,8 @@ theorem never_firing_fire_deepB {core : Nat} (h : NeverFiringTower core)
             * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) * s :=
         ⟨243 * (3 * GSTCanonicalTailLTE.lteCoeff 6)
             * (3 * GSTCanonicalTailLTE.lteCoeff 6) * s, by ring⟩
-      rw [add_mod_of_dvd _ _ _ hd2, add_mod_of_dvd _ _ _ hd1]
+      rw [GSTDiagonalRead.add_mod_of_dvd _ _ _ hd2,
+        GSTDiagonalRead.add_mod_of_dvd _ _ _ hd1]
       exact Nat.mod_eq_of_lt (by norm_num)
     rw [h1, Nat.one_mul, four_pow_129_mod]
     exact Nat.mod_eq_of_lt (by norm_num)
@@ -1039,8 +1068,8 @@ theorem never_firing_fire_deepB {core : Nat} (h : NeverFiringTower core)
     have hW : 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core
         = 2187 * ((4:Nat)^(3^1 * core) / 2187) + 1494 := by omega
     unfold digit3
-    have h31 : (3:Nat)^1 = 3 := by norm_num
-    rw [h31]
+    have h34 : (3:Nat)^(4:Nat) = 81 := by norm_num
+    rw [h34]
     omega
   have hs : digit3 (1 + 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core)
         (1+1+4)
@@ -1065,12 +1094,12 @@ theorem tower_dust_empty (core : Nat) (hfree : ¬ 3 ∣ core) :
         (Nat.dvd_of_mod_eq_zero (by omega)))
     · exact never_firing_fire_frozen h (by omega)
     · rcases Nat.lt_trichotomy (core % 9) 4 with hlt4 | heq4 | hgt4
-      · exact absurd (by omega : True) (by omega)
+      · omega
       · exact never_firing_fire_deepA h (by omega)
       · rcases Nat.lt_trichotomy (core % 9) 7 with hlt7 | heq7 | hgt7
-        · exact absurd (by omega : True) (by omega)
+        · omega
         · exact never_firing_fire_deepB h (by omega)
-        · exact absurd (by omega : True) (by omega)
+        · omega
   · exact never_firing_fire_front h (by omega)
 
 /-! ## §8 THE RECEIPT — the extermination, assembled -/
