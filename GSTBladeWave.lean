@@ -1,6 +1,8 @@
 import Mathlib
 import GSTTheActConstruction
 
+open GSTCanonicalSevenAxisBridge (digit3)
+
 /-!
 # THE BLADE AND THE WAVE — the dust root's exact laws and the wave's periodicity
 
@@ -56,9 +58,13 @@ theorem digit3_mod_pow (R j : Nat) :
   have hq' : R = R % 3^(j+1) + 3^j * (3 * (R / 3^(j+1))) := by
     have h := Nat.div_add_mod R (3^(j+1))
     rw [Nat.pow_succ, Nat.mul_assoc, Nat.add_comm] at h
-    exact h
-  rw [hq', Nat.add_mul_div_right _ _ hp]
-  omega
+    exact h.symm
+  calc R / 3^j % 3
+      = (R % 3^(j+1) + 3^j * (3 * (R / 3^(j+1)))) / 3^j % 3 := by
+          rw [← hq']
+    _ = (R % 3^(j+1) / 3^j + 3 * (R / 3^(j+1))) % 3 := by
+          rw [Nat.add_mul_div_right _ _ hp]
+    _ = (R % 3^(j+1)) / 3^j % 3 := Nat.add_mul_mod_self_left _ _ _
 
 /-- Congruent naturals share ternary digits. -/
 theorem digit3_congr {R₁ R₂ j : Nat}
@@ -80,13 +86,12 @@ theorem dust_root_mod243 (m : Nat) :
     have hpow : 4^(1+3*(m+1)) = 4^(1+3*m) * 64 := by
       have he : 1+3*(m+1) = (1+3*m)+3 := by ring
       rw [he, Nat.pow_add, (by decide : (4:Nat)^3 = 64)]
-    have hpas : (m+1).choose 2 = m.choose 2 + m := by
-      rw [(show (2:Nat) = 1+1 from rfl), Nat.succ_choose,
-        Nat.choose_one_right]
+    have hpas : (m+1).choose 2 = m + m.choose 2 :=
+      (Nat.choose_succ_succ m 1).trans (by rw [Nat.choose_one_right])
     have hsplit : (4 + 252*m + 324*m.choose 2) * 64
-        = (4 + 252*(m+1) + 324*(m.choose 2 + m))
+        = (4 + 252*(m+1) + 324*(m + m.choose 2))
           + 243*(64*m + 84*(m.choose 2)) := by
-      rw [hpas]; ring
+      ring
     calc 4^(1+3*(m+1)) % 243
         = (4^(1+3*m) * 64) % 243 := by rw [hpow]
       _ = ((4 + 252*m + 324*m.choose 2) * 64) % 243 :=
@@ -99,14 +104,10 @@ theorem digit_two_of_dust_root (m : Nat) :
     digit3 (4^(1+3*m)) 2 = m % 3 := by
   rw [digit3_mod_pow]
   norm_num
-  have h27 : 4^(1+3*m) % 27 = (4 + 252*m + 324*m.choose 2) % 27 := by
-    have h := dust_root_mod243 m
-    have hdd : 27 ∣ 243 := ⟨9, by decide⟩
-    have e1 : 4^(1+3*m) % 243 % 27 = 4^(1+3*m) % 27 :=
-      Nat.mod_mod_of_dvd hdd _
-    have e2 : (4 + 252*m + 324*m.choose 2) % 243 % 27
-        = (4 + 252*m + 324*m.choose 2) % 27 := Nat.mod_mod_of_dvd hdd _
-    rw [← e1, ← e2, h]
+  have h := dust_root_mod243 m
+  set A := 4^(1+3*m) with hA
+  clear hA
+  have h27 : A % 27 = (4 + 252*m + 324*m.choose 2) % 27 := by omega
   rw [h27]
   have hs : (4 + 252*m + 324*m.choose 2) % 27 = (4 + 9*m) % 27 := by omega
   rw [hs]
@@ -117,14 +118,10 @@ theorem digit_three_of_dust_root (m : Nat) :
     digit3 (4^(1+3*m)) 3 = (m / 3) % 3 := by
   rw [digit3_mod_pow]
   norm_num
-  have h81 : 4^(1+3*m) % 81 = (4 + 252*m + 324*m.choose 2) % 81 := by
-    have h := dust_root_mod243 m
-    have hdd : 81 ∣ 243 := ⟨3, by decide⟩
-    have e1 : 4^(1+3*m) % 243 % 81 = 4^(1+3*m) % 81 :=
-      Nat.mod_mod_of_dvd hdd _
-    have e2 : (4 + 252*m + 324*m.choose 2) % 243 % 81
-        = (4 + 252*m + 324*m.choose 2) % 81 := Nat.mod_mod_of_dvd hdd _
-    rw [← e1, ← e2, h]
+  have h := dust_root_mod243 m
+  set A := 4^(1+3*m) with hA
+  clear hA
+  have h81 : A % 81 = (4 + 252*m + 324*m.choose 2) % 81 := by omega
   rw [h81]
   have hs : (4 + 252*m + 324*m.choose 2) % 81 = (4 + 9*m) % 81 := by omega
   rw [hs]
@@ -148,16 +145,16 @@ theorem digit_four_of_dust_root (m : Nat) :
 order of divisibility: if `3^(k+1) ∣ x` then `3^(k+2) ∣ (1+x)³ − 1`. -/
 theorem cube_dvd_three (x k : Nat) (hx : 3^(k+1) ∣ x) :
     3^(k+2) ∣ (1+x)^3 - 1 := by
-  obtain ⟨u, hu⟩ := hx
-  have h3 : 3 ∣ x := Nat.dvd_trans ⟨3^k, by rw [Nat.pow_succ]; ring⟩ hx
+  have h3d : 3 ∣ 3^(k+1) := ⟨3^k, by rw [Nat.pow_succ]; ring⟩
+  have h3 : 3 ∣ x := Nat.dvd_trans h3d hx
   obtain ⟨s, hs⟩ := h3
   have hS : 3 ∣ x*x + 3*(x+1) := ⟨3*s*s + (x+1), by rw [hs]; ring⟩
   obtain ⟨w, hw⟩ := hS
+  obtain ⟨u, hu⟩ := hx
   have hexp : (1+x)^3 - 1 = x * (x*x + 3*(x+1)) := by ring
-  rw [hexp, hw, hu]
-  refine ⟨u * w, ?_⟩
-  rw [← Nat.pow_succ]
-  ring
+  have h32 : 3^(k+2) = 3^(k+1) * 3 := by rw [Nat.pow_succ]
+  rw [hexp, hw, hu, h32]
+  exact ⟨u * w, by ring⟩
 
 /-- **The tower map.**  `(1+x)^(3^n)` gains `n` three-adic orders over
 `x`: if `3^(a+1) ∣ x` then `3^(a+n+1) ∣ (1+x)^(3^n) − 1`. -/
@@ -173,7 +170,7 @@ theorem pow3_tower_dvd (x a n : Nat) (hx : 3^(a+1) ∣ x) :
     have hrew : (1+x)^(3^(n+1)) = ((1+x)^(3^n))^3 := by
       rw [Nat.pow_succ 3 n, Nat.pow_mul]
     have hpos : (0:Nat) < (1+x)^(3^n) := by positivity
-    have hA : 1 ≤ (1+x)^(3^n) := by omega
+    have hA : 1 ≤ (1+x)^(3^n) := Nat.le_of_lt hpos
     have h := cube_dvd_three ((1+x)^(3^n) - 1) (a+n) ih
     rw [Nat.add_sub_cancel' hA] at h
     rw [hrew]
@@ -189,17 +186,19 @@ theorem one_add_pow_dvd (y t k : Nat) (hy : 3^k ∣ y) :
     exact Nat.dvd_zero _
   | succ t ih =>
     have hpos : (0:Nat) < (1+y)^t := by positivity
-    have hA : 1 ≤ (1+y)^t := by omega
-    have key : ∀ w yy : Nat, (w+1)*(yy+1) - 1 = w + yy + w*yy := by
+    have hA : 1 ≤ (1+y)^t := Nat.le_of_lt hpos
+    have key : ∀ w yy : Nat, (w+1)*(1+yy) - 1 = w + yy + w*yy := by
       intro w yy
-      have e1 : (w+1)*(yy+1) = w*yy + w + yy + 1 := by ring
-      rw [e1]
-      omega
+      have e1 : (w+1)*(1+yy) = w*yy + w + yy + 1 := by ring
+      rw [e1, Nat.add_sub_cancel_right]
+      ring
     have hexp : (1+y)^(t+1) - 1
         = ((1+y)^t - 1) + y + ((1+y)^t - 1)*y := by
       have h1 : (1+y)^(t+1) = (1+y)^t * (1+y) := Nat.pow_succ (1+y) t
-      have h2 : (1+y)^t = ((1+y)^t - 1) + 1 := Nat.sub_add_cancel hA
-      rw [h1, h2]
+      have h2 : (1+y)^t = ((1+y)^t - 1) + 1 :=
+        (Nat.sub_add_cancel hA).symm
+      rw [h1]
+      conv_lhs => rw [h2]
       exact key _ _
     rw [hexp]
     obtain ⟨w, hw⟩ := ih
@@ -224,21 +223,20 @@ theorem wave_mod (a n core t : Nat) :
   have hsplit : 3^a * (core + 3^n * t) = 3^a * core + 3^(a+n) * t := by
     rw [Nat.pow_add]
     ring
-  rw [hsplit, Nat.pow_add (3^a * core) (3^(a+n) * t)]
+  rw [hsplit, Nat.pow_add 4 (3^a * core) (3^(a+n) * t)]
   have hmul : 4^(3^(a+n) * t) = (4^(3^(a+n)))^t :=
     Nat.pow_mul 4 (3^(a+n)) t
   rw [hmul]
   have hpos4 : (0:Nat) < 4^(3^(a+n)) := by positivity
-  have hle : 1 ≤ 4^(3^(a+n)) := by omega
+  have hle : 1 ≤ 4^(3^(a+n)) := Nat.le_of_lt hpos4
   have hy : 4^(3^(a+n)) = 1 + (4^(3^(a+n)) - 1) :=
     (Nat.add_sub_cancel' hle).symm
   rw [hy]
   obtain ⟨c, hc⟩ := one_add_pow_dvd (4^(3^(a+n)) - 1) t (a+n+1)
     (four_pow_three_pow_dvd a n)
-  have hW : (0:Nat) < (1 + (4^(3^(a+n)) - 1))^t := by positivity
+  have hWpos : (0:Nat) < (1 + (4^(3^(a+n)) - 1))^t := by positivity
   have hpt : (1 + (4^(3^(a+n)) - 1))^t = 3^(a+n+1) * c + 1 := by
-    rw [← hc]
-    omega
+    rw [← hc, Nat.sub_add_cancel (Nat.le_of_lt hWpos)]
   rw [hpt]
   have hexp : 4^(3^a * core) * (3^(a+n+1) * c + 1)
       = 4^(3^a * core) + 3^(a+n+1) * (c * 4^(3^a * core)) := by ring
