@@ -31,8 +31,11 @@ theorem commonTwo_of_mod11960170437031681509315647542642081165564344637137414277
         digit3_eq_of_mod_next _ _ _ hPowResid
       _ = 2 := row237_reference.1
   have hExp1 : (N + 1) % 3 ^ 237 = 239 % 3 ^ 237 := by
-    rw [Nat.add_mod, hExp]
-    norm_num
+    calc
+      (N + 1) % 3 ^ 237 = (N % 3 ^ 237 + 1 % 3 ^ 237) % 3 ^ 237 :=
+        Nat.add_mod N 1 (3 ^ 237)
+      _ = (238 % 3 ^ 237 + 1 % 3 ^ 237) % 3 ^ 237 := by rw [hExp]
+      _ = 239 % 3 ^ 237 := by norm_num
   have hPowResid1 :
       4 ^ (N + 1) % 3 ^ (237 + 1) = 4 ^ 239 % 3 ^ (237 + 1) :=
     (pow4_residue_eq_iff_exponent_residue_eq 237 (N + 1) 239).2 hExp1
