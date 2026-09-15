@@ -3,6 +3,8 @@ import GSTTheActConstruction
 
 open GSTCanonicalSevenAxisBridge (digit3)
 
+namespace GSTBladeWave
+
 /-!
 # THE BLADE AND THE WAVE — the dust root's exact laws and the wave's periodicity
 
@@ -258,3 +260,5 @@ theorem wave_digit_periodic (a n core t : Nat) :
 #print axioms digit_three_of_dust_root
 #print axioms digit_four_of_dust_root
 #print axioms wave_digit_periodic
+
+end GSTBladeWave
