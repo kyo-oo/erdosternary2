@@ -347,7 +347,6 @@ theorem noise_window_law (r j : Nat) (h : 4^r < 3^(j+1)) :
     digit3 (4^r) (j + 1) = 0 := by
   unfold digit3
   rw [Nat.div_eq_of_lt h]
-  exact Nat.zero_mod 3
 
 /-- **THE UNIQUE DEAD CHILD.**  At every level, every prefix owns
 EXACTLY ONE dead child-trit: `(2 - noise) mod 3`.  The blade's
@@ -390,7 +389,7 @@ first child, the noise-zero prefixes kill their second. -/
 theorem dust_fire_row_six (K : Nat)
     (hK : K % 729 = 31 ∨ K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 256 ∨ K % 729 = 271 ∨ K % 729 = 337 ∨ K % 729 = 352 ∨ K % 729 = 409 ∨ K % 729 = 487 ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 568 ∨ K % 729 = 607 ∨ K % 729 = 679 ∨ K % 729 = 685) :
     digit3 (4^K) 6 = 2 := by
-  rcases hK with h31 h37 h172 h253 h256 h271 h337 h352 h409 h487 h490 h526 h568 h607 h679 h685
+  rcases hK with h31 | h37 | h172 | h253 | h256 | h271 | h337 | h352 | h409 | h487 | h490 | h526 | h568 | h607 | h679 | h685
   · exact fire_of_mod729 K 31 0 (by decide) (by decide) (by decide) (by omega)
   · exact fire_of_mod729 K 37 0 (by decide) (by decide) (by decide) (by omega)
   · exact fire_of_mod729 K 172 0 (by decide) (by decide) (by decide) (by omega)
@@ -426,39 +425,39 @@ theorem cantorian_dust_mod_729 (K : Nat)
     K % 729 = 1 ∨ K % 729 = 4 ∨ K % 729 = 10 ∨ K % 729 = 13 ∨ K % 729 = 28 ∨ K % 729 = 40 ∨ K % 729 = 82 ∨ K % 729 = 94 ∨ K % 729 = 109 ∨ K % 729 = 121 ∨ K % 729 = 166 ∨ K % 729 = 193 ∨ K % 729 = 199 ∨ K % 729 = 244 ∨ K % 729 = 247 ∨ K % 729 = 274 ∨ K % 729 = 280 ∨ K % 729 = 283 ∨ K % 729 = 325 ∨ K % 729 = 364 ∨ K % 729 = 415 ∨ K % 729 = 436 ∨ K % 729 = 442 ∨ K % 729 = 496 ∨ K % 729 = 499 ∨ K % 729 = 514 ∨ K % 729 = 517 ∨ K % 729 = 523 ∨ K % 729 = 580 ∨ K % 729 = 595 ∨ K % 729 = 652 ∨ K % 729 = 658 := by
   have h243 := cantorian_dust_mod_243 K hd hc
   have hrow := hc 6 (by omega)
-  have h31 : K % 729 ≠ 31 :=
+  have hdead31 : K % 729 ≠ 31 :=
     fun h => absurd (dust_fire_row_six K (Or.inl h)) hrow
-  have h37 : K % 729 ≠ 37 :=
+  have hdead37 : K % 729 ≠ 37 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inl h))) hrow
-  have h172 : K % 729 ≠ 172 :=
+  have hdead172 : K % 729 ≠ 172 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inl h)))) hrow
-  have h253 : K % 729 ≠ 253 :=
+  have hdead253 : K % 729 ≠ 253 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inl h))))) hrow
-  have h256 : K % 729 ≠ 256 :=
+  have hdead256 : K % 729 ≠ 256 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))) hrow
-  have h271 : K % 729 ≠ 271 :=
+  have hdead271 : K % 729 ≠ 271 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))) hrow
-  have h337 : K % 729 ≠ 337 :=
+  have hdead337 : K % 729 ≠ 337 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))) hrow
-  have h352 : K % 729 ≠ 352 :=
+  have hdead352 : K % 729 ≠ 352 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))) hrow
-  have h409 : K % 729 ≠ 409 :=
+  have hdead409 : K % 729 ≠ 409 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))) hrow
-  have h487 : K % 729 ≠ 487 :=
+  have hdead487 : K % 729 ≠ 487 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))) hrow
-  have h490 : K % 729 ≠ 490 :=
+  have hdead490 : K % 729 ≠ 490 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))) hrow
-  have h526 : K % 729 ≠ 526 :=
+  have hdead526 : K % 729 ≠ 526 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))) hrow
-  have h568 : K % 729 ≠ 568 :=
+  have hdead568 : K % 729 ≠ 568 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))) hrow
-  have h607 : K % 729 ≠ 607 :=
+  have hdead607 : K % 729 ≠ 607 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))) hrow
-  have h679 : K % 729 ≠ 679 :=
+  have hdead679 : K % 729 ≠ 679 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))) hrow
-  have h685 : K % 729 ≠ 685 :=
-    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))) hrow
-  rcases h243 with h1 h4 h10 h13 h28 h31 h37 h40 h82 h94 h109 h121 h166 h172 h193 h199 <;> omega
+  have hdead685 : K % 729 ≠ 685 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))) hrow
+  rcases h243 with h1 | h4 | h10 | h13 | h28 | h31 | h37 | h40 | h82 | h94 | h109 | h121 | h166 | h172 | h193 | h199 <;> omega
 
 /-- **THE LEVEL-FIVE RECEIPT.**  Cascade level five assembled:
 the window law, the unique dead child, the sixteen fires, the
