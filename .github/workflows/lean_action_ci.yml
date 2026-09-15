@@ -24,11 +24,11 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Fresh Task 3.3 row237 compile
+      - name: Fresh Task 3.3 row237 dependency closure and compile
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTFourPowerDirectTwoHundredThirtySeventhRow.lean 2>&1 | tee task33-build.log
+          lake build GSTFourPowerDirectTwoHundredThirtySeventhRow 2>&1 | tee task33-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' task33-build.log
       - name: Fresh Task 3.3 forbidden-route scan
         run: |
