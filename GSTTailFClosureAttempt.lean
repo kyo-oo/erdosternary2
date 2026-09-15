@@ -72,8 +72,31 @@ theorem tailF_observer_backward_pressure
   rw [hidx] at hnot
   exact hnot hchild
 
+/-- Under a surviving observer at sheet `S`, every earlier sheet window is
+forced into a binary state: TOP (it fires on that lower sheet) or BOTTOM.
+The MIDDLE state would escalate a digit two into sheet `S`, contradicting
+that observer. -/
+theorem tailF_lower_sheet_top_or_bottom
+    (S core r : Nat)
+    (hr1 : 1 ≤ r) (hrS : r + 1 ≤ S)
+    (hcore : core % 3 = 1)
+    (hD : ∀ q : Nat, 3 ≤ q → q ≤ S + 1 →
+      (omegaCutWord S 1 * core) % 3^q < 2 * 3^(q-1)) :
+    2 * 3^(r+1) ≤ (omegaCutWord r core) % 3^(r+2) ∨
+      (omegaCutWord r core) % 3^(r+2) < 3^(r+1) := by
+  rcases omega_sheet_window_dichotomy r core hr1 (Or.inl hcore) with
+    htop | hbottom | hmiddle
+  · exact Or.inl htop.1
+  · exact Or.inr hbottom
+  · exfalso
+    have htwo := hmiddle.2.2 S hrS
+    have hnot := observer_dodge_digit_ne_two S core (r+2)
+      (by omega) (by omega) hD
+    exact hnot htwo
+
 #print axioms observer_dodge_digit_ne_two
 #print axioms child_observer_forces_parent_gate_ne_one
 #print axioms tailF_observer_backward_pressure
+#print axioms tailF_lower_sheet_top_or_bottom
 
 end GSTTailFClosureAttempt
