@@ -46,6 +46,15 @@ fed through the prefix-power's digit stream, IS the power's digit stream:
   the fire.  The tree is richer than the Cantor set from level five on —
   machine-named.
 
+* **§4B CASCADE LEVEL FIVE.**  `dust_fire_row_six`: sixteen more
+  infinite uniform classes fire at row six — the first level whose
+  noise takes ALL THREE values (`4^31, 4^37, 4^172` carry trit TWO at
+  row six).  `noise_window_law`: the noise vanishes beyond the diagonal
+  window `4^r ≥ 3^(j+1)`.  `unique_dead_child`: every node owns exactly
+  one dead child — the blade's one-of-three named at the feedback level,
+  so the survivor map doubles (`2, 4, 8, 16, 32`) by structure:
+  `cantorian_dust_mod_729` pins the dust to THIRTY-TWO nodes mod 729.
+
 * **§5 THE SOCKET.**  `hTailF_of_feedback`: hand the tree-escape — every
   `K ≥ 8` fires at some level — and `hTailF` closes through the standing
   green bridges.  `the_construction_receipt`: everything assembled, axiom
@@ -328,6 +337,151 @@ theorem cantorian_dust_mod_243 (K : Nat)
       (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))) hrow
   rcases h81 with h1 | h4 | h10 | h13 | h28 | h31 | h37 | h40 <;> omega
 
+/-! ## §4B CASCADE LEVEL FIVE — the noise turns ternary -/
+
+/-- **THE NOISE WINDOW LAW.**  Beyond the diagonal window the prefix
+noise vanishes: when the prefix-power stays below the modulus, its
+row-`j+1` trit is zero.  The feedback's noise lives in the window
+`4^r ≥ 3^(j+1)` — every deeper row reads bare exponent trits. -/
+theorem noise_window_law (r j : Nat) (h : 4^r < 3^(j+1)) :
+    digit3 (4^r) (j + 1) = 0 := by
+  unfold digit3
+  rw [Nat.div_eq_of_lt h]
+  exact Nat.zero_mod 3
+
+/-- **THE UNIQUE DEAD CHILD.**  At every level, every prefix owns
+EXACTLY ONE dead child-trit: `(2 - noise) mod 3`.  The blade's
+one-of-three, named at the feedback level — every node of the dust
+tree has exactly two alive children, forever, by structure. -/
+theorem unique_dead_child (r j : Nat) :
+    ∃! t : Nat, t < 3 ∧ (digit3 (4^r) (j + 1) + t) % 3 = 2 := by
+  have hd : digit3 (4^r) (j + 1) < 3 := by
+    unfold digit3
+    exact Nat.mod_lt _ (by decide)
+  refine ⟨2 - digit3 (4^r) (j + 1), ⟨by omega, by omega⟩, ?_⟩
+  intro t ht
+  omega
+
+/-- **THE UNIFORM KILL, LEVEL-FIVE FORM.**  Same engine, one level
+deeper: `K ≡ r + 243·t mod 729` fires at row six when the noise
+receipt holds.  All arithmetic literal. -/
+theorem fire_of_mod729 (K r t : Nat)
+    (hr : r < 243) (ht : t < 3)
+    (hnoise : (digit3 (4^r) 6 + t) % 3 = 2)
+    (hclass : K % 729 = r + 243 * t) :
+    digit3 (4^K) 6 = 2 := by
+  have h729 : (3:Nat)^(5+1) = 729 := by decide
+  have h243 : (3:Nat)^5 = 243 := by decide
+  have hK : K % 3^(5+1) = r + 3^5 * t := by
+    rw [h729, h243]
+    exact hclass
+  have hr' : r < 3^5 := by
+    rw [h243]
+    exact hr
+  exact feedback_fire_of_class 5 r t K hr' ht hnoise hK
+
+/-- **CASCADE LEVEL FIVE (row six).**  Every exponent `K ≡ 31, 37,
+172, 253, 256, 271, 337, 352, 409, 487, 490, 526, 568, 607, 679,
+685 mod 729` fires its digit two at row six — sixteen new infinite
+uniform classes.  The first cascade level whose noise takes ALL
+THREE values: the prefixes `4^31, 4^37, 4^172` carry trit TWO at
+row six (their zeroth child dies), the noise-one prefixes kill their
+first child, the noise-zero prefixes kill their second. -/
+theorem dust_fire_row_six (K : Nat)
+    (hK : K % 729 = 31 ∨ K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 256 ∨ K % 729 = 271 ∨ K % 729 = 337 ∨ K % 729 = 352 ∨ K % 729 = 409 ∨ K % 729 = 487 ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 568 ∨ K % 729 = 607 ∨ K % 729 = 679 ∨ K % 729 = 685) :
+    digit3 (4^K) 6 = 2 := by
+  rcases hK with h31 h37 h172 h253 h256 h271 h337 h352 h409 h487 h490 h526 h568 h607 h679 h685
+  · exact fire_of_mod729 K 31 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 37 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 172 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 10 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 13 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 28 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 94 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 109 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 166 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 1 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 4 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 40 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 82 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 121 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 193 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod729 K 199 2 (by decide) (by decide) (by decide) (by omega)
+
+/-- **THE CASCADE KILL, LEVEL FIVE.**  The sixteen new classes die
+outright through the repo's own kill chain. -/
+theorem no22_of_cascade_five (K : Nat)
+    (h : K % 729 = 31 ∨ K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 256 ∨ K % 729 = 271 ∨ K % 729 = 337 ∨ K % 729 = 352 ∨ K % 729 = 409 ∨ K % 729 = 487 ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 568 ∨ K % 729 = 607 ∨ K % 729 = 679 ∨ K % 729 = 685) :
+    noTernaryTwo (4^K) = false :=
+  no22_of_digit_two K 6 (dust_fire_row_six K h)
+
+/-- **THE DUST PINNED AT LEVEL FIVE — THE MAP DOUBLES.**  A Cantorian
+dust exponent lives in one of THIRTY-TWO surviving residues mod
+729.  The structural law in action: every one of the sixteen level-
+four nodes kept exactly two children (`unique_dead_child`), so the
+alive set doubles — `2, 4, 8, 16, 32` — level by level, without
+exception, by the blade's one-of-three. -/
+theorem cantorian_dust_mod_729 (K : Nat)
+    (hd : K % 3 = 1) (hc : CantorianPower K) :
+    K % 729 = 1 ∨ K % 729 = 4 ∨ K % 729 = 10 ∨ K % 729 = 13 ∨ K % 729 = 28 ∨ K % 729 = 40 ∨ K % 729 = 82 ∨ K % 729 = 94 ∨ K % 729 = 109 ∨ K % 729 = 121 ∨ K % 729 = 166 ∨ K % 729 = 193 ∨ K % 729 = 199 ∨ K % 729 = 244 ∨ K % 729 = 247 ∨ K % 729 = 274 ∨ K % 729 = 280 ∨ K % 729 = 283 ∨ K % 729 = 325 ∨ K % 729 = 364 ∨ K % 729 = 415 ∨ K % 729 = 436 ∨ K % 729 = 442 ∨ K % 729 = 496 ∨ K % 729 = 499 ∨ K % 729 = 514 ∨ K % 729 = 517 ∨ K % 729 = 523 ∨ K % 729 = 580 ∨ K % 729 = 595 ∨ K % 729 = 652 ∨ K % 729 = 658 := by
+  have h243 := cantorian_dust_mod_243 K hd hc
+  have hrow := hc 6 (by omega)
+  have h31 : K % 729 ≠ 31 :=
+    fun h => absurd (dust_fire_row_six K (Or.inl h)) hrow
+  have h37 : K % 729 ≠ 37 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inl h))) hrow
+  have h172 : K % 729 ≠ 172 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inl h)))) hrow
+  have h253 : K % 729 ≠ 253 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inl h))))) hrow
+  have h256 : K % 729 ≠ 256 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))) hrow
+  have h271 : K % 729 ≠ 271 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))) hrow
+  have h337 : K % 729 ≠ 337 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))) hrow
+  have h352 : K % 729 ≠ 352 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))) hrow
+  have h409 : K % 729 ≠ 409 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))) hrow
+  have h487 : K % 729 ≠ 487 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))) hrow
+  have h490 : K % 729 ≠ 490 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))) hrow
+  have h526 : K % 729 ≠ 526 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))) hrow
+  have h568 : K % 729 ≠ 568 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))) hrow
+  have h607 : K % 729 ≠ 607 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))) hrow
+  have h679 : K % 729 ≠ 679 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))) hrow
+  have h685 : K % 729 ≠ 685 :=
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))) hrow
+  rcases h243 with h1 h4 h10 h13 h28 h31 h37 h40 h82 h94 h109 h121 h166 h172 h193 h199 <;> omega
+
+/-- **THE LEVEL-FIVE RECEIPT.**  Cascade level five assembled:
+the window law, the unique dead child, the sixteen fires, the
+doubled survivor map, and the kill chain — with axiom printouts
+below. -/
+theorem the_level_five_receipt :
+    (∀ r j : Nat, 4^r < 3^(j+1) → digit3 (4^r) (j+1) = 0) ∧
+    (∀ r j : Nat, ∃! t : Nat, t < 3 ∧ (digit3 (4^r) (j+1) + t) % 3 = 2) ∧
+    (∀ K : Nat, K % 729 = 31 ∨ K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 256 ∨ K % 729 = 271 ∨ K % 729 = 337 ∨ K % 729 = 352 ∨ K % 729 = 409 ∨ K % 729 = 487 ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 568 ∨ K % 729 = 607 ∨ K % 729 = 679 ∨ K % 729 = 685 → digit3 (4^K) 6 = 2) ∧
+    (∀ K : Nat, K % 729 = 31 ∨ K % 729 = 37 ∨ K % 729 = 172 ∨ K % 729 = 253 ∨ K % 729 = 256 ∨ K % 729 = 271 ∨ K % 729 = 337 ∨ K % 729 = 352 ∨ K % 729 = 409 ∨ K % 729 = 487 ∨ K % 729 = 490 ∨ K % 729 = 526 ∨ K % 729 = 568 ∨ K % 729 = 607 ∨ K % 729 = 679 ∨ K % 729 = 685 → noTernaryTwo (4^K) = false) ∧
+    (∀ K : Nat, K % 3 = 1 → CantorianPower K →
+      K % 729 = 1 ∨ K % 729 = 4 ∨ K % 729 = 10 ∨ K % 729 = 13 ∨ K % 729 = 28 ∨ K % 729 = 40 ∨ K % 729 = 82 ∨ K % 729 = 94 ∨ K % 729 = 109 ∨ K % 729 = 121 ∨ K % 729 = 166 ∨ K % 729 = 193 ∨ K % 729 = 199 ∨ K % 729 = 244 ∨ K % 729 = 247 ∨ K % 729 = 274 ∨ K % 729 = 280 ∨ K % 729 = 283 ∨ K % 729 = 325 ∨ K % 729 = 364 ∨ K % 729 = 415 ∨ K % 729 = 436 ∨ K % 729 = 442 ∨ K % 729 = 496 ∨ K % 729 = 499 ∨ K % 729 = 514 ∨ K % 729 = 517 ∨ K % 729 = 523 ∨ K % 729 = 580 ∨ K % 729 = 595 ∨ K % 729 = 652 ∨ K % 729 = 658) :=
+  ⟨fun r j => noise_window_law r j,
+    fun r j => unique_dead_child r j,
+    dust_fire_row_six, no22_of_cascade_five, cantorian_dust_mod_729⟩
+
+#print axioms noise_window_law
+#print axioms unique_dead_child
+#print axioms fire_of_mod729
+#print axioms dust_fire_row_six
+#print axioms no22_of_cascade_five
+#print axioms cantorian_dust_mod_729
+#print axioms the_level_five_receipt
 /-! ## §5 THE SOCKET — the tree-escape closes hTailF -/
 
 /-- **THE SOCKET.**  Hand the tree-escape — every `K ≥ 8` fires at some
