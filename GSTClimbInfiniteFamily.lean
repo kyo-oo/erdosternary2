@@ -686,7 +686,6 @@ theorem digit3_of_top_third (X p : Nat)
     have heq : 2 * 3^p + s = (s + 3^p) + 3^p := by ring
     rw [hs, heq, Nat.add_div_right _ hp, Nat.add_div_right _ hp,
       Nat.div_eq_of_lt hs_lt]
-    norm_num
   rw [digit3_eq_mod_slice, hdiv]
 
 /-- A middle-third residue reads as digit one. -/
@@ -699,7 +698,6 @@ theorem digit3_of_mid_range (X p : Nat)
   have hs_lt : s < 3^p := by omega
   have hdiv : (X % 3^(p+1)) / 3^p = 1 := by
     rw [hs, Nat.add_comm, Nat.add_div_right _ hp, Nat.div_eq_of_lt hs_lt]
-    norm_num
   rw [digit3_eq_mod_slice, hdiv]
 
 /-- **THE NEVER-FIRING TOWER.**  No sheet of the core's whole
