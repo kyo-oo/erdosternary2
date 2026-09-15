@@ -41,9 +41,10 @@ fed through the prefix-power's digit stream, IS the power's digit stream:
   feedback warps the survivor set past the Cantor shape.  The survivor
   map: `cantorian_dust_mod_9/27/81/243` — a Cantorian dust exponent's
   residue is pinned, level by level, down to the sixteen surviving nodes
-  mod `243` — and `82, 166, 172` among them own a trit TWO at position
-  four and still live: the noise absorbed the fire.  The tree is richer
-  than the Cantor set from level five on — machine-named.
+  mod `243` — and `166, 172, 193, 199` among them own a trit TWO at
+  position four and still live: the row-five prefix-noise of one absorbed
+  the fire.  The tree is richer than the Cantor set from level five on —
+  machine-named.
 
 * **§5 THE SOCKET.**  `hTailF_of_feedback`: hand the tree-escape — every
   `K ≥ 8` fires at some level — and `hTailF` closes through the standing
@@ -289,8 +290,9 @@ theorem cantorian_dust_mod_81 (K : Nat)
 
 /-- **THE DUST PINNED AT LEVEL FOUR — THE MAP.**  A Cantorian dust
 exponent lives in one of SIXTEEN surviving residues mod 243.  The noise
-era's signature: `82, 166, 172, 193, 199` among the survivors own trit
-TWO at position four and still live — the prefix-noise absorbed the fire.
+era's signature: `166, 172, 193, 199` among the survivors own trit
+TWO at position four and still live — the prefix-noise absorbed the fire
+(their row-five prefix-noise is one, turning two into zero).
 The survivor set is now RICHER than the Cantor prefixes: the feedback
 tree, machine-drawn at its fifth storey. -/
 theorem cantorian_dust_mod_243 (K : Nat)

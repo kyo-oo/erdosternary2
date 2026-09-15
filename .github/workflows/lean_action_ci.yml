@@ -119,6 +119,13 @@ jobs:
           lake build GSTDiagonalRead 2>&1 | tee diagonalread-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' diagonalread-build.log
 
+      - name: The-act construction separate proof module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTheActConstruction 2>&1 | tee theactconstruction-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' theactconstruction-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail
