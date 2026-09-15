@@ -1,0 +1,104 @@
+name: Astra TailF Proof Check
+
+on:
+  push:
+    branches:
+      - astra-tailf-closure
+  pull_request:
+    paths:
+      - 'GSTTailFClosureAttempt.lean'
+      - '.github/workflows/astra-tailf-proof-check.yml'
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Pin Lean and Mathlib
+        shell: bash
+        run: |
+          cat > lean-toolchain <<'EOF'
+          leanprover/lean4:v4.33.0-rc2
+          EOF
+          cat > lakefile.toml <<'EOF'
+          name = "tailf-closure-check"
+          version = "0.1.0"
+
+          [[require]]
+          name = "mathlib"
+          scope = "leanprover-community"
+          rev = "v4.33.0-rc2"
+          EOF
+          rm -f lake-manifest.json
+
+      - name: Install exact Lean environment
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Materialize local import closure
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          ROOT = Path('GSTTailFClosureAttempt.lean')
+          BUILD = Path('.lake/build/lib/lean')
+          import_re = re.compile(r'^\s*import\s+(.+?)\s*$')
+
+          def local_path(module: str) -> Path:
+              return Path(*module.split('.')).with_suffix('.lean')
+
+          def imports_of(path: Path):
+              out = []
+              for raw in path.read_text(encoding='utf-8').splitlines():
+                  code = raw.split('--', 1)[0].rstrip()
+                  m = import_re.match(code)
+                  if m:
+                      out.extend(m.group(1).split())
+              return out
+
+          order, permanent, temporary = [], set(), []
+          def visit(module: str):
+              if module == 'GSTTailFClosureAttempt' or module in permanent:
+                  return
+              path = local_path(module)
+              if not path.exists():
+                  return
+              if module in temporary:
+                  raise SystemExit('LOCAL_IMPORT_CYCLE=' + ' -> '.join(temporary + [module]))
+              temporary.append(module)
+              for dep in imports_of(path):
+                  visit(dep)
+              temporary.pop()
+              permanent.add(module)
+              order.append((module, path))
+
+          for module in imports_of(ROOT):
+              visit(module)
+
+          BUILD.mkdir(parents=True, exist_ok=True)
+          print('LOCAL_IMPORT_CLOSURE_COUNT=' + str(len(order)))
+          for module, path in order:
+              out = BUILD.joinpath(*module.split('.')).with_suffix('.olean')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              if out.exists():
+                  continue
+              print('=== compiling', module, '===', flush=True)
+              subprocess.run(['lake', 'env', 'lean', '-o', str(out), str(path)], check=True)
+          PY
+
+      - name: Compile TailF closure attempt
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTTailFClosureAttempt.lean | tee tailf-proof-check.log
+          ! grep -Fq 'sorryAx' tailf-proof-check.log
+          echo 'TAILF_CLOSURE_ATTEMPT_GREEN=1'
