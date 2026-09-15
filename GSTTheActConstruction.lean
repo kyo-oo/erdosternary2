@@ -84,7 +84,6 @@ theorem self_read (K j : Nat) :
     have h2 := GSTCanonicalTailLTE.lteCoeff_mod3_one j
     have hpair : (4^(K % 3^j) * GSTCanonicalTailLTE.lteCoeff j) % 3 = 1 := by
       rw [Nat.mul_mod, h1, h2]
-      omega
     rw [Nat.mul_mod, hpair]
     omega
   rw [hB]
