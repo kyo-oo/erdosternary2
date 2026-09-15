@@ -114,6 +114,7 @@ roots = [
   "GSTClimbInfiniteFamily",
   "GSTDiagonalRead",
   "GSTTheActConstruction",
+  "GSTBladeWave",
 ]
 
 [[lean_exe]]

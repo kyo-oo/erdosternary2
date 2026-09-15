@@ -3,6 +3,7 @@ import GSTTheAct
 import GSTDiagonalRead
 import GSTClimbInfiniteFamily
 import GSTTheActConstruction
+import GSTBladeWave
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -62,6 +63,30 @@ theorem the_construction_wire :
 
 #print axioms the_construction_wire
 
+/-- **THE BLADE-WAVE WIRE.**  The four-lane volley's loaded increment,
+carried at the monolith's own entry face: the dust root's three exact
+truncation laws (rows two and three read `m`'s pure trits; row four
+lands the blade's first correction, exactly the binomial coefficient
+`C(m,2)`), and the wave's periodicity (the wave digit `digit_(a+n)` of
+`4^(3^a·core)` depends only on `core mod 3^n`).  Machine receipts:
+1500/1500 × 3 and 3280/3280, exact big-int arithmetic.  The
+accumulating-blade gap (all four lanes' convergence point) now rests
+on these exact foundations. -/
+theorem the_blade_wave_wire :
+    (∀ m : Nat, GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*m)) 2 = m % 3) ∧
+    (∀ m : Nat, GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*m)) 3 = (m / 3) % 3) ∧
+    (∀ m : Nat, GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*m)) 4
+      = ((m / 9) % 3 + m.choose 2) % 3) ∧
+    (∀ a n core t : Nat, GSTCanonicalSevenAxisBridge.digit3
+        (4^(3^a * (core + 3^n * t))) (a + n)
+      = GSTCanonicalSevenAxisBridge.digit3 (4^(3^a * core)) (a + n)) :=
+  ⟨GSTBladeWave.digit_two_of_dust_root,
+   GSTBladeWave.digit_three_of_dust_root,
+   GSTBladeWave.digit_four_of_dust_root,
+   GSTBladeWave.wave_digit_periodic⟩
+
+#print axioms the_blade_wave_wire
+
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do
   IO.println "ErdosTernary2 — Lean formalization workspace"
@@ -81,6 +106,8 @@ def main : IO Unit := do
   IO.println "    Cantorian exponent from 8 on; socket to hTailF green."
   IO.println "  - the_construction_wire: the act <=> the feedback tree's"
   IO.println "    escape (self_read + uniform kill engine + level-four map)."
+  IO.println "  - the_blade_wave_wire: dust root's three exact laws + the"
+  IO.println "    wave's periodicity (the blade's first binomial correction)."
   IO.println ""
   IO.println "Verify cleanliness:"
   IO.println "  ./scripts/sorry_check.sh   # must return 0"
