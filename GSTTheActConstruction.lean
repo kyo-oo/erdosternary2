@@ -456,7 +456,7 @@ theorem cantorian_dust_mod_729 (K : Nat)
   have hdead679 : K % 729 ≠ 679 :=
     fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))) hrow
   have hdead685 : K % 729 ≠ 685 :=
-    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))) hrow
+    fun h => absurd (dust_fire_row_six K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))) hrow
   rcases h243 with h1 | h4 | h10 | h13 | h28 | h31 | h37 | h40 | h82 | h94 | h109 | h121 | h166 | h172 | h193 | h199 <;> omega
 
 /-- **THE LEVEL-FIVE RECEIPT.**  Cascade level five assembled:
