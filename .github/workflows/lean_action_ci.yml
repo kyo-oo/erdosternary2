@@ -31,6 +31,15 @@ jobs:
           lake update
           lake exe cache get
 
+      - name: Kernel-check worldtrace boundary derivation
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTGraphV2Ontological
+          lake env lean GSTWorldtraceBoundary.lean 2>&1 | tee worldtrace-boundary.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' worldtrace-boundary.log
+          echo WORLDTRACE_BOUNDARY_KERNEL_GREEN=1
+
       - name: Kernel-check direct affine classifier
         run: |
           set -euo pipefail
