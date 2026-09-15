@@ -214,7 +214,7 @@ The diagonal window law, completed to the whole plane — no row of the
 tower is outside the read. -/
 theorem every_row_is_read (K p : Nat) (hp : 1 ≤ p) :
     digit3 (4^K) p =
-      digit3 (4^(K % 3^(p-1)) + 3^(p-1+1) *
+      digit3 (4^(K % 3^(p-1)) + 3^p *
         (4^(K % 3^(p-1)) * GSTCanonicalTailLTE.lteCoeff (p-1) *
           (K / 3^(p-1)))) p := by
   have hpow : 0 < 3^(p-1) := Nat.pow_pos (by decide)
@@ -234,7 +234,7 @@ theorem digit3_one_of_mod9 (A u : Nat) (hA : A % 9 = 1) :
     digit3 (A * u) 1 = (u / 3) % 3 := by
   obtain ⟨k, hk⟩ : ∃ k : Nat, A = 1 + 9 * k := ⟨A / 9, by omega⟩
   unfold digit3
-  rw [show A * u = u + 3 * (3 * k * u) from by rw [hk]; ring]
+  rw [show A * u = u + 9 * (k * u) from by rw [hk]; ring]
   omega
 
 /-- Row one of `q + A·u` reads the core's own row one when the preface
@@ -245,7 +245,7 @@ theorem digit3_one_of_preface (q A u : Nat) (hq : q % 9 = 0) (hA : A % 9 = 1) :
   obtain ⟨k, hk⟩ : ∃ k : Nat, A = 1 + 9 * k := ⟨A / 9, by omega⟩
   obtain ⟨m, hm⟩ : ∃ m : Nat, q = 9 * m := ⟨q / 9, by omega⟩
   unfold digit3
-  rw [show q + A * u = u + 3 * (3 * k * u + 3 * m) from by rw [hk, hm]; ring]
+  rw [show q + A * u = u + 9 * (k * u) + 9 * m from by rw [hk, hm]; ring]
   omega
 
 /-- **THE FIRST-CUT READ, ROW TWO.**  For every exponent `K ≡ 1 mod 3`
@@ -448,7 +448,8 @@ theorem the_act_iff_no_cantorian :
   · intro hnc K hK8
     by_cases hCant : CantorianPower K
     · exact absurd ⟨K, hK8, hCant⟩ hnc
-    · push_neg at hCant
+    · unfold CantorianPower at hCant
+      push_neg at hCant
       obtain ⟨p, _, hp⟩ := hCant
       exact has_two_imp_not_no_two (4^K)
         (hasTernaryTwo_of_digit (4^K) p (by simpa [digit3] using hp))
@@ -459,7 +460,7 @@ Cantorian core alone — no hypothesis, no binder beyond the core itself. -/
 theorem hTailF_of_no_cantorian
     (h : ¬ ∃ K : Nat, 8 ≤ K ∧ CantorianPower K) :
     GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF :=
-  GSTTheAct.the_act_iff_hTailF.mp (the_act_iff_no_cantorian.mp h)
+  GSTTheAct.the_act_iff_hTailF.mp (the_act_iff_no_cantorian.mpr h)
 
 /-- `K = 0` is Cantorian: `4^0 = 1` has no trits at all above row zero. -/
 theorem cantorian_zero : CantorianPower 0 := by
@@ -560,7 +561,7 @@ theorem the_completed_read_receipt :
         digit3 (4^r / 3^(v+1) + 4^r * GSTCanonicalTailLTE.lteCoeff v * u) j) ∧
     (∀ K p : Nat, 1 ≤ p →
       digit3 (4^K) p =
-        digit3 (4^(K % 3^(p-1)) + 3^(p-1+1) *
+        digit3 (4^(K % 3^(p-1)) + 3^p *
           (4^(K % 3^(p-1)) * GSTCanonicalTailLTE.lteCoeff (p-1) *
             (K / 3^(p-1)))) p) ∧
     (∀ K : Nat, K % 9 = 7 → digit3 (4^K) 2 = 2) ∧
