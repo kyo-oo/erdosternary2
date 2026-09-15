@@ -110,6 +110,7 @@ roots = [
   "GSTTailFOneLane",
   "GSTTailFInfiniteRead",
   "GSTClimbTruthValue",
+  "GSTTheAct",
   "GSTClimbInfiniteFamily",
   "GSTDiagonalRead",
 ]

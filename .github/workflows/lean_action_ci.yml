@@ -98,6 +98,13 @@ jobs:
           lake build GSTClimbTruthValue 2>&1 | tee climbtruth-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' climbtruth-build.log
 
+      - name: The-act base module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTheAct 2>&1 | tee theact-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' theact-build.log
+
       - name: Climb-infinite-family separate proof module
         run: |
           set -euo pipefail

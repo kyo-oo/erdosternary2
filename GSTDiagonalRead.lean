@@ -1,7 +1,7 @@
 import Mathlib
 import GSTCanonicalTailLTE
 import GSTCanonicalTailStateIso
-import GSTClimbInfiniteFamily
+import GSTTheAct
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -368,7 +368,7 @@ theorem every_exponent_fires (K : Nat) (hK : 8 ≤ K) :
       intro j hjv h2
       exact hfire ⟨j, hjv, h2⟩
   · left
-    have hf := GSTClimbInfiniteFamily.front_law v u
+    have hf := GSTTheAct.front_law v u
     refine ⟨v + 1, ?_⟩
     rw [hKu, hf]
     exact hu2
@@ -387,7 +387,7 @@ theorem no22_of_not_dust (K : Nat) (hK : 8 ≤ K) (h : ¬ WindowCleanDust K) :
 from eight onward fails `noTernaryTwo`. -/
 theorem the_act_of_dust_empty
     (h : ∀ K : Nat, 8 ≤ K → ¬ WindowCleanDust K) :
-    GSTClimbInfiniteFamily.the_act :=
+    GSTTheAct.the_act :=
   fun K hK => no22_of_not_dust K hK (h K hK)
 
 /-- **THE SOCKET, COMPLETE.**  Dust empty ⇒ the act ⇒ `hTailF`, through
@@ -396,7 +396,7 @@ named: kill the window-clean dust and the campaign closes. -/
 theorem hTailF_of_dust_empty
     (h : ∀ K : Nat, 8 ≤ K → ¬ WindowCleanDust K) :
     GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF :=
-  GSTClimbInfiniteFamily.the_act_iff_hTailF.mp (the_act_of_dust_empty h)
+  GSTTheAct.the_act_iff_hTailF.mp (the_act_of_dust_empty h)
 
 /-! ## §5 THE RECEIPT — everything in one theorem -/
 
