@@ -4,6 +4,7 @@ import GSTDiagonalRead
 import GSTClimbInfiniteFamily
 import GSTTheActConstruction
 import GSTBladeWave
+import GSTTowerFire
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -86,6 +87,26 @@ theorem the_blade_wave_wire :
    GSTBladeWave.wave_digit_periodic⟩
 
 #print axioms the_blade_wave_wire
+
+/-- The tower fires — Lane D's deep-hider laws at the entry face:
+the tower constant c_n read bare in the deep rows, and the three
+canonical fire families (3^n at n+2; 2*3^n at n+1; 3^n+1 at n+4). -/
+theorem the_tower_fire_wire :
+    (∀ n : Nat, 1 ≤ n →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(3^n)) (n+2) = 2) ∧
+    (∀ n : Nat,
+      GSTCanonicalSevenAxisBridge.digit3 (4^(2 * 3^n)) (n+1) = 2) ∧
+    (∀ n : Nat, 3 ≤ n →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(3^n + 1)) (n+4) = 2) ∧
+    (∀ j n k : Nat, k ≤ n →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(j * 3^n)) (n+1+k)
+        = GSTCanonicalSevenAxisBridge.digit3 (j * GSTTowerFire.c n) k) :=
+  ⟨GSTTowerFire.three_pow_fires,
+   GSTTowerFire.two_mul_three_pow_fires,
+   GSTTowerFire.three_pow_plus_one_fires,
+   GSTTowerFire.tower_digit_read⟩
+
+#print axioms the_tower_fire_wire
 
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do

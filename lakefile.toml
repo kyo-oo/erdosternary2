@@ -115,6 +115,7 @@ roots = [
   "GSTDiagonalRead",
   "GSTTheActConstruction",
   "GSTBladeWave",
+  "GSTTowerFire",
 ]
 
 [[lean_exe]]

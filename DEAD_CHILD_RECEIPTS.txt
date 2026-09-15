@@ -1,0 +1,60 @@
+======================================================================
+DEAD-CHILD TABLES: for each dust node at level L, which child dies at L+1
+======================================================================
+L=1 (children at row 2): nodes with dead child 0: 0, dead 1: 0, dead 2: 1, multi-dead: 0
+L=2 (children at row 3): nodes with dead child 0: 0, dead 1: 0, dead 2: 2, multi-dead: 0
+L=3 (children at row 4): nodes with dead child 0: 0, dead 1: 0, dead 2: 4, multi-dead: 0
+L=4 (children at row 5): nodes with dead child 0: 0, dead 1: 4, dead 2: 4, multi-dead: 0
+  dead-0 nodes: []
+  dead-1 nodes: [4, 10, 31, 37]
+L=5 (children at row 6): nodes with dead child 0: 3, dead 1: 6, dead 2: 7, multi-dead: 0
+  dead-0 nodes: [31, 37, 172]
+  dead-1 nodes: [10, 13, 28, 94, 109, 166]
+L=6 (children at row 7): nodes with dead child 0: 10, dead 1: 8, dead 2: 14, multi-dead: 0
+  dead-0 nodes: [10, 28, 199, 274, 415, 442, 499, 517, 652, 658]
+  dead-1 nodes: [13, 40, 82, 166, 283, 325, 580, 595]
+L=7 (children at row 8): nodes with dead child 0: 12, dead 1: 26, dead 2: 26, multi-dead: 0
+  dead-0 nodes: [82, 247, 580, 757, 976, 1246, 1381, 1471, 1486, 1498, 1975, 2110]
+  dead-1 nodes: [13, 40, 94, 109, 121, 193, 244, 514, 523, 739, 823, 838, 850, 922, 973, 1171, 1243, 1252, 1387, 1468, 1624, 1741, 1783, 1900, 2053, 2116]
+
+======================================================================
+THE CORRECTION-PERIOD LAW: d(node at level L) depends only on m mod 3^(L-1)?
+======================================================================
+  same (m mod 3^(L-1)) => same dead label, L in [3,7]: 0 consistent, 0 VIOLATIONS
+
+======================================================================
+THE d=0 KILLER EVENTS: nodes whose ZERO-child dies (naturals' death sentence)
+======================================================================
+L=4: dead-0 nodes (r, m): []
+L=5: dead-0 nodes (r, m): [(31, 10), (37, 12), (172, 57)]
+L=6: dead-0 nodes (r, m): [(10, 3), (28, 9), (199, 66), (274, 91), (415, 138), (442, 147), (499, 166), (517, 172), (652, 217), (658, 219)]
+L=7: dead-0 nodes (r, m): [(82, 27), (247, 82), (580, 193), (757, 252), (976, 325), (1246, 415), (1381, 460), (1471, 490), (1486, 495), (1498, 499), (1975, 658), (2110, 703)]
+
+======================================================================
+PATH ANALYSIS: for naturals K (eventually-zero trits), walk the automaton
+======================================================================
+  kill position vs support S (K in [8,20000)): {'within_support': 19322, 'just_above': 642, 'deep': 28}
+  deep kills (fire_row > 2S+2): 28; sample: [(10, 7, 2), (12, 10, 2), (13, 10, 2), (36, 11, 3), (40, 9, 3), (63, 10, 3), (93, 13, 4), (166, 15, 4), (237, 12, 4), (432, 14, 5), (496, 13, 5), (567, 21, 5)]
+
+======================================================================
+THE CONSTANT-PATH LAW: for K with support S, rows S+2.. of 4^K (beyond K's trits)
+======================================================================
+  For DEEP-KILLED K: fire_row vs S and the trits of c_{S+1}*4^top stuff
+    K=10, S=2, top=1, fire_row=7 (S+2+3); trit_3(c_S*4^r)=1
+    K=12, S=2, top=1, fire_row=10 (S+2+6); trit_6(c_S*4^r)=0
+    K=13, S=2, top=1, fire_row=10 (S+2+6); trit_6(c_S*4^r)=1
+    K=36, S=3, top=1, fire_row=11 (S+2+6); trit_6(c_S*4^r)=2
+    K=40, S=3, top=1, fire_row=9 (S+2+4); trit_4(c_S*4^r)=2
+    K=63, S=3, top=2, fire_row=10 (S+2+5)
+    K=93, S=4, top=1, fire_row=13 (S+2+7); trit_7(c_S*4^r)=1
+    K=166, S=4, top=2, fire_row=15 (S+2+9)
+    K=237, S=4, top=2, fire_row=12 (S+2+6)
+    K=432, S=5, top=1, fire_row=14 (S+2+7); trit_7(c_S*4^r)=2
+
+======================================================================
+VERIFY: dust tf classes at L=6 mod 729 == the green pin (32 residues)
+======================================================================
+  count: 32
+  [1, 4, 10, 13, 28, 40, 82, 94, 109, 121, 166, 193, 199, 244, 247, 274, 280, 283, 325, 364, 415, 436, 442, 496, 499, 514, 517, 523, 580, 595, 652, 658]
+
+RECEIPT END — exact big-int, bounded.

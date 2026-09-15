@@ -126,6 +126,13 @@ jobs:
           lake build GSTTheActConstruction 2>&1 | tee theactconstruction-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' theactconstruction-build.log
 
+      - name: Tower-fire separate proof module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTowerFire 2>&1 | tee towerfire-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' towerfire-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail
