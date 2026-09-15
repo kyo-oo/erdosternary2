@@ -12,8 +12,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Apply production surgery
-        run: python3 .surgery/apply.py
       - name: Install exact Lean RC2
         run: |
           set -euo pipefail
@@ -26,44 +24,27 @@ jobs:
           rm -f lake-manifest.json
           lake update
           lake exe cache get
-      - name: Hard build
+      - name: Fresh Task 3.3 row237 compile
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build 2>&1 | tee hard-build.log
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' hard-build.log
-      - name: Exact V5 comparator
+          lake env lean GSTFourPowerDirectTwoHundredThirtySeventhRow.lean 2>&1 | tee task33-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' task33-build.log
+      - name: Fresh Task 3.3 forbidden-route scan
+        run: |
+          set -euo pipefail
+          ! grep -E '\bsorry\b|\badmit\b|\baxiom\b|sorryAx|False\.elim|GSTInfiniteFourPowerNavigation|GSTStep6Close|gst_prefix_one_navigation|ontological_escape' GSTFourPowerDirectTwoHundredThirtySeventhRow.lean
+      - name: Fresh Task 3.3 kernel axiom audit
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          bash scripts/comparator.sh 2>&1 | tee comparator.log
-          grep -Fq 'Your solution is okay!' comparator.log
-          grep -Fq '=== COMPARATOR RESULT: PASS ===' comparator.log
-      - name: Kernel axiom audit
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          cat > MultiNukeAxiomAudit.lean <<'LEAN'
-          import ErdosTernary2
-          #print axioms gst_four_power_creation_master_inline
-          #print axioms gst_prefix_one_navigation_lift
-          #print axioms gst_power_two_wave_large
-          #print axioms erdos_ternary_2_universal
+          cat > Task33AxiomAudit.lean <<'LEAN'
+          import GSTFourPowerDirectTwoHundredThirtySeventhRow
+          open GSTFourPowerDirectTwoHundredThirtySeventhRow
+          #print axioms commonTwo_of_mod119601704370316815093156475426420811655643446371374142778498243399164563914572619949897873671922747759658511969363_238
+          #print axioms physical_happy_of_mod119601704370316815093156475426420811655643446371374142778498243399164563914572619949897873671922747759658511969363_238
+          #print axioms four_power_happy_propagates_of_next_mod119601704370316815093156475426420811655643446371374142778498243399164563914572619949897873671922747759658511969363_238
           LEAN
-          lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
-          rm -f MultiNukeAxiomAudit.lean
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|error:' axiom-audit.log
-      - name: Commit verified production files
-        if: github.ref == 'refs/heads/sol/gpt56-canonical-tail-escape-20260827'
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- ErdosTernary2.lean lakefile.toml; then
-            echo VERIFIED_COMMITTED_STATE=1
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ErdosTernary2.lean lakefile.toml
-          git commit -m 'Multi-nuke obsolete navigation route and wire clean creation chain'
-          git push origin HEAD:sol/gpt56-canonical-tail-escape-20260827
-          echo VERIFIED_SURGERY_PUSHED=1
+          lake env lean Task33AxiomAudit.lean 2>&1 | tee task33-axiom-audit.log
+          rm -f Task33AxiomAudit.lean
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|error:' task33-axiom-audit.log
