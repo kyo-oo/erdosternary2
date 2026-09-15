@@ -55,12 +55,12 @@ theorem digit3_mod_pow (R j : Nat) :
     digit3 R j = (R % 3^(j+1)) / 3^j % 3 := by
   unfold digit3
   have hp : (0:Nat) < 3^j := by positivity
-  have hq' : R = R % 3^(j+1) + 3^j * (3 * (R / 3^(j+1))) := by
+  have hq' : R = R % 3^(j+1) + 3 * (R / 3^(j+1)) * 3^j := by
     have h := Nat.div_add_mod R (3^(j+1))
-    rw [Nat.pow_succ, Nat.mul_assoc, Nat.add_comm] at h
+    rw [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm, Nat.add_comm] at h
     exact h.symm
   calc R / 3^j % 3
-      = (R % 3^(j+1) + 3^j * (3 * (R / 3^(j+1)))) / 3^j % 3 := by
+      = (R % 3^(j+1) + 3 * (R / 3^(j+1)) * 3^j) / 3^j % 3 := by
           rw [← hq']
     _ = (R % 3^(j+1) / 3^j + 3 * (R / 3^(j+1))) % 3 := by
           rw [Nat.add_mul_div_right _ _ hp]
@@ -151,9 +151,10 @@ theorem cube_dvd_three (x k : Nat) (hx : 3^(k+1) ∣ x) :
   have hS : 3 ∣ x*x + 3*(x+1) := ⟨3*s*s + (x+1), by rw [hs]; ring⟩
   obtain ⟨w, hw⟩ := hS
   obtain ⟨u, hu⟩ := hx
-  have hexp : (1+x)^3 - 1 = x * (x*x + 3*(x+1)) := by ring
+  have hexp : (1+x)^3 = 1 + x * (x*x + 3*(x+1)) := by ring
+  have hsub : (1+x)^3 - 1 = x * (x*x + 3*(x+1)) := by omega
   have h32 : 3^(k+2) = 3^(k+1) * 3 := by rw [Nat.pow_succ]
-  rw [hexp, hw, hu, h32]
+  rw [hsub, hw, hu, h32]
   exact ⟨u * w, by ring⟩
 
 /-- **The tower map.**  `(1+x)^(3^n)` gains `n` three-adic orders over
@@ -170,7 +171,7 @@ theorem pow3_tower_dvd (x a n : Nat) (hx : 3^(a+1) ∣ x) :
     have hrew : (1+x)^(3^(n+1)) = ((1+x)^(3^n))^3 := by
       rw [Nat.pow_succ 3 n, Nat.pow_mul]
     have hpos : (0:Nat) < (1+x)^(3^n) := by positivity
-    have hA : 1 ≤ (1+x)^(3^n) := Nat.le_of_lt hpos
+    have hA : 1 ≤ (1+x)^(3^n) := hpos
     have h := cube_dvd_three ((1+x)^(3^n) - 1) (a+n) ih
     rw [Nat.add_sub_cancel' hA] at h
     rw [hrew]
@@ -186,7 +187,7 @@ theorem one_add_pow_dvd (y t k : Nat) (hy : 3^k ∣ y) :
     exact Nat.dvd_zero _
   | succ t ih =>
     have hpos : (0:Nat) < (1+y)^t := by positivity
-    have hA : 1 ≤ (1+y)^t := Nat.le_of_lt hpos
+    have hA : 1 ≤ (1+y)^t := hpos
     have key : ∀ w yy : Nat, (w+1)*(1+yy) - 1 = w + yy + w*yy := by
       intro w yy
       have e1 : (w+1)*(1+yy) = w*yy + w + yy + 1 := by ring
@@ -228,15 +229,16 @@ theorem wave_mod (a n core t : Nat) :
     Nat.pow_mul 4 (3^(a+n)) t
   rw [hmul]
   have hpos4 : (0:Nat) < 4^(3^(a+n)) := by positivity
-  have hle : 1 ≤ 4^(3^(a+n)) := Nat.le_of_lt hpos4
+  have hle : 1 ≤ 4^(3^(a+n)) := hpos4
   have hy : 4^(3^(a+n)) = 1 + (4^(3^(a+n)) - 1) :=
     (Nat.add_sub_cancel' hle).symm
   rw [hy]
   obtain ⟨c, hc⟩ := one_add_pow_dvd (4^(3^(a+n)) - 1) t (a+n+1)
     (four_pow_three_pow_dvd a n)
   have hWpos : (0:Nat) < (1 + (4^(3^(a+n)) - 1))^t := by positivity
+  have hW1 : (1:Nat) ≤ (1 + (4^(3^(a+n)) - 1))^t := hWpos
   have hpt : (1 + (4^(3^(a+n)) - 1))^t = 3^(a+n+1) * c + 1 := by
-    rw [← hc, Nat.sub_add_cancel (Nat.le_of_lt hWpos)]
+    rw [← hc, Nat.sub_add_cancel hW1]
   rw [hpt]
   have hexp : 4^(3^a * core) * (3^(a+n+1) * c + 1)
       = 4^(3^a * core) + 3^(a+n+1) * (c * 4^(3^a * core)) := by ring
