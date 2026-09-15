@@ -625,4 +625,495 @@ theorem the_completed_read_receipt :
 #print axioms cantorian_survivors_below_eight
 #print axioms the_completed_read_receipt
 
+/-! ## §6 THE NEVER-FIRING TOWER — the dust's strongest form, named
+
+The dust of §3-§4 and the Erdős core of §4 are statements about SINGLE
+exponents.  Here is the tower form — the strongest residual shape the
+machinery can name: a three-free core whose ENTIRE multiplicative-three
+tower is Cantorian, every sheet `4^(3^S · core)` at once.  The monolith's
+own green instruments (the tower eye of the fourth dimension, the window
+law, the dust shape law) are the only inputs.  §7 pins and executes. -/
+
+/-- The cut word at core one is the frozen diagonal itself: through the
+repo's own two green factorizations of `4^(3^a)`. -/
+theorem omegaCutWord_one (a : Nat) :
+    GSTGraphV2OmegaWaveLaw.omegaCutWord a 1
+      = GSTCanonicalTailLTE.lteCoeff a := by
+  have h1 := GSTGraphV2OmegaWaveLaw.omega_cut_factor a 1
+  have h2 := GSTCanonicalTailLTE.pow4_three_power_lte_exact a
+  rw [show 3^a * 1 = 3^a from Nat.mul_one] at h1
+  rw [← h2] at h1
+  exact Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (by decide))
+    (Nat.add_left_cancel h1)
+
+/-- The ternary digit as a slice of the next modulus: the row-`p` digit of
+`X` is the quotient of `X`'s residue mod `3^(p+1)` by `3^p`. -/
+theorem digit3_eq_mod_slice (X p : Nat) :
+    digit3 X p = (X % 3^(p+1)) / 3^p := by
+  have hdp : 3^(p+1) = 3^p * 3 := by rw [Nat.pow_succ]; ring
+  have hdm : 3^p * 3 * (X / 3^(p+1)) + X % 3^(p+1) = X := by
+    rw [← hdp]; exact Nat.div_add_mod X (3^(p+1))
+  have h2 := GSTDiagonalRead.div_pow_add (X / 3^(p+1)) (X % 3^(p+1)) p
+  rw [hdm] at h2
+  unfold digit3
+  rw [h2, Nat.add_mod]
+  have h3 : (3 * (X / 3^(p+1))) % 3 = 0 := by
+    rw [Nat.mul_mod]; norm_num
+  rw [h3, Nat.zero_add]
+  have hp : 0 < 3^p := Nat.pow_pos (by decide)
+  have hlt : X % 3^(p+1) < 3 * 3^p := by
+    rw [← hdp]; exact Nat.mod_lt _ (by norm_num : 1 < 3^(p+1))
+  have hq : (X % 3^(p+1)) / 3^p < 3 := by
+    rw [Nat.div_lt_iff_lt_mul hp]
+    omega
+  exact (Nat.mod_eq_of_lt hq)
+
+/-- A top-third residue reads as digit two. -/
+theorem digit3_of_top_third (X p : Nat)
+    (h : 2 * 3^p ≤ X % 3^(p+1)) : digit3 X p = 2 := by
+  have hp3 : 3^(p+1) = 3 * 3^p := by rw [Nat.pow_succ]; ring
+  rw [digit3_eq_mod_slice]
+  omega
+
+/-- A middle-third residue reads as digit one. -/
+theorem digit3_of_mid_range (X p : Nat)
+    (h1 : 3^p ≤ X % 3^(p+1)) (h2 : X % 3^(p+1) < 2 * 3^p) :
+    digit3 X p = 1 := by
+  have hp3 : 3^(p+1) = 3 * 3^p := by rw [Nat.pow_succ]; ring
+  rw [digit3_eq_mod_slice]
+  omega
+
+/-- **THE NEVER-FIRING TOWER.**  No sheet of the core's whole
+multiplicative-three tower ever owns a ternary digit two. -/
+def NeverFiringTower (core : Nat) : Prop :=
+  ∀ S p : Nat, digit3 (4^(3^S * core)) (S + 1 + p) ≠ 2
+
+/-- The never-firing tower dodges every sheet window: any top-third
+window would fire the sheet's own digit two through the tower eye. -/
+theorem hwin_of_never_firing {core : Nat} (h : NeverFiringTower core) :
+    ∀ s : Nat, 1 ≤ s →
+      (GSTGraphV2OmegaWaveLaw.omegaCutWord s core) % 3^(s+2)
+        < 2 * 3^(s+1) := by
+  intro s hs hge
+  have hfire := GSTTailFFourthDimension.tower_observation_digit_two
+    s core (s+1) hge
+  exact h s (s+1) hfire
+
+/-- The never-firing tower dodges the diagonal fire band at every level
+from three upward: a fired diagonal trit would freeze into the frozen
+band of the sheet at its own level, by the window law. -/
+theorem hdust_of_never_firing {core : Nat} (h : NeverFiringTower core) :
+    ∀ k : Nat, 3 ≤ k →
+      (GSTGraphV2OmegaWaveLaw.omegaCutWord (k-1) 1 * core) % 3^k
+        < 2 * 3^(k-1) := by
+  intro k hk hge
+  have hw := GSTDiagonalRead.diagonal_window_law (k-1) core (k-1)
+    (by omega)
+  have hconv : GSTGraphV2OmegaWaveLaw.omegaCutWord (k-1) 1 * core
+      = core * GSTCanonicalTailLTE.lteCoeff (k-1) := by
+    rw [omegaCutWord_one, Nat.mul_comm]
+  rw [hconv] at hge
+  have hd2 : digit3 (core * GSTCanonicalTailLTE.lteCoeff (k-1)) (k-1)
+      = 2 := digit3_of_top_third _ _ hge
+  rw [hd2] at hw
+  exact h (k-1) (k-1) hw
+
+/-! ## §7 THE SIX-POINT PIN — and the extermination -/
+
+/-- **THE ALL-ONES DIAGONAL.**  A never-firing three-free core's scaled
+diagonal is pinned to the exact middle third at every level from three
+upward — by the monolith's own dust shape law: the diagonal trit is ONE
+at every position from two on. -/
+theorem never_firing_diagonal_all_ones {core : Nat}
+    (hfree : core % 3 = 1 ∨ core % 3 = 2)
+    (h : NeverFiringTower core) :
+    ∀ j : Nat, 2 ≤ j →
+      digit3 (GSTGraphV2OmegaWaveLaw.omegaCutWord j 1 * core) j = 1 := by
+  intro j hj
+  have hshape := GSTTailFFourthDimension.omega_dust_shape_middle_third
+    core hfree (hwin_of_never_firing h) (hdust_of_never_firing h)
+  have hrange := hshape (j+1) (by omega)
+  exact digit3_of_mid_range _ _ hrange.1 hrange.2
+
+/-- The mod-slice lift: each digit extends the residue by one modulus
+step. -/
+theorem mod_slice_up (X j : Nat) :
+    X % 3^(j+1) = X % 3^j + 3^j * digit3 X j := by
+  have hdvd : 3^j ∣ 3^(j+1) := by
+    refine ⟨3, ?_⟩
+    rw [Nat.pow_succ]
+    ring
+  have hmod : X % 3^(j+1) % 3^j = X % 3^j :=
+    Nat.mod_mod_of_dvd X hdvd
+  have hslice : digit3 X j = X % 3^(j+1) / 3^j :=
+    digit3_eq_mod_slice X j
+  have hdm : 3^j * (X % 3^(j+1) / 3^j) + X % 3^(j+1) % 3^j
+      = X % 3^(j+1) := Nat.div_add_mod _ _
+  rw [hmod, ← hslice] at hdm
+  omega
+
+/-- Multiplicative congruence transfer. -/
+theorem mul_congr_mod (a b c m : Nat) (h : a % m = b % m) :
+    (a * c) % m = (b * c) % m := by
+  rw [Nat.mul_mod, Nat.mul_mod, h]
+
+/-- Additive congruence transfer. -/
+theorem add_congr_mod (a b c m : Nat) (h : a % m = b % m) :
+    (a + c) % m = (b + c) % m := by
+  rw [Nat.add_mod, Nat.add_mod, h]
+
+/-- **THE LEVEL-FIVE PIN.**  A never-firing three-free core satisfies
+`(2 · L(4) · core + 9) % 243 = 2·t₀ + 6·t₁` where `t₀ = core % 3` is the
+diagonal's zeroth trit and `t₁` its first: the all-ones diagonal from
+position two, chopped level by level by the mod-slice lift.  The six
+possible values `2, 4, 8, 10, 14, 16` are the SIX POINTS. -/
+theorem never_firing_level5_pin {core : Nat}
+    (hfree : core % 3 = 1 ∨ core % 3 = 2)
+    (h : NeverFiringTower core) :
+    (2 * GSTCanonicalTailLTE.lteCoeff 4 * core + 9) % 243
+      = 2 * (core % 3) + 6 * digit3 (7 * core) 1 := by
+  have hL4m9 : GSTCanonicalTailLTE.lteCoeff 4 % 9 = 7 :=
+    GSTDiagonalRead.lteCoeff_mod9 4 (by omega)
+  have hall := never_firing_diagonal_all_ones hfree h
+  have hx3 : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 3 = core % 3 := by
+    rw [Nat.mul_mod, GSTCanonicalTailLTE.lteCoeff_mod3_one, Nat.one_mul]
+    omega
+  have hd1 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 1
+      = digit3 (7 * core) 1 := by
+    apply GSTDiagonalRead.digit3_mod_congr
+    rw [Nat.mul_mod, Nat.mul_mod, hL4m9]
+    norm_num
+  have hd2 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 2 = 1 := by
+    have h1 := hall 2 (by omega)
+    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 2] at h1
+    rw [GSTDiagonalRead.digit3_mod_congr
+      (GSTCanonicalTailLTE.lteCoeff 4 * core)
+      (GSTCanonicalTailLTE.lteCoeff 2 * core) 2
+      (mul_congr_mod _ _ core _
+        (GSTDiagonalRead.lteCoeff_stable 2 4 (by omega)))]
+    exact h1
+  have hd3 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 3 = 1 := by
+    have h1 := hall 3 (by omega)
+    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 3] at h1
+    rw [GSTDiagonalRead.digit3_mod_congr
+      (GSTCanonicalTailLTE.lteCoeff 4 * core)
+      (GSTCanonicalTailLTE.lteCoeff 3 * core) 3
+      (mul_congr_mod _ _ core _
+        (GSTDiagonalRead.lteCoeff_stable 3 4 (by omega)))]
+    exact h1
+  have hd4 : digit3 (GSTCanonicalTailLTE.lteCoeff 4 * core) 4 = 1 := by
+    have h1 := hall 4 (by omega)
+    rw [GSTGraphV2OmegaWaveLaw.omegaCutWord_one 4] at h1
+    exact h1
+  have hs1 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 1
+  have hs2 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 2
+  have hs3 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 3
+  have hs4 := mod_slice_up (GSTCanonicalTailLTE.lteCoeff 4 * core) 4
+  norm_num at hs1 hs2 hs3 hs4
+  rw [hd1, hd2, hd3, hd4] at hs1 hs2 hs3 hs4
+  have hbound : digit3 (7 * core) 1 < 3 := by
+    rw [digit3_eq_mod_slice]
+    have h9 : (3:Nat)^(1+1) = 9 := by norm_num
+    rw [h9]
+    have hm9 : (7 * core) % 9 < 9 := Nat.mod_lt _ (by norm_num)
+    omega
+  have h3b : core % 3 < 3 := Nat.mod_lt core (by norm_num)
+  have hval : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243
+      = core % 3 + 3 * digit3 (7 * core) 1 + 117 := by
+    have hlt : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 < 243 :=
+      Nat.mod_lt _ (by norm_num)
+    omega
+  have hlt243 : (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 < 243 :=
+    Nat.mod_lt _ (by norm_num)
+  have hinner : ((GSTCanonicalTailLTE.lteCoeff 4 * core) % 243) % 243
+      = (GSTCanonicalTailLTE.lteCoeff 4 * core) % 243 :=
+    Nat.mod_eq_of_lt hlt243
+  have hA : (2 * (GSTCanonicalTailLTE.lteCoeff 4 * core)) % 243
+      = (2 * ((GSTCanonicalTailLTE.lteCoeff 4 * core) % 243)) % 243 := by
+    rw [Nat.mul_mod, Nat.mul_mod, hinner]
+  rw [show 2 * GSTCanonicalTailLTE.lteCoeff 4 * core + 9
+        = 2 * (GSTCanonicalTailLTE.lteCoeff 4 * core) + 9 from by ring,
+    add_congr_mod _ _ 9 _ hA, hval]
+  have hsm : 2 * (core % 3 + 3 * digit3 (7 * core) 1 + 117) + 9
+      = 2 * (core % 3) + 6 * digit3 (7 * core) 1 + 243 := by ring
+  rw [hsm, add_mod_of_dvd _ _ _ (Nat.dvd_refl 243)]
+  exact Nat.mod_eq_of_lt (by omega)
+
+/-! ### The Bezout pins and the kernel-checked numerals -/
+
+/-- The cancellation pin for the residue class `113`: `113 · core ≡ -7`
+mod 243 forces `core ≡ 58` — through the Bézout relation
+`43 · 113 + 1 = 20 · 243`. -/
+theorem pin_of_113 {core : Nat} (h : (113 * core + 7) % 243 = 0) :
+    core % 243 = 58 := by
+  have hd : 243 ∣ 113 * core + 7 := Nat.dvd_of_mod_eq_zero h
+  obtain ⟨m, hm⟩ := hd
+  have h43 : 43 * (113 * core + 7) = 243 * (43 * m) := by rw [hm]; ring
+  have h2 : 43 * (113 * core + 7) = 4859 * core + 301 := by ring
+  rw [h2] at h43
+  have h301 : 301 = 243 + 58 := by norm_num
+  omega
+
+/-- The cancellation pin for the residue class `113`, second form:
+`113 · core ≡ -1` mod 243 forces `core ≡ 43`. -/
+theorem pin_of_113' {core : Nat} (h : (113 * core + 1) % 243 = 0) :
+    core % 243 = 43 := by
+  have hd : 243 ∣ 113 * core + 1 := Nat.dvd_of_mod_eq_zero h
+  obtain ⟨m, hm⟩ := hd
+  have h43 : 43 * (113 * core + 1) = 243 * (43 * m) := by rw [hm]; ring
+  have h2 : 43 * (113 * core + 1) = 4859 * core + 43 := by ring
+  rw [h2] at h43
+  omega
+
+/-- The frozen diagonal's second coefficient, kernel-checked. -/
+theorem lteCoeff_one : GSTCanonicalTailLTE.lteCoeff 1 = 7 := by decide
+
+/-- The level-four coefficient's residue mod 243, kernel-checked. -/
+theorem lteCoeff_four_mod : GSTCanonicalTailLTE.lteCoeff 4 % 243 = 178 := by
+  decide
+
+/-- The deep-kill-A power residue, kernel-checked: `4^174 ≡ 496` mod 729. -/
+theorem four_pow_174_mod : (4:Nat)^174 % 729 = 496 := by decide
+
+/-- The deep-kill-B power residue, kernel-checked: `4^129 ≡ 1495`
+mod 2187. -/
+theorem four_pow_129_mod : (4:Nat)^129 % 2187 = 1495 := by decide
+
+/-! ### The four kills — every never-firing tower dies -/
+
+/-- **KILL ONE — THE FRONT.**  A never-firing core congruent to `2` mod 3
+dies at its front row: the front law reads the core's own residue as the
+digit two. -/
+theorem never_firing_fire_front {core : Nat} (h : NeverFiringTower core)
+    (h2 : core % 3 = 2) : False :=
+  h 1 0 (GSTTheAct.front_law 1 core |>.trans h2)
+
+/-- **KILL TWO — THE FROZEN BAND.**  A never-firing core congruent to `1`
+mod 9 dies at its frozen row three: the window law reads the diagonal's
+second trit — `digit3 (7 · core) 1 = 2`. -/
+theorem never_firing_fire_frozen {core : Nat} (h : NeverFiringTower core)
+    (h1 : core % 9 = 1) : False := by
+  have hw := GSTDiagonalRead.diagonal_window_law 1 core 1 (by omega)
+  rw [lteCoeff_one] at hw
+  have hd : digit3 (core * 7) 1 = 2 := by
+    have h7m : (core * 7) % 9 = 7 := by
+      rw [Nat.mul_mod, h1]; norm_num
+    unfold digit3
+    have h31 : (3:Nat)^1 = 3 := by norm_num
+    rw [h31]
+    omega
+  exact h 1 1 (hw.trans hd)
+
+/-- **KILL THREE — THE DEEP CUT AT ROW FIVE.**  A never-firing core
+congruent to `4` mod 9 is pinned by the six-point congruence to
+`core ≡ 58` mod 243; the sheet-one word then fires its digit two at
+trit three — row five of `4^(3·core)` — by the kernel-checked residue
+`4^174 ≡ 496` mod 729. -/
+theorem never_firing_fire_deepA {core : Nat} (h : NeverFiringTower core)
+    (h4 : core % 9 = 4) : False := by
+  have hfree : core % 3 = 1 ∨ core % 3 = 2 := by omega
+  have hpin := never_firing_level5_pin hfree h
+  have ht0 : core % 3 = 1 := by omega
+  have ht1 : digit3 (7 * core) 1 = 0 := by
+    have h7m : (7 * core) % 9 = 1 := by
+      rw [Nat.mul_mod, h4]; norm_num
+    rw [digit3_eq_mod_slice]
+    have h9 : (3:Nat)^(1+1) = 9 := by norm_num
+    rw [h9]
+    omega
+  rw [ht0, ht1] at hpin
+  have hL4m : GSTCanonicalTailLTE.lteCoeff 4 % 243 = 178 := lteCoeff_four_mod
+  have h113c : (2 * GSTCanonicalTailLTE.lteCoeff 4) % 243 = 113 := by
+    rw [Nat.mul_mod, hL4m]; norm_num
+  have hme : (2 * GSTCanonicalTailLTE.lteCoeff 4 * core) % 243
+      = (113 * core) % 243 :=
+    mul_congr_mod _ _ core _ h113c
+  rw [add_congr_mod _ _ 9 _ hme] at hpin
+  have hA : (113 * core + 7) % 243 = 0 := by omega
+  have hcore := pin_of_113 hA
+  have hexp : (4:Nat)^(3^1 * core) % 729 = 496 := by
+    have hdm := Nat.div_add_mod core 243
+    obtain ⟨m, hm⟩ : ∃ m, core = 243 * m + 58 := ⟨core / 243, by omega⟩
+    have h3 : 3 * core = 729 * m + 174 := by omega
+    show (4:Nat)^(3 * core) % 729 = 496
+    rw [h3, Nat.pow_add, Nat.pow_mul, Nat.mul_mod]
+    have h1 : ((4:Nat)^729)^m % 729 = 1 := by
+      have hfac := GSTCanonicalTailLTE.pow4_three_power_lte_exact 6
+      have hp2 : (3:Nat)^(6+1) = 3 * 729 := by norm_num
+      rw [hp2] at hfac
+      have hp1 : (3:Nat)^(6:Nat) = 729 := by norm_num
+      rw [hp1] at hfac
+      have h4p : (4:Nat)^729
+          = 1 + 729 * (3 * GSTCanonicalTailLTE.lteCoeff 6) := by
+        rw [hfac]; ring
+      obtain ⟨s, hs⟩ := GSTDiagonalRead.binom_two_term
+        (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) m
+      rw [h4p, hs]
+      have hd1 : 729 ∣ m * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) :=
+        ⟨m * (3 * GSTCanonicalTailLTE.lteCoeff 6), by ring⟩
+      have hd2 : 729 ∣ (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6))
+            * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) * s :=
+        ⟨729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)
+            * (3 * GSTCanonicalTailLTE.lteCoeff 6) * s, by ring⟩
+      rw [add_mod_of_dvd _ _ _ hd2, add_mod_of_dvd _ _ _ hd1]
+      exact Nat.mod_eq_of_lt (by norm_num)
+    rw [h1, Nat.one_mul, four_pow_174_mod]
+    exact Nat.mod_eq_of_lt (by norm_num)
+  have hfac := GSTGraphV2OmegaWaveLaw.omega_cut_factor 1 core
+  have hd : digit3 (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 3 = 2 := by
+    have hdm := Nat.div_add_mod ((4:Nat)^(3^1 * core)) 729
+    rw [hexp] at hdm
+    have hW : 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core
+        = 729 * ((4:Nat)^(3^1 * core) / 729) + 495 := by omega
+    unfold digit3
+    have h31 : (3:Nat)^1 = 3 := by norm_num
+    rw [h31]
+    omega
+  have hs : digit3 (1 + 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core)
+        (1+1+3)
+      = digit3 (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 3 := by
+    simpa only [GSTCanonicalTailStateIso.digit3, digit3] using
+      GSTCanonicalTailStateIso.prefix_slice_digit_exact (1+1) 1
+        (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 3 (by norm_num)
+  exact h 1 3 (by rw [hfac]; exact hs.trans hd)
+
+/-- **KILL FOUR — THE DEEP CUT AT ROW SIX.**  A never-firing core
+congruent to `7` mod 9 is pinned by the six-point congruence to
+`core ≡ 43` mod 243; the sheet-one word then fires its digit two at
+trit four — row six of `4^(3·core)` — by the kernel-checked residue
+`4^129 ≡ 1495` mod 2187. -/
+theorem never_firing_fire_deepB {core : Nat} (h : NeverFiringTower core)
+    (h7 : core % 9 = 7) : False := by
+  have hfree : core % 3 = 1 ∨ core % 3 = 2 := by omega
+  have hpin := never_firing_level5_pin hfree h
+  have ht0 : core % 3 = 1 := by omega
+  have ht1 : digit3 (7 * core) 1 = 1 := by
+    have h7m : (7 * core) % 9 = 4 := by
+      rw [Nat.mul_mod, h7]; norm_num
+    rw [digit3_eq_mod_slice]
+    have h9 : (3:Nat)^(1+1) = 9 := by norm_num
+    rw [h9]
+    omega
+  rw [ht0, ht1] at hpin
+  have hL4m : GSTCanonicalTailLTE.lteCoeff 4 % 243 = 178 := lteCoeff_four_mod
+  have h113c : (2 * GSTCanonicalTailLTE.lteCoeff 4) % 243 = 113 := by
+    rw [Nat.mul_mod, hL4m]; norm_num
+  have hme : (2 * GSTCanonicalTailLTE.lteCoeff 4 * core) % 243
+      = (113 * core) % 243 :=
+    mul_congr_mod _ _ core _ h113c
+  rw [add_congr_mod _ _ 9 _ hme] at hpin
+  have hA : (113 * core + 1) % 243 = 0 := by omega
+  have hcore := pin_of_113' hA
+  have hexp : (4:Nat)^(3^1 * core) % 2187 = 1495 := by
+    have hdm := Nat.div_add_mod core 243
+    obtain ⟨m, hm⟩ : ∃ m, core = 243 * m + 43 := ⟨core / 243, by omega⟩
+    have h3 : 3 * core = 729 * m + 129 := by omega
+    show (4:Nat)^(3 * core) % 2187 = 1495
+    rw [h3, Nat.pow_add, Nat.pow_mul, Nat.mul_mod]
+    have h1 : ((4:Nat)^729)^m % 2187 = 1 := by
+      have hfac := GSTCanonicalTailLTE.pow4_three_power_lte_exact 6
+      have hp2 : (3:Nat)^(6+1) = 3 * 729 := by norm_num
+      rw [hp2] at hfac
+      have hp1 : (3:Nat)^(6:Nat) = 729 := by norm_num
+      rw [hp1] at hfac
+      have h4p : (4:Nat)^729
+          = 1 + 729 * (3 * GSTCanonicalTailLTE.lteCoeff 6) := by
+        rw [hfac]; ring
+      obtain ⟨s, hs⟩ := GSTDiagonalRead.binom_two_term
+        (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) m
+      rw [h4p, hs]
+      have hd1 : 2187 ∣ m * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) :=
+        ⟨m * GSTCanonicalTailLTE.lteCoeff 6, by ring⟩
+      have hd2 : 2187 ∣ (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6))
+            * (729 * (3 * GSTCanonicalTailLTE.lteCoeff 6)) * s :=
+        ⟨243 * (3 * GSTCanonicalTailLTE.lteCoeff 6)
+            * (3 * GSTCanonicalTailLTE.lteCoeff 6) * s, by ring⟩
+      rw [add_mod_of_dvd _ _ _ hd2, add_mod_of_dvd _ _ _ hd1]
+      exact Nat.mod_eq_of_lt (by norm_num)
+    rw [h1, Nat.one_mul, four_pow_129_mod]
+    exact Nat.mod_eq_of_lt (by norm_num)
+  have hfac := GSTGraphV2OmegaWaveLaw.omega_cut_factor 1 core
+  have hd : digit3 (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 4 = 2 := by
+    have hdm := Nat.div_add_mod ((4:Nat)^(3^1 * core)) 2187
+    rw [hexp] at hdm
+    have hW : 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core
+        = 2187 * ((4:Nat)^(3^1 * core) / 2187) + 1494 := by omega
+    unfold digit3
+    have h31 : (3:Nat)^1 = 3 := by norm_num
+    rw [h31]
+    omega
+  have hs : digit3 (1 + 3^(1+1) * GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core)
+        (1+1+4)
+      = digit3 (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 4 := by
+    simpa only [GSTCanonicalTailStateIso.digit3, digit3] using
+      GSTCanonicalTailStateIso.prefix_slice_digit_exact (1+1) 1
+        (GSTGraphV2OmegaWaveLaw.omegaCutWord 1 core) 4 (by norm_num)
+  exact h 1 4 (by rw [hfac]; exact hs.trans hd)
+
+/-- **THE TOWER DUST IS EMPTY.**  No three-free core has a never-firing
+tower: every core's multiplicative-three tower meets its ternary digit
+two.  The six residue classes of `core % 9` each die — three at the front
+row, one in the frozen band, two by the kernel-checked deep cuts. -/
+theorem tower_dust_empty (core : Nat) (hfree : ¬ 3 ∣ core) :
+    ¬ NeverFiringTower core := by
+  intro h
+  rcases Nat.lt_trichotomy (core % 3) 1 with hlt | heq | hgt
+  · exact hfree (Nat.dvd_of_mod_eq_zero (by omega))
+  · have h9 : core % 9 < 9 := Nat.mod_lt core (by norm_num)
+    rcases Nat.lt_trichotomy (core % 9) 1 with hlt9 | heq9 | hgt9
+    · exact hfree (Nat.dvd_trans (by norm_num : (3:Nat) ∣ 9)
+        (Nat.dvd_of_mod_eq_zero (by omega)))
+    · exact never_firing_fire_frozen h (by omega)
+    · rcases Nat.lt_trichotomy (core % 9) 4 with hlt4 | heq4 | hgt4
+      · exact absurd (by omega : True) (by omega)
+      · exact never_firing_fire_deepA h (by omega)
+      · rcases Nat.lt_trichotomy (core % 9) 7 with hlt7 | heq7 | hgt7
+        · exact absurd (by omega : True) (by omega)
+        · exact never_firing_fire_deepB h (by omega)
+        · exact absurd (by omega : True) (by omega)
+  · exact never_firing_fire_front h (by omega)
+
+/-! ## §8 THE RECEIPT — the extermination, assembled -/
+
+/-- **THE TOWER DUST EXTERMINATION, ASSEMBLED.**  (1) No three-free core
+has a never-firing tower — the dust's strongest form is empty.  (2) The
+act is equivalent to the absence of Cantorian exponents from eight on
+(the standing collapse).  (3) The final socket stands: no Cantorian
+exponent from eight on ⇒ `hTailF`.  The residual of the whole campaign
+is the single-sheet Erdős core alone — the towers are all dead. -/
+theorem the_tower_dust_is_empty_receipt :
+    (∀ core : Nat, ¬ 3 ∣ core → ¬ NeverFiringTower core) ∧
+    (∀ core : Nat, core % 3 = 1 ∨ core % 3 = 2 → ¬ NeverFiringTower core) ∧
+    (GSTTheAct.the_act ↔ ¬ ∃ K : Nat, 8 ≤ K ∧ CantorianPower K) ∧
+    (∀ h : ¬ ∃ K : Nat, 8 ≤ K ∧ CantorianPower K,
+      GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF) :=
+  ⟨tower_dust_empty,
+    fun core hfree => tower_dust_empty core (by omega),
+    the_act_iff_no_cantorian, hTailF_of_no_cantorian⟩
+
+#print axioms omegaCutWord_one
+#print axioms digit3_eq_mod_slice
+#print axioms digit3_of_top_third
+#print axioms digit3_of_mid_range
+#print axioms NeverFiringTower
+#print axioms hwin_of_never_firing
+#print axioms hdust_of_never_firing
+#print axioms never_firing_diagonal_all_ones
+#print axioms mod_slice_up
+#print axioms mul_congr_mod
+#print axioms add_congr_mod
+#print axioms never_firing_level5_pin
+#print axioms pin_of_113
+#print axioms pin_of_113'
+#print axioms lteCoeff_one
+#print axioms lteCoeff_four_mod
+#print axioms four_pow_174_mod
+#print axioms four_pow_129_mod
+#print axioms never_firing_fire_front
+#print axioms never_firing_fire_frozen
+#print axioms never_firing_fire_deepA
+#print axioms never_firing_fire_deepB
+#print axioms tower_dust_empty
+#print axioms the_tower_dust_is_empty_receipt
+
 end GSTClimbInfiniteFamily
