@@ -202,3 +202,18 @@ theorem the_worldtrace_wire_seven :
     GSTWorldtraceArithmetic.cantarian_dust_mod_6561⟩
 
 #print axioms the_worldtrace_wire_seven
+
+/-- **THE PAIR-READ WIRE.**  GAP-E1's first family lands: the uniform
+pair-read formula (the two-support tower factorization through
+`prefaced_digit`) and the fire — every exponent `4 + 3^(j+1)*u` with
+`j ≤ 4`, `u` in {1, 4, 7} reads digit two at row `j+4`. -/
+theorem the_pair_read_wire :
+    (∀ T u j : Nat, 1 ≤ j → 4^T < 3^(j+2) →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(T + 3^(j+1)*u)) (j+4)
+        = GSTCanonicalSevenAxisBridge.digit3 (4^T * u * GSTTowerFire.c (j+1)) 2) ∧
+    (∀ u j : Nat, 4 ≤ j → (u = 1 ∨ u = 4 ∨ u = 7) →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(4 + 3^(j+1)*u)) (j+4) = 2) :=
+  ⟨GSTWorldtraceArithmetic.pair_read_formula,
+    GSTWorldtraceArithmetic.pair_read_fire⟩
+
+#print axioms the_pair_read_wire
