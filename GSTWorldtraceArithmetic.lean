@@ -900,7 +900,7 @@ theorem window_congr (K H r : Nat) (hK : K < 3^(H+1)) (hr : r + 1 ≤ 2*H+2) :
     rw [← Nat.mul_assoc, hpow]
     exact (Nat.pow_dvd_pow 3 (by omega)).mul_right Y
   obtain ⟨q, hq⟩ := hdvd
-  rw [← hq, ← Nat.add_assoc, Nat.mul_comm (3^(r+1)) q]
+  rw [hq, ← Nat.add_assoc]
   exact Nat.add_mul_mod_self_left _ _ _
 
 /-- **THE ROW-(H+2) WINDOW LAW.**  The digit at row `H+2` of `4^K` is
@@ -915,7 +915,8 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
   have htpow : 3^(H+2) = 3^(H+1) * 3 := Nat.pow_succ 3 (H+1)
   have ht : K / 3^H < 3 := by
     have hmod := Nat.mod_add_div K (3^H)
-    have hlt := Nat.mod_lt K (Nat.pow_pos (by decide))
+    have hpH : 0 < 3^H := Nat.pow_pos (by decide)
+    have hlt := Nat.mod_lt K hpH
     rw [Nat.pow_succ 3 H] at hK
     omega
   have hx3 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 3 = K / 3^H := by
@@ -925,11 +926,13 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
     have hpair : ((K / 3^H) * GSTTowerFire.c H) % 3 = (K / 3^H) % 3 := by
       rw [Nat.mul_mod, hc, Nat.mul_one]
     rw [Nat.mul_mod, hpair, hA3, Nat.mul_one, ht3, ht3]
+    omega
   rw [window_congr K H (H+2) hK (by omega)]
   set A := 4^(K % 3^H) with hAdef
   set X := (K / 3^H) * GSTTowerFire.c H * A with hXdef
+  have hp1 : 0 < 3^(H+1) := Nat.pow_pos (by decide)
   have hr1lt : A % 3^(H+2) % 3^(H+1) < 3^(H+1) :=
-    Nat.mod_lt _ (Nat.pow_pos (by decide))
+    Nat.mod_lt _ hp1
   unfold digit3
   have hdiv : (A + 3^(H+1) * X) / 3^(H+2)
       = A / 3^(H+2) + X / 3 + (A % 3^(H+2) / 3^(H+1) + K / 3^H) / 3 := by
@@ -972,6 +975,9 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
         Nat.mul_le_mul_left _ hc
       have h1 : 3^(H+1) * (A % 3^(H+2) / 3^(H+1)) ≤ A % 3^(H+2) := by
         omega
+      have h2 : 3^(H+2) ≤ 3^(H+1) * (A % 3^(H+2) / 3^(H+1)) := by
+        conv_lhs => rw [htpow]
+        exact hle
       omega
     rw [hdiv2]
     omega
@@ -1003,7 +1009,7 @@ theorem four_pow_mod9 (r : Nat) : (4:Nat)^r % 9 = 4^(r % 3) % 9 := by
   have hsplit := Nat.div_add_mod r 3
   obtain ⟨W, hW⟩ := one_add_pow_three_term (9 * 7) (r / 3)
   have h64 : (4:Nat)^(3:Nat) = 1 + 9 * 7 := by decide
-  have hexp : (4:Nat)^r = 4^(r % 3) * (1 + 9 * 7)^(r / 3) := by
+  have hexp : (4:Nat)^r = (1 + 9 * 7)^(r / 3) * 4^(r % 3) := by
     conv_lhs => rw [← hsplit]
     rw [Nat.pow_add, Nat.pow_mul, h64]
   rw [hexp, hW]
@@ -1014,11 +1020,11 @@ theorem four_pow_mod9 (r : Nat) : (4:Nat)^r % 9 = 4^(r % 3) % 9 := by
       + 9 * 9 * (7 * 7 * 7 * W), ?_⟩
     ring
   obtain ⟨q, hq⟩ := hdvd
-  have hfold : 4^(r % 3) * (1 + (r / 3) * (9 * 7)
+  have hfold : (1 + (r / 3) * (9 * 7)
       + Nat.choose (r / 3) 2 * (9 * 7) * (9 * 7)
-      + (9 * 7) * (9 * 7) * (9 * 7) * W)
+      + (9 * 7) * (9 * 7) * (9 * 7) * W) * 4^(r % 3)
       = 4^(r % 3) + 9 * (4^(r % 3) * q) := by
-    rw [← hq]
+    rw [hq]
     ring
   rw [hfold, Nat.add_mul_mod_self_left]
 
@@ -1049,7 +1055,8 @@ theorem window_row_two_dust (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1))
       + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3 := by
   have ht : K / 3^H < 3 := by
     have hmod := Nat.mod_add_div K (3^H)
-    have hlt := Nat.mod_lt K (Nat.pow_pos (by decide))
+    have hpH : 0 < 3^H := Nat.pow_pos (by decide)
+    have hlt := Nat.mod_lt K hpH
     rw [Nat.pow_succ 3 H] at hK
     omega
   have htr : (K % 3^H) % 3 = 1 := by
@@ -1058,8 +1065,8 @@ theorem window_row_two_dust (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1))
       rw [Nat.mul_comm, ← Nat.pow_succ 3 (H-1)]
       congr 1
       omega
-    rw [← Nat.mod_mod_of_dvd K hd3]
-    exact hdust
+    have hrr := Nat.mod_mod_of_dvd K hd3
+    omega
   rw [window_row_two K H hH hK]
   have hx9 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 9 = K / 3^H :=
     dust_branch_mod9 (K / 3^H) (K % 3^H) H hH htr ht
@@ -1087,11 +1094,11 @@ theorem window_reduce (A X H s : Nat) :
     rw [show (H:Nat)+1+(s+1) = H+s+2 from by omega] at h
     exact h.symm
   have hfold : A + 3^(H+1) * X
-      = (A + 3^(H+1) * (X % 3^(s+1))) + 3^(H+s+2) * (X / 3^(s+1)) := by
+      = A + 3^(H+1) * (X % 3^(s+1)) + 3^(H+s+2) * (X / 3^(s+1)) := by
     conv_lhs => rw [← hX]
-    rw [Nat.mul_add, Nat.mul_assoc, hpow]
+    rw [Nat.mul_add, ← Nat.mul_assoc, hpow]
     ring
-  rw [hfold, Nat.mul_comm (3^(H+s+2)) (X / 3^(s+1))]
+  rw [hfold]
   exact Nat.add_mul_mod_self_left _ _ _
 
 /-- **THE DUST WINDOW RECEIPT.**  The period law, the branch vanishing,
