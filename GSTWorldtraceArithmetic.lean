@@ -831,7 +831,9 @@ theorem pair_read_fire_demo_two (j : Nat) (hj : 15 ≤ j) :
     digit3 (4^(13 + 3^(j+1))) (j+4) = 2 := by
   have h17 : (3:Nat)^17 ≤ 3^(j+2) := Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
   have h4 : (4:Nat)^13 < (3:Nat)^17 := by decide
-  exact pair_read_fire_general 13 1 j (by omega) (by omega) (by decide)
+  have hgen := pair_read_fire_general 13 1 j (by omega) (by omega) (by decide)
+  rw [Nat.mul_one] at hgen
+  exact hgen
 
 /-- **THIRD FAMILY — the trunk-10 class with branch two.**  Class 10
 (a level-two dust survivor) with branch `u = 2`:  fires at row `j+4`
@@ -858,6 +860,138 @@ theorem the_general_fire_receipt :
     (∀ j : Nat, 11 ≤ j → digit3 (4^(10 + 3^(j+1)*2)) (j+4) = 2) :=
   ⟨pair_residue_mod27, digit3_row_two_of_residue, pair_read_fire_general,
     no22_of_pair_read_general, pair_read_fire_demo_two, pair_read_fire_demo_three⟩
+
+/-! ## Section 8 The top-split and the addition window — the descent engine -/
+
+/-- **THE EXACT TOP SPLIT.**  For an exponent `K` whose top trit sits at
+position `H` (`K < 3^(H+1)`), the power splits as the trunk power, the
+branch term, and a tail dead below row `2H+2`.  The deep rows of `4^K`
+are a pure base-3 addition of the trunk's digits and the shifted
+digits of `X = t * c(H) * 4^trunk`.  Machine-verified: the
+addition-window law holds 600/600 on random `(H, trunk, t)`. -/
+theorem top_split (K H : Nat) (hK : K < 3^(H+1)) :
+    ∃ Y : Nat, 4^K = 4^(K % 3^H)
+      + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)
+        + 3^(H+1) * Y) := by
+  obtain ⟨R, hR⟩ := one_add_pow_three_term (3^(H+1) * GSTTowerFire.c H) (K / 3^H)
+  have hsplit : K % 3^H + 3^H * (K / 3^H) = K := Nat.mod_add_div K (3^H)
+  have hexp : 4^K = 4^(K % 3^H) * (1 + 3^(H+1) * GSTTowerFire.c H)^(K / 3^H) := by
+    conv_lhs => rw [← hsplit]
+    rw [Nat.pow_add, Nat.pow_mul, GSTTowerFire.four_pow_three_pow_eq H]
+  refine ⟨Nat.choose (K / 3^H) 2 * GSTTowerFire.c H * GSTTowerFire.c H * 4^(K % 3^H)
+      + 3^(H+1) * (GSTTowerFire.c H * GSTTowerFire.c H * GSTTowerFire.c H * R), ?_⟩
+  rw [hexp, hR]
+  ring
+
+/-- **THE ADDITION WINDOW.**  Below row `2H+2`, the digits of `4^K` read
+the two-term sum `4^trunk + 3^(H+1) * X` — the dead tail of the top
+split is invisible.  The descent engine's foundation. -/
+theorem window_congr (K H r : Nat) (hK : K < 3^(H+1)) (hr : r + 1 ≤ 2*H+2) :
+    digit3 (4^K) r = digit3 (4^(K % 3^H)
+      + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H))) r := by
+  obtain ⟨Y, hY⟩ := top_split K H hK
+  refine digit3_eq_of_mod_next _ _ r ?_
+  rw [hY, Nat.add_mul]
+  have hpow : 3^(H+1) * 3^(H+1) = 3^(2*H+2) := by
+    have h := Nat.pow_add 3 (H+1) (H+1)
+    rw [show (H+1)+(H+1) = 2*H+2 from by omega] at h
+    exact h
+  have hdvd : 3^(r+1) ∣ 3^(H+1) * (3^(H+1) * Y) := by
+    rw [← hpow]
+    exact Nat.pow_dvd_pow 3 (by omega)
+  obtain ⟨q, hq⟩ := hdvd
+  rw [← hq, ← Nat.add_assoc, Nat.mul_comm (3^(r+1)) q]
+  exact Nat.add_mul_mod_self_left _ _ _
+
+/-- **THE ROW-(H+2) WINDOW LAW.**  The digit at row `H+2` of `4^K` is
+the trunk's own digit at that row, plus the first trit of the branch
+factor `X = t * c(H) * 4^trunk`, plus the carry from row `H+1` — a pure
+base-3 addition read.  Machine-verified 800/800. -/
+theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
+    digit3 (4^K) (H+2)
+      = (digit3 (4^(K % 3^H)) (H+2)
+          + ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) / 3 % 3
+          + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3 := by
+  have htpow : 3^(H+2) = 3^(H+1) * 3 := Nat.pow_succ 3 (H+1)
+  have ht : K / 3^H < 3 := by
+    have hmod := Nat.mod_add_div K (3^H)
+    have hlt := Nat.mod_lt K (Nat.pow_pos (by decide))
+    rw [Nat.pow_succ 3 H] at hK
+    omega
+  have hx3 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 3 = K / 3^H := by
+    have hc := GSTTowerFire.c_mod3 H
+    have hA3 := GSTClimbInfiniteFamily.pow4_mod3 (K % 3^H)
+    have h1 := Nat.mul_mod (K / 3^H) (GSTTowerFire.c H) 3
+    have h2 := Nat.mul_mod ((K / 3^H) * GSTTowerFire.c H) (4^(K % 3^H)) 3
+    rw [h2, h1, hc, hA3]
+    omega
+  rw [window_congr K H (H+2) hK (by omega)]
+  set A := 4^(K % 3^H) with hAdef
+  set X := (K / 3^H) * GSTTowerFire.c H * A with hXdef
+  have hr1lt : A % 3^(H+2) % 3^(H+1) < 3^(H+1) :=
+    Nat.mod_lt _ (Nat.pow_pos (by decide))
+  unfold digit3
+  have hdiv : (A + 3^(H+1) * X) / 3^(H+2)
+      = A / 3^(H+2) + X / 3 + (A % 3^(H+2) / 3^(H+1) + K / 3^H) / 3 := by
+    have hAsplit := Nat.div_add_mod A (3^(H+2))
+    have hDsplit := Nat.div_add_mod (A % 3^(H+2)) (3^(H+1))
+    have hXsplit := Nat.div_add_mod X 3
+    rw [hx3] at hXsplit
+    have hq3split := Nat.div_add_mod (A % 3^(H+2) / 3^(H+1) + K / 3^H) 3
+    have hkey : A + 3^(H+1) * X
+        = 3^(H+2) * (A / 3^(H+2) + X / 3
+            + (A % 3^(H+2) / 3^(H+1) + K / 3^H) / 3)
+          + (3^(H+1) * ((A % 3^(H+2) / 3^(H+1) + K / 3^H) % 3)
+            + A % 3^(H+2) % 3^(H+1)) := by
+      linear_combination
+        -(hAsplit + 3^(H+1) * hXsplit + hDsplit + 3^(H+1) * hq3split)
+        - (X / 3 + (A % 3^(H+2) / 3^(H+1) + K / 3^H) / 3) * htpow
+    have hslt : 3^(H+1) * ((A % 3^(H+2) / 3^(H+1) + K / 3^H) % 3)
+        + A % 3^(H+2) % 3^(H+1) < 3^(H+2) := by
+      have h3lt : (A % 3^(H+2) / 3^(H+1) + K / 3^H) % 3 < 3 :=
+        Nat.mod_lt _ (by decide)
+      have hmul : 3^(H+1) * ((A % 3^(H+2) / 3^(H+1) + K / 3^H) % 3)
+          ≤ 3^(H+1) * 2 := Nat.mul_le_mul_left _ (by omega)
+      omega
+    rw [hkey, GSTTowerFire.div_add_lt (H+2) _ _ hslt]
+  rw [hdiv]
+  have hd1 : A / 3^(H+1) % 3 = A % 3^(H+2) / 3^(H+1) := by
+    have hAsplit := Nat.div_add_mod A (3^(H+2))
+    have hDsplit := Nat.div_add_mod (A % 3^(H+2)) (3^(H+1))
+    have hA2 : A = 3^(H+1) * (3 * (A / 3^(H+2)) + A % 3^(H+2) / 3^(H+1))
+        + A % 3^(H+2) % 3^(H+1) := by
+      linear_combination -(hAsplit + hDsplit) + (A / 3^(H+2)) * htpow
+    have hdiv2 : A / 3^(H+1)
+        = 3 * (A / 3^(H+2)) + A % 3^(H+2) / 3^(H+1) := by
+      conv_lhs => rw [hA2]
+      exact GSTTowerFire.div_add_lt (H+1) _ _ hr1lt
+    have hDlt : A % 3^(H+2) / 3^(H+1) < 3 := by
+      by_contra hc
+      push_neg at hc
+      have hle : 3^(H+1) * 3 ≤ 3^(H+1) * (A % 3^(H+2) / 3^(H+1)) :=
+        Nat.mul_le_mul_left _ hc
+      omega
+    rw [hdiv2]
+    omega
+  rw [hd1]
+  omega
+
+/-- **THE DESCENT ENGINE RECEIPT.**  The top split, the addition window,
+and the row-(H+2) law assembled. -/
+theorem the_descent_engine_receipt :
+    (∀ K H : Nat, K < 3^(H+1) → ∃ Y : Nat, 4^K = 4^(K % 3^H)
+      + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H) + 3^(H+1) * Y)) ∧
+    (∀ K H r : Nat, K < 3^(H+1) → r + 1 ≤ 2*H+2 →
+      digit3 (4^K) r = digit3 (4^(K % 3^H)
+        + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H))) r) ∧
+    (∀ K H : Nat, 1 ≤ H → K < 3^(H+1) →
+      digit3 (4^K) (H+2)
+        = (digit3 (4^(K % 3^H)) (H+2)
+            + ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) / 3 % 3
+            + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3) :=
+  ⟨fun K H hK => top_split K H hK,
+    fun K H r hK hr => window_congr K H r hK hr,
+    fun K H hH hK => window_row_two K H hH hK⟩
 
 /-- **THE LEVEL-SIX RECEIPT.**  The worldtrace transformation assembled:
 the binomial ladder, the quadratic and cubic blades, the polynomial
@@ -951,5 +1085,9 @@ theorem the_worldtrace_receipt_seven :
 #print axioms pair_read_fire_demo_two
 #print axioms pair_read_fire_demo_three
 #print axioms the_general_fire_receipt
+#print axioms top_split
+#print axioms window_congr
+#print axioms window_row_two
+#print axioms the_descent_engine_receipt
 
 end GSTWorldtraceArithmetic

@@ -234,3 +234,19 @@ theorem the_general_fire_wire :
     GSTWorldtraceArithmetic.pair_read_fire_demo_two⟩
 
 #print axioms the_general_fire_wire
+
+/-- **THE DESCENT ENGINE WIRE.**  The top split, the addition window,
+and the row-(H+2) law — the descent engine that reads the deep digits
+of `4^K` as base-3 additions of the trunk's digits and the branch
+factor's shifted digits. -/
+theorem the_descent_engine_wire :
+    (∀ K H : Nat, K < 3^(H+1) → ∃ Y : Nat, 4^K = 4^(K % 3^H)
+      + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H) + 3^(H+1) * Y)) ∧
+    (∀ K H r : Nat, K < 3^(H+1) → r + 1 ≤ 2*H+2 →
+      GSTCanonicalSevenAxisBridge.digit3 (4^K) r
+        = GSTCanonicalSevenAxisBridge.digit3 (4^(K % 3^H)
+          + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H))) r) :=
+  ⟨GSTWorldtraceArithmetic.top_split,
+    GSTWorldtraceArithmetic.window_congr⟩
+
+#print axioms the_descent_engine_wire
