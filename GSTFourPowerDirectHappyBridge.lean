@@ -38,6 +38,31 @@ theorem commonTwo_to_physical_happy_row
       omega
     simpa [GSTCanonicalTailStateIso.carry4, directCarry4] using hcarry
 
+/-- A physical Happy row on a four-power sheet is exactly strong enough to
+recover a direct consecutive-power common-two witness at the same row.  This
+is the reverse current-production bridge and uses only the exact x4 digit
+formula: Happy says the source digit is `2` and its multiplication carry is
+`0` or `3`, so the target digit remains `2` modulo three. -/
+theorem physical_happy_to_commonTwo
+    (K p : Nat) (hp : 1 ≤ p)
+    (hHappy :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) p)
+        (GSTCanonicalTailStateIso.digit3 (4^K) p)) :
+    CommonTwo K := by
+  unfold GSTCanonicalTailStateIso.HappyCell at hHappy
+  have hs : digit3 (4^K) p = 2 := by
+    simpa [GSTCanonicalTailStateIso.digit3,
+      GSTFourPowerDirectResidue.digit3] using hHappy.1
+  have hc : directCarry4 (4^K) p = 0 ∨ directCarry4 (4^K) p = 3 := by
+    simpa [GSTCanonicalTailStateIso.carry4, directCarry4] using hHappy.2
+  have ht4 : digit3 (4 * (4^K)) p = 2 := by
+    rw [digit3_four_mul, hs]
+    rcases hc with hc | hc <;> simp [hc]
+  have ht : digit3 (4^(K+1)) p = 2 := by
+    simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using ht4
+  exact ⟨p, hp, hs, ht⟩
+
 /-- Once the direct arithmetic existence theorem is proved, the actual Task-3
 physical target follows immediately at a row `q ≥ 1`.  This theorem contains
 no navigation, propagation edge, relocation surrogate, or quarantined route. -/
@@ -89,10 +114,12 @@ theorem four_power_happy_propagates
   exact directExistence_forces_relocated_physical_happy hDirect K p hK hp hHappy
 
 #check commonTwo_to_physical_happy_row
+#check physical_happy_to_commonTwo
 #check directExistence_to_physical_happy_forcing
 #check directExistence_forces_relocated_physical_happy
 #check four_power_happy_propagates
 #print axioms commonTwo_to_physical_happy_row
+#print axioms physical_happy_to_commonTwo
 #print axioms directExistence_to_physical_happy_forcing
 #print axioms directExistence_forces_relocated_physical_happy
 #print axioms four_power_happy_propagates
