@@ -914,10 +914,10 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
           + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3 := by
   have htpow : 3^(H+2) = 3^(H+1) * 3 := Nat.pow_succ 3 (H+1)
   have ht : K / 3^H < 3 := by
-    have hmod := Nat.mod_add_div K (3^H)
-    have hpH : 0 < 3^H := Nat.pow_pos (by decide)
-    have hlt := Nat.mod_lt K hpH
     rw [Nat.pow_succ 3 H] at hK
+    by_contra hc
+    have hd := Nat.mod_add_div K (3^H)
+    have hle : 3^H * 3 ≤ 3^H * (K / 3^H) := Nat.mul_le_mul_left _ (by omega)
     omega
   have hx3 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 3 = K / 3^H := by
     have hc : GSTTowerFire.c H % 3 = 1 := GSTTowerFire.c_mod3 H
@@ -925,8 +925,8 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
     have ht3 : (K / 3^H) % 3 = K / 3^H := Nat.mod_eq_of_lt ht
     have hpair : ((K / 3^H) * GSTTowerFire.c H) % 3 = (K / 3^H) % 3 := by
       rw [Nat.mul_mod, hc, Nat.mul_one]
+      omega
     rw [Nat.mul_mod, hpair, hA3, Nat.mul_one, ht3, ht3]
-    omega
   rw [window_congr K H (H+2) hK (by omega)]
   set A := 4^(K % 3^H) with hAdef
   set X := (K / 3^H) * GSTTowerFire.c H * A with hXdef
@@ -980,7 +980,9 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
         exact hle
       omega
     rw [hdiv2]
-    omega
+    rw [Nat.add_comm (3 * (A / 3^(H+2))) (A % 3^(H+2) / 3^(H+1))]
+    rw [Nat.add_mul_mod_self_left]
+    exact Nat.mod_eq_of_lt hDlt
   rw [hd1]
   omega
 
@@ -1024,8 +1026,7 @@ theorem four_pow_mod9 (r : Nat) : (4:Nat)^r % 9 = 4^(r % 3) % 9 := by
       + Nat.choose (r / 3) 2 * (9 * 7) * (9 * 7)
       + (9 * 7) * (9 * 7) * (9 * 7) * W) * 4^(r % 3)
       = 4^(r % 3) + 9 * (4^(r % 3) * q) := by
-    rw [hq]
-    ring
+    linear_combination 4^(r % 3) * hq
   rw [hfold, Nat.add_mul_mod_self_left]
 
 /-- **THE DUST BRANCH FACTOR.**  For a dust trunk (`trunk mod 3 = 1`)
@@ -1054,10 +1055,10 @@ theorem window_row_two_dust (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1))
     digit3 (4^K) (H+2) = (digit3 (4^(K % 3^H)) (H+2)
       + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3 := by
   have ht : K / 3^H < 3 := by
-    have hmod := Nat.mod_add_div K (3^H)
-    have hpH : 0 < 3^H := Nat.pow_pos (by decide)
-    have hlt := Nat.mod_lt K hpH
     rw [Nat.pow_succ 3 H] at hK
+    by_contra hc
+    have hd := Nat.mod_add_div K (3^H)
+    have hle : 3^H * 3 ≤ 3^H * (K / 3^H) := Nat.mul_le_mul_left _ (by omega)
     omega
   have htr : (K % 3^H) % 3 = 1 := by
     have hd3 : (3:Nat) ∣ 3^H := by
