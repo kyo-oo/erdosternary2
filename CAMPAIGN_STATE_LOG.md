@@ -86,6 +86,14 @@ From `V5_SKILL.md` (maths-researcher V5.0 TRUE POWER):
 
 ---
 
+## 4.5. ROUND 2-3 ADDENDUM (this session)
+
+- Level 7 landed (quartic blade + 64 dead classes mod 6561 + 128 survivors); first CI round failed on (a) recursion-depth decides for parents > 256 (elaborator exponentiation.threshold = 256) — fixed by routing all noise proofs through the quartic blade (polynomial ~66 bits, no exponentiation); (b) malformed Or-nests in the negations — regenerated correctly.
+- **GAP-E1's FIRST FAMILY landed**: `pair_read_formula` (uniform two-support read: row-(j+4) of 4^(T+3^(j+1)*u) = row-two of 4^T*u*c(j+1)) and `pair_read_fire` (every 4+3^(j+1)*u, j>=4, u in {1,4,7} fires at row j+4) — an infinite family no finite cascade level reaches (rides the class-4 trunk; the pair term plants the 2).
+- E1 receipts: ALL 126 level-7 survivors (>= 8) die by position 19 (min 9, median 10). Kill-trit minimal window = ell (no fixed low-trit table). Zero-extension survivors decay ~2/3 per level. c_inf stream [1,2,1,0,2,2,0,1,0,2,1,2,1].
+- Transport corruption discovered: intermittent mangling of inline unicode/space-run/escape patterns in bash tool calls — countermeasures: Write-tool templates, space-free ASCII needles, chr()-built separators, byte-level ops.
+- NEXT: general trunk-uniform fire (18 <= (16*4^T*u) % 27 implies the kill, omega-closable), triple-read formula, then the multi-support automaton = the GAP-A2 closure engine.
+
 ## 5. CURRENT STATE (exact, as of this file's commit)
 
 - HEAD `fe2cb9d` on `sol/kyo-gate-universe-wire`. All campaign files **0 sorries**. `the_act` defined (`GSTTheAct.lean:51`) and fully wired to sockets:
