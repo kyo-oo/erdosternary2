@@ -6,6 +6,7 @@ import GSTTheActConstruction
 import GSTBladeWave
 import GSTTowerFire
 import GSTTowerAxis
+import GSTWorldtraceArithmetic
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -156,3 +157,26 @@ def main : IO Unit := do
   IO.println "Verify cleanliness:"
   IO.println "  ./scripts/sorry_check.sh   # must return 0"
   IO.println "  ./scripts/comparator.sh    # prints 'Your solution is okay!'"
+
+/-- **THE WORLDTRACE WIRE.**  The boss's transformation, landed: the dust
+power `4^(1+3m)` IS the binomial sum `4*(1+63)^m`, its deep rows are
+explicit polynomials (row five the quadratic, row seven the cubic), the
+polynomial kills without computing the power, and the sixth cascade
+level compresses the survivors 32 -> 64 mod 2187. -/
+theorem the_worldtrace_wire :
+    (∀ m : Nat, 4^(1+3*m) ≡ 4 + 252*m + 15876*Nat.choose m 2 [MOD 729]) ∧
+    (∀ m : Nat, GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*m)) 5
+      = GSTCanonicalSevenAxisBridge.digit3 (4 + 252*m + 15876*Nat.choose m 2) 5) ∧
+    (∀ m : Nat, GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*m)) 7
+      = GSTCanonicalSevenAxisBridge.digit3
+        (4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3) 7) ∧
+    (GSTCanonicalSevenAxisBridge.digit3 (4^(1+3*28)) 5 = 2) ∧
+    (∀ K : Nat, K % 3 = 1 → GSTClimbInfiniteFamily.CantorianPower K →
+      K % 2187 = 1 ∨ K % 2187 = 4 ∨ K % 2187 = 13 ∨ K % 2187 = 40 ∨ K % 2187 = 82 ∨ K % 2187 = 94 ∨ K % 2187 = 109 ∨ K % 2187 = 121 ∨ K % 2187 = 166 ∨ K % 2187 = 193 ∨ K % 2187 = 244 ∨ K % 2187 = 247 ∨ K % 2187 = 280 ∨ K % 2187 = 283 ∨ K % 2187 = 325 ∨ K % 2187 = 364 ∨ K % 2187 = 436 ∨ K % 2187 = 496 ∨ K % 2187 = 514 ∨ K % 2187 = 523 ∨ K % 2187 = 580 ∨ K % 2187 = 595 ∨ K % 2187 = 730 ∨ K % 2187 = 733 ∨ K % 2187 = 739 ∨ K % 2187 = 757 ∨ K % 2187 = 823 ∨ K % 2187 = 838 ∨ K % 2187 = 850 ∨ K % 2187 = 922 ∨ K % 2187 = 928 ∨ K % 2187 = 973 ∨ K % 2187 = 976 ∨ K % 2187 = 1003 ∨ K % 2187 = 1009 ∨ K % 2187 = 1093 ∨ K % 2187 = 1144 ∨ K % 2187 = 1165 ∨ K % 2187 = 1171 ∨ K % 2187 = 1225 ∨ K % 2187 = 1228 ∨ K % 2187 = 1243 ∨ K % 2187 = 1246 ∨ K % 2187 = 1252 ∨ K % 2187 = 1381 ∨ K % 2187 = 1387 ∨ K % 2187 = 1468 ∨ K % 2187 = 1471 ∨ K % 2187 = 1486 ∨ K % 2187 = 1498 ∨ K % 2187 = 1540 ∨ K % 2187 = 1624 ∨ K % 2187 = 1657 ∨ K % 2187 = 1732 ∨ K % 2187 = 1741 ∨ K % 2187 = 1783 ∨ K % 2187 = 1873 ∨ K % 2187 = 1900 ∨ K % 2187 = 1957 ∨ K % 2187 = 1975 ∨ K % 2187 = 2038 ∨ K % 2187 = 2053 ∨ K % 2187 = 2110 ∨ K % 2187 = 2116) :=
+  ⟨GSTWorldtraceArithmetic.wt_quad_mod729,
+    GSTWorldtraceArithmetic.wt_row_five_read,
+    GSTWorldtraceArithmetic.wt_row_seven_read,
+    GSTWorldtraceArithmetic.wt_quad_fire_demo,
+    GSTWorldtraceArithmetic.cantorian_dust_mod_2187⟩
+
+#print axioms the_worldtrace_wire

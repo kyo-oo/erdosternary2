@@ -117,6 +117,7 @@ roots = [
   "GSTBladeWave",
   "GSTTowerFire",
   "GSTTowerAxis",
+  "GSTWorldtraceArithmetic",
 ]
 
 [[lean_exe]]
