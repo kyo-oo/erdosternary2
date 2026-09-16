@@ -879,7 +879,7 @@ theorem top_split (K H : Nat) (hK : K < 3^(H+1)) :
     conv_lhs => rw [← hsplit]
     rw [Nat.pow_add, Nat.pow_mul, GSTTowerFire.four_pow_three_pow_eq H]
   refine ⟨Nat.choose (K / 3^H) 2 * GSTTowerFire.c H * GSTTowerFire.c H * 4^(K % 3^H)
-      + 3^(H+1) * (GSTTowerFire.c H * GSTTowerFire.c H * GSTTowerFire.c H * R), ?_⟩
+      + 3^(H+1) * (GSTTowerFire.c H * GSTTowerFire.c H * GSTTowerFire.c H * R * 4^(K % 3^H)), ?_⟩
   rw [hexp, hR]
   ring
 
@@ -891,7 +891,7 @@ theorem window_congr (K H r : Nat) (hK : K < 3^(H+1)) (hr : r + 1 ≤ 2*H+2) :
       + 3^(H+1) * ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H))) r := by
   obtain ⟨Y, hY⟩ := top_split K H hK
   refine digit3_eq_of_mod_next _ _ r ?_
-  rw [hY, Nat.add_mul]
+  rw [hY, Nat.mul_add]
   have hpow : 3^(H+1) * 3^(H+1) = 3^(2*H+2) := by
     have h := Nat.pow_add 3 (H+1) (H+1)
     rw [show (H+1)+(H+1) = 2*H+2 from by omega] at h
@@ -919,12 +919,12 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
     rw [Nat.pow_succ 3 H] at hK
     omega
   have hx3 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 3 = K / 3^H := by
-    have hc := GSTTowerFire.c_mod3 H
-    have hA3 := GSTClimbInfiniteFamily.pow4_mod3 (K % 3^H)
-    have h1 := Nat.mul_mod (K / 3^H) (GSTTowerFire.c H) 3
-    have h2 := Nat.mul_mod ((K / 3^H) * GSTTowerFire.c H) (4^(K % 3^H)) 3
-    rw [h2, h1, hc, hA3]
-    omega
+    have hc : GSTTowerFire.c H % 3 = 1 := GSTTowerFire.c_mod3 H
+    have hA3 : (4^(K % 3^H)) % 3 = 1 := GSTClimbInfiniteFamily.pow4_mod3 (K % 3^H)
+    have ht3 : (K / 3^H) % 3 = K / 3^H := Nat.mod_eq_of_lt ht
+    have hpair : ((K / 3^H) * GSTTowerFire.c H) % 3 = (K / 3^H) % 3 := by
+      rw [Nat.mul_mod, hc, Nat.mul_one]
+    rw [Nat.mul_mod, hpair, hA3, Nat.mul_one, ht3, ht3]
   rw [window_congr K H (H+2) hK (by omega)]
   set A := 4^(K % 3^H) with hAdef
   set X := (K / 3^H) * GSTTowerFire.c H * A with hXdef
@@ -970,6 +970,8 @@ theorem window_row_two (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1)) :
       push_neg at hc
       have hle : 3^(H+1) * 3 ≤ 3^(H+1) * (A % 3^(H+2) / 3^(H+1)) :=
         Nat.mul_le_mul_left _ hc
+      have h1 : 3^(H+1) * (A % 3^(H+2) / 3^(H+1)) ≤ A % 3^(H+2) := by
+        omega
       omega
     rw [hdiv2]
     omega
@@ -1087,7 +1089,7 @@ theorem window_reduce (A X H s : Nat) :
   have hfold : A + 3^(H+1) * X
       = (A + 3^(H+1) * (X % 3^(s+1))) + 3^(H+s+2) * (X / 3^(s+1)) := by
     conv_lhs => rw [← hX]
-    rw [hpow]
+    rw [Nat.mul_add, Nat.mul_assoc, hpow]
     ring
   rw [hfold, Nat.mul_comm (3^(H+s+2)) (X / 3^(s+1))]
   exact Nat.add_mul_mod_self_left _ _ _
