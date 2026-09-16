@@ -62,9 +62,8 @@ theorem wt_choose_one (n : Nat) : Nat.choose n 1 = n := by
   induction n with
   | zero => decide
   | succ k ih =>
-    have h : Nat.choose (k+1) (0+1) = Nat.choose k 0 + Nat.choose k (0+1) :=
+    have h : Nat.choose (k+1) 1 = Nat.choose k 0 + Nat.choose k 1 :=
       Nat.choose_succ_succ k 0
-    rw [Nat.zero_add, Nat.zero_add] at h
     rw [h, Nat.choose_zero_right, ih]
     omega
 
@@ -249,6 +248,82 @@ theorem dust_fire_row_seven (K : Nat)
   · exact fire_of_mod2187 K 496 2 (by decide) (by decide) (by decide) (by omega)
   · exact fire_of_mod2187 K 514 2 (by decide) (by decide) (by decide) (by omega)
   · exact fire_of_mod2187 K 523 2 (by decide) (by decide) (by decide) (by omega)
+/-- **THE DUST PINNED AT LEVEL SIX — THE MAP DOUBLES AGAIN.**  A Cantorian
+dust exponent (`K ≡ 1 mod 3`) lives in one of SIXTY-FOUR surviving
+residues mod 2187.  The structural law, third stroke: `2, 4, 8, 16,
+32, 64` — the alive set doubles level by level without exception,
+every node keeping exactly two children by the blade's one-of-three. -/
+theorem cantorian_dust_mod_2187 (K : Nat)
+    (hd : K % 3 = 1) (hc : CantorianPower K) :
+    K % 2187 = 1 ∨ K % 2187 = 4 ∨ K % 2187 = 13 ∨ K % 2187 = 40 ∨ K % 2187 = 82 ∨ K % 2187 = 94 ∨ K % 2187 = 109 ∨ K % 2187 = 121 ∨ K % 2187 = 166 ∨ K % 2187 = 193 ∨ K % 2187 = 244 ∨ K % 2187 = 247 ∨ K % 2187 = 280 ∨ K % 2187 = 283 ∨ K % 2187 = 325 ∨ K % 2187 = 364 ∨ K % 2187 = 436 ∨ K % 2187 = 496 ∨ K % 2187 = 514 ∨ K % 2187 = 523 ∨ K % 2187 = 580 ∨ K % 2187 = 595 ∨ K % 2187 = 730 ∨ K % 2187 = 733 ∨ K % 2187 = 739 ∨ K % 2187 = 757 ∨ K % 2187 = 823 ∨ K % 2187 = 838 ∨ K % 2187 = 850 ∨ K % 2187 = 922 ∨ K % 2187 = 928 ∨ K % 2187 = 973 ∨ K % 2187 = 976 ∨ K % 2187 = 1003 ∨ K % 2187 = 1009 ∨ K % 2187 = 1093 ∨ K % 2187 = 1144 ∨ K % 2187 = 1165 ∨ K % 2187 = 1171 ∨ K % 2187 = 1225 ∨ K % 2187 = 1228 ∨ K % 2187 = 1243 ∨ K % 2187 = 1246 ∨ K % 2187 = 1252 ∨ K % 2187 = 1381 ∨ K % 2187 = 1387 ∨ K % 2187 = 1468 ∨ K % 2187 = 1471 ∨ K % 2187 = 1486 ∨ K % 2187 = 1498 ∨ K % 2187 = 1540 ∨ K % 2187 = 1624 ∨ K % 2187 = 1657 ∨ K % 2187 = 1732 ∨ K % 2187 = 1741 ∨ K % 2187 = 1783 ∨ K % 2187 = 1873 ∨ K % 2187 = 1900 ∨ K % 2187 = 1957 ∨ K % 2187 = 1975 ∨ K % 2187 = 2038 ∨ K % 2187 = 2053 ∨ K % 2187 = 2110 ∨ K % 2187 = 2116 := by
+  have h729 := cantorian_dust_mod_729 K hd hc
+  have hrow := hc 7 (by omega)
+  have hd0 : K % 2187 ≠ 10 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inl h)) hrow
+  have hd1 : K % 2187 ≠ 28 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inl h))) hrow
+  have hd2 : K % 2187 ≠ 199 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inl h)))) hrow
+  have hd3 : K % 2187 ≠ 274 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inl h))))) hrow
+  have hd4 : K % 2187 ≠ 415 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))) hrow
+  have hd5 : K % 2187 ≠ 442 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))) hrow
+  have hd6 : K % 2187 ≠ 499 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))) hrow
+  have hd7 : K % 2187 ≠ 517 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))) hrow
+  have hd8 : K % 2187 ≠ 652 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))) hrow
+  have hd9 : K % 2187 ≠ 658 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))) hrow
+  have hd10 : K % 2187 ≠ 742 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))) hrow
+  have hd11 : K % 2187 ≠ 769 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))) hrow
+  have hd12 : K % 2187 ≠ 811 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))) hrow
+  have hd13 : K % 2187 ≠ 895 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))) hrow
+  have hd14 : K % 2187 ≠ 1012 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))) hrow
+  have hd15 : K % 2187 ≠ 1054 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))) hrow
+  have hd16 : K % 2187 ≠ 1309 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))) hrow
+  have hd17 : K % 2187 ≠ 1324 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))) hrow
+  have hd18 : K % 2187 ≠ 1459 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))) hrow
+  have hd19 : K % 2187 ≠ 1462 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))) hrow
+  have hd20 : K % 2187 ≠ 1552 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))) hrow
+  have hd21 : K % 2187 ≠ 1567 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))) hrow
+  have hd22 : K % 2187 ≠ 1579 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))) hrow
+  have hd23 : K % 2187 ≠ 1651 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))))) hrow
+  have hd24 : K % 2187 ≠ 1702 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))))) hrow
+  have hd25 : K % 2187 ≠ 1705 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))))))) hrow
+  have hd26 : K % 2187 ≠ 1738 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))))))) hrow
+  have hd27 : K % 2187 ≠ 1822 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))))))))) hrow
+  have hd28 : K % 2187 ≠ 1894 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))))))))) hrow
+  have hd29 : K % 2187 ≠ 1954 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))))))))))) hrow
+  have hd30 : K % 2187 ≠ 1972 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))))))))))) hrow
+  have hd31 : K % 2187 ≠ 1981 :=
+    fun h => absurd (dust_fire_row_seven K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))) hrow
+  rcases h729 with h1 | h4 | h10 | h13 | h28 | h40 | h82 | h94 | h109 | h121 | h166 | h193 | h199 | h244 | h247 | h274 | h280 | h283 | h325 | h364 | h415 | h436 | h442 | h496 | h499 | h514 | h517 | h523 | h580 | h595 | h652 | h658 <;> omega
+
 /-- **THE CASCADE KILL, LEVEL SIX.**  The thirty-two new classes die
 outright through the repo's own kill chain. -/
 theorem no22_of_cascade_six (K : Nat)
