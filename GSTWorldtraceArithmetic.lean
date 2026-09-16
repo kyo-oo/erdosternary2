@@ -895,10 +895,10 @@ theorem window_congr (K H r : Nat) (hK : K < 3^(H+1)) (hr : r + 1 ≤ 2*H+2) :
   have hpow : 3^(H+1) * 3^(H+1) = 3^(2*H+2) := by
     have h := Nat.pow_add 3 (H+1) (H+1)
     rw [show (H+1)+(H+1) = 2*H+2 from by omega] at h
-    exact h
+    exact h.symm
   have hdvd : 3^(r+1) ∣ 3^(H+1) * (3^(H+1) * Y) := by
-    rw [← hpow]
-    exact Nat.pow_dvd_pow 3 (by omega)
+    rw [← Nat.mul_assoc, hpow]
+    exact (Nat.pow_dvd_pow 3 (by omega)).mul_right Y
   obtain ⟨q, hq⟩ := hdvd
   rw [← hq, ← Nat.add_assoc, Nat.mul_comm (3^(r+1)) q]
   exact Nat.add_mul_mod_self_left _ _ _
@@ -992,6 +992,119 @@ theorem the_descent_engine_receipt :
   ⟨fun K H hK => top_split K H hK,
     fun K H r hK hr => window_congr K H r hK hr,
     fun K H hH hK => window_row_two K H hH hK⟩
+
+/-! ## Section 9 The dust window laws — the branch term vanishes mod nine -/
+
+/-- **THE PERIOD-NINE LAW.**  `4^r mod 9` depends only on `r mod 3`
+(`4^3 = 64 = 1 + 9*7`).  Receipt: 0 failures for r < 100. -/
+theorem four_pow_mod9 (r : Nat) : (4:Nat)^r % 9 = 4^(r % 3) % 9 := by
+  have hsplit := Nat.div_add_mod r 3
+  obtain ⟨W, hW⟩ := one_add_pow_three_term (9 * 7) (r / 3)
+  have h64 : (4:Nat)^(3:Nat) = 1 + 9 * 7 := by decide
+  have hexp : (4:Nat)^r = 4^(r % 3) * (1 + 9 * 7)^(r / 3) := by
+    conv_lhs => rw [← hsplit]
+    rw [Nat.pow_add, Nat.pow_mul, h64]
+  rw [hexp, hW]
+  have hdvd : 9 ∣ (r / 3) * (9 * 7)
+      + Nat.choose (r / 3) 2 * (9 * 7) * (9 * 7)
+      + (9 * 7) * (9 * 7) * (9 * 7) * W := by
+    refine ⟨(r / 3) * 7 + 9 * (Nat.choose (r / 3) 2 * 7 * 7)
+      + 9 * 9 * (7 * 7 * 7 * W), ?_⟩
+    ring
+  obtain ⟨q, hq⟩ := hdvd
+  have hfold : 4^(r % 3) * (1 + (r / 3) * (9 * 7)
+      + Nat.choose (r / 3) 2 * (9 * 7) * (9 * 7)
+      + (9 * 7) * (9 * 7) * (9 * 7) * W)
+      = 4^(r % 3) + 9 * (4^(r % 3) * q) := by
+    rw [← hq]
+    ring
+  rw [hfold, Nat.add_mul_mod_self_left]
+
+/-- **THE DUST BRANCH FACTOR.**  For a dust trunk (`trunk mod 3 = 1`)
+the branch factor `X = t * c(H) * 4^trunk` satisfies `X mod 9 = t` —
+`c(H)` is `7 mod 9`, `4^trunk` is `4 mod 9`, and `7 * 4 = 28 = 1 mod 9`.
+Receipt: 0 failures on 300 random (H, trunk, t). -/
+theorem dust_branch_mod9 (t trunk H : Nat) (hH : 1 ≤ H) (htr : trunk % 3 = 1)
+    (ht : t < 3) :
+    (t * GSTTowerFire.c H * 4^trunk) % 9 = t := by
+  have hc := GSTTowerFire.c_mod9 H hH
+  have h4 := four_pow_mod9 trunk
+  rw [htr] at h4
+  have h41 : (4:Nat)^(1:Nat) % 9 = 4 := by decide
+  rw [h41] at h4
+  have h1 := Nat.mul_mod t (GSTTowerFire.c H) 9
+  have h2 := Nat.mul_mod (t * GSTTowerFire.c H) (4^trunk) 9
+  rw [h2, h1, hc, h4]
+  omega
+
+/-- **THE DUST ROW-(H+2) LAW — the branch term vanishes.**  For a dust
+exponent (`K mod 3 = 1`) the row-(H+2) digit is JUST the trunk's digit
+plus the carry — the branch factor's first trit is zero because
+`X mod 9 = t < 3`.  The descent's cleanest rung.  Receipt: 196/196. -/
+theorem window_row_two_dust (K H : Nat) (hH : 1 ≤ H) (hK : K < 3^(H+1))
+    (hdust : K % 3 = 1) :
+    digit3 (4^K) (H+2) = (digit3 (4^(K % 3^H)) (H+2)
+      + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3 := by
+  have ht : K / 3^H < 3 := by
+    have hmod := Nat.mod_add_div K (3^H)
+    have hlt := Nat.mod_lt K (Nat.pow_pos (by decide))
+    rw [Nat.pow_succ 3 H] at hK
+    omega
+  have htr : (K % 3^H) % 3 = 1 := by
+    have hd3 : (3:Nat) ∣ 3^H := by
+      refine ⟨3^(H-1), ?_⟩
+      rw [Nat.mul_comm, ← Nat.pow_succ 3 (H-1)]
+      congr 1
+      omega
+    rw [← Nat.mod_mod_of_dvd K hd3]
+    exact hdust
+  rw [window_row_two K H hH hK]
+  have hx9 : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) % 9 = K / 3^H :=
+    dust_branch_mod9 (K / 3^H) (K % 3^H) H hH htr ht
+  have hterm : ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) / 3 % 3 = 0 := by
+    have hmm := Nat.mod_mod_of_dvd
+      ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) (by decide : (3:Nat) ∣ 9)
+    have hdm := Nat.div_add_mod
+      ((K / 3^H) * GSTTowerFire.c H * 4^(K % 3^H)) 9
+    omega
+  rw [hterm]
+  omega
+
+/-- **THE WINDOW REDUCTION.**  The digit at row `H+1+s` of the two-term
+sum only sees the first `s+1` trits of the branch factor — reduce
+`X mod 3^(s+1)` and the higher trits are invisible.  The consumers'
+computational handle: the reduced branch factor is small. -/
+theorem window_reduce (A X H s : Nat) :
+    digit3 (A + 3^(H+1) * X) (H+1+s)
+      = digit3 (A + 3^(H+1) * (X % 3^(s+1))) (H+1+s) := by
+  refine digit3_eq_of_mod_next _ _ (H+1+s) ?_
+  rw [show (H:Nat)+1+s+1 = H+s+2 from by omega]
+  have hX := Nat.div_add_mod X (3^(s+1))
+  have hpow : 3^(H+1) * 3^(s+1) = 3^(H+s+2) := by
+    have h := Nat.pow_add 3 (H+1) (s+1)
+    rw [show (H:Nat)+1+(s+1) = H+s+2 from by omega] at h
+    exact h.symm
+  have hfold : A + 3^(H+1) * X
+      = (A + 3^(H+1) * (X % 3^(s+1))) + 3^(H+s+2) * (X / 3^(s+1)) := by
+    conv_lhs => rw [← hX]
+    rw [hpow]
+    ring
+  rw [hfold, Nat.mul_comm (3^(H+s+2)) (X / 3^(s+1))]
+  exact Nat.add_mul_mod_self_left _ _ _
+
+/-- **THE DUST WINDOW RECEIPT.**  The period law, the branch vanishing,
+the clean row-(H+2) law, and the reduction handle. -/
+theorem the_dust_window_receipt :
+    (∀ r : Nat, (4:Nat)^r % 9 = 4^(r % 3) % 9) ∧
+    (∀ t trunk H : Nat, 1 ≤ H → trunk % 3 = 1 → t < 3 →
+      (t * GSTTowerFire.c H * 4^trunk) % 9 = t) ∧
+    (∀ K H : Nat, 1 ≤ H → K < 3^(H+1) → K % 3 = 1 →
+      digit3 (4^K) (H+2) = (digit3 (4^(K % 3^H)) (H+2)
+        + (digit3 (4^(K % 3^H)) (H+1) + K / 3^H) / 3) % 3) ∧
+    (∀ A X H s : Nat,
+      digit3 (A + 3^(H+1) * X) (H+1+s)
+        = digit3 (A + 3^(H+1) * (X % 3^(s+1))) (H+1+s)) :=
+  ⟨four_pow_mod9, dust_branch_mod9, window_row_two_dust, window_reduce⟩
 
 /-- **THE LEVEL-SIX RECEIPT.**  The worldtrace transformation assembled:
 the binomial ladder, the quadratic and cubic blades, the polynomial
@@ -1089,5 +1202,10 @@ theorem the_worldtrace_receipt_seven :
 #print axioms window_congr
 #print axioms window_row_two
 #print axioms the_descent_engine_receipt
+#print axioms four_pow_mod9
+#print axioms dust_branch_mod9
+#print axioms window_row_two_dust
+#print axioms window_reduce
+#print axioms the_dust_window_receipt
 
 end GSTWorldtraceArithmetic

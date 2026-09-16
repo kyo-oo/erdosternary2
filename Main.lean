@@ -250,3 +250,17 @@ theorem the_descent_engine_wire :
     GSTWorldtraceArithmetic.window_congr⟩
 
 #print axioms the_descent_engine_wire
+
+/-- **THE DUST WINDOW WIRE.**  The period-nine law, the dust branch
+vanishing, and the clean row-(H+2) law — the descent's cleanest rung. -/
+theorem the_dust_window_wire :
+    (∀ r : Nat, (4:Nat)^r % 9 = 4^(r % 3) % 9) ∧
+    (∀ K H : Nat, 1 ≤ H → K < 3^(H+1) → K % 3 = 1 →
+      GSTCanonicalSevenAxisBridge.digit3 (4^K) (H+2)
+        = (GSTCanonicalSevenAxisBridge.digit3 (4^(K % 3^H)) (H+2)
+          + (GSTCanonicalSevenAxisBridge.digit3 (4^(K % 3^H)) (H+1)
+            + K / 3^H) / 3) % 3) :=
+  ⟨GSTWorldtraceArithmetic.four_pow_mod9,
+    GSTWorldtraceArithmetic.window_row_two_dust⟩
+
+#print axioms the_dust_window_wire
