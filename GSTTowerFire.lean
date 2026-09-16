@@ -202,7 +202,7 @@ theorem tower_digit_read (j n k : Nat) (hk : k ≤ n) :
   rw [hsplit, Nat.add_mul_div_right _ _ (by positivity : (0:Nat) < 3^k)]
   have hd3 : 3 ∣ 3^(n+1-k) * (c n * c n * R) := by
     have e : n+1-k = (n-k)+1 := by omega
-    have h9 : 3^(n+1-k) = 3 * 3^(n-k) := by rw [e, Nat.pow_succ]
+    have h9 : 3^(n+1-k) = 3 * 3^(n-k) := by rw [e, Nat.pow_succ]; ring
     rw [h9]
     exact ⟨3^(n-k) * (c n * c n * R), by ring⟩
   omega
