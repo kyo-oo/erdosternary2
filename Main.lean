@@ -217,3 +217,20 @@ theorem the_pair_read_wire :
     GSTWorldtraceArithmetic.pair_read_fire⟩
 
 #print axioms the_pair_read_wire
+
+/-- **THE GENERAL FIRE WIRE.**  The GAP-E1 engine: the residue transfer
+(the read reduces to `4^T * u * 16 mod 27`), the general trunk-uniform
+fire — any trunk, any branch, the mod-27 kill zone `18 ≤ residue` —
+and the trunk-13 second family. -/
+theorem the_general_fire_wire :
+    (∀ T u j : Nat, 2 ≤ j →
+      (4^T * u * GSTTowerFire.c (j+1)) % 27 = (4^T * u * 16) % 27) ∧
+    (∀ T u j : Nat, 4 ≤ j → 4^T < 3^(j+2) → 18 ≤ (4^T * u * 16) % 27 →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(T + 3^(j+1)*u)) (j+4) = 2) ∧
+    (∀ j : Nat, 15 ≤ j →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(13 + 3^(j+1))) (j+4) = 2) :=
+  ⟨GSTWorldtraceArithmetic.pair_residue_mod27,
+    GSTWorldtraceArithmetic.pair_read_fire_general,
+    GSTWorldtraceArithmetic.pair_read_fire_demo_two⟩
+
+#print axioms the_general_fire_wire

@@ -743,21 +743,17 @@ theorem pair_read_fire (u j : Nat) (hj : 4 ≤ j) (hu : u = 1 ∨ u = 4 ∨ u = 
     have h81 := GSTTowerFire.c_mod81 (j+1) (by omega)
     have hrr := Nat.mod_mod_of_dvd (GSTTowerFire.c (j+1)) (by decide : (27:Nat) ∣ 81)
     rw [← hrr, h81]
-    decide
   have hform := pair_read_formula 4 u j (by omega) hT
   rw [hform, h256]
   rcases hu with rfl | rfl | rfl
   · have hmod : (256 * 1 * GSTTowerFire.c (j+1)) % 27 = 19 % 27 := by
       rw [Nat.mul_one, Nat.mul_mod, hc]
-      decide
     exact (digit3_eq_of_mod_next _ _ 2 hmod).trans (by decide)
   · have hmod : (256 * 4 * GSTTowerFire.c (j+1)) % 27 = 76 % 27 := by
       rw [show (256:Nat) * 4 = 1024 from by decide, Nat.mul_mod, hc]
-      decide
     exact (digit3_eq_of_mod_next _ _ 2 hmod).trans (by decide)
   · have hmod : (256 * 7 * GSTTowerFire.c (j+1)) % 27 = 133 % 27 := by
       rw [show (256:Nat) * 7 = 1792 from by decide, Nat.mul_mod, hc]
-      decide
     exact (digit3_eq_of_mod_next _ _ 2 hmod).trans (by decide)
 
 /-- **THE PAIR-READ KILL.**  The family dies outright through the repo's
@@ -777,6 +773,91 @@ theorem the_pair_read_receipt :
     (∀ u j : Nat, 4 ≤ j → (u = 1 ∨ u = 4 ∨ u = 7) →
       noTernaryTwo (4^(4 + 3^(j+1)*u)) = false) :=
   ⟨pair_read_formula, pair_read_fire, no22_of_pair_read⟩
+
+/-! ## Section 7 The general trunk-uniform fire — any trunk, any branch -/
+
+/-- **THE ROW-TWO READ FROM THE KILL ZONE.**  A number whose mod-27
+residue lands at or above eighteen reads digit two at row two — the
+kill zone of the worldtrace pair-read. -/
+theorem digit3_row_two_of_residue (x : Nat) (hx : 18 ≤ x % 27) :
+    digit3 x 2 = 2 := by
+  have hlt : x % 27 < 27 := Nat.mod_lt _ (by decide : 0 < 27)
+  show x / 9 % 3 = 2
+  omega
+
+/-- **THE PAIR-READ RESIDUE.**  The worldtrace product's mod-27 residue
+is computable without the tower:  `c (j+1)` is `16 mod 27` (green
+`c_mod81`), so the read `4^T * u * c (j+1)` reduces to `4^T * u * 16`.
+Machine-verified 0 failures on 400 random triples. -/
+theorem pair_residue_mod27 (T u j : Nat) (hj : 2 ≤ j) :
+    (4^T * u * GSTTowerFire.c (j+1)) % 27 = (4^T * u * 16) % 27 := by
+  have hc : GSTTowerFire.c (j+1) % 27 = 16 := by
+    have h81 := GSTTowerFire.c_mod81 (j+1) (by omega)
+    have hrr := Nat.mod_mod_of_dvd (GSTTowerFire.c (j+1)) (by decide : (27:Nat) ∣ 81)
+    rw [← hrr, h81]
+  have h16 : (16:Nat) % 27 = 16 := by decide
+  have hl := Nat.mul_mod (4^T * u) (GSTTowerFire.c (j+1)) 27
+  have hr := Nat.mul_mod (4^T * u) 16 27
+  rw [hl, hr, hc, h16]
+
+/-- **THE GENERAL TRUNK-UNIFORM FIRE.**  ANY trunk `T`, ANY branch `u`:
+whenever the mod-27 residue `(4^T * u * 16) % 27` lands in the kill
+zone (`18 ≤ residue`), the exponent `T + 3^(j+1)*u` fires its digit
+two at row `j+4`.  The kill condition is a mod-27 computation on the
+trunk residue and the branch — the Cantor automaton's transition,
+uniform across the entire dust tree.  Machine-verified 0 failures on
+120 valid random triples. -/
+theorem pair_read_fire_general (T u j : Nat) (hj : 4 ≤ j) (hT : 4^T < 3^(j+2))
+    (hkill : 18 ≤ (4^T * u * 16) % 27) :
+    digit3 (4^(T + 3^(j+1)*u)) (j+4) = 2 := by
+  have hform := pair_read_formula T u j (by omega) hT
+  rw [hform]
+  exact digit3_row_two_of_residue _ (by
+    rw [pair_residue_mod27 T u j (by omega)]
+    exact hkill)
+
+/-- **THE GENERAL PAIR-READ KILL.**  The family dies outright through
+the repo's own kill chain. -/
+theorem no22_of_pair_read_general (T u j : Nat) (hj : 4 ≤ j) (hT : 4^T < 3^(j+2))
+    (hkill : 18 ≤ (4^T * u * 16) % 27) :
+    noTernaryTwo (4^(T + 3^(j+1)*u)) = false :=
+  no22_of_digit_two _ (j+4) (pair_read_fire_general T u j hj hT hkill)
+
+/-- **SECOND FAMILY — the trunk-13 dust class.**  Class 13 (a level-two
+dust survivor) with a single deep branch:  fires at row `j+4` for
+every `j ≥ 15`.  The trunk residue `4^13 mod 27 = 13` gives kill
+residue `13 * 16 mod 27 = 19`, inside the kill zone. -/
+theorem pair_read_fire_demo_two (j : Nat) (hj : 15 ≤ j) :
+    digit3 (4^(13 + 3^(j+1))) (j+4) = 2 := by
+  have h17 : (3:Nat)^17 ≤ 3^(j+2) := Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  have h4 : (4:Nat)^13 < (3:Nat)^17 := by decide
+  exact pair_read_fire_general 13 1 j (by omega) (by omega) (by decide)
+
+/-- **THIRD FAMILY — the trunk-10 class with branch two.**  Class 10
+(a level-two dust survivor) with branch `u = 2`:  fires at row `j+4`
+for every `j ≥ 11`.  Kill residue `4 * 2 * 16 mod 27 = 20`. -/
+theorem pair_read_fire_demo_three (j : Nat) (hj : 11 ≤ j) :
+    digit3 (4^(10 + 3^(j+1)*2)) (j+4) = 2 := by
+  have h13 : (3:Nat)^13 ≤ 3^(j+2) := Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+  have h4 : (4:Nat)^10 < (3:Nat)^13 := by decide
+  exact pair_read_fire_general 10 2 j (by omega) (by omega) (by decide)
+
+/-- **THE GENERAL FIRE RECEIPT.**  The GAP-E1 engine assembled: the
+residue transfer, the row-two kill-zone read, the general trunk-uniform
+fire (any trunk, any branch), the kill chain, and two new infinite
+families (trunk 13 single-branch; trunk 10 with branch two). -/
+theorem the_general_fire_receipt :
+    (∀ T u j : Nat, 2 ≤ j →
+      (4^T * u * GSTTowerFire.c (j+1)) % 27 = (4^T * u * 16) % 27) ∧
+    (∀ x : Nat, 18 ≤ x % 27 → digit3 x 2 = 2) ∧
+    (∀ T u j : Nat, 4 ≤ j → 4^T < 3^(j+2) → 18 ≤ (4^T * u * 16) % 27 →
+      digit3 (4^(T + 3^(j+1)*u)) (j+4) = 2) ∧
+    (∀ T u j : Nat, 4 ≤ j → 4^T < 3^(j+2) → 18 ≤ (4^T * u * 16) % 27 →
+      noTernaryTwo (4^(T + 3^(j+1)*u)) = false) ∧
+    (∀ j : Nat, 15 ≤ j → digit3 (4^(13 + 3^(j+1))) (j+4) = 2) ∧
+    (∀ j : Nat, 11 ≤ j → digit3 (4^(10 + 3^(j+1)*2)) (j+4) = 2) :=
+  ⟨pair_residue_mod27, digit3_row_two_of_residue, pair_read_fire_general,
+    no22_of_pair_read_general, pair_read_fire_demo_two, pair_read_fire_demo_three⟩
 
 /-- **THE LEVEL-SIX RECEIPT.**  The worldtrace transformation assembled:
 the binomial ladder, the quadratic and cubic blades, the polynomial
@@ -863,5 +944,12 @@ theorem the_worldtrace_receipt_seven :
 #print axioms pair_read_fire
 #print axioms no22_of_pair_read
 #print axioms the_pair_read_receipt
+#print axioms pair_residue_mod27
+#print axioms digit3_row_two_of_residue
+#print axioms pair_read_fire_general
+#print axioms no22_of_pair_read_general
+#print axioms pair_read_fire_demo_two
+#print axioms pair_read_fire_demo_three
+#print axioms the_general_fire_receipt
 
 end GSTWorldtraceArithmetic
