@@ -26,6 +26,7 @@ roots = [
   "GSTFourPowerAffineOrbit",
   "GSTFourPowerAffinePrefixIsometry",
   "GSTFourPowerDirectHappyBridge",
+  "GSTFourPowerPrefixKillingHappy",
   "GSTFourPowerDirectTwoHundredTwentySeventhRow",
   "GSTFourPowerDirectTwoHundredThirtySeventhRow",
 ]
