@@ -34,6 +34,52 @@ theorem prefix_killing_trit_to_physical_happy
     exact ⟨p+1, by omega, hrow.1, hrow.2⟩
   exact commonTwo_to_physical_happy_row K hcommon
 
+/-- A real physical Happy row already contains an exact prefix-killing
+certificate for its own exponent.  Writing the physical row as `p+1`, the
+reverse Happy/common-two bridge gives the two literal digit-2 equations at
+that same row, and the exponent-trit normal form extracts the corresponding
+prefix equality and killing trit.  Thus no information is hidden in a
+navigation witness: every production Happy row has a concrete arithmetic
+certificate at the immediately lower exponent scale. -/
+theorem physical_happy_exposes_prefix_killing_certificate
+    (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
+    (hSource :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
+        (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow)) :
+    ∃ p : Nat, sourceRow = p+1 ∧
+      GSTFourPowerDirectResidue.digit3
+          (4^(exponentPrefix K p)) (p+1) =
+        GSTFourPowerDirectResidue.digit3
+          (4^((exponentPrefix K p)+1)) (p+1) ∧
+      exponentTrit K p =
+        2 - GSTFourPowerDirectResidue.digit3
+          (4^(exponentPrefix K p)) (p+1) := by
+  obtain ⟨p, rfl⟩ : ∃ p : Nat, sourceRow = p+1 := by
+    exact ⟨sourceRow - 1, by omega⟩
+  have hcommon : CommonTwo K :=
+    physical_happy_to_commonTwo K (p+1) (by omega) hSource
+  rcases hcommon with ⟨q, hq, hs, ht⟩
+  -- The reverse bridge preserves the physical row definitionally, so expose
+  -- that same row directly rather than transporting an existential witness.
+  have hs' : GSTFourPowerDirectResidue.digit3 (4^K) (p+1) = 2 := by
+    unfold GSTCanonicalTailStateIso.HappyCell at hSource
+    simpa [GSTCanonicalTailStateIso.digit3,
+      GSTFourPowerDirectResidue.digit3] using hSource.1
+  have hc : GSTFourPowerDirectAdditionCarry.directCarry4 (4^K) (p+1) = 0 ∨
+      GSTFourPowerDirectAdditionCarry.directCarry4 (4^K) (p+1) = 3 := by
+    unfold GSTCanonicalTailStateIso.HappyCell at hSource
+    simpa [GSTCanonicalTailStateIso.carry4,
+      GSTFourPowerDirectAdditionCarry.directCarry4] using hSource.2
+  have ht4 : GSTFourPowerDirectResidue.digit3 (4 * (4^K)) (p+1) = 2 := by
+    rw [GSTFourPowerDirectAdditionCarry.digit3_four_mul, hs']
+    rcases hc with hc | hc <;> simp [hc]
+  have ht' : GSTFourPowerDirectResidue.digit3 (4^(K+1)) (p+1) = 2 := by
+    simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using ht4
+  have hcert :=
+    (row_common_two_iff_prefix_killing_trit K p).1 ⟨hs', ht'⟩
+  exact ⟨p, rfl, hcert.1, hcert.2⟩
+
 /-- Direct next-sheet relocation constructor.  Starting from the exact
 production source Happy hypothesis, a killing-prefix certificate for exponent
 `K+1` constructs an actual physical Happy row on `4^(K+1)`.  The source
@@ -64,8 +110,10 @@ theorem source_happy_and_next_prefix_kill_to_relocated_happy
   exact prefix_killing_trit_to_physical_happy (K+1) p heq hkill
 
 #check prefix_killing_trit_to_physical_happy
+#check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
+#print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
