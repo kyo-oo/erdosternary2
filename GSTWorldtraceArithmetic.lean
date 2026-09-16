@@ -11,6 +11,7 @@ open GSTFourPowerDirectResidue (digit3_eq_of_mod_next)
 namespace GSTWorldtraceArithmetic
 
 set_option maxHeartbeats 2000000
+set_option maxRecDepth 20000
 
 /-!
 # THE WORLDTRACE ARITHMETIC — the boss's transformation, landed
@@ -649,7 +650,7 @@ theorem cantarian_dust_mod_6561 (K : Nat)
   have hd62 : K % 6561 ≠ 6331 :=
     fun h => absurd (dust_fire_row_eight K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
   have hd63 : K % 6561 ≠ 6412 :=
-    fun h => absurd (dust_fire_row_eight K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+    fun h => absurd (dust_fire_row_eight K (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
   rcases h2187 with h1 | h4 | h13 | h40 | h82 | h94 | h109 | h121 | h166 | h193 | h244 | h247 | h280 | h283 | h325 | h364 | h436 | h496 | h514 | h523 | h580 | h595 | h730 | h733 | h739 | h757 | h823 | h838 | h850 | h922 | h928 | h973 | h976 | h1003 | h1009 | h1093 | h1144 | h1165 | h1171 | h1225 | h1228 | h1243 | h1246 | h1252 | h1381 | h1387 | h1468 | h1471 | h1486 | h1498 | h1540 | h1624 | h1657 | h1732 | h1741 | h1783 | h1873 | h1900 | h1957 | h1975 | h2038 | h2053 | h2110 | h2116 <;> omega
 
 /-- **THE CASCADE KILL, LEVEL SEVEN.**  The sixty-four new classes die
@@ -678,7 +679,7 @@ theorem pair_read_formula (T u j : Nat) (hj : 1 ≤ j) (hT : 4^T < 3^(j+2)) :
           + 3^(j+2) * (4^T * (Nat.choose u 2
               * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
             + 3^(j+2) * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
-              * GSTTowerFire.c (j+1) * R))))
+              * GSTTowerFire.c (j+1) * R)))
         + 4^T := by
     rw [Nat.pow_add, Nat.pow_mul, htow, hR]
     ring
@@ -687,12 +688,12 @@ theorem pair_read_formula (T u j : Nat) (hj : 1 ≤ j) (hT : 4^T < 3^(j+2)) :
           + 3^(j+2) * (4^T * (Nat.choose u 2
               * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
             + 3^(j+2) * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
-              * GSTTowerFire.c (j+1) * R)))) + 4^T) (j+4)
+              * GSTTowerFire.c (j+1) * R))) + 4^T) (j+4)
       = digit3 (4^T * u * GSTTowerFire.c (j+1)
           + 3^(j+2) * (4^T * (Nat.choose u 2
               * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
             + 3^(j+2) * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
-              * GSTTowerFire.c (j+1) * R)))) 2 :=
+              * GSTTowerFire.c (j+1) * R))) 2 :=
     GSTTowerFire.prefaced_digit _ 4^T (j+1) 2 hT
   rw [hp]
   refine digit3_eq_of_mod_next _ _ 2 ?_
@@ -700,7 +701,7 @@ theorem pair_read_formula (T u j : Nat) (hj : 1 ≤ j) (hT : 4^T < 3^(j+2)) :
           + 3^(j+2) * (4^T * (Nat.choose u 2
               * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
             + 3^(j+2) * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
-              * GSTTowerFire.c (j+1) * R)))) % 27
+              * GSTTowerFire.c (j+1) * R))) % 27
      = (4^T * u * GSTTowerFire.c (j+1)) % 27
   have h27eq : 3^(j+2) = 27 * 3^(j-1) := by
     have hsum : j + 2 = (j - 1) + 3 := by omega
