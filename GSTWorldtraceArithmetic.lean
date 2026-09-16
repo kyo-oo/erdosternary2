@@ -38,6 +38,11 @@ Machine receipts BEFORE landing (this session, exact big-int / modular,
     reproduces the machine's green cascade.
   * R4 the cubic identity holds 0 failures on 0 <= m < 6561 step 7, and
     row-seven polynomial reads match direct computation 2187/2187.
+  * R5 (level seven, this session, `/tmp/wt_level7.py`): recursion
+    re-verified against the green tables (s5/d6/s6 exact); quartic AND
+    quintic blades 0 failures on all 0 <= m < 2186; 64 dead classes
+    mod 6561 fire at row eight; survivors double 64 -> 128 exactly
+    (192 = 64*3 children partition checked).
 
 Sections:
 
@@ -52,6 +57,11 @@ Sections:
   * SS4 THE SIXTH CASCADE LEVEL — `fire_of_mod2187`, `dust_fire_row_seven`
     (32 dead classes), `no22_of_cascade_six`, `cantorian_dust_mod_2187`
     (the 64-survivor map).
+  * SS5 THE SEVENTH CASCADE LEVEL — `fire_of_mod6561`, `dust_fire_row_eight`
+    (64 dead classes), `no22_of_cascade_seven`, `cantarian_dust_mod_6561`
+    (the 128-survivor map), plus the quartic blade `wt_quartic_mod19683`,
+    the row-eight read, and the quartic kill demo (K = 82 killed at row
+    eight without computing 4^82).
 -/
 
 /-! ## §1 The binomial ladder -/
@@ -107,6 +117,32 @@ theorem one_add_pow_four_term (x j : Nat) :
     refine ⟨Nat.choose j 3 + R + x*R, ?_⟩
     ring
 
+/-- **The five-term binomial ladder.**  Two orders deeper: the quartic
+window's engine. -/
+theorem one_add_pow_five_term (x j : Nat) :
+    ∃ R : Nat, (1+x)^j = 1 + j*x + Nat.choose j 2 * x * x
+      + Nat.choose j 3 * x * x * x + Nat.choose j 4 * x * x * x * x
+      + x*x*x*x*x*R := by
+  induction j with
+  | zero =>
+    have h02 : Nat.choose 0 2 = 0 := by decide
+    have h03 : Nat.choose 0 3 = 0 := by decide
+    have h04 : Nat.choose 0 4 = 0 := by decide
+    refine ⟨0, ?_⟩
+    rw [Nat.pow_zero, h02, h03, h04]
+    ring
+  | succ j ih =>
+    obtain ⟨R, hR⟩ := ih
+    have hc2 : Nat.choose (j+1) 2 = j + Nat.choose j 2 := by
+      rw [Nat.choose_succ_succ j 1, wt_choose_one j]
+    have hc3 : Nat.choose (j+1) 3 = Nat.choose j 2 + Nat.choose j 3 :=
+      Nat.choose_succ_succ j 2
+    have hc4 : Nat.choose (j+1) 4 = Nat.choose j 3 + Nat.choose j 4 :=
+      Nat.choose_succ_succ j 3
+    rw [Nat.pow_succ, hR, hc2, hc3, hc4]
+    refine ⟨Nat.choose j 4 + R + x*R, ?_⟩
+    ring
+
 /-! ## §2 The transformation — the dust as a binomial sum -/
 
 /-- **THE REBASE.**  Every dust power is a power of sixty-four:
@@ -155,6 +191,30 @@ theorem wt_cubic_mod6561 (m : Nat) :
   have hz : 63011844*R % 6561 = 0 := Nat.mod_eq_zero_of_dvd hd
   omega
 
+/-- **THE QUARTIC BLADE.**  Two windows deeper: `4^(1+3m)` is the quartic
+`4 + 252m + 15876*C(m,2) + 1000188*C(m,3) + 63011844*C(m,4)` mod 19683 —
+the order-four worldtrace.  (63^5 = 3^10 * 7^5 dies mod 3^9 = 19683.) -/
+theorem wt_quartic_mod19683 (m : Nat) :
+    4^(1+3*m) ≡ 4 + 252*m + 15876*Nat.choose m 2
+      + 1000188*Nat.choose m 3 + 63011844*Nat.choose m 4 [MOD 19683] := by
+  obtain ⟨R, hR⟩ := one_add_pow_five_term 63 m
+  have h64 : (64:Nat) = 1 + 63 := by decide
+  have hexp : 4 * (1 + m*63 + Nat.choose m 2 * 63 * 63
+        + Nat.choose m 3 * 63 * 63 * 63 + Nat.choose m 4 * 63 * 63 * 63 * 63
+        + 63*63*63*63*63*R)
+      = 4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3
+        + 63011844*Nat.choose m 4 + 3969746172*R := by ring
+  rw [wt_rebase, h64, hR, hexp]
+  show (4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3
+        + 63011844*Nat.choose m 4 + 3969746172*R) % 19683
+     = (4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3
+        + 63011844*Nat.choose m 4) % 19683
+  have hd : 19683 ∣ 3969746172*R := by
+    refine ⟨201684*R, ?_⟩
+    ring
+  have hz : 3969746172*R % 19683 = 0 := Nat.mod_eq_zero_of_dvd hd
+  omega
+
 /-! ## §3 The reads — the deep rows ARE the polynomials -/
 
 /-- **ROW FIVE IS THE QUADRATIC.**  For EVERY m: the fifth row of the
@@ -176,6 +236,26 @@ theorem wt_row_seven_read (m : Nat) :
   have h := wt_cubic_mod6561 m
   rw [← h6561] at h
   exact digit3_eq_of_mod_next _ _ _ h
+
+/-- **ROW EIGHT IS THE QUARTIC.**  For EVERY m: the eighth row of the
+dust power is the eighth row of the quartic blade — the worldtrace
+read, exact. -/
+theorem wt_row_eight_read (m : Nat) :
+    digit3 (4^(1+3*m)) 8
+      = digit3 (4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3
+          + 63011844*Nat.choose m 4) 8 := by
+  have h19683 : (3:Nat)^(8+1) = 19683 := by decide
+  have h := wt_quartic_mod19683 m
+  rw [← h19683] at h
+  exact digit3_eq_of_mod_next _ _ _ h
+
+/-- **THE QUARTIC KILL DEMO.**  The quartic blade kills K = 82
+(m = 27) at row eight WITHOUT EVER COMPUTING `4^82`: the worldtrace
+quartic reads digit two at row eight.  The transformed problem,
+solved in transformed coordinates, one storey deeper. -/
+theorem wt_quartic_fire_demo : digit3 (4^(1+3*27)) 8 = 2 := by
+  rw [wt_row_eight_read]
+  decide
 
 /-- **THE POLYNOMIAL KILL DEMO.**  The quadratic blade kills K = 85
 (m = 28) at row five WITHOUT EVER COMPUTING `4^85`: the worldtrace
@@ -331,6 +411,249 @@ theorem no22_of_cascade_six (K : Nat)
     noTernaryTwo (4^K) = false :=
   no22_of_digit_two K 7 (dust_fire_row_seven K h)
 
+/-! ## §5 The seventh cascade level — the map doubles to 128 -/
+
+/-- **THE UNIFORM KILL, LEVEL-SEVEN FORM.**  `K ≡ r + 2187*t mod 6561`
+fires at row eight when the noise receipt holds.  All arithmetic
+literal. -/
+theorem fire_of_mod6561 (K r t : Nat)
+    (hr : r < 2187) (ht : t < 3)
+    (hnoise : (digit3 (4^r) 8 + t) % 3 = 2)
+    (hclass : K % 6561 = r + 2187 * t) :
+    digit3 (4^K) 8 = 2 := by
+  have h6561 : (3:Nat)^(7+1) = 6561 := by decide
+  have h2187 : (3:Nat)^7 = 2187 := by decide
+  have hK : K % 3^(7+1) = r + 3^7 * t := by
+    rw [h6561, h2187]
+    exact hclass
+  have hr' : r < 3^7 := by
+    rw [h2187]
+    exact hr
+  exact feedback_fire_of_class 7 r t K hr' ht hnoise hK
+
+/-- **CASCADE LEVEL SEVEN (row eight).**  Every exponent in one of the
+sixty-four dead classes mod 6561 fires its digit two at row eight.
+Generated from the worldtrace noise receipts (`noise_7(r) = digit3 (4^r) 8`,
+dead child `t = (2 - noise) % 3`, dead class `r + 2187*t`) — the seventh
+storey of the feedback tree, each node keeping exactly two alive
+children (`unique_dead_child`). -/
+theorem dust_fire_row_eight (K : Nat)
+    (hK : K % 6561 = 82 ∨ K % 6561 = 247 ∨ K % 6561 = 580 ∨ K % 6561 = 757 ∨ K % 6561 = 976 ∨ K % 6561 = 1246 ∨ K % 6561 = 1381 ∨ K % 6561 = 1471 ∨ K % 6561 = 1486 ∨ K % 6561 = 1498 ∨ K % 6561 = 1975 ∨ K % 6561 = 2110 ∨ K % 6561 = 2200 ∨ K % 6561 = 2227 ∨ K % 6561 = 2281 ∨ K % 6561 = 2296 ∨ K % 6561 = 2308 ∨ K % 6561 = 2380 ∨ K % 6561 = 2431 ∨ K % 6561 = 2701 ∨ K % 6561 = 2710 ∨ K % 6561 = 2926 ∨ K % 6561 = 3010 ∨ K % 6561 = 3025 ∨ K % 6561 = 3037 ∨ K % 6561 = 3109 ∨ K % 6561 = 3160 ∨ K % 6561 = 3358 ∨ K % 6561 = 3430 ∨ K % 6561 = 3439 ∨ K % 6561 = 3574 ∨ K % 6561 = 3655 ∨ K % 6561 = 3811 ∨ K % 6561 = 3928 ∨ K % 6561 = 3970 ∨ K % 6561 = 4087 ∨ K % 6561 = 4240 ∨ K % 6561 = 4303 ∨ K % 6561 = 4375 ∨ K % 6561 = 4378 ∨ K % 6561 = 4540 ∨ K % 6561 = 4654 ∨ K % 6561 = 4657 ∨ K % 6561 = 4699 ∨ K % 6561 = 4738 ∨ K % 6561 = 4810 ∨ K % 6561 = 4870 ∨ K % 6561 = 4969 ∨ K % 6561 = 5104 ∨ K % 6561 = 5107 ∨ K % 6561 = 5302 ∨ K % 6561 = 5377 ∨ K % 6561 = 5383 ∨ K % 6561 = 5467 ∨ K % 6561 = 5518 ∨ K % 6561 = 5539 ∨ K % 6561 = 5599 ∨ K % 6561 = 5602 ∨ K % 6561 = 5914 ∨ K % 6561 = 6031 ∨ K % 6561 = 6106 ∨ K % 6561 = 6247 ∨ K % 6561 = 6331 ∨ K % 6561 = 6412) :
+    digit3 (4^K) 8 = 2 := by
+  rcases hK with h82 | h247 | h580 | h757 | h976 | h1246 | h1381 | h1471 | h1486 | h1498 | h1975 | h2110 | h2200 | h2227 | h2281 | h2296 | h2308 | h2380 | h2431 | h2701 | h2710 | h2926 | h3010 | h3025 | h3037 | h3109 | h3160 | h3358 | h3430 | h3439 | h3574 | h3655 | h3811 | h3928 | h3970 | h4087 | h4240 | h4303 | h4375 | h4378 | h4540 | h4654 | h4657 | h4699 | h4738 | h4810 | h4870 | h4969 | h5104 | h5107 | h5302 | h5377 | h5383 | h5467 | h5518 | h5539 | h5599 | h5602 | h5914 | h6031 | h6106 | h6247 | h6331 | h6412
+  · exact fire_of_mod6561 K 82 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 247 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 580 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 757 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 976 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1246 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1381 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1471 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1486 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1498 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1975 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 2110 0 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 13 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 40 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 94 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 109 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 121 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 193 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 244 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 514 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 523 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 739 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 823 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 838 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 850 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 922 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 973 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1171 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1243 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1252 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1387 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1468 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1624 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1741 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1783 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1900 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 2053 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 2116 1 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 4 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 166 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 280 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 283 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 325 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 364 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 436 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 496 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 595 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 730 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 733 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 928 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1003 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1009 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1093 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1144 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1165 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1225 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1228 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1540 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1657 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1732 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1873 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 1957 2 (by decide) (by decide) (by decide) (by omega)
+  · exact fire_of_mod6561 K 2038 2 (by decide) (by decide) (by decide) (by omega)
+
+/-- **THE DUST PINNED AT LEVEL SEVEN — THE MAP DOUBLES TO 128.**  A
+Cantorian dust exponent (`K ≡ 1 mod 3`) lives in one of ONE HUNDRED
+TWENTY-EIGHT surviving residues mod 6561.  The structural law, fourth
+stroke: `2, 4, 8, 16, 32, 64, 128` — the alive set doubles level by
+level without exception, every node keeping exactly two children by
+the blade's one-of-three. -/
+theorem cantarian_dust_mod_6561 (K : Nat)
+    (hd : K % 3 = 1) (hc : CantorianPower K) :
+    K % 6561 = 1 ∨ K % 6561 = 4 ∨ K % 6561 = 13 ∨ K % 6561 = 40 ∨ K % 6561 = 94 ∨ K % 6561 = 109 ∨ K % 6561 = 121 ∨ K % 6561 = 166 ∨ K % 6561 = 193 ∨ K % 6561 = 244 ∨ K % 6561 = 280 ∨ K % 6561 = 283 ∨ K % 6561 = 325 ∨ K % 6561 = 364 ∨ K % 6561 = 436 ∨ K % 6561 = 496 ∨ K % 6561 = 514 ∨ K % 6561 = 523 ∨ K % 6561 = 595 ∨ K % 6561 = 730 ∨ K % 6561 = 733 ∨ K % 6561 = 739 ∨ K % 6561 = 823 ∨ K % 6561 = 838 ∨ K % 6561 = 850 ∨ K % 6561 = 922 ∨ K % 6561 = 928 ∨ K % 6561 = 973 ∨ K % 6561 = 1003 ∨ K % 6561 = 1009 ∨ K % 6561 = 1093 ∨ K % 6561 = 1144 ∨ K % 6561 = 1165 ∨ K % 6561 = 1171 ∨ K % 6561 = 1225 ∨ K % 6561 = 1228 ∨ K % 6561 = 1243 ∨ K % 6561 = 1252 ∨ K % 6561 = 1387 ∨ K % 6561 = 1468 ∨ K % 6561 = 1540 ∨ K % 6561 = 1624 ∨ K % 6561 = 1657 ∨ K % 6561 = 1732 ∨ K % 6561 = 1741 ∨ K % 6561 = 1783 ∨ K % 6561 = 1873 ∨ K % 6561 = 1900 ∨ K % 6561 = 1957 ∨ K % 6561 = 2038 ∨ K % 6561 = 2053 ∨ K % 6561 = 2116 ∨ K % 6561 = 2188 ∨ K % 6561 = 2191 ∨ K % 6561 = 2269 ∨ K % 6561 = 2353 ∨ K % 6561 = 2434 ∨ K % 6561 = 2467 ∨ K % 6561 = 2470 ∨ K % 6561 = 2512 ∨ K % 6561 = 2551 ∨ K % 6561 = 2623 ∨ K % 6561 = 2683 ∨ K % 6561 = 2767 ∨ K % 6561 = 2782 ∨ K % 6561 = 2917 ∨ K % 6561 = 2920 ∨ K % 6561 = 2944 ∨ K % 6561 = 3115 ∨ K % 6561 = 3163 ∨ K % 6561 = 3190 ∨ K % 6561 = 3196 ∨ K % 6561 = 3280 ∨ K % 6561 = 3331 ∨ K % 6561 = 3352 ∨ K % 6561 = 3412 ∨ K % 6561 = 3415 ∨ K % 6561 = 3433 ∨ K % 6561 = 3568 ∨ K % 6561 = 3658 ∨ K % 6561 = 3673 ∨ K % 6561 = 3685 ∨ K % 6561 = 3727 ∨ K % 6561 = 3844 ∨ K % 6561 = 3919 ∨ K % 6561 = 4060 ∨ K % 6561 = 4144 ∨ K % 6561 = 4162 ∨ K % 6561 = 4225 ∨ K % 6561 = 4297 ∨ K % 6561 = 4387 ∨ K % 6561 = 4414 ∨ K % 6561 = 4456 ∨ K % 6561 = 4468 ∨ K % 6561 = 4483 ∨ K % 6561 = 4495 ∨ K % 6561 = 4567 ∨ K % 6561 = 4618 ∨ K % 6561 = 4621 ∨ K % 6561 = 4888 ∨ K % 6561 = 4897 ∨ K % 6561 = 4954 ∨ K % 6561 = 5113 ∨ K % 6561 = 5131 ∨ K % 6561 = 5197 ∨ K % 6561 = 5212 ∨ K % 6561 = 5224 ∨ K % 6561 = 5296 ∨ K % 6561 = 5347 ∨ K % 6561 = 5350 ∨ K % 6561 = 5545 ∨ K % 6561 = 5617 ∨ K % 6561 = 5620 ∨ K % 6561 = 5626 ∨ K % 6561 = 5755 ∨ K % 6561 = 5761 ∨ K % 6561 = 5842 ∨ K % 6561 = 5845 ∨ K % 6561 = 5860 ∨ K % 6561 = 5872 ∨ K % 6561 = 5998 ∨ K % 6561 = 6115 ∨ K % 6561 = 6157 ∨ K % 6561 = 6274 ∨ K % 6561 = 6349 ∨ K % 6561 = 6427 ∨ K % 6561 = 6484 ∨ K % 6561 = 6490 := by
+  have h2187 := cantorian_dust_mod_2187 K hd hc
+  have hrow := hc 8 (by omega)
+  have hd0 : K % 6561 ≠ 82 :=
+    fun h => absurd (dust_fire_row_eight K (Or.inl h)) hrow
+  have hd1 : K % 6561 ≠ 247 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr h))) hrow
+  have hd2 : K % 6561 ≠ 580 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr h)))) hrow
+  have hd3 : K % 6561 ≠ 757 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr h))))) hrow
+  have hd4 : K % 6561 ≠ 976 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr h)))))) hrow
+  have hd5 : K % 6561 ≠ 1246 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))) hrow
+  have hd6 : K % 6561 ≠ 1381 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))) hrow
+  have hd7 : K % 6561 ≠ 1471 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))) hrow
+  have hd8 : K % 6561 ≠ 1486 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))) hrow
+  have hd9 : K % 6561 ≠ 1498 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))) hrow
+  have hd10 : K % 6561 ≠ 1975 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))) hrow
+  have hd11 : K % 6561 ≠ 2110 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))) hrow
+  have hd12 : K % 6561 ≠ 2200 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))) hrow
+  have hd13 : K % 6561 ≠ 2227 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))) hrow
+  have hd14 : K % 6561 ≠ 2281 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))) hrow
+  have hd15 : K % 6561 ≠ 2296 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))) hrow
+  have hd16 : K % 6561 ≠ 2308 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))) hrow
+  have hd17 : K % 6561 ≠ 2380 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))) hrow
+  have hd18 : K % 6561 ≠ 2431 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))) hrow
+  have hd19 : K % 6561 ≠ 2701 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))) hrow
+  have hd20 : K % 6561 ≠ 2710 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))) hrow
+  have hd21 : K % 6561 ≠ 2926 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))) hrow
+  have hd22 : K % 6561 ≠ 3010 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))) hrow
+  have hd23 : K % 6561 ≠ 3025 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))) hrow
+  have hd24 : K % 6561 ≠ 3037 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))) hrow
+  have hd25 : K % 6561 ≠ 3109 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))) hrow
+  have hd26 : K % 6561 ≠ 3160 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))) hrow
+  have hd27 : K % 6561 ≠ 3358 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))) hrow
+  have hd28 : K % 6561 ≠ 3430 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))) hrow
+  have hd29 : K % 6561 ≠ 3439 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))) hrow
+  have hd30 : K % 6561 ≠ 3574 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))) hrow
+  have hd31 : K % 6561 ≠ 3655 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))) hrow
+  have hd32 : K % 6561 ≠ 3811 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))) hrow
+  have hd33 : K % 6561 ≠ 3928 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))) hrow
+  have hd34 : K % 6561 ≠ 3970 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))) hrow
+  have hd35 : K % 6561 ≠ 4087 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))) hrow
+  have hd36 : K % 6561 ≠ 4240 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))) hrow
+  have hd37 : K % 6561 ≠ 4303 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))) hrow
+  have hd38 : K % 6561 ≠ 4375 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))) hrow
+  have hd39 : K % 6561 ≠ 4378 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd40 : K % 6561 ≠ 4540 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd41 : K % 6561 ≠ 4654 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd42 : K % 6561 ≠ 4657 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd43 : K % 6561 ≠ 4699 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd44 : K % 6561 ≠ 4738 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd45 : K % 6561 ≠ 4810 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd46 : K % 6561 ≠ 4870 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd47 : K % 6561 ≠ 4969 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd48 : K % 6561 ≠ 5104 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd49 : K % 6561 ≠ 5107 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd50 : K % 6561 ≠ 5302 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd51 : K % 6561 ≠ 5377 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd52 : K % 6561 ≠ 5383 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd53 : K % 6561 ≠ 5467 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd54 : K % 6561 ≠ 5518 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd55 : K % 6561 ≠ 5539 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd56 : K % 6561 ≠ 5599 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd57 : K % 6561 ≠ 5602 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd58 : K % 6561 ≠ 5914 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd59 : K % 6561 ≠ 6031 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd60 : K % 6561 ≠ 6106 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd61 : K % 6561 ≠ 6247 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd62 : K % 6561 ≠ 6331 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  have hd63 : K % 6561 ≠ 6412 :=
+    fun h => absurd (dust_fire_row_eight K ((Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) hrow
+  rcases h2187 with h1 | h4 | h13 | h40 | h82 | h94 | h109 | h121 | h166 | h193 | h244 | h247 | h280 | h283 | h325 | h364 | h436 | h496 | h514 | h523 | h580 | h595 | h730 | h733 | h739 | h757 | h823 | h838 | h850 | h922 | h928 | h973 | h976 | h1003 | h1009 | h1093 | h1144 | h1165 | h1171 | h1225 | h1228 | h1243 | h1246 | h1252 | h1381 | h1387 | h1468 | h1471 | h1486 | h1498 | h1540 | h1624 | h1657 | h1732 | h1741 | h1783 | h1873 | h1900 | h1957 | h1975 | h2038 | h2053 | h2110 | h2116 <;> omega
+
+/-- **THE CASCADE KILL, LEVEL SEVEN.**  The sixty-four new classes die
+outright through the repo's own kill chain. -/
+theorem no22_of_cascade_seven (K : Nat)
+    (h : K % 6561 = 82 ∨ K % 6561 = 247 ∨ K % 6561 = 580 ∨ K % 6561 = 757 ∨ K % 6561 = 976 ∨ K % 6561 = 1246 ∨ K % 6561 = 1381 ∨ K % 6561 = 1471 ∨ K % 6561 = 1486 ∨ K % 6561 = 1498 ∨ K % 6561 = 1975 ∨ K % 6561 = 2110 ∨ K % 6561 = 2200 ∨ K % 6561 = 2227 ∨ K % 6561 = 2281 ∨ K % 6561 = 2296 ∨ K % 6561 = 2308 ∨ K % 6561 = 2380 ∨ K % 6561 = 2431 ∨ K % 6561 = 2701 ∨ K % 6561 = 2710 ∨ K % 6561 = 2926 ∨ K % 6561 = 3010 ∨ K % 6561 = 3025 ∨ K % 6561 = 3037 ∨ K % 6561 = 3109 ∨ K % 6561 = 3160 ∨ K % 6561 = 3358 ∨ K % 6561 = 3430 ∨ K % 6561 = 3439 ∨ K % 6561 = 3574 ∨ K % 6561 = 3655 ∨ K % 6561 = 3811 ∨ K % 6561 = 3928 ∨ K % 6561 = 3970 ∨ K % 6561 = 4087 ∨ K % 6561 = 4240 ∨ K % 6561 = 4303 ∨ K % 6561 = 4375 ∨ K % 6561 = 4378 ∨ K % 6561 = 4540 ∨ K % 6561 = 4654 ∨ K % 6561 = 4657 ∨ K % 6561 = 4699 ∨ K % 6561 = 4738 ∨ K % 6561 = 4810 ∨ K % 6561 = 4870 ∨ K % 6561 = 4969 ∨ K % 6561 = 5104 ∨ K % 6561 = 5107 ∨ K % 6561 = 5302 ∨ K % 6561 = 5377 ∨ K % 6561 = 5383 ∨ K % 6561 = 5467 ∨ K % 6561 = 5518 ∨ K % 6561 = 5539 ∨ K % 6561 = 5599 ∨ K % 6561 = 5602 ∨ K % 6561 = 5914 ∨ K % 6561 = 6031 ∨ K % 6561 = 6106 ∨ K % 6561 = 6247 ∨ K % 6561 = 6331 ∨ K % 6561 = 6412) :
+    noTernaryTwo (4^K) = false :=
+  no22_of_digit_two K 8 (dust_fire_row_eight K h)
+
 /-- **THE LEVEL-SIX RECEIPT.**  The worldtrace transformation assembled:
 the binomial ladder, the quadratic and cubic blades, the polynomial
 reads, the polynomial kill demo, the uniform engine, the thirty-two
@@ -361,6 +684,33 @@ theorem the_worldtrace_receipt :
     wt_quad_fire_demo, fire_of_mod2187,
     dust_fire_row_seven, no22_of_cascade_six, cantorian_dust_mod_2187⟩
 
+/-- **THE LEVEL-SEVEN RECEIPT.**  The worldtrace transformation, one
+storey deeper: the five-term ladder, the quartic blade, the row-eight
+read, the quartic kill demo, the uniform engine at level seven, the
+sixty-four fires, the kill chain, and the re-doubled survivor map
+(64 -> 128). -/
+theorem the_worldtrace_receipt_seven :
+    (∀ m : Nat, ∃ R : Nat, (1+63)^m
+      = 1 + m*63 + Nat.choose m 2 * 63 * 63 + Nat.choose m 3 * 63 * 63 * 63
+        + Nat.choose m 4 * 63 * 63 * 63 * 63 + 63*63*63*63*63*R) ∧
+    (∀ m : Nat, 4^(1+3*m) ≡ 4 + 252*m + 15876*Nat.choose m 2
+      + 1000188*Nat.choose m 3 + 63011844*Nat.choose m 4 [MOD 19683]) ∧
+    (∀ m : Nat, digit3 (4^(1+3*m)) 8
+      = digit3 (4 + 252*m + 15876*Nat.choose m 2 + 1000188*Nat.choose m 3
+          + 63011844*Nat.choose m 4) 8) ∧
+    (digit3 (4^(1+3*27)) 8 = 2) ∧
+    (∀ K r t : Nat, r < 2187 → t < 3 →
+      (digit3 (4^r) 8 + t) % 3 = 2 → K % 6561 = r + 2187 * t →
+      digit3 (4^K) 8 = 2) ∧
+    (∀ K : Nat, K % 6561 = 82 ∨ K % 6561 = 247 ∨ K % 6561 = 580 ∨ K % 6561 = 757 ∨ K % 6561 = 976 ∨ K % 6561 = 1246 ∨ K % 6561 = 1381 ∨ K % 6561 = 1471 ∨ K % 6561 = 1486 ∨ K % 6561 = 1498 ∨ K % 6561 = 1975 ∨ K % 6561 = 2110 ∨ K % 6561 = 2200 ∨ K % 6561 = 2227 ∨ K % 6561 = 2281 ∨ K % 6561 = 2296 ∨ K % 6561 = 2308 ∨ K % 6561 = 2380 ∨ K % 6561 = 2431 ∨ K % 6561 = 2701 ∨ K % 6561 = 2710 ∨ K % 6561 = 2926 ∨ K % 6561 = 3010 ∨ K % 6561 = 3025 ∨ K % 6561 = 3037 ∨ K % 6561 = 3109 ∨ K % 6561 = 3160 ∨ K % 6561 = 3358 ∨ K % 6561 = 3430 ∨ K % 6561 = 3439 ∨ K % 6561 = 3574 ∨ K % 6561 = 3655 ∨ K % 6561 = 3811 ∨ K % 6561 = 3928 ∨ K % 6561 = 3970 ∨ K % 6561 = 4087 ∨ K % 6561 = 4240 ∨ K % 6561 = 4303 ∨ K % 6561 = 4375 ∨ K % 6561 = 4378 ∨ K % 6561 = 4540 ∨ K % 6561 = 4654 ∨ K % 6561 = 4657 ∨ K % 6561 = 4699 ∨ K % 6561 = 4738 ∨ K % 6561 = 4810 ∨ K % 6561 = 4870 ∨ K % 6561 = 4969 ∨ K % 6561 = 5104 ∨ K % 6561 = 5107 ∨ K % 6561 = 5302 ∨ K % 6561 = 5377 ∨ K % 6561 = 5383 ∨ K % 6561 = 5467 ∨ K % 6561 = 5518 ∨ K % 6561 = 5539 ∨ K % 6561 = 5599 ∨ K % 6561 = 5602 ∨ K % 6561 = 5914 ∨ K % 6561 = 6031 ∨ K % 6561 = 6106 ∨ K % 6561 = 6247 ∨ K % 6561 = 6331 ∨ K % 6561 = 6412 → digit3 (4^K) 8 = 2) ∧
+    (∀ K : Nat, K % 6561 = 82 ∨ K % 6561 = 247 ∨ K % 6561 = 580 ∨ K % 6561 = 757 ∨ K % 6561 = 976 ∨ K % 6561 = 1246 ∨ K % 6561 = 1381 ∨ K % 6561 = 1471 ∨ K % 6561 = 1486 ∨ K % 6561 = 1498 ∨ K % 6561 = 1975 ∨ K % 6561 = 2110 ∨ K % 6561 = 2200 ∨ K % 6561 = 2227 ∨ K % 6561 = 2281 ∨ K % 6561 = 2296 ∨ K % 6561 = 2308 ∨ K % 6561 = 2380 ∨ K % 6561 = 2431 ∨ K % 6561 = 2701 ∨ K % 6561 = 2710 ∨ K % 6561 = 2926 ∨ K % 6561 = 3010 ∨ K % 6561 = 3025 ∨ K % 6561 = 3037 ∨ K % 6561 = 3109 ∨ K % 6561 = 3160 ∨ K % 6561 = 3358 ∨ K % 6561 = 3430 ∨ K % 6561 = 3439 ∨ K % 6561 = 3574 ∨ K % 6561 = 3655 ∨ K % 6561 = 3811 ∨ K % 6561 = 3928 ∨ K % 6561 = 3970 ∨ K % 6561 = 4087 ∨ K % 6561 = 4240 ∨ K % 6561 = 4303 ∨ K % 6561 = 4375 ∨ K % 6561 = 4378 ∨ K % 6561 = 4540 ∨ K % 6561 = 4654 ∨ K % 6561 = 4657 ∨ K % 6561 = 4699 ∨ K % 6561 = 4738 ∨ K % 6561 = 4810 ∨ K % 6561 = 4870 ∨ K % 6561 = 4969 ∨ K % 6561 = 5104 ∨ K % 6561 = 5107 ∨ K % 6561 = 5302 ∨ K % 6561 = 5377 ∨ K % 6561 = 5383 ∨ K % 6561 = 5467 ∨ K % 6561 = 5518 ∨ K % 6561 = 5539 ∨ K % 6561 = 5599 ∨ K % 6561 = 5602 ∨ K % 6561 = 5914 ∨ K % 6561 = 6031 ∨ K % 6561 = 6106 ∨ K % 6561 = 6247 ∨ K % 6561 = 6331 ∨ K % 6561 = 6412 → noTernaryTwo (4^K) = false) ∧
+    (∀ K : Nat, K % 3 = 1 → CantorianPower K →
+      K % 6561 = 1 ∨ K % 6561 = 4 ∨ K % 6561 = 13 ∨ K % 6561 = 40 ∨ K % 6561 = 94 ∨ K % 6561 = 109 ∨ K % 6561 = 121 ∨ K % 6561 = 166 ∨ K % 6561 = 193 ∨ K % 6561 = 244 ∨ K % 6561 = 280 ∨ K % 6561 = 283 ∨ K % 6561 = 325 ∨ K % 6561 = 364 ∨ K % 6561 = 436 ∨ K % 6561 = 496 ∨ K % 6561 = 514 ∨ K % 6561 = 523 ∨ K % 6561 = 595 ∨ K % 6561 = 730 ∨ K % 6561 = 733 ∨ K % 6561 = 739 ∨ K % 6561 = 823 ∨ K % 6561 = 838 ∨ K % 6561 = 850 ∨ K % 6561 = 922 ∨ K % 6561 = 928 ∨ K % 6561 = 973 ∨ K % 6561 = 1003 ∨ K % 6561 = 1009 ∨ K % 6561 = 1093 ∨ K % 6561 = 1144 ∨ K % 6561 = 1165 ∨ K % 6561 = 1171 ∨ K % 6561 = 1225 ∨ K % 6561 = 1228 ∨ K % 6561 = 1243 ∨ K % 6561 = 1252 ∨ K % 6561 = 1387 ∨ K % 6561 = 1468 ∨ K % 6561 = 1540 ∨ K % 6561 = 1624 ∨ K % 6561 = 1657 ∨ K % 6561 = 1732 ∨ K % 6561 = 1741 ∨ K % 6561 = 1783 ∨ K % 6561 = 1873 ∨ K % 6561 = 1900 ∨ K % 6561 = 1957 ∨ K % 6561 = 2038 ∨ K % 6561 = 2053 ∨ K % 6561 = 2116 ∨ K % 6561 = 2188 ∨ K % 6561 = 2191 ∨ K % 6561 = 2269 ∨ K % 6561 = 2353 ∨ K % 6561 = 2434 ∨ K % 6561 = 2467 ∨ K % 6561 = 2470 ∨ K % 6561 = 2512 ∨ K % 6561 = 2551 ∨ K % 6561 = 2623 ∨ K % 6561 = 2683 ∨ K % 6561 = 2767 ∨ K % 6561 = 2782 ∨ K % 6561 = 2917 ∨ K % 6561 = 2920 ∨ K % 6561 = 2944 ∨ K % 6561 = 3115 ∨ K % 6561 = 3163 ∨ K % 6561 = 3190 ∨ K % 6561 = 3196 ∨ K % 6561 = 3280 ∨ K % 6561 = 3331 ∨ K % 6561 = 3352 ∨ K % 6561 = 3412 ∨ K % 6561 = 3415 ∨ K % 6561 = 3433 ∨ K % 6561 = 3568 ∨ K % 6561 = 3658 ∨ K % 6561 = 3673 ∨ K % 6561 = 3685 ∨ K % 6561 = 3727 ∨ K % 6561 = 3844 ∨ K % 6561 = 3919 ∨ K % 6561 = 4060 ∨ K % 6561 = 4144 ∨ K % 6561 = 4162 ∨ K % 6561 = 4225 ∨ K % 6561 = 4297 ∨ K % 6561 = 4387 ∨ K % 6561 = 4414 ∨ K % 6561 = 4456 ∨ K % 6561 = 4468 ∨ K % 6561 = 4483 ∨ K % 6561 = 4495 ∨ K % 6561 = 4567 ∨ K % 6561 = 4618 ∨ K % 6561 = 4621 ∨ K % 6561 = 4888 ∨ K % 6561 = 4897 ∨ K % 6561 = 4954 ∨ K % 6561 = 5113 ∨ K % 6561 = 5131 ∨ K % 6561 = 5197 ∨ K % 6561 = 5212 ∨ K % 6561 = 5224 ∨ K % 6561 = 5296 ∨ K % 6561 = 5347 ∨ K % 6561 = 5350 ∨ K % 6561 = 5545 ∨ K % 6561 = 5617 ∨ K % 6561 = 5620 ∨ K % 6561 = 5626 ∨ K % 6561 = 5755 ∨ K % 6561 = 5761 ∨ K % 6561 = 5842 ∨ K % 6561 = 5845 ∨ K % 6561 = 5860 ∨ K % 6561 = 5872 ∨ K % 6561 = 5998 ∨ K % 6561 = 6115 ∨ K % 6561 = 6157 ∨ K % 6561 = 6274 ∨ K % 6561 = 6349 ∨ K % 6561 = 6427 ∨ K % 6561 = 6484 ∨ K % 6561 = 6490) :=
+  ⟨fun m => one_add_pow_five_term 63 m,
+    wt_quartic_mod19683, wt_row_eight_read, wt_quartic_fire_demo,
+    fire_of_mod6561, dust_fire_row_eight, no22_of_cascade_seven,
+    cantarian_dust_mod_6561⟩
+
 #print axioms wt_choose_one
 #print axioms one_add_pow_three_term
 #print axioms one_add_pow_four_term
@@ -375,5 +725,14 @@ theorem the_worldtrace_receipt :
 #print axioms no22_of_cascade_six
 #print axioms cantorian_dust_mod_2187
 #print axioms the_worldtrace_receipt
+#print axioms one_add_pow_five_term
+#print axioms wt_quartic_mod19683
+#print axioms wt_row_eight_read
+#print axioms wt_quartic_fire_demo
+#print axioms fire_of_mod6561
+#print axioms dust_fire_row_eight
+#print axioms no22_of_cascade_seven
+#print axioms cantarian_dust_mod_6561
+#print axioms the_worldtrace_receipt_seven
 
 end GSTWorldtraceArithmetic
