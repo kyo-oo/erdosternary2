@@ -5,6 +5,7 @@ import GSTClimbInfiniteFamily
 import GSTTheActConstruction
 import GSTBladeWave
 import GSTTowerFire
+import GSTTowerAxis
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -107,6 +108,28 @@ theorem the_tower_fire_wire :
    GSTTowerFire.tower_digit_read⟩
 
 #print axioms the_tower_fire_wire
+
+/-- **THE TOWER-AXIS WIRE.**  The `s ≥ 1` exponents, killed structurally
+at the monolith's entry face: every `K = 3^s · c` with `s ≥ 1` and
+`c ≡ 1 mod 9` fires at row `s+2` (one theorem, infinitely many
+exponents); the level-two classes `c ≡ 13, 25 mod 27` at row `s+3`; the
+level-three classes `c ≡ 4, 34, 49, 70 mod 81` at row `s+4`.  All
+through the deep-hider master lemma and the tower congruences — the
+sheet-zero cascade's blind side, closed.  Machine receipts: 36/36,
+20/20, 20/20, exact big-int. -/
+theorem the_tower_axis_wire :
+    (∀ s c : Nat, 1 ≤ s → c % 9 = 1 →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(3^s * c)) (s+2) = 2) ∧
+    (∀ s c : Nat, 2 ≤ s → (c % 27 = 13 ∨ c % 27 = 25) →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(3^s * c)) (s+3) = 2) ∧
+    (∀ s c : Nat, 3 ≤ s →
+      (c % 81 = 4 ∨ c % 81 = 34 ∨ c % 81 = 49 ∨ c % 81 = 70) →
+      GSTCanonicalSevenAxisBridge.digit3 (4^(3^s * c)) (s+4) = 2) :=
+  ⟨GSTTowerAxis.tower_axis_level_one,
+   GSTTowerAxis.tower_axis_level_two,
+   GSTTowerAxis.tower_axis_level_three⟩
+
+#print axioms the_tower_axis_wire
 
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do
