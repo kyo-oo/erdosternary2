@@ -694,7 +694,7 @@ theorem pair_read_formula (T u j : Nat) (hj : 1 ≤ j) (hT : 4^T < 3^(j+2)) :
               * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
             + 3^(j+2) * GSTTowerFire.c (j+1) * GSTTowerFire.c (j+1)
               * GSTTowerFire.c (j+1) * R))) 2 :=
-    GSTTowerFire.prefaced_digit _ 4^T (j+1) 2 hT
+    GSTTowerFire.prefaced_digit _ (4^T) (j+1) 2 hT
   rw [hp]
   refine digit3_eq_of_mod_next _ _ 2 ?_
   show (4^T * u * GSTTowerFire.c (j+1)
