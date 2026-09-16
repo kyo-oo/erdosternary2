@@ -5,7 +5,7 @@ import GSTTowerFire
 open GSTCanonicalSevenAxisBridge (digit3)
 open GSTBladeWave (digit3_mod_pow)
 open GSTClimbInfiniteFamily (CantorianPower no22_of_digit_two)
-open GSTTowerFire (tower_digit_read c_mod9 c_mod81)
+open GSTTowerFire (tower_digit_read c_mod81)
 
 /-!
 # THE TOWER AXIS FIRES — the s ≥ 1 exponents, killed structurally
@@ -65,7 +65,7 @@ theorem tower_axis_level_one (s c : Nat) (hs : 1 ≤ s) (hc : c % 9 = 1) :
   rw [show 3^s * c = c * 3^s from Nat.mul_comm _ _,
     show s+2 = s+1+1 from by omega, hread,
     digit3_mod_pow, show (3:Nat)^(1+1) = 9 from by norm_num,
-    Nat.mul_mod, hc, c_mod9 s hs]
+    Nat.mul_mod, hc, GSTTowerFire.c_mod9 s hs]
   norm_num
 
 /-! ## §2 LEVEL TWO — `c ≡ 13, 25 mod 27` dies at row `s+3` -/
