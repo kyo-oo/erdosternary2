@@ -2,6 +2,7 @@ import Mathlib
 import GSTBladeWave
 
 open GSTCanonicalSevenAxisBridge (digit3)
+open GSTBladeWave (digit3_mod_pow)
 
 namespace GSTTowerFire
 
@@ -52,7 +53,7 @@ theorem c_zero : c 0 = 1 := by decide
 
 /-- **The exact tower decomposition** — LTE made an equation. -/
 theorem four_pow_three_pow_eq (n : Nat) : 4^(3^n) = 1 + 3^(n+1) * c n := by
-  have h1 : (1:Nat) ≤ 4^(3^n) := by positivity
+  have h1 : (0:Nat) < 4^(3^n) := by positivity
   have h := GSTBladeWave.four_pow_three_pow_dvd 0 n
   rw [Nat.zero_add] at h
   obtain ⟨w, hw⟩ := h
@@ -81,10 +82,10 @@ theorem c_succ_eq (n : Nat) :
           have p2 : 3^(n+1) = 3^n * 3 := Nat.pow_succ 3 n
           rw [p1, p2]
           ring
-  have hcancel : 3^((n+1)+1) * c (n+1)
-      = 3^((n+1)+1) * (c n + 3^(n+1) * (c n * c n + 3^n * (c n * c n * c n))) := by
+  have hcancel : c (n+1) * 3^((n+1)+1)
+      = (c n + 3^(n+1) * (c n * c n + 3^n * (c n * c n * c n))) * 3^((n+1)+1) := by
     omega
-  exact (Nat.mul_right_cancel (by positivity : (0:Nat) < 3^((n+1)+1))).mp hcancel
+  exact Nat.mul_right_cancel (by positivity : (0:Nat) < 3^((n+1)+1)) hcancel
 
 /-- **The tower's first congruence: `c n ≡ 1 mod 3` at every level. -/
 theorem c_mod3 (n : Nat) : c n % 3 = 1 := by
@@ -110,8 +111,8 @@ theorem c_mod9_all (n : Nat) : 1 ≤ n → c n % 9 = 7 := by
     · have h := c_succ_eq n
       have hm : 3^(n+1) * (c n * c n + 3^n * (c n * c n * c n))
           = 9 * (3^(n-1) * (c n * c n + 3^n * (c n * c n * c n))) := by
-        have e : 3^(n+1) = 9 * 3^(n-1) := by
-          rw [← Nat.pow_add]; congr 1; omega
+        have hexp : n+1 = 2 + (n-1) := by omega
+        have e : 3^(n+1) = 3^2 * 3^(n-1) := by rw [hexp, ← Nat.pow_add]
         rw [e]; ring
       rw [hm] at h
       have iih := ih hpos
@@ -132,8 +133,8 @@ theorem c_mod81_all (n : Nat) : 3 ≤ n → c n % 81 = 16 := by
     · have h := c_succ_eq n
       have hm : 3^(n+1) * (c n * c n + 3^n * (c n * c n * c n))
           = 81 * (3^(n-3) * (c n * c n + 3^n * (c n * c n * c n))) := by
-        have e : 3^(n+1) = 81 * 3^(n-3) := by
-          rw [← Nat.pow_add]; congr 1; omega
+        have hexp : n+1 = 4 + (n-3) := by omega
+        have e : 3^(n+1) = 3^4 * 3^(n-3) := by rw [hexp, ← Nat.pow_add]
         rw [e]; ring
       rw [hm] at h
       have iih := ih hge
@@ -146,10 +147,12 @@ theorem c_mod81 (n : Nat) (hn : 3 ≤ n) : c n % 81 = 16 := c_mod81_all n hn
 /-- **Divide-and-mod gluing:** `3^k * q + s` divided by `3^k` is `q`
 when `s < 3^k`. -/
 theorem div_add_lt (k q s : Nat) (hs : s < 3^k) : (3^k * q + s) / 3^k = q := by
+  have hmod : (3^k * q + s) % 3^k = s := by
+    rw [Nat.add_comm, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt hs]
   have h := Nat.div_add_mod (3^k * q + s) (3^k)
-  rw [Nat.mod_eq_of_lt hs] at h
-  have h2 : 3^k * q = 3^k * ((3^k * q + s) / 3^k) := Nat.add_right_cancel h
-  exact (Nat.mul_right_cancel (by positivity : (0:Nat) < 3^k)).mp h2
+  rw [hmod] at h
+  have h2 : ((3^k * q + s) / 3^k) * 3^k = q * 3^k := by omega
+  exact Nat.mul_right_cancel (by positivity : (0:Nat) < 3^k) h2
 
 /-- **The prefaced read.**  If `s < 3^(n+1)` then row `n+1+k` of the
 prefaced object `3^(n+1) * A + s` is row `k` of `A`. -/
@@ -190,9 +193,9 @@ theorem tower_digit_read (j n k : Nat) (hk : k ≤ n) :
   rw [hexp, prefaced_digit _ 1 n k h1lt]
   unfold digit3
   have hsplit : j * c n + 3^(n+1) * (c n * c n * R)
-      = j * c n + 3^k * (3^(n+1-k) * (c n * c n * R)) := by
-    have e : 3^(n+1) = 3^k * 3^(n+1-k) := by
-      rw [← Nat.pow_add]; congr 1; omega
+      = j * c n + (3^(n+1-k) * (c n * c n * R)) * 3^k := by
+    have hexp : n+1 = k + (n+1-k) := by omega
+    have e : 3^(n+1) = 3^k * 3^(n+1-k) := by rw [hexp, ← Nat.pow_add]
     rw [e]; ring
   rw [hsplit, Nat.add_mul_div_right _ _ (by positivity : (0:Nat) < 3^k)]
   have hd3 : 3 ∣ 3^(n+1-k) * (c n * c n * R) := by
@@ -210,7 +213,6 @@ theorem three_pow_fires (n : Nat) (hn : 1 ≤ n) : digit3 (4^(3^n)) (n+2) = 2 :=
   rw [Nat.one_mul, Nat.one_mul] at h
   rw [show n+2 = n+1+1 from by omega, h]
   rw [digit3_mod_pow, show (3:Nat)^(1+1) = 9 from by norm_num, c_mod9 n hn]
-  norm_num
 
 /-- **THE n+1 LAW (Lane D's L8).**  `2 * 3^n` fires at row `n+1` for
 every `n ≥ 0` — the doubled tower constant reads its leading TWO. -/
@@ -220,7 +222,6 @@ theorem two_mul_three_pow_fires (n : Nat) : digit3 (4^(2 * 3^n)) (n+1) = 2 := by
   unfold digit3
   norm_num
   rw [Nat.mul_mod, c_mod3 n]
-  norm_num
 
 /-- **THE n+4 LAW (Lane D's L9).**  `3^n + 1` fires at row `n+4` for
 every `n ≥ 3`: the prefaced tower constant `4 * c n ≡ 64 mod 81 = 2101₃`
@@ -228,8 +229,8 @@ plants the TWO at offset three. -/
 theorem three_pow_plus_one_fires (n : Nat) (hn : 3 ≤ n) :
     digit3 (4^(3^n + 1)) (n+4) = 2 := by
   have hbig : (4:Nat) < 3^(n+1) := by
-    have e : 3^(n+1) = 81 * 3^(n-3) := by
-      rw [← Nat.pow_add]; congr 1; omega
+    have hexp : n+1 = 4 + (n-3) := by omega
+    have e : 3^(n+1) = 3^4 * 3^(n-3) := by rw [hexp, ← Nat.pow_add]
     have hpos : (0:Nat) < 3^(n-3) := by positivity
     rw [e]
     omega
@@ -241,7 +242,6 @@ theorem three_pow_plus_one_fires (n : Nat) (hn : 3 ≤ n) :
     prefaced_digit _ 4 n 3 hbig]
   rw [digit3_mod_pow, show (3:Nat)^(3+1) = 81 from by norm_num,
     Nat.mul_mod, c_mod81 n hn]
-  norm_num
 
 #print axioms three_pow_fires
 #print axioms two_mul_three_pow_fires
