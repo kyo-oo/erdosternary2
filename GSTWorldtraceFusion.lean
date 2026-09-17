@@ -64,7 +64,7 @@ Under the two transformed inputs:
 * `cantorian_universe_classification` — **the complete Cantorian
   universe is `{0, 1, 4}`**, both directions: the monolith's
   below-eight census (`cantorian_zero/one/four`,
-  `not_cantarian_two/three/five/six/seven`) plus the fusion's
+  `not_cantorian_two/three/five/six/seven`) plus the fusion's
   extinction from eight on;
 * `erdos_ternary_classification` — **the complete Erdős ternary
   exception set is `{0, 2, 8}`**: `noTernaryTwo (2^n) = true ↔
@@ -237,7 +237,7 @@ theorem ghost_witness_descaled (u : Nat) (hg : GSTGhostRay.GhostRay u)
     congr 1
     omega
   rw [hp2] at hm
-  exact ⟨m, Int.mul_left_cancel₀ (by positivity) hm⟩
+  exact ⟨m, mul_left_cancel₀ (by positivity) hm⟩
 
 /-- **THE TERMINAL WORLDTRACE EXCLUSION (corrected).**  Under the
 worldtrace-form Mahler input, no three-free natural's worldtrace is
@@ -271,13 +271,12 @@ theorem the_act_of_worldtrace_fusion
     rintro ⟨K, hK, hcp⟩
     obtain ⟨s, u, hsu, hu⟩ :=
       GSTGhostRay.exists_three_free_decomp K K (by omega) (by omega)
-    exact terminal_worldtrace_exclusion HM u hu
-      ((wtghostray_iff_ghostray u).mp (HC K s u hsu hu hK hcp))
+    exact terminal_worldtrace_exclusion HM u hu (HC K s u hsu hu hK hcp)
   exact GSTTheAct.the_act_iff_hTailF.mpr
     (GSTClimbInfiniteFamily.hTailF_of_no_cantorian hnc)
 
 /-- The fusion's extinction face: no Cantorian exponent from eight on. -/
-theorem no_cantarian_ge_eight_of_fusion
+theorem no_cantorian_ge_eight_of_fusion
     (HM : WorldtraceMahlerLock) (HC : WorldtraceCompression) :
     ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K :=
   GSTClimbInfiniteFamily.the_act_iff_no_cantorian.mp
@@ -302,21 +301,21 @@ theorem cantorian_universe_classification
     · exact ⟨fun _ => Or.inl rfl, fun _ => GSTClimbInfiniteFamily.cantorian_zero⟩
     · exact ⟨fun _ => Or.inr (Or.inl rfl),
         fun _ => GSTClimbInfiniteFamily.cantorian_one⟩
-    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantarian_two,
+    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantorian_two,
         fun h => by rcases h with h | h | h <;> omega⟩
-    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantarian_three,
+    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantorian_three,
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun _ => Or.inr (Or.inr rfl),
         fun _ => GSTClimbInfiniteFamily.cantorian_four⟩
-    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantarian_five,
+    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantorian_five,
         fun h => by rcases h with h | h | h <;> omega⟩
-    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantarian_six,
+    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantorian_six,
         fun h => by rcases h with h | h | h <;> omega⟩
-    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantarian_seven,
+    · exact ⟨fun h => absurd h GSTClimbInfiniteFamily.not_cantorian_seven,
         fun h => by rcases h with h | h | h <;> omega⟩
   · have hnc : ¬ GSTClimbInfiniteFamily.CantorianPower K := by
       intro h
-      exact absurd ⟨K, hK, h⟩ (no_cantarian_ge_eight_of_fusion HM HC)
+      exact absurd ⟨K, hK, h⟩ (no_cantorian_ge_eight_of_fusion HM HC)
     exact ⟨fun h => absurd h hnc,
       fun h => by rcases h with h | h | h <;> omega⟩
 
@@ -338,33 +337,45 @@ theorem erdos_ternary_classification
   · interval_cases n
     · exact ⟨fun _ => Or.inl rfl, fun _ => exception_n0⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^1) = false := by decide
+          have hf : noTernaryTwo (2^1) = false := by
+            rw [noTernaryTwo_eq_struct (2^1) ((2^1)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun _ => Or.inr (Or.inl rfl), fun _ => exception_n2⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^3) = false := by decide
+          have hf : noTernaryTwo (2^3) = false := by
+            rw [noTernaryTwo_eq_struct (2^3) ((2^3)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^4) = false := by decide
+          have hf : noTernaryTwo (2^4) = false := by
+            rw [noTernaryTwo_eq_struct (2^4) ((2^4)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^5) = false := by decide
+          have hf : noTernaryTwo (2^5) = false := by
+            rw [noTernaryTwo_eq_struct (2^5) ((2^5)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^6) = false := by decide
+          have hf : noTernaryTwo (2^6) = false := by
+            rw [noTernaryTwo_eq_struct (2^6) ((2^6)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
     · exact ⟨fun h => by
-          have hf : noTernaryTwo (2^7) = false := by decide
+          have hf : noTernaryTwo (2^7) = false := by
+            rw [noTernaryTwo_eq_struct (2^7) ((2^7)+1) (by norm_num)]
+            decide
           rw [hf] at h
           exact absurd h (by decide),
         fun h => by rcases h with h | h | h <;> omega⟩
@@ -381,7 +392,7 @@ theorem hTailF_of_worldtrace_fusion
     (HM : WorldtraceMahlerLock) (HC : WorldtraceCompression) :
     GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF :=
   GSTClimbInfiniteFamily.hTailF_of_no_cantorian
-    (no_cantarian_ge_eight_of_fusion HM HC)
+    (no_cantorian_ge_eight_of_fusion HM HC)
 
 /-- The full ternary statement through the monolith's own crown socket:
 every `2^n` from nine on fails `noTernaryTwo`. -/

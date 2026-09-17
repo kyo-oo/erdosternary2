@@ -255,7 +255,7 @@ theorem the_worldtrace_wire_seven :
   ⟨GSTWorldtraceArithmetic.wt_quartic_mod19683,
     GSTWorldtraceArithmetic.wt_row_eight_read,
     GSTWorldtraceArithmetic.wt_quartic_fire_demo,
-    GSTWorldtraceArithmetic.cantarian_dust_mod_6561⟩
+    GSTWorldtraceArithmetic.cantorian_dust_mod_6561⟩
 
 #print axioms the_worldtrace_wire_seven
 
