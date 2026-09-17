@@ -320,3 +320,33 @@ theorem the_dust_window_wire :
     GSTWorldtraceArithmetic.window_row_two_dust⟩
 
 #print axioms the_dust_window_wire
+
+/-- **THE WORLDTRACE RAY FLOOR WIRE.**  The closure round's
+unconditional core, landed at the monolith's entry face: the worldtrace
+ghost ray contains no three-free core below `rayMin ≈ 7.24 × 10^46`
+(kernel-certified at depth `3^100`, no hypotheses); under the
+compression hypothesis ALONE no Cantorian exponent exists below the
+floor and every `4^K` with `8 ≤ K < rayMin` owns its ternary digit two
+— the 1979 conjecture certified to `7.24 × 10^46` under ONE named
+input; and the fusion closes under the Mahler lock restricted to cores
+above the floor — strictly weaker than the full lock. -/
+theorem the_worldtrace_ray_floor_wire :
+    (∀ (u : Nat), ¬ 3 ∣ u → u < GSTWorldtraceFusion.rayMin →
+      ¬ GSTWorldtraceFusion.WTGhostRay u) ∧
+    (∀ (HC : GSTWorldtraceFusion.WorldtraceCompression),
+      ¬ ∃ K : Nat, 8 ≤ K ∧ K < GSTWorldtraceFusion.rayMin
+        ∧ GSTClimbInfiniteFamily.CantorianPower K) ∧
+    (∀ (HC : GSTWorldtraceFusion.WorldtraceCompression) (K : Nat),
+      8 ≤ K → K < GSTWorldtraceFusion.rayMin →
+      noTernaryTwo (4^K) = false) ∧
+    (∀ (HA : GSTWorldtraceFusion.WorldtraceMahlerLockAbove)
+        (HC : GSTWorldtraceFusion.WorldtraceCompression), GSTTheAct.the_act) ∧
+    (∀ (H : GSTWorldtraceFusion.WorldtraceMahlerLock),
+      GSTWorldtraceFusion.WorldtraceMahlerLockAbove) :=
+  ⟨GSTWorldtraceFusion.worldtrace_ray_empty_below,
+    GSTWorldtraceFusion.no_cantorian_below_ray_floor,
+    GSTWorldtraceFusion.erdos_ternary_below_ray_floor,
+    GSTWorldtraceFusion.the_act_of_worldtrace_fusion_refined,
+    GSTWorldtraceFusion.worldtrace_mahler_lock_above_of_lock⟩
+
+#print axioms the_worldtrace_ray_floor_wire

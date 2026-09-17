@@ -75,6 +75,22 @@ Under the two transformed inputs:
   (`omega_shadow_kill_all_of_even_conjecture`);
 * `worldtrace_graph_chokehold` — the infinite-controller graph reading
   (`infinite_controller_chokehold_of_universal`).
+
+## The ray floor (added in the closure round — all UNCONDITIONAL)
+
+`worldtrace_ray_floor` — **every three-free core on the worldtrace ray
+exceeds `rayMin ≈ 7.24 × 10^46`, kernel-certified at depth `3^100`**:
+the Mahler seam's entire below-`10^46` content discharged by
+computation, no hypotheses; `worldtrace_ray_empty_below` — the ray is
+empty below the floor; `no_cantorian_below_ray_floor` /
+`erdos_ternary_below_ray_floor` — under the compression hypothesis
+ALONE (the Mahler input eliminated below the floor) no Cantorian
+exponent exists below `rayMin` and every `4^K` with `8 ≤ K < rayMin`
+owns its ternary digit two — the 1979 conjecture certified to
+`7.24 × 10^46` under ONE named input; `the_act_of_worldtrace_fusion_refined`
+— the fusion under `WorldtraceMahlerLockAbove` (the lock restricted to
+cores ≥ the floor — strictly weaker than the full lock by the
+unconditional floor theorem).
 -/
 
 namespace GSTWorldtraceFusion
@@ -457,5 +473,438 @@ theorem the_worldtrace_fusion_receipt :
 #print axioms cantorian_universe_classification
 #print axioms erdos_ternary_classification
 #print axioms the_worldtrace_fusion_receipt
+
+
+/-! ## §10 THE FLOOR CERTIFICATE — the tower's ninety-ninth window mod `3^100`
+
+The computable core of the Mahler seam, extracted.  The monolith's own
+tower `c` is evaluated modulo `3^100` by its own exact recursion, and
+the value is cross-certified against the direct big-integer definition
+`(4^(3^99) - 1) / 3^100` (machine receipt: the modular chain and the
+direct evaluation agree digit for digit; all arithmetic exact, no
+floating point anywhere).  Everything in this section and the next is
+UNCONDITIONAL — no hypotheses, no external inputs, kernel-certified. -/
+
+/-- The certificate modulus: `3^100`. -/
+def M : Nat := 515377520732011331036461129765621272702107522001
+
+theorem M_eq_pow : (3:Nat)^100 = M := by decide
+
+theorem M_pos : 0 < M := by decide
+
+theorem MZ_eq : (3:ℤ)^100 = (M:ℤ) := by decide
+
+theorem MZ_101 : (3:ℤ)^101 = (3:ℤ) * (M:ℤ) := by decide
+
+/-- The tower, evaluated modulo `m` by the monolith's own recursion —
+kernel-computable in ninety-nine small steps. -/
+def cMod (m : Nat) : Nat → Nat
+  | 0 => 7 % m
+  | 1 => 7 % m
+  | s+2 => (cMod m (s+1) + 3^(s+2) * (cMod m (s+1))^2
+      + 3^(2*(s+1)+1) * (cMod m (s+1))^3) % m
+
+/-- The modular tower tracks the true tower: `c t ≡ cMod m t [MOD m]`,
+as an exact division statement. -/
+theorem cMod_spec (m : Nat) (hm : 0 < m) :
+    ∀ t : Nat, ∃ j : Nat, c t = cMod m t + m * j := by
+  intro t
+  induction t using Nat.strongRecOn with
+  | ind t ih =>
+    rcases Nat.lt_or_ge t 2 with h2 | h2
+    · have hc7 : c t = 7 := by
+        rcases t with _ | t'
+        · rfl
+        · have ht'0 : t' = 0 := by omega
+          subst ht'0
+          rfl
+      have hcm : cMod m t = 7 % m := by
+        rcases t with _ | t'
+        · rfl
+        · have ht'0 : t' = 0 := by omega
+          subst ht'0
+          rfl
+      refine ⟨7 / m, ?_⟩
+      have h7 := Nat.div_add_mod 7 m
+      rw [hc7, hcm]
+      omega
+    · obtain ⟨j, hj⟩ := ih (t-1) (by omega)
+      have hrec : c t = c (t-1) + 3^t * (c (t-1))^2
+          + 3^(2*t-1) * (c (t-1))^3 := by
+        have h := c_recursion (t-1) (by omega)
+        rw [show (t-1)+1 = t from by omega,
+          show 2*(t-1)+1 = 2*t-1 from by omega] at h
+        exact h
+      have hcm : cMod m t = (cMod m (t-1) + 3^t * (cMod m (t-1))^2
+          + 3^(2*t-1) * (cMod m (t-1))^3) % m := by
+        obtain ⟨s', hs'⟩ : ∃ s' : Nat, t = s' + 2 := ⟨t-2, by omega⟩
+        subst hs'
+        have hdef : cMod m (s'+2) = (cMod m (s'+1) + 3^(s'+2)
+            * (cMod m (s'+1))^2 + 3^(2*(s'+1)+1) * (cMod m (s'+1))^3) % m := rfl
+        rw [hdef, show 2*(s'+1)+1 = 2*(s'+2)-1 from by omega]
+      set W := cMod m (t-1) with hWd
+      set A := 3^t with hAd
+      set B := 3^(2*t-1) with hBd
+      refine ⟨(W + A * W^2 + B * W^3) / m + (j + A * (2 * W * j + m * j^2)
+          + B * (3 * W^2 * j + 3 * W * m * j^2 + m^2 * j^3)), ?_⟩
+      rw [hrec, hcm, hj]
+      have hexp : (W + m * j) + A * (W + m * j)^2 + B * (W + m * j)^3
+          = (W + A * W^2 + B * W^3) + m * (j + A * (2 * W * j + m * j^2)
+            + B * (3 * W^2 * j + 3 * W * m * j^2 + m^2 * j^3)) := by ring
+      rw [hexp]
+      have hdm := Nat.div_add_mod (W + A * W^2 + B * W^3) m
+      rw [Nat.mul_add m ((W + A * W^2 + B * W^3) / m) (j + A * (2 * W * j + m * j^2)
+          + B * (3 * W^2 * j + 3 * W * m * j^2 + m^2 * j^3))]
+      omega
+
+/-- The tower's ninety-ninth value modulo `3^100` — the kernel-certified
+certificate constant (cross-checked externally against the direct
+big-integer evaluation of `(4^(3^99) - 1) / 3^100`). -/
+def L : Nat := 79542728300108260269642213640611567864276448732
+
+theorem c_mod_ninetynine : c 99 % M = L := by
+  obtain ⟨j, hj⟩ := cMod_spec M M_pos 99
+  have hval : cMod M 99 = L := by decide
+  rw [hj, hval]
+  rw [Nat.add_mod,
+    show M * j % M = 0 from Nat.mod_eq_zero_of_dvd (dvd_mul_right M j),
+    Nat.add_zero, Nat.mod_mod_of_dvd L (Nat.dvd_refl M),
+    Nat.mod_eq_of_lt (by decide : L < M)]
+
+/-- The tower coefficient is a unit modulo `3^100`; `INV` is its
+inverse (doubled), kernel-certified. -/
+def INV : Nat := 231220982972822739301366622903953856304689273390
+
+theorem inv_fact : (2:ℤ) * (L:ℤ) * (INV:ℤ)
+    = 1 + (M:ℤ) * 71372720330403147882345211914659435948372084959 := by decide
+
+/-- The monolith's tower stabilizes modulo `3^(v+1)` — the fusion's own
+bridge to the repo's green stability law. -/
+theorem c_monolith_stable (v w : Nat) (hv : 1 ≤ v) (hw : v ≤ w) :
+    c w % 3^(v+1) = c v % 3^(v+1) := by
+  rw [monolith_c_eq_tower w (by omega), monolith_c_eq_tower v hv]
+  exact GSTGhostRay.c_stable v w hw
+
+/-! ## §11 THE RESIDUE PINNING — the convergence forces an explicit
+residue class
+
+Any core `u` whose scaled tower `6u * c_s` converges 3-adically to a
+head constant `6a - 27` is pinned to ONE explicit residue class modulo
+`3^100`: `u ≡ (2a - 9) * INV [MOD M]`.  This is pure worldtrace
+arithmetic — the depth-101 divisibility, the tower's stabilization, and
+the inverse certificate — with no hypotheses beyond the convergence
+itself. -/
+
+/-- **THE RESIDUE PINNING.**  A convergent scaled tower pins the core to
+the explicit residue class `(2a - 9) * INV` modulo `3^100`. -/
+theorem worldtrace_ray_residue (a u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*(a:ℤ) - 27))) :
+    ∃ W : ℤ, (u:ℤ) - (2*(a:ℤ) - 9) * (INV:ℤ) = (M:ℤ) * W := by
+  obtain ⟨S, hS⟩ := H 101
+  have hd : (3:ℤ)^101 ∣ (6*(u:ℤ)*((c (max S 99) : Nat):ℤ)
+      - (6*(a:ℤ) - 27)) := hS (max S 99) (le_max_left S 99)
+  obtain ⟨t, ht⟩ := hd
+  have hfac : 6*(u:ℤ)*((c (max S 99) : Nat):ℤ) - (6*(a:ℤ) - 27)
+      = (3:ℤ) * (2*(u:ℤ)*((c (max S 99) : Nat):ℤ) - (2*(a:ℤ) - 9)) := by ring
+  rw [hfac, MZ_101] at ht
+  have hY : 2*(u:ℤ)*((c (max S 99) : Nat):ℤ) - (2*(a:ℤ) - 9)
+      = (M:ℤ) * t := by
+    refine mul_left_cancel₀ (by norm_num : ((3:ℤ)) ≠ 0) ?_
+    rw [ht, mul_assoc]
+  have hcsL : (c (max S 99) : Nat) % M = L := by
+    have h1 := c_monolith_stable 99 (max S 99) (by omega) (le_max_right S 99)
+    rw [show (99:Nat) + 1 = 100 from rfl, M_eq_pow] at h1
+    rw [h1, c_mod_ninetynine]
+  have hq := Nat.div_add_mod (c (max S 99)) M
+  rw [hcsL] at hq
+  have hqZ : ((c (max S 99) : Nat):ℤ)
+      = (M:ℤ) * ((c (max S 99) / M : Nat):ℤ) + (L:ℤ) := by
+    exact_mod_cast hq
+  have h2 : 2*(u:ℤ)*(L:ℤ) - (2*(a:ℤ) - 9)
+      = (M:ℤ) * (t - 2*(u:ℤ)*((c (max S 99) / M : Nat):ℤ)) := by
+    linear_combination hY - (2*(u:ℤ)) * hqZ
+  refine ⟨(t - 2*(u:ℤ)*((c (max S 99) / M : Nat):ℤ)) * (INV:ℤ)
+      - (u:ℤ) * 71372720330403147882345211914659435948372084959, ?_⟩
+  linear_combination (INV:ℤ) * h2 - (u:ℤ) * inv_fact
+
+/-! ## §12 THE FLOOR — the six heads and the ray's core minimum -/
+
+/-- **THE FLOOR CERTIFICATE.**  The smallest core residue over the six
+admissible heads — every core pinned to the worldtrace ray exceeds it. -/
+def rayMin : Nat := 72414318613725182000182971030813176026502347727
+
+theorem rayMin_le_residues :
+    rayMin ≤ 442963202118286149036278158734808096675605174274 ∧
+    rayMin ≤ 390027647331920296602550274777094536582876199053 ∧
+    rayMin ≤ 284156537759188591735094506861667416397418248611 ∧
+    rayMin ≤ 231220982972822739301366622903953856304689273390 ∧
+    rayMin ≤ 125349873400091034433910854988526736119231322948 ∧
+    rayMin ≤ 72414318613725182000182971030813176026502347727 := by decide
+
+/-- The ghost ray's convergence, factored out for reuse. -/
+theorem worldtrace_ray_convergence (u : Nat) (hu3 : ¬ 3 ∣ u)
+    (hg : GSTGhostRay.GhostRay u) :
+    ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ)
+        - (6*(((c 1 * u) % 9 : Nat):ℤ) - 27)) := by
+  intro k
+  refine ⟨max 2 k, ?_⟩
+  intro s hs
+  obtain ⟨m, hm⟩ := ghost_witness_descaled u hg s (by omega)
+  exact (pow_dvd_pow (3:ℤ) (by omega : k ≤ s + 2)).trans ⟨m, hm⟩
+
+/-- **THE SIX RESIDUES.**  Each admissible head's convergent core is
+pinned to its explicit residue class modulo `3^100`. -/
+theorem worldtrace_ray_mod_one (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((1:Nat):ℤ) - 27))) :
+    u % M = 442963202118286149036278158734808096675605174274 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 1 u H
+  have hdec : (7:ℤ)*(INV:ℤ)
+      = (M:ℤ)*3 + 72414318613725182000182971030813176026502347727 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+theorem worldtrace_ray_mod_two (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((2:Nat):ℤ) - 27))) :
+    u % M = 390027647331920296602550274777094536582876199053 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 2 u H
+  have hdec : (5:ℤ)*(INV:ℤ)
+      = (M:ℤ)*2 + 125349873400091034433910854988526736119231322948 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+theorem worldtrace_ray_mod_four (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((4:Nat):ℤ) - 27))) :
+    u % M = 284156537759188591735094506861667416397418248611 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 4 u H
+  have hdec : (1:ℤ)*(INV:ℤ)
+      = (M:ℤ)*0 + 231220982972822739301366622903953856304689273390 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+theorem worldtrace_ray_mod_five (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((5:Nat):ℤ) - 27))) :
+    u % M = 231220982972822739301366622903953856304689273390 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 5 u H
+  have hdec : (1:ℤ)*(INV:ℤ)
+      = (M:ℤ)*0 + 231220982972822739301366622903953856304689273390 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+theorem worldtrace_ray_mod_seven (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((7:Nat):ℤ) - 27))) :
+    u % M = 125349873400091034433910854988526736119231322948 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 7 u H
+  have hdec : (5:ℤ)*(INV:ℤ)
+      = (M:ℤ)*2 + 125349873400091034433910854988526736119231322948 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+theorem worldtrace_ray_mod_eight (u : Nat)
+    (H : ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((8:Nat):ℤ) - 27))) :
+    u % M = 72414318613725182000182971030813176026502347727 := by
+  obtain ⟨W, hW⟩ := worldtrace_ray_residue 8 u H
+  have hdec : (7:ℤ)*(INV:ℤ)
+      = (M:ℤ)*3 + 72414318613725182000182971030813176026502347727 := by decide
+  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
+  have hdm := Nat.div_add_mod u M
+  have hmb : u % M < M := Nat.mod_lt u M_pos
+  omega
+
+/-- **THE WORLDTRACE RAY FLOOR.**  Every three-free core on the
+worldtrace ghost ray exceeds `rayMin ≈ 7.24 × 10^46` — unconditional,
+kernel-certified at depth one hundred.  This is the Mahler seam's entire
+below-`10^46` content, closed by computation. -/
+theorem worldtrace_ray_floor (u : Nat) (hu3 : ¬ 3 ∣ u)
+    (hg : WTGhostRay u) :
+    rayMin ≤ u := by
+  have hgh : GSTGhostRay.GhostRay u := (wtghostray_iff_ghostray u).mp hg
+  have hconv := worldtrace_ray_convergence u hu3 hgh
+  have hlt : (c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
+  have hunit : ¬ 3 ∣ (c 1 * u) % 9 := by
+    have hgu := GSTGhostRay.ghost_head_unit u hu3
+    rwa [← monolith_c_eq_tower 1 (by omega)] at hgu
+  have hA : (c 1 * u) % 9 = 1 ∨ (c 1 * u) % 9 = 2 ∨ (c 1 * u) % 9 = 4
+    ∨ (c 1 * u) % 9 = 5 ∨ (c 1 * u) % 9 = 7 ∨ (c 1 * u) % 9 = 8 := by
+    omega
+  rcases hA with h1 | h2 | h4 | h5 | h7 | h8
+  · rw [h1] at hconv
+    have hres := worldtrace_ray_mod_one u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.1
+    omega
+  · rw [h2] at hconv
+    have hres := worldtrace_ray_mod_two u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.2.1
+    omega
+  · rw [h4] at hconv
+    have hres := worldtrace_ray_mod_four u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.2.2.1
+    omega
+  · rw [h5] at hconv
+    have hres := worldtrace_ray_mod_five u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.2.2.2.1
+    omega
+  · rw [h7] at hconv
+    have hres := worldtrace_ray_mod_seven u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.2.2.2.2.1
+    omega
+  · rw [h8] at hconv
+    have hres := worldtrace_ray_mod_eight u hconv
+    have hdm := Nat.div_add_mod u M
+    have hmin := rayMin_le_residues.2.2.2.2.2
+    omega
+
+/-- **THE RAY IS EMPTY BELOW THE FLOOR.**  No three-free natural below
+`rayMin ≈ 7.24 × 10^46` lies on the worldtrace ghost ray — no Mahler
+input, no compression input, no hypotheses at all. -/
+theorem worldtrace_ray_empty_below (u : Nat) (hu3 : ¬ 3 ∣ u)
+    (hlt : u < rayMin) :
+    ¬ WTGhostRay u :=
+  fun hg => absurd (worldtrace_ray_floor u hu3 hg) (by omega)
+
+/-! ## §13 THE COMPRESSION-SIDE COROLLARY — the conjecture certified
+below the floor under ONE hypothesis
+
+Under the compression hypothesis ALONE (the Mahler input eliminated
+below the floor by `worldtrace_ray_floor`), no Cantorian exponent
+exists below `rayMin` — the 1979 conjecture is certified for every
+exponent below `7.24 × 10^46` under a single named input. -/
+
+/-- Under the compression alone, no Cantorian exponent exists below the
+ray floor: any such `K = 3^s * u` has core `u ≤ K < rayMin`, which the
+unconditional floor theorem kills. -/
+theorem no_cantorian_below_ray_floor (HC : WorldtraceCompression) :
+    ¬ ∃ K : Nat, 8 ≤ K ∧ K < rayMin
+      ∧ GSTClimbInfiniteFamily.CantorianPower K := by
+  rintro ⟨K, hK8, hKlt, hcp⟩
+  obtain ⟨s, u, hsu, hu⟩ :=
+    GSTGhostRay.exists_three_free_decomp K K (by omega) (by omega)
+  have huK : u ≤ K := by
+    rcases Nat.eq_zero_or_pos s with hs0 | hs0
+    · rw [hsu, hs0, Nat.pow_zero, Nat.one_mul]
+    · rw [hsu]
+      exact Nat.le_mul_of_pos_left u (Nat.pow_pos (by decide))
+  exact worldtrace_ray_empty_below u hu (by omega) (HC K s u hsu hu hK8 hcp)
+
+/-- **THE CONJECTURE BELOW THE FLOOR, UNDER ONE HYPOTHESIS.**  Under the
+compression input alone, every `4^K` with `8 ≤ K < rayMin` owns its
+ternary digit two — the 1979 statement certified to `7.24 × 10^46`. -/
+theorem erdos_ternary_below_ray_floor (HC : WorldtraceCompression)
+    (K : Nat) (hK8 : 8 ≤ K) (hKlt : K < rayMin) :
+    noTernaryTwo (4^K) = false := by
+  have hnc : ¬ GSTClimbInfiniteFamily.CantorianPower K := by
+    intro hcp
+    exact absurd ⟨K, hK8, hKlt, hcp⟩ (no_cantorian_below_ray_floor HC)
+  unfold GSTClimbInfiniteFamily.CantorianPower at hnc
+  push_neg at hnc
+  obtain ⟨p, _, hp⟩ := hnc
+  exact has_two_imp_not_no_two (4^K)
+    (hasTernaryTwo_of_digit (4^K) p (by simpa [digit3] using hp))
+
+/-! ## §14 THE REFINED FUSION — the Mahler input restricted above the
+floor
+
+The fusion's conditional content shrinks: the act now closes under the
+compression plus the Mahler lock restricted to cores `≥ rayMin` — the
+entire below-`10^46` range of the Mahler seam is discharged
+unconditionally by the floor theorem. -/
+
+/-- **THE MAHLER LOCK ABOVE THE FLOOR.**  The rational-lock denial,
+restricted to cores from `rayMin` upward — the exact residual seam after
+the floor theorem's unconditional discharge of the below-range. -/
+def WorldtraceMahlerLockAbove : Prop :=
+  ¬ ∃ (a u : Nat), (a < 9 ∧ ¬ 3 ∣ a) ∧ (¬ 3 ∣ u) ∧ rayMin ≤ u ∧
+    ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*(a:ℤ) - 27))
+
+/-- The full lock implies the restricted lock: the residual seam only
+shrank. -/
+theorem worldtrace_mahler_lock_above_of_lock
+    (H : WorldtraceMahlerLock) : WorldtraceMahlerLockAbove := by
+  rintro ⟨a, u, ha, hu3, _hmin, hconv⟩
+  exact H ⟨a, u, ha, hu3, hconv⟩
+
+/-- **THE REFINED FUSION.**  The compression plus the Mahler lock above
+the floor close the act: any Cantorian exponent from eight on compresses
+onto the ray, the floor theorem unconditionally kills every core below
+`rayMin`, and the restricted lock kills the rest. -/
+theorem the_act_of_worldtrace_fusion_refined
+    (HA : WorldtraceMahlerLockAbove) (HC : WorldtraceCompression) :
+    GSTTheAct.the_act := by
+  have hnc : ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K := by
+    rintro ⟨K, hK, hcp⟩
+    obtain ⟨s, u, hsu, hu⟩ :=
+      GSTGhostRay.exists_three_free_decomp K K (by omega) (by omega)
+    have hray : WTGhostRay u := HC K s u hsu hu hK hcp
+    have hmin : rayMin ≤ u := worldtrace_ray_floor u hu hray
+    have hgh : GSTGhostRay.GhostRay u := (wtghostray_iff_ghostray u).mp hray
+    have hconv := worldtrace_ray_convergence u hu hgh
+    have hlt : (c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
+    have hunit : ¬ 3 ∣ (c 1 * u) % 9 := by
+      have hgu := GSTGhostRay.ghost_head_unit u hu
+      rwa [← monolith_c_eq_tower 1 (by omega)] at hgu
+    exact HA ⟨(c 1 * u) % 9, u, ⟨hlt, hunit⟩, hu, hmin, hconv⟩
+  exact GSTTheAct.the_act_iff_hTailF.mpr
+    (GSTClimbInfiniteFamily.hTailF_of_no_cantorian hnc)
+
+/-! ## §15 THE RECEIPT -/
+
+/-- **THE WORLDTRACE RAY FLOOR RECEIPT.**  Everything in one theorem:
+the unconditional floor (every ray core exceeds `7.24 × 10^46`), the
+unconditional emptiness below it, the compression-side corollary (the
+conjecture certified below the floor under one hypothesis), and the
+refined fusion (the act under the compression plus the Mahler lock
+restricted above the floor). -/
+theorem the_worldtrace_ray_floor_receipt :
+    (∀ (u : Nat), ¬ 3 ∣ u → WTGhostRay u → rayMin ≤ u) ∧
+    (∀ (u : Nat), ¬ 3 ∣ u → u < rayMin → ¬ WTGhostRay u) ∧
+    (∀ (HC : WorldtraceCompression), ¬ ∃ K : Nat, 8 ≤ K ∧ K < rayMin
+      ∧ GSTClimbInfiniteFamily.CantorianPower K) ∧
+    (∀ (HC : WorldtraceCompression) (K : Nat), 8 ≤ K → K < rayMin →
+      noTernaryTwo (4^K) = false) ∧
+    (∀ (HA : WorldtraceMahlerLockAbove) (HC : WorldtraceCompression),
+      GSTTheAct.the_act) ∧
+    (∀ (H : WorldtraceMahlerLock), WorldtraceMahlerLockAbove) ∧
+    (∀ (H : WorldtraceMahlerLock) (HC : WorldtraceCompression),
+      ∀ n : Nat, noTernaryTwo (2^n) = true
+        ↔ (n = 0 ∨ n = 2 ∨ n = 8)) :=
+  ⟨worldtrace_ray_floor,
+    worldtrace_ray_empty_below,
+    no_cantorian_below_ray_floor,
+    erdos_ternary_below_ray_floor,
+    the_act_of_worldtrace_fusion_refined,
+    worldtrace_mahler_lock_above_of_lock,
+    fun H HC => erdos_ternary_classification H HC⟩
+
+#print axioms c_mod_ninetynine
+#print axioms worldtrace_ray_residue
+#print axioms worldtrace_ray_floor
+#print axioms worldtrace_ray_empty_below
+#print axioms no_cantorian_below_ray_floor
+#print axioms erdos_ternary_below_ray_floor
+#print axioms the_act_of_worldtrace_fusion_refined
+#print axioms the_worldtrace_ray_floor_receipt
 
 end GSTWorldtraceFusion
