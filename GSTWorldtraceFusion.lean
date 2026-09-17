@@ -236,7 +236,7 @@ theorem ghost_witness_descaled (u : Nat) (hg : GSTGhostRay.GhostRay u)
     rw [← pow_add]
     congr 1
     omega
-  rw [hp2, mul_assoc] at hm
+  rw [hp2, mul_assoc ((3:ℤ)^s) ((3:ℤ)^(s+2)) m] at hm
   exact ⟨m, mul_left_cancel₀ (by positivity : ((3:ℤ)^s) ≠ 0) hm⟩
 
 /-- **THE TERMINAL WORLDTRACE EXCLUSION (corrected).**  Under the
