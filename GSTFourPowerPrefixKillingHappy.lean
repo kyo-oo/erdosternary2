@@ -97,35 +97,33 @@ theorem source_happy_and_next_prefix_kill_to_relocated_happy
     physical_happy_to_commonTwo K sourceRow hsourceRow hSource
   exact prefix_killing_trit_to_physical_happy (K+1) p heq hkill
 
-/-- The first complete arithmetic relocation class.  If the next exponent is
-`1 mod 3`, scale `p = 0` has prefix `0`; the two prefix powers are `1` and `4`,
-whose row-one ternary digits are both `1`.  Trit `1` is therefore exactly the
-killing trit, so the target has an actual physical Happy row (indeed row one).
-No navigation or inherited existential witness is involved. -/
-theorem next_mod_three_one_relocated_happy
+/-- Exact low-scale target relocation class.  If the next exponent is `5` or
+`6 mod 9`, the row-two overlap theorem constructs `CommonTwo (K+1)` and the
+direct physical bridge returns an actual Happy row `q ≥ 1`. -/
+theorem next_mod_nine_five_or_six_relocated_happy
     (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
     (hSource :
       GSTCanonicalTailStateIso.HappyCell
         (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
         (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow))
-    (hNext : (K+1) % 3 = 1) :
+    (hNext : (K+1) % 9 = 5 ∨ (K+1) % 9 = 6) :
     ∃ q : Nat, 1 ≤ q ∧
       GSTCanonicalTailStateIso.HappyCell
         (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
         (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
-  apply source_happy_and_next_prefix_kill_to_relocated_happy K sourceRow 0
-      hsourceRow hSource
-  · norm_num [exponentPrefix, GSTFourPowerDirectResidue.digit3]
-  · simpa [exponentTrit, exponentPrefix,
-      GSTFourPowerDirectResidue.digit3] using hNext
+  have _hSourceCommon : CommonTwo K :=
+    physical_happy_to_commonTwo K sourceRow hsourceRow hSource
+  have hTargetCommon : CommonTwo (K+1) :=
+    commonTwo_of_mod9_five_or_six (K+1) hNext
+  exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
 
 #check prefix_killing_trit_to_physical_happy
 #check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
-#check next_mod_three_one_relocated_happy
+#check next_mod_nine_five_or_six_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
 #print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
-#print axioms next_mod_three_one_relocated_happy
+#print axioms next_mod_nine_five_or_six_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
