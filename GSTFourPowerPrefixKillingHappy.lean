@@ -117,13 +117,37 @@ theorem next_mod_nine_five_or_six_relocated_happy
     commonTwo_of_mod9_five_or_six (K+1) hNext
   exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
 
+/-- The next direct residue layer.  For each of the four exact mod-27 target
+classes already certified by row three, construct the relocated physical Happy
+row directly on `4^(K+1)`. -/
+theorem next_mod_twentyseven_row_three_relocated_happy
+    (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
+    (hSource :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
+        (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow))
+    (hNext :
+      (K+1) % 27 = 14 ∨ (K+1) % 27 = 18 ∨
+      (K+1) % 27 = 19 ∨ (K+1) % 27 = 25) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  have _hSourceCommon : CommonTwo K :=
+    physical_happy_to_commonTwo K sourceRow hsourceRow hSource
+  have hTargetCommon : CommonTwo (K+1) :=
+    commonTwo_of_mod27_row_three (K+1) hNext
+  exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
+
 #check prefix_killing_trit_to_physical_happy
 #check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
 #check next_mod_nine_five_or_six_relocated_happy
+#check next_mod_twentyseven_row_three_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
 #print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
 #print axioms next_mod_nine_five_or_six_relocated_happy
+#print axioms next_mod_twentyseven_row_three_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
