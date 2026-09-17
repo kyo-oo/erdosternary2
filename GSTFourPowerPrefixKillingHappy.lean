@@ -1,4 +1,5 @@
 import GSTFourPowerDirectHappyBridge
+import GSTFourPowerDirectResidue243
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -160,17 +161,42 @@ theorem next_mod_eightyone_row_four_relocated_happy
     commonTwo_of_mod81_row_four (K+1) hNext
   exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
 
+/-- Row five extends the same fresh arithmetic construction to all forty exact
+overlap classes modulo `243`.  The row-five classifier gives literal digit-2
+facts at row five for `4^(K+1)` and `4^(K+2)`; packaging those facts as
+`CommonTwo (K+1)` and applying the direct physical bridge yields an actual
+relocated Happy row. -/
+theorem next_mod_twohundredfortythree_row_five_relocated_happy
+    (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
+    (hSource :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
+        (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow))
+    (hNext : GSTFourPowerDirectResidue243.RowFiveClass ((K+1) % 243)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  have _hSourceCommon : CommonTwo K :=
+    physical_happy_to_commonTwo K sourceRow hsourceRow hSource
+  have hrow :=
+    GSTFourPowerDirectResidue243.row_five_overlap_of_mod243_classes (K+1) hNext
+  have hTargetCommon : CommonTwo (K+1) := ⟨5, by norm_num, hrow.1, hrow.2⟩
+  exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
+
 #check prefix_killing_trit_to_physical_happy
 #check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
 #check next_mod_nine_five_or_six_relocated_happy
 #check next_mod_twentyseven_row_three_relocated_happy
 #check next_mod_eightyone_row_four_relocated_happy
+#check next_mod_twohundredfortythree_row_five_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
 #print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
 #print axioms next_mod_nine_five_or_six_relocated_happy
 #print axioms next_mod_twentyseven_row_three_relocated_happy
 #print axioms next_mod_eightyone_row_four_relocated_happy
+#print axioms next_mod_twohundredfortythree_row_five_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
