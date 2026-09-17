@@ -35,12 +35,7 @@ theorem prefix_killing_trit_to_physical_happy
   exact commonTwo_to_physical_happy_row K hcommon
 
 /-- A real physical Happy row already contains an exact prefix-killing
-certificate for its own exponent.  Writing the physical row as `p+1`, the
-reverse Happy/common-two bridge gives the two literal digit-2 equations at
-that same row, and the exponent-trit normal form extracts the corresponding
-prefix equality and killing trit.  Thus no information is hidden in a
-navigation witness: every production Happy row has a concrete arithmetic
-certificate at the immediately lower exponent scale. -/
+certificate for its own exponent. -/
 theorem physical_happy_exposes_prefix_killing_certificate
     (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
     (hSource :
@@ -60,8 +55,6 @@ theorem physical_happy_exposes_prefix_killing_certificate
   have hcommon : CommonTwo K :=
     physical_happy_to_commonTwo K (p+1) (by omega) hSource
   rcases hcommon with ⟨q, hq, hs, ht⟩
-  -- The reverse bridge preserves the physical row definitionally, so expose
-  -- that same row directly rather than transporting an existential witness.
   have hs' : GSTFourPowerDirectResidue.digit3 (4^K) (p+1) = 2 := by
     unfold GSTCanonicalTailStateIso.HappyCell at hSource
     simpa [GSTCanonicalTailStateIso.digit3,
@@ -80,12 +73,7 @@ theorem physical_happy_exposes_prefix_killing_certificate
     (row_common_two_iff_prefix_killing_trit K p).1 ⟨hs', ht'⟩
   exact ⟨p, rfl, hcert.1, hcert.2⟩
 
-/-- Direct next-sheet relocation constructor.  Starting from the exact
-production source Happy hypothesis, a killing-prefix certificate for exponent
-`K+1` constructs an actual physical Happy row on `4^(K+1)`.  The source
-hypothesis is converted only to its arithmetic `CommonTwo K` content; no
-navigation or witness transport is used.  This isolates the remaining Task 3.3
-burden to producing the target exponent's prefix certificate. -/
+/-- Direct next-sheet relocation constructor from a target prefix certificate. -/
 theorem source_happy_and_next_prefix_kill_to_relocated_happy
     (K sourceRow p : Nat) (hsourceRow : 1 ≤ sourceRow)
     (hSource :
@@ -109,11 +97,35 @@ theorem source_happy_and_next_prefix_kill_to_relocated_happy
     physical_happy_to_commonTwo K sourceRow hsourceRow hSource
   exact prefix_killing_trit_to_physical_happy (K+1) p heq hkill
 
+/-- The first complete arithmetic relocation class.  If the next exponent is
+`1 mod 3`, scale `p = 0` has prefix `0`; the two prefix powers are `1` and `4`,
+whose row-one ternary digits are both `1`.  Trit `1` is therefore exactly the
+killing trit, so the target has an actual physical Happy row (indeed row one).
+No navigation or inherited existential witness is involved. -/
+theorem next_mod_three_one_relocated_happy
+    (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
+    (hSource :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
+        (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow))
+    (hNext : (K+1) % 3 = 1) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  apply source_happy_and_next_prefix_kill_to_relocated_happy K sourceRow 0
+      hsourceRow hSource
+  · norm_num [exponentPrefix, GSTFourPowerDirectResidue.digit3]
+  · simpa [exponentTrit, exponentPrefix,
+      GSTFourPowerDirectResidue.digit3] using hNext
+
 #check prefix_killing_trit_to_physical_happy
 #check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
+#check next_mod_three_one_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
 #print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
+#print axioms next_mod_three_one_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
