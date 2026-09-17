@@ -89,7 +89,6 @@ theorem ghost_residue_shape (u : Nat) (hg : GhostRay u) :
   | zero => intro h; exact absurd h (by omega)
   | succ j ih =>
       intro hk
-      rw [Nat.succ_eq_add_one]
       rcases Nat.lt_or_ge j 3 with hj | hj
       · -- j = 2: the base shape at depth three
         have hj2 : j = 2 := by omega
