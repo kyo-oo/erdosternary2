@@ -84,46 +84,56 @@ theorem ghost_residue_shape (u : Nat) (hg : GhostRay u) :
     ∀ k : Nat, 3 ≤ k →
       2 * ((GSTTowerFire.c (k-1) * u) % 3^k) + 9
         = 2 * ((GSTTowerFire.c 1 * u) % 9) + 3^k := by
-  intro k hk
-  induction hk with
-  | refl =>
-      rw [show 3 - 1 = 2 from by omega]
-      norm_num
-      obtain ⟨hlo, hhi⟩ := hg 3 (by omega)
-      rw [show 3 - 1 = 2 from by omega] at hlo hhi
-      norm_num at hlo hhi
-      have hm9 : (GSTTowerFire.c 2 * u) % 9 = (GSTTowerFire.c 1 * u) % 9 := by
-        rw [Nat.mul_mod, Nat.mul_mod, c_stable 1 2 (by omega)]
-      have hmod : ((GSTTowerFire.c 2 * u) % 27) % 9
-          = (GSTTowerFire.c 1 * u) % 9 := by
-        rw [Nat.mod_mod_of_dvd (by decide : (9:Nat) ∣ 27)]
-        exact hm9
-      have ha : (GSTTowerFire.c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
-      have hd := Nat.div_add_mod ((GSTTowerFire.c 2 * u) % 27) 9
-      omega
-  | step m hle ih =>
-      rw [show m + 1 - 1 = m from by omega]
-      obtain ⟨hlo, hhi⟩ := hg (m+1) (by omega)
-      rw [show m + 1 - 1 = m from by omega] at hlo hhi
-      set r' : Nat := (GSTTowerFire.c m * u) % 3^(m+1) with hr'
-      have hsub : r' - 3^m < 3^m := by omega
-      have hkey : r' - 3^m = r' % 3^m := by
-        have e1 : r' = (r' - 3^m) + 1 * 3^m := by
-          rw [one_mul]
-          exact (Nat.add_sub_cancel' hlo).symm
-        rw [e1, Nat.add_mul_mod_self_right, one_mul, Nat.add_sub_cancel,
-          Nat.mod_eq_of_lt hsub]
-      have hmodk : r' % 3^m = (GSTTowerFire.c m * u) % 3^m :=
-        Nat.mod_mod_of_dvd (pow_dvd_pow (3 : ℕ) (by omega))
-      have hcs : GSTTowerFire.c m % 3^m = GSTTowerFire.c (m-1) % 3^m := by
-        have h := c_stable (m-1) m (by omega)
-        rw [show (m-1)+1 = m from by omega] at h
-        exact h
-      have hstab : (GSTTowerFire.c m * u) % 3^m
-          = (GSTTowerFire.c (m-1) * u) % 3^m := by
-        rw [Nat.mul_mod, Nat.mul_mod, hcs]
-      rw [Nat.pow_succ]
-      omega
+  intro k
+  induction k with
+  | zero => intro h; exact absurd h (by omega)
+  | succ j ih =>
+      intro hk
+      rw [Nat.succ_eq_add_one]
+      rcases Nat.lt_or_ge j 3 with hj | hj
+      · -- j = 2: the base shape at depth three
+        have hj2 : j = 2 := by omega
+        subst hj2
+        norm_num
+        obtain ⟨hlo, hhi⟩ := hg 3 (by omega)
+        norm_num at hlo hhi
+        have hm9 : (GSTTowerFire.c 2 * u) % 9 = (GSTTowerFire.c 1 * u) % 9 := by
+          have hc : GSTTowerFire.c 2 % 9 = GSTTowerFire.c 1 % 9 := by
+            simpa using c_stable 1 2 (by omega)
+          rw [Nat.mul_mod, hc, ← Nat.mul_mod]
+        have hmod : ((GSTTowerFire.c 2 * u) % 27) % 9
+            = (GSTTowerFire.c 1 * u) % 9 := by
+          rw [Nat.mod_mod_of_dvd _ (by decide : (9:Nat) ∣ 27)]
+          exact hm9
+        have ha : (GSTTowerFire.c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
+        have hd := Nat.div_add_mod ((GSTTowerFire.c 2 * u) % 27) 9
+        omega
+      · -- j ≥ 3: the inductive lift through stabilization
+        have ihj := ih hj
+        rw [show j + 1 - 1 = j from by omega]
+        obtain ⟨hlo, hhi⟩ := hg (j+1) (by omega)
+        rw [show j + 1 - 1 = j from by omega] at hlo hhi
+        set r' : Nat := (GSTTowerFire.c j * u) % 3^(j+1) with hr'
+        have hsub : r' - 3^j < 3^j := by omega
+        have hkey : r' - 3^j = r' % 3^j := by
+          have e1 : r' = (r' - 3^j) + 1 * 3^j := by
+            rw [one_mul]
+            exact (Nat.add_sub_cancel' hlo).symm
+          rw [e1, Nat.add_mul_mod_self_right, one_mul, Nat.add_sub_cancel,
+            Nat.mod_eq_of_lt hsub]
+        have hmodk : (GSTTowerFire.c j * u) % 3^(j+1) % 3^j
+            = (GSTTowerFire.c j * u) % 3^j :=
+          Nat.mod_mod_of_dvd _ (pow_dvd_pow (3 : ℕ) (by omega))
+        rw [← hr'] at hmodk
+        have hcs : GSTTowerFire.c j % 3^j = GSTTowerFire.c (j-1) % 3^j := by
+          have h := c_stable (j-1) j (by omega)
+          rw [show (j-1)+1 = j from by omega] at h
+          exact h
+        have hstab : (GSTTowerFire.c j * u) % 3^j
+            = (GSTTowerFire.c (j-1) * u) % 3^j := by
+          rw [Nat.mul_mod, hcs, ← Nat.mul_mod]
+        rw [Nat.pow_succ]
+        omega
 
 /-! ## §4 Lemma B — the finite ghost congruence -/
 
@@ -137,8 +147,9 @@ theorem ghost_congruence (u : Nat) (hg : GhostRay u) (k : Nat) (hk : 3 ≤ k) :
     ∃ m : Nat, 2 * (GSTTowerFire.c (k-1) * u) + 9
       = 2 * ((GSTTowerFire.c 1 * u) % 9) + 3^k * m := by
   have hshape := ghost_residue_shape u hg k hk
-  obtain ⟨q, hq⟩ := Nat.div_add_mod (GSTTowerFire.c (k-1) * u) (3^k)
-  exact ⟨2*q + 1, by linarith⟩
+  have hq := Nat.div_add_mod (GSTTowerFire.c (k-1) * u) (3^k)
+  refine ⟨2 * (GSTTowerFire.c (k-1) * u / 3^k) + 1, ?_⟩
+  linarith
 
 /-! ## §5 Lemma C — the tower lock and the Mahler witness -/
 
@@ -223,7 +234,7 @@ theorem ghost_head_unit (u : Nat) (h3 : ¬ 3 ∣ u) :
   apply h3
   have hmod3 : ((GSTTowerFire.c 1 * u) % 9) % 3
       = (GSTTowerFire.c 1 * u) % 3 :=
-    Nat.mod_mod_of_dvd (by decide : (3:Nat) ∣ 9)
+    Nat.mod_mod_of_dvd (GSTTowerFire.c 1 * u) (by decide : (3:Nat) ∣ 9)
   have hcm : (GSTTowerFire.c 1 * u) % 3 = u % 3 := by
     rw [Nat.mul_mod, GSTTowerFire.c_mod3]
     omega
@@ -293,7 +304,7 @@ theorem the_act_of_mahler_compression
     rintro ⟨K, hK, hcp⟩
     obtain ⟨s, u, hsu, hu⟩ := exists_three_free_decomp K K (by omega) (by omega)
     exact terminal_ghost_exclusion H u hu (Hc K s u hsu hu hcp)
-  exact GSTTheAct.the_act_iff_hTailF.mp
+  exact GSTTheAct.the_act_iff_hTailF.mpr
     (GSTClimbInfiniteFamily.hTailF_of_no_cantorian hnc)
 
 /-! ## §10 Receipts -/
