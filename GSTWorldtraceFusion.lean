@@ -541,7 +541,9 @@ theorem cMod_spec (m : Nat) (hm : 0 < m) :
         subst hs'
         have hdef : cMod m (s'+2) = (cMod m (s'+1) + 3^(s'+2)
             * (cMod m (s'+1))^2 + 3^(2*(s'+1)+1) * (cMod m (s'+1))^3) % m := rfl
-        rw [hdef, show 2*(s'+1)+1 = 2*(s'+2)-1 from by omega]
+        rw [show s' + 2 - 1 = s' + 1 from by omega,
+          show 2*(s'+2)-1 = 2*(s'+1)+1 from by omega]
+        rw [hdef]
       set W := cMod m (t-1) with hWd
       set A := 3^t with hAd
       set B := 3^(2*t-1) with hBd
@@ -562,6 +564,7 @@ certificate constant (cross-checked externally against the direct
 big-integer evaluation of `(4^(3^99) - 1) / 3^100`). -/
 def L : Nat := 79542728300108260269642213640611567864276448732
 
+set_option maxRecDepth 100000 in
 theorem c_mod_ninetynine : c 99 % M = L := by
   obtain ⟨j, hj⟩ := cMod_spec M M_pos 99
   have hval : cMod M 99 = L := by decide
@@ -620,7 +623,7 @@ theorem worldtrace_ray_residue (a u : Nat)
   rw [hcsL] at hq
   have hqZ : ((c (max S 99) : Nat):ℤ)
       = (M:ℤ) * ((c (max S 99) / M : Nat):ℤ) + (L:ℤ) := by
-    exact_mod_cast hq
+    exact_mod_cast hq.symm
   have h2 : 2*(u:ℤ)*(L:ℤ) - (2*(a:ℤ) - 9)
       = (M:ℤ) * (t - 2*(u:ℤ)*((c (max S 99) / M : Nat):ℤ)) := by
     linear_combination hY - (2*(u:ℤ)) * hqZ
@@ -661,11 +664,17 @@ theorem worldtrace_ray_mod_one (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((1:Nat):ℤ) - 27))) :
     u % M = 442963202118286149036278158734808096675605174274 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 1 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) + (7:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (7:ℤ)*(INV:ℤ)
-      = (M:ℤ)*3 + 72414318613725182000182971030813176026502347727 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*3
+      + 72414318613725182000182971030813176026502347727 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 442963202118286149036278158734808096675605174274
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 theorem worldtrace_ray_mod_two (u : Nat)
@@ -673,11 +682,17 @@ theorem worldtrace_ray_mod_two (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((2:Nat):ℤ) - 27))) :
     u % M = 390027647331920296602550274777094536582876199053 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 2 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) + (5:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (5:ℤ)*(INV:ℤ)
-      = (M:ℤ)*2 + 125349873400091034433910854988526736119231322948 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*2
+      + 125349873400091034433910854988526736119231322948 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 390027647331920296602550274777094536582876199053
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 theorem worldtrace_ray_mod_four (u : Nat)
@@ -685,11 +700,17 @@ theorem worldtrace_ray_mod_four (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((4:Nat):ℤ) - 27))) :
     u % M = 284156537759188591735094506861667416397418248611 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 4 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) + (1:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (1:ℤ)*(INV:ℤ)
-      = (M:ℤ)*0 + 231220982972822739301366622903953856304689273390 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*0
+      + 231220982972822739301366622903953856304689273390 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 284156537759188591735094506861667416397418248611
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 theorem worldtrace_ray_mod_five (u : Nat)
@@ -697,11 +718,17 @@ theorem worldtrace_ray_mod_five (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((5:Nat):ℤ) - 27))) :
     u % M = 231220982972822739301366622903953856304689273390 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 5 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) - (1:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (1:ℤ)*(INV:ℤ)
-      = (M:ℤ)*0 + 231220982972822739301366622903953856304689273390 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*0
+      + 231220982972822739301366622903953856304689273390 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 231220982972822739301366622903953856304689273390
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 theorem worldtrace_ray_mod_seven (u : Nat)
@@ -709,11 +736,17 @@ theorem worldtrace_ray_mod_seven (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((7:Nat):ℤ) - 27))) :
     u % M = 125349873400091034433910854988526736119231322948 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 7 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) - (5:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (5:ℤ)*(INV:ℤ)
-      = (M:ℤ)*2 + 125349873400091034433910854988526736119231322948 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*2
+      + 125349873400091034433910854988526736119231322948 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 125349873400091034433910854988526736119231322948
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 theorem worldtrace_ray_mod_eight (u : Nat)
@@ -721,11 +754,17 @@ theorem worldtrace_ray_mod_eight (u : Nat)
       (3:ℤ)^k ∣ (6*(u:ℤ)*((c s : Nat):ℤ) - (6*((8:Nat):ℤ) - 27))) :
     u % M = 72414318613725182000182971030813176026502347727 := by
   obtain ⟨W, hW⟩ := worldtrace_ray_residue 8 u H
+  have hMval : (M:ℤ) = 515377520732011331036461129765621272702107522001 := by decide
+  rw [hMval] at hW
+  have hWZ : (u:ℤ) - (7:ℤ)*(INV:ℤ)
+      = (515377520732011331036461129765621272702107522001:ℤ) * W := by
+    linear_combination hW
   have hdec : (7:ℤ)*(INV:ℤ)
-      = (M:ℤ)*3 + 72414318613725182000182971030813176026502347727 := by decide
-  have hMval : M = 515377520732011331036461129765621272702107522001 := by decide
-  have hdm := Nat.div_add_mod u M
-  have hmb : u % M < M := Nat.mod_lt u M_pos
+      = (515377520732011331036461129765621272702107522001:ℤ)*3
+      + 72414318613725182000182971030813176026502347727 := by decide
+  show u % 515377520732011331036461129765621272702107522001
+      = 72414318613725182000182971030813176026502347727
+  have hdm := Nat.div_add_mod u 515377520732011331036461129765621272702107522001
   omega
 
 /-- **THE WORLDTRACE RAY FLOOR.**  Every three-free core on the
@@ -821,7 +860,8 @@ theorem erdos_ternary_below_ray_floor (HC : WorldtraceCompression)
   push_neg at hnc
   obtain ⟨p, _, hp⟩ := hnc
   exact has_two_imp_not_no_two (4^K)
-    (hasTernaryTwo_of_digit (4^K) p (by simpa [digit3] using hp))
+    (hasTernaryTwo_of_digit (4^K) p
+      (by simpa [GSTCanonicalSevenAxisBridge.digit3] using hp))
 
 /-! ## §14 THE REFINED FUSION — the Mahler input restricted above the
 floor
