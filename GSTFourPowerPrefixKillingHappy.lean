@@ -139,15 +139,38 @@ theorem next_mod_twentyseven_row_three_relocated_happy
     commonTwo_of_mod27_row_three (K+1) hNext
   exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
 
+/-- Row four gives the next fresh-production relocation layer.  Any target
+exponent in one of the fourteen exact overlap classes modulo 81 has a literal
+common-two witness at row four, hence a physical Happy row on `4^(K+1)`. -/
+theorem next_mod_eightyone_row_four_relocated_happy
+    (K sourceRow : Nat) (hsourceRow : 1 ≤ sourceRow)
+    (hSource :
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^K) sourceRow)
+        (GSTCanonicalTailStateIso.digit3 (4^K) sourceRow))
+    (hNext :
+      GSTFourPowerDirectResidue81.RowFourClass ((K+1) % 81)) :
+    ∃ q : Nat, 1 ≤ q ∧
+      GSTCanonicalTailStateIso.HappyCell
+        (GSTCanonicalTailStateIso.carry4 (4^(K+1)) q)
+        (GSTCanonicalTailStateIso.digit3 (4^(K+1)) q) := by
+  have _hSourceCommon : CommonTwo K :=
+    physical_happy_to_commonTwo K sourceRow hsourceRow hSource
+  have hTargetCommon : CommonTwo (K+1) :=
+    commonTwo_of_mod81_row_four (K+1) hNext
+  exact commonTwo_to_physical_happy_row (K+1) hTargetCommon
+
 #check prefix_killing_trit_to_physical_happy
 #check physical_happy_exposes_prefix_killing_certificate
 #check source_happy_and_next_prefix_kill_to_relocated_happy
 #check next_mod_nine_five_or_six_relocated_happy
 #check next_mod_twentyseven_row_three_relocated_happy
+#check next_mod_eightyone_row_four_relocated_happy
 #print axioms prefix_killing_trit_to_physical_happy
 #print axioms physical_happy_exposes_prefix_killing_certificate
 #print axioms source_happy_and_next_prefix_kill_to_relocated_happy
 #print axioms next_mod_nine_five_or_six_relocated_happy
 #print axioms next_mod_twentyseven_row_three_relocated_happy
+#print axioms next_mod_eightyone_row_four_relocated_happy
 
 end GSTFourPowerPrefixKillingHappy
