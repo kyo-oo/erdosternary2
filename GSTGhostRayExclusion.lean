@@ -1,0 +1,304 @@
+import Mathlib
+import GSTTowerFire
+import GSTDiagonalRead
+import GSTTheAct
+import GSTClimbInfiniteFamily
+
+set_option maxHeartbeats 20000000
+
+/-!
+# THE GHOST-RAY EXCLUSION — terminal formalization
+
+Formalization of `upload/WORLDTRACE_GHOST_RAY_EXCLUSION_PROOF.md`:
+the terminal Worldtrace ghost-ray exclusion theorem, with the one
+external input (Mahler's 3-adic exponential transcendence) stated as an
+explicit hypothesis in **pure integer divisibility form** — no p-adic
+analysis objects are needed anywhere.
+
+The chain (document §17):
+
+* a ghost ray is the stabilized middle-third condition
+  `∀ k ≥ 3, 3^(k-1) ≤ (c (k-1) * u) % 3^k < 2 * 3^(k-1)`;
+* the ghost forces the exact all-ones tail shape
+  `2 * ((c (k-1) * u) % 3^k) + 9 = 2 * a + 3^k` with `a < 9`, `3 ∤ a`;
+* hence the tower lock
+  `2u(4^(3^s) - 1) - (2a - 9) * 3^(s+1) = 3^(2s+2) * m`;
+* hence the Mahler witness
+  `2u(4^(3^s) - 1) - (6a - 27) * 3^s = 3^(2s+2) * m` is divisible by
+  every power of 3, i.e. the rational sequence `(4^(3^s) - 1) / 3^s`
+  converges 3-adically to the rational `(6a - 27) / (2u)`;
+* the external transcendence input denies exactly this;
+* with the uniform compression bridge (every Cantorian counterexample's
+  three-free core lies on a ghost ray) the act closes.
+
+The tower coefficient is `GSTTowerFire.c s = (4^(3^s) - 1) / 3^(s+1)`,
+the document's `C_s = lteCoeff s = ωCutWord s 1`.
+-/
+
+namespace GSTGhostRay
+
+/-! ## §1 The ghost ray -/
+
+/-- **THE GHOST RAY** (document (G)): the stabilized scaled LTE diagonal
+of the three-free core `u` sits in the exact middle third at every
+ternary depth `k ≥ 3` — every stabilized digit from position two on is
+one. -/
+def GhostRay (u : Nat) : Prop :=
+  ∀ k : Nat, 3 ≤ k →
+    3^(k-1) ≤ (GSTTowerFire.c (k-1) * u) % 3^k
+    ∧ (GSTTowerFire.c (k-1) * u) % 3^k < 2 * 3^(k-1)
+
+/-! ## §2 The tower bridge — `GSTTowerFire.c` is the canonical LTE tower -/
+
+/-- The tower coefficient `c n = (4^(3^n) - 1) / 3^(n+1)` is the
+canonical LTE coefficient `lteCoeff n`: both satisfy the same exact
+LTE identity, so they are equal. -/
+theorem c_eq_lteCoeff (n : Nat) :
+    GSTTowerFire.c n = GSTCanonicalTailLTE.lteCoeff n := by
+  have h1 := GSTTowerFire.four_pow_three_pow_eq n
+  have h2 := GSTCanonicalTailLTE.pow4_three_power_lte_exact n
+  have h3 : 3^(n+1) * GSTTowerFire.c n
+      = 3^(n+1) * GSTCanonicalTailLTE.lteCoeff n := by
+    linarith
+  exact Nat.eq_of_mul_eq_mul_left (by positivity) h3
+
+/-- **Coefficient stabilization** for the tower: `c w ≡ c v [MOD 3^(v+1)]`
+for `v ≤ w` — the document (2.2), through the repo's own green law. -/
+theorem c_stable (v w : Nat) (hw : v ≤ w) :
+    GSTTowerFire.c w % 3^(v+1) = GSTTowerFire.c v % 3^(v+1) := by
+  rw [c_eq_lteCoeff, c_eq_lteCoeff]
+  exact GSTDiagonalRead.lteCoeff_stable v w hw
+
+/-! ## §3 Lemma A — the exact all-ones tail shape -/
+
+/-- **LEMMA A (the exact ghost shape, doubled form).**  A ghost ray
+forces the residue of `c (k-1) * u` modulo `3^k` to be the all-ones
+tail `a + (3^k - 9) / 2` with the fixed head `a = (c 1 * u) % 9` —
+stated free of division as
+`2 * ((c (k-1) * u) % 3^k) + 9 = 2 * a + 3^k`.
+
+The induction needs only the ghost condition at each depth plus
+coefficient stabilization: the top digit is one, and the tail below is
+the previous depth's shape. -/
+theorem ghost_residue_shape (u : Nat) (hg : GhostRay u) :
+    ∀ k : Nat, 3 ≤ k →
+      2 * ((GSTTowerFire.c (k-1) * u) % 3^k) + 9
+        = 2 * ((GSTTowerFire.c 1 * u) % 9) + 3^k := by
+  intro k hk
+  induction hk with
+  | refl =>
+      rw [show 3 - 1 = 2 from by omega]
+      norm_num
+      obtain ⟨hlo, hhi⟩ := hg 3 (by omega)
+      rw [show 3 - 1 = 2 from by omega] at hlo hhi
+      norm_num at hlo hhi
+      have hm9 : (GSTTowerFire.c 2 * u) % 9 = (GSTTowerFire.c 1 * u) % 9 := by
+        rw [Nat.mul_mod, Nat.mul_mod, c_stable 1 2 (by omega)]
+      have hmod : ((GSTTowerFire.c 2 * u) % 27) % 9
+          = (GSTTowerFire.c 1 * u) % 9 := by
+        rw [Nat.mod_mod_of_dvd (by decide : (9:Nat) ∣ 27)]
+        exact hm9
+      have ha : (GSTTowerFire.c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
+      have hd := Nat.div_add_mod ((GSTTowerFire.c 2 * u) % 27) 9
+      omega
+  | step m hle ih =>
+      rw [show m + 1 - 1 = m from by omega]
+      obtain ⟨hlo, hhi⟩ := hg (m+1) (by omega)
+      rw [show m + 1 - 1 = m from by omega] at hlo hhi
+      set r' : Nat := (GSTTowerFire.c m * u) % 3^(m+1) with hr'
+      have hsub : r' - 3^m < 3^m := by omega
+      have hkey : r' - 3^m = r' % 3^m := by
+        have e1 : r' = (r' - 3^m) + 1 * 3^m := by
+          rw [one_mul]
+          exact (Nat.add_sub_cancel' hlo).symm
+        rw [e1, Nat.add_mul_mod_self_right, one_mul, Nat.add_sub_cancel,
+          Nat.mod_eq_of_lt hsub]
+      have hmodk : r' % 3^m = (GSTTowerFire.c m * u) % 3^m :=
+        Nat.mod_mod_of_dvd (pow_dvd_pow (3 : ℕ) (by omega))
+      have hcs : GSTTowerFire.c m % 3^m = GSTTowerFire.c (m-1) % 3^m := by
+        have h := c_stable (m-1) m (by omega)
+        rw [show (m-1)+1 = m from by omega] at h
+        exact h
+      have hstab : (GSTTowerFire.c m * u) % 3^m
+          = (GSTTowerFire.c (m-1) * u) % 3^m := by
+        rw [Nat.mul_mod, Nat.mul_mod, hcs]
+      rw [Nat.pow_succ]
+      omega
+
+/-! ## §4 Lemma B — the finite ghost congruence -/
+
+/-- **LEMMA B (the fundamental finite ghost congruence, document (5.5)).**
+A ghost ray satisfies
+`2 * (c (k-1) * u) + 9 = 2 * a + 3^k * m` for every depth `k ≥ 3`
+with the fixed head `a = (c 1 * u) % 9`: the infinite middle-third ray
+compresses to one fixed signed constant approximated to arbitrarily
+high 3-adic precision by the tower products. -/
+theorem ghost_congruence (u : Nat) (hg : GhostRay u) (k : Nat) (hk : 3 ≤ k) :
+    ∃ m : Nat, 2 * (GSTTowerFire.c (k-1) * u) + 9
+      = 2 * ((GSTTowerFire.c 1 * u) % 9) + 3^k * m := by
+  have hshape := ghost_residue_shape u hg k hk
+  obtain ⟨q, hq⟩ := Nat.div_add_mod (GSTTowerFire.c (k-1) * u) (3^k)
+  exact ⟨2*q + 1, by linarith⟩
+
+/-! ## §5 Lemma C — the tower lock and the Mahler witness -/
+
+/-- **LEMMA C (the tower lock, document (7.1)).**  A ghost ray locks the
+LTE tower itself: for every `s ≥ 2`,
+`2u(4^(3^s) - 1) - (2a - 9) * 3^(s+1) = 3^(2s+2) * m` over the
+integers — pure ordinary arithmetic, the finite avatar of the ghost. -/
+theorem ghost_tower_lock (u : Nat) (hg : GhostRay u) (s : Nat) (hs : 2 ≤ s) :
+    ∃ m : ℤ, (2*(u:ℤ) * ((4:ℤ)^(3^s) - 1)
+        - (2*(((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ) - 9) * (3:ℤ)^(s+1))
+      = (3:ℤ)^(2*s+2) * m := by
+  obtain ⟨m₀, hm₀⟩ := ghost_congruence u hg (s+1) (by omega)
+  have h4ℤ : (4:ℤ)^(3^s)
+      = 1 + (3:ℤ)^(s+1) * ((GSTTowerFire.c s : Nat) : ℤ) := by
+    exact_mod_cast GSTTowerFire.four_pow_three_pow_eq s
+  have hcongℤ : 2 * (((GSTTowerFire.c s : Nat) : ℤ) * (u:ℤ)) + 9
+      = 2 * (((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ)
+        + (3:ℤ)^(s+1) * (m₀ : ℤ) := by
+    exact_mod_cast hm₀
+  have hexpℤ : (3:ℤ)^(s+1) * (3:ℤ)^(s+1) = (3:ℤ)^(2*s+2) := by
+    rw [← pow_add]
+    congr 1
+    omega
+  refine ⟨(m₀ : ℤ), ?_⟩
+  linear_combination (2*(u:ℤ)) * h4ℤ + (3:ℤ)^(s+1) * hcongℤ + (m₀:ℤ) * hexpℤ
+
+/-- **The Mahler witness (document §6-§7).**  A ghost ray makes the
+integer sequence
+`W_s = 2u(4^(3^s) - 1) - (6a - 27) * 3^s`
+divisible by `3^(2s+2)` at every depth `s ≥ 2`: the rational sequence
+`(4^(3^s) - 1) / 3^s` converges 3-adically to the rational
+`(6a - 27) / (2u)`. -/
+theorem ghost_witness (u : Nat) (hg : GhostRay u) (s : Nat) (hs : 2 ≤ s) :
+    ∃ m : ℤ, (2*(u:ℤ) * ((4:ℤ)^(3^s) - 1)
+        - ((6*(((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ) - 27) * (3:ℤ)^s))
+      = (3:ℤ)^(2*s+2) * m := by
+  obtain ⟨m, hm⟩ := ghost_tower_lock u hg s hs
+  refine ⟨m, ?_⟩
+  have hring : ((6*(((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ) - 27) * (3:ℤ)^s)
+      = (2*(((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ) - 9) * (3:ℤ)^(s+1) := by
+    rw [pow_succ]
+    ring
+  linear_combination hring + hm
+
+/-- **The witness convergence.**  For every target precision `k` there
+is a depth `S` such that all deeper witnesses are divisible by `3^k`. -/
+theorem ghost_convergence (u : Nat) (hg : GhostRay u) :
+    ∀ (k : Nat), ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (2*(u:ℤ) * ((4:ℤ)^(3^s) - 1)
+        - ((6*(((GSTTowerFire.c 1 * u) % 9 : Nat) : ℤ) - 27) * (3:ℤ)^s)) := by
+  intro k
+  refine ⟨max 2 k, ?_⟩
+  intro s hs
+  obtain ⟨m, hm⟩ := ghost_witness u hg s (by omega)
+  exact (pow_dvd_pow (3:ℤ) (by omega)).trans ⟨m, hm⟩
+
+/-! ## §6 The external transcendence input, in pure integer form -/
+
+/-- **THE MAHLER INPUT (external hypothesis, pure ℤ form).**  No
+admissible pair `(a, u)` makes the rational `(6a - 27)/(2u)` the
+3-adic limit of the sequence `(4^(3^s) - 1)/3^s`.
+
+This is the rational-lock denial of Mahler's 3-adic exponential
+transcendence theorem (a standard published theorem, 1932): if the
+limit were the nonzero algebraic `α = (6a - 27)/(2u)` with
+`v₃(α) = 1`, then `exp₃(α)` would be transcendental, but
+`exp₃(log₃ 4) = 4` is algebraic.  Stated here WITHOUT any p-adic
+analysis objects: 3-adic convergence of a rational sequence to a
+rational limit is exactly the displayed divisibility. -/
+def mahler_log3_not_rational : Prop :=
+  ¬ ∃ (a u : Nat), (a < 9 ∧ ¬ 3 ∣ a) ∧ (¬ 3 ∣ u) ∧
+    ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3:ℤ)^k ∣ (2*(u:ℤ) * ((4:ℤ)^(3^s) - 1) - ((6*(a:ℤ) - 27) * (3:ℤ)^s))
+
+/-! ## §7 The head is a three-adic unit -/
+
+/-- The ghost head `a = (c 1 * u) % 9` is not divisible by three: the
+tower coefficient is a 3-adic unit and the core is three-free. -/
+theorem ghost_head_unit (u : Nat) (h3 : ¬ 3 ∣ u) :
+    ¬ 3 ∣ (GSTTowerFire.c 1 * u) % 9 := by
+  intro hd
+  apply h3
+  have hmod3 : ((GSTTowerFire.c 1 * u) % 9) % 3
+      = (GSTTowerFire.c 1 * u) % 3 :=
+    Nat.mod_mod_of_dvd (by decide : (3:Nat) ∣ 9)
+  have hcm : (GSTTowerFire.c 1 * u) % 3 = u % 3 := by
+    rw [Nat.mul_mod, GSTTowerFire.c_mod3]
+    omega
+  have h0 : ((GSTTowerFire.c 1 * u) % 9) % 3 = 0 :=
+    Nat.dvd_iff_mod_eq_zero.mp hd
+  have : u % 3 = 0 := by omega
+  exact Nat.dvd_iff_mod_eq_zero.mpr this
+
+/-! ## §8 THE CROWN — the terminal ghost-ray exclusion -/
+
+/-- **TERMINAL GHOST-RAY EXCLUSION (document §12).**  Under the external
+Mahler input, no three-free natural number lies on a ghost ray: the
+all-ones middle-third diagonal would rationally lock the LTE tower,
+forcing a rational value of the 3-adic logarithm of four, which the
+3-adic exponential transcendence forbids. -/
+theorem terminal_ghost_exclusion
+    (H : mahler_log3_not_rational) (u : Nat) (h3 : ¬ 3 ∣ u) :
+    ¬ GhostRay u := by
+  intro hg
+  have hlt : (GSTTowerFire.c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
+  have hunit : ¬ 3 ∣ (GSTTowerFire.c 1 * u) % 9 := ghost_head_unit u h3
+  exact H ⟨(GSTTowerFire.c 1 * u) % 9, u, ⟨hlt, hunit⟩, h3,
+    ghost_convergence u hg⟩
+
+/-! ## §9 The compression bridge and THE ACT -/
+
+/-- **THE UNIFORM COMPRESSION BRIDGE (the corpus's named GAP-A2).**
+Every Cantorian counterexample's three-free core lies on a ghost ray
+at every depth.  This is the one seam the ghost-ray document leaves
+open (its §16 closure claim needs it): a counterexample `K = 3^s * u`
+certifies the middle-third geometry only up to depth `~ s+1`, and the
+all-depths lift is the infinitary compression.  Stated here as an
+explicit hypothesis — the honest form of the remaining input. -/
+def UniformCompression : Prop :=
+  ∀ (K s u : Nat), K = 3^s * u → ¬ 3 ∣ u →
+    GSTClimbInfiniteFamily.CantorianPower K → GhostRay u
+
+/-- Every positive natural decomposes as `3^s * u` with `u` three-free. -/
+theorem exists_three_free_decomp :
+    ∀ (fuel K : Nat), 1 ≤ K → K ≤ fuel →
+      ∃ s u : Nat, K = 3^s * u ∧ ¬ 3 ∣ u := by
+  intro fuel
+  induction fuel with
+  | zero => intro K hK hKF; omega
+  | succ fuel ih =>
+      intro K hK hKF
+      by_cases h3 : 3 ∣ K
+      · obtain ⟨K', hK'⟩ := h3
+        have hK'1 : 1 ≤ K' := by omega
+        have hlt : K' ≤ fuel := by omega
+        obtain ⟨s, u, hsu, hu⟩ := ih K' hK'1 hlt
+        refine ⟨s+1, u, ?_, hu⟩
+        calc K = 3 * K' := hK'
+          _ = 3 * (3^s * u) := by rw [hsu]
+          _ = 3^(s+1) * u := by rw [Nat.pow_succ]; ring
+      · exact ⟨0, K, by simp, h3⟩
+
+/-- **THE ACT CLOSES under the two named external inputs.**  Mahler's
+3-adic exponential transcendence (in pure integer form) plus the
+uniform compression bridge — and the even-exponent Erdős ternary
+statement follows through the repo's own green sockets: no Cantorian
+exponent from eight on, `hTailF`, the act. -/
+theorem the_act_of_mahler_compression
+    (H : mahler_log3_not_rational) (Hc : UniformCompression) :
+    GSTTheAct.the_act := by
+  have hnc : ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K := by
+    rintro ⟨K, hK, hcp⟩
+    obtain ⟨s, u, hsu, hu⟩ := exists_three_free_decomp K K (by omega) (by omega)
+    exact terminal_ghost_exclusion H u hu (Hc K s u hsu hu hcp)
+  exact GSTTheAct.the_act_iff_hTailF.mp
+    (GSTClimbInfiniteFamily.hTailF_of_no_cantorian hnc)
+
+/-! ## §10 Receipts -/
+
+#print axioms terminal_ghost_exclusion
+#print axioms the_act_of_mahler_compression
+
+end GSTGhostRay
