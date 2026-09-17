@@ -115,9 +115,7 @@ theorem ghost_residue_shape (u : Nat) (hg : GhostRay u) :
         set r' : Nat := (GSTTowerFire.c j * u) % 3^(j+1) with hr'
         have hsub : r' - 3^j < 3^j := by omega
         have hkey : r' - 3^j = r' % 3^j := by
-          have e1 : r' = (r' - 3^j) + 1 * 3^j := by
-            rw [one_mul]
-            exact (Nat.add_sub_cancel' hlo).symm
+          have e1 : r' = (r' - 3^j) + 1 * 3^j := by omega
           rw [e1, Nat.add_mul_mod_self_right, one_mul, Nat.add_sub_cancel,
             Nat.mod_eq_of_lt hsub]
         have hmodk : (GSTTowerFire.c j * u) % 3^(j+1) % 3^j
