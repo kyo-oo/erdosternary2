@@ -133,6 +133,13 @@ jobs:
           lake build GSTTowerFire 2>&1 | tee towerfire-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' towerfire-build.log
 
+      - name: Worldtrace fusion module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTWorldtraceFusion 2>&1 | tee worldtracefusion-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' worldtracefusion-build.log
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail

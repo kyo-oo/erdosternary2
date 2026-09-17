@@ -8,6 +8,7 @@ import GSTTowerFire
 import GSTTowerAxis
 import GSTWorldtraceArithmetic
 import GSTGhostRayExclusion
+import GSTWorldtraceFusion
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -150,6 +151,42 @@ theorem the_ghost_ray_wire :
    GSTGhostRay.the_act_of_mahler_compression⟩
 
 #print axioms the_ghost_ray_wire
+
+/-- **THE WORLDTRACE FUSION WIRE.**  The boss's transformation, landed
+at the monolith's entry face: the two named inputs of the ghost-ray
+file are restated in complete worldtrace arithmetic form over the
+monolith's own LTE tower `c`, and the fusion of the two corrected
+inputs yields the complete classifications.  The two vacuity receipts
+are carried at the face itself: the OLD ghost-file forms were FALSE as
+stated (the Mahler witness carried the trivial `3^s` factor inside its
+divisibility; the compression quantifier included the certified
+Cantorian `K = 1`), so every theorem assuming them was vacuous — the
+corrected worldtrace forms below carry the real content.  Crowns:
+the complete Cantorian universe `{0, 1, 4}` and the complete Erdős
+ternary exception set `{0, 2, 8}`. -/
+theorem the_worldtrace_fusion_wire :
+    (¬ GSTGhostRay.mahler_log3_not_rational) ∧
+    (¬ GSTGhostRay.UniformCompression) ∧
+    (∀ (H : GSTWorldtraceFusion.WorldtraceMahlerLock) (u : Nat), ¬ 3 ∣ u →
+      ¬ GSTWorldtraceFusion.WTGhostRay u) ∧
+    (∀ (H : GSTWorldtraceFusion.WorldtraceMahlerLock)
+        (Hc : GSTWorldtraceFusion.WorldtraceCompression), GSTTheAct.the_act) ∧
+    (∀ (H : GSTWorldtraceFusion.WorldtraceMahlerLock)
+        (Hc : GSTWorldtraceFusion.WorldtraceCompression),
+      ∀ K : Nat, GSTClimbInfiniteFamily.CantorianPower K
+        ↔ (K = 0 ∨ K = 1 ∨ K = 4)) ∧
+    (∀ (H : GSTWorldtraceFusion.WorldtraceMahlerLock)
+        (Hc : GSTWorldtraceFusion.WorldtraceCompression),
+      ∀ n : Nat, noTernaryTwo (2^n) = true
+        ↔ (n = 0 ∨ n = 2 ∨ n = 8)) :=
+  ⟨GSTWorldtraceFusion.ghost_mahler_as_stated_is_false,
+    GSTWorldtraceFusion.ghost_compression_as_stated_is_false,
+    GSTWorldtraceFusion.terminal_worldtrace_exclusion,
+    GSTWorldtraceFusion.the_act_of_worldtrace_fusion,
+    GSTWorldtraceFusion.cantorian_universe_classification,
+    GSTWorldtraceFusion.erdos_ternary_classification⟩
+
+#print axioms the_worldtrace_fusion_wire
 
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do
