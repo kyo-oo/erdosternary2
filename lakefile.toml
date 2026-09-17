@@ -19,6 +19,7 @@ roots = [
   "GSTFourPowerDirectResidue",
   "GSTFourPowerDirectResidue27",
   "GSTFourPowerDirectResidue81",
+  "GSTFourPowerDirectResidue243",
   "GSTFourPowerExponentTritObstruction",
   "GSTFourPowerDirectExistence",
   "GSTFourPowerDirectAdditionCarry",
