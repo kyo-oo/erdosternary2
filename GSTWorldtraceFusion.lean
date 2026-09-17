@@ -237,7 +237,7 @@ theorem ghost_witness_descaled (u : Nat) (hg : GSTGhostRay.GhostRay u)
     congr 1
     omega
   rw [hp2] at hm
-  exact ⟨m, mul_left_cancel₀ (by positivity) hm⟩
+  exact ⟨m, mul_left_cancel₀ (by positivity : ((3:ℤ)^s) ≠ 0) hm⟩
 
 /-- **THE TERMINAL WORLDTRACE EXCLUSION (corrected).**  Under the
 worldtrace-form Mahler input, no three-free natural's worldtrace is
