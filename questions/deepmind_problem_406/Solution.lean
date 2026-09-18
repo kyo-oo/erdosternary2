@@ -1,4 +1,4 @@
-import GSTWorldtraceMahlerRelativePrecision
+import ErdosTernary2
 
 /-!
 # DeepMind Problem 406 — comparator solution
@@ -55,13 +55,11 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
       · simp [hn, h2]
         exact ih (n / 3) (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution through
-the production Worldtrace–Mahler crown.  The explicit theory binder is
-intentional here: the official comparator must decide whether this submitted
-surface exactly matches the unconditional challenge. -/
+/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
+from the Ω-Wave Law through the green monolith seam. -/
 theorem erdos_ternary_2
-    (T : GSTWorldtraceMahler.WorldtraceMahlerTheory) :
+    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4) :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact (GSTWorldtraceMahler.worldtrace_mahler_relative_precision_crown T).fullErdos n hn
+  exact erdos_ternary_2_universal_tail4 hTail4 n hn

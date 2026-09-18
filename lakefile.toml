@@ -120,9 +120,6 @@ roots = [
   "GSTWorldtraceArithmetic",
   "GSTGhostRayExclusion",
   "GSTWorldtraceMahlerRelativePrecision",
-  "GSTFinalPrefixOneDirectU2DCollision",
-  "GSTFinalResidualConnector",
-  "GSTResidualOmegaRevival",
 ]
 
 [[lean_exe]]
