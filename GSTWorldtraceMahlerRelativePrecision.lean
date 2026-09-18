@@ -88,7 +88,8 @@ depth; meaningful convergence must therefore ask for precision above it. -/
 theorem worldtraceWitness_baseline (u s : Nat) :
     (3 : ℤ)^(s+1) ∣ worldtraceWitness u s := by
   rw [worldtraceWitness_factor]
-  exact dvd_mul_right _ _
+  exact ⟨2 * (u : ℤ) * (GSTTowerFire.c s : ℤ)
+    - 2 * (worldtraceHead u : ℤ) + 9, rfl⟩
 
 /-- The existing ghost theorem is strictly stronger than the new
 terminal interface: its quadratic-depth witness gives every requested
