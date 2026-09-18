@@ -1,0 +1,38 @@
+name: Prefix One Collision Repair Audit
+
+on:
+  push:
+    branches:
+      - audit/prefix-one-collision-repair
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      - name: Install exact Lean RC2
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake exe cache get
+      - name: Compile level-one residual collision
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFinalResidualCollision.lean 2>&1 | tee residual-collision.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' residual-collision.log
+      - name: Compile direct U2D collision
+        if: success()
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFinalPrefixOneDirectU2DCollision.lean 2>&1 | tee direct-u2d.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' direct-u2d.log
