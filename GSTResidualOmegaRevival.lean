@@ -1,4 +1,5 @@
 import ErdosTernary2
+import GSTTheAct
 
 namespace GSTResidualOmegaRevival
 
@@ -162,7 +163,9 @@ theorem four_power_good_witness_div_three
       rw [hs1] at hk_eq
       norm_num at hk_eq
       by_contra hnot
-      have hb_eq : k / 3 = 1 := by omega
+      have hb' : 1 ≤ k / 3 := by simpa [hs1] using hb
+      have hle : k / 3 ≤ 1 := Nat.le_of_not_gt hnot
+      have hb_eq : k / 3 = 1 := Nat.le_antisymm hle hb'
       rw [hb_eq] at hk_eq
       omega
   have hnav : GSTNavigationWitness
