@@ -6,6 +6,8 @@ on:
       - audit/problem406-8427-closure
     paths:
       - GSTResidualOmegaRevival.lean
+      - questions/deepmind_problem_406/Challenge.lean
+      - questions/deepmind_problem_406/Solution.lean
       - GSTFinalPrefixOneDirectU2DCollision.lean
       - GSTFinalResidualConnector.lean
       - lakefile.toml
