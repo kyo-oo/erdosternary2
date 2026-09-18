@@ -1,3 +1,4 @@
+import ErdosTernary2
 import GSTGraphV2ProductionLaws
 
 set_option maxRecDepth 1000000
