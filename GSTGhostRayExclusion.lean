@@ -203,27 +203,9 @@ theorem ghost_convergence (u : Nat) (hg : GhostRay u) :
   obtain ⟨m, hm⟩ := ghost_witness u hg s (by omega)
   exact (pow_dvd_pow (3:ℤ) (by omega)).trans ⟨m, hm⟩
 
-/-! ## §6 The external transcendence input, in pure integer form -/
+/-! ## §6 The canonical head is a three-adic unit -/
 
-/-- **THE MAHLER INPUT (external hypothesis, pure ℤ form).**  No
-admissible pair `(a, u)` makes the rational `(6a - 27)/(2u)` the
-3-adic limit of the sequence `(4^(3^s) - 1)/3^s`.
-
-This is the rational-lock denial of Mahler's 3-adic exponential
-transcendence theorem (a standard published theorem, 1932): if the
-limit were the nonzero algebraic `α = (6a - 27)/(2u)` with
-`v₃(α) = 1`, then `exp₃(α)` would be transcendental, but
-`exp₃(log₃ 4) = 4` is algebraic.  Stated here WITHOUT any p-adic
-analysis objects: 3-adic convergence of a rational sequence to a
-rational limit is exactly the displayed divisibility. -/
-def mahler_log3_not_rational : Prop :=
-  ¬ ∃ (a u : Nat), (a < 9 ∧ ¬ 3 ∣ a) ∧ (¬ 3 ∣ u) ∧
-    ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
-      (3:ℤ)^k ∣ (2*(u:ℤ) * ((4:ℤ)^(3^s) - 1) - ((6*(a:ℤ) - 27) * (3:ℤ)^s))
-
-/-! ## §7 The head is a three-adic unit -/
-
-/-- The ghost head `a = (c 1 * u) % 9` is not divisible by three: the
+/-- The ghost head \`a = (c 1 * u) % 9\` is not divisible by three: the
 tower coefficient is a 3-adic unit and the core is three-free. -/
 theorem ghost_head_unit (u : Nat) (h3 : ¬ 3 ∣ u) :
     ¬ 3 ∣ (GSTTowerFire.c 1 * u) % 9 := by
@@ -240,36 +222,11 @@ theorem ghost_head_unit (u : Nat) (h3 : ¬ 3 ∣ u) :
   have : u % 3 = 0 := by omega
   exact Nat.dvd_iff_mod_eq_zero.mpr this
 
-/-! ## §8 THE CROWN — the terminal ghost-ray exclusion -/
+/-! ## §7 The three-free decomposition socket -/
 
-/-- **TERMINAL GHOST-RAY EXCLUSION (document §12).**  Under the external
-Mahler input, no three-free natural number lies on a ghost ray: the
-all-ones middle-third diagonal would rationally lock the LTE tower,
-forcing a rational value of the 3-adic logarithm of four, which the
-3-adic exponential transcendence forbids. -/
-theorem terminal_ghost_exclusion
-    (H : mahler_log3_not_rational) (u : Nat) (h3 : ¬ 3 ∣ u) :
-    ¬ GhostRay u := by
-  intro hg
-  have hlt : (GSTTowerFire.c 1 * u) % 9 < 9 := Nat.mod_lt _ (by decide)
-  have hunit : ¬ 3 ∣ (GSTTowerFire.c 1 * u) % 9 := ghost_head_unit u h3
-  exact H ⟨(GSTTowerFire.c 1 * u) % 9, u, ⟨hlt, hunit⟩, h3,
-    ghost_convergence u hg⟩
-
-/-! ## §9 The compression bridge and THE ACT -/
-
-/-- **THE UNIFORM COMPRESSION BRIDGE (the corpus's named GAP-A2).**
-Every Cantorian counterexample's three-free core lies on a ghost ray
-at every depth.  This is the one seam the ghost-ray document leaves
-open (its §16 closure claim needs it): a counterexample `K = 3^s * u`
-certifies the middle-third geometry only up to depth `~ s+1`, and the
-all-depths lift is the infinitary compression.  Stated here as an
-explicit hypothesis — the honest form of the remaining input. -/
-def UniformCompression : Prop :=
-  ∀ (K s u : Nat), K = 3^s * u → ¬ 3 ∣ u →
-    GSTClimbInfiniteFamily.CantorianPower K → GhostRay u
-
-/-- Every positive natural decomposes as `3^s * u` with `u` three-free. -/
+/-- Every positive natural decomposes as \`3^s * u\` with \`u\` three-free.
+This is retained as the finite bridge consumed by the relative-precision
+Worldtrace–Mahler theory. -/
 theorem exists_three_free_decomp :
     ∀ (fuel K : Nat), 1 ≤ K → K ≤ fuel →
       ∃ s u : Nat, K = 3^s * u ∧ ¬ 3 ∣ u := by
@@ -289,24 +246,8 @@ theorem exists_three_free_decomp :
           _ = 3^(s+1) * u := by rw [Nat.pow_succ]; ring
       · exact ⟨0, K, by simp, h3⟩
 
-/-- **THE ACT CLOSES under the two named external inputs.**  Mahler's
-3-adic exponential transcendence (in pure integer form) plus the
-uniform compression bridge — and the even-exponent Erdős ternary
-statement follows through the repo's own green sockets: no Cantorian
-exponent from eight on, `hTailF`, the act. -/
-theorem the_act_of_mahler_compression
-    (H : mahler_log3_not_rational) (Hc : UniformCompression) :
-    GSTTheAct.the_act := by
-  have hnc : ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K := by
-    rintro ⟨K, hK, hcp⟩
-    obtain ⟨s, u, hsu, hu⟩ := exists_three_free_decomp K K (by omega) (by omega)
-    exact terminal_ghost_exclusion H u hu (Hc K s u hsu hu hcp)
-  exact GSTTheAct.the_act_iff_hTailF.mpr
-    (GSTClimbInfiniteFamily.hTailF_of_no_cantorian hnc)
+/-! ## §8 Receipts
 
-/-! ## §10 Receipts -/
-
-#print axioms terminal_ghost_exclusion
-#print axioms the_act_of_mahler_compression
-
-end GSTGhostRay
+The obsolete fixed-precision/two-input terminal socket has been removed.
+Its production replacement is the relative-precision Worldtrace–Mahler
+theory in `GSTWorldtraceMahlerRelativePrecision`.

@@ -8,6 +8,7 @@ import GSTTowerFire
 import GSTTowerAxis
 import GSTWorldtraceArithmetic
 import GSTGhostRayExclusion
+import GSTWorldtraceMahlerRelativePrecision
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -283,3 +284,17 @@ theorem the_dust_window_wire :
     GSTWorldtraceArithmetic.window_row_two_dust⟩
 
 #print axioms the_dust_window_wire
+
+
+/-- **THE WORLDTRACE–MAHLER ATOMIC SURGERY WIRE.**  The former pair of
+terminal Props has been replaced by one coherent theory object.  Its
+relative-precision compression and Mahler fracture collide on the same
+integer witness and export the complete crown: Cantorian extinction,
+digit-two witnesses, \`the_act\`, \`tailF\`, the full theorem, and the
+infinite-controller witness. -/
+theorem the_worldtrace_mahler_wire
+    (T : GSTWorldtraceMahler.WorldtraceMahlerTheory) :
+    GSTWorldtraceMahler.WorldtraceMahlerCrown :=
+  GSTWorldtraceMahler.worldtrace_mahler_relative_precision_crown T
+
+#print axioms the_worldtrace_mahler_wire
