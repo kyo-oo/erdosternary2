@@ -228,7 +228,10 @@ theorem full_erdos :
     ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false :=
   GSTTheAct.full_erdos_of_the_act the_act
 
-#print axioms prefix_one_navigation_lift_direct
+#print axioms omega_termination_s1
+#print axioms omega_termination_s3
+#print axioms omega_termination_stable
+#print axioms omega_termination
 #print axioms residual_navigation_lift
 #print axioms even_universal
 #print axioms the_act
