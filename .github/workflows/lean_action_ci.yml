@@ -77,6 +77,17 @@ jobs:
           lake build GSTTailFWorldtraceReplacement 2>&1 | tee tailf-worldtrace-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-worldtrace-build.log
 
+      - name: Problem 406 zero-input solution
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTResidualOmegaRevival GSTTailFWorldtraceReplacement
+          lake env lean questions/deepmind_problem_406/Solution.lean 2>&1 | tee problem406-solution.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unknown module prefix|unsolved goals|error:' problem406-solution.log
+          ! grep -E 'hTail4|four_power_happy_climb|MahlerSharp|ResidualGhostCompression|WorldtraceMahlerTheory' \
+            GSTTailFWorldtraceReplacement.lean Main.lean questions/deepmind_problem_406/Solution.lean
+          echo PROBLEM406_ZERO_INPUT_SOLUTION_GREEN=1
+
       - name: One-lane separate proof module
         run: |
           set -euo pipefail
@@ -146,15 +157,18 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
-          import ErdosTernary2
+          import Main
+          import GSTResidualOmegaRevival
           import GSTTailFWorldtraceReplacement
-          #print axioms gst_four_power_creation_master_inline
-          #print axioms gst_prefix_one_navigation_lift
-          #print axioms gst_power_two_wave_large
-          #print axioms GSTTailFWorldtraceReplacement.crown
+          #print axioms GSTResidualOmegaRevival.omega_termination
+          #print axioms GSTResidualOmegaRevival.residual_navigation_lift
+          #print axioms GSTResidualOmegaRevival.even_universal
+          #print axioms GSTResidualOmegaRevival.the_act
+          #print axioms GSTResidualOmegaRevival.full_erdos
           #print axioms GSTTailFWorldtraceReplacement.hTailF
-          #print axioms GSTTailFWorldtraceReplacement.the_act
-          #print axioms GSTTailFWorldtraceReplacement.full_erdos
+          #print axioms GSTTailFWorldtraceReplacement.crown
+          #print axioms the_monolith_wire
+          #print axioms the_worldtrace_mahler_wire
           LEAN
           lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
           rm -f MultiNukeAxiomAudit.lean

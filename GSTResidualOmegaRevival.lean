@@ -1,12 +1,14 @@
 import ErdosTernary2
+import GSTTheAct
 
 namespace GSTResidualOmegaRevival
 
 set_option maxHeartbeats 0
 set_option maxRecDepth 1000000
 
-/-- Revived first-level residual Ω∞ termination, isolated from the historical
-quarantine and checked against the current production monolith. -/
+/-- Revived first residual world: level one.  This is the original exact
+Omega-state termination argument, now compiled as a live theorem rather than
+left inside the quarantined archaeology block of the monolith. -/
 theorem omega_termination_s1
     (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
     (hboundary : GSTResidualBoundary 1 k (m % 3))
@@ -36,7 +38,7 @@ theorem omega_termination_s1
       | omega
       | aesop (config := { maxRuleApplications := 10000 }))
 
-/-- Revived level-three residual Ω∞ termination. -/
+/-- Revived level-three residual world. -/
 theorem omega_termination_s3
     (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
     (hboundary : GSTResidualBoundary 3 k (m % 3))
@@ -64,7 +66,7 @@ theorem omega_termination_s3
       | omega
       | aesop (config := { maxRuleApplications := 10000 }))
 
-/-- Revived stable residual Ω∞ termination. -/
+/-- Revived stable residual world for levels at least two other than three. -/
 theorem omega_termination_stable
     (s k m : Nat) (hs : 2 ≤ s) (hs3 : s ≠ 3)
     (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
@@ -93,9 +95,9 @@ theorem omega_termination_stable
       | omega
       | aesop (config := { maxRuleApplications := 10000 }))
 
-/-- The three residual worlds exhaust the boundary, now rechecked as a live
-kernel theorem. -/
-theorem residual_omega_termination : GSTResidualOmegaTermination := by
+/-- The three residual worlds exhaust the monolith's certified residual
+boundary. -/
+theorem omega_termination : GSTResidualOmegaTermination := by
   intro s k m hs hk hm hm3 hnot hchild
   have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
     have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
@@ -110,12 +112,13 @@ theorem residual_omega_termination : GSTResidualOmegaTermination := by
   · exact omega_termination_stable s k m hstable.1 hstable.2.1
       hk hm hm3 (Or.inr (Or.inr hstable)) hchild
 
-/-- Assumption-free residual Navigation lift, revived as a live theorem. -/
+/-- Assumption-free residual Navigation lift, obtained from the revived exact
+Omega termination law rather than the invalid generic U2D sign shortcut. -/
 theorem residual_navigation_lift : GSTResidualNavigationLift :=
-  gst_residual_navigation_lift_of_omega_termination residual_omega_termination
+  gst_residual_navigation_lift_of_omega_termination omega_termination
 
-/-- Universal canonical Navigation, obtained by the monolith's strong induction
-once the residual lift is live. -/
+/-- Universal canonical Navigation, obtained by the monolith's existing
+strong induction once the now-unconditional residual lift is supplied. -/
 theorem navigation_all :
     ∀ s b, 1 ≤ s → 1 ≤ b → b % 3 ≠ 0 → (2 ≤ s ∨ 1 < b) →
       GSTNavigationWitness (gstNavigationConstant s b) :=
@@ -161,10 +164,12 @@ theorem four_power_good_witness_div_three
       have hs1 : v3 k = 1 := by omega
       rw [hs1] at hk_eq
       norm_num at hk_eq
-      by_contra hnot
-      have hb_eq : k / 3 = 1 := by omega
-      rw [hb_eq] at hk_eq
-      omega
+      have hb' : 1 ≤ k / 3 := by
+        simpa [hs1] using hb
+      have hsmall : 1 < k / 3 := by
+        have hk5 : 5 ≤ k := by omega
+        omega
+      simpa only [hs1, Nat.pow_one] using hsmall
   have hnav : GSTNavigationWitness
       (gstNavigationConstant (v3 k) (k / 3^(v3 k))) :=
     navigation_all (v3 k) (k / 3^(v3 k)) hs hb hb3 hdomain
@@ -172,8 +177,8 @@ theorem four_power_good_witness_div_three
     (v3 k) (k / 3^(v3 k)) hs hb hb3 hnav
   simpa only [← hk_eq] using hfull
 
-/-- The unconditional even-power closure reconstructed from the revived
-residual Ω theorem. -/
+/-- The unconditional even-power closure obtained from the direct residual
+collision replacement. -/
 theorem even_universal (a : Nat) (ha : 5 ≤ a) :
     hasTernaryTwo (4^a) = true := by
   by_cases ha500 : a ≤ 500
@@ -221,6 +226,10 @@ theorem full_erdos :
     ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false :=
   GSTTheAct.full_erdos_of_the_act the_act
 
+#print axioms omega_termination_s1
+#print axioms omega_termination_s3
+#print axioms omega_termination_stable
+#print axioms omega_termination
 #print axioms residual_navigation_lift
 #print axioms even_universal
 #print axioms the_act
