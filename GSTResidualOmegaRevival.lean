@@ -167,9 +167,7 @@ theorem four_power_good_witness_div_three
       have hb' : 1 ≤ k / 3 := by
         simpa [hs1] using hb
       have hsmall : 1 < k / 3 := by
-        by_contra hnot
-        have hb_eq : k / 3 = 1 := by omega
-        rw [hb_eq] at hk_eq
+        have hk5 : 5 ≤ k := by omega
         omega
       simpa only [hs1, Nat.pow_one] using hsmall
   have hnav : GSTNavigationWitness
