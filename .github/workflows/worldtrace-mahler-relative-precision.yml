@@ -30,6 +30,13 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake exe cache get
 
+      - name: Compile binder-free residual replacement
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTResidualOmegaRevival 2>&1 | tee residual-omega-revival.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' residual-omega-revival.log
+
       - name: Compile relative-precision theory
         run: |
           set -euo pipefail
@@ -52,14 +59,6 @@ jobs:
           LEAN
           lake env lean WorldtraceMahlerAxiomAudit.lean 2>&1 | tee axiom-audit.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|error:' axiom-audit.log
-
-
-      - name: Compile binder-free residual replacement
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTResidualOmegaRevival 2>&1 | tee residual-omega-revival.log
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' residual-omega-revival.log
 
       - name: Compile Problem 406 solution
         run: |
