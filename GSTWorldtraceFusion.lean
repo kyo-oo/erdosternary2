@@ -1256,7 +1256,7 @@ theorem worldtrace_ray_classification (u : Nat) (hu3 : ¬ 3 ∣ u)
         (Or.inl (worldtrace_ray_mod_seven u hconv)))))
   · rw [h8] at hconv
     exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        (Or.inl (worldtrace_ray_mod_eight u hconv))))))
+        (worldtrace_ray_mod_eight u hconv)))))
 
 /-- **THE RAY IS FINITE: AT MOST SIX MEMBERS.**  The head map is injective
 on the three-free ray cores (same head, same member) and lands in the
