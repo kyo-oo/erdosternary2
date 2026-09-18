@@ -29,6 +29,7 @@ roots = [
   "GSTFourPowerDirectHappyBridge",
   "GSTFourPowerPrefixKillingHappy",
   "GSTFourPowerRowSixLiftRelocation",
+  "GSTFourPowerRowSixNextCluster",
   "GSTFourPowerDirectTwoHundredTwentySeventhRow",
   "GSTFourPowerDirectTwoHundredThirtySeventhRow",
 ]
