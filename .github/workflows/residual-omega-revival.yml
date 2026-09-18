@@ -41,14 +41,14 @@ jobs:
           lake build GSTResidualOmegaRevival 2>&1 | tee residual-revival.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' residual-revival.log
 
-      - name: Compile DeepMind 406 solution
+      - name: Compile Erdos 406 ternary 2^n solution
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           lake env lean questions/deepmind_problem_406/Solution.lean 2>&1 | tee problem406-solution.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' problem406-solution.log
-          grep -Fq "'Erdos406.erdos_406' depends on axioms:" problem406-solution.log
+          grep -Fq "'erdos_ternary_2' depends on axioms:" problem406-solution.log
 
       - name: Audit solution source
         shell: bash
