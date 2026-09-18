@@ -2,9 +2,9 @@
 
 ## Mathematical derivation from the universe-wire theorem base
 
-**Source branch:** \`sol/kyo-gate-universe-wire\`  
-**Source HEAD:** \`13abda879f10ec9033c2b42e6f4c02bd80274ba4\`  
-**Derivation branch:** \`sol/worldtrace-mahler-compression-theory\`
+**Source branch:** `sol/kyo-gate-universe-wire`  
+**Source HEAD:** `13abda879f10ec9033c2b42e6f4c02bd80274ba4`  
+**Derivation branch:** `sol/worldtrace-mahler-compression-theory`
 
 This document is the mathematical derivation phase only.  It does not yet
 replace the Lean theorem package.  Its purpose is to transform the two current
@@ -24,17 +24,17 @@ imported theorem universe.
 
 # 1. The two current propositions are not yet the right terminal objects
 
-The current file \`GSTGhostRayExclusion.lean\` contains the correct finite
+The current file `GSTGhostRayExclusion.lean` contains the correct finite
 ghost machinery:
 
-- \`GhostRay\`;
+- `GhostRay`;
 - coefficient stabilization;
 - the all-ones residue shape;
 - the finite ghost congruence;
-- \`ghost_tower_lock\`;
-- \`ghost_witness\`;
-- \`ghost_convergence\`;
-- \`ghost_head_unit\`.
+- `ghost_tower_lock`;
+- `ghost_witness`;
+- `ghost_convergence`;
+- `ghost_head_unit`.
 
 Those pieces remain valuable.
 
@@ -216,7 +216,7 @@ A(u):=(c_1u)\bmod9.
 \tag{3.1}
 \]
 
-The already-green \`ghost_head_unit\` calculation gives, without needing a
+The already-green `ghost_head_unit` calculation gives, without needing a
 ghost hypothesis,
 
 \[
@@ -284,7 +284,7 @@ This is the exact Worldtrace form of
 \quad\text{in }\mathbb Q_3.
 \]
 
-It is strictly better fitted than \`GhostRay\` as the terminal interface.
+It is strictly better fitted than `GhostRay` as the terminal interface.
 
 A ghost ray is geometric.  RelativeLock is the arithmetic consequence that
 Mahler actually attacks.
@@ -296,7 +296,7 @@ uses.
 
 # 5. GhostRay implies RelativeLock
 
-The existing green finite theorem \`ghost_witness\` already gives, for
+The existing green finite theorem `ghost_witness` already gives, for
 \(s\ge2\),
 
 \[
@@ -683,7 +683,7 @@ Equivalently,
 \]
 
 This is stronger information than the current
-\`the_act_of_mahler_compression\` result alone because it keeps the explicit
+`the_act_of_mahler_compression` result alone because it keeps the explicit
 digit witness.
 
 ---
@@ -705,7 +705,7 @@ From (10.1):
 \tag{11.1}
 \]
 
-That is \`GSTTheAct.the_act\`.
+That is `GSTTheAct.the_act`.
 
 ## 11.2 Second-observer Worldtrace tail
 
@@ -835,13 +835,13 @@ A suitable theorem name is
 \]
 
 This is the theorem that should replace the narrow current
-\`the_act_of_mahler_compression\` crown.
+`the_act_of_mahler_compression` crown.
 
 ---
 
 # 13. Why this theorem is genuinely stronger and better fitted
 
-The current crown concludes only \`the_act\` from two abstract Props.
+The current crown concludes only `the_act` from two abstract Props.
 
 The new crown does more.
 
@@ -882,7 +882,7 @@ The terminal analytic content is reduced to one correct moving-modulus
 divisibility law.
 
 The internal unfinished content is reduced to one pure Worldtrace arithmetic
-law: \`WorldtraceScaledCompression\`.
+law: `WorldtraceScaledCompression`.
 
 That is a much cleaner theory boundary.
 
@@ -898,10 +898,10 @@ attack it from multiple directions.
 
 Use:
 
-- \`self_read\`;
-- \`cantorian_iff_feedback\`;
-- \`unique_dead_child\`;
-- \`noise_window_law\`;
+- `self_read`;
+- `cantorian_iff_feedback`;
+- `unique_dead_child`;
+- `noise_window_law`;
 - the cascade and uniform kill engine.
 
 A hypothetical Cantorian exponent determines one infinite feedback path.
@@ -911,10 +911,10 @@ A hypothetical Cantorian exponent determines one infinite feedback path.
 Use:
 
 - exact \(4^{3^s}=1+3^{s+1}c_s\);
-- \`lteCoeff_stable\`;
-- \`diagonal_window_law\`;
+- `lteCoeff_stable`;
+- `diagonal_window_law`;
 - the frozen residues of \(c_s\);
-- \`WindowCleanDust\`.
+- `WindowCleanDust`.
 
 These convert a survivor into stabilized arithmetic constraints.
 
@@ -922,15 +922,15 @@ These convert a survivor into stabilized arithmetic constraints.
 
 Use:
 
-- \`omega_cut_word_mod_pow2\`;
-- \`omega_cut_word_stabilizes\`;
-- \`omega_cut_word_cube_lift_exact\`;
-- \`omega_cut_word_lift_one\`;
-- \`omega_sheet_window_dichotomy\`;
-- \`omega_window_dodge_escalates\`;
-- \`omega_dust_shape_middle_third\`;
-- \`omega_tripling_cut_word\`;
-- \`omega_tripling_digit_transfer\`.
+- `omega_cut_word_mod_pow2`;
+- `omega_cut_word_stabilizes`;
+- `omega_cut_word_cube_lift_exact`;
+- `omega_cut_word_lift_one`;
+- `omega_sheet_window_dichotomy`;
+- `omega_window_dodge_escalates`;
+- `omega_dust_shape_middle_third`;
+- `omega_tripling_cut_word`;
+- `omega_tripling_digit_transfer`.
 
 These laws explain how finite survivor information propagates and lifts between
 sheets.
@@ -1088,7 +1088,7 @@ That is the new theory's core.
 
 The next formal phase should introduce approximately these objects:
 
-\`\`\`text
+```text
 worldtraceHead
 worldtraceWitness
 WorldtraceRelativeLock
@@ -1100,10 +1100,10 @@ worldtrace_mahler_fracture
 worldtrace_mahler_extinction
 worldtrace_mahler_kill_all
 worldtrace_mahler_relative_precision_crown
-\`\`\`
+```
 
-The old \`GhostRay\` lemmas should remain as one route to
-\`WorldtraceRelativeLock\`; they do not need to be deleted.
+The old `GhostRay` lemmas should remain as one route to
+`WorldtraceRelativeLock`; they do not need to be deleted.
 
 The present two terminal Props should not be reused verbatim.
 
