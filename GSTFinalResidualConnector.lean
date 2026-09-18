@@ -7,6 +7,7 @@ set_option maxHeartbeats 10000000
 open GSTGraphV2InfiniteControl
 open GSTU2DEventTransport
 open GSTGraphV2HandwrittenOmegaUBlock
+open GSTCanonicalSevenAxisBridge
 
 namespace GSTFinalResidualConnector
 
@@ -52,8 +53,8 @@ theorem residual_child_witness_to_left_happy
     0 (s+k+1) 1 (gstNavigationConstant (s+k) m) j hE hone
   apply hiff.2
   have hseed : (4 * 1) / 3^(s+k+1) = 0 := Nat.div_eq_of_lt hfour
-  simpa [digit3, gstDigit, seededCarry, gstCarry, hseed] using
-    ⟨hd, hcarry⟩
+  simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit,
+    seededCarry, gstCarry, hseed] using ⟨hd, hcarry⟩
 
 /-- An all-depth residual Omega bad trace is literally a bad right boundary on
 that same residual Graph-V2 rectangle at every corresponding absolute row. -/
@@ -97,12 +98,21 @@ theorem residual_bad_trace_to_right_bad
   have hiff := graph_prefix_slice_happy_iff
     1 (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
     (s+1) 1 (gstNavigationConstant s (1 + 3^k*m)) (k+j) hE hone
-  have hq := hiff.1 habs
+  have habs' :
+      HappyCell
+        (GSTGraphV2InfiniteControl.graph 1
+          (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
+          (s+1+(k+j))).seven.carry
+        (GSTGraphV2InfiniteControl.graph 1
+          (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
+          (s+1+(k+j))).seven.digit := by
+    simpa [Nat.add_assoc] using habs
+  have hq := hiff.1 habs'
   have hseed : (4 * 1) / 3^(s+1) = 0 := Nat.div_eq_of_lt hfour
   have hproj := gst_omega_parent_projection s k m j hs
   have hdOmega : (gstOmega s k m j).parentDigit = 2 := by
     rw [← hproj.1]
-    simpa [digit3, gstDigit] using hq.1
+    simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit] using hq.1
   have hcOmega :
       (gstOmega s k m j).parentCarry = 0 ∨
       (gstOmega s k m j).parentCarry = 3 := by
