@@ -251,3 +251,13 @@ theorem exists_three_free_decomp :
 The obsolete fixed-precision/two-input terminal socket has been removed.
 Its production replacement is the relative-precision Worldtrace–Mahler
 theory in `GSTWorldtraceMahlerRelativePrecision`.
+
+-/
+
+#print axioms ghost_tower_lock
+#print axioms ghost_witness
+#print axioms ghost_convergence
+#print axioms ghost_head_unit
+#print axioms exists_three_free_decomp
+
+end GSTGhostRay
