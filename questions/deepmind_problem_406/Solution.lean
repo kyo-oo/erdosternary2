@@ -1,65 +1,56 @@
-import ErdosTernary2
+import GSTResidualOmegaRevival
+import Mathlib.Data.Nat.Digits.Lemmas
 
 /-!
-# DeepMind Problem 406 — comparator solution
+# DeepMind Formal Conjectures — Erdős Problem 406
 
-This is the solution-side Lean file for the official comparator harness.
-It imports the checked green monolith `ErdosTernary2` and bridges the
-question-side recursive predicate to the monolith's `noTernaryTwo`
-predicate.
+Solution-side bridge from the binder-free residual Ω closure to DeepMind's
+actual finiteness formulation.
 
-The production seam now carries the Ω-shadow wave tail in its second-sheet
-form as its single named input: the Ω-Wave Law (`GSTGraphV2OmegaWaveLaw`)
-delivers the ternary digit two unconditionally for every exponent outside
-the Ω-shadow residue (the canonical 3-free-core classes the tower's proven
-levels do not reach), the kernel-checked modular base carries every
-half-exponent up to five hundred — shadow members included — the tower's
-third and fourth levels carry their gate classes (thirteen and
-twenty-five modulo twenty-seven at sheet level two and above; the top
-third of the residue window modulo eighty-one at sheet level three and
-above), the Ω-sheet gate — the wave word one digit beyond the
-stabilization window — carries every dodger whose sheet-local cut word
-has top trit two modulo the squared cut modulus, the Ω-second-sheet gate
-— the binomial correction's own trit at row `2s+3`, where the wave word's
-second order first touches — carries the four-sheet's lowest-third and
-the seven-sheet's middle-third sheet words, and the sheet-zero
-exponent-cycle gates carry the base's own period classes at rows three
-and four.  The input speaks only for shadow exponents above the kernel
-base that dodge every proven gate, both sheet gates, and the period
-classes: weaker than the sealed shadow wave, and strictly weaker than the
-retired third-wave climb.  The repository also carries the campaign's
-zero-input target `four_power_omega_shadow_wave_closed` together with
-the receipt theorem `four_power_omega_shadow_wave_closed_iff_tail4`:
-the closed statement is equivalent to the fifth-weakening tail input,
-so the tail's residual is exactly the closed wave's own content.
+No Mahler hypothesis, compression hypothesis, tail hypothesis, or custom
+proposition is accepted by the exported theorem.
 -/
 
-/-- Byte-identical challenge-side definition. -/
-def noTernaryDigitTwo (n : Nat) : Bool :=
-  if n = 0 then true
-  else if n % 3 = 2 then false
-  else noTernaryDigitTwo (n / 3)
-termination_by n
-decreasing_by exact Nat.div_lt_self (by omega) (by decide : 1 < 3)
+namespace Erdos406
 
-/-- Bridge the challenge recursion to the monolith's `noTernaryTwo`. -/
-theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
-    noTernaryDigitTwo n = noTernaryTwo n := by
-  induction n using Nat.strongRecOn with
-  | ind n ih =>
-    rw [noTernaryDigitTwo.eq_def n, noTernaryTwo.eq_def n]
-    by_cases hn : n = 0
-    · simp [hn]
-    · by_cases h2 : n % 3 = 2
-      · simp [hn, h2]
-      · simp [hn, h2]
-        exact ih (n / 3) (Nat.div_lt_self (by omega) (by decide : 1 < 3))
+private theorem digit_two_forbids_zero_one_digits
+    (n p : Nat) (hp : n / 3^p % 3 = 2) :
+    ¬ Nat.digits 3 n ⊆ [0, 1] := by
+  intro hsub
+  have hget : (Nat.digits 3 n).getD p 0 = 2 := by
+    rw [Nat.getD_digits n p (by decide : 2 ≤ 3)]
+    exact hp
+  by_cases hpl : p < (Nat.digits 3 n).length
+  · have hmem : (Nat.digits 3 n)[p] ∈ Nat.digits 3 n :=
+      List.getElem_mem hpl
+    have h01 := hsub hmem
+    have hget' : (Nat.digits 3 n)[p] = 2 := by
+      rw [← List.getD_eq_getElem (l := Nat.digits 3 n) (d := 0) hpl]
+      exact hget
+    simp only [List.mem_cons, List.mem_singleton] at h01
+    omega
+  · have hge : (Nat.digits 3 n).length ≤ p := Nat.le_of_not_gt hpl
+    have hz : (Nat.digits 3 n).getD p 0 = 0 :=
+      List.getD_eq_default (l := Nat.digits 3 n) (d := 0) hge
+    omega
 
-/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution, delivered
-from the Ω-Wave Law through the green monolith seam. -/
-theorem erdos_ternary_2
-    (hTail4 : GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tail4) :
-    ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
+theorem erdos_406 :
+    {n : Nat | n.isPowerOfTwo ∧ Nat.digits 3 n ⊆ [0, 1]}.Finite := by
+  refine (Set.finite_Iic (2^8 : Nat)).subset ?_
   intro n hn
-  rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal_tail4 hTail4 n hn
+  rcases hn with ⟨hpow, hdigits⟩
+  rcases hpow with ⟨k, rfl⟩
+  have hklt : k < 9 := by
+    by_contra hnot
+    have hk9 : 9 ≤ k := by omega
+    have hfalse : noTernaryTwo (2^k) = false :=
+      GSTResidualOmegaRevival.full_erdos k hk9
+    obtain ⟨p, hp⟩ := no_two_false_digit_witness (2^k) hfalse
+    have hp' : 2^k / 3^p % 3 = 2 := by
+      simpa [gstDigit] using hp
+    exact digit_two_forbids_zero_one_digits (2^k) p hp' hdigits
+  exact Nat.pow_le_pow_right (by decide : 0 < (2 : Nat)) (by omega)
+
+#print axioms erdos_406
+
+end Erdos406
