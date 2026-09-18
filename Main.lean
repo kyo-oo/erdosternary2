@@ -350,3 +350,37 @@ theorem the_worldtrace_ray_floor_wire :
     GSTWorldtraceFusion.worldtrace_mahler_lock_above_of_lock⟩
 
 #print axioms the_worldtrace_ray_floor_wire
+
+/-- **THE WORLDTRACE TERMINAL WIRE.**  The fusion's terminal closure state,
+landed at the monolith's entry face: the worldtrace ghost ray, over
+three-free cores, is a set of AT MOST SIX members (`worldtrace_ray_le_six`)
+— the Mahler input's entire content reduced to six explicit objects; the
+Mahler lock is EXACTLY the ray's emptiness (one green iff); every member
+exceeds `rayMin2 ≈ 3.6 × 10^952` (kernel-certified at depth `3^2000`,
+no hypotheses); and the act closes under the compression plus the
+six-object emptiness, carrying both crowns. -/
+theorem the_worldtrace_terminal_wire :
+    (∀ (s : Finset Nat), (∀ u ∈ s, ¬ 3 ∣ u ∧ GSTWorldtraceFusion.WTGhostRay u) →
+      s.card ≤ 6) ∧
+    (GSTWorldtraceFusion.WorldtraceMahlerLock ↔
+      ∀ u : Nat, ¬ 3 ∣ u → ¬ GSTWorldtraceFusion.WTGhostRay u) ∧
+    (∀ (u : Nat), ¬ 3 ∣ u → GSTWorldtraceFusion.WTGhostRay u →
+      GSTWorldtraceFusion.rayMin2 ≤ u) ∧
+    (∀ (u : Nat), ¬ 3 ∣ u → u < GSTWorldtraceFusion.rayMin2 →
+      ¬ GSTWorldtraceFusion.WTGhostRay u) ∧
+    (∀ (HC : GSTWorldtraceFusion.WorldtraceCompression)
+        (HE : ∀ u : Nat, ¬ 3 ∣ u → ¬ GSTWorldtraceFusion.WTGhostRay u),
+      GSTTheAct.the_act) ∧
+    (∀ (HC : GSTWorldtraceFusion.WorldtraceCompression)
+        (HE : ∀ u : Nat, ¬ 3 ∣ u → ¬ GSTWorldtraceFusion.WTGhostRay u),
+      ∀ n : Nat, noTernaryTwo (2^n) = true
+        ↔ (n = 0 ∨ n = 2 ∨ n = 8)) :=
+  ⟨GSTWorldtraceFusion.worldtrace_ray_le_six,
+    GSTWorldtraceFusion.worldtrace_lock_iff_ray_empty,
+    GSTWorldtraceFusion.worldtrace_ray2_floor,
+    GSTWorldtraceFusion.worldtrace_ray2_empty_below,
+    GSTWorldtraceFusion.the_act_of_worldtrace_fusion_terminal,
+    GSTWorldtraceFusion.erdos_ternary_classification_terminal⟩
+
+#print axioms the_worldtrace_terminal_wire
+
