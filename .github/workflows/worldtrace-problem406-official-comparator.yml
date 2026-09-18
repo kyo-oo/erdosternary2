@@ -1,0 +1,134 @@
+name: Worldtrace Problem 406 Official Comparator
+
+on:
+  push:
+    branches:
+      - sol/kyo-gate-universe-wire
+    paths:
+      - questions/deepmind_problem_406/Challenge.lean
+      - questions/deepmind_problem_406/Solution.lean
+      - GSTWorldtraceMahlerRelativePrecision.lean
+      - GSTGhostRayExclusion.lean
+      - Main.lean
+      - ErdosTernary2.lean
+      - lakefile.toml
+      - .github/workflows/worldtrace-problem406-official-comparator.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-comparator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Materialize official Challenge and Solution modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp questions/deepmind_problem_406/Challenge.lean Challenge.lean
+          cp questions/deepmind_problem_406/Solution.lean Solution.lean
+          cat >> lakefile.toml <<'EOF'
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
+EOF
+          cat > comparator_config.json <<'EOF'
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": ["erdos_ternary_2"],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": false
+}
+EOF
+
+      - name: Install exact Lean RC2 and pinned Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+
+      - name: Build production proof and judge modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTWorldtraceMahlerRelativePrecision Challenge Solution
+
+      - name: Audit submitted solution source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('Solution.lean').read_text(encoding='utf-8')
+          bad=[]
+          for i,line in enumerate(text.splitlines(),1):
+              if line.lstrip().startswith('--'):
+                  continue
+              if re.search(r'\bsorry\b|\badmit\b|\baxiom\b|\bnative_decide\b', line):
+                  bad.append(f'{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('forbidden solution escape')
+          print('SOLUTION_SOURCE_AUDIT_CLEAN=1')
+          PY
+
+      - name: Build pinned lean4export
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .tools
+          git clone https://github.com/leanprover/lean4export.git .tools/lean4export
+          cd .tools/lean4export
+          git checkout 9fb131bb100eb32ccf6836f14e4f8328d13b6792
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build lean4export
+
+      - name: Build pinned official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git .tools/comparator
+          cd .tools/comparator
+          git checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('lakefile.toml')
+          s=p.read_text()
+          s=s.replace('rev = "master"', 'rev = "9fb131bb100eb32ccf6836f14e4f8328d13b6792"')
+          p.write_text(s)
+          PY
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build comparator
+
+      - name: Run official comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          ROOT="$PWD"
+          CMP_ROOT="$ROOT/.tools/comparator"
+          EXPORT_ROOT="$ROOT/.tools/lean4export"
+          COMPARATOR_LANDRUN="$CMP_ROOT/scripts/fake-landrun.sh" \
+          COMPARATOR_LEAN4EXPORT="$EXPORT_ROOT/.lake/build/bin/lean4export" \
+          lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee official-comparator.log
+          grep -F "Your solution is okay!" official-comparator.log
+          echo OFFICIAL_PROBLEM406_COMPARATOR_GREEN=1
