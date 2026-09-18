@@ -134,23 +134,7 @@ theorem the_tower_axis_wire :
 
 #print axioms the_tower_axis_wire
 
-/-- **THE GHOST-RAY WIRE.**  The terminal exclusion, landed at the
-monolith's entry face: under Mahler's 3-adic exponential transcendence
-(stated in pure integer divisibility form — no p-adic objects) no
-three-free natural lies on the stabilized middle-third ghost ray; with
-the uniform compression bridge (every Cantorian counterexample's core
-lies on a ghost ray) the act itself closes through the repo's own
-green sockets.  The two inputs are named, explicit hypotheses — the
-honest form of the remaining external seam. -/
-theorem the_ghost_ray_wire :
-    (∀ (H : GSTGhostRay.mahler_log3_not_rational) (u : Nat), ¬ 3 ∣ u →
-      ¬ GSTGhostRay.GhostRay u) ∧
-    (∀ (H : GSTGhostRay.mahler_log3_not_rational)
-      (Hc : GSTGhostRay.UniformCompression), GSTTheAct.the_act) :=
-  ⟨GSTGhostRay.terminal_ghost_exclusion,
-   GSTGhostRay.the_act_of_mahler_compression⟩
 
-#print axioms the_ghost_ray_wire
 
 /-- Entry point: prints workspace status and points to the comparator. -/
 def main : IO Unit := do
