@@ -90,8 +90,7 @@ theorem prefix_one_navigation_lift_direct :
       GSTPerfectPowerTailNavigation.canonicalTail,
       gstNavigationConstant] using hstandalone
 
-  exact (GSTFinalPrefixOneDirectU2DCollision
-    .canonical_perfect_power_block_collision_direct
+  exact (GSTFinalPrefixOneDirectU2DCollision.canonical_perfect_power_block_collision_direct
       s n hs hn hChild hRightBad).elim
 
 /-- The monolith already proves that one prefix-one lift plus its zero-lift
