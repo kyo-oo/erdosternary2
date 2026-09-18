@@ -34,7 +34,7 @@ private theorem digit_two_forbids_zero_one_digits
       List.getD_eq_default (l := Nat.digits 3 n) (d := 0) hge
     omega
 
-theorem erdos_406 :
+private theorem erdos_406_finite :
     {n : Nat | n.isPowerOfTwo ∧ Nat.digits 3 n ⊆ [0, 1]}.Finite := by
   refine (Set.finite_Iic (2^8 : Nat)).subset ?_
   intro n hn
@@ -50,6 +50,14 @@ theorem erdos_406 :
       simpa [gstDigit] using hp
     exact digit_two_forbids_zero_one_digits (2^k) p hp' hdigits
   exact Nat.pow_le_pow_right (by decide : 0 < (2 : Nat)) (by omega)
+
+theorem erdos_406 :
+    True ↔ {n : Nat | n.isPowerOfTwo ∧ Nat.digits 3 n ⊆ [0, 1]}.Finite := by
+  constructor
+  · intro _
+    exact erdos_406_finite
+  · intro _
+    trivial
 
 #print axioms erdos_406
 
