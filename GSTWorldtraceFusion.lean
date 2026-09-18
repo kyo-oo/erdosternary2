@@ -969,7 +969,8 @@ theorem worldtrace_convergence_pin (a u : Nat)
   obtain ⟨t, ht⟩ := hd
   have hfac : 6*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (6*(a:ℤ) - 27)
       = (3:ℤ) * (2*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (2*(a:ℤ) - 9)) := by ring
-  rw [hfac, show (3:ℤ)^(D+1) = (3:ℤ) * (3:ℤ)^D from by rw [pow_succ]; ring] at ht
+  have hpD : (3:ℤ)^(D+1) = (3:ℤ) * (3:ℤ)^D := by rw [pow_succ]; ring
+  rw [hfac, hpD] at ht
   have hY : 2*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (2*(a:ℤ) - 9)
       = (3:ℤ)^D * t := by
     refine mul_left_cancel₀ (by norm_num : ((3:ℤ)) ≠ 0) ?_
@@ -1024,26 +1025,33 @@ theorem worldtrace_ghostray_of_convergence (a u : Nat) (ha : a < 9)
       + ((c A * u % 3^(A+1) : Nat):ℤ) = ((c A * u : Nat):ℤ) := by
     exact_mod_cast hprod
   rw [hpsucc] at hprodZ
+  have hcastu : ((c A * u : Nat):ℤ) = ((c A : Nat):ℤ) * (u:ℤ) := by push_cast
   have hxx : 2*((c A * u % 3^(A+1) : Nat):ℤ)
       = (2*(a:ℤ) - 9) + (3:ℤ) * (3:ℤ)^A
         * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by
-    linear_combination hW + 2 * hprodZ
+    linear_combination hW + 2 * hprodZ + 2 * hcastu
   have hxlt : c A * u % 3^(A+1) < 3^(A+1) := Nat.mod_lt _ (by positivity)
   have hx0 : (0:ℤ) ≤ ((c A * u % 3^(A+1) : Nat):ℤ) := by positivity
-  have hxB0 : ((c A * u % 3^(A+1) : Nat):ℤ) < (3:ℤ)^(A+1) := by
+  have hxB0 : ((c A * u % 3^(A+1) : Nat):ℤ) < (3:ℤ) * (3:ℤ)^A := by
     have hcast : ((c A * u % 3^(A+1) : Nat):ℤ) < ((3^(A+1) : Nat):ℤ) := by
       exact_mod_cast hxlt
-    have hlink0 : ((3^(A+1) : Nat):ℤ) = (3:ℤ)^(A+1) := by rw [Nat.cast_pow]
-    rw [hlink0] at hcast
+    have hlink0 : ((3^(A+1) : Nat):ℤ) = (3:ℤ)^(A+1) := by push_cast
+    rw [hlink0, hpsucc] at hcast
     exact hcast
-  rw [hpsucc] at hxB0
+  have hlink : ((3^A : Nat):ℤ) = (3:ℤ)^A := by push_cast
   have hTA : (9:ℤ) ≤ (3:ℤ)^A := by
-    have h9 : (9:Nat) ≤ 3^A := by
-      simpa using Nat.pow_le_pow_right (by omega : (2:Nat) ≤ A)
-    exact_mod_cast h9
+    have hone : (1:Nat) ≤ 3^(A-2) := Nat.one_le_pow _ _ (by decide)
+    have hsplit : 3^A = 3^2 * 3^(A-2) := by
+      rw [← Nat.pow_add, show 2 + (A-2) = A from by omega]
+    have h32 : (3:Nat)^2 = 9 := by decide
+    rw [h32] at hsplit
+    have h9 : (9:Nat) ≤ 3^A := by omega
+    have h9Z : (9:ℤ) ≤ ((3^A : Nat):ℤ) := by exact_mod_cast h9
+    rw [hlink] at h9Z
+    exact h9Z
   have hcases : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) = 1 := by
-    rcases lt_or_le (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) 1 with h1 | h1
-    · rcases eq_or_ne (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) 0 with h0 | h0
+    by_cases h1 : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) ≤ 0
+    · by_cases h0 : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) = 0
       · rw [h0, mul_zero, add_zero] at hxx
         exact absurd hxx (by omega)
       · have hjle : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) ≤ -1 := by omega
@@ -1055,29 +1063,32 @@ theorem worldtrace_ghostray_of_convergence (a u : Nat) (ha : a < 9)
                 mul_le_mul_of_nonneg_left hjle (by positivity)
             _ = -((3:ℤ) * (3:ℤ)^A) := by ring
         linarith
-    · rcases eq_or_ne (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) 1 with h1e | h1e
-      · exact h1e
-      · rcases eq_or_ne (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) 2 with h2e | h2e
-        · rw [h2e] at hxx
+    · by_cases h2 : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) ≤ 2
+      · by_cases h1e : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) = 1
+        · exact h1e
+        · have h2e : (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) = 2 := by omega
+          rw [h2e] at hxx
           exact absurd hxx (by omega)
-        · have hjge : (3:ℤ) ≤ (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by omega
-          have hprod_ge : (3:ℤ) * ((3:ℤ) * (3:ℤ)^A)
-              ≤ (3:ℤ) * (3:ℤ)^A
-                * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by
-            calc (3:ℤ) * ((3:ℤ) * (3:ℤ)^A)
-                ≤ (W - 2*((c A * u / 3^(A+1) : Nat):ℤ))
-                    * ((3:ℤ) * (3:ℤ)^A) :=
-                  mul_le_mul_of_nonneg_right hjge (by positivity)
-              _ = (3:ℤ) * (3:ℤ)^A
-                    * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by ring
-          have h2xlt : (2:ℤ)*((c A * u % 3^(A+1) : Nat):ℤ)
-              < 2 * ((3:ℤ) * (3:ℤ)^A) := by linarith
-          linarith
+      · have hjge : (3:ℤ) ≤ (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by omega
+        have hprod_ge : (3:ℤ) * ((3:ℤ) * (3:ℤ)^A)
+            ≤ (3:ℤ) * (3:ℤ)^A
+              * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by
+          calc (3:ℤ) * ((3:ℤ) * (3:ℤ)^A)
+              ≤ (W - 2*((c A * u / 3^(A+1) : Nat):ℤ))
+                  * ((3:ℤ) * (3:ℤ)^A) :=
+                mul_le_mul_of_nonneg_right hjge (by positivity)
+            _ = (3:ℤ) * (3:ℤ)^A
+                  * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by ring
+        have h2xlt : (2:ℤ)*((c A * u % 3^(A+1) : Nat):ℤ)
+            < 2 * ((3:ℤ) * (3:ℤ)^A) := by linarith
+        linarith
   rw [hcases] at hxx
   rw [show (A+1)-1 = A from by omega]
-  have hlink : ((3^A : Nat):ℤ) = (3:ℤ)^A := by rw [Nat.cast_pow]
-  have hT9 : (9:Nat) ≤ 3^A := by
-    simpa using Nat.pow_le_pow_right (by omega : (2:Nat) ≤ A)
+  have hone : (1:Nat) ≤ 3^(A-2) := Nat.one_le_pow _ _ (by decide)
+  have hsplit : 3^A = 3^2 * 3^(A-2) := by
+    rw [← Nat.pow_add, show 2 + (A-2) = A from by omega]
+  have h32 : (3:Nat)^2 = 9 := by decide
+  rw [h32] at hsplit
   constructor <;> omega
 
 /-- **THE RAY IS THE CONVERGENCE.**  For a three-free core, being on the
@@ -1096,12 +1107,13 @@ theorem worldtrace_ray_of_pin (a u : Nat) (ha : a < 9)
     WTGhostRay u := by
   refine worldtrace_ghostray_of_convergence a u ha ?_
   intro k
-  rcases Nat.lt_or_ge 2 k with hk | hk
+  rcases Nat.lt_or_ge k 2 with hk | hk
   · interval_cases k
     · exact ⟨0, fun s _ => one_dvd _⟩
     · exact ⟨0, fun s _ => ⟨2*(u:ℤ)*((c s : Nat):ℤ) - (2*(a:ℤ) - 9),
         by rw [pow_one]; ring⟩⟩
   · obtain ⟨W, hW⟩ := H (k+1) (by omega)
+    rw [show (k+1)-1 = k from by omega] at hW
     have hpsucc : (3:ℤ)^(k+1) = (3:ℤ) * (3:ℤ)^k := by rw [pow_succ]; ring
     rw [hpsucc] at hW
     refine ⟨k, fun s hs => ?_⟩
@@ -1163,7 +1175,7 @@ theorem worldtrace_ray_head_unique (u v : Nat) (hu3 : ¬ 3 ∣ u) (hv3 : ¬ 3 �
       WTGhostRay y → (c 1 * x) % 9 = (c 1 * y) % 9 → False := by
     intro x y hxy hx3 hy3 hgx hgy hxyhead
     obtain ⟨t, w, hdecomp, hw3⟩ :=
-      exists_three_free_decomp (y - x) (y - x) (by omega) (by omega)
+      GSTGhostRay.exists_three_free_decomp (y - x) (y - x) (by omega) (by omega)
     obtain ⟨Wx, hxW⟩ := worldtrace_ray_pin x hx3 hgx (t+2) (by omega)
     obtain ⟨Wy, hyW⟩ := worldtrace_ray_pin y hy3 hgy (t+2) (by omega)
     rw [← hxyhead] at hyW
@@ -1239,7 +1251,7 @@ theorem worldtrace_ray_classification (u : Nat) (hu3 : ¬ 3 ∣ u)
         (Or.inl (worldtrace_ray_mod_seven u hconv)))))
   · rw [h8] at hconv
     exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        (Or.inr (Or.inl (worldtrace_ray_mod_eight u hconv)))))))
+        (Or.inl (worldtrace_ray_mod_eight u hconv)))))
 
 /-- **THE RAY IS FINITE: AT MOST SIX MEMBERS.**  The head map is injective
 on the three-free ray cores (same head, same member) and lands in the
@@ -1269,7 +1281,7 @@ theorem worldtrace_ray_le_six (s : Finset Nat)
     exact worldtrace_ray_head_unique x y (hs x hx).1 (hs y hy).1
       (hs x hx).2 (hs y hy).2 hxy
   calc s.card = (s.image (fun u => (c 1 * u) % 9)).card :=
-        (Finset.card_image_of_injOn (fun u => (c 1 * u) % 9) s hinj).symm
+        (Finset.card_image_of_injOn hinj).symm
     _ ≤ ({1, 2, 4, 5, 7, 8} : Finset Nat).card := by
         apply Finset.card_le_card
         intro x hx
@@ -1288,12 +1300,15 @@ inputs, kernel-certified. -/
 /-- The depth-two-thousand certificate modulus: `3^2000`. -/
 def M2 : Nat := 1747871251722651609659974619164660570529062487435188517811888011810686266227275489291486469864681111075608950696145276588771368435875508647514414202093638481872912380089977179381529628478320523519319142681504424059410890214500500647813935818925701905402605484098137956979368551025825239411318643997916523677044769662628646406540335627975329619264245079750470862462474091105444437355302146151475348090755330153269067933091699479889089824650841795567478606396975664557143737657027080403239977757865296846740093712377915770536094223688049108023244139183027962484411078464439516845227961935221269814753416782576455507316073751985374046064592546796043150737808314501684679758056905948759246368644416151863138085276603595816410945157599742077617618911601185155602080771746785959359879490191933389965271275403127925432247963269675912646103156343954375442792688936047041533537523137941310690833949767764290081333900380310406154723157882112449991673819054110440001
 
+set_option maxRecDepth 1000000 in
 theorem M2_eq_pow : (3:Nat)^2000 = M2 := by decide
 
 theorem M2_pos : 0 < M2 := by decide
 
+set_option maxRecDepth 1000000 in
 theorem MZ2_eq : (3:ℤ)^2000 = (M2:ℤ) := by decide
 
+set_option maxRecDepth 1000000 in
 theorem MZ2_2001 : (3:ℤ)^2001 = (3:ℤ) * (M2:ℤ) := by decide
 
 /-- The tower's 1999th value modulo `3^2000`, kernel-certified (cross-checked externally against the direct big-integer evaluation of `(4^(3^1999) - 1) / 3^2000`, digit for digit). -/
@@ -1566,7 +1581,7 @@ theorem the_worldtrace_terminal_receipt :
       (c 1 * u) % 9 = (c 1 * v) % 9 → u = v) ∧
     (WorldtraceMahlerLock ↔ ∀ u : Nat, ¬ 3 ∣ u → ¬ WTGhostRay u) ∧
     (∀ (u : Nat), ¬ 3 ∣ u →
-      WTGhostRay u ↔ WorldtraceConvergence ((c 1 * u) % 9) u) ∧
+      (WTGhostRay u ↔ WorldtraceConvergence ((c 1 * u) % 9) u)) ∧
     (∀ (u : Nat), ¬ 3 ∣ u → (WTGhostRay u ↔ ∃ a : Nat, a < 9 ∧ ¬ 3 ∣ a ∧
       (∀ D : Nat, 2 ≤ D → ∃ W : ℤ, 2*(u:ℤ)*((c (D-1):Nat):ℤ)
         - (2*(a:ℤ) - 9) = (3:ℤ)^D * W))) ∧
