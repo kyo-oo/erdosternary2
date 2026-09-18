@@ -25,6 +25,7 @@ roots = [
   "GSTFinalPrefixOneDirectU2DCollision",
   "GSTFinalPurePowerResidueTransplant",
   "GSTFinalResidualConnector",
+  "GSTFinalResidualCollision",
   "GSTFourPowerThirdWave",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
