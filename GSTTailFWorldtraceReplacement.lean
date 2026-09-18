@@ -10,9 +10,8 @@ set_option maxRecDepth 20000
 /-!
 # Zero-input Worldtrace production replacement
 
-The former production surface accepted terminal Props
-`MahlerSharp`, `ResidualGhostCompression`, or a bundled
-`WorldtraceMahlerTheory`.  This module removes that socket entirely.
+The former production surface accepted external terminal proof sockets.
+This module removes that interface entirely.
 
 The live monolith already contains the unconditional even theorem
 `erdos_ternary_2_even_universal`; the odd wing is elementary.  From those
