@@ -34,9 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          mkdir -p .lake/build/lib/lean
-          lake env lean -o .lake/build/lib/lean/GSTWorldtraceMahlerRelativePrecision.olean \
-            GSTWorldtraceMahlerRelativePrecision.lean 2>&1 | tee worldtrace-mahler.log
+          lake build GSTWorldtraceMahlerRelativePrecision 2>&1 | tee worldtrace-mahler.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' worldtrace-mahler.log
 
       - name: Axiom audit
