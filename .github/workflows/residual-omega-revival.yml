@@ -3,7 +3,7 @@ name: Residual Omega Revival Proof
 on:
   push:
     branches:
-      - sol/kyo-gate-universe-wire
+      - audit/problem406-8427-closure
     paths:
       - GSTResidualOmegaRevival.lean
       - GSTFinalPrefixOneDirectU2DCollision.lean
