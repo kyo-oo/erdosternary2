@@ -8,6 +8,7 @@ import GSTTowerFire
 import GSTTowerAxis
 import GSTWorldtraceArithmetic
 import GSTGhostRayExclusion
+import GSTWorldtraceMahlerRelativePrecision
 
 /-!
 # ErdosTernary2 — the monolith's entry face
