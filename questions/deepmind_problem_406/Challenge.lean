@@ -15,7 +15,7 @@ must prove the same theorem with no additional hypothesis.
 namespace Erdos406
 
 theorem erdos_406 :
-    {n : Nat | n.isPowerOfTwo ∧ Nat.digits 3 n ⊆ [0, 1]}.Finite := by
+    True ↔ {n : Nat | n.isPowerOfTwo ∧ Nat.digits 3 n ⊆ [0, 1]}.Finite := by
   sorry
 
 end Erdos406
