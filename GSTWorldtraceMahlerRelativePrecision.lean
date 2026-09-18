@@ -91,6 +91,64 @@ theorem worldtraceWitness_baseline (u s : Nat) :
   exact ⟨2 * (u : ℤ) * (GSTTowerFire.c s : ℤ)
     - 2 * (worldtraceHead u : ℤ) + 9, rfl⟩
 
+/-! ## Legacy-interface diagnostics -/
+
+/-- The fixed-precision divisibility used by the legacy Mahler Prop is
+automatic: the expression already contains the visible factor `3^s`.
+This is the formal reason the old encoding did not express convergence
+after division by `3^s`. -/
+theorem legacy_fixed_precision_automatic (a u : Nat) :
+    ∀ k : Nat, ∃ S : Nat, ∀ s : Nat, S ≤ s →
+      (3 : ℤ)^k ∣
+        (2 * (u : ℤ) * ((4 : ℤ)^(3^s) - 1)
+          - (6 * (a : ℤ) - 27) * (3 : ℤ)^s) := by
+  intro k
+  refine ⟨k, ?_⟩
+  intro s hs
+  have h4 : (4 : ℤ)^(3^s)
+      = 1 + (3 : ℤ)^(s+1) * (GSTTowerFire.c s : ℤ) := by
+    exact_mod_cast GSTTowerFire.four_pow_three_pow_eq s
+  have hfactor :
+      2 * (u : ℤ) * ((4 : ℤ)^(3^s) - 1)
+          - (6 * (a : ℤ) - 27) * (3 : ℤ)^s
+        = (3 : ℤ)^s *
+          (6 * (u : ℤ) * (GSTTowerFire.c s : ℤ)
+            - 6 * (a : ℤ) + 27) := by
+    rw [h4, pow_succ]
+    ring
+  rw [hfactor]
+  obtain ⟨t, ht⟩ := pow_dvd_pow (3 : ℤ) hs
+  refine ⟨t * (6 * (u : ℤ) * (GSTTowerFire.c s : ℤ)
+    - 6 * (a : ℤ) + 27), ?_⟩
+  rw [ht]
+  ring
+
+/-- The legacy fixed-modulus Mahler proposition is formally false:
+the admissible pair `a=1,u=1` already satisfies its eventual
+fixed-precision divisibility at every target precision. -/
+theorem legacy_mahler_prop_false :
+    ¬ GSTGhostRay.mahler_log3_not_rational := by
+  intro H
+  apply H
+  refine ⟨1, 1, ⟨by decide, by norm_num⟩, by norm_num, ?_⟩
+  exact legacy_fixed_precision_automatic 1 1
+
+/-- The legacy unbounded UniformCompression is also formally false.
+It includes the green Cantorian exponent `K=1`, which would force
+`GhostRay 1`; depth four contradicts `c_3 ≡ 16 (mod 81)`. -/
+theorem legacy_uniform_compression_false :
+    ¬ GSTGhostRay.UniformCompression := by
+  intro H
+  have hg : GSTGhostRay.GhostRay 1 :=
+    H 1 0 1 (by norm_num) (by norm_num)
+      GSTClimbInfiniteFamily.cantorian_one
+  have hlo := (hg 4 (by norm_num)).1
+  change 27 ≤ GSTTowerFire.c 3 % 81 at hlo
+  have hc : GSTTowerFire.c 3 % 81 = 16 :=
+    GSTTowerFire.c_mod81 3 (by norm_num)
+  rw [hc] at hlo
+  omega
+
 /-- The existing ghost theorem is strictly stronger than the new
 terminal interface: its quadratic-depth witness gives every requested
 relative precision. -/
@@ -227,6 +285,19 @@ theorem worldtrace_mahler_relative_precision_crown
     hAct, hTail, GSTTheAct.full_erdos_of_the_act hAct, ?_⟩
   intro n hn
   exact infinite_controller_ternary_two_chokehold hTail n hn
+
+/-- Direct crown from the corrected ghost-geometric interface:
+residual ghost compression is converted internally to scaled arithmetic
+compression before the Mahler collision. -/
+theorem worldtrace_mahler_crown_of_residual_ghost
+    (H : MahlerSharp) (HC : ResidualGhostCompression) :
+    WorldtraceMahlerCrown :=
+  worldtrace_mahler_relative_precision_crown
+    ⟨H, scaled_compression_of_residual_ghost HC⟩
+
+#print axioms legacy_mahler_prop_false
+#print axioms legacy_uniform_compression_false
+#print axioms worldtrace_mahler_crown_of_residual_ghost
 
 #print axioms worldtraceWitness_factor
 #print axioms ghost_implies_relative_lock
