@@ -1,6 +1,7 @@
 import Mathlib
 import GSTTheAct
 import GSTDiagonalRead
+import GSTTailFFourthDimension
 import GSTFourPowerHappyProvider
 import GSTCanonicalTailLTE
 import GSTCanonicalTailStateIso
