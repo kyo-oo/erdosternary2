@@ -6,6 +6,9 @@ on:
       - sol/kyo-gate-universe-wire
     paths:
       - GSTResidualOmegaRevival.lean
+      - GSTFinalPrefixOneDirectU2DCollision.lean
+      - GSTFinalResidualConnector.lean
+      - lakefile.toml
       - .github/workflows/residual-omega-revival.yml
   workflow_dispatch:
 
@@ -28,16 +31,10 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-      - name: Build monolith dependency
+      - name: Compile revived proof and dependencies
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build ErdosTernary2
-      - name: Compile revived proof
-        shell: bash
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean GSTResidualOmegaRevival.lean 2>&1 | tee residual-revival.log
+          lake build GSTResidualOmegaRevival 2>&1 | tee residual-revival.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unsolved goals|error:' residual-revival.log
