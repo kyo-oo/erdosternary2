@@ -55,7 +55,8 @@ theorem the_monolith_wire
     C.noCantorian,
     C.theAct,
     C.tailF,
-    GSTTailFProof.hTailF_iff_even_conjecture⟩
+    (by
+      simpa [GSTTheAct.the_act] using GSTTheAct.the_act_iff_hTailF.symm)⟩
 
 #print axioms the_monolith_wire
 

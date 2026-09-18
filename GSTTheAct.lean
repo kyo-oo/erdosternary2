@@ -1,6 +1,6 @@
 import Mathlib
 import GSTInfiniteFourPowerNavigation
-import GSTTailFProof
+import ErdosTernary2
 import GSTClimbTruthValue
 import GSTCanonicalTailLTE
 import GSTFinalPurePowerResidueTransplant
