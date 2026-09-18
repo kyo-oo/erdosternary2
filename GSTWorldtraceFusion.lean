@@ -964,14 +964,14 @@ theorem worldtrace_convergence_pin (a u : Nat)
     ∃ W : ℤ, 2*(u:ℤ)*((c (D-1) : Nat):ℤ) - (2*(a:ℤ) - 9)
       = (3:ℤ)^D * W := by
   obtain ⟨S, hS⟩ := H (D+1)
-  have hd : (3:ℤ)^(D+1) ∣ (6*(u:ℤ)*((c (max S (D-1) : Nat):ℤ)
+  have hd : (3:ℤ)^(D+1) ∣ (6*(u:ℤ)*((c (max S (D-1)) : Nat):ℤ)
       - (6*(a:ℤ) - 27)) := hS (max S (D-1)) (le_max_left S (D-1))
   obtain ⟨t, ht⟩ := hd
-  have hfac : 6*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (6*(a:ℤ) - 27)
-      = (3:ℤ) * (2*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (2*(a:ℤ) - 9)) := by ring
+  have hfac : 6*(u:ℤ)*((c (max S (D-1)) : Nat):ℤ) - (6*(a:ℤ) - 27)
+      = (3:ℤ) * (2*(u:ℤ)*((c (max S (D-1)) : Nat):ℤ) - (2*(a:ℤ) - 9)) := by ring
   have hpD : (3:ℤ)^(D+1) = (3:ℤ) * (3:ℤ)^D := by rw [pow_succ]; ring
   rw [hfac, hpD] at ht
-  have hY : 2*(u:ℤ)*((c (max S (D-1) : Nat):ℤ) - (2*(a:ℤ) - 9)
+  have hY : 2*(u:ℤ)*((c (max S (D-1)) : Nat):ℤ) - (2*(a:ℤ) - 9)
       = (3:ℤ)^D * t := by
     refine mul_left_cancel₀ (by norm_num : ((3:ℤ)) ≠ 0) ?_
     rw [ht]
@@ -1025,7 +1025,8 @@ theorem worldtrace_ghostray_of_convergence (a u : Nat) (ha : a < 9)
       + ((c A * u % 3^(A+1) : Nat):ℤ) = ((c A * u : Nat):ℤ) := by
     exact_mod_cast hprod
   rw [hpsucc] at hprodZ
-  have hcastu : ((c A * u : Nat):ℤ) = ((c A : Nat):ℤ) * (u:ℤ) := by push_cast
+  have hcastu : ((c A * u : Nat):ℤ) = ((c A : Nat):ℤ) * (u:ℤ) :=
+    by norm_num [Nat.cast_mul, Nat.cast_ofNat]
   have hxx : 2*((c A * u % 3^(A+1) : Nat):ℤ)
       = (2*(a:ℤ) - 9) + (3:ℤ) * (3:ℤ)^A
         * (W - 2*((c A * u / 3^(A+1) : Nat):ℤ)) := by
@@ -1035,10 +1036,12 @@ theorem worldtrace_ghostray_of_convergence (a u : Nat) (ha : a < 9)
   have hxB0 : ((c A * u % 3^(A+1) : Nat):ℤ) < (3:ℤ) * (3:ℤ)^A := by
     have hcast : ((c A * u % 3^(A+1) : Nat):ℤ) < ((3^(A+1) : Nat):ℤ) := by
       exact_mod_cast hxlt
-    have hlink0 : ((3^(A+1) : Nat):ℤ) = (3:ℤ)^(A+1) := by push_cast
+    have hlink0 : ((3^(A+1) : Nat):ℤ) = (3:ℤ)^(A+1) :=
+      by norm_num [Nat.cast_pow, Nat.cast_ofNat]
     rw [hlink0, hpsucc] at hcast
     exact hcast
-  have hlink : ((3^A : Nat):ℤ) = (3:ℤ)^A := by push_cast
+  have hlink : ((3^A : Nat):ℤ) = (3:ℤ)^A :=
+    by norm_num [Nat.cast_pow, Nat.cast_ofNat]
   have hTA : (9:ℤ) ≤ (3:ℤ)^A := by
     have hone : (1:Nat) ≤ 3^(A-2) := Nat.one_le_pow _ _ (by decide)
     have hsplit : 3^A = 3^2 * 3^(A-2) := by
@@ -1184,8 +1187,10 @@ theorem worldtrace_ray_head_unique (u v : Nat) (hu3 : ¬ 3 ∣ u) (hv3 : ¬ 3 �
       linear_combination hyW - hxW
     have hdZ : ((y - x : Nat):ℤ) = (3:ℤ)^t * (w:ℤ) := by
       exact_mod_cast hdecomp
-    have hdY : ((y - x : Nat):ℤ) = (y:ℤ) - (x:ℤ) :=
-      Int.natCast_sub (by omega : x ≤ y)
+    have hdY : ((y - x : Nat):ℤ) = (y:ℤ) - (x:ℤ) := by
+      have hsub : (y - x : Nat) + x = y := by omega
+      have hZ : ((y - x : Nat):ℤ) + (x:ℤ) = (y:ℤ) := by exact_mod_cast hsub
+      linarith
     rw [← hdY, hdZ] at hsub
     have hp2 : (3:ℤ)^(t+2) = (3:ℤ)^t * 9 := by
       rw [show t+2 = (t+1)+1 from by omega, pow_succ, pow_succ]; ring
@@ -1197,8 +1202,8 @@ theorem worldtrace_ray_head_unique (u v : Nat) (hu3 : ¬ 3 ∣ u) (hv3 : ¬ 3 �
       have hpos : (0:ℤ) ≤ 2*(w:ℤ)*((c (t+2-1) : Nat):ℤ) := by positivity
       linarith
     obtain ⟨z, hz⟩ : ∃ z : Nat, (Wy - Wx) = (z:ℤ) := by
-      refine ⟨(Wy - Wx).natCast, ?_⟩
-      exact (Int.natCast_of_nonneg hnn).symm
+      refine ⟨(Wy - Wx).toNat, ?_⟩
+      exact (Int.toNat_of_nonneg hnn).symm
     have hcnat : (2:Nat) * w * c (t+2-1) = 9 * z := by
       have h0 : (2*(w:ℤ)*((c (t+2-1) : Nat):ℤ)) = (9:ℤ) * (z:ℤ) := by
         rw [← hz]; exact hc
@@ -1206,8 +1211,8 @@ theorem worldtrace_ray_head_unique (u v : Nat) (hu3 : ¬ 3 ∣ u) (hv3 : ¬ 3 �
     have h3dvd : (3:Nat) ∣ 2 * w * c (t+2-1) := by
       rw [hcnat]
       exact ⟨3*z, by ring⟩
-    rcases Nat.Prime.dvd_mul (by decide : Nat.Prime 3) h3dvd with h2w | hcc
-    · rcases Nat.Prime.dvd_mul (by decide : Nat.Prime 3) h2w with h2 | hw
+    rcases (Nat.Prime.dvd_mul (by decide : Nat.Prime 3)).mp h3dvd with h2w | hcc
+    · rcases (Nat.Prime.dvd_mul (by decide : Nat.Prime 3)).mp h2w with h2 | hw
       · exact absurd h2 (by decide)
       · exact hw3 hw
     · exact absurd hcc (fun h => by
@@ -1251,7 +1256,7 @@ theorem worldtrace_ray_classification (u : Nat) (hu3 : ¬ 3 ∣ u)
         (Or.inl (worldtrace_ray_mod_seven u hconv)))))
   · rw [h8] at hconv
     exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        (Or.inl (worldtrace_ray_mod_eight u hconv)))))
+        (Or.inl (worldtrace_ray_mod_eight u hconv))))))
 
 /-- **THE RAY IS FINITE: AT MOST SIX MEMBERS.**  The head map is injective
 on the three-free ray cores (same head, same member) and lands in the
