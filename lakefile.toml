@@ -20,7 +20,6 @@ roots = [
   "GSTFourPowerDirectResidue27",
   "GSTFourPowerDirectResidue81",
   "GSTFourPowerDirectResidue243",
-  "GSTFourPowerDirectResidue729",
   "GSTFourPowerExponentTritObstruction",
   "GSTFourPowerDirectExistence",
   "GSTFourPowerDirectAdditionCarry",
@@ -29,7 +28,7 @@ roots = [
   "GSTFourPowerAffinePrefixIsometry",
   "GSTFourPowerDirectHappyBridge",
   "GSTFourPowerPrefixKillingHappy",
-  "GSTFourPowerRowSixPhysicalRelocation",
+  "GSTFourPowerRowSixLiftRelocation",
   "GSTFourPowerDirectTwoHundredTwentySeventhRow",
   "GSTFourPowerDirectTwoHundredThirtySeventhRow",
 ]
