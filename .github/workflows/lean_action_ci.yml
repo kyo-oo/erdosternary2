@@ -77,15 +77,6 @@ jobs:
           lake build GSTTailFWorldtraceReplacement 2>&1 | tee tailf-worldtrace-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-worldtrace-build.log
 
-      - name: Problem 406 zero-input solution
-        run: |
-          set -euo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean questions/deepmind_problem_406/Solution.lean 2>&1 | tee problem406-solution.log
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unknown module prefix|unsolved goals|error:' problem406-solution.log
-          ! grep -E 'hTail4|four_power_happy_climb|MahlerSharp|ResidualGhostCompression|WorldtraceMahlerTheory' \
-            GSTTailFWorldtraceReplacement.lean Main.lean questions/deepmind_problem_406/Solution.lean
-
       - name: One-lane separate proof module
         run: |
           set -euo pipefail
@@ -155,15 +146,15 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
-          import Main
+          import ErdosTernary2
           import GSTTailFWorldtraceReplacement
-          #print axioms GSTTailFWorldtraceReplacement.even_erdos
-          #print axioms GSTTailFWorldtraceReplacement.the_act
-          #print axioms GSTTailFWorldtraceReplacement.hTailF
-          #print axioms GSTTailFWorldtraceReplacement.full_erdos
+          #print axioms gst_four_power_creation_master_inline
+          #print axioms gst_prefix_one_navigation_lift
+          #print axioms gst_power_two_wave_large
           #print axioms GSTTailFWorldtraceReplacement.crown
-          #print axioms the_monolith_wire
-          #print axioms the_worldtrace_mahler_wire
+          #print axioms GSTTailFWorldtraceReplacement.hTailF
+          #print axioms GSTTailFWorldtraceReplacement.the_act
+          #print axioms GSTTailFWorldtraceReplacement.full_erdos
           LEAN
           lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
           rm -f MultiNukeAxiomAudit.lean

@@ -33,11 +33,13 @@ own entry point by explicit order:
   row five), and the survivor map (sixteen nodes mod 243).
 -/
 
-/-- **THE MONOLITH WIRE — ZERO-INPUT PRODUCTION FACE.**
-The campaign closure is now read from the live unconditional even theorem.
-No Mahler, compression, climb, tail, or theory-object hypothesis occurs at
-the entry face. -/
-theorem the_monolith_wire :
+/-- **THE MONOLITH WIRE — WORLDTRACE hTail SURGERY.**
+The structural identities remain unchanged, but the production hTailF face is
+now supplied directly by the green Worldtrace–Mahler crown instead of the old
+GST no-Cantorian-to-hTail socket. -/
+theorem the_monolith_wire
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     (∀ core : Nat, ¬ 3 ∣ core →
       ¬ GSTClimbInfiniteFamily.NeverFiringTower core) ∧
     (GSTTheAct.the_act ↔
@@ -47,7 +49,7 @@ theorem the_monolith_wire :
     GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ∧
     (GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ↔
       ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) := by
-  have C := GSTTailFWorldtraceReplacement.crown
+  have C := GSTTailFWorldtraceReplacement.crown H HC
   exact ⟨GSTClimbInfiniteFamily.tower_dust_empty,
     GSTClimbInfiniteFamily.the_act_iff_no_cantorian,
     C.noCantorian,
@@ -276,12 +278,12 @@ theorem the_dust_window_wire :
 #print axioms the_dust_window_wire
 
 
-/-- **THE WORLDTRACE–MAHLER PRODUCTION WIRE — ZERO INPUT.**
-The historical terminal hypotheses are gone from the public wire.  The crown
-is reconstructed from the live unconditional even theorem and the elementary
-odd wing. -/
-theorem the_worldtrace_mahler_wire :
+/-- **THE WORLDTRACE–MAHLER PRODUCTION WIRE.**
+Read the corrected green crown directly through the hTail replacement provider. -/
+theorem the_worldtrace_mahler_wire
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     GSTWorldtraceMahler.WorldtraceMahlerCrown :=
-  GSTTailFWorldtraceReplacement.crown
+  GSTTailFWorldtraceReplacement.crown H HC
 
 #print axioms the_worldtrace_mahler_wire
