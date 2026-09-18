@@ -106,7 +106,6 @@ roots = [
   "GSTU2DSharpCrossingBlock",
   "GSTV2InfiniteCore",
   "GSTTailFFourthDimension",
-  "GSTTailFProof",
   "GSTTailFOneLane",
   "GSTTailFInfiniteRead",
   "GSTClimbTruthValue",
