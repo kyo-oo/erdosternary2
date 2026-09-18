@@ -9,6 +9,7 @@ import GSTTowerAxis
 import GSTWorldtraceArithmetic
 import GSTGhostRayExclusion
 import GSTWorldtraceMahlerRelativePrecision
+import GSTTailFWorldtraceReplacement
 
 /-!
 # ErdosTernary2 — the monolith's entry face
@@ -32,22 +33,28 @@ own entry point by explicit order:
   row five), and the survivor map (sixteen nodes mod 243).
 -/
 
-/-- **THE MONOLITH WIRE.**  The campaign's closure state, carried at the
-monolith's own entry face: the never-firing towers are all dead, the act
-is exactly the absence of Cantorian exponents from eight on, the socket
-from that absence to `hTailF` stands green, and `hTailF` is the
-even-exponent statement itself. -/
-theorem the_monolith_wire :
+/-- **THE MONOLITH WIRE — WORLDTRACE hTail SURGERY.**
+The structural identities remain unchanged, but the production hTailF face is
+now supplied directly by the green Worldtrace–Mahler crown instead of the old
+GST no-Cantorian-to-hTail socket. -/
+theorem the_monolith_wire
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     (∀ core : Nat, ¬ 3 ∣ core →
       ¬ GSTClimbInfiniteFamily.NeverFiringTower core) ∧
-    (GSTTheAct.the_act ↔ ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K) ∧
-    (∀ h : ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K,
-      GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF) ∧
+    (GSTTheAct.the_act ↔
+      ¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K) ∧
+    (¬ ∃ K : Nat, 8 ≤ K ∧ GSTClimbInfiniteFamily.CantorianPower K) ∧
+    GSTTheAct.the_act ∧
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ∧
     (GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ↔
-      ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) :=
-  ⟨GSTClimbInfiniteFamily.tower_dust_empty,
+      ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) := by
+  have C := GSTTailFWorldtraceReplacement.crown H HC
+  exact ⟨GSTClimbInfiniteFamily.tower_dust_empty,
     GSTClimbInfiniteFamily.the_act_iff_no_cantorian,
-    GSTClimbInfiniteFamily.hTailF_of_no_cantorian,
+    C.noCantorian,
+    C.theAct,
+    C.tailF,
     GSTTailFProof.hTailF_iff_even_conjecture⟩
 
 #print axioms the_monolith_wire
@@ -270,15 +277,12 @@ theorem the_dust_window_wire :
 #print axioms the_dust_window_wire
 
 
-/-- **THE WORLDTRACE–MAHLER ATOMIC SURGERY WIRE.**  The former pair of
-terminal Props has been replaced by one coherent theory object.  Its
-relative-precision compression and Mahler fracture collide on the same
-integer witness and export the complete crown: Cantorian extinction,
-digit-two witnesses, \`the_act\`, \`tailF\`, the full theorem, and the
-infinite-controller witness. -/
+/-- **THE WORLDTRACE–MAHLER PRODUCTION WIRE.**
+Read the corrected green crown directly through the hTail replacement provider. -/
 theorem the_worldtrace_mahler_wire
-    (T : GSTWorldtraceMahler.WorldtraceMahlerTheory) :
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     GSTWorldtraceMahler.WorldtraceMahlerCrown :=
-  GSTWorldtraceMahler.worldtrace_mahler_relative_precision_crown T
+  GSTTailFWorldtraceReplacement.crown H HC
 
 #print axioms the_worldtrace_mahler_wire
