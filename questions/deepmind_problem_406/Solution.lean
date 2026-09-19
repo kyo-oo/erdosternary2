@@ -1,5 +1,4 @@
 import ErdosTernary2
-import GSTTheAct
 
 namespace Problem406ResidualOmega
 
@@ -212,19 +211,21 @@ theorem even_universal (a : Nat) (ha : 5 ≤ a) :
         rw [hpow] at hd4
         exact hasTernaryTwo_of_digit (4^a) p hd4
 
-/-- Binder-free THE ACT. -/
-theorem the_act : GSTTheAct.the_act := by
-  intro K hK
-  exact has_two_imp_not_no_two (4^K) (even_universal K (by omega))
-
 /-- Binder-free full Erdős statement. -/
 theorem full_erdos :
-    ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false :=
-  GSTTheAct.full_erdos_of_the_act the_act
+    ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false := by
+  intro n hn
+  rcases Nat.even_or_odd n with ⟨K, hK⟩ | ⟨K, hK⟩
+  · have hn2 : n = 2 * K := by omega
+    have hK5 : 5 ≤ K := by omega
+    have hpow : 2^n = 4^K := by
+      rw [hn2, Nat.pow_mul]
+    rw [hpow]
+    exact has_two_imp_not_no_two (4^K) (even_universal K hK5)
+  · exact erdos_ternary_2_odd_universal n hn (by omega)
 
 #print axioms residual_navigation_lift
 #print axioms even_universal
-#print axioms the_act
 #print axioms full_erdos
 
 end Problem406ResidualOmega
