@@ -37,7 +37,9 @@ own entry point by explicit order:
 The structural identities remain unchanged, but the production hTailF face is
 now supplied directly by the green Worldtrace–Mahler crown instead of the old
 GST no-Cantorian-to-hTail socket. -/
-theorem the_monolith_wire :
+theorem the_monolith_wire
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     (∀ core : Nat, ¬ 3 ∣ core →
       ¬ GSTClimbInfiniteFamily.NeverFiringTower core) ∧
     (GSTTheAct.the_act ↔
@@ -47,7 +49,7 @@ theorem the_monolith_wire :
     GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ∧
     (GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF ↔
       ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false) := by
-  have C := GSTTailFWorldtraceReplacement.crown
+  have C := GSTTailFWorldtraceReplacement.crown H HC
   exact ⟨GSTClimbInfiniteFamily.tower_dust_empty,
     GSTClimbInfiniteFamily.the_act_iff_no_cantorian,
     C.noCantorian,
@@ -278,8 +280,10 @@ theorem the_dust_window_wire :
 
 /-- **THE WORLDTRACE–MAHLER PRODUCTION WIRE.**
 Read the corrected green crown directly through the hTail replacement provider. -/
-theorem the_worldtrace_mahler_wire :
+theorem the_worldtrace_mahler_wire
+    (H : GSTWorldtraceMahler.MahlerSharp)
+    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
     GSTWorldtraceMahler.WorldtraceMahlerCrown :=
-  GSTTailFWorldtraceReplacement.crown
+  GSTTailFWorldtraceReplacement.crown H HC
 
 #print axioms the_worldtrace_mahler_wire
