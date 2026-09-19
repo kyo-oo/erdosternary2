@@ -119,7 +119,6 @@ roots = [
   "GSTWorldtraceArithmetic",
   "GSTGhostRayExclusion",
   "GSTWorldtraceMahlerRelativePrecision",
-  "GSTResidualOmegaRevival",
   "GSTTailFWorldtraceReplacement",
 ]
 
