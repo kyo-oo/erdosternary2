@@ -62,9 +62,11 @@ theorem residual_child_witness_to_left_happy
         simpa [gstCarry] using h0
       have hsplit := Nat.mod_add_div
         (4 * (gstNavigationConstant (s+k) m % 3^j)) (3^j)
-      have hmodlt := Nat.mod_lt
-        (4 * (gstNavigationConstant (s+k) m % 3^j))
-        (Nat.pow_pos (by decide : 0 < 3))
+      have hmodlt :
+          (4 * (gstNavigationConstant (s+k) m % 3^j)) % 3^j < 3^j :=
+        Nat.mod_lt
+          (4 * (gstNavigationConstant (s+k) m % 3^j))
+          (Nat.pow_pos (by decide : 0 < 3) : 0 < 3^j)
       rw [hdiv0, Nat.mul_zero, Nat.add_zero] at hsplit
       omega
     · right
