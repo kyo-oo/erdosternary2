@@ -1,6 +1,5 @@
 import GSTFourPowerMultiscaleRenormalization
 import GSTFourPowerAffineRenormalizedOrbit
-import GSTFourPowerThirdWaveBranchReactor
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 100000000
@@ -12,7 +11,6 @@ open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineChannelAutomaton
 open GSTFourPowerAffineRenormalizedOrbit
 open GSTFourPowerMultiscaleRenormalization
-open GSTFourPowerThirdWaveBranchReactor
 
 /-- Scale zero is exactly the historical affine orbit. -/
 theorem scaleOrbit_zero_eq_affineOrbit (q : Nat) :
@@ -23,7 +21,7 @@ theorem scaleOrbit_zero_eq_affineOrbit (q : Nat) :
   | succ q ih =>
       rw [scaleOrbit_zero_succ, affineOrbit_succ, ih]
 
-/-- Scale one is exactly the renormalized orbit used by the third-wave reactor. -/
+/-- Scale one is exactly the renormalized orbit used by the third-wave analysis. -/
 theorem scaleOrbit_one_eq_renormOrbit (q : Nat) :
     scaleOrbit 1 q = renormOrbit q := by
   induction q with
@@ -79,22 +77,28 @@ theorem tail3_affineOrbit_three_mul_add_two_multiscale (q : Nat) :
 /-- The branch-zero classifier expressed entirely through the multiscale orbit. -/
 theorem noCommonTwo_three_mul_scale_iff (q : Nat) :
     (¬ CommonTwo (3*q)) ↔ BadChannel 0 (scaleOrbit 1 q) := by
-  rw [GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_renorm_iff,
-    ← scaleOrbit_one_eq_renormOrbit]
+  simpa [scaleOrbit_one_eq_renormOrbit] using
+    (GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_renorm_iff q)
 
 /-- The branch-one classifier expressed entirely through the multiscale orbit. -/
 theorem noCommonTwo_three_mul_add_one_scale_iff (q : Nat) :
     (¬ CommonTwo (3*q+1)) ↔ BadChannel 1 (4 * scaleOrbit 1 q) := by
-  rw [GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_add_one_renorm_iff,
-    ← scaleOrbit_one_eq_renormOrbit]
+  simpa [scaleOrbit_one_eq_renormOrbit] using
+    (GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_add_one_renorm_iff q)
 
 /-- The branch-two classifier expressed entirely through the multiscale orbit. -/
 theorem noCommonTwo_three_mul_add_two_scale_iff (q : Nat) :
     (¬ CommonTwo (3*q+2)) ↔ BadChannel 3 (16 * scaleOrbit 1 q + 1) := by
-  rw [GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_add_two_renorm_iff,
-    ← scaleOrbit_one_eq_renormOrbit]
+  simpa [scaleOrbit_one_eq_renormOrbit] using
+    (GSTFourPowerAffineRenormalizedOrbit.noCommonTwo_three_mul_add_two_renorm_iff q)
 
-/-- Multiscale form of the exact remaining third-wave closure. -/
+/-- Exact exponent form of the remaining third-wave closure. -/
+def ThirdWaveNoCommonDescent : Prop :=
+  (∀ q : Nat, ¬ CommonTwo (3*q) → ¬ CommonTwo q) ∧
+  (∀ q : Nat, ¬ CommonTwo (3*q+1) → ¬ CommonTwo q) ∧
+  (∀ q : Nat, ¬ CommonTwo (3*q+2) → ¬ CommonTwo q)
+
+/-- Same closure expressed on the canonical scale-zero/scale-one coordinates. -/
 def MultiscaleBranchBadDescent : Prop :=
   (∀ q : Nat,
     BadChannel 0 (scaleOrbit 1 q) →
@@ -106,55 +110,68 @@ def MultiscaleBranchBadDescent : Prop :=
     BadChannel 3 (16 * scaleOrbit 1 q + 1) →
       BadChannel 1 (scaleOrbit 0 q))
 
-/-- The new multiscale descent target is definitionally the old reactor target,
-after replacing the two historical orbit coordinates by their exact scale
-coordinates. -/
-theorem multiscaleBranchBadDescent_iff_branchBadDescent :
-    MultiscaleBranchBadDescent ↔
-      GSTFourPowerUniversalInduction.BranchBadDescent := by
+/-- The direct exponent closure and the multiscale bad-channel closure are
+literally the same theorem after the exact scale conjugacies. -/
+theorem thirdWaveNoCommonDescent_iff_multiscale :
+    ThirdWaveNoCommonDescent ↔ MultiscaleBranchBadDescent := by
   constructor
   · intro h
-    unfold MultiscaleBranchBadDescent at h
-    unfold GSTFourPowerUniversalInduction.BranchBadDescent
+    unfold ThirdWaveNoCommonDescent at h
+    unfold MultiscaleBranchBadDescent
     constructor
     · intro q hBad
-      rw [← scaleOrbit_one_eq_renormOrbit] at hBad
-      have hp := h.1 q hBad
+      have hNoChild : ¬ CommonTwo (3*q) :=
+        (noCommonTwo_three_mul_scale_iff q).2 hBad
+      have hNoParent := h.1 q hNoChild
+      have hp : BadChannel 1 (affineOrbit q) :=
+        (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).1 hNoParent
       simpa [scaleOrbit_zero_eq_affineOrbit] using hp
     · constructor
       · intro q hBad
-        rw [← scaleOrbit_one_eq_renormOrbit] at hBad
-        have hp := h.2.1 q hBad
+        have hNoChild : ¬ CommonTwo (3*q+1) :=
+          (noCommonTwo_three_mul_add_one_scale_iff q).2 hBad
+        have hNoParent := h.2.1 q hNoChild
+        have hp : BadChannel 1 (affineOrbit q) :=
+          (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).1 hNoParent
         simpa [scaleOrbit_zero_eq_affineOrbit] using hp
       · intro q hBad
-        rw [← scaleOrbit_one_eq_renormOrbit] at hBad
-        have hp := h.2.2 q hBad
+        have hNoChild : ¬ CommonTwo (3*q+2) :=
+          (noCommonTwo_three_mul_add_two_scale_iff q).2 hBad
+        have hNoParent := h.2.2 q hNoChild
+        have hp : BadChannel 1 (affineOrbit q) :=
+          (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).1 hNoParent
         simpa [scaleOrbit_zero_eq_affineOrbit] using hp
   · intro h
-    unfold MultiscaleBranchBadDescent
-    unfold GSTFourPowerUniversalInduction.BranchBadDescent at h
+    unfold MultiscaleBranchBadDescent at h
+    unfold ThirdWaveNoCommonDescent
     constructor
-    · intro q hBad
-      have hb : BadChannel 0 (renormOrbit q) := by
-        simpa [scaleOrbit_one_eq_renormOrbit] using hBad
+    · intro q hNoChild
+      have hb : BadChannel 0 (scaleOrbit 1 q) :=
+        (noCommonTwo_three_mul_scale_iff q).1 hNoChild
       have hp := h.1 q hb
-      simpa [scaleOrbit_zero_eq_affineOrbit] using hp
+      have hp' : BadChannel 1 (affineOrbit q) := by
+        simpa [scaleOrbit_zero_eq_affineOrbit] using hp
+      exact (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).2 hp'
     · constructor
-      · intro q hBad
-        have hb : BadChannel 1 (4 * renormOrbit q) := by
-          simpa [scaleOrbit_one_eq_renormOrbit] using hBad
+      · intro q hNoChild
+        have hb : BadChannel 1 (4 * scaleOrbit 1 q) :=
+          (noCommonTwo_three_mul_add_one_scale_iff q).1 hNoChild
         have hp := h.2.1 q hb
-        simpa [scaleOrbit_zero_eq_affineOrbit] using hp
-      · intro q hBad
-        have hb : BadChannel 3 (16 * renormOrbit q + 1) := by
-          simpa [scaleOrbit_one_eq_renormOrbit] using hBad
+        have hp' : BadChannel 1 (affineOrbit q) := by
+          simpa [scaleOrbit_zero_eq_affineOrbit] using hp
+        exact (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).2 hp'
+      · intro q hNoChild
+        have hb : BadChannel 3 (16 * scaleOrbit 1 q + 1) :=
+          (noCommonTwo_three_mul_add_two_scale_iff q).1 hNoChild
         have hp := h.2.2 q hb
-        simpa [scaleOrbit_zero_eq_affineOrbit] using hp
+        have hp' : BadChannel 1 (affineOrbit q) := by
+          simpa [scaleOrbit_zero_eq_affineOrbit] using hp
+        exact (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).2 hp'
 
 #print axioms scaleOrbit_zero_eq_affineOrbit
 #print axioms scaleOrbit_one_eq_renormOrbit
 #print axioms affineOrbit_three_mul_multiscale
 #print axioms tail3_affineOrbit_three_mul_add_two_multiscale
-#print axioms multiscaleBranchBadDescent_iff_branchBadDescent
+#print axioms thirdWaveNoCommonDescent_iff_multiscale
 
 end GSTFourPowerThirdWaveMultiscaleBridge
