@@ -70,12 +70,12 @@ jobs:
           lake build GSTTailFFourthDimension 2>&1 | tee tailf-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-build.log
 
-      - name: Worldtrace hTailF replacement module
+      - name: Fourth-dimension hTailF proof module
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTailFWorldtraceReplacement 2>&1 | tee tailf-worldtrace-build.log
-          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-worldtrace-build.log
+          lake build GSTTailFProof 2>&1 | tee tailf-proof-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' tailf-proof-build.log
 
       - name: One-lane separate proof module
         run: |
@@ -147,14 +147,10 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
-          import GSTTailFWorldtraceReplacement
           #print axioms gst_four_power_creation_master_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms gst_power_two_wave_large
-          #print axioms GSTTailFWorldtraceReplacement.crown
-          #print axioms GSTTailFWorldtraceReplacement.hTailF
-          #print axioms GSTTailFWorldtraceReplacement.the_act
-          #print axioms GSTTailFWorldtraceReplacement.full_erdos
+          #print axioms erdos_ternary_2_universal_of_tailF
           LEAN
           lake env lean MultiNukeAxiomAudit.lean 2>&1 | tee axiom-audit.log
           rm -f MultiNukeAxiomAudit.lean

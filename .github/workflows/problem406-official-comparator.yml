@@ -5,7 +5,6 @@ on:
     branches:
       - sol/kyo-gate-universe-wire
     paths:
-      - GSTTailFWorldtraceReplacement.lean
       - Main.lean
       - lakefile.toml
       - questions/deepmind_problem_406/Challenge.lean
@@ -58,12 +57,12 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Build production replacement and judge modules
+      - name: Build monolith and judge modules
         shell: bash
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTTailFWorldtraceReplacement Challenge Solution
+          lake build ErdosTernary2 Challenge Solution
 
       - name: Audit solution source
         shell: bash

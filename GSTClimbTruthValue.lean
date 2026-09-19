@@ -1,6 +1,6 @@
 import Mathlib
 import GSTInfiniteFourPowerNavigation
-import ErdosTernary2
+import GSTTailFProof
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -17,8 +17,8 @@ Erdős conjecture proven?**
 * **§1 THE CONDITIONALITY CERTIFICATE.**  `climb_implies_erdos`: whoever
   proves the climb proves the even-exponent Erdős ternary statement
   (`∀ K ≥ 8, noTernaryTwo (4^K) = false`), through the repo's own green
-  chain — the climb's literal Happy witness already contains a ternary digit two,
-  so the conclusion is read directly with no hTail detour.
+  chain — `hTailF` consumes the climb, the green unconditional iff
+  `erdos_even_conjecture_iff_tailF` converts tailF into the statement.
   `erdos_ternary_full_of_climb`: the climb, plus the repo's own green
   odd-exponent half (`erdos_ternary_2_conjecture_odd`) and the verified
   instances below the floor, assembles the FULL Erdős ternary statement
@@ -51,15 +51,13 @@ open GSTU2DEventTransport (HappyCell)
 /-! ## §1 THE CONDITIONALITY CERTIFICATE -/
 
 /-- The climb implies the even-exponent Erdős ternary statement, through
-the climb's own Happy witness: its digit component is already the required
-ternary two.  Zero hTail indirection and zero new input. -/
+the repo's own green chain: `hTailF` consumes the climb, and the green
+unconditional iff `erdos_even_conjecture_iff_tailF` turns the tailF
+property into the statement.  Zero new input. -/
 theorem climb_implies_erdos
     (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
-    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false := by
-  intro K hK
-  obtain ⟨p, _hp3, ⟨hd2, _hcarry⟩⟩ := hClimb K hK
-  exact has_two_imp_not_no_two (4^K)
-    (hasTernaryTwo_of_digit (4^K) p hd2)
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_iff_tailF.mpr (GSTTailFProof.hTailF hClimb)
 
 /-- Verified instance at `K = 5` (below the climb's floor). -/
 theorem no22_four_pow_five : noTernaryTwo (4^5) = false := by
