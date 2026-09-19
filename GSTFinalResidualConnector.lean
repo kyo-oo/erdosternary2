@@ -53,8 +53,22 @@ theorem residual_child_witness_to_left_happy
     0 (s+k+1) 1 (gstNavigationConstant (s+k) m) j hE hone
   apply hiff.2
   have hseed : (4 * 1) / 3^(s+k+1) = 0 := Nat.div_eq_of_lt hfour
-  simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit,
-    seededCarry, gstCarry, hseed] using ⟨hd, hcarry⟩
+  constructor
+  · simpa [GSTCanonicalSevenAxisBridge.digit3, gstDigit] using hd
+  · rcases hcarry with h0 | h3
+    · left
+      have hdiv0 :
+          (4 * (gstNavigationConstant (s+k) m % 3^j)) / 3^j = 0 := by
+        simpa [gstCarry] using h0
+      have hsplit := Nat.mod_add_div
+        (4 * (gstNavigationConstant (s+k) m % 3^j)) (3^j)
+      have hmodlt := Nat.mod_lt
+        (4 * (gstNavigationConstant (s+k) m % 3^j))
+        (Nat.pow_pos (by decide : 0 < 3))
+      rw [hdiv0, Nat.mul_zero, Nat.add_zero] at hsplit
+      omega
+    · right
+      simpa [seededCarry, gstCarry, hseed] using h3
 
 /-- An all-depth residual Omega bad trace is literally a bad right boundary on
 that same residual Graph-V2 rectangle at every corresponding absolute row. -/
@@ -106,7 +120,8 @@ theorem residual_bad_trace_to_right_bad
         (GSTGraphV2InfiniteControl.graph 1
           (GSTGraphV2HandwrittenOmegaUBlock.residualParentExponent s k m)
           (s+1+(k+j))).seven.digit := by
-    simpa [Nat.add_assoc] using habs
+    have hidx : s + k + 1 + j = s + 1 + (k+j) := by omega
+    simpa only [hidx] using habs
   have hq := hiff.1 habs'
   have hseed : (4 * 1) / 3^(s+1) = 0 := Nat.div_eq_of_lt hfour
   have hproj := gst_omega_parent_projection s k m j hs
