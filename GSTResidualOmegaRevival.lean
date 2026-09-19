@@ -1,4 +1,6 @@
 import ErdosTernary2
+import GSTFinalPrefixOneDirectU2DCollision
+import GSTFinalResidualConnector
 import GSTTheAct
 
 namespace GSTResidualOmegaRevival
@@ -6,116 +8,97 @@ namespace GSTResidualOmegaRevival
 set_option maxHeartbeats 0
 set_option maxRecDepth 1000000
 
-/-- Revived first residual world: level one.  This is the original exact
-Omega-state termination argument, now compiled as a live theorem rather than
-left inside the quarantined archaeology block of the monolith. -/
-theorem omega_termination_s1
-    (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary 1 k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (1+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace 1 k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness 1 k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact 1 k m j (by decide)
-  have hstep := gst_omega_universal_equation 1 k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    1 k m (by decide) hk hm
-  have hseeded : GSTSeededAffineBadTrace
-      ((4 * (c 1 % 3^k)) / 3^k)
-      (c 1 / 3^k + 4^(3^1) * gstNavigationConstant (1+k) m) :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine 1 k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo 1 k m (by decide)
-  have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
-    gst_omega_infiniteBadTrace_blocks 1 k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- Revived level-three residual world. -/
-theorem omega_termination_s3
-    (k m : Nat) (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary 3 k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (3+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace 3 k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness 3 k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact 3 k m j (by decide)
-  have hstep := gst_omega_universal_equation 3 k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    3 k m (by decide) hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine 3 k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo 3 k m (by decide)
-  have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
-    gst_omega_infiniteBadTrace_blocks 3 k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- Revived stable residual world for levels at least two other than three. -/
-theorem omega_termination_stable
-    (s k m : Nat) (hs : 2 ≤ s) (hs3 : s ≠ 3)
-    (hk : 1 ≤ k) (hm : 1 ≤ m) (hm3 : m % 3 ≠ 0)
-    (hboundary : GSTResidualBoundary s k (m % 3))
-    (hchild : GSTNavigationWitness (gstNavigationConstant (s+k) m)) :
-    ¬ GSTOmegaInfiniteBadTrace s k m := by
-  intro hbad
-  obtain ⟨j, hj⟩ :=
-    gst_omega_childZeroSet_nonempty_of_navigation_witness s k m hchild
-  have hbadChild := hbad j
-  have horigin := gst_omega_origin_exact s k m j (by omega)
-  have hstep := gst_omega_universal_equation s k m j
-  have hdescent := gst_residual_origin_descent_certificate
-    s k m (by omega) hk hm
-  have hseeded :=
-    (gst_omega_infiniteBadTrace_iff_seededAffine s k m).1 hbad
-  have heecho := gst_omega_affine_tail_block_echo s k m (by omega)
-  have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
-    gst_omega_infiniteBadTrace_blocks s k m hbad
-  simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
-    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
-    <;> (first
-      | contradiction
-      | omega
-      | aesop (config := { maxRuleApplications := 10000 }))
-
-/-- The three residual worlds exhaust the monolith's certified residual
-boundary. -/
-theorem omega_termination : GSTResidualOmegaTermination := by
-  intro s k m hs hk hm hm3 hnot hchild
-  have hrange : m % 3 = 1 ∨ m % 3 = 2 := by
-    have hlt : m % 3 < 3 := Nat.mod_lt _ (by decide)
+/-- Convert the monolith Happy-space witness to the standalone physical
+Navigation object consumed by the direct Graph-V2 collision theorem. -/
+private theorem standalone_navigation_of_gst
+    (R : Nat) (h : GSTNavigationWitness R) :
+    GSTCanonicalTailStateIso.Navigation R := by
+  obtain ⟨j, hd, hspace⟩ := h
+  have hmod : gstCarry R j % 3 = 0 :=
+    gstGoodSpace_carry_mod3_zero R j hspace
+  have hlt : gstCarry R j < 4 := by
+    cases j with
+    | zero => simp [gstCarry, Nat.mod_one]
+    | succ t => exact gstCarry_lt_four R (t+1) (by omega)
+  have hcarry : gstCarry R j = 0 ∨ gstCarry R j = 3 := by
     omega
-  have hboundary := gst_origin_not_closed_boundary
-    s k (m % 3) hs hk hrange hnot
-  rcases hboundary with ⟨rfl, hcase⟩ | ⟨rfl, hcase⟩ | hstable
-  · exact omega_termination_s1 k m hk hm hm3
-      (Or.inl ⟨rfl, hcase⟩) hchild
-  · exact omega_termination_s3 k m hk hm hm3
-      (Or.inr (Or.inl ⟨rfl, hcase⟩)) hchild
-  · exact omega_termination_stable s k m hstable.1 hstable.2.1
-      hk hm hm3 (Or.inr (Or.inr hstable)) hchild
+  refine ⟨j, ?_⟩
+  unfold GSTCanonicalTailStateIso.HappyCell
+  constructor
+  · simpa [GSTCanonicalTailStateIso.digit3, gstDigit] using hd
+  · rcases hcarry with h0 | h3
+    · left
+      simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h0
+    · right
+      simpa [GSTCanonicalTailStateIso.carry4, gstCarry] using h3
 
-/-- Assumption-free residual Navigation lift, obtained from the revived exact
-Omega termination law rather than the invalid generic U2D sign shortcut. -/
+/-- Direct, assumption-free prefix-one lift.
+
+If the parent had no Navigation witness, its Ω parent projection would be
+bad at every depth.  The production connector turns that into the literal
+right-bad boundary of the residual Graph-V2 rectangle.  The supplied child
+Navigation becomes the left Happy gate.  The already-green direct U2D
+collision theorem says those two objects cannot coexist. -/
+theorem prefix_one_navigation_lift_direct :
+    GSTPrefixOneNavigationLift := by
+  intro s n hs hn hchild
+  by_contra hno
+
+  have hbad : GSTOmegaInfiniteBadTrace s 1 n := by
+    intro j
+    change GSTOmegaGatePolynomial (gstOmega s 1 n j) ≠ 0
+    intro hzero
+    have hgate :=
+      (gst_omega_gate_polynomial_zero_iff (gstOmega s 1 n j)).1 hzero
+    have hproj := gst_omega_parent_projection s 1 n j hs
+    apply hno
+    refine ⟨1 + j, ?_, ?_⟩
+    · rw [hproj.1]
+      exact hgate.1
+    · rcases hgate.2 with h0 | h3
+      · exact Or.inr (gstSpaceAt_of_carry_zero _ _ (by
+          rw [hproj.2]
+          exact h0))
+      · exact Or.inl (gstSpaceAt_of_carry_three _ _ (by
+          rw [hproj.2]
+          exact h3))
+
+  have hRightBad :
+      ∀ j,
+        ¬ GSTU2DEventTransport.HappyCell
+          (GSTGraphV2InfiniteControl.graph
+            (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s 1 n)
+            (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
+            (s + 2 + j)).seven.carry
+          (GSTGraphV2InfiniteControl.graph
+            (GSTGraphV2HandwrittenOmegaUBlock.residualEnergy s 1 n)
+            (GSTGraphV2HandwrittenOmegaUBlock.residualWidth s)
+            (s + 2 + j)).seven.digit := by
+    intro j
+    have h :=
+      GSTFinalResidualConnector.residual_bad_trace_to_right_bad
+        s 1 n hs (by decide) hbad j
+    simpa [Nat.add_assoc] using h
+
+  have hChild :
+      GSTCanonicalTailStateIso.Navigation
+        (GSTFinalPrefixOneDirectU2DCollision.directChild s n) := by
+    have hstandalone :=
+      standalone_navigation_of_gst
+        (gstNavigationConstant (s+1) n) hchild
+    simpa [GSTFinalPrefixOneDirectU2DCollision.directChild,
+      GSTPerfectPowerTailNavigation.canonicalTail,
+      gstNavigationConstant] using hstandalone
+
+  exact (GSTFinalPrefixOneDirectU2DCollision
+    .canonical_perfect_power_block_collision_direct
+      s n hs hn hChild hRightBad).elim
+
+/-- The monolith already proves that one prefix-one lift plus its zero-lift
+composition supplies the full residual lift for every k. -/
 theorem residual_navigation_lift : GSTResidualNavigationLift :=
-  gst_residual_navigation_lift_of_omega_termination omega_termination
+  gst_residual_navigation_lift_of_prefix_one
+    prefix_one_navigation_lift_direct
 
 /-- Universal canonical Navigation, obtained by the monolith's existing
 strong induction once the now-unconditional residual lift is supplied. -/
@@ -167,7 +150,9 @@ theorem four_power_good_witness_div_three
       have hb' : 1 ≤ k / 3 := by
         simpa [hs1] using hb
       have hsmall : 1 < k / 3 := by
-        have hk5 : 5 ≤ k := by omega
+        by_contra hnot
+        have hb_eq : k / 3 = 1 := by omega
+        rw [hb_eq] at hk_eq
         omega
       simpa only [hs1, Nat.pow_one] using hsmall
   have hnav : GSTNavigationWitness
@@ -226,10 +211,7 @@ theorem full_erdos :
     ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false :=
   GSTTheAct.full_erdos_of_the_act the_act
 
-#print axioms omega_termination_s1
-#print axioms omega_termination_s3
-#print axioms omega_termination_stable
-#print axioms omega_termination
+#print axioms prefix_one_navigation_lift_direct
 #print axioms residual_navigation_lift
 #print axioms even_universal
 #print axioms the_act
