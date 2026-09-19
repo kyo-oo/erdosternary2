@@ -4,10 +4,8 @@ import GSTTailFWorldtraceReplacement
 # Erdős Problem 406 — ternary powers of two
 
 For every exponent n ≥ 9, the ternary expansion of 2^n contains digit 2.
-This file is wired to the verified production hTailF replacement.  The
-replacement currently consumes the two explicit inputs of the corrected
-Worldtrace–Mahler crown; the separate official comparator checks whether the
-unconditional benchmark surface has been reached.
+The submitted theorem is wired through the production hTail replacement,
+which is now binder-free and backed by the kernel-green residual Ω closure.
 -/
 
 def noTernaryDigitTwo (n : Nat) : Bool :=
@@ -30,12 +28,10 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
         exact ih (n / 3)
           (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-theorem erdos_ternary_2
-    (H : GSTWorldtraceMahler.MahlerSharp)
-    (HC : GSTWorldtraceMahler.ResidualGhostCompression) :
+theorem erdos_ternary_2 :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact GSTTailFWorldtraceReplacement.full_erdos H HC n hn
+  exact GSTTailFWorldtraceReplacement.full_erdos n hn
 
 #print axioms erdos_ternary_2

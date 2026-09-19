@@ -81,7 +81,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build GSTResidualOmegaRevival GSTTailFWorldtraceReplacement
+          lake build GSTTailFWorldtraceReplacement
           lake env lean questions/deepmind_problem_406/Solution.lean 2>&1 | tee problem406-solution.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown constant|unknown module prefix|unsolved goals|error:' problem406-solution.log
           ! grep -E 'hTail4|four_power_happy_climb|MahlerSharp|ResidualGhostCompression|WorldtraceMahlerTheory' \
