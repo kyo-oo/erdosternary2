@@ -24,6 +24,7 @@ roots = [
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
   "GSTFourPowerThirdWave",
+  "GSTFourPowerThirdWaveMultiscaleBridge",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
   "GSTFourPowerAffineClassifierBridge",
