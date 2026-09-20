@@ -53,6 +53,14 @@ circularity receipt — so `hS0` REFUTES the s = 0 premise rather than
 consuming it.
 
 ## §7 THE CROWN FORM — `erdos_even_conjecture_of_slices`.
+
+## §8 THE CARDINAL WORLDS LAW-PROMOTION — hTailF as a THEOREM of the
+granted laws: **Postulate I** (the 2-world signature law) combined with
+the **absorption-mirror bridge** (the worlds' combination law — the chief
+of the other bridges).  The green receipts carried along: the 3-world
+tower-twin of Postulate I's proven faces (`lteCoeff_has_two`), and the
+6-world product bridge `4^a · d(2a−2) = 3^(2^(2a−2)) − 1`.  Postulate II
+is nowhere in this promotion.
 -/
 
 namespace GSTCardinalWorldsBridge
@@ -782,7 +790,134 @@ theorem erdos_even_conjecture_of_slices
     ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
   fun K hK => has_two_imp_not_no_two _ (erdos_even_of_slices hWave hS0 K hK)
 
-/-! ## §8 Receipts -/
+/-! ## §8 THE CARDINAL WORLDS LAW-PROMOTION — hTailF as a theorem of the
+granted laws -/
+
+/-- **THE 3-WORLD TOWER-TWIN RECEIPT.**  The c-tower (the LTE mean
+cascade) fires at every sheet from one on — `lteCoeff s ≡ 7 (mod 9)` is
+the ternary word `21`, the signature at row one.  This is the 3-world's
+twin of Postulate I's proven faces (`bridge_sig_even`,
+`bridge_sig_j_mod6_3`): each world's tower carries the signature in its
+own register. -/
+theorem lteCoeff_has_two (s : Nat) (hs : 1 ≤ s) :
+    hasTernaryTwo (lteCoeff s) = true := by
+  have h9 : lteCoeff s % 9 = 7 := omega_lteCoeff_mod9 s hs
+  have hd : lteCoeff s = 9 * (lteCoeff s / 9) + 7 := by
+    have := Nat.div_add_mod (lteCoeff s) 9
+    omega
+  have hdiv3 : lteCoeff s / 3 = 3 * (lteCoeff s / 9) + 2 := by
+    have h3 := Nat.div_add_mod (lteCoeff s) 3
+    omega
+  refine hasTernaryTwo_of_digit (lteCoeff s) 1 ?_
+  rw [Nat.pow_one, hdiv3]
+  omega
+
+/-- **THE 6-WORLD PRODUCT BRIDGE.**  `4^a · d(2a−2) = 3^(2^(2a−2)) − 1`:
+the 3-world's power times the 2-world's tower value at the matched index
+is the maximal all-twos word of the 6-world — the product world `6^j =
+2^j · 3^j` in its killing form.  This is the arithmetic face of the
+synchronized shadows: the two cardinal worlds' objects multiply into the
+one maximal cascade object. -/
+theorem four_pow_mul_d (a : Nat) (ha : 2 ≤ a) :
+    4^a * d (2*a - 2) = 3^(2^(2*a - 2)) - 1 := by
+  have hne : 2*a - 2 ≠ 0 := by omega
+  have hj1 : 1 ≤ 2*a - 2 := by omega
+  have hdvd : 2^((2*a-2)+2) ∣ (3^(2^(2*a-2)) - 1) :=
+    two_pow_divides (2*a-2) hj1
+  obtain ⟨q, hq⟩ := hdvd
+  have hexp : (2*a-2)+2 = 2*a := by omega
+  rw [hexp] at hq
+  have hd : d (2*a-2) = (3^(2^(2*a-2)) - 1) / 2^(2*a) := by
+    simp only [d, if_neg hne]
+    rw [hexp]
+  have h4 : 4^a = 2^(2*a) := by
+    rw [← Nat.pow_mul]
+    congr 1
+    omega
+  have hdiv : (3^(2^(2*a-2)) - 1) / 2^(2*a) = q := by
+    rw [hq, Nat.mul_div_cancel_left _ (Nat.pow_pos (by decide : (0:Nat) < 2))]
+  rw [h4, hd, hdiv, ← hq]
+
+/-- **THE ABSORPTION-MIRROR BRIDGE** — the worlds' combination law (the
+chief of the other bridges).  The 2-world and the 3-world share the one
+absorption tree of the 6-world — the synchronized shadows' CRT
+identification (`6^k`-resolution is exactly simultaneous `2^k`- and
+`3^k`-resolution).  Its two faces: a silent sheet cut word (the 3-world's
+absorption surviving its whole window) manufactures a silent 2-world
+tower value; a silent deep-class power manufactures one too.  Combined
+with Postulate I — no silent tower values from index two on — both
+worlds' absorption trees are empty, and the fire is transported from the
+2-world's law into the 3-world's powers. -/
+structure CardinalWorldsMirrorBridge where
+  wave : ∀ s core : Nat, 1 ≤ s → 2 ≤ core → ¬ (3 ∣ core) →
+    hasTernaryTwo (omegaCutWord s core) = false →
+    ∃ j : Nat, 2 ≤ j ∧ hasTernaryTwo (d j) = false
+  deep : ∀ a : Nat, 5 ≤ a → ¬ (3 ∣ a) → (a % 9 = 1 ∨ a % 9 = 4) →
+    hasTernaryTwo (4^a) = false →
+    ∃ j : Nat, 2 ≤ j ∧ hasTernaryTwo (d j) = false
+
+/-- **THE WAVE TRANSPORT.**  Postulate I + the mirror bridge kill every
+silent sheet cut word: a silent cut word would manufacture a silent
+2-world tower value, and Postulate I forbids silent tower values from
+index two on. -/
+theorem hWave_of_postulateI_mirror
+    (hPI : ∀ j : Nat, 2 ≤ j → hasTernaryTwo (d j) = true)
+    (hM : CardinalWorldsMirrorBridge) :
+    ∀ s core : Nat, 1 ≤ s → 2 ≤ core → ¬ (3 ∣ core) →
+      hasTernaryTwo (omegaCutWord s core) = true := by
+  intro s core hs hc h3
+  by_contra h
+  have hf : hasTernaryTwo (omegaCutWord s core) = false := by
+    cases hbb : hasTernaryTwo (omegaCutWord s core) with
+    | false => rfl
+    | true => exact absurd hbb h
+  obtain ⟨j, hj, hdj⟩ := hM.wave s core hs hc h3 hf
+  rw [hPI j hj] at hdj
+  exact Bool.noConfusion hdj
+
+/-- **THE DEEP-CLASS TRANSPORT.**  Postulate I + the mirror bridge kill
+every silent deep-class power: `4^a` silent would manufacture a silent
+2-world tower value, and Postulate I forbids them. -/
+theorem hS0_of_postulateI_mirror
+    (hPI : ∀ j : Nat, 2 ≤ j → hasTernaryTwo (d j) = true)
+    (hM : CardinalWorldsMirrorBridge) :
+    ∀ a : Nat, 5 ≤ a → ¬ (3 ∣ a) → (a % 9 = 1 ∨ a % 9 = 4) →
+      hasTernaryTwo (4^a) = true := by
+  intro a ha h3 hclass
+  by_contra h
+  have hf : hasTernaryTwo (4^a) = false := by
+    cases hbb : hasTernaryTwo (4^a) with
+    | false => rfl
+    | true => exact absurd hbb h
+  obtain ⟨j, hj, hdj⟩ := hM.deep a ha h3 hclass hf
+  rw [hPI j hj] at hdj
+  exact Bool.noConfusion hdj
+
+/-- **THE LAW-PROMOTION — `hTailF` as a THEOREM of the granted laws.**
+The hypothesis `hTailF` — the nine-clause second-observer conditional —
+is consumed in full: the boundary is now the two cardinal-worlds laws
+the directive names, Postulate I (the 2-world signature law) and the
+absorption-mirror bridge (the worlds' combination).  Postulate II is
+nowhere. -/
+theorem four_power_omega_shadow_wave_tailF_of_postulateI
+    (hPI : ∀ j : Nat, 2 ≤ j → hasTernaryTwo (d j) = true)
+    (hM : CardinalWorldsMirrorBridge) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF :=
+  four_power_omega_shadow_wave_tailF_of_slices
+    (hWave_of_postulateI_mirror hPI hM)
+    (hS0_of_postulateI_mirror hPI hM)
+
+/-- **THE CROWN UNDER THE GRANTED LAWS** — the even-exponent Erdős
+statement as a theorem of Postulate I + the mirror bridge. -/
+theorem erdos_even_conjecture_of_postulateI
+    (hPI : ∀ j : Nat, 2 ≤ j → hasTernaryTwo (d j) = true)
+    (hM : CardinalWorldsMirrorBridge) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_of_slices
+    (hWave_of_postulateI_mirror hPI hM)
+    (hS0_of_postulateI_mirror hPI hM)
+
+/-! ## §9 Receipts -/
 
 #print axioms two_mul_cantor_kill
 #print axioms two_mul_cantor_kill_all
@@ -798,5 +933,11 @@ theorem erdos_even_conjecture_of_slices
 #print axioms four_power_omega_shadow_wave_tailF_of_slices
 #print axioms erdos_even_of_slices
 #print axioms erdos_even_conjecture_of_slices
+#print axioms lteCoeff_has_two
+#print axioms four_pow_mul_d
+#print axioms hWave_of_postulateI_mirror
+#print axioms hS0_of_postulateI_mirror
+#print axioms four_power_omega_shadow_wave_tailF_of_postulateI
+#print axioms erdos_even_conjecture_of_postulateI
 
 end GSTCardinalWorldsBridge
