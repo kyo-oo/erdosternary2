@@ -831,9 +831,7 @@ theorem four_pow_mul_d (a : Nat) (ha : 2 ≤ a) :
     simp only [d, if_neg hne]
     rw [hexp]
   have h4 : 4^a = 2^(2*a) := by
-    rw [← Nat.pow_mul]
-    congr 1
-    omega
+    rw [show (4:Nat) = 2^2 from by decide, ← Nat.pow_mul]
   have hdiv : (3^(2^(2*a-2)) - 1) / 2^(2*a) = q := by
     rw [hq, Nat.mul_div_cancel_left _ (Nat.pow_pos (by decide : (0:Nat) < 2))]
   rw [h4, hd, hdiv, ← hq]
