@@ -23,6 +23,8 @@ roots = [
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
+  "GSTFinalPrefixOneDirectU2DCollision",
+  "GSTFinalResidualConnector",
   "GSTFourPowerThirdWave",
   "GSTFourPowerThirdWaveMultiscaleBridge",
   "GSTFourPowerThirdWaveMultiscaleClosure",
@@ -122,6 +124,7 @@ roots = [
   "GSTWorldtraceArithmetic",
   "GSTGhostRayExclusion",
   "GSTWorldtraceMahlerRelativePrecision",
+  "GSTResidualOmegaRevival",
 ]
 
 [[lean_exe]]
