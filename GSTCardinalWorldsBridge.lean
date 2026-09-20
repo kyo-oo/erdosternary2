@@ -74,14 +74,15 @@ theorem digit3_zero (n : Nat) : n / 3^0 % 3 = n % 3 := by
 
 theorem div_mul_three (m i : Nat) : (3 * m) / 3^(i+1) = m / 3^i := by
   have hp : 3^(i+1) = 3 * 3^i := three_pow_succ_mul i
+  have hmodlt : m % 3^i < 3^i := Nat.mod_lt m (three_pow_pos' i)
   have hlt : 3 * (m % 3^i) < 3 * 3^i :=
-    Nat.mul_lt_mul_of_pos_left (Nat.mod_lt _ (by decide : 0 < 3)) (by decide : 0 < 3)
+    Nat.mul_lt_mul_of_pos_left hmodlt (by decide : 0 < 3)
+  have hdm := Nat.div_add_mod m (3^i)
   have hdecomp : 3 * m = 3^(i+1) * (m / 3^i) + 3 * (m % 3^i) := by
-    have hdm := Nat.div_add_mod m (3^i)
-    calc 3 * m = 3 * (3^i * (m / 3^i) + m % 3^i) := by rw [← hdm]
+    calc 3 * m = 3 * (3^i * (m / 3^i) + m % 3^i) := by omega
       _ = 3^(i+1) * (m / 3^i) + 3 * (m % 3^i) := by rw [hp]; ring
   rw [hdecomp, Nat.add_comm, Nat.add_mul_div_left _ _ (three_pow_pos' (i+1)),
-    Nat.div_eq_of_lt (by rw [← hp]; exact hlt), Nat.zero_add]
+    Nat.div_eq_of_lt (by rw [hp]; exact hlt), Nat.zero_add]
 
 theorem digit3_mul3_shift (m i : Nat) :
     (3 * m) / 3^(i+1) % 3 = m / 3^i % 3 := by
@@ -92,9 +93,13 @@ theorem div_lt_of_lt_mul' (a b c : Nat) (hb : 0 < b) (h : a < b * c) :
   by_contra hcon
   push_neg at hcon
   have hmul := Nat.div_mul_le_self a b
-  have hcb : c * b ≤ a := by
-    calc c * b ≤ (a / b) * b := Nat.mul_le_mul hcon (Nat.le_refl b)
-      _ ≤ a := hmul
+  have hcb : b * c ≤ a := by
+    have h1 : b * c ≤ b * (a / b) := Nat.mul_le_mul_left b hcon
+    have h2 : b * (a / b) ≤ a := by
+      have := Nat.div_mul_le_self a b
+      rw [Nat.mul_comm b (a / b)]
+      exact this
+    omega
   omega
 
 /-- The trit of `n / d` read through any window of height `3·d`. -/
@@ -103,18 +108,20 @@ theorem div_digit_window (n d v : Nat) (hd : 0 < d) (hv : v < 3 * d)
   have hdm := Nat.div_add_mod n (3 * d)
   rw [hn] at hdm
   have hvlt : v / d < 3 := div_lt_of_lt_mul' v d 3 hd (by omega)
-  have hsplit : n / d = 3 * (n / (3 * d)) + v / d := by
-    rw [← hdm, show 3 * d * (n / (3 * d)) = d * (3 * (n / (3 * d))) from by ring,
-      Nat.add_comm, Nat.add_mul_div_left _ _ hd, Nat.div_eq_of_lt hvlt]
-  rw [hsplit, Nat.add_mul_mod_self_left, Nat.zero_add,
-    Nat.mod_eq_of_lt hvlt]
+  have hsplit : n / d = v / d + 3 * (n / (3 * d)) := by
+    have h2 : n = d * (3 * (n / (3 * d))) + v := by omega
+    rw [h2, Nat.add_comm, Nat.add_mul_div_left _ _ hd]
+  rw [hsplit, Nat.add_mul_mod_self_left]
 
-/-- The period engine: if `b ≡ 1 (mod m)` then `b^q ≡ 1 (mod m)`. -/
-theorem pow_mod_one_period (b q m : Nat) (hmod : b % m = 1) : b^q % m = 1 := by
+/-- The period engine: if `b ≡ 1 (mod m)` with `1 < m`, then every
+power `b^q ≡ 1 (mod m)`. -/
+theorem pow_mod_one_period (b q m : Nat) (hm : 1 < m) (hmod : b % m = 1) :
+    b^q % m = 1 := by
   induction q with
-  | zero => rw [Nat.pow_zero, Nat.mod_one]
+  | zero => rw [Nat.pow_zero]; omega
   | succ q ih =>
-    rw [Nat.pow_succ, Nat.mul_mod, ih, hmod, Nat.one_mul, Nat.mod_one]
+    rw [Nat.pow_succ, Nat.mul_mod, ih, hmod, Nat.one_mul]
+    omega
 
 theorem four_cube_mod9 : (4^3 : Nat) % 9 = 1 := by decide
 
@@ -126,7 +133,7 @@ theorem four_pow_mod9_period (core : Nat) : 4^core % 9 = 4^(core % 3) % 9 := by
   have hr : core % 3 = r := by omega
   rw [show 4^core = 4^(3 * q + r) from by rw [← hqr], hr, Nat.pow_add,
     show 4^(3 * q) = (4^3)^q from by rw [Nat.pow_mul], Nat.mul_mod,
-    pow_mod_one_period _ _ _ four_cube_mod9, Nat.one_mul]
+    pow_mod_one_period _ _ _ (by decide : 1 < 9) four_cube_mod9, Nat.one_mul]
   exact Nat.mod_mod_of_dvd (4^r) (Nat.dvd_refl 9)
 
 theorem four_pow_mod27_period (core : Nat) : 4^core % 27 = 4^(core % 9) % 27 := by
@@ -135,7 +142,7 @@ theorem four_pow_mod27_period (core : Nat) : 4^core % 27 = 4^(core % 9) % 27 := 
   have hr : core % 9 = r := by omega
   rw [show 4^core = 4^(9 * q + r) from by rw [← hqr], hr, Nat.pow_add,
     show 4^(9 * q) = (4^9)^q from by rw [Nat.pow_mul], Nat.mul_mod,
-    pow_mod_one_period _ _ _ four_nine_mod27, Nat.one_mul]
+    pow_mod_one_period _ _ _ (by decide : 1 < 27) four_nine_mod27, Nat.one_mul]
   exact Nat.mod_mod_of_dvd (4^r) (Nat.dvd_refl 27)
 
 /-! ## §1 THE ×2 BRIDGE — the signature injection law -/
@@ -162,11 +169,14 @@ theorem two_mul_cantor_kill (m k : Nat)
   induction k generalizing m with
   | zero => exact Nat.mod_one m
   | succ k ih =>
-    have h0m : m % 3 ≠ 2 := hm 0 (by omega)
+    have h0m : m % 3 ≠ 2 := by
+      have hv := hm 0 (by omega)
+      rw [digit3_zero] at hv
+      exact hv
     have h02 : (2 * m) % 3 ≠ 2 := by
-      have := h2 0 (by omega)
-      rw [digit3_zero] at this
-      exact this
+      have hv := h2 0 (by omega)
+      rw [digit3_zero] at hv
+      exact hv
     have hm03 : m % 3 = 0 := by
       have hmlt : m % 3 < 3 := Nat.mod_lt _ (by decide : 0 < 3)
       rcases (by omega : m % 3 = 0 ∨ m % 3 = 1) with h | h
@@ -182,13 +192,13 @@ theorem two_mul_cantor_kill (m k : Nat)
     have hm' : CantorWindow (m / 3) k := by
       intro i hi
       have hval := hm (i+1) (by omega)
-      rw [← digit3_mul3_shift, hm3] at hval
+      rw [hm3, digit3_mul3_shift] at hval
       exact hval
     have h2' : CantorWindow (2 * (m / 3)) k := by
       intro i hi
       have hval := h2 (i+1) (by omega)
-      rw [hm3, digit3_mul3_shift,
-        show 2 * m = 3 * (2 * (m / 3)) from by rw [hm3]; ring] at hval
+      rw [show 2 * m = 3 * (2 * (m / 3)) from by rw [hm3]; ring,
+        digit3_mul3_shift] at hval
       exact hval
     have hrec := ih (m / 3) hm' h2'
     obtain ⟨q, hq⟩ : ∃ q, m / 3 = 3^k * q :=
@@ -197,7 +207,7 @@ theorem two_mul_cantor_kill (m k : Nat)
         rw [hrec] at hdm
         omega⟩
     have hdvd : 3^(k+1) ∣ m := by
-      refine ⟨3 * q, ?_⟩
+      refine ⟨q, ?_⟩
       rw [hm3, hq, three_pow_succ_mul]
       ring
     exact Nat.mod_eq_zero_of_dvd hdvd
@@ -210,7 +220,7 @@ theorem two_mul_cantor_kill_all (m : Nat)
     two_mul_cantor_kill m k (fun i _ => hm i) (fun i _ => h2 i)
   have hlt : m < 3^(m+1) := by
     have h3 : 3^m ≤ 3^(m+1) :=
-      Nat.pow_le_pow_of_le (by decide : 1 ≤ (3: Nat)) (by omega)
+      Nat.pow_le_pow_of_le (by decide : 1 < (3: Nat)) (by omega)
     calc m < 3^m := Nat.lt_pow_self (by decide : 1 < (3: Nat))
       _ ≤ 3^(m+1) := h3
   have hmod := hzero (m+1)
@@ -229,38 +239,34 @@ theorem d_recurrence (j : Nat) (hj : 1 ≤ j) :
   have hpos : 0 < 3^(2^j) := three_pow_pos' (2^j)
   have h3 : 3^(2^j) = 1 + 2^(j+2) * d j := by omega
   have hsq : 3^(2^(j+1)) = (3^(2^j))^2 := by
-    rw [show 2^(j+1) = 2 * 2^j from by rw [Nat.pow_succ]; ac_rfl,
-      ← Nat.pow_mul]
-  have hp4 : 2^(j+3) * 2^(j+1) = 2^(j+2) * 2^(j+2) := by
+    rw [show 2^(j+1) = 2^j * 2 from by rw [Nat.pow_succ]; ac_rfl,
+      Nat.pow_mul]
+  have hp4 : 2^(j+2) * 2^(j+2) = 2^(j+3) * 2^(j+1) := by
     rw [← Nat.pow_add, ← Nat.pow_add]
     congr 1
     omega
+  have h2a : 2^(j+3) = 2 * 2^(j+2) := by rw [Nat.pow_succ]; ac_rfl
   have hexpand : (1 + 2^(j+2) * d j)^2
-      = 1 + 2^(j+3) * d j + 2^(j+3) * 2^(j+1) * (d j)^2 := by
-    have htwo := Nat.pow_two (1 + 2^(j+2) * d j)
-    rw [htwo, hp4]
-    rw [show 2 * 2^(j+2) = 2^(j+3) from by rw [← Nat.pow_add]; congr 1; omega]
+      = 1 + 2^(j+3) * d j + 2^(j+2) * 2^(j+2) * (d j)^2 := by
+    rw [h2a]
     ring
   have hBadd : 2^(j+1+2) * d (j+1) + 1 = 3^(2^(j+1)) := by omega
   have h1 : 2^(j+1+2) * d (j+1) + 1 = (3^(2^j))^2 := by rw [← hBadd, hsq]
   have h2' : (3^(2^j))^2 = (1 + 2^(j+2) * d j)^2 := by rw [h3]
   have h3' : 2^(j+1+2) * d (j+1) + 1
-      = 1 + 2^(j+3) * d j + 2^(j+3) * 2^(j+1) * (d j)^2 := by
+      = 1 + 2^(j+3) * d j + 2^(j+2) * 2^(j+2) * (d j)^2 := by
     rw [h1, h2']
     exact hexpand
   have h4 : 2^(j+1+2) * d (j+1)
-      = 2^(j+3) * d j + 2^(j+3) * 2^(j+1) * (d j)^2 := by omega
+      = 2^(j+3) * d j + 2^(j+2) * 2^(j+2) * (d j)^2 := by omega
   have h5 : 2^(j+1+2) * (d j + 2^(j+1) * (d j)^2)
       = 2^(j+3) * d j + 2^(j+3) * 2^(j+1) * (d j)^2 := by
-    rw [Nat.mul_add]
-    have he1 : 2^(j+1+2) = 2^(j+3) := by congr 1; omega
-    have he2 : 2^(j+1+2) * 2^(j+1) = 2^(j+3) * 2^(j+1) := by
-      rw [← Nat.pow_add, ← Nat.pow_add]
-      congr 1
-      omega
-    rw [he1, he2]
-  rw [h5]
-  exact Nat.mul_left_cancel (Nat.pow_pos (by decide : 0 < 2)) h4
+    rw [Nat.mul_add, show 2^(j+1+2) = 2^(j+3) from by congr 1; omega]
+    ring
+  rw [hp4] at h4
+  have hcancel : 2^(j+1+2) * d (j+1)
+      = 2^(j+1+2) * (d j + 2^(j+1) * (d j)^2) := h4.trans h5.symm
+  exact Nat.mul_left_cancel (Nat.pow_pos (by decide : 0 < 2)) hcancel
 
 theorem two_pow_mod3_pair (j : Nat) :
     (2^j % 3 = 1 ∧ j % 2 = 0) ∨ (2^j % 3 = 2 ∧ j % 2 = 1) := by
@@ -298,22 +304,23 @@ theorem d_mod3_parity (j : Nat) : 1 ≤ j →
         rw [hd1]
         decide
       · have hj2 : 2 ≤ j := by omega
-        have hrec := d_recurrence (j-1) (by omega)
-        have hprev := ih (j-1) (by omega)
-        have hjsucc : j = (j-1) + 1 := by omega
-        rw [hjsucc] at hrec ⊢
-        have hmod : d ((j-1)+1) % 3
-            = (d (j-1) % 3 + (2^((j-1)+1) % 3) * ((d (j-1))^2 % 3)) % 3 := by
-          rw [hrec, Nat.add_mod, Nat.mul_mod, Nat.pow_mod]
-        have hpair := two_pow_mod3_pair ((j-1)+1)
-        by_cases hpar : ((j-1)+1) % 2 = 0
+        have hrec : d j = d (j-1) + 2^j * (d (j-1))^2 := by
+          have h := d_recurrence (j-1) (by omega)
+          rw [show j - 1 + 1 = j from by omega] at h
+          exact h
+        have hprev := ih (j-1) (by omega) (by omega)
+        have hmod : d j % 3
+            = (d (j-1) % 3 + (2^j % 3 * ((d (j-1))^2 % 3)) % 3) % 3 := by
+          rw [hrec, Nat.add_mod, Nat.mul_mod]
+        have hpair := two_pow_mod3_pair j
+        by_cases hpar : j % 2 = 0
         · rcases hpair with ⟨h2v, h2p⟩ | ⟨h2v, h2p⟩
           · have hprevodd : (j-1) % 2 = 1 := by omega
             have hdprev := hprev.2 hprevodd
-            refine ⟨fun _ => ?_, fun hcon => absurd hcon hpar⟩
+            refine ⟨fun _ => ?_, fun hcon => absurd hcon (by omega)⟩
             rw [hmod, hdprev, h2v, Nat.pow_mod, hdprev]
             decide
-          · exact absurd h2p hpar
+          · exact absurd h2p (by omega)
         · rcases hpair with ⟨h2v, h2p⟩ | ⟨h2v, h2p⟩
           · exact absurd h2p (by omega)
           · have hpreveven : (j-1) % 2 = 0 := by omega
@@ -324,10 +331,11 @@ theorem d_mod3_parity (j : Nat) : 1 ≤ j →
 
 theorem two_pow_six_mod9 (q : Nat) : (2^6)^q % 9 = 1 := by
   induction q with
-  | zero => rw [Nat.pow_zero, Nat.mod_one]
+  | zero => rw [Nat.pow_zero]; omega
   | succ q ih =>
     rw [Nat.pow_succ, Nat.mul_mod, ih, show (2^6 : Nat) % 9 = 1 from by decide,
-      Nat.one_mul, Nat.mod_one]
+      Nat.one_mul]
+    omega
 
 theorem two_pow_mod9 (j : Nat) : 2^j % 9 = 2^(j % 6) % 9 := by
   obtain ⟨q, r, hqr, hrlt⟩ : ∃ q r, j = 6 * q + r ∧ r < 6 :=
@@ -353,47 +361,65 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
   | ind j ih =>
     intro hj
     by_cases hj8 : j ≤ 8
-    · rcases (by omega : j = 3 ∨ j = 4 ∨ j = 5 ∨ j = 6 ∨ j = 7 ∨ j = 8) with
-        h | h | h | h | h | h <;> subst h <;> decide
+    · by_cases h3 : j = 3
+      · subst h3; decide
+      · by_cases h4 : j = 4
+        · subst h4; decide
+        · by_cases h5 : j = 5
+          · subst h5; decide
+          · by_cases h6 : j = 6
+            · subst h6; decide
+            · by_cases h7 : j = 7
+              · subst h7; decide
+              · have h8 : j = 8 := by omega
+                subst h8; decide
     · have hj9 : 9 ≤ j := by omega
-      have hrec := d_recurrence (j-1) (by omega)
-      have hprev := ih (j-1) (by omega)
+      have hrec : d j = d (j-1) + 2^j * (d (j-1))^2 := by
+        have h := d_recurrence (j-1) (by omega)
+        rw [show j - 1 + 1 = j from by omega] at h
+        exact h
+      have hprev := ih (j-1) (by omega) (by omega)
       have hmod : d j % 9
-          = (d (j-1) % 9 + (2^j % 9) * ((d (j-1))^2 % 9)) % 9 := by
-        rw [show j = (j-1) + 1 from by omega] at hrec ⊢
-        rw [hrec, Nat.add_mod, Nat.mul_mod, Nat.pow_mod]
+          = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+        rw [hrec, Nat.add_mod, Nat.mul_mod]
       have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
       by_cases h0 : j % 6 = 0
       · have hF := hprev.2.2.2.2.2 (by omega)
         refine fun _ => ?_
-        rw [hmod, h2mod, h0, Nat.pow_mod, hF]
+        rw [hmod, h2mod, h0, show (2:Nat)^0 % 9 = 1 from by decide,
+          Nat.pow_mod (d (j-1)) 2 9, hF]
         decide
       · by_cases h1 : j % 6 = 1
         · have hF := hprev.1 (by omega)
           refine fun _ => ?_
-          rw [hmod, h2mod, h1, Nat.pow_mod, hF]
+          rw [hmod, h2mod, h1, show (2:Nat)^1 % 9 = 2 from by decide,
+            Nat.pow_mod (d (j-1)) 2 9, hF]
           decide
         · by_cases h2 : j % 6 = 2
           · have hF := hprev.2.1 (by omega)
             refine fun _ => ?_
-            rw [hmod, h2mod, h2, Nat.pow_mod, hF]
+            rw [hmod, h2mod, h2, show (2:Nat)^2 % 9 = 4 from by decide,
+              Nat.pow_mod (d (j-1)) 2 9, hF]
             decide
           · by_cases h3 : j % 6 = 3
             · have hF := hprev.2.2.1 (by omega)
               refine fun _ => ?_
-              rw [hmod, h2mod, h3, Nat.pow_mod, hF]
+              rw [hmod, h2mod, h3, show (2:Nat)^3 % 9 = 8 from by decide,
+                Nat.pow_mod (d (j-1)) 2 9, hF]
               decide
             · by_cases h4 : j % 6 = 4
               · have hF := hprev.2.2.2.1 (by omega)
                 refine fun _ => ?_
-                rw [hmod, h2mod, h4, Nat.pow_mod, hF]
+                rw [hmod, h2mod, h4, show (2:Nat)^4 % 9 = 7 from by decide,
+                  Nat.pow_mod (d (j-1)) 2 9, hF]
                 decide
               · have h5 : j % 6 = 5 := by
                   have : j % 6 < 6 := Nat.mod_lt _ (by decide : 0 < 6)
                   omega
                 have hF := hprev.2.2.2.2.1 (by omega)
                 refine fun _ => ?_
-                rw [hmod, h2mod, h5, Nat.pow_mod, hF]
+                rw [hmod, h2mod, h5, show (2:Nat)^5 % 9 = 5 from by decide,
+                  Nat.pow_mod (d (j-1)) 2 9, hF]
                 decide
 
 /-- **POSTULATE I's oscillation face.**  For every `j ≥ 2` outside the
@@ -430,41 +456,39 @@ theorem cut_shift_general (E s W i : Nat) (hE : 4^E = 1 + 3^(s+1) * W) :
   have hr0lt : W % 3^(i+1) % 3^i < 3^i :=
     Nat.mod_lt _ (three_pow_pos' i)
   have hr1lt : W % 3^(i+1) / 3^i < 3 := by
-    refine div_lt_of_lt_mul' _ 3^i 3 (three_pow_pos' i) ?_
+    refine div_lt_of_lt_mul' _ (3^i) 3 (three_pow_pos' i) ?_
     rw [three_pow_succ_mul]
     omega
   have hWsplit : W = 3^(i+1) * (W / 3^(i+1))
-      + 3^i * (W % 3^(i+1) / 3^i) + W % 3^(i+1) % 3^i := by omega
-  have hpow1 : 3^(s+1) * 3^(i+1) = 3^(s+1+i+1) := by
-    rw [Nat.pow_add]; ring
+      + 3^i * (W % 3^(i+1) / 3^i) + W % 3^(i+1) % 3^i := by
+    have hR1 := Nat.div_add_mod (W % 3^(i+1)) (3^i)
+    omega
   have hpow2 : 3^(s+1) * 3^i = 3^(s+1+i) := by rw [Nat.pow_add]; ring
-  have hEsplit : 4^E = 3^(s+1+i) * (3 * (W / 3^(i+1))
-      + W % 3^(i+1) / 3^i) + (1 + 3^(s+1) * (W % 3^(i+1) % 3^i)) := by
-    rw [hE, hWsplit, hpow1, hpow2,
-      show 3^(s+1+i+1) = 3 * 3^(s+1+i) from three_pow_succ_mul (s+1+i)]
+  have hregroup : W = W % 3^(i+1) % 3^i
+      + 3^i * (3 * (W / 3^(i+1)) + W % 3^(i+1) / 3^i) := by
+    rw [hWsplit, three_pow_succ_mul]
+    ring
+  have hEsplit : 4^E = (1 + 3^(s+1) * (W % 3^(i+1) % 3^i))
+      + 3^(s+1+i) * (3 * (W / 3^(i+1)) + W % 3^(i+1) / 3^i) := by
+    rw [hE, hregroup, Nat.mul_add, Nat.mul_assoc, hpow2]
     ring
   have hsmall : 1 + 3^(s+1) * (W % 3^(i+1) % 3^i) < 3^(s+1+i) := by
     have hA1 : (3: Nat)^1 ≤ 3^(s+1) :=
-      Nat.pow_le_pow_of_le (by decide : 1 ≤ (3: Nat)) (by omega)
+      Nat.pow_le_pow_of_le (by decide : 1 < (3: Nat)) (by omega)
     have hmulbound : 3^(s+1) * (W % 3^(i+1) % 3^i) + 3^(s+1)
         ≤ 3^(s+1) * 3^i := by
       have h := Nat.mul_le_mul (Nat.le_refl (3^(s+1)))
         (by omega : W % 3^(i+1) % 3^i + 1 ≤ 3^i)
-      rw [Nat.mul_add, Nat.one_mul] at h
+      rw [Nat.mul_add, Nat.mul_one] at h
       exact h
     have h31 : (3: Nat)^1 = 3 := rfl
     omega
   have hdivL : 4^E / 3^(s+1+i)
       = 3 * (W / 3^(i+1)) + W % 3^(i+1) / 3^i := by
-    rw [hEsplit, Nat.add_comm,
-      Nat.add_mul_div_left _ _ (three_pow_pos' (s+1+i)),
+    rw [hEsplit, Nat.add_mul_div_left _ _ (three_pow_pos' (s+1+i)),
       Nat.div_eq_of_lt hsmall, Nat.zero_add]
-  have hregroup : W = 3^i * (3 * (W / 3^(i+1))
-      + W % 3^(i+1) / 3^i) + W % 3^(i+1) % 3^i := by
-    rw [hWsplit, three_pow_succ_mul]
-    ring
   have hdivR : W / 3^i = 3 * (W / 3^(i+1)) + W % 3^(i+1) / 3^i := by
-    rw [hregroup, Nat.add_comm, Nat.add_mul_div_left _ _ (three_pow_pos' i),
+    rw [hregroup, Nat.add_mul_div_left _ _ (three_pow_pos' i),
       Nat.div_eq_of_lt hr0lt, Nat.zero_add]
   rw [hdivL, hdivR]
 
@@ -477,8 +501,7 @@ theorem cut_shift_s0 (core q : Nat) :
   have hE' : 4^core = 1 + 3^(0+1) * omegaCutWord 0 core := by
     rw [← hE, Nat.pow_zero, Nat.one_mul]
   have hshift := cut_shift_general core 0 (omegaCutWord 0 core) q hE'
-  rw [show 0 + 1 + q = 1 + q from by omega] at hshift
-  rw [show 1 + q = q + 1 from by omega] at hshift
+  rw [show 0 + 1 + q = q + 1 from by omega] at hshift
   exact hshift
 
 /-! ## §5 THE SHEET DECOMPOSITION -/
@@ -518,9 +541,10 @@ theorem s0_premise_full_clean (core : Nat) (hclass : core % 3 = 1)
     rw [← hshift]
     exact hwin
   have hW1v : omegaCutWord 0 core / 3^1 % 3 ≠ 2 := by
+    show omegaCutWord 0 core / 3 % 3 ≠ 2
     have hlt9 : omegaCutWord 0 core % 9 < 6 := by
-      rw [show 3^(0+2) = 9 from by decide,
-        show 2 * 3^(0+1) = 6 from by decide]
+      rw [show (9: Nat) = 3^(0+2) from by decide,
+        show (6: Nat) = 2 * 3^(0+1) from by decide]
       exact hW1
     have hwin := div_digit_window (omegaCutWord 0 core) 3
       (omegaCutWord 0 core % 9) (by decide)
@@ -529,22 +553,28 @@ theorem s0_premise_full_clean (core : Nat) (hclass : core % 3 = 1)
     omega
   intro p
   rcases p with
-  | zero => rw [digit3_zero, pow4_mod3_one]
+  | zero =>
+    rw [digit3_zero, pow4_mod3_one]
+    decide
   | succ q =>
     rw [cut_shift_s0 core q]
     rcases q with
-    | zero => rw [Nat.pow_zero, Nat.div_one]; exact hW0
+    | zero => rw [hW0]; decide
     | succ j =>
       have hj : 2 ≤ j + 1 := by omega
       have hlt := hWall (j+1) hj
       have hpow : 3 * 3^(j+1) = 3^(j+1+1) := (three_pow_succ_mul (j+1)).symm
       have hwin := div_digit_window (omegaCutWord 0 core) (3^(j+1))
         (omegaCutWord 0 core % 3^(j+1+1)) (three_pow_pos' (j+1))
-        (by rw [← three_pow_succ_mul]; omega)
+        (by
+          have hmb := Nat.mod_lt (omegaCutWord 0 core) (three_pow_pos' (j+1+1))
+          have hp := three_pow_succ_mul (j+1)
+          omega)
         (by rw [three_pow_succ_mul])
-      rw [hwin, Nat.mod_eq_of_lt
-        (div_lt_of_lt_mul' _ (3^(j+1)) 2 (three_pow_pos' (j+1))
-          (by omega))]
+      have hq2 : omegaCutWord 0 core % 3^(j+1+1) / 3^(j+1) < 2 :=
+        div_lt_of_lt_mul' _ (3^(j+1)) 2 (three_pow_pos' (j+1)) (by omega)
+      rw [hwin, Nat.mod_eq_of_lt (by omega :
+        omegaCutWord 0 core % 3^(j+1+1) / 3^(j+1) < 3)]
       omega
 
 /-- **THE PROMOTION — `hTailF` as a theorem from the two transparent
@@ -588,10 +618,12 @@ theorem four_power_omega_shadow_wave_tailF_of_slices
     exact absurd hp (hfull p)
   · have hcore2 : 2 ≤ core := by
       rcases Nat.eq_zero_or_pos core with h0 | hp
-      · exact absurd (⟨0, (Nat.mul_zero 3).symm⟩ : 3 ∣ core) hc3
+      · exfalso
+        rw [h0] at hc3
+        exact hc3 ⟨0, rfl⟩
       · by_cases h1 : core = 1
         · exfalso
-          rcases hclass with h4 | ⟨h0s, _⟩ | ⟨h1s, _⟩
+          rcases hclass with h4 | ⟨h0s, _⟩ | ⟨h1s, h7⟩
           · rw [h1] at h4
             exact absurd h4 (by decide)
           · exact absurd h0s (by omega)
@@ -604,6 +636,7 @@ theorem four_power_omega_shadow_wave_tailF_of_slices
     have hE : 4^(3^s * core) = 1 + 3^(s+1) * omegaCutWord s core :=
       omega_cut_factor s core
     have hshift := cut_shift_general (3^s * core) s (omegaCutWord s core) i hE
+    show 4^K / 3^(s+1+i) % 3 = 2
     rw [hsc]
     exact hshift.trans hi
 
@@ -624,6 +657,7 @@ theorem erdos_even_of_slices
   rcases Nat.eq_zero_or_pos s with hs0 | hs1
   · subst hs0
     rw [Nat.pow_zero, Nat.one_mul] at hsc
+    subst hsc
     by_cases h71 : K % 9 = 7
     · have hmod27 : 4^K % 27 = 22 := by
         rw [four_pow_mod27_period K, h71]
@@ -644,9 +678,14 @@ theorem erdos_even_of_slices
           have : K % 3 < 3 := Nat.mod_lt _ (by decide : 0 < 3)
           omega
         have hclass9 : K % 9 = 1 ∨ K % 9 = 4 := by
-          have : K % 9 < 9 := Nat.mod_lt _ (by decide : 0 < 9)
-          omega
-        exact hS0 K hK hc3 hclass9
+          have h9lt : K % 9 < 9 := Nat.mod_lt _ (by decide : 0 < 9)
+          by_cases hc1 : K % 9 = 1
+          · exact Or.inl hc1
+          · by_cases hc4 : K % 9 = 4
+            · exact Or.inr hc4
+            · exfalso
+              omega
+        exact hS0 K (by omega) hc3 hclass9
   · by_cases hcore1 : core = 1
     · rw [hcore1, Nat.mul_one] at hsc
       have hE : 4^(3^s) = 1 + 3^(s+1) * lteCoeff s :=
@@ -657,10 +696,14 @@ theorem erdos_even_of_slices
         (by rw [hlte])
       rw [show (7: Nat)/3 % 3 = 2 from by decide] at hwin
       rw [hsc]
-      exact hasTernaryTwo_of_digit (4^(3^s)) (s+1+1) (by rw [hshift]; exact hwin)
+      refine hasTernaryTwo_of_digit (4^(3^s)) (s+1+1) ?_
+      rw [hshift]
+      exact hwin
     · have hcore2 : 2 ≤ core := by
         rcases Nat.eq_zero_or_pos core with h0 | hp
-        · exact absurd (⟨0, (Nat.mul_zero 3).symm⟩ : 3 ∣ core) hc3
+        · exfalso
+          rw [h0] at hc3
+          exact hc3 ⟨0, rfl⟩
         · omega
       have hfireW := hWave s core hs1 hcore2 hc3
       obtain ⟨i, hi⟩ := hasTernaryTwo_pos _ hfireW
