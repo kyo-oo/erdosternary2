@@ -46,26 +46,28 @@ theorem lteCoeff_step_mod (s : Nat) :
 theorem lteCoeff_mod243_step (s : Nat) (hs : 4 ≤ s) :
     lteCoeff (s+1) % 243 = lteCoeff s % 243 := by
   have h243 : 243 ∣ 3^(s+1) := by
-    obtain ⟨t, ht⟩ := (show ∃ t, s + 1 = 5 + t by omega)
-    refine ⟨3^t, ?_⟩
-    rw [ht, Nat.pow_add]
-    norm_num
+    refine ⟨3^(s-4), ?_⟩
+    rw [show s + 1 = 5 + (s - 4) by omega, Nat.pow_add]
+    try norm_num
   have h := lteCoeff_step_mod s
   have hl : lteCoeff (s+1) % 243 = (lteCoeff (s+1) % 3^(s+1)) % 243 :=
-    (Nat.mod_mod_of_dvd h243 _).symm
+    (Nat.mod_mod_of_dvd (lteCoeff (s+1)) h243).symm
   have hr : lteCoeff s % 243 = (lteCoeff s % 3^(s+1)) % 243 :=
-    (Nat.mod_mod_of_dvd h243 _).symm
+    (Nat.mod_mod_of_dvd (lteCoeff s) h243).symm
   rw [hl, hr, h]
 
 /-- The stabilized pin: `lteCoeff s ≡ 178 mod 243` for every `s ≥ 4`. -/
 theorem lteCoeff_mod243 (s : Nat) (hs : 4 ≤ s) : lteCoeff s % 243 = 178 := by
-  have base : lteCoeff 4 % 243 = 178 := by decide
-  obtain ⟨t, rfl⟩ := (show ∃ t, s = 4 + t by omega)
-  induction t with
-  | zero => exact base
-  | succ t ih =>
-    show lteCoeff ((4+t)+1) % 243 = 178
-    exact (lteCoeff_mod243_step (4+t) (by omega)).trans ih
+  have key : ∀ t : Nat, lteCoeff (4 + t) % 243 = 178 := by
+    intro t
+    induction t with
+    | zero => exact (show lteCoeff 4 % 243 = 178 by decide)
+    | succ t ih =>
+      have h1 : 4 + (t + 1) = (4 + t) + 1 := by omega
+      rw [h1]
+      exact (lteCoeff_mod243_step (4 + t) (by omega)).trans ih
+  rw [show s = 4 + (s - 4) by omega]
+  exact key (s - 4)
 
 /-- The unit-tail happy pin at row 4 for every `s ≥ 4`: digit two, carry zero. -/
 theorem lteCoeff_happy_four_ge (s : Nat) (hs : 4 ≤ s) :
@@ -84,12 +86,12 @@ theorem lteCoeff_happy_four_ge (s : Nat) (hs : 4 ≤ s) :
     omega
 
 /-- The finite base `s = 2`: happy row 4, carry 3. -/
-theorem lteCoeff_happy_two : HappyCell (carry4 (lteCoeff 2) 4) (digit3 (lteCoeff 2) 4) := by
-  decide
+theorem lteCoeff_happy_two : HappyCell (carry4 (lteCoeff 2) 4) (digit3 (lteCoeff 2) 4) :=
+  ⟨by decide, Or.inr (by decide)⟩
 
 /-- The finite base `s = 3`: happy row 7, carry 0. -/
-theorem lteCoeff_happy_three : HappyCell (carry4 (lteCoeff 3) 7) (digit3 (lteCoeff 3) 7) := by
-  decide
+theorem lteCoeff_happy_three : HappyCell (carry4 (lteCoeff 3) 7) (digit3 (lteCoeff 3) 7) :=
+  ⟨by decide, Or.inl (by decide)⟩
 
 /-- **LAW 1 — the unit-tail base family.** Every unit tail navigates:
 `Navigation (lteCoeff s)` for all `s ≥ 2`. -/
