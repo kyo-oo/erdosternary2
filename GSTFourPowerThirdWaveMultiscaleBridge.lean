@@ -294,6 +294,44 @@ theorem cubic_reference_transport
       simpa [N] using hmul'
 
 
+
+/-- Cubic-cone closure.  A scale-s exponent with current trit two is an
+immediate common-two exponent whenever both reference powers stay below row
+s+1.  This kills an expanding cone of the ternary exponent tree at every
+positive scale. -/
+theorem cubic_cone_commonTwo
+    (s b r : Nat) (hs : 1 ≤ s) (hb : b % 3 = 2)
+    (hsmall : 4^(r+1) < 3^(s+1)) :
+    CommonTwo (3^s * b + r) := by
+  have hbdec : b = 3 * (b / 3) + 2 := by
+    have h := Nat.div_add_mod b 3
+    rw [hb] at h
+    omega
+  have hK :
+      3^s * b + r =
+        r + 2 * 3^s + 3^(s+1) * (b / 3) := by
+    rw [hbdec, Nat.pow_succ]
+    ring
+  have hrle : 4^r ≤ 4^(r+1) := by
+    rw [Nat.pow_succ]
+    omega
+  have hsmall0 : 4^r < 3^(s+1) := lt_of_le_of_lt hrle hsmall
+  have hd0 : digit3 (4^r) (s+1) = 0 := by
+    unfold digit3
+    rw [Nat.div_eq_of_lt hsmall0]
+    simp
+  have hd1 : digit3 (4^(r+1)) (s+1) = 0 := by
+    unfold digit3
+    rw [Nat.div_eq_of_lt hsmall]
+    simp
+  have hp :=
+    GSTFourPowerExponentTritObstruction.pow4_shared_trit_pair
+      s r 2 (b / 3) (by norm_num : (2:Nat) < 3)
+  refine ⟨s+1, by omega, ?_, ?_⟩
+  · rw [hK, hp.1, hd0]
+  · rw [hK, hp.2, hd1]
+
+
 #print axioms scaleOrbit_zero_eq_affineOrbit
 #print axioms scaleOrbit_one_eq_renormOrbit
 #print axioms affineOrbit_three_mul_multiscale
