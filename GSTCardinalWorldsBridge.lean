@@ -268,7 +268,8 @@ theorem d_recurrence (j : Nat) (hj : 1 ≤ j) :
       = 2^(j+3) * d j + 2^(j+2) * 2^(j+2) * (d j)^2 := by omega
   have h5 : 2^(j+1+2) * (d j + 2^(j+1) * (d j)^2)
       = 2^(j+3) * d j + 2^(j+3) * 2^(j+1) * (d j)^2 := by
-    rw [Nat.mul_add, show 2^(j+1+2) = 2^(j+3) from by congr 1; omega]
+    rw [Nat.mul_add, show 2^(j+1+2) = 2^(j+3) from by rfl]
+    ring
   rw [hp4] at h4
   have hcancel : 2^(j+1+2) * d (j+1)
       = 2^(j+1+2) * (d j + 2^(j+1) * (d j)^2) := h4.trans h5.symm
@@ -393,7 +394,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
           fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
         rw [hmod, h2mod, h0, show (2:Nat)^0 % 9 = 1 from by decide,
           Nat.pow_mod (d (j-1)) 2 9, hF]
-        decide
       · by_cases h1 : j % 6 = 1
         · have hF0 : (j-1) % 6 = 0 := by omega
           have hF := hprev.1 hF0
@@ -406,7 +406,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
             fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
           rw [hmod, h2mod, h1, show (2:Nat)^1 % 9 = 2 from by decide,
             Nat.pow_mod (d (j-1)) 2 9, hF]
-          decide
         · by_cases h2 : j % 6 = 2
           · have hF1 : (j-1) % 6 = 1 := by omega
             have hF := hprev.2.1 hF1
@@ -419,7 +418,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
               fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
             rw [hmod, h2mod, h2, show (2:Nat)^2 % 9 = 4 from by decide,
               Nat.pow_mod (d (j-1)) 2 9, hF]
-            decide
           · by_cases h3 : j % 6 = 3
             · have hF2 : (j-1) % 6 = 2 := by omega
               have hF := hprev.2.2.1 hF2
@@ -432,7 +430,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
                 fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
               rw [hmod, h2mod, h3, show (2:Nat)^3 % 9 = 8 from by decide,
                 Nat.pow_mod (d (j-1)) 2 9, hF]
-              decide
             · by_cases h4 : j % 6 = 4
               · have hF3 : (j-1) % 6 = 3 := by omega
                 have hF := hprev.2.2.2.1 hF3
@@ -445,7 +442,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
                   fun _ => ?_, fun h => absurd h (by omega)⟩
                 rw [hmod, h2mod, h4, show (2:Nat)^4 % 9 = 7 from by decide,
                   Nat.pow_mod (d (j-1)) 2 9, hF]
-                decide
               · have h5 : j % 6 = 5 := by
                   have : j % 6 < 6 := Nat.mod_lt _ (by decide : 0 < 6)
                   omega
@@ -460,7 +456,6 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
                   fun h => absurd h (by omega), fun _ => ?_⟩
                 rw [hmod, h2mod, h5, show (2:Nat)^5 % 9 = 5 from by decide,
                   Nat.pow_mod (d (j-1)) 2 9, hF]
-                decide
 
 /-- **POSTULATE I's oscillation face.**  For every `j ≥ 2` outside the
 deep classes (`j ≡ 1,5 (mod 6)`), the bridge signature fires. -/
@@ -619,26 +614,29 @@ theorem s0_premise_full_clean (core : Nat) (hclass : core % 3 = 1)
   cases p with
   | zero =>
     rw [digit3_zero, pow4_mod3_one]
-    decide
+    try decide
   | succ q =>
     rw [cut_shift_s0 core q]
     cases q with
-    | zero => rw [hW0]; decide
+    | zero => rw [hW0]; try decide
     | succ j =>
-      have hj : 2 ≤ j + 1 := by omega
-      have hlt := hWall (j+1) hj
-      have hwin := div_digit_window (omegaCutWord 0 core) (3^(j+1))
-        (omegaCutWord 0 core % 3^(j+1+1)) (three_pow_pos' (j+1))
-        (by
-          have hmb := Nat.mod_lt (omegaCutWord 0 core) (three_pow_pos' (j+1+1))
-          have hp := three_pow_succ_mul (j+1)
-          omega)
-        (by rw [three_pow_succ_mul (j+1)])
-      have hq2 : omegaCutWord 0 core % 3^(j+1+1) / 3^(j+1) < 2 :=
-        div_lt_of_lt_mul' _ (3^(j+1)) 2 (three_pow_pos' (j+1)) (by omega)
-      rw [hwin, Nat.mod_eq_of_lt (by omega :
-        omegaCutWord 0 core % 3^(j+1+1) / 3^(j+1) < 3)]
-      omega
+      cases j with
+      | zero => exact hW1v
+      | succ j' =>
+        have hj : 2 ≤ j' + 2 := by omega
+        have hlt := hWall (j'+2) hj
+        have hwin := div_digit_window (omegaCutWord 0 core) (3^(j'+2))
+          (omegaCutWord 0 core % 3^(j'+2+1)) (three_pow_pos' (j'+2))
+          (by
+            have hmb := Nat.mod_lt (omegaCutWord 0 core) (three_pow_pos' (j'+2+1))
+            have hp := three_pow_succ_mul (j'+2)
+            omega)
+          (by rw [three_pow_succ_mul (j'+2)])
+        have hq2 : omegaCutWord 0 core % 3^(j'+2+1) / 3^(j'+2) < 2 :=
+          div_lt_of_lt_mul' _ (3^(j'+2)) 2 (three_pow_pos' (j'+2)) (by omega)
+        rw [hwin, Nat.mod_eq_of_lt (by omega :
+          omegaCutWord 0 core % 3^(j'+2+1) / 3^(j'+2) < 3)]
+        exact ne_of_lt hq2
 
 /-- **THE PROMOTION — `hTailF` as a theorem from the two transparent
 slices.**  Inputs:
