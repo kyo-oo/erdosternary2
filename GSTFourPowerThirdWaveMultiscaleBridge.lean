@@ -168,6 +168,132 @@ theorem thirdWaveNoCommonDescent_iff_multiscale :
           simpa [scaleOrbit_zero_eq_affineOrbit] using hp
         exact (GSTFourPowerAffineClassifierBridge.noCommonTwo_iff_badChannel_one q).2 hp'
 
+
+/-- Cubing upgrades one ternary digit of relative precision.  If two powers
+agree modulo 3^(p+1) up to the coefficient e*3^p, then after tripling both
+exponents (and adding the same a) that coefficient survives unchanged one
+level higher. -/
+theorem cubic_reference_transport
+    (n h p e a : Nat) (hp : 1 ≤ p)
+    (H :
+      4^n % 3^(p+1) =
+        (4^h + e * 3^p) % 3^(p+1)) :
+    4^(3*n+a) % 3^(p+2) =
+      (4^(3*h+a) + e * 3^(p+1)) % 3^(p+2) := by
+  cases p with
+  | zero => omega
+  | succ k =>
+      let T : Nat := 3^k
+      have hP : 3^(Nat.succ k) = 3 * T := by
+        dsimp [T]
+        rw [Nat.pow_succ]
+        ring
+      have hP1 : 3^(Nat.succ k + 1) = 9 * T := by
+        calc
+          3^(Nat.succ k + 1) = 3^(Nat.succ (Nat.succ k)) := by congr 1 <;> omega
+          _ = 3^(Nat.succ k) * 3 := by rw [Nat.pow_succ]
+          _ = (3 * T) * 3 := by rw [hP]
+          _ = 9 * T := by ring
+      have hP2 : 3^(Nat.succ k + 2) = 27 * T := by
+        calc
+          3^(Nat.succ k + 2) = 3^(Nat.succ (Nat.succ (Nat.succ k))) := by
+            congr 1 <;> omega
+          _ = 3^(Nat.succ (Nat.succ k)) * 3 := by rw [Nat.pow_succ]
+          _ = (9 * T) * 3 := by
+            rw [show 3^(Nat.succ (Nat.succ k)) = 9 * T by
+              calc
+                3^(Nat.succ (Nat.succ k)) = 3^(Nat.succ k + 1) := by
+                  congr 1 <;> omega
+                _ = 9 * T := hP1]
+          _ = 27 * T := by ring
+      rw [hP1] at H
+      rw [hP, hP2]
+      let A : Nat := 4^n
+      let H0 : Nat := 4^h
+      let B : Nat := H0 + e * (3 * T)
+      let L : Nat := 9 * T
+      let N : Nat := 27 * T
+      let r : Nat := A % L
+      let qa : Nat := A / L
+      let qb : Nat := B / L
+      have hremB : B % L = r := by
+        simpa [A, H0, B, L, r] using H.symm
+      have hA : A = r + L * qa := by
+        simpa [r, qa] using (Nat.mod_add_div A L).symm
+      have hB : B = r + L * qb := by
+        calc
+          B = B % L + L * (B / L) := (Nat.mod_add_div B L).symm
+          _ = r + L * qb := by rw [hremB]; rfl
+      have hcube (q : Nat) :
+          (r + L*q)^3 =
+            r^3 + N * (r^2*q + 9*r*T*q^2 + 27*T^2*q^3) := by
+        dsimp [L, N]
+        ring
+      have hAcube : A^3 % N = r^3 % N := by
+        rw [hA, hcube, Nat.add_mul_mod_self_left]
+      have hBcube : B^3 % N = r^3 % N := by
+        rw [hB, hcube, Nat.add_mul_mod_self_left]
+      have hH0mod : H0 % 3 = 1 := by
+        simpa [H0] using pow4_mod3_one h
+      let u : Nat := H0 / 3
+      have hH0 : H0 = 1 + 3*u := by
+        calc
+          H0 = H0 % 3 + 3 * (H0 / 3) := (Nat.mod_add_div H0 3).symm
+          _ = 1 + 3*u := by rw [hH0mod]; rfl
+      have hBspecial :
+          ∃ Q : Nat, B^3 =
+            (H0^3 + 9*T*e) + N*Q := by
+        refine ⟨2*e*u + 3*e*u^2 + e^2*T*H0 + e^3*T^2, ?_⟩
+        change (H0 + e*(3*T))^3 =
+          (H0^3 + 9*T*e) +
+            27*T*(2*e*u + 3*e*u^2 + e^2*T*H0 + e^3*T^2)
+        rw [hH0]
+        ring
+      have hBtarget :
+          B^3 % N = (H0^3 + 9*T*e) % N := by
+        obtain ⟨Q, hQ⟩ := hBspecial
+        rw [hQ, Nat.add_mul_mod_self_left]
+      have hcubeTarget :
+          A^3 % N = (H0^3 + 9*T*e) % N := by
+        exact hAcube.trans (hBcube.symm.trans hBtarget)
+      let C : Nat := 4^a
+      have hmul :
+          (A^3 * C) % N =
+            ((H0^3 + 9*T*e) * C) % N := by
+        calc
+          (A^3 * C) % N = ((A^3 % N) * (C % N)) % N := by
+            rw [Nat.mul_mod]
+          _ = (((H0^3 + 9*T*e) % N) * (C % N)) % N := by
+            rw [hcubeTarget]
+          _ = ((H0^3 + 9*T*e) * C) % N := by
+            rw [Nat.mul_mod]
+      have hCmod : C % 3 = 1 := by
+        simpa [C] using pow4_mod3_one a
+      let v : Nat := C / 3
+      have hC : C = 1 + 3*v := by
+        calc
+          C = C % 3 + 3 * (C / 3) := (Nat.mod_add_div C 3).symm
+          _ = 1 + 3*v := by rw [hCmod]; rfl
+      have hprod :
+          (H0^3 + 9*T*e) * C =
+            (H0^3*C + 9*T*e) + N*(e*v) := by
+        dsimp [N]
+        rw [hC]
+        ring
+      have hmul' :
+          (A^3 * C) % N =
+            (H0^3*C + 9*T*e) % N := by
+        rw [hmul, hprod, Nat.add_mul_mod_self_left]
+      have hpowA : A^3 * C = 4^(3*n+a) := by
+        dsimp [A, C]
+        rw [show 3*n+a = n*3+a by omega, Nat.pow_add, Nat.pow_mul]
+      have hpowH : H0^3 * C = 4^(3*h+a) := by
+        dsimp [H0, C]
+        rw [show 3*h+a = h*3+a by omega, Nat.pow_add, Nat.pow_mul]
+      rw [← hpowA, ← hpowH]
+      simpa [N] using hmul'
+
+
 #print axioms scaleOrbit_zero_eq_affineOrbit
 #print axioms scaleOrbit_one_eq_renormOrbit
 #print axioms affineOrbit_three_mul_multiscale
