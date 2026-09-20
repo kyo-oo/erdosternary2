@@ -25,6 +25,7 @@ roots = [
   "GSTFinalPurePowerResidueTransplant",
   "GSTFourPowerThirdWave",
   "GSTFourPowerThirdWaveMultiscaleBridge",
+  "GSTFourPowerThirdWaveMultiscaleClosure",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
   "GSTFourPowerAffineClassifierBridge",
