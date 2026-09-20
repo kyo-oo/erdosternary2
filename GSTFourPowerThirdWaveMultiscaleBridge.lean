@@ -207,7 +207,7 @@ theorem cubic_reference_transport
                   congr 1 <;> omega
                 _ = 9 * T := hP1]
           _ = 27 * T := by ring
-      rw [hP1] at H
+      rw [hP1, hP] at H
       rw [hP, hP2]
       let A : Nat := 4^n
       let H0 : Nat := 4^h
