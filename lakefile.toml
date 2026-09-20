@@ -17,6 +17,7 @@ name = "ErdosTernary2"
 name = "GSTLocalClosure"
 roots = [
   "GST2DMixedEmergence",
+  "GSTCardinalWorldsBridge",
   "GSTCanonicalCarryDynamics",
   "GSTCanonicalSevenAxisBridge",
   "GSTCanonicalTailLTE",
