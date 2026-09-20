@@ -7,6 +7,7 @@ set_option maxHeartbeats 100000000
 namespace GSTFourPowerThirdWaveMultiscaleBridge
 
 open GSTFourPowerDirectExistence
+open GSTFourPowerDirectResidue
 open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineChannelAutomaton
 open GSTFourPowerAffineRenormalizedOrbit
