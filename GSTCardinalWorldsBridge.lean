@@ -112,7 +112,8 @@ theorem div_digit_window (n d v : Nat) (hd : 0 < d) (hv : v < 3 * d)
     have h2 : n = d * (3 * (n / (3 * d))) + v := by
       rw [← Nat.mul_assoc, Nat.mul_comm d (3: Nat)]
       exact hdm.symm
-    rw [h2, Nat.add_comm, Nat.add_mul_div_left _ _ hd]
+    conv_lhs => rw [h2]
+    rw [Nat.add_comm, Nat.add_mul_div_left _ _ hd]
   rw [hsplit, Nat.add_mul_mod_self_left]
 
 /-- The period engine: if `b ≡ 1 (mod m)` with `1 < m`, then every
@@ -187,7 +188,6 @@ theorem two_mul_cantor_kill (m k : Nat)
         · exfalso
           have h2m : (2 * m) % 3 = 2 := by
             rw [Nat.mul_mod, h1]
-            decide
           exact h02 h2m
         · omega
     have hm3 : m = 3 * (m / 3) := by
@@ -250,7 +250,7 @@ theorem d_recurrence (j : Nat) (hj : 1 ≤ j) :
     rw [← Nat.pow_add, ← Nat.pow_add]
     congr 1
     omega
-  have h2a : 2^(j+3) = 2 * 2^(j+2) := by rw [Nat.pow_succ]
+  have h2a : 2^(j+3) = 2 * 2^(j+2) := by rw [Nat.pow_succ]; ac_rfl
   have hexpand : (1 + 2^(j+2) * d j)^2
       = 1 + 2^(j+3) * d j + 2^(j+2) * 2^(j+2) * (d j)^2 := by
     rw [h2a]
@@ -280,12 +280,12 @@ theorem two_pow_mod3_pair (j : Nat) :
   | zero => exact Or.inl ⟨by decide, by decide⟩
   | succ j ih =>
     rcases ih with ⟨hv, hp⟩ | ⟨hv, hp⟩
-    · refine Or.inr ⟨?_, ?_⟩
-      · rw [Nat.pow_succ, Nat.mul_mod, hv]
-      · omega
-    · refine Or.inl ⟨?_, ?_⟩
-      · rw [Nat.pow_succ, Nat.mul_mod, hv]
-      · omega
+    · refine Or.inr ⟨?_, by omega⟩
+      rw [Nat.pow_succ, Nat.mul_mod, hv]
+      try decide
+    · refine Or.inl ⟨?_, by omega⟩
+      rw [Nat.pow_succ, Nat.mul_mod, hv]
+      try decide
 
 /-- **THE d-TOWER PARITY LAW.**  `d(j) ≡ 2 (mod 3)` for even `j`, `≡ 1`
 for odd `j` (from `j ≥ 1`).  The 2-world tower oscillates across the
@@ -333,11 +333,11 @@ theorem d_mod3_parity (j : Nat) : 1 ≤ j →
 theorem two_pow_six_mod9 (q : Nat) : (2^6)^q % 9 = 1 := by
   induction q with
   | zero => rw [Nat.pow_zero]
-            exact Nat.mod_eq_of_lt (by decide : 1 < 9)
+            try exact Nat.mod_eq_of_lt (by decide : 1 < 9)
   | succ q ih =>
     rw [Nat.pow_succ, Nat.mul_mod, ih, show (2^6 : Nat) % 9 = 1 from by decide,
       Nat.one_mul]
-    exact Nat.mod_eq_of_lt (by decide : 1 < 9)
+    try exact Nat.mod_eq_of_lt (by decide : 1 < 9)
 
 theorem two_pow_mod9 (j : Nat) : 2^j % 9 = 2^(j % 6) % 9 := by
   obtain ⟨q, r, hqr, hrlt⟩ : ∃ q r, j = 6 * q + r ∧ r < 6 :=
@@ -381,57 +381,83 @@ theorem d_mod9_cycle (j : Nat) : 3 ≤ j →
         rw [show j - 1 + 1 = j from by omega] at h
         exact h
       have hprev := ih (j-1) (by omega) (by omega)
-      have hmod : d j % 9
-          = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
-        rw [hrec, Nat.add_mod, Nat.mul_mod]
-      have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
       by_cases h0 : j % 6 = 0
-      · have hF := hprev.2.2.2.2.2 (by omega)
-        refine ⟨fun h => absurd h (by omega), fun h => absurd h (by omega),
+      · have hF5 : (j-1) % 6 = 5 := by omega
+        have hF := hprev.2.2.2.2.2 hF5
+        have hmod : d j % 9
+            = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+          rw [hrec, Nat.add_mod, Nat.mul_mod]
+        have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
+        refine ⟨fun _ => ?_, fun h => absurd h (by omega),
           fun h => absurd h (by omega), fun h => absurd h (by omega),
-          fun h => absurd h (by omega), fun _ => ?_⟩
+          fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
         rw [hmod, h2mod, h0, show (2:Nat)^0 % 9 = 1 from by decide,
           Nat.pow_mod (d (j-1)) 2 9, hF]
         decide
       · by_cases h1 : j % 6 = 1
-        · have hF := hprev.1 (by omega)
-          refine ⟨fun _ => ?_, fun h => absurd h (by omega),
+        · have hF0 : (j-1) % 6 = 0 := by omega
+          have hF := hprev.1 hF0
+          have hmod : d j % 9
+              = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+            rw [hrec, Nat.add_mod, Nat.mul_mod]
+          have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
+          refine ⟨fun h => absurd h (by omega), fun _ => ?_,
             fun h => absurd h (by omega), fun h => absurd h (by omega),
             fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
           rw [hmod, h2mod, h1, show (2:Nat)^1 % 9 = 2 from by decide,
             Nat.pow_mod (d (j-1)) 2 9, hF]
           decide
         · by_cases h2 : j % 6 = 2
-          · have hF := hprev.2.1 (by omega)
-            refine ⟨fun h => absurd h (by omega), fun _ => ?_,
-              fun h => absurd h (by omega), fun h => absurd h (by omega),
+          · have hF1 : (j-1) % 6 = 1 := by omega
+            have hF := hprev.2.1 hF1
+            have hmod : d j % 9
+                = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+              rw [hrec, Nat.add_mod, Nat.mul_mod]
+            have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
+            refine ⟨fun h => absurd h (by omega), fun h => absurd h (by omega),
+              fun _ => ?_, fun h => absurd h (by omega),
               fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
             rw [hmod, h2mod, h2, show (2:Nat)^2 % 9 = 4 from by decide,
               Nat.pow_mod (d (j-1)) 2 9, hF]
             decide
           · by_cases h3 : j % 6 = 3
-            · have hF := hprev.2.2.1 (by omega)
+            · have hF2 : (j-1) % 6 = 2 := by omega
+              have hF := hprev.2.2.1 hF2
+              have hmod : d j % 9
+                  = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+                rw [hrec, Nat.add_mod, Nat.mul_mod]
+              have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
               refine ⟨fun h => absurd h (by omega), fun h => absurd h (by omega),
-                fun _ => ?_, fun h => absurd h (by omega),
+                fun h => absurd h (by omega), fun _ => ?_,
                 fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
               rw [hmod, h2mod, h3, show (2:Nat)^3 % 9 = 8 from by decide,
                 Nat.pow_mod (d (j-1)) 2 9, hF]
               decide
             · by_cases h4 : j % 6 = 4
-              · have hF := hprev.2.2.2.1 (by omega)
+              · have hF3 : (j-1) % 6 = 3 := by omega
+                have hF := hprev.2.2.2.1 hF3
+                have hmod : d j % 9
+                    = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+                  rw [hrec, Nat.add_mod, Nat.mul_mod]
+                have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
                 refine ⟨fun h => absurd h (by omega), fun h => absurd h (by omega),
-                  fun h => absurd h (by omega), fun _ => ?_,
-                  fun h => absurd h (by omega), fun h => absurd h (by omega)⟩
+                  fun h => absurd h (by omega), fun h => absurd h (by omega),
+                  fun _ => ?_, fun h => absurd h (by omega)⟩
                 rw [hmod, h2mod, h4, show (2:Nat)^4 % 9 = 7 from by decide,
                   Nat.pow_mod (d (j-1)) 2 9, hF]
                 decide
               · have h5 : j % 6 = 5 := by
                   have : j % 6 < 6 := Nat.mod_lt _ (by decide : 0 < 6)
                   omega
-                have hF := hprev.2.2.2.2.1 (by omega)
+                have hF4 : (j-1) % 6 = 4 := by omega
+                have hF := hprev.2.2.2.2.1 hF4
+                have hmod : d j % 9
+                    = (d (j-1) % 9 + (2^j % 9 * ((d (j-1))^2 % 9)) % 9) % 9 := by
+                  rw [hrec, Nat.add_mod, Nat.mul_mod]
+                have h2mod : 2^j % 9 = 2^(j % 6) % 9 := two_pow_mod9 j
                 refine ⟨fun h => absurd h (by omega), fun h => absurd h (by omega),
                   fun h => absurd h (by omega), fun h => absurd h (by omega),
-                  fun _ => ?_, fun h => absurd h (by omega)⟩
+                  fun h => absurd h (by omega), fun _ => ?_⟩
                 rw [hmod, h2mod, h5, show (2:Nat)^5 % 9 = 5 from by decide,
                   Nat.pow_mod (d (j-1)) 2 9, hF]
                 decide
@@ -500,7 +526,7 @@ theorem cut_shift_general (E s W i : Nat) (hE : 4^E = 1 + 3^(s+1) * W) :
             rw [Nat.mul_add]
         _ = 3^(s+1) * R
             + 3^(s+1+i) * (3 * (W / 3^(i+1)) + W % 3^(i+1) / 3^i) := by
-            rw [Nat.mul_assoc, hpow2]
+            rw [← Nat.mul_assoc, hpow2]
     rw [hW]
     ring
   have hsmall : 1 + 3^(s+1) * R < 3^(s+1+i) := by
@@ -585,8 +611,10 @@ theorem s0_premise_full_clean (core : Nat) (hclass : core % 3 = 1)
     have hwin := div_digit_window (omegaCutWord 0 core) 3
       (omegaCutWord 0 core % 9) (by decide)
       (Nat.mod_lt _ (by decide : 0 < 9)) rfl
+    have hlt2 : omegaCutWord 0 core % 9 / 3 < 2 :=
+      div_lt_of_lt_mul' _ 3 2 (by decide) (by omega)
     rw [hwin, Nat.mod_eq_of_lt (by omega : omegaCutWord 0 core % 9 / 3 < 3)]
-    omega
+    exact ne_of_lt hlt2
   intro p
   cases p with
   | zero =>
@@ -605,7 +633,7 @@ theorem s0_premise_full_clean (core : Nat) (hclass : core % 3 = 1)
           have hmb := Nat.mod_lt (omegaCutWord 0 core) (three_pow_pos' (j+1+1))
           have hp := three_pow_succ_mul (j+1)
           omega)
-        (by rw [three_pow_succ_mul])
+        (by rw [three_pow_succ_mul (j+1)])
       have hq2 : omegaCutWord 0 core % 3^(j+1+1) / 3^(j+1) < 2 :=
         div_lt_of_lt_mul' _ (3^(j+1)) 2 (three_pow_pos' (j+1)) (by omega)
       rw [hwin, Nat.mod_eq_of_lt (by omega :
