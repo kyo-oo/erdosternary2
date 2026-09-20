@@ -43,7 +43,6 @@ theorem erdos_ternary_2 :
     have hK5 : 5 ≤ K := by omega
     have hpow : 2^n = 4^K := by
       rw [hn2, Nat.pow_mul]
-      norm_num
     rw [hpow]
     exact has_two_imp_not_no_two (4^K)
       (erdos_ternary_2_even_universal K hK5)
