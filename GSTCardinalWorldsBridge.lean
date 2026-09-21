@@ -1149,6 +1149,7 @@ theorem d_window (j k : Nat) (hj : 1 ≤ j) (hk : k ≤ 2^j) :
   rcases w with _ | w'
   · omega
   · rw [hid, hw]
+    have hp3 : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
     have hexp : 3^k * (w'+1) - 1 = 3^k * w' + (3^k - 1) := by
       have h1 : 3^k * (w'+1) = 3^k * w' + 3^k := by ring
       rw [h1]
@@ -1286,8 +1287,10 @@ theorem cancel_two_3pow (k X Y : Nat) (hk : 1 ≤ k)
   have hmul : 2 * ((3^k + 1) / 2) = 3^k + 1 := by
     have hdm := Nat.div_add_mod (3^k + 1) 2
     omega
-  have h3k : 3^k = 3 * 3^(k-1) := by
-    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
+  have h3k : 3^k = 3^(k-1) * 3 := by
+    have h := Nat.pow_succ 3 (k-1)
+    rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+    exact h
   have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
   have h1lt : 1 < 3^k := by omega
   have hinv : (2 * ((3^k + 1) / 2)) % 3^k = 1 := by
@@ -1395,8 +1398,11 @@ theorem three_pow_ge_self : ∀ k : Nat, 1 ≤ k → k ≤ 3^(k-1) := by
     · rw [hk1]; decide
     · have hk1' : 1 ≤ k := by omega
       have ih' := ih hk1'
-      have h3k : 3^k = 3 * 3^(k-1) := by
-        rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
+      have h3k : 3^k = 3^(k-1) * 3 := by
+        have h := Nat.pow_succ 3 (k-1)
+        rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+        exact h
+      rw [show k + 1 - 1 = k from by omega]
       omega
 
 /-- **The all-ones obstruction family.**  At index `j = 2·3^(k-1) - 1`
@@ -1415,6 +1421,12 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
     have hlt := two_pow_self_ge (2*3^(k-1) - 1)
     omega
   have hwin := d_window (2*3^(k-1) - 1) k hge hkb
+  have h3k : 3^k = 3^(k-1) * 3 := by
+    have h := Nat.pow_succ 3 (k-1)
+    rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+    exact h
+  have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
+  have h2lt : 2 < 3^k := by omega
   have h2mod : 2^(2*3^(k-1) - 1 + 2) % 3^k = 2 := by
     have hcyc := two_pow_cycle (k-1)
     rw [show (k:Nat) - 1 + 1 = k from by omega] at hcyc
@@ -1426,10 +1438,6 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
       rw [h1, h2]
     rw [hexp, Nat.mul_mod, hcyc, Nat.mul_one, Nat.mod_mod,
         Nat.mod_eq_of_lt h2lt]
-  have h3k : 3^k = 3 * 3^(k-1) := by
-    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
-  have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
-  have h2lt : 2 < 3^k := by omega
   -- (2 · d j) ≡ 3^k - 1 (mod 3^k), by the periodicity of 2^(j+2)
   have hL : (2 * d (2*3^(k-1) - 1)) % 3^k = 3^k - 1 := by
     have hsplit2 := Nat.mul_mod (2^(2*3^(k-1) - 1 + 2)) (d (2*3^(k-1) - 1)) (3^k)
