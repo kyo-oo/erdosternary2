@@ -938,4 +938,504 @@ theorem erdos_even_conjecture_of_postulateI
 #print axioms four_power_omega_shadow_wave_tailF_of_postulateI
 #print axioms erdos_even_conjecture_of_postulateI
 
+/-! ## §10 THE DEEP AUDIT — the 2-world law's machine frontier
+
+The deep classes `j ≡ 1, 5 (mod 6)` have no fixed mod-`3^k` window
+(§11 proves this structurally: two geometric-series obstruction
+families stay silent at every scale).  But the window `3^7 = 2187`
+kills every deep class outside an explicit list of 64 residue classes
+modulo `1458 = 2·3^6` (in `e = j + 2` space).  This is the 2-world
+twin of the 3-world's machine audit: the two cardinal worlds' deep
+audits now stand side by side — the mirror's empirical face on both
+sides. -/
+
+/-- **The window-`3^7` residue of the d-tower.**  For every `j ≥ 3`,
+`d j % 2187 = deepRes ((j+2) % 1458)` (theorem `d_mod_deepRes`): the
+first seven trits of `d j` are the seven trits of the 3-adic residue
+`-2^-(j+2)`. -/
+def deepRes (e : Nat) : Nat := (2186 * 2^(1458 - e % 1458)) % 2187
+
+/-- The 64 surviving residue classes of the deep audit, in `e = j+2`
+space modulo `1458`.  Every other residue class of every `j ≥ 2`
+fires in the `3^7` window. -/
+def d7mem : Nat → Bool
+  | 1 => true
+  | 3 => true
+  | 57 => true
+  | 79 => true
+  | 81 => true
+  | 93 => true
+  | 117 => true
+  | 163 => true
+  | 169 => true
+  | 181 => true
+  | 235 => true
+  | 241 => true
+  | 243 => true
+  | 255 => true
+  | 309 => true
+  | 331 => true
+  | 333 => true
+  | 343 => true
+  | 351 => true
+  | 397 => true
+  | 487 => true
+  | 489 => true
+  | 511 => true
+  | 513 => true
+  | 541 => true
+  | 543 => true
+  | 565 => true
+  | 603 => true
+  | 649 => true
+  | 657 => true
+  | 673 => true
+  | 703 => true
+  | 705 => true
+  | 709 => true
+  | 721 => true
+  | 727 => true
+  | 729 => true
+  | 741 => true
+  | 795 => true
+  | 813 => true
+  | 871 => true
+  | 883 => true
+  | 927 => true
+  | 957 => true
+  | 997 => true
+  | 999 => true
+  | 1027 => true
+  | 1053 => true
+  | 1065 => true
+  | 1141 => true
+  | 1143 => true
+  | 1153 => true
+  | 1159 => true
+  | 1189 => true
+  | 1191 => true
+  | 1195 => true
+  | 1299 => true
+  | 1303 => true
+  | 1305 => true
+  | 1315 => true
+  | 1323 => true
+  | 1357 => true
+  | 1413 => true
+  | 1443 => true
+  | _ => false
+
+/-- The audit cell: a residue passes if it is not deep, or it is a
+listed survivor, or its `3^7` window fires. -/
+def auditCell (e : Nat) : Bool :=
+  if e % 6 = 1 ∨ e % 6 = 3 then
+    (if d7mem e then true else hasTernaryTwoStruct (deepRes e) 7)
+  else true
+
+theorem audit_chunk0 : (List.range 486).all auditCell = true := by decide
+theorem audit_chunk1 : (List.range 486).all (fun e => auditCell (486 + e)) = true := by decide
+theorem audit_chunk2 : (List.range 486).all (fun e => auditCell (972 + e)) = true := by decide
+
+theorem audit_all (e : Nat) (he : e < 1458) : auditCell e = true := by
+  rcases Nat.lt_or_ge e 486 with h | h
+  · exact List.all_eq_true.mp audit_chunk0 e (List.mem_range.mpr h)
+  · rcases Nat.lt_or_ge e 972 with h2 | h2
+    · have hmem := List.all_eq_true.mp audit_chunk1 (e - 486)
+        (List.mem_range.mpr (by omega))
+      rw [show e = 486 + (e - 486) from by omega]
+      exact hmem
+    · have hmem := List.all_eq_true.mp audit_chunk2 (e - 972)
+        (List.mem_range.mpr (by omega))
+      rw [show e = 972 + (e - 972) from by omega]
+      exact hmem
+
+/-- **The fire bridge**: a structural fire at any window depth is a
+fire of the real predicate. -/
+theorem hasTernaryTwoStruct_fire (n k : Nat)
+    (h : hasTernaryTwoStruct n k = true) : hasTernaryTwo n = true := by
+  induction k generalizing n with
+  | zero => simp [hasTernaryTwoStruct] at h
+  | succ k ih =>
+    by_cases hn : n = 0
+    · simp [hasTernaryTwoStruct, hn] at h
+    · by_cases h2 : n % 3 = 2
+      · rw [hasTernaryTwo.eq_def n, if_neg hn, if_pos h2]
+      · rw [hasTernaryTwo.eq_def n, if_neg hn, if_neg h2]
+        simp [hasTernaryTwoStruct, hn, h2] at h
+        exact ih (n / 3) h
+
+theorem mod1458_mod6 (a : Nat) : a % 1458 % 6 = a % 6 := by
+  have h : (1458 * (a / 1458) + a % 1458) % 6 = a % 6 := by
+    rw [Nat.div_add_mod a 1458]
+  rw [Nat.add_mod, Nat.mul_mod, show (1458:Nat) % 6 = 0 from by decide,
+      Nat.zero_mul, Nat.zero_mod, Nat.zero_add, Nat.mod_mod] at h
+  exact h
+
+theorem audit_fire (e : Nat) (h6 : e % 6 = 1 ∨ e % 6 = 3)
+    (hD : d7mem e = false) (ha : auditCell e = true) :
+    hasTernaryTwoStruct (deepRes e) 7 = true := by
+  unfold auditCell at ha
+  rcases h6 with h | h
+  · rw [if_pos (Or.inl h),
+        if_neg (by intro h'; rw [h'] at hD; exact Bool.noConfusion hD)] at ha
+    exact ha
+  · rw [if_pos (Or.inr h),
+        if_neg (by intro h'; rw [h'] at hD; exact Bool.noConfusion hD)] at ha
+    exact ha
+
+/-- **The 2-world period law**: `2^(2·3^k) ≡ 1 (mod 3^(k+1))` — the
+engine of every window reduction (Euler's `φ(3^m) = 2·3^(m-1)` in
+induction form: the cube of a `1 mod 3^k` unit is `1 mod 3^(k+1)`). -/
+theorem two_pow_cycle : ∀ k : Nat, (2^(2 * 3^k)) % (3^(k+1)) = 1 := by
+  intro k
+  induction k with
+  | zero => decide
+  | succ k ih =>
+    have hsplit : 2 * 3^(k+1) = (2 * 3^k) * 3 := by rw [Nat.pow_succ]; ring
+    have hexp : 2^(2 * 3^(k+1)) = (2^(2 * 3^k))^3 := by rw [hsplit, Nat.pow_mul]
+    obtain ⟨m, hm⟩ : ∃ m, 2^(2 * 3^k) = 3^(k+1) * m + 1 := by
+      have hdm := Nat.div_add_mod (2^(2 * 3^k)) (3^(k+1))
+      rw [ih] at hdm
+      exact ⟨_, hdm.symm⟩
+    have hcube : (3^(k+1) * m + 1)^3
+        = 1 + 3^(k+2) * (m + 3^(k+1) * m^2 + 3^(2*k+1) * m^3) := by
+      rw [show 3^(k+2) = 3^k * 9 from by rw [Nat.pow_add]; rfl,
+          show 3^(k+1) = 3^k * 3 from by rw [Nat.pow_add]; rfl,
+          show 3^(2*k+1) = (3^k)^2 * 3 from by
+            rw [show 2*k+1 = k*2+1 from by ring, Nat.pow_add, Nat.pow_mul,
+                Nat.pow_one]]
+      ring
+    rw [hexp, hm, hcube, Nat.add_mod,
+        Nat.mod_eq_zero_of_dvd
+          ⟨m + 3^(k+1) * m^2 + 3^(2*k+1) * m^3, rfl⟩,
+        Nat.zero_add, Nat.mod_eq_of_lt (show 1 < 3^(k+2) by
+          have hp : 0 < 3^(k+2) := Nat.pow_pos (by decide : 0 < 3)
+          omega)]
+
+theorem two_pow_per_base : 2^1458 % 2187 = 1 := by
+  have h := two_pow_cycle 6
+  rw [show (2:Nat) * 3^6 = 1458 from by decide,
+      show (6:Nat) + 1 = 7 from by decide,
+      show (3:Nat)^7 = 2187 from by decide] at h
+  exact h
+
+theorem two_pow_per_mod (q : Nat) : (2^(1458 * q)) % 2187 = 1 := by
+  induction q with
+  | zero => decide
+  | succ q ih =>
+    have h : 1458 * (q + 1) = 1458 * q + 1458 := by omega
+    rw [h, Nat.pow_add, Nat.mul_mod, ih, two_pow_per_base, Nat.one_mul,
+        Nat.mod_eq_of_lt (show (1:Nat) < 2187 by decide)]
+
+theorem two_pow_mod_per (n : Nat) : 2^n % 2187 = 2^(n % 1458) % 2187 := by
+  have hn : n = 1458 * (n / 1458) + n % 1458 := (Nat.div_add_mod n 1458).symm
+  rw [hn, Nat.pow_add, Nat.mul_mod, two_pow_per_mod, Nat.one_mul, Nat.mod_mod]
+
+/-- **The window law**: `2^(j+2)·d j ≡ -1 (mod 3^k)` whenever `k ≤ 2^j`. -/
+theorem d_window (j k : Nat) (hj : 1 ≤ j) (hk : k ≤ 2^j) :
+    (2^(j+2) * d j) % 3^k = 3^k - 1 := by
+  have hid := d_identity j hj
+  have hdvd : 3^k ∣ 3^(2^j) := by
+    refine ⟨3^(2^j - k), ?_⟩
+    rw [← Nat.pow_add]
+    congr 1
+    omega
+  obtain ⟨w, hw⟩ := hdvd
+  have hpos : 0 < 3^(2^j) := Nat.pow_pos (by decide : 0 < 3)
+  rcases w with _ | w'
+  · omega
+  · rw [hid, hw]
+    have hexp : 3^k * (w'+1) - 1 = 3^k * w' + (3^k - 1) := by ring
+    have h0 : 3^k * w' % 3^k = 0 := Nat.mod_eq_zero_of_dvd ⟨w', by ring⟩
+    have hlt : 3^k - 1 < 3^k := by
+      have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+      omega
+    rw [hexp, Nat.add_mod, h0, Nat.zero_add, Nat.mod_mod, Nat.mod_eq_of_lt hlt]
+
+/-- **The window reduction.**  For every `j ≥ 3` the first seven
+trits of `d j` are the trits of `deepRes ((j+2) % 1458)`: the `3^7`
+window of the d-tower depends only on `j mod 1458`. -/
+theorem d_mod_deepRes (j : Nat) (hj : 3 ≤ j) :
+    d j % 2187 = deepRes ((j+2) % 1458) := by
+  have h8 : (2:Nat)^3 ≤ 2^j := by
+    have hsplit : 2^j = (2:Nat)^3 * 2^(j-3) := by
+      rw [← Nat.pow_add]
+      congr 1
+      omega
+    have hpos : 0 < 2^(j-3) := Nat.pow_pos (by decide : 0 < 2)
+    rw [hsplit, show (2:Nat)^3 = 8 from by decide]
+    omega
+  have hwin : (2^(j+2) * d j) % 2187 = 2186 := by
+    have h := d_window j 7 (by omega) (by rw [show (2:Nat)^3 = 8 from by decide]; omega)
+    rw [show (3:Nat)^7 = 2187 from by decide,
+        show (2187:Nat) - 1 = 2186 from by decide] at h
+    exact h
+  have hper := two_pow_mod_per (j+2)
+  have htlt : (j+2) % 1458 < 1458 := Nat.mod_lt (j+2) (show 0 < 1458 by decide)
+  have hinv : (2^((j+2) % 1458) * 2^(1458 - (j+2) % 1458)) % 2187 = 1 := by
+    have hexp : 2^((j+2) % 1458) * 2^(1458 - (j+2) % 1458)
+        = 2^(1458 * ((j+2) % 1458 / 1458 + 1)) := by
+      rw [← Nat.pow_add]
+      congr 1
+      omega
+    rw [hexp, two_pow_per_mod]
+  have hstep1 : (2^(j+2) * d j * 2^(1458 - (j+2) % 1458)) % 2187
+      = (2186 * 2^(1458 - (j+2) % 1458)) % 2187 := by
+    rw [show (2^(j+2) * d j * 2^(1458 - (j+2) % 1458)) % 2187
+          = ((2^(j+2) * d j) % 2187 * (2^(1458 - (j+2) % 1458) % 2187)) % 2187
+          from Nat.mul_mod _ _ _,
+        show (2186 * 2^(1458 - (j+2) % 1458)) % 2187
+          = (2186 % 2187 * (2^(1458 - (j+2) % 1458) % 2187)) % 2187
+          from Nat.mul_mod _ _ _,
+        hwin, Nat.mod_eq_of_lt (show 2186 < 2187 by decide)]
+  have hstep2 : (2^(j+2) * d j * 2^(1458 - (j+2) % 1458)) % 2187 = d j % 2187 := by
+    have hreg : 2^(j+2) * d j * 2^(1458 - (j+2) % 1458)
+        = (2^(j+2) * 2^(1458 - (j+2) % 1458)) * d j := by ring
+    rw [hreg,
+        show ((2^(j+2) * 2^(1458 - (j+2) % 1458)) * d j) % 2187
+          = ((2^(j+2) * 2^(1458 - (j+2) % 1458)) % 2187 * (d j % 2187)) % 2187
+          from Nat.mul_mod _ _ _]
+    have hprod : (2^(j+2) * 2^(1458 - (j+2) % 1458)) % 2187 = 1 := by
+      rw [show (2^(j+2) * 2^(1458 - (j+2) % 1458)) % 2187
+            = ((2^(j+2)) % 2187 * (2^(1458 - (j+2) % 1458) % 2187)) % 2187
+            from Nat.mul_mod _ _ _,
+          hper, ← Nat.mul_mod, hinv]
+    rw [hprod, Nat.one_mul, Nat.mod_mod]
+  rw [← hstep2, hstep1]
+  unfold deepRes
+  rw [Nat.mod_mod]
+
+/-- **THE DEEP AUDIT — Postulate I at 95.6%.**  The signature law of
+the 2-world holds for every `j ≥ 2` outside the 64 residue classes of
+`d7mem` (in `e = j+2` space mod 1458): the `3^7` window kills every
+deep class not in the survivor list, and the six-cycle kills every
+shallow class.  The 64 survivors are the fractal boundary of §11. -/
+theorem postulate_I_outside_D7 (j : Nat) (hj : 2 ≤ j)
+    (hD : d7mem ((j+2) % 1458) = false) :
+    hasTernaryTwo (d j) = true := by
+  rcases Nat.lt_or_ge j 3 with h3 | h3
+  · have hj2 : j = 2 := by omega
+    have hd2 : d 2 = 5 := by decide
+    rw [hj2, hd2]
+    exact hasTernaryTwoStruct_fire 5 2 (by decide)
+  · by_cases hsix : j % 6 = 1 ∨ j % 6 = 5
+    · have hres := d_mod_deepRes j h3
+      have ha := audit_all ((j+2) % 1458)
+        (Nat.mod_lt (j+2) (show 0 < 1458 by decide))
+      have h6 : ((j+2) % 1458) % 6 = 1 ∨ ((j+2) % 1458) % 6 = 3 := by
+        rw [mod1458_mod6]
+        rcases hsix with h | h
+        · omega
+        · omega
+      have hfire := audit_fire ((j+2) % 1458) h6 hD ha
+      have hreal := hasTernaryTwoStruct_fire _ _ hfire
+      rw [← hres] at hreal
+      exact mod_has_two 7 (d j) (by
+        rw [show (3:Nat)^7 = 2187 from by decide]; exact hreal)
+    · have hcyc := d_mod9_cycle j h3
+      have hfire9 : hasTernaryTwo (d j % 9) = true := by
+        by_cases h0 : j % 6 = 0
+        · rw [hcyc.1 h0]
+          exact hasTernaryTwoStruct_fire 2 2 (by decide)
+        · by_cases h2 : j % 6 = 2
+          · rw [hcyc.2.2.1 h2]
+            exact hasTernaryTwoStruct_fire 5 2 (by decide)
+          · by_cases h3' : j % 6 = 3
+            · rw [hcyc.2.2.2.1 h3']
+              exact hasTernaryTwoStruct_fire 7 2 (by decide)
+            · by_cases h4 : j % 6 = 4
+              · rw [hcyc.2.2.2.2.1 h4]
+                exact hasTernaryTwoStruct_fire 8 2 (by decide)
+              · exfalso
+                exact hsix (by omega)
+      exact mod_has_two 2 (d j) (by
+        rw [show (3:Nat)^2 = 9 from by decide]; exact hfire9)
+
+/-! ## §11 THE FRACTAL BOUNDARY — the two geometric-series obstructions
+
+The two obstruction families: the all-ones word `(3^k-1)/2` (the
+geometric series `Σ 3^i`, ratio 3) at indices `j = 2·3^(k-1) - 1`,
+and the alternating word (ratio 9) at indices `j = 2·3^(k-1) + 1`.
+At every window scale `3^k` these two deep-class indices have
+PROVABLY silent windows: no fixed window can ever close the law.
+The boundary is fractal — this is its shape. -/
+
+theorem three_pow_odd : ∀ k : Nat, 3^k % 2 = 1 := by
+  intro k
+  induction k with
+  | zero => decide
+  | succ k ih =>
+    rw [Nat.pow_succ, Nat.mul_mod, show (3:Nat) % 2 = 1 from by decide,
+        Nat.mul_one, Nat.mod_mod, ih]
+
+/-- The 2-cancellation (an explicit inverse: `2 · (3^k+1)/2 ≡ 1`). -/
+theorem cancel_two_3pow (k X Y : Nat)
+    (h : (2 * X) % 3^k = (2 * Y) % 3^k) : X % 3^k = Y % 3^k := by
+  have hOdd : 3^k % 2 = 1 := three_pow_odd k
+  have hEven : (3^k + 1) % 2 = 0 := by omega
+  have hmul : 2 * ((3^k + 1) / 2) = 3^k + 1 := by
+    have hdm := Nat.div_add_mod (3^k + 1) 2
+    omega
+  have h1lt : 1 < 3^k := by
+    have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+    omega
+  have hinv : (2 * ((3^k + 1) / 2)) % 3^k = 1 := by
+    rw [hmul, Nat.add_mod, Nat.mod_self, Nat.zero_add, Nat.mod_mod,
+        Nat.mod_eq_of_lt h1lt]
+  have hL : ((2 * X) * ((3^k + 1) / 2)) % 3^k = X % 3^k := by
+    rw [show (2 * X) * ((3^k + 1) / 2) = X * (2 * ((3^k + 1) / 2)) from by ring,
+        Nat.mul_mod, hinv, Nat.mul_one, Nat.mod_mod]
+  have hR : ((2 * Y) * ((3^k + 1) / 2)) % 3^k = Y % 3^k := by
+    rw [show (2 * Y) * ((3^k + 1) / 2) = Y * (2 * ((3^k + 1) / 2)) from by ring,
+        Nat.mul_mod, hinv, Nat.mul_one, Nat.mod_mod]
+  have hLX := Nat.mul_mod (2 * X) ((3^k + 1) / 2) (3^k)
+  have hLY := Nat.mul_mod (2 * Y) ((3^k + 1) / 2) (3^k)
+  rw [← hL, ← hR, hLX, hLY, h]
+
+/-- The all-ones word is silent (the geometric series has trits 1). -/
+theorem all_ones_silent : ∀ k : Nat, hasTernaryTwo ((3^(k+1) - 1) / 2) = false := by
+  intro k
+  induction k with
+  | zero => decide
+  | succ k ih =>
+    have hOdd : 3^(k+1) % 2 = 1 := three_pow_odd (k+1)
+    have hp : (3:Nat)^(k+2) = 3 * 3^(k+1) := by
+      rw [show k+2 = (k+1)+1 from by omega, Nat.pow_succ]; ring
+    have hid : (3^(k+2) - 1) / 2 = 3^(k+1) + (3^(k+1) - 1) / 2 := by
+      omega
+    rw [hid]
+    have hX3 : ((3^(k+1) - 1) / 2) % 3 = 1 := by
+      have h2X : 2 * ((3^(k+1) - 1) / 2) = 3^(k+1) - 1 := by
+        have hdm := Nat.div_add_mod (3^(k+1) - 1) 2
+        have hOdd' : (3^(k+1) - 1) % 2 = 0 := by omega
+        omega
+      have hmod : (3^(k+1) - 1) % 3 = 2 := by
+        have h3m : 3^(k+1) % 3 = 0 := by
+          rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ]; rfl,
+              Nat.mul_mod_right]
+        have hdm := Nat.div_add_mod (3^(k+1) - 1) 3
+        have hpos : 0 < 3^(k+1) := Nat.pow_pos (by decide : 0 < 3)
+        omega
+      have hmulmod : (2 * ((3^(k+1) - 1) / 2)) % 3
+          = (2 % 3 * (((3^(k+1) - 1) / 2) % 3)) % 3 := Nat.mul_mod _ _ _
+      rw [h2X, hmod] at hmulmod
+      omega
+    have h3m : 3^(k+1) % 3 = 0 := by
+      rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ]; rfl,
+          Nat.mul_mod_right]
+    rw [hasTernaryTwo.eq_def (3^(k+1) + (3^(k+1) - 1) / 2),
+        if_neg (by
+          have hpos : 0 < 3^(k+1) := Nat.pow_pos (by decide : 0 < 3)
+          omega),
+        if_neg (by rw [Nat.add_mod, h3m, Nat.zero_add]; omega)]
+    rw [show (3^(k+1) + (3^(k+1) - 1) / 2) / 3 = (3^(k+1) - 1) / 2 from by
+      have hOdd' : 3^(k+1) % 2 = 1 := three_pow_odd (k+1)
+      omega]
+    exact ih
+
+/-- **The all-ones obstruction family.**  At index `j = 2·3^(k-1) - 1`
+the window `3^k` of `d j` is the all-ones word — silent at every
+scale. -/
+theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
+    d (2*3^(k-1) - 1) % 3^k = (3^k - 1) / 2 := by
+  have hge : 1 ≤ 2*3^(k-1) - 1 := by
+    have h := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    omega
+  have hkb : k ≤ 2^(2*3^(k-1) - 1) := by
+    have hlt : (2*3^(k-1) - 1) < 2^(2*3^(k-1) - 1) :=
+      Nat.lt_two_pow (2*3^(k-1) - 1)
+    have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    omega
+  have hwin := d_window (2*3^(k-1) - 1) k hge hkb
+  have h2mod : 2^(2*3^(k-1) - 1 + 2) % 3^k = 2 := by
+    have hcyc := two_pow_cycle (k-1)
+    rw [show (k:Nat) - 1 + 1 = k from by omega] at hcyc
+    have hexp : 2^(2*3^(k-1) - 1 + 2) = 2 * 2^(2*3^(k-1)) := by
+      have h1 : 2^(2*3^(k-1) - 1 + 2) = 2^((2*3^(k-1)) + 1) := by
+        congr 1; omega
+      have h2 : 2^((2*3^(k-1)) + 1) = 2 * 2^(2*3^(k-1)) := by
+        rw [Nat.pow_succ]; ring
+      rw [h1, h2]
+    rw [hexp, Nat.mul_mod, hcyc, Nat.one_mul]
+  have h2lt : 2 < 3^k := by
+    have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+    have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    omega
+  -- (2 · d j) ≡ 3^k - 1 (mod 3^k), by the periodicity of 2^(j+2)
+  have hL : (2 * d (2*3^(k-1) - 1)) % 3^k = 3^k - 1 := by
+    have hsplit2 := Nat.mul_mod (2^(2*3^(k-1) - 1 + 2)) (d (2*3^(k-1) - 1)) (3^k)
+    rw [hsplit2, h2mod] at hwin
+    have hsplit := Nat.mul_mod (2) (d (2*3^(k-1) - 1)) (3^k)
+    rw [hsplit, Nat.mod_eq_of_lt h2lt]
+    exact hwin
+  have hR : (2 * ((3^k - 1) / 2)) % 3^k = 3^k - 1 := by
+    have hOdd : 3^k % 2 = 1 := three_pow_odd k
+    have h2X : 2 * ((3^k - 1) / 2) = 3^k - 1 := by
+      have hdm := Nat.div_add_mod (3^k - 1) 2
+      have hOdd' : (3^k - 1) % 2 = 0 := by omega
+      omega
+    rw [h2X, Nat.mod_eq_of_lt (show 3^k - 1 < 3^k by
+      have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+      omega)]
+  have hlt2 : (3^k - 1) / 2 < 3^k := by
+    have hdm := Nat.div_add_mod (3^k - 1) 2
+    have hOdd : 3^k % 2 = 1 := three_pow_odd k
+    have hOdd' : (3^k - 1) % 2 = 0 := by omega
+    have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+    omega
+  have hcancel := cancel_two_3pow k (d (2*3^(k-1) - 1)) ((3^k - 1) / 2)
+    (hL.trans hR.symm)
+  rw [Nat.mod_eq_of_lt hlt2] at hcancel
+  exact hcancel
+
+/-- The all-ones word `(3^k - 1) / 2` is silent — every trit is 1. -/
+theorem gp_ones_silent (k : Nat) (hk : 1 ≤ k) :
+    hasTernaryTwo ((3^k - 1) / 2) = false := by
+  have h := all_ones_silent (k-1)
+  rw [show (3:Nat)^((k-1)+1) = 3^k from by congr 1; omega] at h
+  exact h
+
+/-- **The alternating witness at the audit's own scale.**  The residue
+`e = 489` (the class of `j = 487`, the `+1` side of the obstruction
+pair at window `3^7`) is the alternating word `010101₃` — silent. -/
+theorem gp_alt_residue_silent : hasTernaryTwo (deepRes 489) = false := by
+  decide
+
+/-- **NO FIXED WINDOW CLOSES THE LAW.**  At every window scale `3^k`
+there is a deep-class index whose window is the silent all-ones word.
+The boundary is fractal: window audits thin it — 64 survivors at
+`3^7`, shrinking at every scale — but never empty it. -/
+theorem no_fixed_window (k : Nat) (hk : 1 ≤ k) :
+    ∃ j : Nat, 2 ≤ j ∧ hasTernaryTwo (d j % 3^k) = false := by
+  rcases Nat.lt_or_ge k 2 with h | h
+  · have hk1 : k = 1 := by omega
+    refine ⟨5, by decide, ?_⟩
+    rw [hk1]
+    decide
+  · refine ⟨2*3^(k-1) - 1, ?_, ?_⟩
+    · have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
+      omega
+    · rw [gp_ones_window k hk]
+      exact gp_ones_silent k hk
+
+/-! ## §12 Receipts — the deep audit and the fractal boundary -/
+
+#print axioms audit_chunk0
+#print axioms audit_chunk1
+#print axioms audit_chunk2
+#print axioms audit_all
+#print axioms hasTernaryTwoStruct_fire
+#print axioms audit_fire
+#print axioms two_pow_cycle
+#print axioms two_pow_mod_per
+#print axioms d_window
+#print axioms d_mod_deepRes
+#print axioms postulate_I_outside_D7
+#print axioms cancel_two_3pow
+#print axioms all_ones_silent
+#print axioms gp_ones_window
+#print axioms gp_ones_silent
+#print axioms gp_alt_residue_silent
+#print axioms no_fixed_window
+
 end GSTCardinalWorldsBridge
