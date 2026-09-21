@@ -2045,46 +2045,57 @@ theorem erdos_even_conjecture_of_mirror (hM : CardinalWorldsMirrorBridge) :
 #print axioms erdos_even_conjecture_of_mirror
 
 
-/-! ## §16 THE MIRROR BRIDGE AUDIT — audited, then CORRIGENDED in §16.6
+/-! ## §16 LAW 2 — THE MIRROR BRIDGE — the handed maths on the production charge
 
 The BOSS handed down LAW 2 — THE MIRROR BRIDGE — as an exact universal
 transport: `Nav(Q_{s+1} n) → Nav(Q_s (1+3n))` (already definitional in the
 monolith as `GSTPrefixOneNavigationLift`), to be closed by a signed
 crossing charge ρ over the ×4 multiplication rectangle, a horizontal and
-a vertical telescope, and a positivity collision.  This section banks the
-audit of that hand.
+a vertical telescope, and a positivity collision.  This section banks THE
+MATHS OF THE HAND on the PRODUCTION charge: the `84·S` term of formula
+(6) is the production `surviveI ∈ {0,1,2}` of `GST2DMixedEmergence` —
+the number of microscopic BIG2→BIG2 edges inside one x4 cell — and the
+charge IS the production `GSTU2DExactCrossingCharge.crossDensity`
+(`mbCharge_eq_crossDensity`): the twelve-cell table below is the HAND's
+table (7), kernel-checked twice — once here, once as the production
+`crossDensity_physical_table`, green in this very CI.
 
-THE AUDIT'S OWN ERROR, CORRIGENDED IN §16.6 — the original audit
-evaluated the hand's formula (6) with a BOOLEAN Happy indicator in the
-`84·S` term (visible in `mbRho` below), in place of the production
-`surviveI ∈ {0,1,2}` of `GST2DMixedEmergence` — the number of
-microscopic BIG2→BIG2 edges inside one x4 cell.  The production file
-`GSTU2DExactCrossingCharge.lean`, green in this very CI, carries the
-kernel-checked physical table `crossDensity_physical_table` — the HAND's
-table (7).  Both original "defects" evaluated the wrong charge and are
-WITHDRAWN:
+THE AUDIT IS WITHDRAWN AND ROLLED BACK.  The audit that preceded this
+section evaluated formula (6) with a BOOLEAN Happy indicator
+`S(C,d) ∈ {0,1}` in the `84·S` term.  That function is NOT the hand's
+charge, and every theorem asserting its values has been REMOVED from
+this module in the rollback — the wrong charge survives only in this
+history: its four disputed entries read `189, −165, −84, 21` where the
+hand's table (7) reads `105, −81, 0, 105`, the deviation being exactly
+`±84` per unit of SURVIVE incidence erased at the four cells
+`(0,2), (1,1), (2,2), (3,2)`.
 
-* DEFECT 1 WITHDRAWN — the four "irreproducible" entries of the audit's
-table were values of the Boolean-substituted charge.  With the production
-`surviveI` they read `105, −81, 0, 105`; the live-instance row pressure
-is `R_q = 1344` (not `0`); and the handed estimate (15)
-`94·4^3 + 149 = 6165 ≤ 5·R_q = 6720` HOLDS, with margin `555`.
+* DEFECT 1 WITHDRAWN — with the production `surviveI` the four entries
+read `105, −81, 0, 105`; the live-instance row pressure is `R_q = 1344`
+(not `0`); and the handed estimate (15) `94·4^3 + 149 = 6165 ≤ 5·R_q =
+6720` HOLDS, with margin `555` (`mb_corr_row_pressure_live`,
+`mb_corr_pressure_estimate_holds`) — estimate (15) is the repo's own
+green positive collision side in `GSTU2DSharpCrossingBlock`
+(`weightedCrossPrefix_positive_of_top_leading_happy`).
 
 * DEFECT 2 WITHDRAWN — the interior `4^6` gate at row 2 is the production
 cell `(0, 2)`: by `happy_chord_dichotomy` it is the NULL chord
-`2 → 1 → 2` with `surviveI = 0` — zero microscopic SURVIVE mass.
-Macroscopic HAPPY and microscopic SURVIVE incidence are different
-predicates, and the production rectangle identity
-`reverseCrossRectangle_exact` retains the `84·reverseSurviveCode` term
-explicitly as one component of a signed divergence.
+`2 → 1 → 2` with `surviveI = 0` — zero microscopic SURVIVE mass
+(`mb_corr_interior_cell_null_chord`,
+`mb_corr_interior_survive_mass_zero`).  Macroscopic HAPPY and microscopic
+SURVIVE incidence are different predicates (`mb_corr_happy_ne_survive`),
+and the production rectangle identity `reverseCrossRectangle_exact`
+retains the `84·reverseSurviveCode` term explicitly as one component of a
+signed divergence.
 
-WHAT SURVIVES (banked below, kernel-checked): the exact cell algebra and
-its sign rigidity; the exact x4 transition laws; the child-to-left-boundary
-gate transport.  WHAT REMAINS: Law 2 is still the sole grant of the
-campaign, in either of its two live forms — the absorption-mirror bridge
-`CardinalWorldsMirrorBridge` (§14 above) or the third-wave climb
-`four_power_happy_climb` (the monolith's live seam, bridged in §16.5).
-The crossing-charge route to it is NOT refuted by this audit. -/
+BANKED BELOW, KERNEL-CHECKED: the exact cell algebra and the production
+charge — the hand's own — with its identity bridge, its twelve-cell table
+(7), and its sign rigidity; the exact x4 transition laws; the
+child-to-left-boundary gate transport; the live-instance receipts — the
+law itself holds at `(s,n) = (1,1)` (child gate, transport, parent gate),
+the row pressure `1344`, estimate (15) with margin `555`, the NULL chord,
+the dichotomy — and the sharp `s = 0` edge.  The grant inventory of the
+campaign is carried by §14 and §16.5. -/
 
 /-! ### §16.1 The exact cell algebra -/
 
@@ -2106,58 +2117,62 @@ def mbPhi (d : Nat) : Int :=
 def mbPsi (c : Nat) : Int :=
   if c = 0 then 0 else if c = 1 then -19 else if c = 2 then -56 else 0
 
-/-- The audit's local crossing density — formula (6) of the hand with the
-`84·S` term evaluated on the BOOLEAN Happy indicator:
-`ρ(C,d) = Φ(e) − 4·Φ(d) + Ψ(C) − 3·Ψ(C') + 84·[Happy]`, with
-`e = (C + 4·d) % 3` the output digit and `C' = (C + 4·d) / 3` the
-next-row carry of the exact x4 cell.  WARNING: this is NOT the production
-charge — `GSTU2DExactCrossingCharge.crossDensity` uses `84·surviveI(C,d)`
-with `surviveI ∈ {0,1,2}` counting the two microscopic BIG2→BIG2 edges;
-see §16.6. -/
-def mbRho (C d : Nat) : Int :=
+/-- **THE CROSSING CHARGE OF THE HAND — formula (6) on the production
+SURVIVE term.**  `ρ(C,d) = Φ(e) − 4·Φ(d) + Ψ(C) − 3·Ψ(C') + 84·S(C,d)`,
+with `e = (C + 4·d) % 3` the output digit, `C' = (C + 4·d) / 3` the
+next-row carry of the exact x4 cell, and `S = surviveI ∈ {0,1,2}` the
+number of microscopic BIG2→BIG2 edges inside the cell.  This IS the
+production `GSTU2DExactCrossingCharge.crossDensity` — the identity
+bridge below is definitional. -/
+def mbCharge (C d : Nat) : Int :=
   mbPhi ((C + 4 * d) % 3) - 4 * mbPhi d + mbPsi C - 3 * mbPsi ((C + 4 * d) / 3) +
-    (if d = 2 ∧ (C = 0 ∨ C = 3) then (84 : Int) else 0)
+    84 * GST2DMixedEmergence.surviveI C d
 
-/-- The row crossing pressure `R_p(N) = Σ_t 4^(N−1−t)·ρ(cell_t)` — the
-closed form of the hand's `reverseCrossCode`, built by the recursion
-`row(N+1) = 4·row(N) + ρ(cell_N)`. -/
-def mbRhoRow (R q : Nat) : Nat → Int
-  | 0 => 0
-  | N + 1 => 4 * mbRhoRow R q N + mbRho (mbCarry (4^N * R) q) (mbDigit (4^N * R) q)
+/-- **THE IDENTITY BRIDGE.**  The hand's charge is the production charge,
+definitional component by definitional component. -/
+theorem mbCharge_eq_crossDensity (C d : Nat) :
+    mbCharge C d = GSTU2DExactCrossingCharge.crossDensity C d := by
+  have hΦ : ∀ k : Nat, mbPhi k
+      = GSTU2DExactCrossingCharge.digitPotential k := fun _ => rfl
+  have hΨ : ∀ k : Nat, mbPsi k
+      = GSTU2DExactCrossingCharge.carryPotentialX k := by
+    intro k
+    simp only [mbPsi, GSTU2DExactCrossingCharge.carryPotentialX]
+    split_ifs <;> omega
+  simp only [mbCharge, GSTU2DExactCrossingCharge.crossDensity,
+    GST2DMixedEmergence.outDigit, GST2DMixedEmergence.nextCarry]
+  rw [hΦ ((C + 4 * d) % 3), hΦ d, hΨ C, hΨ ((C + 4 * d) / 3)]
 
-/-- **THE BOOLEAN-SUBSTITUTION TABLE.**  Direct kernel evaluation of
-formula (6) with the Boolean `84·[Happy]` term.  The four entries where
-this deviates from the handed table (7) — `(0,2)` is 189 (handed 105),
-`(1,1)` is −165 (handed −81), `(2,2)` is −84 (handed 0), `(3,2)` is 21
-(handed 105) — are exactly the cells where the Boolean indicator differs
-from the production `surviveI` (deviation `±84`); the hand's table is the
-production `crossDensity_physical_table` (§16.6). -/
-theorem mb_rho_values :
-    mbRho 0 0 = -57 ∧ mbRho 0 1 = -111 ∧ mbRho 0 2 = 189 ∧
-    mbRho 1 0 = -39 ∧ mbRho 1 1 = -165 ∧ mbRho 1 2 = -84 ∧
-    mbRho 2 0 = -111 ∧ mbRho 2 1 = -93 ∧ mbRho 2 2 = -84 ∧
-    mbRho 3 0 = 0 ∧ mbRho 3 1 = 0 ∧ mbRho 3 2 = 21 := by
+/-- **THE HAND'S TABLE (7).**  Direct kernel evaluation of formula (6) on
+the production SURVIVE term.  Both physical Happy realizations carry
+`105`; every non-Happy physical cell is non-positive.  This is the
+production `crossDensity_physical_table`, re-derived on the hand's own
+coordinate charge. -/
+theorem mb_charge_table :
+    mbCharge 0 0 = -57 ∧ mbCharge 0 1 = -111 ∧ mbCharge 0 2 = 105 ∧
+    mbCharge 1 0 = -39 ∧ mbCharge 1 1 = -81 ∧ mbCharge 1 2 = -84 ∧
+    mbCharge 2 0 = -111 ∧ mbCharge 2 1 = -93 ∧ mbCharge 2 2 = 0 ∧
+    mbCharge 3 0 = 0 ∧ mbCharge 3 1 = 0 ∧ mbCharge 3 2 = 105 := by
   decide
 
-/-- **THE SURVIVING SIGN RIGIDITY (equivalence (8) of the hand).**  The
-Boolean-substituted crossing charge is strictly positive exactly on the
-two Happy cells — and the production charge satisfies the same rigidity
-(`happy_iff_crossDensity_positive`).  This is the correct core of the
-hand's architecture. -/
-theorem mb_rho_pos_of_happy {C d : Nat} (hd : d = 2) (hC : C = 0 ∨ C = 3) :
-    0 < mbRho C d := by
-  rcases hC with rfl | rfl <;> rw [hd] <;> decide
+/-- **THE SIGN RIGIDITY (equivalence (8) of the hand).**  A Happy cell is
+exactly a `+105` charge source — the production `crossDensity_happy_exact`
+through the identity bridge. -/
+theorem mb_charge_happy_exact {C d : Nat} (hd : d = 2) (hC : C = 0 ∨ C = 3) :
+    mbCharge C d = 105 := by
+  rw [mbCharge_eq_crossDensity]
+  exact GSTU2DExactCrossingCharge.crossDensity_happy_exact C d ⟨hd, hC⟩
 
-theorem mb_rho_nonpos_of_not_happy (C d : Nat) (hC : C ≤ 3) (hd : d ≤ 2)
-    (h : ¬ (d = 2 ∧ (C = 0 ∨ C = 3))) : mbRho C d ≤ 0 := by
-  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
-  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
-  rcases hCc with rfl | rfl | rfl | rfl <;>
-    rcases hdc with rfl | rfl | rfl <;>
-    first
-      | exact absurd ⟨rfl, Or.inl rfl⟩ h
-      | exact absurd ⟨rfl, Or.inr rfl⟩ h
-      | decide
+/-- Every non-Happy physical cell has non-positive charge — the
+production `crossDensity_nonpositive_of_not_happy` through the identity
+bridge. -/
+theorem mb_charge_nonpos_of_not_happy (C d : Nat) (hC : C ≤ 3) (hd : d ≤ 2)
+    (h : ¬ (d = 2 ∧ (C = 0 ∨ C = 3))) : mbCharge C d ≤ 0 := by
+  rw [mbCharge_eq_crossDensity]
+  refine GSTU2DExactCrossingCharge.crossDensity_nonpositive_of_not_happy C d
+    (by omega) (by omega) ?_
+  intro hh
+  exact h hh
 
 /-! ### §16.2 The exact x4 transition — equation (5) of the hand -/
 
@@ -2259,7 +2274,7 @@ theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
   · exact ⟨hEdig.trans hd, Or.inl (hEcar.trans h0)⟩
   · exact ⟨hEdig.trans hd, Or.inr (hEcar.trans h3)⟩
 
-/-! ### §16.4 The live instance — the law holds, the pressure reads zero -/
+/-! ### §16.4 The live instance — the law itself holds -/
 
 /-- The canonical tails of the live instance `(s, n) = (1, 1)`:
 `Q_2(1) = 9709`, the parent `Q_1(4) = 1864135`, and the child power
@@ -2284,35 +2299,14 @@ theorem mb_inst_parent_gate : mbHappyGate 1864135 8 := by
   show mbDigit 1864135 8 = 2 ∧ (mbCarry 1864135 8 = 0 ∨ mbCarry 1864135 8 = 3)
   exact ⟨by decide, by decide⟩
 
-/-- **THE BOOLEAN-CHARGE PRESSURE VANISHES ON A LIVE INSTANCE.**  At
-`(s, n) = (1, 1)` the row-7 crossing pressure of the transported child
-gate — row cells `(3,2), (1,2), (3,0)` with weights `16, 4, 1` — is
-exactly ZERO *for the Boolean-substituted charge*:
-`16·21 + 4·(−84) + 1·0 = 0`.  With the production `surviveI` charge the
-same row reads `1344` and the handed estimate HOLDS
-(`mb_corr_row_pressure_live`, `mb_corr_pressure_estimate_holds`, §16.6).
-This receipt is retained as the record of the substitution error, not as
-a refutation of the hand. -/
-theorem mb_inst_pressure_vanishes : mbRhoRow 262144 7 3 = 0 := by decide
-
-/-- **ESTIMATE (15) REFUTED — ONLY FOR THE BOOLEAN-SUBSTITUTED CHARGE.**
-This negation holds for `mbRhoRow` (the Boolean charge), whose pressure
-vanishes at the live instance.  With the production charge the same
-instance satisfies the estimate with margin `555`
-(`mb_corr_pressure_estimate_holds`, §16.6).  Retained as the record of
-the substitution error. -/
-theorem mb_pressure_estimate_refuted :
-    ¬ ((94 * 4^3 + 149 : Int) ≤ 5 * mbRhoRow 262144 7 3) := by decide
-
-/-- **THE INTERIOR GATE (TRUE), THE SURVIVE-MASS INFERENCE (WITHDRAWN).**
-`4^6` does own a Happy gate at ternary row 2 with NULL carry — but that
-cell is the production `(C, d) = (0, 2)`, the NULL chord `2 → 1 → 2` with
-`surviveI = 0`: ZERO microscopic SURVIVE mass
-(`mb_corr_interior_cell_null_chord`, `mb_corr_interior_survive_mass_zero`,
-§16.6).  The original Defect-2 inference — that this gate inflates `W_K`
-— conflated macroscopic Happy with microscopic SURVIVE incidence and is
-withdrawn. -/
-theorem mb_interior_survivor : mbHappyGate (4^6) 2 := by
+/-- **THE INTERIOR GATE OF ROW 2.**  `4^6` does own a Happy gate at
+ternary row 2 with NULL carry — and that cell is the production
+`(C, d) = (0, 2)`, the NULL chord `2 → 1 → 2` with `surviveI = 0`: ZERO
+microscopic SURVIVE mass (`mb_corr_interior_cell_null_chord`,
+`mb_corr_interior_survive_mass_zero`, §16.6).  Macroscopic HAPPY and
+microscopic SURVIVE incidence are different predicates
+(`mb_corr_happy_ne_survive`, §16.6). -/
+theorem mb_interior_gate : mbHappyGate (4^6) 2 := by
   show mbDigit (4^6) 2 = 2 ∧ (mbCarry (4^6) 2 = 0 ∨ mbCarry (4^6) 2 = 3)
   exact ⟨by decide, by decide⟩
 
@@ -2361,9 +2355,10 @@ even-exponent crown, via the monolith's live route (the kernel-checked
 modular base plus the ontological escape).  The campaign's remaining
 boundary is ONE grant, in either of its two live forms: the
 absorption-mirror bridge `CardinalWorldsMirrorBridge` (§14 above) or this
-climb.  The handed crossing-charge proof of Law 2 is NOT refuted by the
-audit receipts of §16.4 — those attack a Boolean-substituted charge; see
-the corrigendum §16.6. -/
+climb.  The handed crossing-charge proof of Law 2 is NOT refuted — the
+audit that claimed two defects evaluated a Boolean-substituted charge;
+both defects are withdrawn and the wrong-charge theorems rolled back
+(§16, §16.6). -/
 theorem erdos_even_conjecture_of_climb
     (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
     ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false := by
@@ -2373,20 +2368,24 @@ theorem erdos_even_conjecture_of_climb
 
 /-! ### §16.6 THE CORRIGENDUM — the production charge, the withdrawn defects
 
-The audit of §16.1–§16.4 evaluated the hand's formula (6) with a BOOLEAN
-Happy indicator `S(C,d) ∈ {0,1}` in the `84·S` term — the substitution is
-visible at the definition of `mbRho` above.  The production repository
-defines that term with `GST2DMixedEmergence.surviveI C d ∈ {0,1,2}`, the
+The audit that preceded this section evaluated the hand's formula (6)
+with a BOOLEAN Happy indicator `S(C,d) ∈ {0,1}` in the `84·S` term — in
+place of the production `GST2DMixedEmergence.surviveI C d ∈ {0,1,2}`, the
 number of microscopic BIG2→BIG2 edges inside the x4 cell (the two x2
-layers' chord `d → midDigit → finalMicroDigit`), and the production file
-`GSTU2DExactCrossingCharge.lean` — green in this very CI — already
-carries the kernel-checked physical table `crossDensity_physical_table`,
-which is the HAND's table (7).
+layers' chord `d → midDigit → finalMicroDigit`).  The production file
+`GSTU2DExactCrossingCharge.lean` — green in this very CI — carries the
+kernel-checked physical table `crossDensity_physical_table`, which is the
+HAND's table (7); the identity bridge `mbCharge_eq_crossDensity` (§16.1)
+makes the hand's charge and the production charge ONE function.
 
-Both defects of the original audit are therefore WITHDRAWN.  They
-refuted a different charge.  The receipts below are all bridged directly
-to the production definitions — no re-derivation, the production theorem
-names are cited in the proofs. -/
+Both defects of the original audit are therefore WITHDRAWN — they
+refuted a different charge — and the wrong-charge theorems are ROLLED
+BACK (deleted from this module).  The four entries the audit declared
+irreproducible (`189, −165, −84, 21`) were the Boolean charge's values;
+the production/hand values are `105, −81, 0, 105` — the deviation is
+exactly `±84` per unit of SURVIVE incidence at exactly those four cells.
+The receipts below are all bridged directly to the production definitions
+— no re-derivation, the production theorem names are cited in the proofs. -/
 
 /-- The four disputed microscopic SURVIVE incidences of the production
 charge — the values the Boolean substitution erased. -/
@@ -2408,32 +2407,19 @@ theorem mb_corr_production_table :
   have h := GSTU2DExactCrossingCharge.crossDensity_physical_table
   omega
 
-/-- **THE SUBSTITUTION ERROR, MACHINE-CHECKED.**  The audit's `mbRho`
-deviates from the production charge exactly at the four cells where the
-Boolean indicator differs from `surviveI`, by exactly `±84` per unit of
-incidence — and at no other cell (the other eight entries of both tables
-agree, as the two tables above certify). -/
-theorem mb_corr_rho_gap :
-    GSTU2DExactCrossingCharge.crossDensity 0 2 - mbRho 0 2 = -84 ∧
-    GSTU2DExactCrossingCharge.crossDensity 3 2 - mbRho 3 2 = 84 ∧
-    GSTU2DExactCrossingCharge.crossDensity 1 1 - mbRho 1 1 = 84 ∧
-    GSTU2DExactCrossingCharge.crossDensity 2 2 - mbRho 2 2 = 84 := by
-  have h1 := GSTU2DExactCrossingCharge.crossDensity_physical_table
-  have h2 := mb_rho_values
-  omega
-
-/-- The production-charge row pressure — the same recursion and the same
-row cells as `mbRhoRow`, with the production `crossDensity` in place of
-the audit's Boolean-substituted `mbRho`. -/
+/-- The production-charge row pressure over the ×4 multiplication row:
+the same row cells `(C_t, d_t) = (mbCarry (4^N·R) q, mbDigit (4^N·R) q)`
+as the hand's `reverseCrossCode` recursion, with the production
+`crossDensity` as the cell charge. -/
 def mbPhysRow (R q : Nat) : Nat → Int
   | 0 => 0
   | N + 1 => 4 * mbPhysRow R q N +
       GSTU2DExactCrossingCharge.crossDensity (mbCarry (4^N * R) q) (mbDigit (4^N * R) q)
 
-/-- **THE LIVE-INSTANCE ROW PRESSURE, PRODUCTION CHARGE.**  The same row
-`(3,2), (1,2), (3,0)` with the same weights `16, 4, 1` — the row of
-`mb_inst_pressure_vanishes` — reads `16·105 + 4·(−84) + 1·0 = 1344`, not
-zero. -/
+/-- **THE LIVE-INSTANCE ROW PRESSURE, PRODUCTION CHARGE.**  The row
+`(3,2), (1,2), (3,0)` with the weights `16, 4, 1` — the row of the
+transported child gate of §16.4 — reads `16·105 + 4·(−84) + 1·0 = 1344`,
+not zero. -/
 theorem mb_corr_row_pressure_live : mbPhysRow 262144 7 3 = 1344 := by
   decide
 
@@ -2443,8 +2429,9 @@ theorem mb_corr_lhs_eval : 94 * 4^3 + 149 = 6165 := by
 
 /-- **ESTIMATE (15) OF THE HAND HOLDS AT THE LIVE INSTANCE.**  With the
 production charge, `94·4^3 + 149 = 6165 ≤ 5·R_q = 5·1344 = 6720`, with
-margin `555`.  The refutation receipt `mb_pressure_estimate_refuted`
-above refutes only the Boolean-substituted charge, not the hand's. -/
+margin `555` — estimate (15) is the repo's own green positive collision
+side in `GSTU2DSharpCrossingBlock`
+(`weightedCrossPrefix_positive_of_top_leading_happy`). -/
 theorem mb_corr_pressure_estimate_holds :
     ((6165 : Int) ≤ 5 * mbPhysRow 262144 7 3) ∧
       5 * mbPhysRow 262144 7 3 - 6165 = 555 := by
@@ -2486,11 +2473,12 @@ theorem mb_corr_happy_ne_survive :
   intro h
   simp [GSTU2DEventTransport.HappyCell] at h
 
-/-! ## §17 Receipts — the mirror bridge audit -/
+/-! ## §17 Receipts — Law 2 on the production charge -/
 
-#print axioms mb_rho_values
-#print axioms mb_rho_pos_of_happy
-#print axioms mb_rho_nonpos_of_not_happy
+#print axioms mbCharge_eq_crossDensity
+#print axioms mb_charge_table
+#print axioms mb_charge_happy_exact
+#print axioms mb_charge_nonpos_of_not_happy
 #print axioms mb_cell_e
 #print axioms mb_cell_c
 #print axioms mb_child_gate_transport
@@ -2498,16 +2486,13 @@ theorem mb_corr_happy_ne_survive :
 #print axioms mb_inst_child_gate
 #print axioms mb_inst_transport
 #print axioms mb_inst_parent_gate
-#print axioms mb_inst_pressure_vanishes
-#print axioms mb_pressure_estimate_refuted
-#print axioms mb_interior_survivor
+#print axioms mb_interior_gate
 #print axioms mb_has_two_85
 #print axioms mb_has_two_7
 #print axioms mb_l2_edge_is_sharp
 #print axioms erdos_even_conjecture_of_climb
 #print axioms mb_corr_survive_incidences
 #print axioms mb_corr_production_table
-#print axioms mb_corr_rho_gap
 #print axioms mb_corr_row_pressure_live
 #print axioms mb_corr_lhs_eval
 #print axioms mb_corr_pressure_estimate_holds
