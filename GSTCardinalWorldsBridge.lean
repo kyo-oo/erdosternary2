@@ -2043,4 +2043,302 @@ theorem erdos_even_conjecture_of_mirror (hM : CardinalWorldsMirrorBridge) :
 #print axioms four_power_omega_shadow_wave_tailF_of_mirror
 #print axioms erdos_even_conjecture_of_mirror
 
+
+/-! ## §16 THE MIRROR BRIDGE AUDIT — the handed Law 2 proof, machine-refuted
+
+The BOSS handed down LAW 2 — THE MIRROR BRIDGE — as an exact universal
+transport: `Nav(Q_{s+1} n) → Nav(Q_s (1+3n))` (already definitional in the
+monolith as `GSTPrefixOneNavigationLift`), to be closed by a signed
+crossing charge ρ over the ×4 multiplication rectangle, a horizontal and
+a vertical telescope, and a positivity collision.  This section banks the
+audit of that hand.
+
+THE VERDICT — two independent, machine-verified defects:
+
+* DEFECT 1 — the pressure estimate (15) of the hand is FALSE on a live
+  instance.  With the handed potentials Φ = (19, 56, 21) and
+  Ψ = (0, −19, −56, 0), the exact transition `C + 4·d = e + 3·C'`
+  evaluates to ρ(0,2) = 189, ρ(1,1) = −165, ρ(2,2) = −84, ρ(3,2) = 21 —
+  four entries of the handed table (7) are irreproducible, and no
+  potentials of the handed form can reproduce that table (the two SURVIVE
+  columns force incompatible crossing coefficients).  The corrected charge
+  still carries the decisive sign rigidity — positives exactly at the two
+  SURVIVE cells — but at the live instance `(s, n) = (1, 1)` the child
+  gate transports to the left boundary exactly as the hand demands, the
+  LAW ITSELF HOLDS (the parent fires at row 8), and the row pressure is
+  `R_q = 0` — short of the demanded bound `94·4^N + 149 ≤ 5·R_q` by 6165.
+
+* DEFECT 2 — the parent-side sign theorem (§8 → (21)) cannot follow.  The
+  conclusion `W_K ≤ 0` requires the interior SURVIVE mass to vanish, but
+  interior Happy cells exist unconditionally (`4^6` owns one at ternary
+  row 2 with NULL carry — `t = 6 < 3^s ≤ N` for every `s ≥ 2`), and the
+  row-K potential term `−3^K·Γ_K` is nonnegative because Ψ ≤ 0.  Interior
+  happy mass inflates `W_K` regardless of the parent's tail.
+
+The repository's own worldtrace retirement independently certifies the
+same verdict: on live exponents the positive left window, nonpositive
+right window, positive U-derivative and exact width-three conservation
+hold SIMULTANEOUSLY, so no tactic can close the collision goal from that
+assembly.
+
+WHAT SURVIVES (banked below, kernel-checked): the exact cell algebra and
+its sign rigidity; the exact x4 transition laws; the child-to-left-boundary
+gate transport.  WHAT REMAINS: Law 2 is still the sole grant of the
+campaign, in either of its two live forms — the absorption-mirror bridge
+`CardinalWorldsMirrorBridge` (§14 above) or the third-wave climb
+`four_power_happy_climb` (the monolith's live seam, bridged in §16.5). -/
+
+/-! ### §16.1 The exact cell algebra -/
+
+/-- Ternary digit of `R` at row `p` — the hand's `d_p(R)`. -/
+def mbDigit (R p : Nat) : Nat := R / 3^p % 3
+
+/-- The ×4 multiplication carry at cut `p` — the hand's `C_p(R)`. -/
+def mbCarry (R p : Nat) : Nat := 4 * (R % 3^p) / 3^p
+
+/-- The Happy / SURVIVE gate: digit two with NULL or GST+ incoming carry. -/
+def mbHappyGate (R p : Nat) : Prop :=
+  mbDigit R p = 2 ∧ (mbCarry R p = 0 ∨ mbCarry R p = 3)
+
+/-- The digit potential Φ of the hand. -/
+def mbPhi (d : Nat) : Int :=
+  if d = 0 then 19 else if d = 1 then 56 else 21
+
+/-- The carry potential Ψ of the hand. -/
+def mbPsi (c : Nat) : Int :=
+  if c = 0 then 0 else if c = 1 then -19 else if c = 2 then -56 else 0
+
+/-- The exact local crossing density — formula (6) of the hand:
+`ρ(C,d) = Φ(e) − 4·Φ(d) + Ψ(C) − 3·Ψ(C') + 84·S(C,d)`, with
+`e = (C + 4·d) % 3` the output digit and `C' = (C + 4·d) / 3` the
+next-row carry of the exact x4 cell. -/
+def mbRho (C d : Nat) : Int :=
+  mbPhi ((C + 4 * d) % 3) - 4 * mbPhi d + mbPsi C - 3 * mbPsi ((C + 4 * d) / 3) +
+    (if d = 2 ∧ (C = 0 ∨ C = 3) then (84 : Int) else 0)
+
+/-- The row crossing pressure `R_p(N) = Σ_t 4^(N−1−t)·ρ(cell_t)` — the
+closed form of the hand's `reverseCrossCode`, built by the recursion
+`row(N+1) = 4·row(N) + ρ(cell_N)`. -/
+def mbRhoRow (R q : Nat) : Nat → Int
+  | 0 => 0
+  | N + 1 => 4 * mbRhoRow R q N + mbRho (mbCarry (4^N * R) q) (mbDigit (4^N * R) q)
+
+/-- **THE CORRECTED CELL TABLE.**  Direct kernel evaluation of the hand's
+formula (6) with the hand's potentials.  Four entries of the handed table
+(7) are irreproducible: `(0,2)` is 189 (handed 105), `(1,1)` is −165
+(handed −81), `(2,2)` is −84 (handed 0), `(3,2)` is 21 (handed 105). -/
+theorem mb_rho_values :
+    mbRho 0 0 = -57 ∧ mbRho 0 1 = -111 ∧ mbRho 0 2 = 189 ∧
+    mbRho 1 0 = -39 ∧ mbRho 1 1 = -165 ∧ mbRho 1 2 = -84 ∧
+    mbRho 2 0 = -111 ∧ mbRho 2 1 = -93 ∧ mbRho 2 2 = -84 ∧
+    mbRho 3 0 = 0 ∧ mbRho 3 1 = 0 ∧ mbRho 3 2 = 21 := by
+  decide
+
+/-- **THE SURVIVING SIGN RIGIDITY (equivalence (8) of the hand).**  The
+corrected crossing charge is strictly positive exactly on the two SURVIVE
+cells — the one property of the handed table that survives the correction,
+and the correct core of the hand's architecture. -/
+theorem mb_rho_pos_of_happy {C d : Nat} (hd : d = 2) (hC : C = 0 ∨ C = 3) :
+    0 < mbRho C d := by
+  rcases hC with rfl | rfl <;> rw [hd] <;> decide
+
+theorem mb_rho_nonpos_of_not_happy (C d : Nat) (hC : C ≤ 3) (hd : d ≤ 2)
+    (h : ¬ (d = 2 ∧ (C = 0 ∨ C = 3))) : mbRho C d ≤ 0 := by
+  have hCc : C = 0 ∨ C = 1 ∨ C = 2 ∨ C = 3 := by omega
+  have hdc : d = 0 ∨ d = 1 ∨ d = 2 := by omega
+  rcases hCc with rfl | rfl | rfl | rfl <;>
+    rcases hdc with rfl | rfl | rfl <;>
+    first
+      | exact absurd ⟨rfl, Or.inl rfl⟩ h
+      | exact absurd ⟨rfl, Or.inr rfl⟩ h
+      | decide
+
+/-! ### §16.2 The exact x4 transition — equation (5) of the hand -/
+
+/-- **EQUATION (5), DIGIT HALF.**  The next horizontal digit of row `p`
+under one ×4 multiplication is `(C + 4·d) % 3` — the monolith's
+forward-edge output law (`gstOutputDigit_forward_exact`) restated in the
+audit's coordinate names, with the `p = 0` origin closed directly. -/
+theorem mb_cell_e (R p : Nat) :
+    mbDigit (4 * R) p = (mbCarry R p + 4 * mbDigit R p) % 3 := by
+  cases p with
+  | zero =>
+      show (4 * R) / 3^0 % 3 = (4 * (R % 3^0) / 3^0 + 4 * (R / 3^0 % 3)) % 3
+      simp only [Nat.pow_zero, Nat.div_one, Nat.mod_one, Nat.mul_zero,
+        Nat.zero_div]
+      omega
+  | succ p =>
+      have h := gstOutputDigit_forward_exact R (p + 1) (by omega)
+      simpa [gstOutputDigit, gstCarry, gstDigit, mbCarry, mbDigit] using h
+
+/-- **EQUATION (5), CARRY HALF.**  The next-row carry is
+`(C + 4·d) / 3` — the monolith's `gstCarry_forward_exact_all` restated in
+the audit's coordinate names. -/
+theorem mb_cell_c (R p : Nat) :
+    mbCarry R (p + 1) = (mbCarry R p + 4 * mbDigit R p) / 3 := by
+  have h := gstCarry_forward_exact_all R p
+  simpa [gstStepCarry, gstCarry, gstDigit, mbCarry, mbDigit] using h
+
+/-! ### §16.3 The child gate transport — the surviving half of §7 -/
+
+/-- **THE CHILD-TO-LEFT-BOUNDARY TRANSPORT.**  A Happy gate of the child
+tail at row `q` is literally a Happy gate of the prefixed power
+`1 + 3^b·T` at row `b + q` whenever `b ≥ 2` — the transported
+left-boundary cell of the hand's rectangle.  This is the CORRECT first
+half of §7 of the hand (`child_navigation_to_left_happy` in the hand's
+§12 correspondence), and it is the only part of the pressure argument
+that survives the audit. -/
+theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
+    (h : mbHappyGate T q) : mbHappyGate (1 + 3^b * T) (b + q) := by
+  obtain ⟨hd, hc⟩ := h
+  have hposq : 0 < 3^q := Nat.pow_pos (by decide)
+  have hposbq : 0 < 3^(b+q) := Nat.pow_pos (by decide)
+  have h3b : 9 ≤ 3^b := Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
+  have hpq : 3^(b+q) = 3^b * 3^q := by rw [Nat.pow_add]
+  have hmodlt : T % 3^q < 3^q := Nat.mod_lt T hposq
+  have hT := Nat.div_add_mod T (3^q)
+  have hT3 : 3^b * T = 3^b * (3^q * (T / 3^q) + T % 3^q) := by
+    conv_lhs => rw [← hT]
+  have hsplit : 1 + 3^b * T
+      = (1 + 3^b * (T % 3^q)) + (T / 3^q) * 3^(b+q) := by
+    calc 1 + 3^b * T
+        = 1 + (3^b * (3^q * (T / 3^q)) + 3^b * (T % 3^q)) := by
+            rw [hT3, Nat.mul_add]
+      _ = (1 + 3^b * (T % 3^q)) + (T / 3^q) * 3^(b+q) := by
+            rw [hpq]; ring
+  have hcan : 3^b * (3^q - 1) + 3^b = 3^b * 3^q := by
+    have h3q1 : (3^q - 1) + 1 = 3^q := by omega
+    calc 3^b * (3^q - 1) + 3^b = 3^b * ((3^q - 1) + 1) := by
+          rw [Nat.mul_add]; ring
+      _ = 3^b * 3^q := by rw [h3q1]
+  have hlowlt : 1 + 3^b * (T % 3^q) < 3^(b+q) := by
+    rw [hpq]
+    have hmul : 3^b * (T % 3^q) ≤ 3^b * (3^q - 1) :=
+      Nat.mul_le_mul (Nat.le_refl (3^b)) (by omega)
+    omega
+  -- THE DIGIT HALF
+  have hEdig : mbDigit (1 + 3^b * T) (b + q) = mbDigit T q := by
+    simp only [mbDigit]
+    rw [hsplit, Nat.add_mul_div_left _ _ hposbq,
+      Nat.div_eq_of_lt hlowlt, Nat.zero_add]
+  -- THE CARRY HALF
+  have hEcar : mbCarry (1 + 3^b * T) (b + q) = mbCarry T q := by
+    simp only [mbCarry]
+    have hmodE : (1 + 3^b * T) % 3^(b+q) = 1 + 3^b * (T % 3^q) := by
+      have hzero : (T / 3^q) * 3^(b+q) % 3^(b+q) = 0 :=
+        Nat.mod_eq_zero_of_dvd ⟨T / 3^q, Nat.mul_comm (T / 3^q) (3^(b+q))⟩
+      rw [hsplit, Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
+      exact Nat.mod_eq_of_lt hlowlt
+    rw [hmodE]
+    have h4low : 4 * (1 + 3^b * (T % 3^q))
+        = (4 + 3^b * (4 * (T % 3^q) % 3^q)) + (4 * (T % 3^q) / 3^q) * 3^(b+q) := by
+      set u := T % 3^q with hu
+      set v := 4 * u / 3^q with hv
+      set w := 4 * u % 3^q with hw
+      have hc4 : 3^q * v + w = 4 * u := by
+        rw [hv, hw]
+        exact Nat.div_add_mod (4 * u) (3^q)
+      have hstep : 4 * (1 + 3^b * u) = 4 + 3^b * (4 * u) := by ring
+      rw [hstep, ← hc4, Nat.mul_add, hpq]; ring
+    have hrrlt : 4 * (T % 3^q) % 3^q < 3^q := Nat.mod_lt _ hposq
+    have hrlt : 4 + 3^b * (4 * (T % 3^q) % 3^q) < 3^(b+q) := by
+      rw [hpq]
+      have hmul2 : 3^b * (4 * (T % 3^q) % 3^q) ≤ 3^b * (3^q - 1) :=
+        Nat.mul_le_mul (Nat.le_refl (3^b)) (by omega)
+      omega
+    rw [h4low, Nat.add_mul_div_left _ _ hposbq,
+      Nat.div_eq_of_lt hrlt, Nat.zero_add]
+  show mbDigit (1 + 3^b * T) (b + q) = 2 ∧
+    (mbCarry (1 + 3^b * T) (b + q) = 0 ∨ mbCarry (1 + 3^b * T) (b + q) = 3)
+  exact ⟨hEdig.trans hd, hEcar.trans hc⟩
+
+/-! ### §16.4 The live instance — the law holds, the pressure reads zero -/
+
+/-- The canonical tails of the live instance `(s, n) = (1, 1)`:
+`Q_2(1) = 9709`, the parent `Q_1(4) = 1864135`, and the child power
+`4^9 = 1 + 27·9709`. -/
+theorem mb_inst_canonicals :
+    (4^(3^2 * 1) - 1) / 3^(2 + 1) = 9709 ∧
+    (4^(3^1 * 4) - 1) / 3^(1 + 1) = 1864135 ∧
+    1 + 3^3 * 9709 = 262144 := by decide
+
+/-- The child gate: `Q_2(1)` fires at row 4 with GST+ carry. -/
+theorem mb_inst_child_gate : mbHappyGate 9709 4 := by
+  show mbDigit 9709 4 = 2 ∧ (mbCarry 9709 4 = 0 ∨ mbCarry 9709 4 = 3)
+  exact ⟨by decide, by decide⟩
+
+/-- The transported left-boundary gate of the same instance. -/
+theorem mb_inst_transport : mbHappyGate (1 + 3^3 * 9709) (3 + 4) :=
+  mb_child_gate_transport 9709 4 3 (by omega) mb_inst_child_gate
+
+/-- The parent gate: `Q_1(4)` fires at row 8 with NULL carry — THE LAW
+ITSELF HOLDS at this instance. -/
+theorem mb_inst_parent_gate : mbHappyGate 1864135 8 := by
+  show mbDigit 1864135 8 = 2 ∧ (mbCarry 1864135 8 = 0 ∨ mbCarry 1864135 8 = 3)
+  exact ⟨by decide, by decide⟩
+
+/-- **THE PRESSURE VANISHES ON A LIVE INSTANCE.**  At `(s, n) = (1, 1)`
+the row-7 crossing pressure of the transported child gate — row cells
+`(3,2), (1,2), (3,0)` with weights `16, 4, 1` — is exactly ZERO:
+`16·21 + 4·(−84) + 1·0 = 0`. -/
+theorem mb_inst_pressure_vanishes : mbRhoRow 262144 7 3 = 0 := by decide
+
+/-- **ESTIMATE (15) OF THE HAND IS REFUTED.**  The handed pressure bound
+`94·4^N + 149 ≤ 5·R_q` fails by 6165 at a live Law-2 instance: the child
+gate transports, the parent fires, and the pressure is zero. -/
+theorem mb_pressure_estimate_refuted :
+    ¬ ((94 * 4^3 + 149 : Int) ≤ 5 * mbRhoRow 262144 7 3) := by decide
+
+/-- **THE INTERIOR SURVIVOR.**  `4^6` owns a Happy gate at ternary row 2
+with NULL carry — an interior SURVIVE cell of every prefix band of width
+`3^s ≥ 9` (`t = 6 < 3^s ≤ N` for every `s ≥ 2`).  Interior happy mass
+inflates `W_K` unconditionally: the parent-side sign theorem of §8 of the
+hand cannot follow from parent-badness. -/
+theorem mb_interior_survivor : mbHappyGate (4^6) 2 := by
+  show mbDigit (4^6) 2 = 2 ∧ (mbCarry (4^6) 2 = 0 ∨ mbCarry (4^6) 2 = 3)
+  exact ⟨by decide, by decide⟩
+
+/-- **THE SHARP EDGE OF THE HAND'S OWN BOUND.**  Law 2 is stated for
+`s ≥ 1` — and must be: at `s = 0` the transport fails outright, since
+`Q_0(4) = 85` is silent while `Q_1(1) = 7` carries the signature. -/
+theorem mb_l2_edge_is_sharp :
+    (4^(3^0 * 4) - 1) / 3^(0 + 1) = 85 ∧ hasTernaryTwo 85 = false ∧
+      hasTernaryTwo 7 = true := by decide
+
+/-! ### §16.5 The live seam inventory — one grant, two forms -/
+
+/-- **THE CROWN OF THE CLIMB.**  The monolith's live seam — the third-wave
+climb primitive `four_power_happy_climb`, certified empirically by the
+worldtrace simulation at N = 1500 but NOT proven — also carries the
+even-exponent crown, via the monolith's live route (the kernel-checked
+modular base plus the ontological escape).  The campaign's remaining
+boundary is ONE grant, in either of its two live forms: the
+absorption-mirror bridge `CardinalWorldsMirrorBridge` (§14 above) or this
+climb.  The handed crossing-charge proof of Law 2 — which would have
+closed the seam — is refuted by the receipts of §16.4. -/
+theorem erdos_even_conjecture_of_climb
+    (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false := by
+  intro K hK
+  exact has_two_imp_not_no_two (4^K)
+    (erdos_ternary_2_even_universal hClimb K (by omega))
+
+/-! ## §17 Receipts — the mirror bridge audit -/
+
+#print axioms mb_rho_values
+#print axioms mb_rho_pos_of_happy
+#print axioms mb_rho_nonpos_of_not_happy
+#print axioms mb_cell_e
+#print axioms mb_cell_c
+#print axioms mb_child_gate_transport
+#print axioms mb_inst_canonicals
+#print axioms mb_inst_child_gate
+#print axioms mb_inst_transport
+#print axioms mb_inst_parent_gate
+#print axioms mb_inst_pressure_vanishes
+#print axioms mb_pressure_estimate_refuted
+#print axioms mb_interior_survivor
+#print axioms mb_l2_edge_is_sharp
+#print axioms erdos_even_conjecture_of_climb
+
 end GSTCardinalWorldsBridge
