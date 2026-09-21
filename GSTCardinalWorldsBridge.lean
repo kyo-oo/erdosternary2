@@ -1289,7 +1289,7 @@ theorem cancel_two_3pow (k X Y : Nat) (hk : 1 ≤ k)
     omega
   have h3k : 3^k = 3^(k-1) * 3 := by
     have h := Nat.pow_succ 3 (k-1)
-    rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+    rw [show Nat.succ (k-1) = k from by omega] at h
     exact h
   have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
   have h1lt : 1 < 3^k := by omega
@@ -1400,7 +1400,7 @@ theorem three_pow_ge_self : ∀ k : Nat, 1 ≤ k → k ≤ 3^(k-1) := by
       have ih' := ih hk1'
       have h3k : 3^k = 3^(k-1) * 3 := by
         have h := Nat.pow_succ 3 (k-1)
-        rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+        rw [show Nat.succ (k-1) = k from by omega] at h
         exact h
       rw [show k + 1 - 1 = k from by omega]
       omega
@@ -1423,13 +1423,13 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
   have hwin := d_window (2*3^(k-1) - 1) k hge hkb
   have h3k : 3^k = 3^(k-1) * 3 := by
     have h := Nat.pow_succ 3 (k-1)
-    rw [show (k:Nat) - 1 + 1 = k from by omega] at h
+    rw [show Nat.succ (k-1) = k from by omega] at h
     exact h
   have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
   have h2lt : 2 < 3^k := by omega
   have h2mod : 2^(2*3^(k-1) - 1 + 2) % 3^k = 2 := by
     have hcyc := two_pow_cycle (k-1)
-    rw [show (k:Nat) - 1 + 1 = k from by omega] at hcyc
+    rw [show Nat.succ (k-1) = k from by omega] at hcyc
     have hexp : 2^(2*3^(k-1) - 1 + 2) = 2 * 2^(2*3^(k-1)) := by
       have h1 : 2^(2*3^(k-1) - 1 + 2) = 2^((2*3^(k-1)) + 1) := by
         congr 1; omega
