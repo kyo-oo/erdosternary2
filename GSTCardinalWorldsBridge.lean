@@ -1521,4 +1521,496 @@ theorem no_fixed_window (k : Nat) (hk : 1 ≤ k) :
 #print axioms gp_alt_residue_silent
 #print axioms no_fixed_window
 
+/-! ## §13 THE HALF-TURN COMPLEMENT ROTATION — LAW 1 CLOSED
+
+The signature law of the 2-world, promoted from grant to THEOREM.  For
+`j ≥ 2` write `N := 2^j`, `Q := 2^(j+2)`, `M := 3^N - 1`, so
+`Q * d j = M` (`d_identity`), and let `H := N/2 = 2^(j-1)` be the
+half-turn.  Two descriptions of the same transformation:
+
+* ARITHMETIC: `3^H ≡ 1 + Q/2 (mod Q)` (2-adic LTE at exact valuation
+  `j+1`), so `(3^H * d j) % M = d j + M/2` — the digitwise complement.
+* GEOMETRY: mod `M`, multiplication by `3^H` rotates the `N`-trit
+  cylinder by half a turn — a `{0,1}`-word stays a `{0,1}`-word.
+
+A silent `d j` would make the SAME integer both `{0,1}`-only and
+signature-carrying.  Contradiction.  No finite window audit, no
+surviving phase set, no additional postulate. -/
+
+/-- Bounded-coefficient ternary sums stay below the next power. -/
+theorem htc_sum_lt (c : Nat → Nat) : ∀ k : Nat, (∀ i, i < k → c i < 3) →
+    Finset.sum (Finset.range k) (fun i => c i * 3^i) < 3^k := by
+  intro k
+  induction k with
+  | zero => intro _; simp
+  | succ k ih =>
+    intro hc
+    rw [Finset.sum_range_succ, Nat.pow_succ]
+    have hck : c k < 3 := hc k (by omega)
+    have hle : c k * 3^k ≤ 2 * 3^k := Nat.mul_le_mul (by omega : c k ≤ 2) (Nat.le_refl _)
+    have hlt := ih (fun i hi => hc i (by omega))
+    have h3 : (0:Nat) < 3^k := three_pow_pos' k
+    omega
+
+/-- Digit extraction from bounded-coefficient ternary sums. -/
+theorem htc_digit_of_sum (c : Nat → Nat) : ∀ k : Nat, (∀ i, i < k → c i < 3) →
+    ∀ p, p < k → (Finset.sum (Finset.range k) (fun i => c i * 3^i) / 3^p) % 3 = c p := by
+  intro k
+  induction k with
+  | zero => intro _ p hp; omega
+  | succ k ih =>
+    intro hc p hp
+    have hck : c k < 3 := hc k (by omega)
+    have h3p : (0:Nat) < 3^p := three_pow_pos' p
+    rw [Finset.sum_range_succ]
+    rcases Nat.lt_or_ge p k with hlt | hge
+    · have hsh : c k * 3^k = 3^p * (c k * 3^(k - p)) := by
+        have hpow : 3^k = 3^p * 3^(k - p) := by rw [← Nat.pow_add]; congr 1; omega
+        rw [hpow]; ring
+      rw [hsh, Nat.add_mul_div_left _ _ h3p, Nat.add_mod]
+      have hih := ih (fun i hi => hc i (by omega)) p hlt
+      rw [hih]
+      have hz : (c k * 3^(k - p)) % 3 = 0 := by
+        rw [show 3^(k - p) = 3^(k - p - 1) * 3 from by rw [← Nat.pow_succ]; congr 1; omega,
+            show c k * (3^(k - p - 1) * 3) = (c k * 3^(k - p - 1)) * 3 from by ring,
+            Nat.mul_mod_self_right]
+      have hcp : c p < 3 := hc p hp
+      rw [hz, Nat.add_zero, Nat.mod_eq_of_lt hcp]
+    · have hpk : p = k := by omega
+      subst hpk
+      have hsltv : Finset.sum (Finset.range k) (fun i => c i * 3^i) < 3^k :=
+        htc_sum_lt c k (fun i hi => hc i (by omega))
+      have h3k : (0:Nat) < 3^k := three_pow_pos' k
+      rw [Nat.add_mul_div_left _ _ h3k, Nat.div_eq_of_lt hsltv, Nat.zero_add,
+          Nat.mod_eq_of_lt hck]
+
+/-- The all-ones word as a sum: `∑_{i<k} 3^i = (3^k - 1) / 2`. -/
+theorem htc_geom_sum (k : Nat) :
+    Finset.sum (Finset.range k) (fun i => 3^i) = (3^k - 1) / 2 := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [Finset.sum_range_succ]
+    have hOdd : 3^(k+1) % 2 = 1 := three_pow_odd (k+1)
+    have hp : 3^(k+1) = 3 * 3^k := three_pow_succ_mul k
+    rw [ih]
+    omega
+
+/-- Digits of a residue below the modulus's power: for `i < N`, the
+`i`-th trit of `x % 3^N` is the `i`-th trit of `x`. -/
+theorem htc_mod_div_digit (x N i : Nat) (hi : i < N) :
+    ((x % 3^N) / 3^i) % 3 = (x / 3^i) % 3 := by
+  have hsplit : x / 3^i = 3^(N - i) * (x / 3^N) + (x % 3^N) / 3^i := by
+    have hxe : x = (x % 3^N) + 3^i * (3^(N - i) * (x / 3^N)) := by
+      have hp : 3^N = 3^i * 3^(N - i) := by rw [← Nat.pow_add]; congr 1; omega
+      calc x = 3^N * (x / 3^N) + x % 3^N := (Nat.div_add_mod x (3^N)).symm
+        _ = (3^i * 3^(N - i)) * (x / 3^N) + x % 3^N := by rw [hp]
+        _ = (x % 3^N) + 3^i * (3^(N - i) * (x / 3^N)) := by ring
+    conv_lhs => rw [hxe]
+    rw [Nat.add_mul_div_left _ _ (three_pow_pos' i)]
+    ring
+  rw [hsplit, Nat.add_mod]
+  have hz : (3^(N - i) * (x / 3^N)) % 3 = 0 := by
+    have hmul : 3^(N - i) * (x / 3^N) = (x / 3^N) * 3^(N - i - 1) * 3 := by
+      rw [show 3^(N - i) = 3^(N - i - 1) * 3 from by rw [← Nat.pow_succ]; congr 1; omega]; ring
+    rw [hmul, Nat.mul_mod_self_right]
+  rw [hz, Nat.zero_add]
+
+/-- Every number below `3^k` is the sum of its trits. -/
+theorem htc_digit_reconstruction (x k : Nat) : x < 3^k →
+    x = Finset.sum (Finset.range k) (fun i => (x / 3^i) % 3 * 3^i) := by
+  induction k generalizing x with
+  | zero =>
+    intro hx
+    have hx0 : x = 0 := by have h1 : (3:Nat)^0 = 1 := by decide; omega
+    rw [hx0, Finset.range_zero, Finset.sum_empty]
+  | succ k ih =>
+    intro hx
+    have h3k : (0:Nat) < 3^k := three_pow_pos' k
+    have hq : x / 3^k < 3 :=
+      div_lt_of_lt_mul' x (3^k) 3 h3k
+        (show x < 3^k * 3 from by rw [show 3^k * 3 = 3^(k+1) from by rw [Nat.mul_comm, ← three_pow_succ_mul k]]; exact hx)
+    have hr : x % 3^k < 3^k := Nat.mod_lt _ h3k
+    have ihr := ih (x % 3^k) hr
+    have hdigeq : ∀ i, i < k → ((x % 3^k) / 3^i) % 3 = (x / 3^i) % 3 :=
+      fun i hi => htc_mod_div_digit x k i hi
+    have hcongr : Finset.sum (Finset.range k) (fun i => ((x % 3^k) / 3^i) % 3 * 3^i)
+        = Finset.sum (Finset.range k) (fun i => (x / 3^i) % 3 * 3^i) :=
+      Finset.sum_congr rfl (fun i hi => by rw [hdigeq i (Finset.mem_range.mp hi)])
+    rw [Finset.sum_range_succ]
+    have hdm := Nat.div_add_mod x (3^k)
+    calc x = 3^k * (x / 3^k) + x % 3^k := hdm.symm
+      _ = 3^k * ((x / 3^k) % 3) + Finset.sum (Finset.range k) (fun i => ((x % 3^k) / 3^i) % 3 * 3^i) := by
+          rw [Nat.mod_eq_of_lt hq, ihr]
+      _ = Finset.sum (Finset.range k) (fun i => (x / 3^i) % 3 * 3^i) + (x / 3^k) % 3 * 3^k := by
+          rw [hcongr]; ring
+
+/-- **THE HALF-TURN SPLIT LEMMA** — the geometric engine.  If `U` and
+`V` are `{0,1}`-words below `3^H`, then `3^H * U + V` (the half-turn
+rotation of the combined word) is again a `{0,1}`-word: silent. -/
+theorem htc_half_turn_silent (H U V : Nat)
+    (hUdig : ∀ p, p < H → (U / 3^p) % 3 ≠ 2)
+    (hVdig : ∀ p, p < H → (V / 3^p) % 3 ≠ 2)
+    (hUlt : U < 3^H) (hVlt : V < 3^H) :
+    ∀ p, ((3^H * U + V) / 3^p) % 3 ≠ 2 := by
+  intro p
+  rcases Nat.lt_or_ge p H with hplt | hpge
+  · have hv : (3^H * U + V) % 3^(p+1) = V % 3^(p+1) := by
+      have hz : (3^H * U) % 3^(p+1) = 0 := by
+        have hsplit : 3^H * U = 3^(p+1) * (3^(H - p - 1) * U) := by
+          rw [show 3^H = 3^(p+1) * 3^(H - p - 1) from by rw [← Nat.pow_add]; congr 1; omega]; ring
+        rw [hsplit, Nat.mul_mod_self_left]
+      rw [Nat.add_mod, hz, Nat.zero_add]
+    have h1 : ((3^H * U + V) / 3^p) % 3 = ((3^H * U + V) % 3^(p+1)) / 3^p % 3 :=
+      div_digit_window (3^H * U + V) (3^p) ((3^H * U + V) % 3^(p+1)) (three_pow_pos' p)
+        (show (3^H * U + V) % 3^(p+1) < 3 * 3^p from by
+          rw [show 3 * 3^p = 3^(p+1) from three_pow_succ_mul p]
+          exact Nat.mod_lt _ (three_pow_pos' (p+1)))
+        (show (3^H * U + V) % (3 * 3^p) = (3^H * U + V) % 3^(p+1) from by rw [three_pow_succ_mul p])
+    have h2 : (V % 3^(p+1)) / 3^p % 3 = (V / 3^p) % 3 :=
+      div_digit_window V (3^p) (V % 3^(p+1)) (three_pow_pos' p)
+        (show V % 3^(p+1) < 3 * 3^p from by
+          rw [show 3 * 3^p = 3^(p+1) from three_pow_succ_mul p]
+          exact Nat.mod_lt _ (three_pow_pos' (p+1)))
+        (show V % (3 * 3^p) = V % 3^(p+1) from by rw [three_pow_succ_mul p])
+    rw [h1, hv, h2]
+    exact hVdig p hplt
+  · have hWH : (3^H * U + V) / 3^H = U := by
+      rw [Nat.add_comm, Nat.add_mul_div_left _ _ (three_pow_pos' H), Nat.div_eq_of_lt hVlt,
+          Nat.zero_add]
+    have hsplit : (3^H * U + V) / 3^p = U / 3^(p - H) := by
+      rw [show 3^p = 3^H * 3^(p - H) from by rw [← Nat.pow_add]; congr 1; omega,
+          ← Nat.div_div_eq_div_mul, hWH]
+    rw [hsplit]
+    rcases Nat.lt_or_ge (p - H) H with h2 | h2
+    · exact hUdig (p - H) h2
+    · rw [Nat.div_eq_of_lt (by have hle := Nat.pow_le_pow_of_le (by decide : 1 < 3) h2; omega)]
+      decide
+
+/-- The 2-adic half-turn congruence, one square-lift step: LTE at the
+exact valuation `v₂(3^(2^(j-1)) - 1) = j + 1`. -/
+theorem half_turn_step (j : Nat) (hj : 2 ≤ j)
+    (h : 3^(2^(j-1)) % 2^(j+2) = 1 + 2^(j+1)) :
+    3^(2^(j+1-1)) % 2^(j+1+2) = 1 + 2^(j+1+1) := by
+  have hpow : 3^(2^j) = 3^(2^(j-1)) * 3^(2^(j-1)) := by
+    rw [show 2^j = 2^(j-1) + 2^(j-1) from by have := two_pow_factored j (by omega : 1 <= j); omega,
+        Nat.pow_add]
+  obtain ⟨q, hq⟩ : ∃ q : Nat, 3^(2^(j-1)) = 2^(j+2) * q + (1 + 2^(j+1)) :=
+    ⟨3^(2^(j-1)) / 2^(j+2), by
+      exact (Nat.div_add_mod (3^(2^(j-1))) (2^(j+2))).symm.trans (by rw [h])⟩
+  have hlt : 1 + 2^(j+1+1) < 2^(j+1+2) := by
+    have hd : 2^(j+1+2) = 2 * 2^(j+1+1) := by
+      rw [show j+1+2 = (j+1+1)+1 from by omega, Nat.pow_succ]; ring
+    have hpos := two_pow_pos (j+1+1)
+    omega
+  have ea : 2^(j+1) = 2 * 2 * 2^(j-1) := by
+    rw [two_pow_factored (j+1) (by omega : 1 <= j+1), two_pow_factored j (by omega : 1 <= j)]; ring
+  have eb : 2^(j+2) = 2 * 2 * 2 * 2^(j-1) := by
+    rw [two_pow_factored (j+2) (by omega : 1 <= j+2), two_pow_factored (j+1) (by omega : 1 <= j+1),
+        two_pow_factored j (by omega : 1 <= j)]; ring
+  have ec : 2^(j+1+2) = 2 * 2 * 2 * 2 * 2^(j-1) := by
+    rw [show j+1+2 = j+3 from by omega, two_pow_factored (j+3) (by omega : 1 <= j+3),
+        two_pow_factored (j+2) (by omega : 1 <= j+2), two_pow_factored (j+1) (by omega : 1 <= j+1),
+        two_pow_factored j (by omega : 1 <= j)]; ring
+  have ed : 2^(j+1+1) = 2 * 2 * 2 * 2^(j-1) := by rw [show j+1+1 = j+2 from by omega]; exact eb
+  have hsq : 3^(2^j) = 2^(j+1+2) * (2^(j+1) * q * q + q * (1 + 2^(j+1)) + 2^(j-1))
+      + (1 + 2^(j+1+1)) := by
+    rw [hpow, ← hq, ec, ed, eb, ea]
+    ring
+  rw [show j + 1 - 1 = j from by omega, hsq, Nat.add_mul_mod_self_right,
+      Nat.mod_eq_of_lt hlt]
+
+/-- **The 2-adic half-turn congruence** — `3^(2^(j-1)) ≡ 1 + 2^(j+1)
+(mod 2^(j+2))` for every `j ≥ 2`. -/
+theorem half_turn_cong (j : Nat) (hj : 2 ≤ j) :
+    3^(2^(j-1)) % 2^(j+2) = 1 + 2^(j+1) := by
+  have key : ∀ m : Nat, ∀ jj : Nat, jj = m + 2 →
+      3^(2^(jj-1)) % 2^(jj+2) = 1 + 2^(jj+1) := by
+    intro m
+    induction m with
+    | zero =>
+      intro jj hjj
+      rw [hjj]
+      decide
+    | succ m ih =>
+      intro jj hjj
+      have hprev := ih (m + 2) rfl
+      rw [show jj = m + 2 + 1 from by omega]
+      exact half_turn_step (m + 2) (by omega) hprev
+  exact key (j - 2) j (by omega)
+
+/-- **POSTULATE I — THE 2-WORLD SIGNATURE LAW, CLOSED.**  For every
+`j ≥ 2` the d-tower value `d j = (3^(2^j) - 1) / 2^(j+2)` carries the
+ternary signature: `hasTernaryTwo (d j) = true`.  The half-turn
+complement rotation: multiplication by `3^H` is simultaneously a cyclic
+half-rotation (preserving `{0,1}`-words) and the arithmetic complement
+`+ M/2` (turning the live trit `1` of any nonzero `{0,1}`-word into
+the signature `2`). -/
+theorem postulate_I (j : Nat) (hj : 2 ≤ j) : hasTernaryTwo (d j) = true := by
+  by_contra hne
+  have hf : hasTernaryTwo (d j) = false := by
+    cases hbb : hasTernaryTwo (d j) with
+    | false => rfl
+    | true => exact absurd hbb hne
+  have hQd := d_identity j (by omega : 1 <= j)
+  have hle2 : 2 ≤ 2^j := two_pow_ge2 j (by omega)
+  have h9 : 9 ≤ 3^(2^j) := by
+    rw [show (9:Nat) = 3^2 from by decide]
+    exact Nat.pow_le_pow_of_le (by decide : 1 < 3) hle2
+  have hdpos : 0 < d j := by
+    by_contra h0
+    push_neg at h0
+    have hd0 : d j = 0 := by omega
+    rw [hd0, Nat.mul_zero] at hQd
+    omega
+  have hdlt : d j < 3^(2^j) := by
+    have hle : d j ≤ 2^(j+2) * d j := by
+      calc d j = 1 * d j := (Nat.one_mul _).symm
+        _ ≤ 2^(j+2) * d j := Nat.mul_le_mul_right _ (by have := two_pow_pos (j+2); omega)
+    rw [hQd] at hle
+    omega
+  have hdig : ∀ i, (d j / 3^i) % 3 ≠ 2 := by
+    intro i hi
+    have hfire := hasTernaryTwo_of_digit (d j) i hi
+    rw [hf] at hfire
+    exact Bool.noConfusion hfire
+  have hdig1 : ∀ i, (d j / 3^i) % 3 ≤ 1 := by
+    intro i
+    have h3 : (d j / 3^i) % 3 < 3 := Nat.mod_lt _ (show 0 < 3 by decide)
+    have := hdig i
+    omega
+  have hrecon : d j = Finset.sum (Finset.range (2^j)) (fun i => (d j / 3^i) % 3 * 3^i) :=
+    htc_digit_reconstruction (d j) (2^j) hdlt
+  have hHH : 2^(j-1) + 2^(j-1) = 2^j := by
+    have := two_pow_factored j (by omega : 1 <= j)
+    omega
+  -- THE HALF-TURN SPLIT: d j = U + 3^H · V
+  have hV2 : Finset.sum (Finset.range (2^(j-1)))
+        (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^(2^(j-1) + i))
+      = 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1)))
+        (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) := by
+    rw [← Finset.mul_sum]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Nat.pow_add]; ring
+  have hsplitD : d j = Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1)))
+        (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) := by
+    conv_lhs => rw [hrecon, ← hHH]
+    rw [Finset.sum_range_add (fun i => (d j / 3^i) % 3 * 3^i) (2^(j-1)) (2^(j-1))]
+    try beta_reduce
+    rw [hV2]
+  -- the U/V digit facts
+  have hUdig : ∀ p, p < 2^(j-1) →
+      ((Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)) / 3^p) % 3 ≠ 2 := by
+    intro p hp
+    rw [htc_digit_of_sum (fun i => (d j / 3^i) % 3) (2^(j-1))
+      (fun i hi => Nat.mod_lt _ (show 0 < 3 by decide)) p hp]
+    exact hdig p
+  have hVdig : ∀ p, p < 2^(j-1) →
+      ((Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)) / 3^p) % 3 ≠ 2 := by
+    intro p hp
+    rw [htc_digit_of_sum (fun i => (d j / 3^(2^(j-1) + i)) % 3) (2^(j-1))
+      (fun i hi => Nat.mod_lt _ (show 0 < 3 by decide)) p hp]
+    exact hdig (2^(j-1) + p)
+  have hUlt : Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i) < 3^(2^(j-1)) :=
+    htc_sum_lt _ _ (fun i hi => Nat.mod_lt _ (show 0 < 3 by decide))
+  have hVlt : Finset.sum (Finset.range (2^(j-1)))
+      (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) < 3^(2^(j-1)) :=
+    htc_sum_lt _ _ (fun i hi => Nat.mod_lt _ (show 0 < 3 by decide))
+  -- THE ROTATION: 3^H · d j = M · V + (3^H · U + V)
+  have htt : 3^(2^(j-1)) * 3^(2^(j-1)) = 3^(2^j) := by
+    rw [← Nat.pow_add, hHH]
+  have hrot : 3^(2^(j-1)) * d j = (3^(2^j) - 1) * Finset.sum (Finset.range (2^(j-1)))
+        (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)
+      + (3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)) := by
+    conv_lhs => rw [hsplitD]
+    have hexp : 3^(2^(j-1)) * (Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+        + 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1)))
+          (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i))
+        = 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+        + 3^(2^j) * Finset.sum (Finset.range (2^(j-1)))
+          (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) := by
+      rw [← htt]; ring
+    rw [hexp]
+    ring
+  -- W < M via 2W ≤ M
+  have hlesumU : Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      ≤ Finset.sum (Finset.range (2^(j-1))) (fun i => 3^i) :=
+    Finset.sum_le_sum (fun i _ =>
+      Nat.le_trans (Nat.mul_le_mul (hdig1 i) (Nat.le_refl _)) (by rw [Nat.one_mul]))
+  have hUle : Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      ≤ (3^(2^(j-1)) - 1) / 2 := by
+    rw [← htc_geom_sum (2^(j-1))]
+    exact hlesumU
+  have hlesumV : Finset.sum (Finset.range (2^(j-1)))
+        (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)
+      ≤ Finset.sum (Finset.range (2^(j-1))) (fun i => 3^i) :=
+    Finset.sum_le_sum (fun i _ =>
+      Nat.le_trans (Nat.mul_le_mul (hdig1 _) (Nat.le_refl _)) (by rw [Nat.one_mul]))
+  have hVle : Finset.sum (Finset.range (2^(j-1)))
+      (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) ≤ (3^(2^(j-1)) - 1) / 2 := by
+    rw [← htc_geom_sum (2^(j-1))]
+    exact hlesumV
+  have hOddH : 3^(2^(j-1)) % 2 = 1 := three_pow_odd (2^(j-1))
+  have h2U : 2 * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      ≤ 3^(2^(j-1)) - 1 := by omega
+  have h2V : 2 * Finset.sum (Finset.range (2^(j-1)))
+      (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) ≤ 3^(2^(j-1)) - 1 := by omega
+  have key4 : ∀ t : Nat, 1 ≤ t → t * (t - 1) + (t - 1) = t * t - 1 := by
+    intro t ht
+    have h1 : t - 1 + 1 = t := by omega
+    have h2 : t * (t - 1) + (t - 1) + 1 = t * t := by
+      calc t * (t - 1) + (t - 1) + 1 = t * (t - 1) + (t - 1 + 1) := by ring
+        _ = t * (t - 1) + t := by rw [h1]
+        _ = t * ((t - 1) + 1) := by ring
+        _ = t * t := by rw [h1]
+    omega
+  have h2W : 2 * (3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i))
+      ≤ 3^(2^j) - 1 := by
+    calc 2 * (3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+        + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i))
+        = 3^(2^(j-1)) * (2 * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i))
+          + 2 * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) := by ring
+      _ ≤ 3^(2^(j-1)) * (3^(2^(j-1)) - 1) + (3^(2^(j-1)) - 1) :=
+          Nat.add_le_add (Nat.mul_le_mul_left _ h2U) h2V
+      _ = 3^(2^j) - 1 := by
+          rw [← htt]
+          exact key4 _ (by have := three_pow_pos' (2^(j-1)); omega)
+  have hWlt : 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)
+      < 3^(2^j) - 1 := by
+    have key : ∀ w : Nat, 2 * w ≤ 3^(2^j) - 1 → w < 3^(2^j) - 1 := by
+      intro w h1w; have := h9; omega
+    exact key _ h2W
+  have hWmod : (3^(2^(j-1)) * d j) % (3^(2^j) - 1)
+      = 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) := by
+    rw [hrot, Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hWlt]
+  -- THE ARITHMETIC HALF: (3^H · d j) % M = d j + M/2
+  have hRlt : 1 + 2^(j+1) < 2^(j+2) := by
+    have hQ2 := two_pow_factored (j+2) (by omega : 1 <= j+2)
+    have h2p := two_pow_ge2 (j+1) (by omega)
+    omega
+  have hcong := half_turn_cong j hj
+  obtain ⟨A, hA⟩ : ∃ A : Nat, 3^(2^(j-1)) = 2^(j+2) * A + (1 + 2^(j+1)) :=
+    ⟨3^(2^(j-1)) / 2^(j+2), by
+      exact (Nat.div_add_mod (3^(2^(j-1))) (2^(j+2))).symm.trans (by rw [hcong])⟩
+  have hXmod : (3^(2^(j-1)) * d j) % (3^(2^j) - 1) = d j + (3^(2^j) - 1) / 2 := by
+    have hsplit : 3^(2^(j-1)) * d j = (1 + 2^(j+1)) * d j + A * (3^(2^j) - 1) := by
+      calc 3^(2^(j-1)) * d j = (2^(j+2) * A + (1 + 2^(j+1))) * d j := by rw [hA]
+        _ = (1 + 2^(j+1)) * d j + 2^(j+2) * (A * d j) := by ring
+        _ = (1 + 2^(j+1)) * d j + A * (2^(j+2) * d j) := by ring
+        _ = (1 + 2^(j+1)) * d j + A * (3^(2^j) - 1) := by rw [hQd]
+    have hRdlt : (1 + 2^(j+1)) * d j < 3^(2^j) - 1 := by
+      have hmono : (1 + 2^(j+1)) * d j < 2^(j+2) * d j :=
+        Nat.mul_lt_mul_of_pos_right hRlt hdpos
+      rw [hQd] at hmono
+      exact hmono
+    rw [hsplit, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt hRdlt]
+    have hQ2 := two_pow_factored (j+2) (by omega : 1 <= j+2)
+    have h2t : 2 * (2^(j+1) * d j) = 3^(2^j) - 1 := by
+      calc 2 * (2^(j+1) * d j) = (2 * 2^(j+1)) * d j := by ring
+        _ = 2^(j+2) * d j := by rw [hQ2]
+        _ = 3^(2^j) - 1 := hQd
+    have hdiv : (3^(2^j) - 1) / 2 = 2^(j+1) * d j := by omega
+    rw [hdiv]; ring
+  have hXW : d j + (3^(2^j) - 1) / 2
+      = 3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i) :=
+    hXmod.symm.trans hWmod
+  -- THE FIRE: some trit of d j is 1, so the complement has a 2
+  obtain ⟨p₀, hp₀lt, hp₀dig⟩ : ∃ p : Nat, p < 2^j ∧ (d j / 3^p) % 3 = 1 := by
+    by_contra hall
+    have hall' : ∀ p, p < 2^j → (d j / 3^p) % 3 ≠ 1 := by
+      intro p hp hpe
+      exact hall ⟨p, hp, hpe⟩
+    have hzero : Finset.sum (Finset.range (2^j)) (fun i => (d j / 3^i) % 3 * 3^i) = 0 :=
+      Finset.sum_eq_zero (fun i hi => by
+        have h1 : (d j / 3^i) % 3 = 0 := by
+          have h3 : (d j / 3^i) % 3 < 3 := Nat.mod_lt _ (show 0 < 3 by decide)
+          have hne := hall' i (Finset.mem_range.mp hi)
+          omega
+        rw [h1, Nat.zero_mul])
+    rw [hrecon, hzero] at hdpos
+    omega
+  have hXsum : d j + (3^(2^j) - 1) / 2
+      = Finset.sum (Finset.range (2^j)) (fun i => ((d j / 3^i) % 3 + 1) * 3^i) := by
+    conv_lhs => rw [hrecon, ← htc_geom_sum (2^j)]
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    ring
+  have hdigX : ((d j + (3^(2^j) - 1) / 2) / 3^p₀) % 3 = 2 := by
+    rw [hXsum, htc_digit_of_sum (fun i => (d j / 3^i) % 3 + 1) (2^j)
+      (fun i hi => by have h3 : (d j / 3^i) % 3 < 3 := Nat.mod_lt _ (show 0 < 3 by decide); omega)
+      p₀ hp₀lt, hp₀dig]
+  have hfireX : hasTernaryTwo (d j + (3^(2^j) - 1) / 2) = true :=
+    hasTernaryTwo_of_digit (d j + (3^(2^j) - 1) / 2) p₀ hdigX
+  -- THE SILENCE: the rotated word is a {0,1}-word
+  have hWdig : ∀ p, ((3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)) / 3^p) % 3 ≠ 2 :=
+    htc_half_turn_silent (2^(j-1)) (Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^i) % 3 * 3^i))
+      (Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i))
+      hUdig hVdig hUlt hVlt
+  have hWsil : hasTernaryTwo (3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1)))
+      (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)) = false := by
+    cases hbb : hasTernaryTwo (3^(2^(j-1)) * Finset.sum (Finset.range (2^(j-1)))
+      (fun i => (d j / 3^i) % 3 * 3^i)
+      + Finset.sum (Finset.range (2^(j-1))) (fun i => (d j / 3^(2^(j-1) + i)) % 3 * 3^i)) with
+    | false => rfl
+    | true => exact absurd (hasTernaryTwo_pos _ hbb) (by
+        rintro ⟨p, hp⟩
+        exact hWdig p hp)
+  -- THE COLLISION
+  rw [hXW] at hfireX
+  rw [hWsil] at hfireX
+  exact Bool.noConfusion hfireX
+
+/-! ## §14 THE SPINE COLLAPSES — the crown of Law 2 alone
+
+With Postulate I a THEOREM, the entire §8 law-promotion spine
+collapses onto the absorption-mirror bridge alone: every hypothesis
+`hPI` is now discharged by `postulate_I`.  The even-exponent Erdős
+statement `∀ K ≥ 8, noTernaryTwo (4^K) = false` is a theorem of the
+ONE remaining granted law. -/
+
+theorem hWave_of_mirror (hM : CardinalWorldsMirrorBridge) :
+    ∀ s core : Nat, 1 ≤ s → 2 ≤ core → ¬ (3 ∣ core) →
+      hasTernaryTwo (omegaCutWord s core) = true :=
+  hWave_of_postulateI_mirror postulate_I hM
+
+theorem hS0_of_mirror (hM : CardinalWorldsMirrorBridge) :
+    ∀ a : Nat, 5 ≤ a → ¬ (3 ∣ a) → (a % 9 = 1 ∨ a % 9 = 4) →
+      hasTernaryTwo (4^a) = true :=
+  hS0_of_postulateI_mirror postulate_I hM
+
+theorem four_power_omega_shadow_wave_tailF_of_mirror (hM : CardinalWorldsMirrorBridge) :
+    GSTGraphV2OmegaWaveLaw.four_power_omega_shadow_wave_tailF :=
+  four_power_omega_shadow_wave_tailF_of_postulateI postulate_I hM
+
+/-- **THE CROWN OF LAW 2 ALONE** — with Postulate I closed by the
+half-turn complement rotation, the even-exponent Erdős statement is a
+theorem of the absorption-mirror bridge, the single remaining grant. -/
+theorem erdos_even_conjecture_of_mirror (hM : CardinalWorldsMirrorBridge) :
+    ∀ K : Nat, 8 ≤ K → noTernaryTwo (4^K) = false :=
+  erdos_even_conjecture_of_postulateI postulate_I hM
+
+/-! ## §15 Receipts — Law 1 closed -/
+
+#print axioms htc_sum_lt
+#print axioms htc_digit_of_sum
+#print axioms htc_geom_sum
+#print axioms htc_mod_div_digit
+#print axioms htc_digit_reconstruction
+#print axioms htc_half_turn_silent
+#print axioms half_turn_step
+#print axioms half_turn_cong
+#print axioms postulate_I
+#print axioms hWave_of_mirror
+#print axioms hS0_of_mirror
+#print axioms four_power_omega_shadow_wave_tailF_of_mirror
+#print axioms erdos_even_conjecture_of_mirror
+
 end GSTCardinalWorldsBridge
