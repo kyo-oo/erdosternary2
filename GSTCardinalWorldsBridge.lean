@@ -2164,8 +2164,7 @@ theorem mb_cell_e (R p : Nat) :
   cases p with
   | zero =>
       show (4 * R) / 3^0 % 3 = (4 * (R % 3^0) / 3^0 + 4 * (R / 3^0 % 3)) % 3
-      simp only [Nat.pow_zero, Nat.div_one, Nat.mod_one, Nat.mul_zero,
-        Nat.zero_div]
+      simp only [Nat.pow_zero, Nat.div_one, Nat.mod_one, Nat.mul_zero]
       omega
   | succ p =>
       have h := gstOutputDigit_forward_exact R (p + 1) (by omega)
@@ -2200,11 +2199,11 @@ theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
   have hT3 : 3^b * T = 3^b * (3^q * (T / 3^q) + T % 3^q) := by
     conv_lhs => rw [← hT]
   have hsplit : 1 + 3^b * T
-      = (1 + 3^b * (T % 3^q)) + (T / 3^q) * 3^(b+q) := by
+      = (1 + 3^b * (T % 3^q)) + 3^(b+q) * (T / 3^q) := by
     calc 1 + 3^b * T
         = 1 + (3^b * (3^q * (T / 3^q)) + 3^b * (T % 3^q)) := by
             rw [hT3, Nat.mul_add]
-      _ = (1 + 3^b * (T % 3^q)) + (T / 3^q) * 3^(b+q) := by
+      _ = (1 + 3^b * (T % 3^q)) + 3^(b+q) * (T / 3^q) := by
             rw [hpq]; ring
   have hcan : 3^b * (3^q - 1) + 3^b = 3^b * 3^q := by
     have h3q1 : (3^q - 1) + 1 = 3^q := by omega
@@ -2225,13 +2224,13 @@ theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
   have hEcar : mbCarry (1 + 3^b * T) (b + q) = mbCarry T q := by
     simp only [mbCarry]
     have hmodE : (1 + 3^b * T) % 3^(b+q) = 1 + 3^b * (T % 3^q) := by
-      have hzero : (T / 3^q) * 3^(b+q) % 3^(b+q) = 0 :=
-        Nat.mod_eq_zero_of_dvd ⟨T / 3^q, Nat.mul_comm (T / 3^q) (3^(b+q))⟩
+      have hzero : 3^(b+q) * (T / 3^q) % 3^(b+q) = 0 :=
+        Nat.mod_eq_zero_of_dvd ⟨T / 3^q, rfl⟩
       rw [hsplit, Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
       exact Nat.mod_eq_of_lt hlowlt
     rw [hmodE]
     have h4low : 4 * (1 + 3^b * (T % 3^q))
-        = (4 + 3^b * (4 * (T % 3^q) % 3^q)) + (4 * (T % 3^q) / 3^q) * 3^(b+q) := by
+        = (4 + 3^b * (4 * (T % 3^q) % 3^q)) + 3^(b+q) * (4 * (T % 3^q) / 3^q) := by
       set u := T % 3^q with hu
       set v := 4 * u / 3^q with hv
       set w := 4 * u % 3^q with hw
@@ -2250,7 +2249,9 @@ theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
       Nat.div_eq_of_lt hrlt, Nat.zero_add]
   show mbDigit (1 + 3^b * T) (b + q) = 2 ∧
     (mbCarry (1 + 3^b * T) (b + q) = 0 ∨ mbCarry (1 + 3^b * T) (b + q) = 3)
-  exact ⟨hEdig.trans hd, hEcar.trans hc⟩
+  rcases hc with h0 | h3
+  · exact Or.inl (hEcar.trans h0)
+  · exact Or.inr (hEcar.trans h3)
 
 /-! ### §16.4 The live instance — the law holds, the pressure reads zero -/
 
@@ -2298,12 +2299,41 @@ theorem mb_interior_survivor : mbHappyGate (4^6) 2 := by
   show mbDigit (4^6) 2 = 2 ∧ (mbCarry (4^6) 2 = 0 ∨ mbCarry (4^6) 2 = 3)
   exact ⟨by decide, by decide⟩
 
+/-- The `s = 0` failure tail: `Q_0(4) = 85` is ternary-clean
+(`10011₃`), unfolded manually since `hasTernaryTwo` is well-founded. -/
+theorem mb_has_two_85 : hasTernaryTwo 85 = false := by
+  rw [hasTernaryTwo.eq_def 85, if_neg (by decide : (85:Nat) ≠ 0),
+    if_neg (by decide : (85:Nat) % 3 ≠ 2),
+    show (85:Nat) / 3 = 28 from by decide,
+    hasTernaryTwo.eq_def 28, if_neg (by decide : (28:Nat) ≠ 0),
+    if_neg (by decide : (28:Nat) % 3 ≠ 2),
+    show (28:Nat) / 3 = 9 from by decide,
+    hasTernaryTwo.eq_def 9, if_neg (by decide : (9:Nat) ≠ 0),
+    if_neg (by decide : (9:Nat) % 3 ≠ 2),
+    show (9:Nat) / 3 = 3 from by decide,
+    hasTernaryTwo.eq_def 3, if_neg (by decide : (3:Nat) ≠ 0),
+    if_neg (by decide : (3:Nat) % 3 ≠ 2),
+    show (3:Nat) / 3 = 1 from by decide,
+    hasTernaryTwo.eq_def 1, if_neg (by decide : (1:Nat) ≠ 0),
+    if_neg (by decide : (1:Nat) % 3 ≠ 2),
+    show (1:Nat) / 3 = 0 from by decide]
+  exact hasTernaryTwo_zero_lemma
+
+/-- The `s = 0` child base: `Q_1(1) = 7` carries the signature (`21₃`). -/
+theorem mb_has_two_7 : hasTernaryTwo 7 = true := by
+  rw [hasTernaryTwo.eq_def 7, if_neg (by decide : (7:Nat) ≠ 0),
+    if_neg (by decide : (7:Nat) % 3 ≠ 2),
+    show (7:Nat) / 3 = 2 from by decide,
+    hasTernaryTwo.eq_def 2, if_neg (by decide : (2:Nat) ≠ 0),
+    if_pos (by decide : (2:Nat) % 3 = 2)]
+
 /-- **THE SHARP EDGE OF THE HAND'S OWN BOUND.**  Law 2 is stated for
 `s ≥ 1` — and must be: at `s = 0` the transport fails outright, since
 `Q_0(4) = 85` is silent while `Q_1(1) = 7` carries the signature. -/
 theorem mb_l2_edge_is_sharp :
     (4^(3^0 * 4) - 1) / 3^(0 + 1) = 85 ∧ hasTernaryTwo 85 = false ∧
-      hasTernaryTwo 7 = true := by decide
+      hasTernaryTwo 7 = true :=
+  ⟨by decide, mb_has_two_85, mb_has_two_7⟩
 
 /-! ### §16.5 The live seam inventory — one grant, two forms -/
 
@@ -2338,6 +2368,8 @@ theorem erdos_even_conjecture_of_climb
 #print axioms mb_inst_pressure_vanishes
 #print axioms mb_pressure_estimate_refuted
 #print axioms mb_interior_survivor
+#print axioms mb_has_two_85
+#print axioms mb_has_two_7
 #print axioms mb_l2_edge_is_sharp
 #print axioms erdos_even_conjecture_of_climb
 
