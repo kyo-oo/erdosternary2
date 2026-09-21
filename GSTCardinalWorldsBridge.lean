@@ -1099,18 +1099,20 @@ theorem two_pow_cycle : ∀ k : Nat, (2^(2 * 3^k)) % (3^(k+1)) = 1 := by
       exact ⟨_, hdm.symm⟩
     have hcube : (3^(k+1) * m + 1)^3
         = 1 + 3^(k+2) * (m + 3^(k+1) * m^2 + 3^(2*k+1) * m^3) := by
-      rw [show 3^(k+2) = 3^k * 9 from by rw [Nat.pow_add]; rfl,
-          show 3^(k+1) = 3^k * 3 from by rw [Nat.pow_add]; rfl,
+      rw [show 3^(k+2) = 3^k * 9 from by rw [Nat.pow_add],
+          show 3^(k+1) = 3^k * 3 from by rw [Nat.pow_succ],
           show 3^(2*k+1) = (3^k)^2 * 3 from by
             rw [show 2*k+1 = k*2+1 from by ring, Nat.pow_add, Nat.pow_mul,
                 Nat.pow_one]]
       ring
+    have h1lt2 : 1 < 3^(k+2) := by
+      have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
+      have h9 : (3:Nat)^(k+2) = 3^k * 9 := by rw [Nat.pow_add]
+      omega
     rw [hexp, hm, hcube, Nat.add_mod,
         Nat.mod_eq_zero_of_dvd
           ⟨m + 3^(k+1) * m^2 + 3^(2*k+1) * m^3, rfl⟩,
-        Nat.zero_add, Nat.mod_eq_of_lt (show 1 < 3^(k+2) by
-          have hp : 0 < 3^(k+2) := Nat.pow_pos (by decide : 0 < 3)
-          omega)]
+        Nat.add_zero, Nat.mod_mod, Nat.mod_eq_of_lt h1lt2]
 
 theorem two_pow_per_base : 2^1458 % 2187 = 1 := by
   have h := two_pow_cycle 6
@@ -1129,7 +1131,9 @@ theorem two_pow_per_mod (q : Nat) : (2^(1458 * q)) % 2187 = 1 := by
 
 theorem two_pow_mod_per (n : Nat) : 2^n % 2187 = 2^(n % 1458) % 2187 := by
   have hn : n = 1458 * (n / 1458) + n % 1458 := (Nat.div_add_mod n 1458).symm
-  rw [hn, Nat.pow_add, Nat.mul_mod, two_pow_per_mod, Nat.one_mul, Nat.mod_mod]
+  have hmod : (1458 * (n / 1458) + n % 1458) % 1458 = n % 1458 := by omega
+  rw [hn, Nat.pow_add, Nat.mul_mod, two_pow_per_mod, Nat.one_mul, Nat.mod_mod,
+      hmod]
 
 /-- **The window law**: `2^(j+2)·d j ≡ -1 (mod 3^k)` whenever `k ≤ 2^j`. -/
 theorem d_window (j k : Nat) (hj : 1 ≤ j) (hk : k ≤ 2^j) :
@@ -1145,7 +1149,11 @@ theorem d_window (j k : Nat) (hj : 1 ≤ j) (hk : k ≤ 2^j) :
   rcases w with _ | w'
   · omega
   · rw [hid, hw]
-    have hexp : 3^k * (w'+1) - 1 = 3^k * w' + (3^k - 1) := by ring
+    have hexp : 3^k * (w'+1) - 1 = 3^k * w' + (3^k - 1) := by
+      have h1 : 3^k * (w'+1) = 3^k * w' + 3^k := by ring
+      rw [h1]
+      generalize hP : 3^k * w' = P
+      omega
     have h0 : 3^k * w' % 3^k = 0 := Nat.mod_eq_zero_of_dvd ⟨w', by ring⟩
     have hlt : 3^k - 1 < 3^k := by
       have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
@@ -1166,7 +1174,9 @@ theorem d_mod_deepRes (j : Nat) (hj : 3 ≤ j) :
     rw [hsplit, show (2:Nat)^3 = 8 from by decide]
     omega
   have hwin : (2^(j+2) * d j) % 2187 = 2186 := by
-    have h := d_window j 7 (by omega) (by rw [show (2:Nat)^3 = 8 from by decide]; omega)
+    have h8v : (2:Nat)^3 = 8 := by decide
+    rw [h8v] at h8
+    have h := d_window j 7 (by omega) (by omega)
     rw [show (3:Nat)^7 = 2187 from by decide,
         show (2187:Nat) - 1 = 2186 from by decide] at h
     exact h
@@ -1269,16 +1279,17 @@ theorem three_pow_odd : ∀ k : Nat, 3^k % 2 = 1 := by
         Nat.mul_one, Nat.mod_mod, ih]
 
 /-- The 2-cancellation (an explicit inverse: `2 · (3^k+1)/2 ≡ 1`). -/
-theorem cancel_two_3pow (k X Y : Nat)
+theorem cancel_two_3pow (k X Y : Nat) (hk : 1 ≤ k)
     (h : (2 * X) % 3^k = (2 * Y) % 3^k) : X % 3^k = Y % 3^k := by
   have hOdd : 3^k % 2 = 1 := three_pow_odd k
   have hEven : (3^k + 1) % 2 = 0 := by omega
   have hmul : 2 * ((3^k + 1) / 2) = 3^k + 1 := by
     have hdm := Nat.div_add_mod (3^k + 1) 2
     omega
-  have h1lt : 1 < 3^k := by
-    have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
-    omega
+  have h3k : 3^k = 3 * 3^(k-1) := by
+    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
+  have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
+  have h1lt : 1 < 3^k := by omega
   have hinv : (2 * ((3^k + 1) / 2)) % 3^k = 1 := by
     rw [hmul, Nat.add_mod, Nat.mod_self, Nat.zero_add, Nat.mod_mod,
         Nat.mod_eq_of_lt h1lt]
@@ -1292,11 +1303,43 @@ theorem cancel_two_3pow (k X Y : Nat)
   have hLY := Nat.mul_mod (2 * Y) ((3^k + 1) / 2) (3^k)
   rw [← hL, ← hR, hLX, hLY, h]
 
+/-- `hasTernaryTwo 1 = false` — the one-word is silent. -/
+theorem hasTernaryTwo_one : hasTernaryTwo 1 = false := by
+  rw [hasTernaryTwo.eq_def 1, if_neg (by decide : (1:Nat) ≠ 0),
+      if_neg (by decide : ¬((1:Nat) % 3 = 2)),
+      show (1:Nat) / 3 = 0 from by decide, hasTernaryTwo_zero_lemma]
+
+/-- **The silent bridge**: a structural silence at window depth `k`
+for a value below `3^k` is a silence of the real predicate. -/
+theorem hasTernaryTwoStruct_silent (n k : Nat) (hn : n < 3^k)
+    (h : hasTernaryTwoStruct n k = false) : hasTernaryTwo n = false := by
+  induction k generalizing n with
+  | zero =>
+    have hn0 : n = 0 := by rw [Nat.pow_zero] at hn; omega
+    rw [hn0, hasTernaryTwo.eq_def 0, if_pos rfl]
+  | succ k ih =>
+    by_cases hn0 : n = 0
+    · rw [hn0, hasTernaryTwo.eq_def 0, if_pos rfl]
+    · by_cases h2 : n % 3 = 2
+      · exfalso
+        simp [hasTernaryTwoStruct, hn0, h2] at h
+      · rw [hasTernaryTwo.eq_def n, if_neg hn0, if_neg h2]
+        have hs : hasTernaryTwoStruct (n / 3) k = false := by
+          simp [hasTernaryTwoStruct, hn0, h2] at h
+          exact h
+        have hnd : n / 3 < 3^k := by
+          have hnp : 3^(k+1) = 3 * 3^k := by rw [Nat.pow_succ]; ring
+          rw [hnp] at hn
+          omega
+        exact ih (n / 3) hnd hs
+
 /-- The all-ones word is silent (the geometric series has trits 1). -/
 theorem all_ones_silent : ∀ k : Nat, hasTernaryTwo ((3^(k+1) - 1) / 2) = false := by
   intro k
   induction k with
-  | zero => decide
+  | zero =>
+    rw [show ((3:Nat)^(0+1) - 1) / 2 = 1 from by decide]
+    exact hasTernaryTwo_one
   | succ k ih =>
     have hOdd : 3^(k+1) % 2 = 1 := three_pow_odd (k+1)
     have hp : (3:Nat)^(k+2) = 3 * 3^(k+1) := by
@@ -1311,8 +1354,8 @@ theorem all_ones_silent : ∀ k : Nat, hasTernaryTwo ((3^(k+1) - 1) / 2) = false
         omega
       have hmod : (3^(k+1) - 1) % 3 = 2 := by
         have h3m : 3^(k+1) % 3 = 0 := by
-          rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ]; rfl,
-              Nat.mul_mod_right]
+          rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ],
+              Nat.mod_eq_zero_of_dvd ⟨3^k, by ring⟩]
         have hdm := Nat.div_add_mod (3^(k+1) - 1) 3
         have hpos : 0 < 3^(k+1) := Nat.pow_pos (by decide : 0 < 3)
         omega
@@ -1321,8 +1364,8 @@ theorem all_ones_silent : ∀ k : Nat, hasTernaryTwo ((3^(k+1) - 1) / 2) = false
       rw [h2X, hmod] at hmulmod
       omega
     have h3m : 3^(k+1) % 3 = 0 := by
-      rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ]; rfl,
-          Nat.mul_mod_right]
+      rw [show (3:Nat)^(k+1) = 3^k * 3 from by rw [Nat.pow_succ],
+          Nat.mod_eq_zero_of_dvd ⟨3^k, by ring⟩]
     rw [hasTernaryTwo.eq_def (3^(k+1) + (3^(k+1) - 1) / 2),
         if_neg (by
           have hpos : 0 < 3^(k+1) := Nat.pow_pos (by decide : 0 < 3)
@@ -1333,18 +1376,43 @@ theorem all_ones_silent : ∀ k : Nat, hasTernaryTwo ((3^(k+1) - 1) / 2) = false
       omega]
     exact ih
 
+theorem two_pow_self_ge : ∀ n : Nat, n < 2^n := by
+  intro n
+  induction n with
+  | zero => decide
+  | succ n ih =>
+    have hp : 0 < 2^n := Nat.pow_pos (by decide : 0 < 2)
+    rw [Nat.pow_succ]
+    omega
+
+theorem three_pow_ge_self : ∀ k : Nat, 1 ≤ k → k ≤ 3^(k-1) := by
+  intro k
+  induction k with
+  | zero => intro h; omega
+  | succ k ih =>
+    intro hk
+    by_cases hk1 : k = 0
+    · rw [hk1]; decide
+    · have hk1' : 1 ≤ k := by omega
+      have ih' := ih hk1'
+      have h3k : 3^k = 3 * 3^(k-1) := by
+        rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
+      omega
+
 /-- **The all-ones obstruction family.**  At index `j = 2·3^(k-1) - 1`
 the window `3^k` of `d j` is the all-ones word — silent at every
 scale. -/
 theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
     d (2*3^(k-1) - 1) % 3^k = (3^k - 1) / 2 := by
   have hge : 1 ≤ 2*3^(k-1) - 1 := by
-    have h := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    have h : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
     omega
   have hkb : k ≤ 2^(2*3^(k-1) - 1) := by
-    have hlt : (2*3^(k-1) - 1) < 2^(2*3^(k-1) - 1) :=
-      Nat.lt_two_pow (2*3^(k-1) - 1)
-    have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    have hle : k ≤ 2*3^(k-1) - 1 := by
+      have h3 := three_pow_ge_self k hk
+      have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
+      omega
+    have hlt := two_pow_self_ge (2*3^(k-1) - 1)
     omega
   have hwin := d_window (2*3^(k-1) - 1) k hge hkb
   have h2mod : 2^(2*3^(k-1) - 1 + 2) % 3^k = 2 := by
@@ -1356,11 +1424,12 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
       have h2 : 2^((2*3^(k-1)) + 1) = 2 * 2^(2*3^(k-1)) := by
         rw [Nat.pow_succ]; ring
       rw [h1, h2]
-    rw [hexp, Nat.mul_mod, hcyc, Nat.one_mul]
-  have h2lt : 2 < 3^k := by
-    have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
-    have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
-    omega
+    rw [hexp, Nat.mul_mod, hcyc, Nat.mul_one, Nat.mod_mod,
+        Nat.mod_eq_of_lt h2lt]
+  have h3k : 3^k = 3 * 3^(k-1) := by
+    rw [show k = (k-1)+1 from by omega, Nat.pow_succ]; ring
+  have hpe : 0 < 3^(k-1) := Nat.pow_pos (by decide : 0 < 3)
+  have h2lt : 2 < 3^k := by omega
   -- (2 · d j) ≡ 3^k - 1 (mod 3^k), by the periodicity of 2^(j+2)
   have hL : (2 * d (2*3^(k-1) - 1)) % 3^k = 3^k - 1 := by
     have hsplit2 := Nat.mul_mod (2^(2*3^(k-1) - 1 + 2)) (d (2*3^(k-1) - 1)) (3^k)
@@ -1383,7 +1452,7 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
     have hOdd' : (3^k - 1) % 2 = 0 := by omega
     have hp : 0 < 3^k := Nat.pow_pos (by decide : 0 < 3)
     omega
-  have hcancel := cancel_two_3pow k (d (2*3^(k-1) - 1)) ((3^k - 1) / 2)
+  have hcancel := cancel_two_3pow k (d (2*3^(k-1) - 1)) ((3^k - 1) / 2) hk
     (hL.trans hR.symm)
   rw [Nat.mod_eq_of_lt hlt2] at hcancel
   exact hcancel
@@ -1399,7 +1468,11 @@ theorem gp_ones_silent (k : Nat) (hk : 1 ≤ k) :
 `e = 489` (the class of `j = 487`, the `+1` side of the obstruction
 pair at window `3^7`) is the alternating word `010101₃` — silent. -/
 theorem gp_alt_residue_silent : hasTernaryTwo (deepRes 489) = false := by
-  decide
+  have hlt : deepRes 489 < 3^7 := by
+    rw [show (3:Nat)^7 = 2187 from by decide]
+    unfold deepRes
+    exact Nat.mod_lt _ (show 0 < 2187 by decide)
+  exact hasTernaryTwoStruct_silent (deepRes 489) 7 hlt (by decide)
 
 /-- **NO FIXED WINDOW CLOSES THE LAW.**  At every window scale `3^k`
 there is a deep-class index whose window is the silent all-ones word.
@@ -1411,9 +1484,11 @@ theorem no_fixed_window (k : Nat) (hk : 1 ≤ k) :
   · have hk1 : k = 1 := by omega
     refine ⟨5, by decide, ?_⟩
     rw [hk1]
-    decide
+    have hd5 : d 5 % (3:Nat)^1 = 1 := by decide
+    rw [hd5]
+    exact hasTernaryTwo_one
   · refine ⟨2*3^(k-1) - 1, ?_, ?_⟩
-    · have h3 : 1 ≤ 3^(k-1) := Nat.pow_pos (by decide : 0 < 3) (k-1)
+    · have h3 := three_pow_ge_self k hk
       omega
     · rw [gp_ones_window k hk]
       exact gp_ones_silent k hk
