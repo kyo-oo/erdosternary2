@@ -2402,8 +2402,8 @@ audit declared irreproducible are exactly the kernel-checked values of
 `GSTU2DExactCrossingCharge.crossDensity_physical_table`. -/
 theorem mb_corr_production_table :
     GSTU2DExactCrossingCharge.crossDensity 0 2 = 105 ∧
-    GST2DExactCrossingCharge.crossDensity 1 1 = -81 ∧
-    GST2DExactCrossingCharge.crossDensity 2 2 = 0 ∧
+    GSTU2DExactCrossingCharge.crossDensity 1 1 = -81 ∧
+    GSTU2DExactCrossingCharge.crossDensity 2 2 = 0 ∧
     GSTU2DExactCrossingCharge.crossDensity 3 2 = 105 := by
   have h := GSTU2DExactCrossingCharge.crossDensity_physical_table
   omega
