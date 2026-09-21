@@ -1726,7 +1726,6 @@ theorem half_turn_step (j : Nat) (hj : 2 ≤ j)
     rw [ec]
     rw [ed]
     rw [ea]
-    rw [eb]
     ring
   rw [show j + 1 - 1 = j from by omega, hsq, Nat.add_comm, Nat.add_mul_mod_self_left,
       Nat.mod_eq_of_lt hlt]
