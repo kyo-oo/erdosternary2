@@ -1581,7 +1581,8 @@ theorem htc_digit_of_sum (c : Nat → Nat) : ∀ k : Nat, (∀ i, i < k → c i 
       have hsltv : Finset.sum (Finset.range k) (fun i => c i * 3^i) < 3^k :=
         htc_sum_lt c k (fun i hi => hc i (by omega))
       have h3k : (0:Nat) < 3^k := three_pow_pos' k
-      rw [Nat.add_mul_div_left _ _ h3k, Nat.div_eq_of_lt hsltv, Nat.zero_add,
+      rw [show c k * 3^k = 3^k * c k from by ring,
+          Nat.add_mul_div_left _ _ h3k, Nat.div_eq_of_lt hsltv, Nat.zero_add,
           Nat.mod_eq_of_lt hck]
 
 /-- The all-ones word as a sum: `∑_{i<k} 3^i = (3^k - 1) / 2`. -/
@@ -1720,7 +1721,12 @@ theorem half_turn_step (j : Nat) (hj : 2 ≤ j)
     exact eb
   have hsq : 3^(2^j) = 2^(j+1+2) * (2^(j+1) * q * q + q * (1 + 2^(j+1)) + 2^(j-1))
       + (1 + 2^(j+1+1)) := by
-    rw [hpow, hq, ec, ed, eb, ea]
+    rw [hpow]
+    rw [hq]
+    rw [ec]
+    rw [ed]
+    rw [ea]
+    rw [eb]
     ring
   rw [show j + 1 - 1 = j from by omega, hsq, Nat.add_comm, Nat.add_mul_mod_self_left,
       Nat.mod_eq_of_lt hlt]
