@@ -1429,7 +1429,7 @@ theorem gp_ones_window (k : Nat) (hk : 1 ≤ k) :
   have h2lt : 2 < 3^k := by omega
   have h2mod : 2^(2*3^(k-1) - 1 + 2) % 3^k = 2 := by
     have hcyc := two_pow_cycle (k-1)
-    rw [show Nat.succ (k-1) = k from by omega] at hcyc
+    rw [show (k:Nat) - 1 + 1 = k from by omega] at hcyc
     have hexp : 2^(2*3^(k-1) - 1 + 2) = 2 * 2^(2*3^(k-1)) := by
       have h1 : 2^(2*3^(k-1) - 1 + 2) = 2^((2*3^(k-1)) + 1) := by
         congr 1; omega
