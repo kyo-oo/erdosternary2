@@ -2250,8 +2250,8 @@ theorem mb_child_gate_transport (T q b : Nat) (hb : 2 ≤ b)
   show mbDigit (1 + 3^b * T) (b + q) = 2 ∧
     (mbCarry (1 + 3^b * T) (b + q) = 0 ∨ mbCarry (1 + 3^b * T) (b + q) = 3)
   rcases hc with h0 | h3
-  · exact Or.inl (hEcar.trans h0)
-  · exact Or.inr (hEcar.trans h3)
+  · exact ⟨hEdig.trans hd, Or.inl (hEcar.trans h0)⟩
+  · exact ⟨hEdig.trans hd, Or.inr (hEcar.trans h3)⟩
 
 /-! ### §16.4 The live instance — the law holds, the pressure reads zero -/
 
