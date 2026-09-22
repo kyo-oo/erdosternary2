@@ -7546,7 +7546,7 @@ theorem gst_graph_witness_four_pow_div_three
     (v3 k) (k / 3^(v3 k)) hs hb hb3 hnav
   simpa only [← hk_eq] using hgraph
 
-theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
+theorem erdos_ternary_2_even_universal_residual (a : Nat) (ha : 5 ≤ a) :
     hasTernaryTwo (4^a) = true := by
   by_cases ha500 : a ≤ 500
   · exact modular_check_base a ha ha500
@@ -16956,7 +16956,7 @@ theorem gst_power_two_wave_large
 
 /-- The weaker two-wave theorem closes the even exponent directly from the
 proven third-wave gate. -/
-theorem erdos_ternary_2_even_universal_of_climb
+theorem erdos_ternary_2_even_universal
     (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
     (a : Nat) (ha : 5 ≤ a) :
     hasTernaryTwo (4^a) = true := by
@@ -17006,12 +17006,12 @@ theorem erdos_ternary_2_universal
       rw [hn2, Nat.pow_mul]
     rw [hpow]
     exact has_two_imp_not_no_two (4^K)
-      (erdos_ternary_2_even_universal K hK5)
+      (erdos_ternary_2_even_universal_residual K hK5)
   · exact erdos_ternary_2_odd_universal n hn (by omega)
 
 #print axioms gst_residual_omega_termination
 #print axioms gst_residual_navigation_lift
-#print axioms erdos_ternary_2_even_universal
+#print axioms erdos_ternary_2_even_universal_residual
 #print axioms erdos_ternary_2_universal
 
 /-- THE OMEGA EVEN ROUTE.  The even case delivered from the Ω-Wave Law's

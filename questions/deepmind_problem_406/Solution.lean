@@ -3,7 +3,7 @@ import ErdosTernary2
 /-!
 # Erdős Problem 406 — ternary powers of two
 
-Fresh comparator solution against the repaired production monolith.
+Fresh comparator solution against the repaired, compatibility-preserving production monolith.
 The exported theorem is zero-input: the residual Ω termination theorem is
 live, supplies residual Navigation, and closes the unconditional even wing.
 -/
