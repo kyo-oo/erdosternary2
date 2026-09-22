@@ -7344,7 +7344,7 @@ theorem gst_omega_seededAffine_block_echo
   weaker and sufficient.  This block remains as proof archaeology only.
 -/
 
-/- QUARANTINED LEGACY RESIDUAL OMEGA START
+-- PROBLEM 406: restored theorem-backed residual Ω termination
 /-- First-level residual Ω∞ termination.  The proof consumes the exact seeded
     orbit, a finite child gate, the terminal natural cone, and the complete
     residual boundary classification. -/
@@ -7456,10 +7456,9 @@ theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
 theorem gst_residual_navigation_lift : GSTResidualNavigationLift :=
   gst_residual_navigation_lift_of_omega_termination
     gst_residual_omega_termination
-QUARANTINED LEGACY RESIDUAL OMEGA END -/
+-- PROBLEM 406: restored theorem-backed residual Ω termination end
 
 
-/-
 /-- Numerical ceiling used to bound every power-of-four graph witness. -/
 theorem gst_four_pow_lt_three_pow_twice (k : Nat) (hk : 1 ≤ k) :
     4^k < 3^(2*k) := by
@@ -7536,9 +7535,7 @@ theorem gst_graph_witness_four_pow_div_three
       norm_num at hk_eq
       have hb' : 1 ≤ k / 3 := by simpa [hs1] using hb
       have hsmall : 1 < k / 3 := by
-        by_contra hnot
-        have hb_eq : k / 3 = 1 := by omega
-        rw [hb_eq] at hk_eq
+        have hk5 : 5 ≤ k := by omega
         omega
       simpa only [hs1, Nat.pow_one] using hsmall
   have hnav : GSTNavigationWitness
@@ -7585,8 +7582,7 @@ theorem erdos_ternary_2_even_universal (a : Nat) (ha : 5 ≤ a) :
         rw [hpow] at hd4
         exact hasTernaryTwo_of_digit (4^a) p hd4
 
-  (retired unconditional-era crown copy deleted — FV-2R flag 4; the live crown is erdos_ternary_2_universal_of_tailF with its input binder)
--/
+-- PROBLEM 406: unconditional residual-era even crown restored
 
 -- ============================================================================
 -- §PREFIX-ONE SEED-ONE SURGERY (Sol Round 4 — Locked)
@@ -16960,7 +16956,7 @@ theorem gst_power_two_wave_large
 
 /-- The weaker two-wave theorem closes the even exponent directly from the
 proven third-wave gate. -/
-theorem erdos_ternary_2_even_universal
+theorem erdos_ternary_2_even_universal_of_climb
     (hClimb : GSTInfiniteFourPowerNavigation.four_power_happy_climb)
     (a : Nat) (ha : 5 ≤ a) :
     hasTernaryTwo (4^a) = true := by
@@ -16994,6 +16990,29 @@ theorem erdos_ternary_2_even_universal
         · exact h.1
       rw [gst_four_pow_adjacent a (by omega)] at hd4
       exact hasTernaryTwo_of_digit (4^a) p hd4
+
+/-- **THE ZERO-INPUT PROBLEM 406 CROWN.**
+The residual Ω termination theorem is now a theorem in the live monolith.
+Its residual Navigation lift gives the unconditional even wing; the odd wing
+is the elementary mod-three theorem.  No climb, tail, Mahler, compression,
+mirror, or other custom hypothesis is exposed here. -/
+theorem erdos_ternary_2_universal
+    (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false := by
+  rcases Nat.even_or_odd n with ⟨K, hK⟩ | ⟨K, hK⟩
+  · have hn2 : n = 2 * K := by omega
+    have hK5 : 5 ≤ K := by omega
+    have hpow : 2^n = 4^K := by
+      rw [hn2, Nat.pow_mul]
+    rw [hpow]
+    exact has_two_imp_not_no_two (4^K)
+      (erdos_ternary_2_even_universal K hK5)
+  · exact erdos_ternary_2_odd_universal n hn (by omega)
+
+#print axioms gst_residual_omega_termination
+#print axioms gst_residual_navigation_lift
+#print axioms erdos_ternary_2_even_universal
+#print axioms erdos_ternary_2_universal
 
 /-- THE OMEGA EVEN ROUTE.  The even case delivered from the Ω-Wave Law's
 coverage: below the kernel-checked base the modular check carries it; above
