@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - sol/kyo-gate-universe-wire
+      - astra/problem406-hypothesis-theorem-repair
     paths:
       - Main.lean
       - lakefile.toml
