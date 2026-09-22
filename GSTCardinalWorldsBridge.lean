@@ -2199,6 +2199,22 @@ theorem mb_cell_c (R p : Nat) :
   have h := gstCarry_forward_exact_all R p
   simpa [gstStepCarry, gstCarry, gstDigit, mbCarry, mbDigit] using h
 
+/-- **EQUATION (20) OF THE HAND — THE BASE CARRY OF THE CANONICAL
+RECTANGLE.**  The forced prefix one at the canonical cut rides a zero x4
+carry: for every `b ≥ 2` and every tail `T`, the cell of `1 + 3^b·T` at
+row `b` — the rectangle's left-boundary base — has `C_{0,b} = 0`.  This is
+the first missing piece of the telescope assembly (the reconstruction's
+right track, STEP 1.7): the hand's (20), on the production `mbCarry`,
+universal in `T` and `b`. -/
+theorem mb_base_carry_zero (T b : Nat) (hb : 2 ≤ b) :
+    mbCarry (1 + 3^b * T) b = 0 := by
+  have h9 : (9:Nat) ≤ 3^b := Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
+  have hmod : (1 + 3^b * T) % 3^b = 1 := by
+    rw [Nat.add_mul_mod_self_right]
+    exact Nat.mod_eq_of_lt (by omega)
+  simp only [mbCarry, hmod, Nat.mul_one]
+  exact Nat.div_eq_of_lt (by omega)
+
 /-! ### §16.3 The child gate transport — the surviving half of §7 -/
 
 /-- **THE CHILD-TO-LEFT-BOUNDARY TRANSPORT.**  A Happy gate of the child
@@ -2481,6 +2497,7 @@ theorem mb_corr_happy_ne_survive :
 #print axioms mb_charge_nonpos_of_not_happy
 #print axioms mb_cell_e
 #print axioms mb_cell_c
+#print axioms mb_base_carry_zero
 #print axioms mb_child_gate_transport
 #print axioms mb_inst_canonicals
 #print axioms mb_inst_child_gate
