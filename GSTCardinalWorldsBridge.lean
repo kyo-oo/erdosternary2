@@ -2211,7 +2211,7 @@ theorem mb_base_carry_zero (T b : Nat) (hb : 2 ≤ b) :
   have h9 : (9:Nat) ≤ 3^b := Nat.pow_le_pow_of_le (by decide : 1 < 3) hb
   have hmod : (1 + 3^b * T) % 3^b = 1 := by
     have hzero : 3^b * T % 3^b = 0 := Nat.mod_eq_zero_of_dvd ⟨T, rfl⟩
-    rw [Nat.add_mod, hzero, Nat.add_zero]
+    rw [Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
     exact Nat.mod_eq_of_lt (by omega)
   simp only [mbCarry, hmod, Nat.mul_one]
   exact Nat.div_eq_of_lt (by omega)
