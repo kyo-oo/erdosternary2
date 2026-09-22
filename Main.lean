@@ -12,6 +12,7 @@ import GSTWorldtraceArithmetic
 import GSTGhostRayExclusion
 import GSTWorldtraceMahlerRelativePrecision
 import GSTFinalResidualConnector
+import GSTFinalPrefixOneStep6Boundary
 
 /-!
 # ErdosTernary2 — the monolith's entry face
