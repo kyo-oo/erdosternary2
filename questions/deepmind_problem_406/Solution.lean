@@ -1,13 +1,11 @@
-import ErdosTernary2
+import GSTResidualOmegaRevival
 
 /-!
 # Erdős Problem 406 — ternary powers of two
 
-Fresh comparator solution against the repaired, compatibility-preserving production monolith.
-The exported theorem is zero-input: the exact residual Ω termination theorem is
-live and kernel-compiled, supplies residual Navigation, and closes the unconditional even wing.
-This file is intentionally minimal so the official Challenge/Solution comparator audits the
-public theorem surface rather than a duplicated proof script.
+Fresh comparator solution against the repaired theorem-backed residual Ω closure.
+The public theorem has no custom hypothesis: exact residual Ω termination supplies
+residual Navigation, the unconditional even wing, THE ACT, and the full Erdős statement.
 -/
 
 def noTernaryDigitTwo (n : Nat) : Bool :=
@@ -34,6 +32,6 @@ theorem erdos_ternary_2 :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact erdos_ternary_2_universal n hn
+  exact GSTResidualOmegaRevival.full_erdos n hn
 
 #print axioms erdos_ternary_2
