@@ -94,7 +94,8 @@ theorem exists_happy_of_happyBelow :
         exact ⟨B, hcond.1, by omega,
           ⟨by unfold digit3; exact hcond.2.1,
             by unfold carry4; exact hcond.2.2⟩⟩
-      · exact ih n h
+      · obtain ⟨p, hp3, hpB, hcell⟩ := ih n h
+        exact ⟨p, hp3, by omega, hcell⟩
 
 /-- The x4-carry at a position below the window bound is untouched by the
 window reduction: carries at positions `≤ B` depend only on `R mod 3^B`. -/
@@ -114,16 +115,17 @@ theorem digit3_mod_window (R B p : Nat) (hp : p < B) :
     rw [← Nat.pow_add]
     congr 1
     omega
+  have hfac : 3^B * (R / 3^B) = 3^p * (3^(B - p) * (R / 3^B)) := by
+    rw [← Nat.mul_assoc, ← hsplit]
   have hR : R = 3^p * (3^(B - p) * (R / 3^B)) + R % 3^B := by
-    have hdm := Nat.div_add_mod R (3^B)
-    rw [hsplit, Nat.mul_assoc] at hdm
+    have hdm : 3^B * (R / 3^B) + R % 3^B = R := Nat.div_add_mod R (3^B)
     omega
-  conv_rhs => rw [hR, Nat.add_mul_div_left _ _ h3p]
+  conv_rhs => rw [hR, Nat.add_comm, Nat.add_mul_div_left _ _ h3p]
   have hzero : (3^(B - p) * (R / 3^B)) % 3 = 0 := by
     rcases Nat.exists_eq_succ_of_ne_zero (by omega : B - p ≠ 0) with ⟨m, hm⟩
     rw [hm, Nat.pow_succ]
     simp [Nat.mul_mod]
-  rw [Nat.add_mod, hzero, Nat.zero_add, Nat.mod_mod]
+  rw [Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
 
 /-- A Happy cell of the window-reduced power is a Happy cell of the power
 itself, inside the window. -/
