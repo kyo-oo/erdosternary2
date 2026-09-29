@@ -121,7 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake build ErdosTernary2
+          lake build ErdosTernary2 GSTFourPowerHappyBaseCamp
           lake env lean questions/deepmind_problem_406/Solution.lean
           echo PROBLEM406_CHALLENGE_SOLUTION_BUILD_GREEN=1
 
