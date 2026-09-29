@@ -126,6 +126,7 @@ roots = [
   "GSTWorldtraceArithmetic",
   "GSTGhostRayExclusion",
   "GSTWorldtraceMahlerRelativePrecision",
+  "GSTHypothesisToTheorem",
 ]
 
 [[lean_exe]]
