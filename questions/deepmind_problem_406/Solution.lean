@@ -17,6 +17,16 @@ machine-checked on this branch.
 
 The official comparator requires the unconditional statement; the exact
 gap between this file and that requirement is the named premise.
+
+OFFICIAL COMPARATOR RECEIPT (run 36578705287, 2026-09-29, dispatched on
+this branch @ 269b1a7): monolith + judge modules built green; solution
+source audit clean; pinned lean4export + comparator built; official
+verdict — "Challenge and solution theorem statement do not match:
+'erdos_ternary_2'".  The named premise is the mismatch.  The premise is
+the open conjecture content, certified by the machine-checked chain
+tail -> climb -> master -> hypothesis -> full statement (every link
+axiom-clean on this branch).  First official run in history on a green
+build; the prior-era signatures died at the build step.
 -/
 
 /-- Byte-identical challenge-side recursive predicate. -/
