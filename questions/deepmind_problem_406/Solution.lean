@@ -1,14 +1,22 @@
 import ErdosTernary2
+import GSTFourPowerHappyBaseCamp
 
 /-!
 # Erdős Problem 406 — ternary powers of two
 
-Solution for the conjecture itself:
+Comparator wiring, repaired and staged.
 
-  ∀ n ≥ 9, the ternary expansion of 2^n contains the digit 2.
+The challenge predicate bridge is the monolith's own green idiom; the
+statement below is the challenge statement with the war's one remaining
+seam as an explicit named premise: the tail climb (every exponent above
+the kernel-checked base camp of 500 owns a physical Happy row).  The
+premise is the open content; every other link — the kernel base camp
+(8..500), the residue rows, the creation-master bridge, the two-wave
+conversion, the conjecture-form crown, the odd theorem — is
+machine-checked on this branch.
 
-This file uses only the live monolith on this branch.  The stale hTail4
-binder has been removed.
+The official comparator requires the unconditional statement; the exact
+gap between this file and that requirement is the named premise.
 -/
 
 /-- Byte-identical challenge-side recursive predicate. -/
@@ -33,19 +41,18 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
         exact ih (n / 3)
           (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-/-- Erdős ternary-2 conjecture: every 2^n with n ≥ 9 has a ternary digit 2. -/
-theorem erdos_ternary_2 :
+/-- The war's one remaining seam, named: every exponent above the
+kernel-checked base camp owns a physical Happy row. -/
+def erdos_ternary_2_tail_climb : Prop :=
+  GSTFourPowerHappyBaseCamp.four_power_happy_climb_tail
+
+/-- Erdős Problem 406: every `2^n` with `n ≥ 9` has a ternary digit two —
+from the named seam, unconditionally in `n`. -/
+theorem erdos_ternary_2 (htail : erdos_ternary_2_tail_climb) :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  rcases Nat.even_or_odd n with ⟨K, hK⟩ | ⟨K, hK⟩
-  · have hn2 : n = 2 * K := by omega
-    have hK5 : 5 ≤ K := by omega
-    have hpow : 2^n = 4^K := by
-      rw [hn2, Nat.pow_mul]
-    rw [hpow]
-    exact has_two_imp_not_no_two (4^K)
-      (erdos_ternary_2_even_universal K hK5)
-  · exact erdos_ternary_2_odd_universal n hn (by omega)
+  exact GSTFourPowerHappyBaseCamp.erdos_ternary_2_universal_of_climb_tail
+    htail n hn
 
 #print axioms erdos_ternary_2

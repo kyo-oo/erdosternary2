@@ -127,6 +127,7 @@ roots = [
   "GSTGhostRayExclusion",
   "GSTWorldtraceMahlerRelativePrecision",
   "GSTHypothesisToTheorem",
+  "GSTFourPowerHappyBaseCamp",
 ]
 
 [[lean_exe]]

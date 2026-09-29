@@ -140,6 +140,25 @@ jobs:
           lake build GSTHypothesisToTheorem 2>&1 | tee hyptheo-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' hyptheo-build.log
 
+      - name: Happy base camp module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTFourPowerHappyBaseCamp 2>&1 | tee basecamp-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' basecamp-build.log
+
+      - name: Solution wiring builds (official probe staging)
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          cp questions/deepmind_problem_406/Challenge.lean Challenge.lean
+          cp questions/deepmind_problem_406/Solution.lean Solution.lean
+          printf '\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n' >> lakefile.toml
+          lake build Solution 2>&1 | tee solution-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' solution-build.log
+          git checkout -- lakefile.toml
+          rm -f Challenge.lean Solution.lean
+
       - name: Exact V5 comparator
         run: |
           set -euo pipefail
