@@ -5,6 +5,7 @@ on:
     branches:
       - sol/gpt56-canonical-tail-escape-20260827
       - sol/kyo-de11-axiom-to-theorem
+      - astra/problem406-hypothesis-theorem-repair
     paths:
       - ErdosTernary2.lean
       - questions/deepmind_problem_406/Challenge.lean

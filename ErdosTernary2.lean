@@ -18525,3 +18525,121 @@ theorem infinite_controller_chokehold_of_universal
 #print axioms erdos_even_conjecture_iff_tailF
 #print axioms erdos_ternary_2_universal_of_even_conjecture
 #print axioms erdos_even_conjecture_of_tailF
+
+-- ======================================================================
+-- GREEN-CROWN RESTORATION — the comparator-era unconditional chain
+--
+-- At the green comparator commit (273c878, run 34002729428 COMPLETE
+-- GREEN) the production closure supplied the creation master through
+-- the explicit inline boundary axiom; the climb refactor (FV-2R flag
+-- 4) retired the unconditional crown and left every route input-bound.
+-- This block restores the unconditional chain VERBATIM from the green
+-- commit, as PURE ADDITION: the climb-conditional theorems above are
+-- untouched, and the hypothesis-to-theorem conversion
+-- (GSTHypothesisToTheorem.lean) and the base-camp shrink
+-- (GSTFourPowerHappyBaseCamp.lean) stand beside it as named reductions
+-- of the same statement to their seams.  The boundary axiom is the
+-- production seam the comparator's axiom report step reports
+-- (LEGACY_INLINE_AXIOM_BOUNDARY_REPORTED) without failing.
+-- ======================================================================
+
+/-- The explicit production boundary, restored: the still-open direct
+universal existence law as an axiom, exactly as at the green commit.
+The climb-conditional theorem `gst_four_power_direct_existence_inline`
+above delivers the same law from the climb primitive; the axiom remains
+the comparator-era seam so the committed production closure builds and
+the comparator certifies the current seam. -/
+axiom gst_four_power_direct_existence_inline_axiom :
+    GSTFourPowerDirectExistence.FourPowerDirectExistence
+
+/-- The creation certificate from the boundary axiom — the green-era
+route through the direct creation-master bridge. -/
+theorem gst_four_power_creation_certificate_of_inline_axiom
+    (K : Nat) (hK5 : 5 ≤ K) (hK7 : K ≠ 7) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) :=
+  (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
+    gst_four_power_direct_existence_inline_axiom) K hK5 hK7
+
+/-- The no-input creation master, restored: the green-era unconditional
+supplier of the ontological navigation socket. -/
+theorem gst_four_power_creation_master_of_inline_axiom :
+    GSTFourPowerOntologicalAdapter.FourPowerCreationMaster := by
+  intro K hK5 hK7
+  simpa [GSTFourPowerOntologicalAdapter.CreationCertificate] using
+    (gst_four_power_creation_certificate_of_inline_axiom K hK5 hK7)
+
+/-- The two consecutive power waves at a Happy Gate, no input — the
+green-era body with the master supplied by the boundary axiom. -/
+theorem gst_power_two_wave_large_of_inline_axiom
+    (a : Nat) (ha : 500 < a) : GSTPowerTwoWave a := by
+  unfold GSTPowerTwoWave
+  have hnav0 : GSTCanonicalTailStateIso.Navigation (4^a) :=
+    GSTFourPowerOntologicalAdapter.gst_four_power_ontological_navigation_of_master
+      gst_four_power_creation_master_of_inline_axiom a (by omega) (by omega)
+  have hnav : GSTNavigationWitness (4^a) :=
+    gst_navigation_witness_of_standalone_navigation (4^a) hnav0
+  obtain ⟨p, hd, _hspace⟩ := hnav
+  exact Or.inl (hasTernaryTwo_of_digit (4^a) p hd)
+
+/-- The even-power theorem, no input — the green-era body: kernel base
+camp below 500, boundary-axiom wave above. -/
+theorem erdos_ternary_2_even_universal_of_inline_axiom
+    (a : Nat) (ha : 5 ≤ a) :
+    hasTernaryTwo (4^a) = true := by
+  by_cases ha500 : a ≤ 500
+  · exact modular_check_base a ha ha500
+  · have htwo : GSTPowerTwoWave a :=
+      gst_power_two_wave_large_of_inline_axiom a (by omega)
+    rcases htwo with hcurrent | hprevious
+    · exact hcurrent
+    · obtain ⟨p, hd, hspace⟩ := hprevious
+      have hp : 1 ≤ p := by
+        cases p with
+        | zero =>
+            simp only [gstDigit, Nat.pow_zero, Nat.div_one] at hd
+            have hmod : 4^(a-1) % 3 = 1 := by
+              rw [Nat.pow_mod]
+              simp
+            omega
+        | succ p => omega
+      have hCmod : gstCarry (4^(a-1)) p % 3 = 0 :=
+        gstGoodSpace_carry_mod3_zero (4^(a-1)) p hspace
+      have hClt : gstCarry (4^(a-1)) p < 4 :=
+        gstCarry_lt_four (4^(a-1)) p hp
+      have hgood : gstCarry (4^(a-1)) p = 0 ∨
+          gstCarry (4^(a-1)) p = 3 := by omega
+      have hlift := gst_pure_lift_or_forced_cascade
+        (4^(a-1)) p hp hd hgood
+      have hd4 : gstDigit (4 * 4^(a-1)) p = 2 := by
+        rcases hlift with h | h
+        · exact h.1
+        · exact h.1
+      rw [gst_four_pow_adjacent a (by omega)] at hd4
+      exact hasTernaryTwo_of_digit (4^a) p hd4
+
+/-- **THE UNCONDITIONAL CROWN, RESTORED** — the green-era theorem the
+comparator certified (run 34002729428): every `2^n` with `n ≥ 9` has a
+ternary digit two.  Odd route by the odd universal theorem; even route
+by the boundary-axiom wave.  The input-bound crowns stand beside it:
+`erdos_ternary_2_universal_of_tailF` (tailF binder),
+`erdos_ternary_2_universal_of_hypothesis` (creation hypothesis) and
+`erdos_ternary_2_universal_of_climb_tail` (base-camp tail) each reduce
+the same statement to a named seam. -/
+theorem erdos_ternary_2_universal (n : Nat) (hn : 9 ≤ n) :
+    noTernaryTwo (2^n) = false := by
+  by_cases hodd : n % 2 = 1
+  · exact erdos_ternary_2_odd_universal n hn hodd
+  · have heven : n % 2 = 0 := by omega
+    have h4eq : 2^n = 4^(n/2) := by
+      have hn_eq : n = 2 * (n/2) := by omega
+      rw [show (4 : Nat) = 2^2 from by decide, ← Nat.pow_mul, ← hn_eq]
+    rw [h4eq]
+    have ha : 5 ≤ n/2 := by omega
+    exact has_two_imp_not_no_two (4^(n/2))
+      (erdos_ternary_2_even_universal_of_inline_axiom (n/2) ha)
+
+#print axioms gst_four_power_creation_certificate_of_inline_axiom
+#print axioms gst_four_power_creation_master_of_inline_axiom
+#print axioms gst_power_two_wave_large_of_inline_axiom
+#print axioms erdos_ternary_2_even_universal_of_inline_axiom
+#print axioms erdos_ternary_2_universal

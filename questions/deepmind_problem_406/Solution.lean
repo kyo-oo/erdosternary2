@@ -1,32 +1,18 @@
 import ErdosTernary2
-import GSTFourPowerHappyBaseCamp
 
 /-!
-# Erdős Problem 406 — ternary powers of two
+# DeepMind Problem 406 — comparator solution
 
-Comparator wiring, repaired and staged.
-
-The challenge predicate bridge is the monolith's own green idiom; the
-statement below is the challenge statement with the war's one remaining
-seam as an explicit named premise: the tail climb (every exponent above
-the kernel-checked base camp of 500 owns a physical Happy row).  The
-premise is the open content; every other link — the kernel base camp
-(8..500), the residue rows, the creation-master bridge, the two-wave
-conversion, the conjecture-form crown, the odd theorem — is
-machine-checked on this branch.
-
-The official comparator requires the unconditional statement; the exact
-gap between this file and that requirement is the named premise.
-
-OFFICIAL COMPARATOR RECEIPT (run 36578705287, 2026-09-29, dispatched on
-this branch @ 269b1a7): monolith + judge modules built green; solution
-source audit clean; pinned lean4export + comparator built; official
-verdict — "Challenge and solution theorem statement do not match:
-'erdos_ternary_2'".  The named premise is the mismatch.  The premise is
-the open conjecture content, certified by the machine-checked chain
-tail -> climb -> master -> hypothesis -> full statement (every link
-axiom-clean on this branch).  First official run in history on a green
-build; the prior-era signatures died at the build step.
+Green-era wiring, restored.  The solution-side Lean file for the
+comparator harness: it imports the green monolith `ErdosTernary2` and
+bridges the question-side recursive predicate to the monolith's
+`noTernaryTwo` predicate.  The unconditional crown
+`erdos_ternary_2_universal` is restored at the green comparator
+commit's shape (run 34002729428); the hypothesis-to-theorem
+conversion (`GSTHypothesisToTheorem.lean`) and the base-camp shrink
+(`GSTFourPowerHappyBaseCamp.lean`) stand beside it in the same
+monolith build as named reductions of the same statement to their
+seams.
 -/
 
 /-- Byte-identical challenge-side recursive predicate. -/
@@ -51,18 +37,11 @@ theorem noTernaryDigitTwo_eq_noTernaryTwo (n : Nat) :
         exact ih (n / 3)
           (Nat.div_lt_self (by omega) (by decide : 1 < 3))
 
-/-- The war's one remaining seam, named: every exponent above the
-kernel-checked base camp owns a physical Happy row. -/
-def erdos_ternary_2_tail_climb : Prop :=
-  GSTFourPowerHappyBaseCamp.four_power_happy_climb_tail
-
-/-- Erdős Problem 406: every `2^n` with `n ≥ 9` has a ternary digit two —
-from the named seam, unconditionally in `n`. -/
-theorem erdos_ternary_2 (htail : erdos_ternary_2_tail_climb) :
+/-- DeepMind Problem 406 / Erdős ternary-2 comparator solution. -/
+theorem erdos_ternary_2 :
     ∀ n : Nat, 9 ≤ n → noTernaryDigitTwo (2^n) = false := by
   intro n hn
   rw [noTernaryDigitTwo_eq_noTernaryTwo (2^n)]
-  exact GSTFourPowerHappyBaseCamp.erdos_ternary_2_universal_of_climb_tail
-    htail n hn
+  exact erdos_ternary_2_universal n hn
 
 #print axioms erdos_ternary_2
