@@ -83,7 +83,9 @@ theorem omega_happy_conjugation (a core j : Nat) (ha : 1 ≤ a)
     exact hd
   · have hcar := prefix_slice_seed_zero (a+1) 1 (omegaCutWord a core) j hP hseed
     have hsc : seededCarry 0 (omegaCutWord a core) j
-        = carry4 (omegaCutWord a core) j := rfl
+        = carry4 (omegaCutWord a core) j := by
+      unfold seededCarry carry4
+      rw [Nat.zero_add]
     rw [hf, hcar, hsc]
     exact hc
 
