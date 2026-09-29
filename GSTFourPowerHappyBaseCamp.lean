@@ -131,7 +131,8 @@ theorem happy_cell_pow_mod (K B p : Nat) (hp : p < B)
     (h : HappyCell (carry4 (powMod 4 K (3^B)) p) (digit3 (powMod 4 K (3^B)) p)) :
     HappyCell (carry4 (4^K) p) (digit3 (4^K) p) := by
   have hpm : powMod 4 K (3^B) = 4^K % 3^B :=
-    powMod_correct 4 K (3^B) (by decide)
+    powMod_correct 4 K (3^B)
+      (by have h : 0 < 3^B := Nat.pow_pos (by decide); omega)
   rw [hpm] at h
   rw [carry4_mod_window 4^K B p (by omega),
     digit3_mod_window 4^K B p hp] at h
