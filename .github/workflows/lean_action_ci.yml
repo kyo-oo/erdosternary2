@@ -147,6 +147,13 @@ jobs:
           lake build GSTFourPowerHappyBaseCamp 2>&1 | tee basecamp-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' basecamp-build.log
 
+      - name: Omega cell-conjugation module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTOmegaCellConjugation 2>&1 | tee omegaconj-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' omegaconj-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
