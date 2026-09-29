@@ -26,7 +26,6 @@ roots = [
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
   "GSTFinalResidualConnector",
-  "GSTResidualOmegaRevival",
   "GSTFourPowerThirdWave",
   "GSTFourPowerThirdWaveMultiscaleBridge",
   "GSTFourPowerThirdWaveMultiscaleClosure",
