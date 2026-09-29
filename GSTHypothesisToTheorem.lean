@@ -148,11 +148,11 @@ with `n ≥ 9` has a ternary digit two, given the creation hypothesis. -/
 theorem erdos_ternary_2_universal_of_hypothesis
     (h : erdos_ternary_2_creation_hypothesis)
     (n : Nat) (hn : 9 ≤ n) :
-    noTernaryTwo (2^n) = false := by
-  apply erdos_ternary_2_universal_of_even_conjecture
-  intro K hK
-  exact has_two_imp_not_no_two (4^K)
-    (erdos_ternary_2_even_universal_of_hypothesis h K (by omega))
+    noTernaryTwo (2^n) = false :=
+  erdos_ternary_2_universal_of_even_conjecture
+    (fun K hK => has_two_imp_not_no_two (4^K)
+      (erdos_ternary_2_even_universal_of_hypothesis h K (by omega)))
+    n hn
 
 /-! ## Section 2 — the named core and the k=1 collision-core wire -/
 
@@ -178,7 +178,7 @@ def GSTStep6SignClosure (s n : Nat) : Prop :=
 
 /-- The canonical residual rectangle is nondegenerate: `residualWidth s = 3^s
 ≥ 1`. -/
-theorem residualWidth_pos (s : Nat) (hs : 1 ≤ s) : 1 ≤ residualWidth s := by
+theorem residualWidth_pos (s : Nat) (_hs : 1 ≤ s) : 1 ≤ residualWidth s := by
   unfold residualWidth
   have hpos : 0 < 3^s := Nat.pow_pos (by decide)
   omega
