@@ -129,6 +129,8 @@ roots = [
   "GSTHypothesisToTheorem",
   "GSTFourPowerHappyBaseCamp",
   "GSTOmegaCellConjugation",
+  "GSTShadowGap",
+  "GSTShadowGapReceipt",
 ]
 
 [[lean_exe]]

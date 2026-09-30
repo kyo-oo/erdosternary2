@@ -154,6 +154,20 @@ jobs:
           lake build GSTOmegaCellConjugation 2>&1 | tee omegaconj-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' omegaconj-build.log
 
+      - name: Shadow gap module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTShadowGap 2>&1 | tee shadowgap-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' shadowgap-build.log
+
+      - name: Shadow gap receipt module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTShadowGapReceipt 2>&1 | tee shadowreceipt-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' shadowreceipt-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
