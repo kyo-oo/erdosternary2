@@ -131,6 +131,7 @@ roots = [
   "GSTOmegaCellConjugation",
   "GSTShadowGap",
   "GSTShadowGapReceipt",
+  "GSTShadowSeparationAttack",
 ]
 
 [[lean_exe]]
