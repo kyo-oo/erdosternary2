@@ -132,6 +132,7 @@ roots = [
   "GSTShadowGap",
   "GSTShadowGapReceipt",
   "GSTShadowSeparationAttack",
+  "GSTUnifiedCrown",
 ]
 
 [[lean_exe]]

@@ -175,6 +175,13 @@ jobs:
           lake build GSTShadowSeparationAttack 2>&1 | tee shadowattack-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' shadowattack-build.log
 
+      - name: Unified crown module
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTUnifiedCrown 2>&1 | tee unifiedcrown-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' unifiedcrown-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
