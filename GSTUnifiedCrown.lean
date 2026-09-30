@@ -109,8 +109,7 @@ theorem crown_of_third_wave_no_common_descent
   fun n hn =>
     GSTHypothesisToTheorem.erdos_ternary_2_universal_of_hypothesis
       (GSTFourPowerDirectCreationMaster.directExistence_to_creation_master
-        (GSTFourPowerThirdWaveMultiscaleClosure.
-            fourPowerDirectExistence_of_thirdWaveNoCommonDescent h)) n hn
+        (GSTFourPowerThirdWaveMultiscaleClosure.fourPowerDirectExistence_of_thirdWaveNoCommonDescent h)) n hn
 
 /-! ## Route 4 — the cardinal-worlds mirror bridge -/
 
@@ -232,7 +231,7 @@ theorem crown_of_any_named_route
 #print axioms crown_of_separation
 #print axioms crown_of_any_named_route
 
-/-- The unit tail law — unconditional — enters the war branch's CI
+/- The unit tail law — unconditional — enters the war branch's CI
 through this module's import chain. -/
 #check GSTNavigationUnitTail.navigation_unit_tail
 
