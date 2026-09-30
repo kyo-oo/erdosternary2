@@ -66,7 +66,6 @@ theorem even_digit_two_of_comparator
   have hn := h (2 * m) hnm
   have hpow : 2^(2 * m) = 4^m := by
     rw [Nat.pow_mul]
-    norm_num
   rw [hpow] at hn
   obtain ⟨p, hp⟩ := no_two_false_digit_witness (4^m) hn
   exact ⟨p, hp⟩
@@ -78,7 +77,7 @@ digit two. -/
 theorem comparator_iff_even_digit_two :
     (∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false) ↔
     (∀ m : Nat, 5 ≤ m → ∃ p : Nat, digit3 (4^m) p = 2) :=
-  ⟨comparator_of_even_digit_two, even_digit_two_of_comparator⟩
+  ⟨even_digit_two_of_comparator, comparator_of_even_digit_two⟩
 
 /-! ## Section 2 — the climb route, restated in one place -/
 
@@ -127,11 +126,11 @@ theorem THE_REMAINING_CONTENT :
   constructor
   · intro h m hm hshadow
     obtain ⟨p, hp⟩ := h m hm
-    exact hp ((eternally_shadowed_iff_no_digit_two m).mp hshadow p)
+    exact (eternally_shadowed_iff_no_digit_two m).mp hshadow p hp
   · intro h m hm
     by_contra hclean
     exact h m hm ((eternally_shadowed_iff_no_digit_two m).mpr
-      (fun p => hclean p))
+      (not_exists.mp hclean))
 
 /-! ## Section 4 — receipts -/
 
