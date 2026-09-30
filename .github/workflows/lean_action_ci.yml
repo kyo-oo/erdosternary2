@@ -182,6 +182,14 @@ jobs:
           lake build GSTUnifiedCrown 2>&1 | tee unifiedcrown-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' unifiedcrown-build.log
 
+      - name: Unconditional coverage module
+        if: always()
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTUnconditionalCoverage 2>&1 | tee coverage-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' coverage-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
