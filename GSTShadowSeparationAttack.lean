@@ -523,7 +523,7 @@ theorem killed_class_early_digit_two (L m : Nat)
   apply hkill
   refine survivorClasses_complete L (m % 3^L) hr ?_
   intro p hp hdirty
-  rw [htrans p hp] at hdirty
+  rw [← htrans p hp] at hdirty
   exact hno ⟨p, hp, hdirty⟩
 
 /-! ### The level-five kernel receipt -/
