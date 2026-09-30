@@ -154,10 +154,10 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
       -- the key modular law: c + m*Y mod 3m for c < m
       have keymod (m c Y : Nat) (hm : 0 < m) (hclt : c < m) :
           (c + m * Y) % (3 * m) = c + m * (Y % 3) := by
-        have hY : Y = 3 * (Y / 3) + Y % 3 := Nat.div_add_mod Y 3
+        have hY : Y = 3 * (Y / 3) + Y % 3 := (Nat.div_add_mod Y 3).symm
         have hY3 : Y % 3 < 3 := Nat.mod_lt _ (by norm_num)
         have hexp : c + m * Y = (c + m * (Y % 3)) + (3 * m) * (Y / 3) := by
-          rw [hY]
+          conv_lhs => rw [hY]
           ring
         rw [hexp, Nat.add_mul_mod_self_left]
         apply Nat.mod_eq_of_lt
@@ -191,7 +191,7 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
               rw [hp2]
               exact Nat.pow_dvd_pow 3 hle
             rw [hsq]
-            exact hMdvd.mul _
+            exact dvd_mul_of_dvd_left hMdvd _
           rw [hg2, hMM]
           obtain ⟨k, hk⟩ := hdvd
           have hexp : 1 + 2 * (3^(L+1) * lteCoeff L) + (3^(L+1) * lteCoeff L)^2
@@ -245,7 +245,7 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
             = (4^rp % 3^(L+1)) + 3^(L+1) * ((1 + 3*z) / 3^(L+1)) := by
           have hdm : 3^(L+1) * ((1 + 3*z) / 3^(L+1)) + (1 + 3*z) % 3^(L+1)
               = 1 + 3*z := Nat.div_add_mod (1 + 3*z) (3^(L+1))
-          have hcc : (1 + 3*z) % 3^(L+1) = 4^rp % 3^(L+1) := hrpow
+          have hcc : (1 + 3*z) % 3^(L+1) = 4^rp % 3^(L+1) := hrpow.symm
           omega
         rw [hMM]
         conv_lhs => rw [hBeq]
