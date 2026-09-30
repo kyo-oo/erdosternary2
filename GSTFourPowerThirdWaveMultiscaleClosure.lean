@@ -81,13 +81,13 @@ theorem fourPowerDirectExistence_of_thirdWaveNoCommonDescent
         omega
       have hNoq : ¬ CommonTwo q := by
         have hrCases : r = 0 ∨ r = 1 ∨ r = 2 := by omega
-        rcases hrCases with rfl | rfl | rfl
+        rcases hrCases with hr0 | hr1 | hr2
         · apply hDesc.1 q
-          simpa [hKqr] using hNo
+          simpa [hKqr, hr0] using hNo
         · apply hDesc.2.1 q
-          simpa [hKqr] using hNo
+          simpa [hKqr, hr1] using hNo
         · apply hDesc.2.2 q
-          simpa [hKqr] using hNo
+          simpa [hKqr, hr2] using hNo
       have hqLt : q < K := by
         dsimp [q]
         exact Nat.div_lt_self (by omega) (by decide : 1 < 3)
