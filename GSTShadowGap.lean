@@ -98,7 +98,7 @@ theorem digit3_mod_window (R B p : Nat) (hp : p < B) :
     rcases Nat.exists_eq_succ_of_ne_zero (by omega : B - p ≠ 0) with ⟨m, hm⟩
     rw [hm, Nat.pow_succ]
     simp [Nat.mul_mod]
-  rw [hsplit, Nat.add_mod, hzero, Nat.add_zero]
+  rw [hsplit, Nat.add_mod, hzero, Nat.add_zero, Nat.mod_mod]
 
 /-- The window-class law: the window content of `4^m` at scale `L`
 depends only on `m % 3^L`. -/
@@ -140,7 +140,7 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
           rw [three_pow_succ_mul]
           ring
         rw [h3z, Nat.add_mul_mod_self_left]
-      rw [← htarget] at hrpow
+      rw [htarget] at hrpow
       -- LTE: the lifting generator and its unit coefficient
       have hLTE : 4^(3^L) = 1 + 3^(L+1) * lteCoeff L :=
         pow4_three_power_lte_exact L
@@ -273,7 +273,7 @@ def cleanList : Nat → List Nat
 
 theorem cleanList_length (n : Nat) : (cleanList n).length = 2^n := by
   induction n with
-  | zero => simp
+  | zero => rfl
   | succ n ih =>
       simp only [cleanList, List.length_map, List.length_append, ih]
       have hp : 2^(n+1) = 2 * 2^n := by
@@ -327,13 +327,15 @@ theorem cleanList_complete (n : Nat) : ∀ z : Nat, z < 3^n →
       intro z hz _
       have hz0 : z = 0 := Nat.lt_one_iff.mp hz
       subst hz0
-      simp
+      simp [cleanList]
   | succ n ih =>
       intro z hz hclean
       have he : z % 3 < 3 := Nat.mod_lt _ (by norm_num)
       have hd0 : digit3 z 0 = z % 3 := by
         simp only [digit3, Nat.pow_zero, Nat.div_one]
-      have hne : z % 3 ≠ 2 := hclean 0 (by omega)
+      have hne : z % 3 ≠ 2 := by
+        rw [← hd0]
+        exact hclean 0 (by omega)
       have hzy : z = 3 * (z / 3) + z % 3 := (Nat.div_add_mod z 3).symm
       have hylt : z / 3 < 3^n := by
         apply Nat.div_lt_of_lt_mul
@@ -357,14 +359,16 @@ theorem cleanList_complete (n : Nat) : ∀ z : Nat, z < 3^n →
 
 theorem cleanList_nodup (n : Nat) : (cleanList n).Nodup := by
   induction n with
-  | zero => simp
+  | zero => simp [cleanList]
   | succ n ih =>
       simp only [cleanList]
       have inj1 : Function.Injective (fun z : Nat => 3 * z) := by
         intro a b h
+        have h' : 3 * a = 3 * b := h
         omega
       have inj2 : Function.Injective (fun z : Nat => 3 * z + 1) := by
         intro a b h
+        have h' : 3 * a + 1 = 3 * b + 1 := h
         omega
       refine List.Nodup.append (List.Nodup.map inj1 ih) (List.Nodup.map inj2 ih) ?_
       intro x hx
@@ -384,15 +388,16 @@ noncomputable def shadowLog (L z : Nat) : Nat :=
 
 theorem shadowLog_spec (L z : Nat) (hz : z < 3^L) :
     shadowLog L z < 3^L ∧ 4^(shadowLog L z) % 3^(L+1) = 1 + 3*z := by
-  have hex := pow4_generator_surj L z hz
+  have hzlt : 1 + 3*z < 3^(L+1) := by
+    have hB : 3^(L+1) = 3 * 3^L := three_pow_succ_mul L
+    omega
   unfold shadowLog
   rw [dif_pos hz]
-  obtain ⟨h1, h2⟩ := Nat.find_spec hex
-  refine ⟨h1, ?_⟩
-  have hB : 3^(L+1) = 3 * 3^L := three_pow_succ_mul L
-  have hzlt : 1 + 3*z < 3^(L+1) := by omega
-  rw [Nat.mod_eq_of_lt hzlt] at h2
-  exact h2
+  have hfs := Nat.find_spec (pow4_generator_surj L z hz)
+  have h2' : 4^(Nat.find (pow4_generator_surj L z hz)) % 3^(L+1)
+      = 1 + 3*z := by
+    rw [hfs.2, Nat.mod_eq_of_lt hzlt]
+  exact ⟨hfs.1, h2'⟩
 
 theorem shadowLog_eq (L z r : Nat) (hz : z < 3^L) (hr : r < 3^L)
     (h : 4^r % 3^(L+1) = 1 + 3*z) : shadowLog L z = r := by
@@ -401,6 +406,7 @@ theorem shadowLog_eq (L z r : Nat) (hz : z < 3^L) (hr : r < 3^L)
     show 4^r % 3^(L+1) = 4^(shadowLog L z) % 3^(L+1)
     rw [h, hspec.2]
   have hex := (pow4_modeq_iff_exponent_modeq L r (shadowLog L z)).mp hmodeq
+  have hex' : r % 3^L = (shadowLog L z) % 3^L := hex
   have h1 : r % 3^L = r := Nat.mod_eq_of_lt hr
   have h2 : (shadowLog L z) % 3^L = shadowLog L z :=
     Nat.mod_eq_of_lt hspec.1
@@ -414,11 +420,16 @@ private theorem shadowLog_inj_aux (L z z' : Nat) (hz : z < 3^L)
   have s1 := shadowLog_spec L z hz
   have s2 := shadowLog_spec L z' hz'
   rw [h] at s1
-  have hcongr : (1 + 3*z) % 3^(L+1) = (1 + 3*z') % 3^(L+1) := by
-    rw [← s1.2, s2.2]
+  obtain ⟨_, s1b⟩ := s1
+  obtain ⟨_, s2b⟩ := s2
+  have hraw : (1:Nat) + 3*z = 1 + 3*z' := by omega
+  have hcongr : (1 + 3*z) % 3^(L+1) = (1 + 3*z') % 3^(L+1) :=
+    congrArg (fun w => w % 3^(L+1)) hraw
   -- cancel the common word: 3*(z'-z) ≡ 0 mod 3^(L+1)
   have hme0 : (1 + 3*z) + 3*(z'-z) ≡ (1 + 3*z) + 0 [MOD 3^(L+1)] := by
     rw [Nat.add_zero]
+    have hx : (1 + 3*z) + 3*(z'-z) = 1 + 3*z' := by omega
+    rw [hx]
     exact hcongr.symm
   have hzero : 3*(z'-z) ≡ 0 [MOD 3^(L+1)] :=
     Nat.ModEq.add_left_cancel' (1 + 3*z) hme0
@@ -508,7 +519,7 @@ theorem shadow_count_exact (L : Nat) :
       4^(shadowLog L z) % 3^(L+1) = 1 + 3*z := by
     intro z hmem
     exact shadowLog_spec L z (cleanList_bound L z hmem).1
-  refine ⟨(cleanList L).map (fun z => shadowLog L z), ?_, ?_, ?_, ?_⟩
+  refine ⟨(cleanList L).map (shadowLog L), ?_, ?_, ?_, ?_⟩
   · rw [List.length_map, cleanList_length]
   · refine List.Nodup.map_on ?_ (cleanList_nodup L)
     intro x hx y hy hxy
@@ -516,7 +527,7 @@ theorem shadow_count_exact (L : Nat) :
     have hy' := cleanList_bound L y hy
     exact shadowLog_inj L x y hx'.1 hy'.1 hxy
   · intro r hr
-    obtain ⟨z, hmem, rfl⟩ := hr
+    obtain ⟨z, hmem, rfl⟩ := List.mem_map.mp hr
     have hspec := hkey z hmem
     refine ⟨hspec.1, ?_⟩
     exact (shadow_class_iff L (shadowLog L z) hspec.1).mpr
@@ -525,7 +536,7 @@ theorem shadow_count_exact (L : Nat) :
     obtain ⟨z, hmem, hcongr⟩ := (shadow_class_iff L r hr).mp hsurv
     have hlog : shadowLog L z = r :=
       shadowLog_eq L z r (cleanList_bound L z hmem).1 hr hcongr
-    have hmem' : shadowLog L z ∈ (cleanList L).map (fun z => shadowLog L z) :=
+    have hmem' : shadowLog L z ∈ (cleanList L).map (shadowLog L) :=
       List.mem_map_of_mem hmem
     rw [hlog] at hmem'
     exact hmem'
@@ -541,7 +552,7 @@ theorem survivors_are_lived_in (L r : Nat) (hr : r < 3^L)
   have hcls : 4^m % 3^(L+1) = 4^r % 3^(L+1) := by
     rw [pow4_mod_window_class L m, hmr]
   have hwin : digit3 (4^m % 3^(L+1)) p = digit3 (4^m) p :=
-    (digit3_mod_window (4^m) (L+1) p hp).symm
+    digit3_mod_window (4^m) (L+1) p hp
   rw [← hwin, hcls, digit3_mod_window (4^r) (L+1) p hp]
   exact hsurv p hp
 
