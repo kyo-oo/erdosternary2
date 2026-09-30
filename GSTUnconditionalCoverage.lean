@@ -1,6 +1,7 @@
 import ErdosTernary2
 import GSTGraphV2OmegaWaveLaw
 import GSTShadowSeparationAttack
+import GSTShadowGapReceipt
 
 set_option maxRecDepth 100000
 set_option maxHeartbeats 4000000
@@ -222,15 +223,59 @@ theorem erdos_ternary_2_iff_combined_residual :
           · exact hasTernaryTwo_of_digit (4 ^ (n / 2)) p hp
         · exact hasTernaryTwo_of_digit (4 ^ (n / 2)) p hp
 
+/-! ## The eternal shadows live in the residual -/
+
+/-- Every eternal shadow from five on is a combined-residual exponent:
+an exponent with no ternary digit two anywhere must exceed the kernel
+base (the base would fire it), dodge every gate of the five-gate
+dispatch (each gate fires a digit two), and sit in a level-five
+surviving class (the killed classes fire below row six). -/
+theorem eternally_shadowed_combined (m : Nat) (hm : 5 ≤ m)
+    (hE : GSTShadowGapReceipt.EternallyShadowed m) :
+    CombinedResidual m := by
+  have hbase : 500 < m := by
+    by_contra h500
+    have hle : m ≤ 500 := by omega
+    obtain ⟨q, hq, _⟩ :=
+      hasTernaryTwo_first_pos (4 ^ m) (modular_check_base m hm hle)
+    exact hE q q (Nat.lt_succ_self q) hq
+  refine ⟨hbase, ?_, ?_⟩
+  · have hK8 : 8 ≤ m := by omega
+    rcases GSTGraphV2OmegaWaveLaw.omega_digit_two_cases m hK8 with
+      hShadow | ⟨p, hp⟩
+    · rcases shadow_split_of_gates m hK8 hShadow with hT | ⟨p, hp⟩
+      · exact hT
+      · exact absurd hp (hE p p (Nat.lt_succ_self p))
+    · exact absurd hp (hE p p (Nat.lt_succ_self p))
+  · rcases GSTShadowSeparationAttack.level_five_reach m with hs | ⟨p, _, hp⟩
+    · exact hs
+    · exact absurd hp (hE p p (Nat.lt_succ_self p))
+
+/-- **THE RESIDUAL-FIRING STATEMENT IS A SEPARATION SUPPLIER.**  If
+every combined-residual exponent owns a ternary digit two, then no
+exponent from five on is eternally shadowed — the door-ten statement.
+Combined with the shadow-gap receipt's equivalence, the residual family
+is the war: kill it and the full unconditional crown follows. -/
+theorem separation_of_residual_firing
+    (h : ∀ K : Nat, CombinedResidual K → ∃ p : Nat, (4 ^ K) / 3 ^ p % 3 = 2) :
+    ∀ m : Nat, 5 ≤ m → ¬ GSTShadowGapReceipt.EternallyShadowed m := by
+  intro m hm hE
+  obtain ⟨p, hp⟩ := h m (eternally_shadowed_combined m hm hE)
+  exact hE p p (Nat.lt_succ_self p) hp
+
 /-! ## Receipts -/
 
 #print axioms shadow_split_of_gates
 #print axioms erdos_ternary_2_unconditional_coverage
 #print axioms erdos_ternary_2_iff_combined_residual
+#print axioms eternally_shadowed_combined
+#print axioms separation_of_residual_firing
 
 #check @shadow_split_of_gates
 #check @erdos_ternary_2_unconditional_coverage
 #check @erdos_ternary_2_iff_combined_residual
 #check @CombinedResidual
+#check @eternally_shadowed_combined
+#check @separation_of_residual_firing
 
 end GSTUnconditionalCoverage
