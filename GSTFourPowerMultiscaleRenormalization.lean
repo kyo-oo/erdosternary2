@@ -68,8 +68,13 @@ theorem scaleOrbit_three_mul (m q : Nat) :
     exact Nat.add_left_cancel hEq
   have hmul' :
       3^(m+1) * scaleOrbit m (3*q) =
-        3^(m+1) * (3 * scaleOrbit (m+1) q) := by
-    simpa [Nat.pow_succ, Nat.mul_assoc] using hmul
+        3^(m+1) * (3 * scaleOrbit (m+1) q) :=
+    calc 3^(m+1) * scaleOrbit m (3*q)
+        = 3^((m+1)+1) * scaleOrbit (m+1) q := hmul
+      _ = 3^(m+1) * (3 * scaleOrbit (m+1) q) := by
+          have hp : 3^((m+1)+1) = 3^(m+1) * 3 := by
+            rw [Nat.pow_succ]; ring
+          rw [hp, Nat.mul_assoc]
   exact Nat.eq_of_mul_eq_mul_left (by positivity : 0 < 3^(m+1)) hmul'
 
 /-- At scale zero the normalized orbit is the familiar recurrence
