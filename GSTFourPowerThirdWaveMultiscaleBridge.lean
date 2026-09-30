@@ -208,7 +208,7 @@ theorem cubic_reference_transport
                 _ = 9 * T := hP1]
           _ = 27 * T := by ring
       rw [hP1, hP] at H
-      rw [hP, hP2]
+      rw [hP1, hP2]
       let A : Nat := 4^n
       let H0 : Nat := 4^h
       let B : Nat := H0 + e * (3 * T)
@@ -311,7 +311,8 @@ theorem cubic_cone_commonTwo
   have hK :
       3^s * b + r =
         r + 2 * 3^s + 3^(s+1) * (b / 3) := by
-    rw [hbdec, Nat.pow_succ]
+    conv_lhs => rw [hbdec]
+    rw [Nat.pow_succ]
     ring
   have hrle : 4^r ≤ 4^(r+1) := by
     rw [Nat.pow_succ]
@@ -320,11 +321,9 @@ theorem cubic_cone_commonTwo
   have hd0 : digit3 (4^r) (s+1) = 0 := by
     unfold digit3
     rw [Nat.div_eq_of_lt hsmall0]
-    simp
   have hd1 : digit3 (4^(r+1)) (s+1) = 0 := by
     unfold digit3
     rw [Nat.div_eq_of_lt hsmall]
-    simp
   have hp :=
     GSTFourPowerExponentTritObstruction.pow4_shared_trit_pair
       s r 2 (b / 3) (by norm_num : (2:Nat) < 3)
