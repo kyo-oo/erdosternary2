@@ -224,7 +224,7 @@ theorem cubic_reference_transport
       have hB : B = r + L * qb := by
         calc
           B = B % L + L * (B / L) := (Nat.mod_add_div B L).symm
-          _ = r + L * qb := by rw [hremB]; rfl
+          _ = r + L * qb := by rw [hremB]
       have hcube (q : Nat) :
           (r + L*q)^3 =
             r^3 + N * (r^2*q + 9*r*T*q^2 + 27*T^2*q^3) := by
@@ -240,7 +240,7 @@ theorem cubic_reference_transport
       have hH0 : H0 = 1 + 3*u := by
         calc
           H0 = H0 % 3 + 3 * (H0 / 3) := (Nat.mod_add_div H0 3).symm
-          _ = 1 + 3*u := by rw [hH0mod]; rfl
+          _ = 1 + 3*u := by rw [hH0mod]
       have hBspecial :
           ∃ Q : Nat, B^3 =
             (H0^3 + 9*T*e) + N*Q := by
@@ -266,24 +266,23 @@ theorem cubic_reference_transport
             rw [Nat.mul_mod]
           _ = (((H0^3 + 9*T*e) % N) * (C % N)) % N := by
             rw [hcubeTarget]
-          _ = ((H0^3 + 9*T*e) * C) % N := by
-            rw [Nat.mul_mod]
+          _ = ((H0^3 + 9*T*e) * C) % N := (Nat.mul_mod _ _ _).symm
       have hCmod : C % 3 = 1 := by
         simpa [C] using pow4_mod3_one a
       let v : Nat := C / 3
       have hC : C = 1 + 3*v := by
         calc
           C = C % 3 + 3 * (C / 3) := (Nat.mod_add_div C 3).symm
-          _ = 1 + 3*v := by rw [hCmod]; rfl
+          _ = 1 + 3*v := by rw [hCmod]
       have hprod :
           (H0^3 + 9*T*e) * C =
-            (H0^3*C + 9*T*e) + N*(e*v) := by
+            (H0^3*C + e*(9*T)) + N*(e*v) := by
         dsimp [N]
         rw [hC]
         ring
       have hmul' :
           (A^3 * C) % N =
-            (H0^3*C + 9*T*e) % N := by
+            (H0^3*C + e*(9*T)) % N := by
         rw [hmul, hprod, Nat.add_mul_mod_self_left]
       have hpowA : A^3 * C = 4^(3*n+a) := by
         dsimp [A, C]
