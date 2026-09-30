@@ -337,6 +337,7 @@ theorem cleanQuot_factor_even (m : Nat) (hme : m % 2 = 0) :
     have hs1 : y + 1 - 1 = y := by omega
     have hs2 : y + 1 + 1 = y + 2 := by omega
     rw [hs1, hs2]
+    have hP : 0 < (y + 1) * (y + 1) := Nat.mul_pos (by omega) (by omega)
     omega
   unfold cleanQuot
   rw [hsq, div_mul_of_dvd _ _ hdvd]
@@ -359,6 +360,7 @@ theorem cleanQuot_factor_odd (m : Nat) (hmo : m % 2 = 1) :
     have hs1 : y + 1 - 1 = y := by omega
     have hs2 : y + 1 + 1 = y + 2 := by omega
     rw [hs1, hs2]
+    have hP : 0 < (y + 1) * (y + 1) := Nat.mul_pos (by omega) (by omega)
     omega
   unfold cleanQuot
   rw [hsq, mul_div_of_dvd _ _ hdvd]
@@ -396,14 +398,27 @@ theorem factor_coprime_even (m : Nat) (hm1 : 1 ≤ m) (hme : m % 2 = 0) :
   have hdB : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 2^m + 1 :=
     Nat.gcd_dvd_right _ _
   have hd3A : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 3 * ((2^m - 1) / 3) := by
-    obtain ⟨k, hk⟩ := hdA
-    refine ⟨3 * k, ?_⟩
-    conv_rhs => rw [hk]
-    ring
-  have hBeq : 2^m + 1 = 3 * ((2^m - 1) / 3) + 2 := by omega
-  rw [hBeq] at hdB
-  have hdsub : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 2 :=
-    (Nat.dvd_add_left hd3A).mp hdB
+    have key : ∀ g : Nat, g ∣ (2^m - 1) / 3 →
+        g ∣ 3 * ((2^m - 1) / 3) := by
+      intro g hg
+      obtain ⟨k, hk⟩ := hg
+      refine ⟨3 * k, ?_⟩
+      rw [hk]
+      ring
+    exact key _ hdA
+  have hdsub : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 2 := by
+    obtain ⟨u, hu⟩ := hdB
+    obtain ⟨v, hv⟩ := hd3A
+    have huv : u = v + (u - v) := by omega
+    rw [huv] at hu
+    have hexpand : Nat.gcd ((2^m - 1) / 3) (2^m + 1) * (v + (u - v))
+        = Nat.gcd ((2^m - 1) / 3) (2^m + 1) * v
+          + Nat.gcd ((2^m - 1) / 3) (2^m + 1) * (u - v) :=
+      Nat.mul_add _ _ _
+    rw [hexpand] at hu
+    rw [← hv] at hu
+    have hw : Nat.gcd ((2^m - 1) / 3) (2^m + 1) * (u - v) = 2 := by omega
+    exact ⟨u - v, hw.symm⟩
   have hBodd : (2^m + 1) % 2 = 1 := by
     have h2m : 2^m = 2^(m - 1) * 2 := by
       conv_lhs => rw [show m = (m - 1) + 1 from by omega]
@@ -442,14 +457,27 @@ theorem factor_coprime_odd (m : Nat) (hmo : m % 2 = 1) :
   have hdB : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 2^m - 1 :=
     Nat.gcd_dvd_right _ _
   have hd3A : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 3 * ((2^m + 1) / 3) := by
-    obtain ⟨k, hk⟩ := hdA
-    refine ⟨3 * k, ?_⟩
-    conv_rhs => rw [hk]
-    ring
-  have hBeq : 3 * ((2^m + 1) / 3) = (2^m - 1) + 2 := by omega
-  rw [hBeq] at hd3A
-  have hdsub : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 2 :=
-    (Nat.dvd_add_left hdB).mp hd3A
+    have key : ∀ g : Nat, g ∣ (2^m + 1) / 3 →
+        g ∣ 3 * ((2^m + 1) / 3) := by
+      intro g hg
+      obtain ⟨k, hk⟩ := hg
+      refine ⟨3 * k, ?_⟩
+      rw [hk]
+      ring
+    exact key _ hdA
+  have hdsub : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 2 := by
+    obtain ⟨u, hu⟩ := hdB
+    obtain ⟨v, hv⟩ := hd3A
+    have hvu : v = u + (v - u) := by omega
+    rw [hvu] at hv
+    have hexpand : Nat.gcd ((2^m + 1) / 3) (2^m - 1) * (u + (v - u))
+        = Nat.gcd ((2^m + 1) / 3) (2^m - 1) * u
+          + Nat.gcd ((2^m + 1) / 3) (2^m - 1) * (v - u) :=
+      Nat.mul_add _ _ _
+    rw [hexpand] at hv
+    rw [← hu] at hv
+    have hw : Nat.gcd ((2^m + 1) / 3) (2^m - 1) * (v - u) = 2 := by omega
+    exact ⟨v - u, hw.symm⟩
   have hBodd : (2^m - 1) % 2 = 1 := by
     have h2m : 2^m = 2^(m - 1) * 2 := by
       conv_lhs => rw [show m = (m - 1) + 1 from by omega]
