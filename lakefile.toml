@@ -50,6 +50,7 @@ roots = [
   "GSTFourPowerHappyProvider",
   "GSTFourPowerDirectNo22",
   "GSTFourPowerDirectResidue",
+  "GSTFourPowerMultiscaleRenormalization",
   "GSTFourPowerDirectResidue27",
   "GSTFourPowerDirectResidue81",
   "GSTFourPowerExactExponentPeriod",
