@@ -216,7 +216,7 @@ theorem erdos_ternary_2_iff_combined_residual :
             · have hkill : GSTShadowSeparationAttack.survivor5 (n / 2 % 243) = false := by
                 cases hh : GSTShadowSeparationAttack.survivor5 (n / 2 % 243) with
                 | true => exact absurd hh hs5
-                | false => exact hh
+                | false => rfl
               obtain ⟨p, _, hp⟩ :=
                 GSTShadowSeparationAttack.separation_level_five (n / 2) hkill
               exact hasTernaryTwo_of_digit (4 ^ (n / 2)) p hp
