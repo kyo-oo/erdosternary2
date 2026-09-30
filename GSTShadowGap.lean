@@ -366,7 +366,7 @@ theorem cleanList_nodup (n : Nat) : (cleanList n).Nodup := by
       have inj2 : Function.Injective (fun z : Nat => 3 * z + 1) := by
         intro a b h
         omega
-      refine List.Nodup.append (List.nodup_map inj1 ih) (List.nodup_map inj2 ih) ?_
+      refine List.Nodup.append (List.Nodup.map inj1 ih) (List.Nodup.map inj2 ih) ?_
       intro x hx
       simp only [List.mem_map] at hx
       obtain ⟨a, _, rfl⟩ := hx
