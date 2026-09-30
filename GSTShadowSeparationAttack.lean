@@ -69,6 +69,10 @@ theorem pow4_eq_succ_three_mul_cleanQuot (m : Nat) :
   have h1 : 4^m % 3 = 1 := pow4_mod3_one m
   have h2 : 4^m - 1 = 3 * ((4^m - 1) / 3) + (4^m - 1) % 3 :=
     (Nat.div_add_mod (4^m - 1) 3).symm
+  have hE : 4^m % 3 + 3 * (4^m / 3) = 4^m := Nat.mod_add_div (4^m) 3
+  rw [h1] at hE
+  have hz : (4^m - 1) % 3 = 0 := by omega
+  rw [hz, Nat.add_zero] at h2
   unfold cleanQuot
   omega
 
@@ -125,7 +129,7 @@ delivers the comparator's unconditional stamp. -/
 theorem crown_of_clean_word_equation
     (h : ∀ m : Nat, 5 ≤ m → ∃ q : Nat, digit3 (cleanQuot m) q = 2) :
     ∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false :=
-  THE_REMAINING_CONTENT.mp (separation_iff_clean_word_equation.mpr h)
+  THE_REMAINING_CONTENT.mpr (separation_iff_clean_word_equation.mpr h)
 
 /-- The quotient word as a geometric sum: `1 + 4 + ⋯ + 4^{m−1}` — in binary
 the alternating word `1010…101` with `m` ones. -/
@@ -158,7 +162,6 @@ private theorem three_pow_odd (k : Nat) : 3^k % 2 = 1 := by
   | zero => decide
   | succ k ih =>
       rw [three_pow_succ_mul', Nat.mul_mod, ih]
-      decide
 
 private theorem three_pow_half (k : Nat) :
     2 * ((3^k - 1) / 2) = 3^k - 1 := by
@@ -178,11 +181,11 @@ theorem mod_pow_split (n k : Nat) :
   have h2 : n / 3^k = 3 * (n / 3^(k+1)) + (n / 3^k) % 3 := by
     have hdm := Nat.div_add_mod (n / 3^k) 3
     rw [h1] at hdm
-    exact hdm
+    exact hdm.symm
   have h3 : 3^k * (n / 3^k) + n % 3^k = n :=
-    (Nat.div_add_mod n (3^k)).symm
+    Nat.div_add_mod n (3^k)
   have h4 : 3^(k+1) * (n / 3^(k+1)) + n % 3^(k+1) = n :=
-    (Nat.div_add_mod n (3^(k+1))).symm
+    Nat.div_add_mod n (3^(k+1))
   have hsplit2 : 3^k * (n / 3^k)
       = 3^k * (3 * (n / 3^(k+1))) + 3^k * ((n / 3^k) % 3) := by
     conv_lhs => rw [h2]
@@ -315,26 +318,26 @@ private theorem two_pow_mod3_odd (m : Nat) (hmo : m % 2 = 1) :
   have hm : m = 2 * (m / 2) + 1 := by omega
   rw [hm, Nat.pow_add, Nat.pow_mul, show (2:Nat)^2 = 4 from by decide]
   rw [Nat.mul_mod, pow4_mod3_one]
-  decide
 
 /-- **THE FACTORIZATION, EVEN ROW.**  For even `m` the quotient word is the
 product of the pair `A = (2^m − 1)/3`, `B = 2^m + 1`. -/
 theorem cleanQuot_factor_even (m : Nat) (hme : m % 2 = 0) :
     cleanQuot m = ((2^m - 1) / 3) * (2^m + 1) := by
   have h1 := two_pow_mod3_even m hme
-  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := Nat.div_add_mod (2^m) 3
+  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := (Nat.div_add_mod (2^m) 3).symm
   rw [h1] at h2
   have hdvd : 3 ∣ 2^m - 1 := by
     refine ⟨(2^m - 1) / 3, ?_⟩
     omega
   have h2m : 0 < 2^m := Nat.pow_pos (by decide)
   have hsq : 4^m - 1 = (2^m - 1) * (2^m + 1) := by
-    rw [four_pow_eq_two_pow_sq]
-    obtain ⟨t, rfl⟩ := Nat.eq_succ_of_ne_zero (by omega)
-    have hring : t * (t + 2) + 1 = (t + 1) * (t + 1) := by ring
-    have hsub : (t + 1) * (t + 1) - 1 = t * (t + 2) := by omega
-    rw [Nat.succ_sub_one, hsub]
-    norm_num
+    obtain ⟨y, hy⟩ := Nat.exists_eq_succ_of_ne_zero h2m.ne'
+    rw [four_pow_eq_two_pow_sq, hy]
+    have hring : (y + 1) * (y + 1) = y * (y + 2) + 1 := by ring
+    have hs1 : y + 1 - 1 = y := by omega
+    have hs2 : y + 1 + 1 = y + 2 := by omega
+    rw [hs1, hs2]
+    omega
   unfold cleanQuot
   rw [hsq, div_mul_of_dvd _ _ hdvd]
 
@@ -343,28 +346,30 @@ product of the pair `A = (2^m + 1)/3`, `B = 2^m − 1`. -/
 theorem cleanQuot_factor_odd (m : Nat) (hmo : m % 2 = 1) :
     cleanQuot m = ((2^m + 1) / 3) * (2^m - 1) := by
   have h1 := two_pow_mod3_odd m hmo
-  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := Nat.div_add_mod (2^m) 3
+  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := (Nat.div_add_mod (2^m) 3).symm
   rw [h1] at h2
   have hdvd : 3 ∣ 2^m + 1 := by
     refine ⟨(2^m + 1) / 3, ?_⟩
     omega
   have h2m : 0 < 2^m := Nat.pow_pos (by decide)
   have hsq : 4^m - 1 = (2^m - 1) * (2^m + 1) := by
-    rw [four_pow_eq_two_pow_sq]
-    obtain ⟨t, rfl⟩ := Nat.eq_succ_of_ne_zero (by omega)
-    have hring : t * (t + 2) + 1 = (t + 1) * (t + 1) := by ring
-    have hsub : (t + 1) * (t + 1) - 1 = t * (t + 2) := by omega
-    rw [Nat.succ_sub_one, hsub]
-    norm_num
+    obtain ⟨y, hy⟩ := Nat.exists_eq_succ_of_ne_zero h2m.ne'
+    rw [four_pow_eq_two_pow_sq, hy]
+    have hring : (y + 1) * (y + 1) = y * (y + 2) + 1 := by ring
+    have hs1 : y + 1 - 1 = y := by omega
+    have hs2 : y + 1 + 1 = y + 2 := by omega
+    rw [hs1, hs2]
+    omega
   unfold cleanQuot
   rw [hsq, mul_div_of_dvd _ _ hdvd]
+  exact Nat.mul_comm _ _
 
 /-- **THE LINE LAW, EVEN ROW.**  The even-row factor pair sits on the line
 `B − 3A = 2`. -/
 theorem factor_line_even (m : Nat) (hme : m % 2 = 0) :
     (2^m + 1) - 3 * ((2^m - 1) / 3) = 2 := by
   have h1 := two_pow_mod3_even m hme
-  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := Nat.div_add_mod (2^m) 3
+  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := (Nat.div_add_mod (2^m) 3).symm
   rw [h1] at h2
   have hq : (2^m - 1) / 3 = 2^m / 3 := by omega
   rw [hq]
@@ -375,7 +380,7 @@ theorem factor_line_even (m : Nat) (hme : m % 2 = 0) :
 theorem factor_line_odd (m : Nat) (hmo : m % 2 = 1) :
     3 * ((2^m + 1) / 3) - (2^m - 1) = 2 := by
   have h1 := two_pow_mod3_odd m hmo
-  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := Nat.div_add_mod (2^m) 3
+  have h2 : 2^m = 3 * (2^m / 3) + 2^m % 3 := (Nat.div_add_mod (2^m) 3).symm
   rw [h1] at h2
   have hq : (2^m + 1) / 3 = 2^m / 3 + 1 := by omega
   rw [hq]
@@ -392,10 +397,13 @@ theorem factor_coprime_even (m : Nat) (hm1 : 1 ≤ m) (hme : m % 2 = 0) :
     Nat.gcd_dvd_right _ _
   have hd3A : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 3 * ((2^m - 1) / 3) := by
     obtain ⟨k, hk⟩ := hdA
-    exact ⟨3 * k, by rw [hk]; ring⟩
-  have hdsub : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ (2^m + 1) - 3 * ((2^m - 1) / 3) :=
-    Nat.dvd_sub' hdB hd3A
-  rw [hline] at hdsub
+    refine ⟨3 * k, ?_⟩
+    conv_rhs => rw [hk]
+    ring
+  have hBeq : 2^m + 1 = 3 * ((2^m - 1) / 3) + 2 := by omega
+  rw [hBeq] at hdB
+  have hdsub : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ∣ 2 :=
+    (Nat.dvd_add_left hd3A).mp hdB
   have hBodd : (2^m + 1) % 2 = 1 := by
     have h2m : 2^m = 2^(m - 1) * 2 := by
       conv_lhs => rw [show m = (m - 1) + 1 from by omega]
@@ -404,6 +412,8 @@ theorem factor_coprime_even (m : Nat) (hm1 : 1 ≤ m) (hme : m % 2 = 0) :
   have hge : 1 ≤ Nat.gcd ((2^m - 1) / 3) (2^m + 1) := by
     by_cases hg0 : Nat.gcd ((2^m - 1) / 3) (2^m + 1) = 0
     · obtain ⟨k, hk⟩ := hdB
+      rw [hg0] at hk
+      have h2m : 0 < 2^m := Nat.pow_pos (by decide)
       omega
     · omega
   have hgle : Nat.gcd ((2^m - 1) / 3) (2^m + 1) ≤ 2 := by
@@ -433,10 +443,13 @@ theorem factor_coprime_odd (m : Nat) (hmo : m % 2 = 1) :
     Nat.gcd_dvd_right _ _
   have hd3A : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 3 * ((2^m + 1) / 3) := by
     obtain ⟨k, hk⟩ := hdA
-    exact ⟨3 * k, by rw [hk]; ring⟩
-  have hdsub : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 3 * ((2^m + 1) / 3) - (2^m - 1) :=
-    Nat.dvd_sub' hd3A hdB
-  rw [hline] at hdsub
+    refine ⟨3 * k, ?_⟩
+    conv_rhs => rw [hk]
+    ring
+  have hBeq : 3 * ((2^m + 1) / 3) = (2^m - 1) + 2 := by omega
+  rw [hBeq] at hd3A
+  have hdsub : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ∣ 2 :=
+    (Nat.dvd_add_left hdB).mp hd3A
   have hBodd : (2^m - 1) % 2 = 1 := by
     have h2m : 2^m = 2^(m - 1) * 2 := by
       conv_lhs => rw [show m = (m - 1) + 1 from by omega]
@@ -446,6 +459,8 @@ theorem factor_coprime_odd (m : Nat) (hmo : m % 2 = 1) :
   have hge : 1 ≤ Nat.gcd ((2^m + 1) / 3) (2^m - 1) := by
     by_cases hg0 : Nat.gcd ((2^m + 1) / 3) (2^m - 1) = 0
     · obtain ⟨k, hk⟩ := hdB
+      rw [hg0] at hk
+      have h2m : 0 < 2^m := Nat.pow_pos (by decide)
       omega
     · omega
   have hgle : Nat.gcd ((2^m + 1) / 3) (2^m - 1) ≤ 2 := by
@@ -478,7 +493,7 @@ verified structure of the equation, not as a separation certificate. -/
 
 /-- The surviving classes at level `L`: the discrete logs of the clean words,
 the exhibited list of `shadow_count_exact`. -/
-def survivorClasses (L : Nat) : List Nat := (cleanList L).map (shadowLog L)
+noncomputable def survivorClasses (L : Nat) : List Nat := (cleanList L).map (shadowLog L)
 
 /-- Completeness of the exhibited survivor list: every clean-window class is
 on it. -/
@@ -560,7 +575,7 @@ theorem winClean_iff (w B : Nat) :
         · intro hall
           have hd0 := hall 0 (by omega)
           rw [h0, hw] at hd0
-          exact hd0 rfl
+          exact absurd rfl hd0
       · rw [if_neg hw]
         constructor
         · intro hall p hp
@@ -572,7 +587,7 @@ theorem winClean_iff (w B : Nat) :
         · intro hall
           refine ih (w / 3) |>.mpr ?_
           intro p hp
-          rw [hsh p]
+          rw [← hsh p]
           exact hall (p + 1) (by omega)
 
 /-- The 32 surviving exponent classes modulo `243 = 3^5`, in order. -/
@@ -663,7 +678,7 @@ theorem level_five_reach (m : Nat) :
     survivor5 (m % 243) = true ∨
     ∃ p : Nat, p < 6 ∧ digit3 (4^m) p = 2 := by
   cases hb : survivor5 (m % 243) with
-  | true => exact Or.inl hb
+  | true => exact Or.inl rfl
   | false => exact Or.inr (separation_level_five m hb)
 
 /-! ## Section 5 — receipts -/
