@@ -197,7 +197,6 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
           have hexp : 1 + 2 * (3^(L+1) * lteCoeff L) + (3^(L+1) * lteCoeff L)^2
               = (1 + 2 * (3^(L+1) * lteCoeff L)) + (3 * 3^(L+1)) * k := by
             rw [hk, hMM]
-            ring
           rw [hexp, Nat.add_mul_mod_self_left]
       -- each lift's window value at the child scale
       have liftval (t : Nat) (ht : t ≤ 2) :
@@ -261,6 +260,8 @@ theorem pow4_generator_surj : ∀ (L z : Nat), z < 3^L →
       obtain ⟨t, ht, htpow⟩ := hext
       refine ⟨rp + t * 3^L, ?_, ?_⟩
       · rw [three_pow_succ_mul]
+        have hbound : t * 3^L ≤ 2 * 3^L :=
+          Nat.mul_le_mul ht (Nat.le_refl (3^L))
         omega
       · rw [liftval t ht, childval, htpow]
 
