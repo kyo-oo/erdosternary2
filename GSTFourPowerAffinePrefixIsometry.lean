@@ -23,9 +23,13 @@ theorem pow4_modeq_iff_exponent_modeq (p a b : Nat) :
       4^u ≡ 4^v [MOD 3^(p+1)] → u ≡ v [MOD 3^p] := by
     intro u v huv hpow
     have hv : v = u + (v-u) := by omega
-    rw [hv, Nat.pow_add] at hpow
+    have hsplit : 4^v = 4^u * 4^(v-u) := by
+      conv_lhs => rw [hv, Nat.pow_add]
+    rw [hsplit] at hpow
+    have hone : (4^u : Nat) * 1 = 4^u := Nat.mul_one _
     have hmul : 4^u * 1 ≡ 4^u * 4^(v-u) [MOD 3^(p+1)] := by
-      simpa using hpow
+      rw [hone]
+      exact hpow
     have hcop : Nat.Coprime (3^(p+1)) (4^u) := by
       exact (by norm_num : Nat.Coprime 3 4).pow (p+1) u
     have hcancel : 1 ≡ 4^(v-u) [MOD 3^(p+1)] :=
@@ -47,9 +51,13 @@ theorem pow4_modeq_iff_exponent_modeq (p a b : Nat) :
       change 4^(v-u) % 3^(p+1) = 1 % 3^(p+1)
       rw [hperiod, Nat.mod_eq_of_lt hM]
     have hmul := hperModeq.mul_left (4^u)
+    have hone : (4^u : Nat) * 1 = 4^u := Nat.mul_one _
+    rw [hone] at hmul
     have hv : v = u + (v-u) := by omega
-    rw [hv, Nat.pow_add]
-    simpa using hmul.symm
+    have hsplit : 4^v = 4^u * 4^(v-u) := by
+      conv_lhs => rw [hv, Nat.pow_add]
+    rw [hsplit]
+    exact hmul.symm
   constructor
   · intro h
     rcases le_total a b with hab | hba
