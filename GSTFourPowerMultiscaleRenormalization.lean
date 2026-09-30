@@ -72,8 +72,7 @@ theorem scaleOrbit_three_mul (m q : Nat) :
     calc 3^(m+1) * scaleOrbit m (3*q)
         = 3^((m+1)+1) * scaleOrbit (m+1) q := hmul
       _ = 3^(m+1) * (3 * scaleOrbit (m+1) q) := by
-          have hp : 3^((m+1)+1) = 3^(m+1) * 3 := by
-            rw [Nat.pow_succ]; ring
+          have hp : 3^((m+1)+1) = 3^(m+1) * 3 := Nat.pow_succ 3 (m+1)
           rw [hp, Nat.mul_assoc]
   exact Nat.eq_of_mul_eq_mul_left (by positivity : 0 < 3^(m+1)) hmul'
 
