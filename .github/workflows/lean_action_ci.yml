@@ -198,6 +198,14 @@ jobs:
           lake build GSTShadowPerfectTree 2>&1 | tee perfecttree-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' perfecttree-build.log
 
+      - name: Crown combination module (total supply chain)
+        if: always()
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTCrownCombination 2>&1 | tee crowncombination-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' crowncombination-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
