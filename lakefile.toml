@@ -137,6 +137,7 @@ roots = [
   "GSTUnifiedCrown",
   "GSTUnconditionalCoverage",
   "GSTCrownCombination",
+  "GSTShadowExhibited",
 ]
 
 [[lean_exe]]

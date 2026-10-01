@@ -206,6 +206,14 @@ jobs:
           lake build GSTCrownCombination 2>&1 | tee crowncombination-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' crowncombination-build.log
 
+      - name: Exhibited shadow set module
+        if: always()
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTShadowExhibited 2>&1 | tee exhibitedshadow-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' exhibitedshadow-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail
