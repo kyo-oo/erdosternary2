@@ -102,10 +102,10 @@ conversely. -/
 theorem eternally_shadowed_iff_cantorian (m : Nat) :
     EternallyShadowed m ↔ GSTClimbInfiniteFamily.CantorianPower m := by
   constructor
-  · intro hE p hp
-    have hraw : 4^m / 3^p % 3 ≠ 2 := hE (p - 1) p (by omega)
+  · intro hE p _hp
+    have hraw : 4^m / 3^p % 3 ≠ 2 := hE p p (by omega)
     exact hraw
-  · intro hC L p hp
+  · intro hC L p _hp
     cases p with
     | zero =>
         rw [digit3_pow4_zero]
@@ -234,7 +234,7 @@ theorem the_one_battle_exhibited :
     ((∀ n : Nat, 9 ≤ n → noTernaryTwo (2^n) = false) ↔
       (∀ m : Nat, EternallyShadowed m ↔ m = 0 ∨ m = 1 ∨ m = 4)) ∧
     (EternallyShadowed 0 ∧ EternallyShadowed 1 ∧ EternallyShadowed 4) :=
-  ⟨shadow_set_iff_exhibited, shadow_zero, shadow_one, shadow_four⟩
+  ⟨shadow_set_iff_exhibited.symm, shadow_zero, shadow_one, shadow_four⟩
 
 /-! ## Section 7 — the element law -/
 
@@ -264,16 +264,16 @@ at every scale beyond its own magnitude. -/
 theorem shadow_is_element (m L : Nat) (hE : EternallyShadowed m)
     (hL : m < 3^L) :
     m ∈ GSTShadowSeparationAttack.survivorClasses L := by
-  have hmod : m % 3^L = m := Nat.mod_eq_of_lt hL
-  rw [hmod]
-  exact shadow_class_all_levels m L hE
+  have hmem := shadow_class_all_levels m L hE
+  rw [Nat.mod_eq_of_lt hL] at hmem
+  exact hmem
 
 /-- **THE LEVEL-SEVEN CLASS CONSTRAINT.**  Any eternal shadow from five
 on lies in one of the `128` surviving classes of the level-seven table:
 its class mod `2187` is on `survivorTable7`.  A counterexample to the
 Erdős ternary conjecture is pinned, unconditionally, to one of these
 `128` residue classes. -/
-theorem shadow_survivor_seven (m : Nat) (hm : 5 ≤ m)
+theorem shadow_survivor_seven (m : Nat) (_hm : 5 ≤ m)
     (hE : EternallyShadowed m) :
     survivor7 (m % 2187) = true := by
   rcases level_seven_reach m with h | ⟨p, hp8, hp⟩
