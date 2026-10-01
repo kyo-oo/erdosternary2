@@ -227,15 +227,13 @@ theorem shadow_perfect_binary_tree (L r : Nat) (hr : r < 3^L)
   · intro r' hr' hmod hmem
     have hc := survivorClasses_clean (L+1) r' hr' hmem
     have hsplit : ∃ t : Nat, t < 3 ∧ r' = r + t*3^L := by
-      have hrml : r % 3^L < 3^L := Nat.mod_lt r (tpow_pos (L+1))
-      have hrm' : r' % 3^L < 3^L := Nat.mod_lt r' (tpow_pos (L+1))
-      have hsame : r' % 3^L = r := by omega
+      have hsame : r' % 3^L = r := hmod
       refine ⟨r' / 3^L, ?_, ?_⟩
       · have h3 : 3^(L+1) = 3 * 3^L := tpow_succ L
         rw [h3, Nat.mul_comm] at hr'
         exact Nat.div_lt_of_lt_mul hr'
       · have hdm := Nat.div_add_mod r' (3^L)
-        rw [Nat.mul_comm 3^L (r' / 3^L)] at hdm
+        rw [Nat.mul_comm (3^L) (r' / 3^L)] at hdm
         omega
     obtain ⟨t, ht, rfl⟩ := hsplit
     have := hall t ht hc
