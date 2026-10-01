@@ -89,7 +89,7 @@ theorem pow4_three_pow_unit (L : Nat) :
 /-- **THE ROWS LAW.**  The child agrees with the parent on every row `≤ L`:
 the lift `t*3^L` is a multiple of `3^p` for every `p ≤ L`, so
 `pow4_digit_period` applies row by row. -/
-theorem shadow_child_rows (L r t : Nat) (ht : t < 3)
+theorem shadow_child_rows (L r t : Nat) (_ht : t < 3)
     (p : Nat) (hp : p ≤ L) :
     digit3 (4^(r + t*3^L)) p = digit3 (4^r) p := by
   have hshift : t * 3^L = 3^p * (t * 3^(L - p)) := by
@@ -218,9 +218,9 @@ theorem shadow_perfect_binary_tree (L r : Nat) (hr : r < 3^L)
       r + t*3^L < 3^(L+1) := by
     have h3 : 3^(L+1) = 3 * 3^L := tpow_succ L
     rcases (show t = 0 ∨ t = 1 ∨ t = 2 by omega) with rfl | rfl | rfl
-    · omega [h3, hr]
-    · omega [h3, hr]
-    · omega [h3, hr]
+    · omega
+    · omega
+    · omega
   refine ⟨a, b, ha, hb, hne, ?_, ?_, ?_⟩
   · exact survivorClasses_complete (L+1) (r + a*3^L) (hchild a ha hca) hca
   · exact survivorClasses_complete (L+1) (r + b*3^L) (hchild b hb hcb) hcb
@@ -229,14 +229,14 @@ theorem shadow_perfect_binary_tree (L r : Nat) (hr : r < 3^L)
     have hsplit : ∃ t : Nat, t < 3 ∧ r' = r + t*3^L := by
       have hrml : r % 3^L < 3^L := Nat.mod_lt r (tpow_pos (L+1))
       have hrm' : r' % 3^L < 3^L := Nat.mod_lt r' (tpow_pos (L+1))
-      have hsame : r' % 3^L = r := by omega [hmod]
+      have hsame : r' % 3^L = r := by omega
       refine ⟨r' / 3^L, ?_, ?_⟩
       · have h3 : 3^(L+1) = 3 * 3^L := tpow_succ L
         rw [h3, Nat.mul_comm] at hr'
         exact Nat.div_lt_of_lt_mul hr'
       · have hdm := Nat.div_add_mod r' (3^L)
         rw [Nat.mul_comm 3^L (r' / 3^L)] at hdm
-        omega [hdm, hsame]
+        omega
     obtain ⟨t, ht, rfl⟩ := hsplit
     have := hall t ht hc
     rcases this with rfl | rfl
