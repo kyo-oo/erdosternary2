@@ -190,6 +190,14 @@ jobs:
           lake build GSTUnconditionalCoverage 2>&1 | tee coverage-build.log
           ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' coverage-build.log
 
+      - name: Shadow perfect tree module
+        if: always()
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTShadowPerfectTree 2>&1 | tee perfecttree-build.log
+          ! grep -E 'sorryAx|declaration uses .sorry.|unknown identifier|unknown module prefix|unsolved goals|error:' perfecttree-build.log
+
       - name: Solution wiring builds (official probe staging)
         run: |
           set -euo pipefail

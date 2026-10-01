@@ -133,6 +133,7 @@ roots = [
   "GSTShadowGap",
   "GSTShadowGapReceipt",
   "GSTShadowSeparationAttack",
+  "GSTShadowPerfectTree",
   "GSTUnifiedCrown",
   "GSTUnconditionalCoverage",
 ]
