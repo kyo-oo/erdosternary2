@@ -53,7 +53,9 @@ open GSTFourPowerDirectResidue
 
 /-! ## Section 1 — the LTE unit law, window form -/
 
-private theorem tpow_succ (k : Nat) : 3^(k+1) = 3 * 3^k := Nat.pow_succ 3 k
+private theorem tpow_succ (k : Nat) : 3^(k+1) = 3 * 3^k := by
+  rw [Nat.mul_comm]
+  exact Nat.pow_succ 3 k
 
 private theorem tpow_pos (k : Nat) : 0 < 3^k := by positivity
 
@@ -80,7 +82,7 @@ theorem pow4_three_pow_unit (L : Nat) :
     rw [show 3^(L+2) = 3 * 3^(L+1) from tpow_succ (L+1)]
     ring
   have h := pow4_three_power_lte_exact L
-  rw [h, hq, hinner, Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hlt]
+  rw [h, hq, hinner, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt hlt]
 
 /-! ## Section 2 — the child laws -/
 
@@ -91,8 +93,8 @@ theorem shadow_child_rows (L r t : Nat) (ht : t < 3)
     (p : Nat) (hp : p ≤ L) :
     digit3 (4^(r + t*3^L)) p = digit3 (4^r) p := by
   have hshift : t * 3^L = 3^p * (t * 3^(L - p)) := by
-    rw [← Nat.pow_add]
-    rw [show (L - p) + p = L from by omega]
+    rw [show 3^L = 3^p * 3^(L - p) from by
+          rw [← Nat.pow_add, show p + (L - p) = L from by omega]]
     ring
   rw [hshift]
   exact pow4_digit_period p r (t * 3^(L - p))
@@ -128,7 +130,7 @@ theorem shadow_two_children (L r : Nat)
       rw [shadow_child_top L r t ht] at hrow
       exact hrow
     · intro htop p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · have hp' : p ≤ L := by omega
         rw [shadow_child_rows L r t ht p hp']
         exact hclean p (by omega)
@@ -139,13 +141,13 @@ theorem shadow_two_children (L r : Nat)
       ∨ digit3 (4^r) (L+1) = 2 by omega) with h0 | h1 | h2
   · refine ⟨0, 1, by omega, by omega, by omega, ?_, ?_, ?_⟩
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 0 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 0 (by omega), h0]
         omega
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 1 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 1 (by omega), h0]
@@ -159,13 +161,13 @@ theorem shadow_two_children (L r : Nat)
       · omega
   · refine ⟨0, 2, by omega, by omega, by omega, ?_, ?_, ?_⟩
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 0 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 0 (by omega), h1]
         omega
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 2 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 2 (by omega), h1]
@@ -179,13 +181,13 @@ theorem shadow_two_children (L r : Nat)
       · exact Or.inr rfl
   · refine ⟨1, 2, by omega, by omega, by omega, ?_, ?_, ?_⟩
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 1 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 1 (by omega), h2]
         omega
     · intro p hp
-      rcases Nat.lt_or_eq_self p (L+1) (by omega) with hple | hpe
+      rcases (show p < L+1 ∨ p = L+1 by omega) with hple | hpe
       · rw [shadow_child_rows L r 2 (by omega) p (by omega)]
         exact hclean p (by omega)
       · rw [hpe, shadow_child_top L r 2 (by omega), h2]
@@ -215,8 +217,10 @@ theorem shadow_perfect_binary_tree (L r : Nat) (hr : r < 3^L)
       (hc : ∀ p : Nat, p < L+2 → digit3 (4^(r + t*3^L)) p ≠ 2) :
       r + t*3^L < 3^(L+1) := by
     have h3 : 3^(L+1) = 3 * 3^L := tpow_succ L
-    have hrm : r + t*3^L < 3^L + 3*3^L := by omega
-    omega [hrm, h3]
+    rcases (show t = 0 ∨ t = 1 ∨ t = 2 by omega) with rfl | rfl | rfl
+    · omega [h3, hr]
+    · omega [h3, hr]
+    · omega [h3, hr]
   refine ⟨a, b, ha, hb, hne, ?_, ?_, ?_⟩
   · exact survivorClasses_complete (L+1) (r + a*3^L) (hchild a ha hca) hca
   · exact survivorClasses_complete (L+1) (r + b*3^L) (hchild b hb hcb) hcb
@@ -228,9 +232,11 @@ theorem shadow_perfect_binary_tree (L r : Nat) (hr : r < 3^L)
       have hsame : r' % 3^L = r := by omega [hmod]
       refine ⟨r' / 3^L, ?_, ?_⟩
       · have h3 : 3^(L+1) = 3 * 3^L := tpow_succ L
-        exact Nat.div_lt_of_lt_mul (by rw [h3]; exact hr')
+        rw [h3, Nat.mul_comm] at hr'
+        exact Nat.div_lt_of_lt_mul hr'
       · have hdm := Nat.div_add_mod r' (3^L)
-        omega [hdm, hsame, hrml]
+        rw [Nat.mul_comm 3^L (r' / 3^L)] at hdm
+        omega [hdm, hsame]
     obtain ⟨t, ht, rfl⟩ := hsplit
     have := hall t ht hc
     rcases this with rfl | rfl
