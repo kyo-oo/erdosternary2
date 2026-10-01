@@ -142,8 +142,8 @@ theorem the_one_battle :
         ∃ p : Nat, (4^K)/3^p % 3 = 2)) ∧
     ((∀ m : Nat, 5 ≤ m → ¬ EternallyShadowed m) ↔
       (∀ m : Nat, 5 ≤ m → ∃ q : Nat, digit3 (cleanQuot m) q = 2)) :=
-  ⟨THE_REMAINING_CONTENT, residual_firing_iff_no_eternal_shadow,
-    deep_firing_iff_no_eternal_shadow,
+  ⟨THE_REMAINING_CONTENT, residual_firing_iff_no_eternal_shadow.symm,
+    deep_firing_iff_no_eternal_shadow.symm,
     separation_iff_clean_word_equation⟩
 
 /-! ## Section 4 — the total disjunction -/
