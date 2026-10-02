@@ -22,27 +22,70 @@ open GSTFourPowerDirectResidue81
 open GSTFourPowerDirectResidue243
 open GSTFourPowerExponentTritObstruction
 
+/-- Later green Navigation machinery specialized back onto the frozen `de11`
+production base.  This is the exact theorem body used by the binder-free line;
+it is copied here instead of importing that branch's monolith. -/
+theorem graph_witness_four_pow_div_three
+    (k : Nat) (hk : 5 ≤ k) (hk3 : k % 3 = 0) :
+    ∃ p, GSTGraphWitness (4^k) (2*k) p := by
+  have hkpos : 0 < k := by omega
+  have hs : 1 ≤ v3 k := by
+    rw [v3_succ_of_div3 k hkpos hk3]
+    omega
+  have hdvd : 3^(v3 k) ∣ k := pow_v3_dvd k hkpos
+  have hmod : k % 3^(v3 k) = 0 := Nat.mod_eq_zero_of_dvd hdvd
+  have hk_eq : k = 3^(v3 k) * (k / 3^(v3 k)) := by
+    have h := Nat.div_add_mod k (3^(v3 k))
+    rw [hmod, Nat.add_zero] at h
+    exact h.symm
+  have hb : 1 ≤ k / 3^(v3 k) := by
+    apply Nat.one_le_iff_ne_zero.mpr
+    intro hz
+    rw [hz, Nat.mul_zero] at hk_eq
+    omega
+  have hb3 : (k / 3^(v3 k)) % 3 ≠ 0 := v3_maximal k hkpos
+  have hdomain : 2 ≤ v3 k ∨ 1 < k / 3^(v3 k) := by
+    by_cases hs2 : 2 ≤ v3 k
+    · exact Or.inl hs2
+    · right
+      have hs1 : v3 k = 1 := by omega
+      rw [hs1] at hk_eq
+      norm_num at hk_eq
+      have hb' : 1 ≤ k / 3 := by simpa [hs1] using hb
+      have hsmall : 1 < k / 3 := by
+        by_contra hnot
+        have hb_eq : k / 3 = 1 := by omega
+        rw [hb_eq] at hk_eq
+        omega
+      simpa only [hs1, Nat.pow_one] using hsmall
+  have hnav : GSTNavigationWitness
+      (gstNavigationConstant (v3 k) (k / 3^(v3 k))) :=
+    gst_navigation_witness_all_of_residual gst_residual_navigation_lift
+      (v3 k) (k / 3^(v3 k)) hs hb hb3 hdomain
+  have hgraph := gst_graph_witness_of_navigation
+    (v3 k) (k / 3^(v3 k)) hs hb hb3 hnav
+  simpa only [← hk_eq] using hgraph
+
 /-- A certified full-power GST+/NULL witness is already the exact same-row
 `CommonTwo` event. -/
 theorem commonTwo_of_div_three
     (K : Nat) (hK5 : 5 ≤ K) (hK3 : K % 3 = 0) :
     CommonTwo K := by
-  obtain ⟨p, hp, _hpN, hd, hspace⟩ :=
-    gst_graph_witness_four_pow_div_three K hK5 hK3
+  obtain ⟨p, hp⟩ := graph_witness_four_pow_div_three K hK5 hK3
   have hCmod : gstCarry (4^K) p % 3 = 0 :=
-    gstGoodSpace_carry_mod3_zero (4^K) p hspace
+    gstGoodSpace_carry_mod3_zero (4^K) p hp.2.2.2
   have hClt : gstCarry (4^K) p < 4 :=
-    gstCarry_lt_four (4^K) p hp
+    gstCarry_lt_four (4^K) p hp.1
   have hgood : gstCarry (4^K) p = 0 ∨ gstCarry (4^K) p = 3 := by
     omega
   have hlift :=
-    gst_pure_lift_or_forced_cascade (4^K) p hp hd hgood
+    gst_pure_lift_or_forced_cascade (4^K) p hp.1 hp.2.2.1 hgood
   have hdnext : gstDigit (4 * 4^K) p = 2 := by
     rcases hlift with h | h
     · exact h.1
     · exact h.1
-  refine ⟨p, hp, ?_, ?_⟩
-  · simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hd
+  refine ⟨p, hp.1, ?_, ?_⟩
+  · simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hp.2.2.1
   · have hpow : 4^(K+1) = 4 * 4^K := by
       rw [Nat.pow_succ]
       ring
@@ -77,27 +120,25 @@ theorem commonTwo_of_mod729_lifted_prefix
     simpa using And.intro (hpair.1.trans h0) (hpair.2.trans h1)
   exact ⟨6, by norm_num, hrow.1, hrow.2⟩
 
-/-- The genuinely new row-six residues proved on the `7359d...` relocation
-lineage.  These are kept as a compact structural class rather than copying the
-historical relocation/provider modules. -/
+/-- Row-six residues whose lifted-prefix hypotheses are actually discharged by
+kernel arithmetic.  The historical `301` and `302` experiments are excluded:
+for prefixes 58 and 59 one of the two required row-six digit equations is
+false, while 288, 289, 292 and 303 are genuine overlaps. -/
 def RelocatedRowSixClass (r : Nat) : Prop :=
-  r = 288 ∨ r = 289 ∨ r = 292 ∨ r = 301 ∨ r = 302 ∨ r = 303
+  r = 288 ∨ r = 289 ∨ r = 292 ∨ r = 303
 
-/-- Direct production `CommonTwo` theorem for every salvaged row-six residue. -/
+/-- Direct production `CommonTwo` theorem for every certified salvaged row-six
+residue. -/
 theorem commonTwo_of_relocated_row_six
     (K : Nat) (hres : RelocatedRowSixClass (K % 729)) :
     CommonTwo K := by
   unfold RelocatedRowSixClass at hres
-  rcases hres with h | h | h | h | h | h
+  rcases hres with h | h | h | h
   · exact commonTwo_of_mod729_lifted_prefix K 45 1 (by norm_num)
       (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
   · exact commonTwo_of_mod729_lifted_prefix K 46 1 (by norm_num)
       (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
   · exact commonTwo_of_mod729_lifted_prefix K 49 1 (by norm_num)
-      (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
-  · exact commonTwo_of_mod729_lifted_prefix K 58 1 (by norm_num)
-      (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
-  · exact commonTwo_of_mod729_lifted_prefix K 59 1 (by norm_num)
       (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
   · exact commonTwo_of_mod729_lifted_prefix K 60 1 (by norm_num)
       (by norm_num at h ⊢; exact h) (by norm_num [digit3]) (by norm_num [digit3])
@@ -129,11 +170,13 @@ theorem noCommonTwo_survivor_constraints
   exact ⟨h3, h9.1, h9.2, h27.1, h27.2.1, h27.2.2.1,
     h27.2.2.2, h81, h243, h729⟩
 
+#check graph_witness_four_pow_div_three
 #check commonTwo_of_div_three
 #check commonTwo_of_mod243_row_five
 #check commonTwo_of_mod729_lifted_prefix
 #check commonTwo_of_relocated_row_six
 #check noCommonTwo_survivor_constraints
+#print axioms graph_witness_four_pow_div_three
 #print axioms commonTwo_of_div_three
 #print axioms commonTwo_of_mod243_row_five
 #print axioms commonTwo_of_mod729_lifted_prefix
