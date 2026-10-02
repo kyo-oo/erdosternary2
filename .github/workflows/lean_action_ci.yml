@@ -45,6 +45,7 @@ jobs:
             GSTFourPowerAffineClassifierBridge \
             GSTFourPowerAffinePeelClassifier \
             GSTFourPowerDirectResidue243 \
+            GSTResidualOmegaRevival \
             GSTFourPowerDirectExistenceClosure
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
@@ -59,6 +60,7 @@ jobs:
           name: direct-existence-diagnostics
           path: |
             GSTFourPower*.log
+            GSTResidualOmegaRevival.log
             axiom-audit.log
             hard-build.log
             comparator.log
@@ -91,7 +93,11 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
+          import GSTResidualOmegaRevival
           import GSTFourPowerDirectExistenceClosure
+          #print axioms GSTResidualOmegaRevival.omega_termination
+          #print axioms GSTResidualOmegaRevival.residual_navigation_lift
+          #print axioms GSTResidualOmegaRevival.four_power_good_witness_div_three
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_div_three
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod243_row_five
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod729_lifted_prefix
