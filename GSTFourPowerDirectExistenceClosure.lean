@@ -2,6 +2,8 @@ import ErdosTernary2
 import GSTFourPowerDirectExistence
 import GSTFourPowerDirectResidue243
 import GSTResidualOmegaRevival
+import GSTFourPowerAffineChannelAutomaton
+import GSTFourPowerAffineClassifierBridge
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 40000000
@@ -22,6 +24,68 @@ open GSTFourPowerDirectResidue
 open GSTFourPowerDirectResidue81
 open GSTFourPowerDirectResidue243
 open GSTFourPowerExponentTritObstruction
+open GSTFourPowerAffineBadState
+open GSTFourPowerAffineChannelAutomaton
+open GSTFourPowerAffineClassifierBridge
+
+/-- The direct pair witness for the affine edge `X -> 4X+1` is exactly the
+monolith's seed-one GST affine witness.  This is the missing dictionary between
+the direct `CommonTwo` automaton and the residual Ω language. -/
+theorem seedOneAffineWitness_iff_pairCommonTwo (X : Nat) :
+    GSTSeedOneAffineWitness X ↔ PairCommonTwo X (4 * X + 1) := by
+  constructor
+  · rintro ⟨j, hd, hcarry⟩
+    refine ⟨j, ?_, ?_⟩
+    · simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hd
+    · have hform := gst_affine_mul_digit_exact 4 1 X j
+      rcases hcarry with h0 | h3
+      · rw [hd, h0] at hform
+        simpa [GSTFourPowerDirectResidue.digit3, gstDigit, Nat.add_comm] using hform
+      · rw [hd, h3] at hform
+        simpa [GSTFourPowerDirectResidue.digit3, gstDigit, Nat.add_comm] using hform
+  · rintro ⟨j, hdRaw, htRaw⟩
+    have hd : gstDigit X j = 2 := by
+      simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hdRaw
+    have ht : gstDigit (1 + 4 * X) j = 2 := by
+      simpa [GSTFourPowerDirectResidue.digit3, gstDigit, Nat.add_comm] using htRaw
+    have hform := gst_affine_mul_digit_exact 4 1 X j
+    rw [hd, ht] at hform
+    have hlt : gstAffineMulCarry 4 1 X j < 4 :=
+      gst_affine_carry_lt_multiplier 4 1 X j (by norm_num) (by norm_num)
+    refine ⟨j, hd, ?_⟩
+    omega
+
+/-- Consequently, direct bad channel one is literally the seeded GST bad
+trace used by the Ω termination theorem.  No semantic approximation or
+provider proposition sits between the two languages. -/
+theorem badChannel_one_iff_seededAffineBadTrace (X : Nat) :
+    BadChannel 1 X ↔ GSTSeededAffineBadTrace 1 X := by
+  rw [show BadChannel 1 X ↔ ¬ PairCommonTwo X (4 * X + 1) by
+    rfl]
+  rw [← seedOneAffineWitness_iff_pairCommonTwo X]
+  simp only [GSTSeedOneAffineWitness, GSTSeededAffineBadTrace, GSTBadPair]
+  push_neg
+  rfl
+
+/-- At level zero the monolith's Navigation constant is exactly the affine
+orbit coordinate.  This pins the direct same-position problem to the missing
+level-zero seeded-navigation boundary. -/
+theorem navigationConstant_zero_eq_affineOrbit (K : Nat) :
+    gstNavigationConstant 0 K = GSTFourPowerAffineOrbit.affineOrbit K := by
+  unfold gstNavigationConstant
+  norm_num
+  have hpow := GSTFourPowerAffineOrbit.four_pow_eq_one_plus_three_affineOrbit K
+  omega
+
+/-- A direct `CommonTwo` counterexample is therefore an infinite seed-one GST
+bad trace on the level-zero Navigation constant. -/
+theorem noCommonTwo_to_levelZero_seeded_bad
+    (K : Nat) (hNo : ¬ CommonTwo K) :
+    GSTSeededAffineBadTrace 1 (gstNavigationConstant 0 K) := by
+  have hbad : BadChannel 1 (GSTFourPowerAffineOrbit.affineOrbit K) :=
+    (noCommonTwo_iff_badChannel_one K).1 hNo
+  rw [navigationConstant_zero_eq_affineOrbit K]
+  exact (badChannel_one_iff_seededAffineBadTrace _).1 hbad
 
 /-- The revived residual Ω theorem gives a full-power GST+/NULL digit-two
 witness for every admissible exponent divisible by three.  One exact local
@@ -130,11 +194,19 @@ theorem noCommonTwo_survivor_constraints
   exact ⟨h3, h9.1, h9.2, h27.1, h27.2.1, h27.2.2.1,
     h27.2.2.2, h81, h243, h729⟩
 
+#check seedOneAffineWitness_iff_pairCommonTwo
+#check badChannel_one_iff_seededAffineBadTrace
+#check navigationConstant_zero_eq_affineOrbit
+#check noCommonTwo_to_levelZero_seeded_bad
 #check commonTwo_of_div_three
 #check commonTwo_of_mod243_row_five
 #check commonTwo_of_mod729_lifted_prefix
 #check commonTwo_of_relocated_row_six
 #check noCommonTwo_survivor_constraints
+#print axioms seedOneAffineWitness_iff_pairCommonTwo
+#print axioms badChannel_one_iff_seededAffineBadTrace
+#print axioms navigationConstant_zero_eq_affineOrbit
+#print axioms noCommonTwo_to_levelZero_seeded_bad
 #print axioms commonTwo_of_div_three
 #print axioms commonTwo_of_mod243_row_five
 #print axioms commonTwo_of_mod729_lifted_prefix
