@@ -31,7 +31,7 @@ theorem omega_termination_s1
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
     <;> (first
       | contradiction
       | omega
@@ -59,7 +59,7 @@ theorem omega_termination_s3
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
     <;> (first
       | contradiction
       | omega
@@ -88,7 +88,7 @@ theorem omega_termination_stable
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
   simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
     GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
-    GSTSeededAffineBadTrace, Set.mem_setOf_eq]
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
     <;> (first
       | contradiction
       | omega
