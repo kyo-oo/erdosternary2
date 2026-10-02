@@ -44,6 +44,54 @@ theorem commonTwo_to_creation_certificate
     dsimp [c] at hcMod
     simpa [directCarry4] using hcMod
 
+/-- The historical creation certificate is not weaker than direct existence.
+In its carry-zero branch the same row is already common-two.  In its carry-one
+branch the exact carry recurrence sends carry one plus source digit two to
+carry three one row later, while the certificate supplies digit two there;
+that next row is therefore common-two. -/
+theorem creation_certificate_to_commonTwo
+    (K : Nat) (h : CreationCertificate (4^K)) :
+    CommonTwo K := by
+  rcases h with ⟨p, hp, hsrcRaw, hcase⟩
+  have hsrc : digit3 (4^K) p = 2 := by
+    simpa [GSTFourPowerDirectResidue.digit3] using hsrcRaw
+  rcases hcase with hzero | hone
+  · have hcmod : directCarry4 (4^K) p % 3 = 0 := by
+      simpa [directCarry4] using hzero
+    have hclt : directCarry4 (4^K) p < 4 :=
+      directCarry4_lt_four (4^K) p
+    have hc : directCarry4 (4^K) p = 0 ∨ directCarry4 (4^K) p = 3 := by
+      omega
+    have htMul : digit3 (4 * (4^K)) p = 2 := by
+      rw [digit3_four_mul, hsrc]
+      rcases hc with h0 | h3
+      · rw [h0]
+        norm_num
+      · rw [h3]
+        norm_num
+    have ht : digit3 (4^(K+1)) p = 2 := by
+      simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using htMul
+    exact ⟨p, hp, hsrc, ht⟩
+  · have hcmod : directCarry4 (4^K) p % 3 = 1 := by
+      simpa [directCarry4] using hone.1
+    have hclt : directCarry4 (4^K) p < 4 :=
+      directCarry4_lt_four (4^K) p
+    have hc : directCarry4 (4^K) p = 1 := by
+      omega
+    have hnext := directCarry4_forward_exact_all (4^K) p
+    have hcnext : directCarry4 (4^K) (p+1) = 3 := by
+      rw [hc, hsrc] at hnext
+      norm_num at hnext
+      exact hnext
+    have hsrcNext : digit3 (4^K) (p+1) = 2 := by
+      simpa [GSTFourPowerDirectResidue.digit3] using hone.2
+    have htMulNext : digit3 (4 * (4^K)) (p+1) = 2 := by
+      rw [digit3_four_mul, hsrcNext, hcnext]
+      norm_num
+    have htNext : digit3 (4^(K+1)) (p+1) = 2 := by
+      simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using htMulNext
+    exact ⟨p+1, by omega, hsrcNext, htNext⟩
+
 /-- The direct arithmetic existence theorem supplies the exact historical
 four-power creation master.  This is the production-facing replacement for the
 old collision/navigation route. -/
@@ -53,9 +101,27 @@ theorem directExistence_to_creation_master
   intro K hK5 hK7
   exact commonTwo_to_creation_certificate K (hDirect K hK5 hK7)
 
+/-- Conversely, any genuine creation master already supplies the direct
+same-position common-two law. -/
+theorem creationMaster_to_directExistence
+    (hMaster : FourPowerCreationMaster) :
+    FourPowerDirectExistence := by
+  intro K hK5 hK7
+  exact creation_certificate_to_commonTwo K (hMaster K hK5 hK7)
+
+/-- The two production seam formulations are mathematically equivalent. -/
+theorem directExistence_iff_creationMaster :
+    FourPowerDirectExistence ↔ FourPowerCreationMaster :=
+  ⟨directExistence_to_creation_master, creationMaster_to_directExistence⟩
+
 #check commonTwo_to_creation_certificate
+#check creation_certificate_to_commonTwo
 #check directExistence_to_creation_master
+#check creationMaster_to_directExistence
 #print axioms commonTwo_to_creation_certificate
+#print axioms creation_certificate_to_commonTwo
 #print axioms directExistence_to_creation_master
+#print axioms creationMaster_to_directExistence
+#print axioms directExistence_iff_creationMaster
 
 end GSTFourPowerDirectCreationMaster
