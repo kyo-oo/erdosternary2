@@ -44,6 +44,8 @@ jobs:
             GSTFourPowerAffineChannelAutomaton \
             GSTFourPowerAffineClassifierBridge \
             GSTFourPowerAffinePeelClassifier \
+            GSTFourPowerAffineRenormalizedOrbit \
+            GSTFourPowerUniversalInduction \
             GSTFourPowerDirectResidue243 \
             GSTResidualOmegaRevival \
             GSTFourPowerDirectExistenceClosure
@@ -94,10 +96,13 @@ jobs:
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
           import GSTResidualOmegaRevival
+          import GSTFourPowerUniversalInduction
           import GSTFourPowerDirectExistenceClosure
           #print axioms GSTResidualOmegaRevival.omega_termination
           #print axioms GSTResidualOmegaRevival.residual_navigation_lift
           #print axioms GSTResidualOmegaRevival.four_power_good_witness_div_three
+          #print axioms GSTFourPowerUniversalInduction.no_bad_affine_channel_one_of_branch_bad_descent
+          #print axioms GSTFourPowerUniversalInduction.fourPowerDirectExistence_of_branch_bad_descent
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_div_three
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod243_row_five
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod729_lifted_prefix
