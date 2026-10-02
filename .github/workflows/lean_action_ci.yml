@@ -46,6 +46,7 @@ jobs:
             GSTFourPowerAffinePeelClassifier \
             GSTFourPowerAffineRenormalizedOrbit \
             GSTFourPowerUniversalInduction \
+            GSTFourPowerDirectCreationMaster \
             GSTFourPowerDirectResidue243 \
             GSTResidualOmegaRevival \
             GSTFourPowerDirectExistenceClosure
@@ -97,12 +98,16 @@ jobs:
           import ErdosTernary2
           import GSTResidualOmegaRevival
           import GSTFourPowerUniversalInduction
+          import GSTFourPowerDirectCreationMaster
           import GSTFourPowerDirectExistenceClosure
           #print axioms GSTResidualOmegaRevival.omega_termination
           #print axioms GSTResidualOmegaRevival.residual_navigation_lift
           #print axioms GSTResidualOmegaRevival.four_power_good_witness_div_three
           #print axioms GSTFourPowerUniversalInduction.no_bad_affine_channel_one_of_branch_bad_descent
           #print axioms GSTFourPowerUniversalInduction.fourPowerDirectExistence_of_branch_bad_descent
+          #print axioms GSTFourPowerDirectCreationMaster.creation_certificate_to_commonTwo
+          #print axioms GSTFourPowerDirectCreationMaster.creationMaster_to_directExistence
+          #print axioms GSTFourPowerDirectCreationMaster.directExistence_iff_creationMaster
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_div_three
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod243_row_five
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod729_lifted_prefix
