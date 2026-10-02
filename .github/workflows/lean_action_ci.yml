@@ -44,12 +44,25 @@ jobs:
             GSTFourPowerAffineChannelAutomaton \
             GSTFourPowerAffineClassifierBridge \
             GSTFourPowerAffinePeelClassifier \
+            GSTFourPowerDirectResidue243 \
             GSTFourPowerDirectExistenceClosure
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
           echo DIRECT_AFFINE_CLASSIFIER_AND_CLOSURE_KERNEL_GREEN=1
+
+      - name: Upload direct-existence diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: direct-existence-diagnostics
+          path: |
+            GSTFourPower*.log
+            axiom-audit.log
+            hard-build.log
+            comparator.log
+          if-no-files-found: ignore
 
       - name: Legacy production surgery disabled
         run: |
@@ -80,8 +93,10 @@ jobs:
           import ErdosTernary2
           import GSTFourPowerDirectExistenceClosure
           #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_div_three
+          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod243_row_five
+          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_mod729_lifted_prefix
+          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_relocated_row_six
           #print axioms GSTFourPowerDirectExistenceClosure.noCommonTwo_survivor_constraints
-          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_certified_low_layer
           #print axioms gst_four_power_creation_master_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms gst_power_two_wave_large
