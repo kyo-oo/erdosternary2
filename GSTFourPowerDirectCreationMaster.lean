@@ -66,9 +66,7 @@ theorem creation_certificate_to_commonTwo
       rw [digit3_four_mul, hsrc]
       rcases hc with h0 | h3
       · rw [h0]
-        norm_num
       · rw [h3]
-        norm_num
     have ht : digit3 (4^(K+1)) p = 2 := by
       simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using htMul
     exact ⟨p, hp, hsrc, ht⟩
@@ -87,7 +85,6 @@ theorem creation_certificate_to_commonTwo
       simpa [GSTFourPowerDirectResidue.digit3] using hone.2
     have htMulNext : digit3 (4 * (4^K)) (p+1) = 2 := by
       rw [digit3_four_mul, hsrcNext, hcnext]
-      norm_num
     have htNext : digit3 (4^(K+1)) (p+1) = 2 := by
       simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using htMulNext
     exact ⟨p+1, by omega, hsrcNext, htNext⟩
