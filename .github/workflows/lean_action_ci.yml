@@ -31,7 +31,7 @@ jobs:
           lake update
           lake exe cache get
 
-      - name: Kernel-check direct affine classifier
+      - name: Kernel-check direct affine classifier and direct-existence closure
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
@@ -43,12 +43,13 @@ jobs:
             GSTFourPowerAffineBadState \
             GSTFourPowerAffineChannelAutomaton \
             GSTFourPowerAffineClassifierBridge \
-            GSTFourPowerAffinePeelClassifier
+            GSTFourPowerAffinePeelClassifier \
+            GSTFourPowerDirectExistenceClosure
           do
             lake env lean -o ".lake/build/lib/lean/${module}.olean" "${module}.lean" 2>&1 | tee "${module}.log"
             ! grep -E 'declaration uses .sorry.|sorryAx|unknown identifier|unknown module prefix|unsolved goals|error:' "${module}.log"
           done
-          echo DIRECT_AFFINE_CLASSIFIER_KERNEL_GREEN=1
+          echo DIRECT_AFFINE_CLASSIFIER_AND_CLOSURE_KERNEL_GREEN=1
 
       - name: Legacy production surgery disabled
         run: |
@@ -77,6 +78,10 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           cat > MultiNukeAxiomAudit.lean <<'LEAN'
           import ErdosTernary2
+          import GSTFourPowerDirectExistenceClosure
+          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_div_three
+          #print axioms GSTFourPowerDirectExistenceClosure.noCommonTwo_survivor_constraints
+          #print axioms GSTFourPowerDirectExistenceClosure.commonTwo_of_certified_low_layer
           #print axioms gst_four_power_creation_master_inline
           #print axioms gst_prefix_one_navigation_lift
           #print axioms gst_power_two_wave_large
