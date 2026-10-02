@@ -1,5 +1,4 @@
 import ErdosTernary2
-import GSTTheAct
 
 namespace GSTResidualOmegaRevival
 
