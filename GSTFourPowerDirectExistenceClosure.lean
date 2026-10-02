@@ -1,6 +1,7 @@
 import ErdosTernary2
 import GSTFourPowerDirectExistence
 import GSTFourPowerDirectResidue243
+import GSTResidualOmegaRevival
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 40000000
@@ -22,70 +23,29 @@ open GSTFourPowerDirectResidue81
 open GSTFourPowerDirectResidue243
 open GSTFourPowerExponentTritObstruction
 
-/-- Later green Navigation machinery specialized back onto the frozen `de11`
-production base.  This is the exact theorem body used by the binder-free line;
-it is copied here instead of importing that branch's monolith. -/
-theorem graph_witness_four_pow_div_three
-    (k : Nat) (hk : 5 ≤ k) (hk3 : k % 3 = 0) :
-    ∃ p, GSTGraphWitness (4^k) (2*k) p := by
-  have hkpos : 0 < k := by omega
-  have hs : 1 ≤ v3 k := by
-    rw [v3_succ_of_div3 k hkpos hk3]
-    omega
-  have hdvd : 3^(v3 k) ∣ k := pow_v3_dvd k hkpos
-  have hmod : k % 3^(v3 k) = 0 := Nat.mod_eq_zero_of_dvd hdvd
-  have hk_eq : k = 3^(v3 k) * (k / 3^(v3 k)) := by
-    have h := Nat.div_add_mod k (3^(v3 k))
-    rw [hmod, Nat.add_zero] at h
-    exact h.symm
-  have hb : 1 ≤ k / 3^(v3 k) := by
-    apply Nat.one_le_iff_ne_zero.mpr
-    intro hz
-    rw [hz, Nat.mul_zero] at hk_eq
-    omega
-  have hb3 : (k / 3^(v3 k)) % 3 ≠ 0 := v3_maximal k hkpos
-  have hdomain : 2 ≤ v3 k ∨ 1 < k / 3^(v3 k) := by
-    by_cases hs2 : 2 ≤ v3 k
-    · exact Or.inl hs2
-    · right
-      have hs1 : v3 k = 1 := by omega
-      rw [hs1] at hk_eq
-      norm_num at hk_eq
-      have hb' : 1 ≤ k / 3 := by simpa [hs1] using hb
-      have hsmall : 1 < k / 3 := by
-        by_contra hnot
-        have hb_eq : k / 3 = 1 := by omega
-        rw [hb_eq] at hk_eq
-        omega
-      simpa only [hs1, Nat.pow_one] using hsmall
-  have hnav : GSTNavigationWitness
-      (gstNavigationConstant (v3 k) (k / 3^(v3 k))) :=
-    gst_navigation_witness_all_of_residual gst_residual_navigation_lift
-      (v3 k) (k / 3^(v3 k)) hs hb hb3 hdomain
-  have hgraph := gst_graph_witness_of_navigation
-    (v3 k) (k / 3^(v3 k)) hs hb hb3 hnav
-  simpa only [← hk_eq] using hgraph
-
-/-- A certified full-power GST+/NULL witness is already the exact same-row
-`CommonTwo` event. -/
+/-- The revived residual Ω theorem gives a full-power GST+/NULL digit-two
+witness for every admissible exponent divisible by three.  One exact local
+x4 lift turns that witness into the same-position digit-two event in the next
+power, which is precisely `CommonTwo`. -/
 theorem commonTwo_of_div_three
     (K : Nat) (hK5 : 5 ≤ K) (hK3 : K % 3 = 0) :
     CommonTwo K := by
-  obtain ⟨p, hp⟩ := graph_witness_four_pow_div_three K hK5 hK3
+  obtain ⟨p, hp, hd, hspace⟩ :=
+    GSTResidualOmegaRevival.four_power_good_witness_div_three K hK5 hK3
   have hCmod : gstCarry (4^K) p % 3 = 0 :=
-    gstGoodSpace_carry_mod3_zero (4^K) p hp.2.2.2
+    gstGoodSpace_carry_mod3_zero (4^K) p hspace
   have hClt : gstCarry (4^K) p < 4 :=
-    gstCarry_lt_four (4^K) p hp.1
+    gstCarry_lt_four (4^K) p hp
   have hgood : gstCarry (4^K) p = 0 ∨ gstCarry (4^K) p = 3 := by
     omega
   have hlift :=
-    gst_pure_lift_or_forced_cascade (4^K) p hp.1 hp.2.2.1 hgood
+    gst_pure_lift_or_forced_cascade (4^K) p hp hd hgood
   have hdnext : gstDigit (4 * 4^K) p = 2 := by
     rcases hlift with h | h
     · exact h.1
     · exact h.1
-  refine ⟨p, hp.1, ?_, ?_⟩
-  · simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hp.2.2.1
+  refine ⟨p, hp, ?_, ?_⟩
+  · simpa [GSTFourPowerDirectResidue.digit3, gstDigit] using hd
   · have hpow : 4^(K+1) = 4 * 4^K := by
       rw [Nat.pow_succ]
       ring
@@ -170,13 +130,11 @@ theorem noCommonTwo_survivor_constraints
   exact ⟨h3, h9.1, h9.2, h27.1, h27.2.1, h27.2.2.1,
     h27.2.2.2, h81, h243, h729⟩
 
-#check graph_witness_four_pow_div_three
 #check commonTwo_of_div_three
 #check commonTwo_of_mod243_row_five
 #check commonTwo_of_mod729_lifted_prefix
 #check commonTwo_of_relocated_row_six
 #check noCommonTwo_survivor_constraints
-#print axioms graph_witness_four_pow_div_three
 #print axioms commonTwo_of_div_three
 #print axioms commonTwo_of_mod243_row_five
 #print axioms commonTwo_of_mod729_lifted_prefix
