@@ -1,0 +1,48 @@
+name: Sol Generate Comparator Manifest
+
+on:
+  push:
+    branches:
+      - sol/gpt56-close-one-error
+    paths:
+      - .github/workflows/sol_generate_manifest.yml
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: sol/gpt56-close-one-error
+      - name: Generate rc2 Mathlib manifest with diagnostics
+        shell: bash
+        run: |
+          set +e
+          : > SOL_MANIFEST_DIAGNOSTIC.txt
+          echo "=== elan install ===" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh 2>>SOL_MANIFEST_DIAGNOSTIC.txt | sh -s -- -y --default-toolchain none >>SOL_MANIFEST_DIAGNOSTIC.txt 2>&1
+          CURL_RC=$?
+          export PATH="$HOME/.elan/bin:$PATH"
+          echo "curl_rc=$CURL_RC" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          echo "=== toolchain install ===" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          elan toolchain install leanprover/lean4:v4.33.0-rc2 >> SOL_MANIFEST_DIAGNOSTIC.txt 2>&1
+          TOOLCHAIN_RC=$?
+          echo "toolchain_rc=$TOOLCHAIN_RC" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          echo "=== lake update ===" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          lake update >> SOL_MANIFEST_DIAGNOSTIC.txt 2>&1
+          LAKE_RC=$?
+          echo "lake_rc=$LAKE_RC" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          if test -f lake-manifest.json; then
+            echo "manifest=present" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          else
+            echo "manifest=missing" >> SOL_MANIFEST_DIAGNOSTIC.txt
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SOL_MANIFEST_DIAGNOSTIC.txt
+          test ! -f lake-manifest.json || git add lake-manifest.json
+          git commit -m "build: capture rc2 manifest generation result"
+          git push origin HEAD:sol/gpt56-close-one-error
