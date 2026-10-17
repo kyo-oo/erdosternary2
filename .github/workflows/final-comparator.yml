@@ -1,0 +1,105 @@
+name: Final Lean Comparator
+
+on:
+  push:
+    branches:
+      - sol/gst-v2-atomic-surgery-20260818
+  pull_request:
+
+jobs:
+  comparator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Materialize clean judge modules and exact package
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['Challenge.lean', 'Solution.lean']:
+              src = Path('ker07-snapshot') / name
+              text = src.read_text(encoding='utf-8')
+              i = text.find('import ')
+              if i < 0:
+                  raise SystemExit(f'no import marker in {src}')
+              Path(name).write_text(text[i:], encoding='utf-8')
+          raw = Path('modules/0009_comparator_config.json').read_text(encoding='utf-8')
+          j = raw.find('{')
+          if j < 0:
+              raise SystemExit('comparator config payload not found')
+          Path('comparator_config.json').write_text(raw[j:], encoding='utf-8')
+          Path('lean-toolchain').write_text('leanprover/lean4:v4.33.0-rc2\n', encoding='utf-8')
+          Path('lakefile.toml').write_text('''name = "erdos-ternary2-proof"\nversion = "0.1.0"\ndefaultTargets = ["GSTTactic", "ErdosTernary2", "Challenge", "Solution"]\n\n[[require]]\nname = "mathlib"\nscope = "leanprover-community"\nrev = "v4.33.0-rc2"\n\n[[lean_lib]]\nname = "GSTTactic"\n\n[[lean_lib]]\nname = "ErdosTernary2"\n\n[[lean_lib]]\nname = "Challenge"\n\n[[lean_lib]]\nname = "Solution"\n''', encoding='utf-8')
+          Path('lake-manifest.json').unlink(missing_ok=True)
+          PY
+      - name: Install exact Lean and Mathlib
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+      - name: Compile canonical proof and solution
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build GSTTactic ErdosTernary2 Challenge Solution
+      - name: Audit executable solution sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          bad = []
+          for name in ['GSTTactic.lean', 'ErdosTernary2.lean', 'Solution.lean']:
+              for i, line in enumerate(Path(name).read_text(encoding='utf-8').splitlines(), 1):
+                  stripped = line.lstrip()
+                  if stripped.startswith('--'):
+                      continue
+                  if re.search(r'\bsorry\b', line):
+                      bad.append(f'{name}:{i}:{line}')
+          if bad:
+              print('\n'.join(bad))
+              raise SystemExit('executable solution contains forbidden placeholder token')
+          print('executable solution audit: clean')
+          PY
+      - name: Build pinned lean4export
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p .tools
+          git clone https://github.com/leanprover/lean4export.git .tools/lean4export
+          cd .tools/lean4export
+          git checkout 9fb131bb100eb32ccf6836f14e4f8328d13b6792
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build lean4export
+      - name: Build pinned comparator
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          git clone https://github.com/leanprover/comparator.git .tools/comparator
+          cd .tools/comparator
+          git checkout 75c730e9b6ef5c2c3b334fad7c3d51fe20624c88
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('lakefile.toml')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('rev = "master"', 'rev = "9fb131bb100eb32ccf6836f14e4f8328d13b6792"')
+          p.write_text(s, encoding='utf-8')
+          PY
+          cp ../../lean-toolchain lean-toolchain
+          lake update
+          lake build comparator
+      - name: Run official comparator
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          ROOT="$PWD"
+          CMP_ROOT="$ROOT/.tools/comparator"
+          EXPORT_ROOT="$ROOT/.tools/lean4export"
+          COMPARATOR_LANDRUN="$CMP_ROOT/scripts/fake-landrun.sh" \
+          COMPARATOR_LEAN4EXPORT="$EXPORT_ROOT/.lake/build/bin/lean4export" \
+          lake env "$CMP_ROOT/.lake/build/bin/comparator" comparator_config.json | tee comparator.log
+          grep -F "Your solution is okay!" comparator.log
