@@ -1,0 +1,1 @@
+Atomic GST V2 diagnostic branch. Canonical target remains root ErdosTernary2.lean. Historical ErdosTernary2 copies are banned as main sources. This branch exists to obtain exact Lean CI diagnostics before mathematical surgery.
