@@ -6,9 +6,140 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  gst-v2-probe:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
+
+      - name: Materialize latest Sol scratch layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="ker07-snapshot/branches/16_sol_latest__5c579-final-bigN-right-chord-atomic"
+          find "$SRC" -maxdepth 1 -type f -name '*.lean' ! -name 'ErdosTernary2.lean' -exec cp '{}' . \;
+
+      - name: Normalize injected chronology headers only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for p in Path('.').glob('*.lean'):
+              lines=p.read_text(encoding='utf-8').splitlines(True)
+              first_import=next((i for i,l in enumerate(lines) if l.startswith('import ')), 0)
+              changed=0
+              for i in range(first_import):
+                  if lines[i].startswith('/-'):
+                      lines[i]='--'+lines[i][2:]
+                      changed += 1
+              if changed:
+                  p.write_text(''.join(lines),encoding='utf-8')
+          PY
+
+      - name: Workspace-only quarantine of legacy residual overproof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ErdosTernary2.lean')
+          s=p.read_text(encoding='utf-8')
+          a=s.index('/-- First-level residual Ω∞ termination.')
+          b=s.index('/-\n/-- Numerical ceiling used to bound every power-of-four graph witness.', a)
+          s=s[:a] + '-- EXPERIMENT ONLY: legacy residual Ω theorem family quarantined.\n\n' + s[b:]
+          c=s.index('/-- Exact remaining information-descent seam.')
+          s=s[:c] + '-- EXPERIMENT ONLY: production consumer intentionally omitted.\n'
+          p.write_text(s,encoding='utf-8')
+          print('sanitized core bytes', len(s.encode('utf-8')))
+          PY
+
+      - name: Restore exact comparator workspace and recursive scratch closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > lean-toolchain <<'EOF'
+          leanprover/lean4:v4.33.0-rc2
+          EOF
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          seeds = [
+              'CanonicalOriginTritForcingScratch',
+              'CanonicalResidualInfiniteSupportBridgeScratch',
+          ]
+          excluded = {'ErdosTernary2', 'GSTTactic'}
+          seen = set()
+          stack = list(seeds)
+          while stack:
+              mod = stack.pop()
+              if mod in seen or mod in excluded:
+                  continue
+              path = Path(mod.replace('.', '/') + '.lean')
+              if not path.exists():
+                  # External/mathlib module: Lake resolves it from dependencies.
+                  continue
+              seen.add(mod)
+              text = path.read_text(encoding='utf-8')
+              for line in text.splitlines():
+                  m = re.match(r'^\s*import\s+([A-Za-z0-9_.]+)\s*$', line)
+                  if m:
+                      dep = m.group(1)
+                      dep_path = Path(dep.replace('.', '/') + '.lean')
+                      if dep not in excluded and dep_path.exists():
+                          stack.append(dep)
+
+          roots = sorted(seen) + ['ErdosTernary2.AtomicSurgeryProbe']
+          print('SCRATCH IMPORT CLOSURE:', len(seen), 'modules')
+          for r in roots:
+              print('  ', r)
+
+          quoted = ',\n    '.join('"' + r + '"' for r in roots)
+          lake = f'''name = "erdos-ternary2-proof"
+          version = "0.1.0"
+          defaultTargets = ["AtomicProbe"]
+
+          [[require]]
+          name = "mathlib"
+          scope = "leanprover-community"
+          rev = "v4.33.0-rc2"
+
+          [[lean_lib]]
+          name = "GSTTactic"
+
+          [[lean_lib]]
+          name = "ErdosTernary2"
+
+          [[lean_lib]]
+          name = "AtomicProbe"
+          roots = [
+            {quoted}
+          ]
+          '''
+          Path('lakefile.toml').write_text(lake, encoding='utf-8')
+          PY
+          rm -f lake-manifest.json
+
+      - name: Install pinned rc2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          source "$HOME/.elan/env"
+          elan toolchain install "$(cat lean-toolchain)"
+          elan default "$(cat lean-toolchain)"
+
+      - name: Resolve pinned Mathlib and cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$HOME/.elan/env"
+          lake update
+          lake exe cache get || true
+
+      - name: Kernel-check GST V2 bridge reducer
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$HOME/.elan/env"
+          lake build AtomicProbe

@@ -4,6 +4,7 @@ defaultTargets = ["erdosternary2"]
 
 [[lean_lib]]
 name = "ErdosTernary2"
+roots = ["ErdosTernary2", "GSTTactic"]
 
 [[lean_exe]]
 name = "erdosternary2"
