@@ -111,3 +111,6 @@ name = "GSTInfinityBridgeAudit"
 
 [[lean_lib]]
 name = "GSTInfiniteDelayAudit"
+
+[[lean_lib]]
+name = "GSTOmegaAbsorbingZero"
