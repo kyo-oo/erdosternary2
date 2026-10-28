@@ -17,7 +17,6 @@ No unconditional Erdős conclusion is claimed here.
 namespace GSTNormalizedCoreRigidity
 
 open GSTCanonicalTailLTE
-open GSTFourPowerDirectResidue
 open GSTWorldtraceTowerWindow
 open GSTWorldtraceCoeffStability
 
@@ -53,8 +52,8 @@ theorem coefficient_stabilization_any_band
 produces an actual ternary-two digit in 4^(u*3^s) at all s >= 29. -/
 theorem fixed_coefficient_digit_transports_unconditionally
     (u s k : Nat) (hs : 29 ≤ s) (hk : k < 30)
-    (hcert : digit3 (u * lteCoeff 29) k = 2) :
-    digit3 (4^(u*3^s)) (s+1+k) = 2 := by
+    (hcert : GSTFourPowerDirectResidue.digit3 (u * lteCoeff 29) k = 2) :
+    GSTFourPowerDirectResidue.digit3 (4^(u*3^s)) (s+1+k) = 2 := by
   have hcoeff :
       lteCoeff s % 3^30 = lteCoeff 29 % 3^30 :=
     coefficient_stabilization_any_band 29 s hs
@@ -79,13 +78,13 @@ theorem fixed_coefficient_digit_transports_unconditionally
       _ = (u*lteCoeff 29)%3^(k+1) :=
             Nat.mod_mod_of_dvd _ hdiv
   have hread :
-      digit3 (u*lteCoeff s) k = digit3 (u*lteCoeff 29) k :=
-    digit3_eq_of_mod_next _ _ _ hmod
+      GSTFourPowerDirectResidue.digit3 (u*lteCoeff s) k = GSTFourPowerDirectResidue.digit3 (u*lteCoeff 29) k :=
+    GSTFourPowerDirectResidue.digit3_eq_of_mod_next _ _ _ hmod
   calc
-    digit3 (4^(u*3^s)) (s+1+k) =
-        digit3 (u*lteCoeff s) k :=
+    GSTFourPowerDirectResidue.digit3 (4^(u*3^s)) (s+1+k) =
+        GSTFourPowerDirectResidue.digit3 (u*lteCoeff s) k :=
           tower_digit_read_from_block s u k (by omega)
-    _ = digit3 (u*lteCoeff 29) k := hread
+    _ = GSTFourPowerDirectResidue.digit3 (u*lteCoeff 29) k := hread
     _ = 2 := hcert
 
 /-- A valuation factor in the multiplier is exactly a shift in GST scale.
@@ -102,8 +101,8 @@ all sufficiently large scales, even when its multiplier contains 3^v. -/
 theorem normalized_core_certificate_transport
     (u v s k : Nat)
     (hs : 29 ≤ s+v) (hk : k < 30)
-    (hcert : digit3 (u*lteCoeff 29) k = 2) :
-    digit3 (4^((u*3^v)*3^s)) ((s+v)+1+k) = 2 := by
+    (hcert : GSTFourPowerDirectResidue.digit3 (u*lteCoeff 29) k = 2) :
+    GSTFourPowerDirectResidue.digit3 (4^((u*3^v)*3^s)) ((s+v)+1+k) = 2 := by
   rw [valuation_factor_absorbs_into_scale]
   exact fixed_coefficient_digit_transports_unconditionally
     u (s+v) k hs hk hcert
