@@ -107,6 +107,26 @@ theorem normalized_core_certificate_transport
   exact fixed_coefficient_digit_transports_unconditionally
     u (s+v) k hs hk hcert
 
+
+/-- A genuinely unbounded normalized-core family beyond every finite
+enumeration: when u ≡ 2 (mod 3), the first tower coefficient digit
+already equals two, for every scale and every size of u. -/
+theorem every_two_mod_three_core_fires
+    (s u : Nat) (hu : u % 3 = 2) :
+    GSTFourPowerDirectResidue.digit3 (4^(u*3^s)) (s+1) = 2 := by
+  have hread := tower_digit_read_from_block s u 0 (by omega)
+  rw [hread]
+  unfold GSTFourPowerDirectResidue.digit3
+  simp only [pow_zero, Nat.div_one]
+  calc
+    (u*lteCoeff s)%3 = ((u%3)*(lteCoeff s%3))%3 :=
+      Nat.mul_mod _ _ _
+    _ = (2*1)%3 := by
+      rw [hu, lteCoeff_mod3_one s]
+    _ = 2 := by decide
+
+#print axioms every_two_mod_three_core_fires
+
 #print axioms coefficient_stabilization_any_band
 #print axioms fixed_coefficient_digit_transports_unconditionally
 #print axioms valuation_factor_absorbs_into_scale
