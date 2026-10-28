@@ -32,7 +32,9 @@ theorem exceptional_four_is_clean (p : Nat) :
       have h : 4^4 < 3^6 := by decide
       omega
     have hzero : 4^4 / 3^p = 0 := Nat.div_eq_of_lt hsmall
-    simp [digit3, hzero]
+    change (4^4 / 3^p) % 3 ≠ 2
+    rw [hzero]
+    decide
 
 /-- Any arbitrarily large natural exponent can reproduce the clean
 seed through an arbitrarily prescribed ternary observation horizon.
@@ -42,18 +44,23 @@ theorem arbitrarily_large_natural_clean_prefix
     ∃ K : Nat, 5 ≤ K ∧ M ≤ K ∧
       ∀ p : Nat, p ≤ L → digit3 (4^K) p ≠ 2 := by
   let K : Nat := 4 + 3^L * (M+5)
-  have hpge : 1 ≤ 3^L := by positivity
+  have hpge : 1 ≤ 3^L := by
+    have hpos : 0 < 3^L := by positivity
+    omega
   refine ⟨K, ?_, ?_, ?_⟩
   · dsimp [K]
     nlinarith
   · dsimp [K]
     nlinarith
   · intro p hp
-    have hshape :
-        3^L * (M+5) = 3^p * (3^(L-p)*(M+5)) := by
+    have hpow : 3^L = 3^p*3^(L-p) := by
       rw [← pow_add]
       congr 1
       omega
+    have hshape :
+        3^L * (M+5) = 3^p * (3^(L-p)*(M+5)) := by
+      rw [hpow]
+      ring
     have hrepr : K = 4 + 3^p * (3^(L-p)*(M+5)) := by
       dsimp [K]
       rw [hshape]
