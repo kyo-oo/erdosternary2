@@ -1,0 +1,35 @@
+name: GPT6 GST Finite Core Lean Certificate
+on:
+  push:
+    branches:
+      - gpt6/erdos-fixed-core-kernel-20261029
+    paths:
+      - GSTFixedCoreCertificate.lean
+      - .github/workflows/gpt6_fixed_core_kernel.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean RC2 and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTWorldtraceBlockLift GSTFourPowerDirectResidue
+          lake env lean -o .lake/build/lib/lean/GSTWorldtraceTowerWindow.olean GSTWorldtraceTowerWindow.lean
+      - name: Kernel decision exact 566 by 18 finite certification
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTFixedCoreCertificate.lean 2>&1 | tee gst-fixed-lean.log
+          ! grep -E 'error:|unsolved goals|sorryAx|unknown identifier|declaration uses .sorry.' gst-fixed-lean.log
+          echo GST_FIXED_566_LEAN_CERTIFIED=1
