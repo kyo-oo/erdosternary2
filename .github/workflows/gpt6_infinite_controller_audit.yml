@@ -1,0 +1,35 @@
+name: GPT6 GST Infinity Controller Axiom Audit
+on:
+  push:
+    branches:
+      - gpt6/erdos-infinite-controller-audit-20261029
+    paths:
+      - GSTInfiniteFourPowerKernelAudit.lean
+      - GSTInfiniteFourPowerNavigation.lean
+      - .github/workflows/gpt6_infinite_controller_audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+      - name: Compile isolated alleged universal theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build GSTInfiniteFourPowerNavigation
+          lake env lean GSTInfiniteFourPowerKernelAudit.lean 2>&1 | tee gst-infinity-kernel.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' gst-infinity-kernel.log
+          grep -Fq 'GSTInfiniteFourPowerNavigation.four_power_happy_ge_three' gst-infinity-kernel.log
+          echo GST_INFINITE_UNCONDITIONAL_KERNEL_PASS=1
