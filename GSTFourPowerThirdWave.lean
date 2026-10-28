@@ -247,7 +247,8 @@ theorem thirdWave_of_periodic_certificate
 have a shared digit two in 4^K and 4^(K+1) at position seven. -/
 theorem thirdWave_of_mod2187_nine (K : Nat) (hK : K % 2187 = 9) :
     thirdWave K := by
-  have hr : K % 3^7 = 9 := by simpa using hK
+  have hp7 : (3 : Nat)^7 = 2187 := by norm_num
+  have hr : K % 3^7 = 9 := by simpa only [hp7] using hK
   apply thirdWave_of_periodic_certificate K 7 (by norm_num)
   · rw [hr]
     norm_num [digit3]
