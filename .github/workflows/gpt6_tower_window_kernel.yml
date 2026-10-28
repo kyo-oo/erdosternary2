@@ -1,0 +1,33 @@
+name: GPT6 GST Tower Window Kernel
+on:
+  push:
+    branches:
+      - gpt6/erdos-tower-window-20261029
+    paths:
+      - GSTWorldtraceTowerWindow.lean
+      - .github/workflows/gpt6_tower_window_kernel.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean RC2 and Mathlib cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTWorldtraceBlockLift GSTFourPowerDirectResidue
+      - name: Kernel-check GST tower quotient and digit-window proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTWorldtraceTowerWindow.lean 2>&1 | tee gst-tower-window.log
+          ! grep -E 'error:|unknown identifier|unsolved goals|sorryAx|declaration uses .sorry.' gst-tower-window.log
+          echo GST_TOWER_WINDOW_KERNEL_GREEN=1
