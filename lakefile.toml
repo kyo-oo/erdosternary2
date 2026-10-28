@@ -105,3 +105,7 @@ roots = [
 [[lean_exe]]
 name = "erdosternary2"
 root = "Main"
+
+[[lean_lib]]
+name = "GSTInfinityAudit"
+roots = ["GSTInfiniteFourPowerNavigation", "GSTInfiniteFourPowerKernelAudit"]
