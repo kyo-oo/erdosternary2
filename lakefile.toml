@@ -21,6 +21,8 @@ roots = [
   "GSTCanonicalSevenAxisBridge",
   "GSTCanonicalTailLTE",
   "GSTWorldtraceBlockLift",
+  "GSTWorldtraceTowerWindow",
+  "GSTWorldtraceTwoSupport",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
