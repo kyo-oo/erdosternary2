@@ -114,3 +114,6 @@ name = "GSTInfiniteDelayAudit"
 
 [[lean_lib]]
 name = "GSTOmegaAbsorbingZero"
+
+[[lean_lib]]
+name = "GSTCoupledControllerCountermodel"
