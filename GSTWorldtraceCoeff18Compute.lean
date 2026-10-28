@@ -24,8 +24,50 @@ private theorem polynomial_mod (n x y : Nat)
     (h : x%modulus=y%modulus) :
     (x+3^(n+1)*x^2+3^(2*n+1)*x^3)%modulus =
     (y+3^(n+1)*y^2+3^(2*n+1)*y^3)%modulus := by
-  simp only [Nat.add_mod, Nat.mul_mod, Nat.pow_mod]
-  rw [h]
+  have hp2 : (x^2)%modulus=(y^2)%modulus := by
+    calc
+      (x^2)%modulus = ((x%modulus)^2)%modulus := Nat.pow_mod x 2 modulus
+      _ = ((y%modulus)^2)%modulus := by rw [h]
+      _ = (y^2)%modulus := (Nat.pow_mod y 2 modulus).symm
+  have hp3 : (x^3)%modulus=(y^3)%modulus := by
+    calc
+      (x^3)%modulus = ((x%modulus)^3)%modulus := Nat.pow_mod x 3 modulus
+      _ = ((y%modulus)^3)%modulus := by rw [h]
+      _ = (y^3)%modulus := (Nat.pow_mod y 3 modulus).symm
+  have hm2 : (3^(n+1)*x^2)%modulus =
+      (3^(n+1)*y^2)%modulus := by
+    calc
+      (3^(n+1)*x^2)%modulus =
+          ((3^(n+1)%modulus)*(x^2%modulus))%modulus :=
+        Nat.mul_mod _ _ _
+      _ = ((3^(n+1)%modulus)*(y^2%modulus))%modulus := by rw [hp2]
+      _ = (3^(n+1)*y^2)%modulus := (Nat.mul_mod _ _ _).symm
+  have hm3 : (3^(2*n+1)*x^3)%modulus =
+      (3^(2*n+1)*y^3)%modulus := by
+    calc
+      (3^(2*n+1)*x^3)%modulus =
+          ((3^(2*n+1)%modulus)*(x^3%modulus))%modulus :=
+        Nat.mul_mod _ _ _
+      _ = ((3^(2*n+1)%modulus)*(y^3%modulus))%modulus := by rw [hp3]
+      _ = (3^(2*n+1)*y^3)%modulus := (Nat.mul_mod _ _ _).symm
+  have hsum2 :
+      (x+3^(n+1)*x^2)%modulus =
+      (y+3^(n+1)*y^2)%modulus := by
+    calc
+      (x+3^(n+1)*x^2)%modulus =
+        ((x%modulus)+(3^(n+1)*x^2)%modulus)%modulus :=
+          Nat.add_mod _ _ _
+      _ = ((y%modulus)+(3^(n+1)*y^2)%modulus)%modulus := by
+        rw [h, hm2]
+      _ = (y+3^(n+1)*y^2)%modulus := (Nat.add_mod _ _ _).symm
+  calc
+    (x+3^(n+1)*x^2+3^(2*n+1)*x^3)%modulus =
+      (((x+3^(n+1)*x^2)%modulus)+
+       (3^(2*n+1)*x^3)%modulus)%modulus := Nat.add_mod _ _ _
+    _ = (((y+3^(n+1)*y^2)%modulus)+
+       (3^(2*n+1)*y^3)%modulus)%modulus := by rw [hsum2, hm3]
+    _ = (y+3^(n+1)*y^2+3^(2*n+1)*y^3)%modulus :=
+       (Nat.add_mod _ _ _).symm
 
 theorem residue_coeff_correct (n : Nat) :
     residueCoeff n = lteCoeff n%modulus := by
