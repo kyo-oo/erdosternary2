@@ -51,6 +51,39 @@ theorem origin_support_finite_unconditionally (n : Nat) :
     ¬ InfiniteTernarySupportS n :=
   natural_not_infinite_ternary_supportS n
 
+
+/-- Exact, infinite-time bad orbit with a *finite* digit source.
+    This rebuts any derivation of infinite origin support solely from
+    badness plus conserved finite source energy, without the special
+    residual power-origin hypotheses. -/
+theorem finite_one_can_have_eternally_bad_seeded_trace :
+    GSTSeededAffineBadTrace 0 1 := by
+  intro j
+  change GSTBadPair (gstAffineMulCarry 4 0 1 j) (gstDigit 1 j)
+  have hd : gstDigit 1 j ≠ 2 := by
+    cases j with
+    | zero =>
+        norm_num [gstDigit]
+    | succ j =>
+        have hpow : 1 < 3^(j+1) := by
+          have hp : 0 < 3^j := by positivity
+          rw [pow_succ]
+          omega
+        have hz : 1 / 3^(j+1) = 0 := Nat.div_eq_of_lt hpow
+        simp [gstDigit, hz]
+  exact fun h => hd h.1
+
+/-- Finite source support coexists with an infinite bad orbit.
+    A forcing bridge needs more than the generic Omega conservation
+    and eventual-zero input mechanism. -/
+theorem finite_support_and_seeded_bad_are_compatible :
+    (¬ InfiniteTernarySupportS 1) ∧ GSTSeededAffineBadTrace 0 1 :=
+  ⟨natural_not_infinite_ternary_supportS 1,
+   finite_one_can_have_eternally_bad_seeded_trace⟩
+
+#print axioms finite_support_and_seeded_bad_are_compatible
+
+
 #print axioms infinite_support_bridge_iff_prefix_one_termination
 #print axioms omega_child_future_zero_unconditionally
 #print axioms origin_support_finite_unconditionally
