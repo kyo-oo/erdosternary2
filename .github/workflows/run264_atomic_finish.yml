@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - sol/run264-atomic-final-fix-20261019
+      - gpt6/erdos-omega-termination-audit-20261029
   workflow_dispatch:
 
 jobs:
