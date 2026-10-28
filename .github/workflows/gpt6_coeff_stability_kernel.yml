@@ -1,0 +1,33 @@
+name: GPT6 GST Worldtrace Coefficient Stability
+on:
+  push:
+    branches:
+      - gpt6/erdos-tower-window-20261029
+    paths:
+      - GSTWorldtraceCoeffStability.lean
+      - .github/workflows/gpt6_coeff_stability_kernel.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean and build coefficient prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTCanonicalTailLTE
+      - name: Check scale-unbounded 18-trit coefficient stability
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTWorldtraceCoeffStability.lean 2>&1 | tee gst-coeff-stability.log
+          ! grep -E 'error:|unknown identifier|unsolved goals|sorryAx|declaration uses .sorry.' gst-coeff-stability.log
+          echo GST_COEFF_STABILITY_KERNEL_GREEN=1
