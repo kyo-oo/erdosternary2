@@ -20,7 +20,6 @@ namespace GSTOmegaExactDelayedEscape
 
 open GSTCanonicalTailLTE
 open GSTWorldtraceCoeffStability
-open GSTFourPowerDirectResidue
 
 /-- Unbounded scale stabilization on the first 3 coefficient trits. -/
 theorem lteCoeff_mod27_sixteen
@@ -68,14 +67,13 @@ theorem delayed_seed_quotient_mod27
         (lteCoeff L * 256)%27 := by
           simpa only [show (4:Nat)^4=256 by decide, Nat.mul_comm] using h
     _ = 19 := by
-      rw [Nat.mul_mod, hc]
-      decide
+      rw [Nat.mul_mod, hc] <;> decide
 
 /-- The first three quotient trits are exactly 1,0,2,
 uniformly in L>=5. -/
 theorem delayed_seed_three_trits
     (L k : Nat) (hL : 5 ≤ L) (hk : k < 3) :
-    digit3 (4^(4+3^L)) (L+1+k) = digit3 19 k := by
+    GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) (L+1+k) = GSTFourPowerDirectResidue.digit3 19 k := by
   have hmod := delayed_seed_quotient_mod27 L hL
   have hdiv : 3^(k+1) ∣ 27 := by
     have h := Nat.pow_dvd_pow 3 (show k+1≤3 by omega)
@@ -89,54 +87,55 @@ theorem delayed_seed_three_trits
       _ = (19%27)%3^(k+1) := by
         simpa only [Nat.mod_eq_of_lt (by decide : (19:Nat)<27)] using congrArg (fun z : Nat => z%3^(k+1)) hmod
       _ = 19%3^(k+1) := Nat.mod_mod_of_dvd _ hdiv
-  have hread := digit3_eq_of_mod_next
+  have hread := GSTFourPowerDirectResidue.digit3_eq_of_mod_next
     (4^(4+3^L)/3^(L+1)) 19 k hs
   calc
-    digit3 (4^(4+3^L)) (L+1+k) =
-        digit3 (4^(4+3^L)/3^(L+1)) k := by
-          unfold digit3
-          rw [pow_add, ← Nat.div_div_eq_div_mul]
-    _ = digit3 19 k := hread
+    GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) (L+1+k) =
+        GSTFourPowerDirectResidue.digit3 (4^(4+3^L)/3^(L+1)) k := by
+          unfold GSTFourPowerDirectResidue.digit3
+          have hp : 3^(L+1+k) = 3^(L+1)*3^k := by rw [pow_add]
+          rw [hp, ← Nat.div_div_eq_div_mul]
+    _ = GSTFourPowerDirectResidue.digit3 19 k := hread
 
 /-- Every digit strictly before row L+3 is clean. -/
 theorem delayed_seed_no_two_before
     (L p : Nat) (hL : 5 ≤ L) (hp : p < L+3) :
-    digit3 (4^(4+3^L)) p ≠ 2 := by
+    GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) p ≠ 2 := by
   by_cases hpL : p ≤ L
   · have hshape : 3^L = 3^p*3^(L-p) := by
       rw [← pow_add]
       congr 1
       omega
     have hrepr : 4+3^L = 4+3^p*3^(L-p) := by rw [hshape]
-    rw [hrepr, pow4_digit_period]
+    rw [hrepr, GSTFourPowerDirectResidue.pow4_digit_period]
     by_cases hsmall : p < 6
-    · interval_cases p <;> norm_num [digit3]
+    · interval_cases p <;> norm_num [GSTFourPowerDirectResidue.digit3]
     · have hpow : 3^6 ≤ 3^p :=
         Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
       have hlt : 4^4 < 3^p := by
         have h : (4:Nat)^4 < 3^6 := by decide
         omega
-      simp [digit3, Nat.div_eq_of_lt hlt]
+      simp [GSTFourPowerDirectResidue.digit3, Nat.div_eq_of_lt hlt]
   · have hcase : p=L+1 ∨ p=L+2 := by omega
     rcases hcase with rfl | rfl
     · have h := delayed_seed_three_trits L 0 hL (by omega)
-      simpa [digit3] using (show digit3 (4^(4+3^L)) (L+1+0)≠2 from by
+      simpa [GSTFourPowerDirectResidue.digit3] using (show GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) (L+1+0)≠2 from by
         rw [h]
-        norm_num [digit3])
+        norm_num [GSTFourPowerDirectResidue.digit3])
     · have h := delayed_seed_three_trits L 1 hL (by omega)
-      simpa [digit3] using (show digit3 (4^(4+3^L)) (L+1+1)≠2 from by
+      simpa [GSTFourPowerDirectResidue.digit3] using (show GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) (L+1+1)≠2 from by
         rw [h]
-        norm_num [digit3])
+        norm_num [GSTFourPowerDirectResidue.digit3])
 
 /-- A fully explicit unbounded natural-path terminal gate, with
 its first position exactly L+3, for every L>=5. -/
 theorem delayed_seed_first_two_exact
     (L : Nat) (hL : 5 ≤ L) :
-    digit3 (4^(4+3^L)) (L+3) = 2 ∧
-      ∀ p, p < L+3 → digit3 (4^(4+3^L)) p ≠ 2 := by
+    GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) (L+3) = 2 ∧
+      ∀ p, p < L+3 → GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) p ≠ 2 := by
   constructor
   · have h := delayed_seed_three_trits L 2 hL (by omega)
-    simpa [digit3] using h
+    simpa [GSTFourPowerDirectResidue.digit3] using h
   · intro p hp
     exact delayed_seed_no_two_before L p hL hp
 
