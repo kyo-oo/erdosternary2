@@ -7354,7 +7354,13 @@ theorem gst_omega_termination_s1
   have hblocks : ∀ q, GSTOmegaBadBlock 1 k m q :=
     gst_omega_infiniteBadTrace_blocks 1 k m hbad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  gst_omega
+  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
+    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
+    <;> (first
+      | contradiction
+      | omega
+      | aesop (config := { maxRuleApplications := 10000 }))
 
 /-- Level-three residual Ω∞ termination, after the certified cut states have
     been removed from the boundary. -/
@@ -7377,7 +7383,13 @@ theorem gst_omega_termination_s3
   have hblocks : ∀ q, GSTOmegaBadBlock 3 k m q :=
     gst_omega_infiniteBadTrace_blocks 3 k m hbad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  gst_omega
+  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
+    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
+    <;> (first
+      | contradiction
+      | omega
+      | aesop (config := { maxRuleApplications := 10000 }))
 
 /-- Stable residual Ω∞ termination for `2 ≤ s`, `s ≠ 3`, and the remaining
     young cuts. -/
@@ -7401,7 +7413,13 @@ theorem gst_omega_termination_stable
   have hblocks : ∀ q, GSTOmegaBadBlock s k m q :=
     gst_omega_infiniteBadTrace_blocks s k m hbad
   simp only [GSTOmegaBadSet, Set.mem_setOf_eq] at hbadChild
-  gst_omega
+  simp_all (config := { maxSteps := 1000000 }) only [GSTResidualBoundary,
+    GSTOmegaChildZeroSet, GSTOmegaBadSet, GSTOmegaBadBlock,
+    GSTSeededAffineBadTrace, GST.digit, Set.mem_setOf_eq]
+    <;> (first
+      | contradiction
+      | omega
+      | aesop (config := { maxRuleApplications := 10000 }))
 
 /-- The three exact residual graph worlds exhaust the origin boundary. -/
 theorem gst_residual_omega_termination : GSTResidualOmegaTermination := by
