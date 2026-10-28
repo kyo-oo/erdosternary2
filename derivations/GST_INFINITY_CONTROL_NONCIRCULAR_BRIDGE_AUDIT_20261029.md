@@ -141,3 +141,41 @@ Current certificate links:
   checked before status promotion.
 
 The original conjecture remains unresolved in this checkpoint.
+
+
+## Stronger exact canonical-seed/offset stress test (Wolfram)
+
+The preceding arbitrary coupled-state counterexample is not the end of
+the stress test. Instantiate the actual prefix-one affine coordinates
+s=1, k=1. In the source:
+
+ c_1 = 7, A=4^(3^1)=64,
+ bridge seed D=(4*(c_1 mod 3))/3=1,
+ offset z=floor(c_1/3)=2.
+
+Choose child T=46 (three-free: T mod3=1). It has a genuine child
+Navigation gate at j=2. The correct affine parent trace is
+
+ X=z+A*T=2+64*46=2946.
+
+With the exact seeded carry
+ C_j=(1+4*(2946 mod 3^j))/3^j,
+the parent has NO Happy vertex at any j>=0: for j<=8, the exact
+digit/carry table includes two-free or ALT-minus at every step; for
+j>=9 both the finite source input and seed carry are zero.
+Wolfram independently checked all values j=0..12.
+
+This child also matches a canonical low-exponent residue:
+ c_2 mod 27 = 16 and 46 mod27 = (13*16) mod27 =19,
+with n=13 three-free. That proves even the exact seed, offset,
+power multiplier, and first three child coefficient trits do not
+force parent navigation.
+
+**Crucial distinction:** T=46 is NOT the full canonical child
+T=gstNavigationConstant(2,13). Therefore it does NOT falsify
+GSTCanonicalResidualInfiniteSupportBridgeS, the Erdős conjecture,
+or a theorem using the full power-origin identity. It identifies
+exactly why the full origin fingerprint (and not any fixed
+finite residue alone) must occur in the missing forcing proof.
+
+Source: GSTCanonicalSeedCountermodel.lean (verify CI separately).
