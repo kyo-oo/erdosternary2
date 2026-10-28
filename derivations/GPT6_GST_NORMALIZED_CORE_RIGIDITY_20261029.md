@@ -98,3 +98,34 @@ and checks trusted kernel axiom dependencies. It is a strict LOCAL
 test, not an external official grading-service claim.
 
 No unconditional proof of Erdős is asserted in this checkpoint.
+
+
+## Exact all-exponent GST dust-tree and global density-zero theorem
+
+Let D_L be the set of exponents r modulo 3^L for which 4^r has
+no digit two in positions 1,...,L. The GST exponent-trit lift is
+
+  digit_3(4^(r+a*3^L),L+1) =
+    (digit_3(4^r,L+1)+a) mod 3,    0<=a<3.
+
+The three children of each r cover the three possible new digits exactly
+once. The previously fixed rows 1..L are invariant under addition of
+a*3^L. Thus each surviving node has exactly two surviving children,
+starting with the one empty node D_0={0}. Inductively,
+
+  |D_L|=2^L for every L>=0.
+
+Wolfram exact modular arithmetic independently checked L=1..8 with counts
+2,4,8,16,32,64,128,256. The local one-dead-child law is formalized in
+GSTWorldtraceFiniteDust.lean (verify its dedicated kernel CI before
+promoting that file to kernel-checked).
+
+For any finite N, at most 2^L*(floor((N-1)/3^L)+1) exponents 0<=K<N
+can have no digit two anywhere in 4^K. Dividing by N and letting N grow
+shows upper density at most (2/3)^L for each L. Taking L to infinity,
+the set of complete digit-two-free four-power exponents has NATURAL
+DENSITY ZERO.
+
+This is a global unconditional consequence for unrestricted exponents K.
+Density zero does not imply emptiness and is not a replacement for the
+terminal natural-path exclusion.
