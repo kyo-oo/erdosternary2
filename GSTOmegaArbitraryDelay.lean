@@ -58,8 +58,8 @@ theorem arbitrarily_large_natural_clean_prefix
       dsimp [K]
       rw [hshape]
     rw [hrepr]
-    simpa using (pow4_digit_period p 4 (3^(L-p)*(M+5)))
-      ▸ exceptional_four_is_clean p
+    rw [pow4_digit_period p 4 (3^(L-p)*(M+5))]
+    exact exceptional_four_is_clean p
 
 #print axioms exceptional_four_is_clean
 #print axioms arbitrarily_large_natural_clean_prefix
