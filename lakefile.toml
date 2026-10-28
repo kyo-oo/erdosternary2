@@ -20,6 +20,7 @@ roots = [
   "GSTCanonicalCarryDynamics",
   "GSTCanonicalSevenAxisBridge",
   "GSTCanonicalTailLTE",
+  "GSTWorldtraceBlockLift",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
