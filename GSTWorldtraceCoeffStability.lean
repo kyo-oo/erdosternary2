@@ -46,14 +46,16 @@ theorem coeff_step_mod18 (s : Nat) (hs : 17 ≤ s) :
 /-- Uniform, scale-unbounded stabilization on the 18-trit band. -/
 theorem coeff_mod18_stable (s : Nat) (hs : 17 ≤ s) :
     lteCoeff s % 3^18 = lteCoeff 17 % 3^18 := by
-  have hform : s=17+(s-17) := by omega
-  rw [hform]
-  generalize h : s-17 = k
-  induction k with
-  | zero => rfl
-  | succ k ih =>
-      rw [show 17+(k+1) = (17+k)+1 by omega]
-      exact (coeff_step_mod18 (17+k) (by omega)).trans ih
+  have hbase : ∀ k : Nat,
+      lteCoeff (17+k) % 3^18 = lteCoeff 17 % 3^18 := by
+    intro k
+    induction k with
+    | zero => rfl
+    | succ k ih =>
+        rw [show 17+(k+1) = (17+k)+1 by omega]
+        exact (coeff_step_mod18 (17+k) (by omega)).trans ih
+  rw [show s=17+(s-17) by omega]
+  exact hbase (s-17)
 
 #print axioms coeff_step
 #print axioms coeff_step_mod
