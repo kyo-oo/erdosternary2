@@ -108,3 +108,6 @@ root = "Main"
 
 [[lean_lib]]
 name = "GSTInfinityBridgeAudit"
+
+[[lean_lib]]
+name = "GSTInfiniteDelayAudit"
