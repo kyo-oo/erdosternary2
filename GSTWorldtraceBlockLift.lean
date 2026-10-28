@@ -49,7 +49,8 @@ theorem quotient_block_lift
       let P := A * (1+T*c)^b
       have hshape :
           A*(1+T*c)^(b+1) = P*(1+T*c) := by
-        simp [P, pow_succ]
+        simp only [P, pow_succ]
+        ring
       have hind : (P/T)%U = (A/T+b*c*A)%U := ih
       have hmul : (c*P)%U = (c*A)%U := by
         calc
@@ -80,7 +81,8 @@ theorem pow4_whole_block_lift
   have hU : 1 < 3^w := by
     have he : 3^1 ≤ 3^w :=
       Nat.pow_le_pow_of_le (by decide : 1 < 3) hw
-    norm_num at he ⊢
+    norm_num at he
+    omega
   have hUT : 3^w ∣ 3^(t+1) := by
     refine ⟨3^(t+1-w), ?_⟩
     rw [← pow_add]
@@ -88,7 +90,7 @@ theorem pow4_whole_block_lift
     omega
   have hp : 4^(M+b*3^t) =
       4^M * (1+3^(t+1)*GSTCanonicalTailLTE.lteCoeff t)^b := by
-    rw [show M+b*3^t = M+3^t*b by omega, pow_add, pow_mul,
+    rw [show M+b*3^t = M+3^t*b by ac_rfl, pow_add, pow_mul,
       GSTCanonicalTailLTE.pow4_three_power_lte_exact t]
   rw [hp]
   exact quotient_block_lift (4^M) (GSTCanonicalTailLTE.lteCoeff t)
