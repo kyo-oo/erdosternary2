@@ -218,4 +218,29 @@ theorem thirdWave_of_mod27_row_three (K : Nat)
 #print axioms thirdWave_iff_commonTwo
 #print axioms fourPowerDirectExistence_iff_thirdWave
 
+
+
+/-- A new infinite row-seven family obtained from the exact exponent-period
+law.  Every exponent congruent to nine modulo 2187 has a shared ternary
+digit two at row seven in consecutive fourth powers.  Neither finite
+sampling nor an additional hypothesis is used. -/
+theorem thirdWave_of_mod2187_nine (K : Nat) (hK : K % 2187 = 9) :
+    thirdWave K := by
+  apply (thirdWave_iff_commonTwo K).2
+  have hd9 : digit3 (4^9) 7 = 2 := by norm_num [digit3]
+  have hd10 : digit3 (4^10) 7 = 2 := by norm_num [digit3]
+  have hdecomp : K = 9 + 3^7 * (K / 2187) := by
+    have hm := Nat.mod_add_div K 2187
+    rw [hK] at hm
+    norm_num at hm ⊢
+    omega
+  refine ⟨7, by norm_num, ?_, ?_⟩
+  · rw [hdecomp]
+    exact (pow4_digit_period 7 9 (K / 2187)).trans hd9
+  · have hnext : K + 1 = 10 + 3^7 * (K / 2187) := by
+      omega
+    rw [hnext]
+    exact (pow4_digit_period 7 10 (K / 2187)).trans hd10
+
+#print axioms thirdWave_of_mod2187_nine
 end GSTFourPowerThirdWave
