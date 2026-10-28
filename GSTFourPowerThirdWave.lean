@@ -220,27 +220,40 @@ theorem thirdWave_of_mod27_row_three (K : Nat)
 
 
 
-/-- A new infinite row-seven family obtained from the exact exponent-period
-law.  Every exponent congruent to nine modulo 2187 has a shared ternary
-digit two at row seven in consecutive fourth powers.  Neither finite
-sampling nor an additional hypothesis is used. -/
+/-- GST finite-certificate-to-infinite-family principle: a shared row-p digit
+certificate for the exponent remainder K mod 3^p lifts to the entire
+infinite progression K = r + 3^p q. No global hypothesis is consumed. -/
+theorem thirdWave_of_periodic_certificate
+    (K p : Nat) (hp : 1 ≤ p)
+    (h0 : digit3 (4^(K % 3^p)) p = 2)
+    (h1 : digit3 (4^((K % 3^p) + 1)) p = 2) :
+    thirdWave K := by
+  let r := K % 3^p
+  let q := K / 3^p
+  have hdecomp : K = r + 3^p * q := by
+    dsimp [r, q]
+    exact (Nat.mod_add_div K (3^p)).symm
+  have h0' : digit3 (4^r) p = 2 := h0
+  have h1' : digit3 (4^(r+1)) p = 2 := h1
+  apply (thirdWave_iff_commonTwo K).2
+  refine ⟨p, hp, ?_, ?_⟩
+  · rw [hdecomp]
+    exact (pow4_digit_period p r q).trans h0'
+  · have hnext : K + 1 = (r+1) + 3^p*q := by omega
+    rw [hnext]
+    exact (pow4_digit_period p (r+1) q).trans h1'
+
+/-- First certified new level-seven family: all K congruent to 9 modulo 2187
+have a shared digit two in 4^K and 4^(K+1) at position seven. -/
 theorem thirdWave_of_mod2187_nine (K : Nat) (hK : K % 2187 = 9) :
     thirdWave K := by
-  apply (thirdWave_iff_commonTwo K).2
-  have hd9 : digit3 (4^9) 7 = 2 := by norm_num [digit3]
-  have hd10 : digit3 (4^10) 7 = 2 := by norm_num [digit3]
-  have hdecomp : K = 9 + 3^7 * (K / 2187) := by
-    have hm := Nat.mod_add_div K 2187
-    rw [hK] at hm
-    norm_num at hm ⊢
-    omega
-  refine ⟨7, by norm_num, ?_, ?_⟩
-  · rw [hdecomp]
-    exact (pow4_digit_period 7 9 (K / 2187)).trans hd9
-  · have hnext : K + 1 = 10 + 3^7 * (K / 2187) := by
-      omega
-    rw [hnext]
-    exact (pow4_digit_period 7 10 (K / 2187)).trans hd10
+  have hr : K % 3^7 = 9 := by simpa using hK
+  apply thirdWave_of_periodic_certificate K 7 (by norm_num)
+  · rw [hr]
+    norm_num [digit3]
+  · rw [hr]
+    norm_num [digit3]
 
+#print axioms thirdWave_of_periodic_certificate
 #print axioms thirdWave_of_mod2187_nine
 end GSTFourPowerThirdWave
