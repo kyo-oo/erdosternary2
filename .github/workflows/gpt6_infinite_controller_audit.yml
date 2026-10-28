@@ -28,8 +28,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build GSTInfiniteFourPowerNavigation
-          lake env lean GSTInfiniteFourPowerKernelAudit.lean 2>&1 | tee gst-infinity-kernel.log
+          lake build GSTInfinityAudit 2>&1 | tee gst-infinity-kernel.log
           ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' gst-infinity-kernel.log
           grep -Fq 'GSTInfiniteFourPowerNavigation.four_power_happy_ge_three' gst-infinity-kernel.log
           echo GST_INFINITE_UNCONDITIONAL_KERNEL_PASS=1
