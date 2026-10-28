@@ -117,3 +117,6 @@ name = "GSTOmegaAbsorbingZero"
 
 [[lean_lib]]
 name = "GSTCoupledControllerCountermodel"
+
+[[lean_lib]]
+name = "GSTCanonicalSeedCountermodel"
