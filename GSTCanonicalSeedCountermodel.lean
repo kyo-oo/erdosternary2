@@ -8,8 +8,8 @@ set_option maxHeartbeats 20000000
 
 At s=1, k=1, the TRUE origin-affine channel has
   A=4^(3^1)=64, c_1=7, seed=4*(c_1%3)/3=1, offset=c_1/3=2.
-An arbitrary child T=18 has a Navigation Happy Gate at position 2,
-while the whole parent seeded word X=2+64*18=1154 is BAD at ALL
+An arbitrary child T=46 has a Navigation Happy Gate at position 2,
+while the whole parent seeded word X=2+64*46=2946 is BAD at ALL
 natural positions.
 
 So power multiplier, correct carry seed, exact offset and all-depth
@@ -22,28 +22,33 @@ namespace GSTCanonicalSeedCountermodel
 
 theorem canonical_origin_coeff_one : c 1 = 7 := by decide
 
-theorem child_18_navigation : GSTNavigationWitness 18 := by
+/-- Even the three-free normalized origin residue matches the genuine
+GST child at the first three coefficient trits for m=13. -/
+theorem three_free_core_and_correct_low_residue :
+    46 % 3 = 1 ∧ 46 % 27 = (13 * 16) % 27 := by decide
+
+theorem child_46_navigation : GSTNavigationWitness 46 := by
   refine ⟨2, ?_, ?_⟩
   · norm_num [gstDigit]
   · right
     norm_num [gstSpaceAt, gstCarry]
 
-theorem seeded_parent_1154_bad : GSTSeededAffineBadTrace 1 1154 := by
+theorem seeded_parent_2946_bad : GSTSeededAffineBadTrace 1 2946 := by
   intro j
-  change GSTBadPair (gstAffineMulCarry 4 1 1154 j) (gstDigit 1154 j)
+  change GSTBadPair (gstAffineMulCarry 4 1 2946 j) (gstDigit 2946 j)
   by_cases hj : j < 8
   · interval_cases j <;>
       norm_num [GSTBadPair, gstAffineMulCarry, gstDigit]
   · have hp : 3^8 ≤ 3^j :=
       Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
-    have hshort : 1+4*1154 < 3^j := by
-      have h8 : 1+4*1154 < 3^8 := by decide
+    have hshort : 1+4*2946 < 3^j := by
+      have h8 : 1+4*2946 < 3^8 := by decide
       omega
-    have htail : 1154 < 3^j := by omega
-    have hd0 : 1154 / 3^j = 0 := Nat.div_eq_of_lt htail
-    have hcarry : (1+4*(1154 % 3^j))/3^j=0 := by
-      have hmod : 1154 % 3^j ≤ 1154 := Nat.mod_le _ _
-      have hnum : 1+4*(1154%3^j) < 3^j := by omega
+    have htail : 2946 < 3^j := by omega
+    have hd0 : 2946 / 3^j = 0 := Nat.div_eq_of_lt htail
+    have hcarry : (1+4*(2946 % 3^j))/3^j=0 := by
+      have hmod : 2946 % 3^j ≤ 2946 := Nat.mod_le _ _
+      have hnum : 1+4*(2946%3^j) < 3^j := by omega
       exact Nat.div_eq_of_lt hnum
     simp [GSTBadPair, gstAffineMulCarry, gstDigit, hd0, hcarry]
 
@@ -55,12 +60,12 @@ theorem canonical_seed_affine_transport_can_fail :
       GSTSeededAffineBadTrace
         ((4*(c 1 % 3))/3)
         (c 1/3 + 4^(3^1)*T) := by
-  refine ⟨18, child_18_navigation, ?_⟩
+  refine ⟨46, child_46_navigation, ?_⟩
   have hc := canonical_origin_coeff_one
-  simpa [hc] using seeded_parent_1154_bad
+  simpa [hc] using seeded_parent_2946_bad
 
-#print axioms child_18_navigation
-#print axioms seeded_parent_1154_bad
+#print axioms child_46_navigation
+#print axioms seeded_parent_2946_bad
 #print axioms canonical_seed_affine_transport_can_fail
 
 end GSTCanonicalSeedCountermodel
