@@ -294,7 +294,7 @@ theorem any_unit_orbit_commonTwo_within_eighteen
     simp only [pow_zero, Nat.div_one]
     calc
       (A*4^j)%3 = ((A%3)*(4^j%3))%3 := Nat.mul_mod _ _ _
-      _ = 1 := by rw [hAmod,hmodpow]; decide
+      _ = 1 := by rw [hAmod,hmodpow]
   have hp : 1 ≤ p := by
     by_contra hpnot
     have hp0 : p=0 := by omega
