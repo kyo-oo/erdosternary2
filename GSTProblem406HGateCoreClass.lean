@@ -310,6 +310,167 @@ theorem commonTwo_new_fourth_trit_classes
 #print axioms fourth_block_quotient_mod81
 #print axioms commonTwo_new_fourth_trit_classes
 
+
+
+/-! ## Fifth-trit GST exact new residue classes
+
+At one higher Worldtrace cut, c_L = 178 modulo 243 for all L >= 6.
+Source coefficient (256*c_L) = 127 and neighbor (1024*c_L) = 22
+modulo 243. An additional TEN 3-free multiplier classes that were
+not in the previous fourth-trit new classes now have a simultaneous
+digit 2 in their fifth postcut trit.
+-/
+
+/-- Stable fifth Worldtrace coefficient, uniformly over every L >= 6. -/
+theorem lteCoeff_mod243_178 (L : Nat) (hL : 6 ≤ L) :
+    GSTCanonicalTailLTE.lteCoeff L % 243 = 178 := by
+  have hstep (t : Nat) (ht : 4 ≤ t) :
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 243 =
+        GSTCanonicalTailLTE.lteCoeff t % 243 := by
+    have hdiv : 243 ∣ 3^(t+1) := by
+      have hd : 3^5 ∣ 3^(t+1) :=
+        Nat.pow_dvd_pow 3 (by omega)
+      simpa only [show (3:Nat)^5=243 by decide] using hd
+    calc
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 243 =
+          (GSTCanonicalTailLTE.lteCoeff (t+1) % 3^(t+1)) % 243 :=
+            (Nat.mod_mod_of_dvd _ hdiv).symm
+      _ = (GSTCanonicalTailLTE.lteCoeff t % 3^(t+1)) % 243 := by
+            rw [GSTWorldtraceCoeffStability.coeff_step_mod]
+      _ = GSTCanonicalTailLTE.lteCoeff t % 243 :=
+            Nat.mod_mod_of_dvd _ hdiv
+  have hbase : ∀ k : Nat,
+      GSTCanonicalTailLTE.lteCoeff (4+k) % 243 = 178 := by
+    intro k
+    induction k with
+    | zero => decide
+    | succ k ih =>
+        rw [show 4+(k+1)=(4+k)+1 by omega]
+        rw [hstep (4+k) (by omega)]
+        exact ih
+  rw [show L=4+(L-4) by omega]
+  exact hbase (L-4)
+
+/-- Reusable fifth-block quotient law with the original physical source. -/
+theorem fifth_block_quotient_mod243
+    (M u L m : Nat) (hL : 6 ≤ L)
+    (hsmall : 4^M < 3^(L+1))
+    (hm : (178*4^M)%243 = m) :
+    (4^(M+u*3^L)/3^(L+1))%243=(m*u)%243 := by
+  have hdiv : 4^M/3^(L+1)=0 := Nat.div_eq_of_lt hsmall
+  have h := GSTWorldtraceBlockLift.pow4_whole_block_lift
+    M u L 5 (by omega) (by omega)
+  have hblock :
+      (4^(M+u*3^L)/3^(L+1))%243 =
+        (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%243 := by
+    simpa only [show (3:Nat)^5=243 by decide,
+      hdiv, Nat.zero_add] using h
+  have hc : (GSTCanonicalTailLTE.lteCoeff L*4^M)%243=m := by
+    calc
+      (GSTCanonicalTailLTE.lteCoeff L*4^M)%243 =
+        ((GSTCanonicalTailLTE.lteCoeff L%243)*((4^M)%243))%243 :=
+          Nat.mul_mod _ _ _
+      _ = (178*4^M)%243 := by
+          rw [lteCoeff_mod243_178 L hL]
+          simpa using (Nat.mul_mod 178 (4^M) 243).symm
+      _ = m := hm
+  calc
+    (4^(M+u*3^L)/3^(L+1))%243 =
+      (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%243 := hblock
+    _ = (u*(GSTCanonicalTailLTE.lteCoeff L*4^M))%243 := by ring
+    _ = (u*m)%243 := by
+        calc
+          (u*(GSTCanonicalTailLTE.lteCoeff L*4^M))%243 =
+              ((u%243)*((GSTCanonicalTailLTE.lteCoeff L*4^M)%243))%243 :=
+                Nat.mul_mod _ _ _
+          _ = ((u%243)*m)%243 := by rw [hc]
+          _ = (u*m)%243 := by
+                simpa using (Nat.mul_mod u m 243).symm
+    _ = (m*u)%243 := by ac_rfl
+
+theorem source_fifth_quotient_mod243
+    (L u : Nat) (hL : 6 ≤ L) :
+    (4^(4+u*3^L)/3^(L+1))%243=(127*u)%243 := by
+  apply fifth_block_quotient_mod243 4 u L 127 hL
+  · have hb : (4:Nat)^4 < 3^7 := by decide
+    have hp : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    exact lt_of_lt_of_le hb hp
+  · norm_num
+
+theorem neighbor_fifth_quotient_mod243
+    (L u : Nat) (hL : 6 ≤ L) :
+    (4^(5+u*3^L)/3^(L+1))%243=(22*u)%243 := by
+  apply fifth_block_quotient_mod243 5 u L 22 hL
+  · have hb : (4:Nat)^5 < 3^7 := by decide
+    have hp : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    exact lt_of_lt_of_le hb hp
+  · norm_num
+
+private theorem fifth_block_digit_bridge (M u L m : Nat)
+    (hmod : (4^(M+u*3^L)/3^(L+1))%243=(m*u)%243) :
+    digit3 (4^(M+u*3^L)) (L+5)=digit3 (m*u) 4 := by
+  have hread : digit3 (4^(M+u*3^L)/3^(L+1)) 4 =
+      digit3 (m*u) 4 :=
+    digit3_eq_of_mod_next _ _ 4 (by
+      simpa only [show (3:Nat)^(4+1)=243 by decide] using hmod)
+  calc
+    digit3 (4^(M+u*3^L)) (L+5) =
+        digit3 (4^(M+u*3^L)/3^(L+1)) 4 := by
+          unfold digit3
+          have hp : 3^(L+5) = 3^(L+1)*3^4 := by
+            rw [show L+5=(L+1)+4 by omega, pow_add]
+          rw [hp, ← Nat.div_div_eq_div_mul]
+    _ = digit3 (m*u) 4 := hread
+
+private theorem same_digit_mul_mod243 (u m : Nat) :
+    digit3 (m*u) 4=digit3 (m*(u%243)) 4 := by
+  apply digit3_eq_of_mod_next
+  change (m*u)%243=(m*(u%243))%243
+  simp [Nat.mul_mod]
+
+/-- Ten new modulo-243 multiplier residue classes, verified by exact
+finite kernel arithmetic, and applied below to ALL unbounded multipliers. -/
+def FifthNewClass (r : Nat) : Prop :=
+  r=19 ∨ r=76 ∨ r=97 ∨ r=118 ∨ r=130 ∨
+  r=151 ∨ r=187 ∨ r=208 ∨ r=229 ∨ r=241
+
+private theorem fifth_new_classes_kernel :
+    ∀ r : Fin 243, FifthNewClass r.val →
+      digit3 (127*r.val) 4=2 ∧ digit3 (22*r.val) 4=2 := by
+  decide
+
+/-- For every L>=6 and every u in TEN unbounded residue classes mod243,
+there is an actual SAME-ROW source-neighbor digit pair at row L+5. -/
+theorem commonTwo_new_fifth_trit_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : FifthNewClass (u%243)) :
+    CommonTwo (4+u*3^L) := by
+  let r : Fin 243 := ⟨u%243, Nat.mod_lt _ (by decide)⟩
+  have hpair : digit3 (127*r.val) 4=2 ∧
+      digit3 (22*r.val) 4=2 :=
+    fifth_new_classes_kernel r hu
+  have hs : digit3 (127*u) 4=2 := by
+    rw [same_digit_mul_mod243 u 127]
+    exact hpair.1
+  have hn : digit3 (22*u) 4=2 := by
+    rw [same_digit_mul_mod243 u 22]
+    exact hpair.2
+  refine ⟨L+5, by omega, ?_, ?_⟩
+  · rw [fifth_block_digit_bridge 4 u L 127
+      (source_fifth_quotient_mod243 L u hL)]
+    exact hs
+  · have he : (4+u*3^L)+1=5+u*3^L := by omega
+    rw [he, fifth_block_digit_bridge 5 u L 22
+      (neighbor_fifth_quotient_mod243 L u hL)]
+    exact hn
+
+#print axioms lteCoeff_mod243_178
+#print axioms source_fifth_quotient_mod243
+#print axioms neighbor_fifth_quotient_mod243
+#print axioms commonTwo_new_fifth_trit_classes
+
 #print axioms neighbor_quotient_mod27
 #print axioms neighbor_three_digit_bridge
 #print axioms eleven_of_eighteen_kernel
