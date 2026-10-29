@@ -249,6 +249,62 @@ theorem adjacent22_within_eighteen (K : Nat) :
       (4^(K+j)) m hl' hword
   omega
 
+/-- Entirely base-independent multiplicative pattern birth:
+for EVERY positive natural integer A, at least one of
+A, 4A, 4^2 A, ..., 4^18 A has a literal ternary 22 block.
+No perfect-power assumption is needed for this theorem. -/
+theorem any_positive_orbit_adjacent22 (A : Nat) (hA : 0 < A) :
+    ∃ j : Nat, j ≤ 18 ∧
+      ∃ p : Nat,
+        GSTFourPowerDirectResidue.digit3 (A*4^j) p = 2 ∧
+        GSTFourPowerDirectResidue.digit3 (A*4^j) (p+1) = 2 := by
+  obtain ⟨j,m,hj,hl,hh⟩ :=
+    archimedean_escape_within_eighteen A hA
+  refine ⟨j,hj,?_⟩
+  by_contra hNo
+  have hword :
+      GSTFourPowerNo22Magnitude.No22Ternary (A*4^j) := by
+    intro p hp
+    exact hNo ⟨p,hp⟩
+  have hbound :=
+    GSTFourPowerNo22Magnitude.no22_nine_power_bound
+      (A*4^j) m hl hword
+  omega
+
+/-- Stronger global physical source-neighbor statement:
+for EVERY positive integer A congruent 1 modulo 3, some j <= 18
+makes A*4^j and 4*A*4^j share a digit 2 at a POSITIVE ternary
+row. This generalizes the powers-of-four bounded-gap gate. -/
+theorem any_unit_orbit_commonTwo_within_eighteen
+    (A : Nat) (hAmod : A%3=1) :
+    ∃ j : Nat, j ≤ 18 ∧
+      ∃ p : Nat, 1 ≤ p ∧
+        GSTFourPowerDirectResidue.digit3 (A*4^j) p = 2 ∧
+        GSTFourPowerDirectResidue.digit3 (4*(A*4^j)) p = 2 := by
+  have hApos : 0 < A := by omega
+  obtain ⟨j,hj,p,h2,h22⟩ :=
+    any_positive_orbit_adjacent22 A hApos
+  refine ⟨j,hj,?_⟩
+  by_contra hNo
+  have hmodpow : 4^j%3 = 1 := by
+    simp [Nat.pow_mod]
+  have hsource0 :
+      GSTFourPowerDirectResidue.digit3 (A*4^j) 0 = 1 := by
+    unfold GSTFourPowerDirectResidue.digit3
+    simp only [pow_zero, Nat.div_one]
+    calc
+      (A*4^j)%3 = ((A%3)*(4^j%3))%3 := Nat.mul_mod _ _ _
+      _ = 1 := by rw [hAmod,hmodpow]; decide
+  have hp : 1 ≤ p := by
+    by_contra hpnot
+    have hp0 : p=0 := by omega
+    subst p
+    omega
+  have hforbidden :=
+    GSTFourPowerDirectNo22.no_common_forbids_source_22
+      (A*4^j) p hp hNo h2
+  exact hforbidden h22
+
 /-- The exact original production third-wave predicate also fires
 within 18 exponent increments from every starting K. -/
 theorem thirdWave_within_eighteen (K : Nat) :
@@ -260,6 +316,8 @@ theorem thirdWave_within_eighteen (K : Nat) :
 #print axioms phase_cover_nineteen
 #print axioms exists_nine_envelope
 #print axioms archimedean_escape_within_eighteen
+#print axioms any_positive_orbit_adjacent22
+#print axioms any_unit_orbit_commonTwo_within_eighteen
 #print axioms adjacent22_within_eighteen
 #print axioms commonTwo_within_eighteen
 #print axioms thirdWave_within_eighteen
