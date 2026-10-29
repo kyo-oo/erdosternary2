@@ -100,4 +100,53 @@ theorem first_two_for_two_mod_three_multiplier
 #print axioms all_two_mod_three_multipliers_fire_at_cut
 #print axioms first_two_for_two_mod_three_multiplier
 
+
+/-- All u == 1 modulo 27 reproduce the canonical u=1
+infinite-exponent trace through the first escape row L+3.
+This is exact ternary phase agreement over an unbounded
+two-parameter family. -/
+theorem one_mod27_core_prefix_agrees
+    (L u p : Nat) (hL : 5 ≤ L)
+    (hu : u % 27 = 1) (hp : p ≤ L+3) :
+    GSTFourPowerDirectResidue.digit3 (4^(4+u*3^L)) p =
+      GSTFourPowerDirectResidue.digit3 (4^(4+3^L)) p := by
+  have huRepr : u = 1+27*(u/27) := by
+    have h := Nat.mod_add_div u 27
+    omega
+  have hpower : 3^(L+3) = 3^L*27 := by
+    rw [pow_add]
+    norm_num
+  have hexp :
+      4+u*3^L = (4+3^L)+3^(L+3)*(u/27) := by
+    rw [huRepr,hpower]
+    ring
+  have hfactor :
+      3^(L+3) = 3^p*3^(L+3-p) := by
+    rw [← pow_add]
+    congr 1
+    omega
+  rw [hexp,hfactor]
+  simpa only [mul_assoc] using
+    (GSTFourPowerDirectResidue.pow4_digit_period
+      p (4+3^L) (3^(L+3-p)*(u/27)))
+
+/-- Exact first two for all arbitrarily large u congruent one mod27,
+not only the seed multiplier u=1. -/
+theorem first_two_for_one_mod27_multiplier
+    (L u : Nat) (hL : 5 ≤ L) (hu : u % 27 = 1) :
+    GSTFourPowerDirectResidue.digit3 (4^(4+u*3^L)) (L+3) = 2 ∧
+      ∀ p, p < L+3 →
+        GSTFourPowerDirectResidue.digit3 (4^(4+u*3^L)) p ≠ 2 := by
+  obtain ⟨hfirst,hbefore⟩ :=
+    GSTOmegaExactDelayedEscape.delayed_seed_first_two_exact L hL
+  constructor
+  · rw [one_mod27_core_prefix_agrees L u (L+3) hL hu (by omega)]
+    exact hfirst
+  · intro p hp
+    rw [one_mod27_core_prefix_agrees L u p hL hu (by omega)]
+    exact hbefore p hp
+
+#print axioms one_mod27_core_prefix_agrees
+#print axioms first_two_for_one_mod27_multiplier
+
 end GSTOmegaThreeTritMultiplierLaw
