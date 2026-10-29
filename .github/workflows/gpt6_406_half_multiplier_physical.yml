@@ -1,0 +1,34 @@
+name: GST exact original half-multiplier physical CommonTwo
+on:
+  push:
+    branches: [gpt6/problem406-halving-exponent-lte-20261029]
+    paths: [GSTProblem406HalfMultiplierPhysical.lean, .github/workflows/gpt6_406_half_multiplier_physical.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile original physical powers and exact GST coefficient
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerAffineOrbit
+          lake build GSTFourPowerDirectExistence
+          lake build GSTWorldtraceBlockLift
+          lake env lean -o .lake/build/lib/lean/GSTProblem406HalfExponentEscape.olean GSTProblem406HalfExponentEscape.lean
+          lake env lean -o .lake/build/lib/lean/GSTProblem406HalfMultiplierArithmetic.olean GSTProblem406HalfMultiplierArithmetic.lean
+      - name: Kernel certify actual source and neighbor multipliers for all scales
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406HalfMultiplierPhysical.lean 2>&1 | tee gst-half-physical-406.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.|gst_four_power_direct_existence_inline' gst-half-physical-406.log
+          echo GST_HALF_PHYSICAL_MULTIPLIER_COMMON_TWO_PASS=1
