@@ -26,7 +26,8 @@ theorem middle_carry_counts_equal (n : Nat) :
   induction n with
   | zero => rfl
   | succ n ih =>
-      simp only [survivingCount]
+      change (survivingCount n 0+survivingCount n 1+survivingCount n 3) =
+        (survivingCount n 0+survivingCount n 2+survivingCount n 3)
       omega
 
 theorem next_zero (n : Nat) :
@@ -43,7 +44,8 @@ theorem next_one (n : Nat) :
 theorem next_three (n : Nat) :
     survivingCount (n+1) 3 =
       2 * survivingCount n 1 := by
-  simp only [survivingCount]
+  change survivingCount n 1+survivingCount n 2 =
+    2*survivingCount n 1
   rw [← middle_carry_counts_equal n]
   omega
 
@@ -56,10 +58,24 @@ theorem original_carry_cubic_recurrence (n : Nat) :
   have h0 := next_zero n
   have h1 := next_one n
   have h3 := next_three n
-  have h01 := next_zero (n+1)
-  have h11 := next_one (n+1)
-  have h31 := next_three (n+1)
-  have h12 := next_one (n+2)
+  have h01 :
+      survivingCount (n+2) 0 =
+        survivingCount (n+1) 0+survivingCount (n+1) 1 := by
+    simpa [show n+1+1=n+2 by omega] using next_zero (n+1)
+  have h11 :
+      survivingCount (n+2) 1 =
+        survivingCount (n+1) 0+survivingCount (n+1) 1+
+          survivingCount (n+1) 3 := by
+    simpa [show n+1+1=n+2 by omega] using next_one (n+1)
+  have h31 :
+      survivingCount (n+2) 3 =
+        2*survivingCount (n+1) 1 := by
+    simpa [show n+1+1=n+2 by omega] using next_three (n+1)
+  have h12 :
+      survivingCount (n+3) 1 =
+        survivingCount (n+2) 0+survivingCount (n+2) 1+
+          survivingCount (n+2) 3 := by
+    simpa [show n+2+1=n+3 by omega] using next_one (n+2)
   omega
 
 /-- Every carry state supports at least 2^n noncollision continuations,
