@@ -185,8 +185,8 @@ Wolfram's independent exact finite residue classification shows
 **169 of the 243 possible u residues mod243** have some common
 2 among the first five quotient trits. This is unconditional
 mathematics at the stated finite-width modular scale; strict
-Lean verification of the wider family is tracked separately
-in the dedicated workflow. Nothing here is extrapolated to
+Lean verification of the original physical family is PASS:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40861612042 Nothing here is extrapolated to
 the remaining 74 classes or to all arbitrary K.
 
 ## Explicit arbitrarily delayed physical survivors (not counterexamples)
@@ -225,3 +225,20 @@ This explicit sequence supplies an independent infinite-scale
 obstruction to a bounded-prefix-only argument. It is compatible
 with the target theorem because a collision can occur
 at a larger K-dependent row.
+
+## Strict verification closeout for this research checkpoint
+
+- Finite original exponent-prefix completeness: **PASS** https://github.com/kyo-oo/erdosternary2/actions/runs/40860951943
+- Finite exact source-neighbor physical prefix mimicry: **PASS** https://github.com/kyo-oo/erdosternary2/actions/runs/40861363743
+- Four-state entropy bound plus independent actual-power audit: **PASS** https://github.com/kyo-oo/erdosternary2/actions/runs/40860395471
+- New unbounded pure-three physical exponent family: **PASS** https://github.com/kyo-oo/erdosternary2/actions/runs/40861612042
+
+All these named workflows reject error messages and Lean `sorryAx`;
+they do not postulate the universal `CommonTwo` premise.
+The explicit `K_m=(3^m-1)/2` late-survivor identity above
+is a mathematical derivation recorded in this document,
+not yet a dedicated Lean declaration.
+
+**Unresolved exact theorem** remains
+`∀ K ≥ 5, K ≠ 7 → CommonTwo K`.
+It is not upgraded to a full proof by the four CI passes.
