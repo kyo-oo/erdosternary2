@@ -142,3 +142,87 @@ version restricted to R=4^K.
 
 This is a substantive, source-exact new mathematical route and
 an audited checkpoint, **not a completed proof of Erdős 406**.
+
+## 7. Certified physical source BAD reduction
+
+The separate module `GSTProblem406BinaryOriginBadSurvivor.lean` proves without
+custom axioms that *any real hypothetical exception* `K>=13` to
+the original `CommonTwo K` induces a packet
+`L=physicalShortCut K, R=4^K` satisfying **all** of:
+
+```text
+L>=10, 0<R<3^L, R%3=1,
+2^((3*L)/2+1) divides R,
+every p>=1 is noncollision in (R,4R).
+```
+
+This is a valid source-exact one-way implication, not a proof that no
+packet exists and not an assumption. The exact original proof was
+Lean kernel-certified in targeted workflow:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40971389441 .
+
+A further module `GSTProblem406PhysicalCutGateEquivalence.lean` gives
+the exact same-source equivalence for all K>=13:
+```text
+CommonTwo K iff there exists p where
+  1<=p<floor((4K-1)/3)
+  and digit3(4^K,p)=digit3(4^(K+1),p)=2.
+```
+Its Lean certificate is checked separately. This improves the old
+physical finite-search horizon from `2(K+1)+1` to `floor((4K-1)/3)`;
+it does NOT establish the witness's existence.
+
+## 8. New all-depth weighted GST carry contraction
+
+A distinct, unconditional four-state structural improvement now has
+its own Lean module `GSTProblem406DualValuationEntropy.lean`.
+The exact original affine carry transition matrix is
+```text
+M = [[1,1,0,0],
+     [1,1,0,1],
+     [1,0,1,1],
+     [0,1,1,0]]
+```
+The strictly positive integer weight vector `w=(7,10,10,8)`
+satisfies `M*w=(17,25,25,20)`, and
+`2*M*w=(34,50,50,40) <= 5*w=(35,50,50,40)` entrywise.
+By induction the survivor count from every carry state obeys
+```text
+7 * 2^n * survivingCount(n,c) <= w_c * 5^n, all n>=0.
+```
+In particular, at the *true affine physical carry c=1*:
+```text
+7 * 2^n * survivingCount(n,1) <= 10 * 5^n
+7 * 4^m * survivingCount(2m,1) <= 10 * 25^m.
+```
+This is a strict asymptotic improvement over the old
+`survivingCount(2m,1)<=7^m`. It reduces the exponent-residue
+population upper exponent to `log_3(5/2) ~ 0.83404`, provided
+the existing finite exponent-prefix isometry is used in the
+transfer. Wolfram independently verified the matrix inequality.
+Targeted strict Lean kernel workflow PASS:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40972493936 .
+It supplies **no** universal witness by itself: a zero-density
+exceptional set may still contain some natural exponents.
+
+## 9. Exact remaining theorem
+
+The precise unresolved inference in this new research route is:
+
+```text
+forall L>=10, forall R>0,
+  R<3^L and R%3=1 and
+  2^((3*L)/2+1) divides R
+  implies EXISTS a positive ternary row p such that
+    digit3(R,p)=digit3(4R,p)=2.
+```
+
+This strong all-integer lemma might turn out to be false or harder
+than the original; if so, retain the physical origin `R=4^K`.
+The finite experiment tests 10<=L<=240 only, and no theorem of
+this all-L scope has been verified.
+
+**Final required outcome remains** the original Lean term
+`gst_four_power_third_wave_gate` with no hGate argument or custom
+axiom, followed by a binder-free, kernel-checked exact comparator.
+This checkpoint does not claim that outcome.
