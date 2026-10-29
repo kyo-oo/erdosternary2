@@ -1,0 +1,32 @@
+name: GST exact Archimedean finite search for original CommonTwo
+on:
+  push:
+    branches: [gpt6/problem406-exponent-termination-20261029]
+    paths:
+      - GSTProblem406FiniteNaturalTermination.lean
+      - .github/workflows/gpt6_problem406_finite_natural_termination.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  natural-end:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build original direct CommonTwo modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerDirectExistence
+      - name: Kernel verify finite physical termination certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406FiniteNaturalTermination.lean 2>&1 | tee gst406-finite-end.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.|gst_four_power_direct_existence_inline' gst406-finite-end.log
+          echo GST406_FINITE_NATURAL_END_ROW_PASS=1
