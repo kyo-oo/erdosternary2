@@ -115,7 +115,12 @@ theorem delayed_seed_no_two_before
       have hlt : 4^4 < 3^p := by
         have h : (4:Nat)^4 < 3^6 := by decide
         omega
-      simp [GSTFourPowerDirectResidue.digit3, Nat.div_eq_of_lt hlt]
+      have h256 : (256:Nat)<3^p := by
+        simpa only [show (4:Nat)^4=256 by decide] using hlt
+      have hz : (256:Nat)/3^p=0 := Nat.div_eq_of_lt h256
+      change ((256:Nat)/3^p)%3 ≠ 2
+      rw [hz]
+      decide
   · have hcase : p=L+1 ∨ p=L+2 := by omega
     rcases hcase with rfl | rfl
     · have h := delayed_seed_three_trits L 0 hL (by omega)
