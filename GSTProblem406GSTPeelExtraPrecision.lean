@@ -91,7 +91,7 @@ theorem physical_allones_two_extra_affine_congruence (m : Nat) :
 /-- Every one of the first m+2 NONTRIVIAL ternary source positions
 is zero or one, hence cannot be a shared two with its real neighbor. -/
 theorem physical_allones_first_m_plus_two_source_not_two
-    (m j : Nat) (hj : j<m+2) :
+    (m j : Nat) (hj : j < m + 2) :
     digit3 (4^(ternaryOnes m)) (j+1) ≠ 2 := by
   have hdiv : 3^(j+1) ∣ 3^(m+2) :=
     Nat.pow_dvd_pow 3 (by omega)
@@ -126,7 +126,7 @@ theorem physical_allones_first_m_plus_two_source_not_two
 /-- Every all-one physical exponent survives two additional trits
 past its ternary exponent length. -/
 theorem physical_allones_survives_m_plus_two_rows (m : Nat) :
-    ∀ j : Nat, 1≤j → j≤m+2 →
+    ∀ j : Nat, 1≤j → j ≤ m + 2 →
       ¬ (digit3 (4^(ternaryOnes m)) j = 2 ∧
          digit3 (4^(ternaryOnes m+1)) j = 2) := by
   intro j hj1 hjm hhit
