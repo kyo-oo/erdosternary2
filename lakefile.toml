@@ -27,6 +27,7 @@ roots = [
   "GSTProblem406ShortSeedPhysicalWave",
   "GSTProblem406ArchimedeanPhysicalEscape",
   "GSTProblem406SyndeticArchimedeanGate",
+  "GSTProblem406UniversalMultiplicativePair",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
