@@ -1,5 +1,6 @@
 import GSTWorldtraceBlockLift
 import GSTFourPowerAffineOrbit
+import GSTFourPowerDirectExistence
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 30000000
