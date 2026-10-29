@@ -3,6 +3,8 @@ on:
   push:
     branches: [gpt6/problem406-binary-origin-valuation-20261030]
     paths:
+      - lakefile.toml
+      - GSTProblem406CarryEntropyBound.lean
       - GSTProblem406DualValuationEntropy.lean
       - .github/workflows/gpt6_gst_dual_valuation_entropy.yml
   workflow_dispatch:
