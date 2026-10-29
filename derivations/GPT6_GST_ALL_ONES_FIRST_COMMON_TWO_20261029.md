@@ -41,7 +41,7 @@ physical perfect-power sources DOES eventually collide.
 Validation: exact modular computations for m=8,...,70 found p=m+9,
 and arithmetic residue certificate supplied above independently proves
 the entire unbounded family. Not a full universal hGate proof.
-Lean formalization and separate strict CI remain to be done.
+The existence of a physical same-row 2 at p=m+9 for every m>=8 is now STRICT LEAN KERNEL VERIFIED in GSTProblem406AllOnesFirstCollision.lean; dedicated GitHub Actions run 40911647994 PASSED. Exact minimality of that row (the word FIRST) is established in the arithmetic derivation here, but is not yet a separately kernel-certified minimality theorem.
 
 
 ## Independent GST-native proof by the exact nonlinear peel1 law
