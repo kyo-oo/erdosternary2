@@ -20,7 +20,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-          lake build GSTWorldtraceBlockLift
+          lake build GSTWorldtraceBlockLift GSTFourPowerDirectExistence
           lake env lean -o .lake/build/lib/lean/GSTWorldtraceCoeffStability.olean GSTWorldtraceCoeffStability.lean
           lake env lean -o .lake/build/lib/lean/GSTFourPowerDirectExistence.olean GSTFourPowerDirectExistence.lean
       - name: Strict prove new physical exponent families
