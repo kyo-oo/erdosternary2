@@ -509,11 +509,15 @@ theorem two_wave_any_width_block_exact
     4 u L w hw hband
   have h5 := GSTWorldtraceBlockLift.pow4_whole_block_lift
     5 u L w hw hband
+  have h256 : (256:Nat)/3^(L+1)=0 := by
+    simpa only [show (4:Nat)^4=256 by decide] using hdivs
+  have h1024 : (1024:Nat)/3^(L+1)=0 := by
+    simpa only [show (4:Nat)^5=1024 by decide] using hdivn
   constructor
   · simpa only [show (4:Nat)^4=256 by decide,
-        hdivs, Nat.zero_add] using h4
+        h256, Nat.zero_add] using h4
   · simpa only [show (4:Nat)^5=1024 by decide,
-        hdivn, Nat.zero_add] using h5
+        h1024, Nat.zero_add] using h5
 
 /-- Exact digit readback from ANY physical shifted tower quotient,
 when an abstract block word A matches its first w trits. -/
