@@ -1,0 +1,33 @@
+name: GST original half-exponent universal multiplier coefficient
+on:
+  push:
+    branches: [gpt6/problem406-halving-exponent-lte-20261029]
+    paths: [GSTProblem406HalfMultiplierArithmetic.lean, .github/workflows/gpt6_406_half_multiplier_coefficient.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build original physical power and whole-block Worldtrace
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerAffineOrbit
+          lake build GSTFourPowerDirectExistence
+          lake build GSTWorldtraceBlockLift
+          lake env lean -o .lake/build/lib/lean/GSTProblem406HalfExponentEscape.olean GSTProblem406HalfExponentEscape.lean
+      - name: Kernel certify all-m 8416 original physical coefficient
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406HalfMultiplierArithmetic.lean 2>&1 | tee gst-half-multiplier-406.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.|gst_four_power_direct_existence_inline' gst-half-multiplier-406.log
+          echo GST_406_ALL_M_HALF_MULTIPLIER_COEFFICIENT_PASS=1
