@@ -68,7 +68,7 @@ theorem original_creation_certificate_of_archimedean_escape
     (hBelow : 4^K < 9^m)
     (hEscape : 7*(9^m-1) < 8*4^K) :
     GSTFourPowerOntologicalAdapter.CreationCertificate (4^K) := by
-  exact GSTFourPowerDirectCreationMaster.commonTwo_to_creation_certificate
+  exact GSTFourPowerDirectCreationMaster.commonTwo_to_creation_certificate K
     (CommonTwo_of_archimedean_escape K m hBelow hEscape)
 
 /-- A single existential Archimedean trigger, independent of any
@@ -87,7 +87,7 @@ theorem thirdWave_of_ArchimedeanEscape
 conditional on the *explicit numerical escape condition* and must not
 be substituted for the still-open original all-K hGate. -/
 theorem original_hGate_body_on_ArchimedeanEscape
-    (K : Nat) (hK : 5 ≤ K) (hK7 : K ≠ 7)
+    (K : Nat) (_hK : 5 ≤ K) (_hK7 : K ≠ 7)
     (hEscape : ArchimedeanEscape K) :
     GSTFourPowerThirdWave.thirdWave K :=
   thirdWave_of_ArchimedeanEscape K hEscape
