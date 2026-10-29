@@ -54,9 +54,9 @@ theorem two_twos_force_pair (p r : Nat) (hr : r < 3^p) :
   have hchoice :
       ((4*r+1)/3^p+32)%3=2 ∨
       (((4*r+1)/3^p+32)/3)%3=2 := by
-    have hc : (4*r+1)/3^p=0 ∨ (4*r+1)/3^p=1 ∨
-        (4*r+1)/3^p=2 ∨ (4*r+1)/3^p=3 := by
-      interval_cases h : (4*r+1)/3^p <;> omega
+    have four_cases (c : Nat) (hc : c < 4) :
+        c=0 ∨ c=1 ∨ c=2 ∨ c=3 := by omega
+    have hc := four_cases ((4*r+1)/3^p) hcarry
     rcases hc with h0 | h1 | h2 | h3
     · left
       norm_num [h0]
