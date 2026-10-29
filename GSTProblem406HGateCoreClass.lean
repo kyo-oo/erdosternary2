@@ -149,6 +149,167 @@ theorem commonTwo_unbounded_core_classes
     rw [hexp, neighbor_three_digit_bridge L u k.val hL k.isLt]
     exact hneighbor
 
+
+
+/-! ## New discovery: a fourth Worldtrace trit resolves additional live hGate classes
+
+The two physical consecutive powers are retained; neither a generic BAD
+controller nor a substituted source-only digit property occurs.
+The coefficient stabilizes modulo 81 for ALL scales L >= 3.
+The exact fourth quotient trits are 46*u and 22*u mod 81.
+
+The three multiplier congruence classes u=10,40,58 (mod 81)
+did not have a shared digit two among the first three trits, but
+their fourth trit is simultaneously two in both powers. -/
+
+/-- The fourth coefficient trit stabilizes at 16 modulo 81 after scale 3. -/
+theorem lteCoeff_mod81_sixteen (L : Nat) (hL : 3 ≤ L) :
+    GSTCanonicalTailLTE.lteCoeff L % 81 = 16 := by
+  have hstep (t : Nat) (ht : 3 ≤ t) :
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 81 =
+        GSTCanonicalTailLTE.lteCoeff t % 81 := by
+    have hdiv : 81 ∣ 3^(t+1) := by
+      have hd : 3^4 ∣ 3^(t+1) :=
+        Nat.pow_dvd_pow 3 (by omega)
+      simpa only [show (3:Nat)^4 = 81 by decide] using hd
+    calc
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 81 =
+          (GSTCanonicalTailLTE.lteCoeff (t+1) % 3^(t+1)) % 81 :=
+            (Nat.mod_mod_of_dvd _ hdiv).symm
+      _ = (GSTCanonicalTailLTE.lteCoeff t % 3^(t+1)) % 81 := by
+            rw [GSTWorldtraceCoeffStability.coeff_step_mod]
+      _ = GSTCanonicalTailLTE.lteCoeff t % 81 :=
+            Nat.mod_mod_of_dvd _ hdiv
+  have hbase : ∀ k : Nat,
+      GSTCanonicalTailLTE.lteCoeff (3+k) % 81 = 16 := by
+    intro k
+    induction k with
+    | zero => decide
+    | succ k ih =>
+        rw [show 3+(k+1) = (3+k)+1 by omega]
+        rw [hstep (3+k) (by omega)]
+        exact ih
+  rw [show L = 3+(L-3) by omega]
+  exact hbase (L-3)
+
+/-- A single whole-block identity covers BOTH source M=4 and neighbor M=5,
+with exact physical source 4^M and without any abstract transport premise. -/
+theorem fourth_block_quotient_mod81
+    (M u L m : Nat) (hL : 6 ≤ L)
+    (hsmall : 4^M < 3^(L+1))
+    (hm : (16 * 4^M) % 81 = m) :
+    (4^(M+u*3^L)/3^(L+1))%81 = (m*u)%81 := by
+  have hdiv : 4^M / 3^(L+1) = 0 := Nat.div_eq_of_lt hsmall
+  have h := GSTWorldtraceBlockLift.pow4_whole_block_lift
+    M u L 4 (by omega) (by omega)
+  have hblock :
+      (4^(M+u*3^L)/3^(L+1))%81 =
+        (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%81 := by
+    simpa only [show (3:Nat)^4=81 by decide,
+      hdiv, Nat.zero_add] using h
+  have hc : (GSTCanonicalTailLTE.lteCoeff L*4^M)%81 = m := by
+    calc
+      (GSTCanonicalTailLTE.lteCoeff L*4^M)%81 =
+          ((GSTCanonicalTailLTE.lteCoeff L%81)*((4^M)%81))%81 :=
+            Nat.mul_mod _ _ _
+      _ = (16*(4^M))%81 := by
+            rw [lteCoeff_mod81_sixteen L (by omega)]
+            simpa using (Nat.mul_mod 16 (4^M) 81).symm
+      _ = m := hm
+  calc
+    (4^(M+u*3^L)/3^(L+1))%81 =
+      (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%81 := hblock
+    _ = (u*(GSTCanonicalTailLTE.lteCoeff L*4^M))%81 := by ring
+    _ = (u*m)%81 := by
+      calc
+        (u*(GSTCanonicalTailLTE.lteCoeff L*4^M))%81 =
+            ((u%81)*((GSTCanonicalTailLTE.lteCoeff L*4^M)%81))%81 :=
+              Nat.mul_mod _ _ _
+        _ = ((u%81)*m)%81 := by rw [hc]
+        _ = (u*m)%81 := by
+              simpa using (Nat.mul_mod u m 81).symm
+    _ = (m*u)%81 := by ac_rfl
+
+/-- Full source power's fourth post-cut digit equals the fourth trit of 46*u. -/
+theorem source_fourth_quotient_mod81
+    (L u : Nat) (hL : 6 ≤ L) :
+    (4^(4+u*3^L)/3^(L+1))%81 = (46*u)%81 := by
+  apply fourth_block_quotient_mod81 4 u L 46 hL
+  · have hb : (4:Nat)^4 < 3^7 := by decide
+    have hp : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    exact lt_of_lt_of_le hb hp
+  · norm_num
+
+/-- Full neighbor power's fourth post-cut digit equals 22*u. -/
+theorem neighbor_fourth_quotient_mod81
+    (L u : Nat) (hL : 6 ≤ L) :
+    (4^(5+u*3^L)/3^(L+1))%81 = (22*u)%81 := by
+  apply fourth_block_quotient_mod81 5 u L 22 hL
+  · have hb : (4:Nat)^5 < 3^7 := by decide
+    have hp : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    exact lt_of_lt_of_le hb hp
+  · norm_num
+
+/-- Read the exact fourth trit from a quotient block without truncating
+either of the two original perfect powers. -/
+private theorem fourth_block_digit_bridge (M u L m : Nat)
+    (hmod : (4^(M+u*3^L)/3^(L+1))%81 = (m*u)%81) :
+    digit3 (4^(M+u*3^L)) (L+4) = digit3 (m*u) 3 := by
+  have hread : digit3 (4^(M+u*3^L)/3^(L+1)) 3 =
+      digit3 (m*u) 3 :=
+    digit3_eq_of_mod_next _ _ 3 (by
+      simpa only [show (3:Nat)^(3+1)=81 by decide] using hmod)
+  calc
+    digit3 (4^(M+u*3^L)) (L+4) =
+        digit3 (4^(M+u*3^L)/3^(L+1)) 3 := by
+          unfold digit3
+          have hp : 3^(L+4) = 3^(L+1)*3^3 := by
+            rw [show L+4 = (L+1)+3 by omega, pow_add]
+          rw [hp, ← Nat.div_div_eq_div_mul]
+    _ = digit3 (m*u) 3 := hread
+
+/-- Four-trit residue reduction, independent of the size of u. -/
+private theorem same_digit_mul_mod81 (u m : Nat) :
+    digit3 (m*u) 3 = digit3 (m*(u%81)) 3 := by
+  apply digit3_eq_of_mod_next
+  change (m*u)%81 = (m*(u%81))%81
+  simp [Nat.mul_mod]
+
+/-- Exact finite classification of the three NEW multiplier classes. -/
+private theorem new_fourth_residue_pair
+    (u : Nat) (hu : u%81=10 ∨ u%81=40 ∨ u%81=58) :
+    digit3 (46*u) 3 = 2 ∧ digit3 (22*u) 3 = 2 := by
+  constructor
+  · rw [same_digit_mul_mod81 u 46]
+    rcases hu with h | h | h
+    all_goals rw [h] <;> norm_num [digit3]
+  · rw [same_digit_mul_mod81 u 22]
+    rcases hu with h | h | h
+    all_goals rw [h] <;> norm_num [digit3]
+
+/-- New UNBOUNDED exact hGate family: ALL L >= 6 and ALL natural u in
+three previously unproved modulo-81 classes yield the SAME row L+4 digit
+two in consecutive physical powers 4^(4+u3^L) and 4^(5+u3^L). -/
+theorem commonTwo_new_fourth_trit_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : u%81=10 ∨ u%81=40 ∨ u%81=58) :
+    CommonTwo (4+u*3^L) := by
+  obtain ⟨hs, hn⟩ := new_fourth_residue_pair u hu
+  refine ⟨L+4, by omega, ?_, ?_⟩
+  · rw [fourth_block_digit_bridge 4 u L 46
+      (source_fourth_quotient_mod81 L u hL)]
+    exact hs
+  · have he : (4+u*3^L)+1 = 5+u*3^L := by omega
+    rw [he, fourth_block_digit_bridge 5 u L 22
+      (neighbor_fourth_quotient_mod81 L u hL)]
+    exact hn
+
+#print axioms lteCoeff_mod81_sixteen
+#print axioms fourth_block_quotient_mod81
+#print axioms commonTwo_new_fourth_trit_classes
+
 #print axioms neighbor_quotient_mod27
 #print axioms neighbor_three_digit_bridge
 #print axioms eleven_of_eighteen_kernel
