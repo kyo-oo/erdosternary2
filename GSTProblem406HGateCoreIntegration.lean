@@ -42,6 +42,49 @@ theorem original_creation_master_on_unbounded_core
   exact commonTwo_unbounded_core_classes L u hL h3
     h4 h10 h13 h16 h19 h22 h25
 
+
+
+/-! Fourth and fifth GST Worldtrace gate bodies: new residue families. -/
+
+/-- Original thirdWave HGate BODY, without hGate, on the new fourth-trit
+residue classes that escaped the first three-trit source-neighbor test. -/
+theorem original_hGate_on_fourth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : u%81=10 ∨ u%81=40 ∨ u%81=58) :
+    GSTFourPowerThirdWave.thirdWave (4+u*3^L) := by
+  apply (GSTFourPowerThirdWave.thirdWave_iff_commonTwo _).2
+  exact commonTwo_new_fourth_trit_classes L u hL hu
+
+/-- Fourth-trit creation certificate for the ORIGINAL perfect-power source. -/
+theorem original_creation_master_on_fourth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : u%81=10 ∨ u%81=40 ∨ u%81=58) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^(4+u*3^L)) := by
+  apply GSTFourPowerDirectCreationMaster.commonTwo_to_creation_certificate
+  exact commonTwo_new_fourth_trit_classes L u hL hu
+
+/-- The exact original HGate BODY, extended to ten new fifth-trit
+multiplier families for ALL unbounded u in each class modulo 243. -/
+theorem original_hGate_on_fifth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : FifthNewClass (u%243)) :
+    GSTFourPowerThirdWave.thirdWave (4+u*3^L) := by
+  apply (GSTFourPowerThirdWave.thirdWave_iff_commonTwo _).2
+  exact commonTwo_new_fifth_trit_classes L u hL hu
+
+/-- Original creation certificate for the exact ten new fifth-trit families. -/
+theorem original_creation_master_on_fifth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : FifthNewClass (u%243)) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^(4+u*3^L)) := by
+  apply GSTFourPowerDirectCreationMaster.commonTwo_to_creation_certificate
+  exact commonTwo_new_fifth_trit_classes L u hL hu
+
+#print axioms original_hGate_on_fourth_trit_new_classes
+#print axioms original_creation_master_on_fourth_trit_new_classes
+#print axioms original_hGate_on_fifth_trit_new_classes
+#print axioms original_creation_master_on_fifth_trit_new_classes
+
 #print axioms original_hGate_on_unbounded_core
 #print axioms original_creation_master_on_unbounded_core
 
