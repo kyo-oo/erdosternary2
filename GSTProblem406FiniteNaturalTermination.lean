@@ -52,7 +52,9 @@ extension or generic affine input. -/
 theorem original_physical_source_digit_vanishes_above_end
     (K p : Nat) (hp : physicalEndRow K ≤ p) :
     digit3 (4^K) p = 0 := by
-  have hpow : 3^(physicalEndRow K) ≤ 3^p := by gcongr
+  have hpow : 3^(physicalEndRow K) ≤ 3^p := by
+    gcongr
+    omega
   have hlt : 4^K < 3^p :=
     lt_of_lt_of_le (physical_source_below_end_cut K) hpow
   unfold digit3
