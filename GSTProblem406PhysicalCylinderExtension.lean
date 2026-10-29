@@ -58,17 +58,13 @@ theorem two_twos_force_pair (p r : Nat) (hr : r < 3^p) :
         (4*r+1)/3^p=2 ∨ (4*r+1)/3^p=3 := by omega
     rcases hc with h0 | h1 | h2 | h3
     · left
-      rw [h0]
-      norm_num
+      norm_num [h0]
     · right
-      rw [h1]
-      norm_num
+      norm_num [h1]
     · right
-      rw [h2]
-      norm_num
+      norm_num [h2]
     · left
-      rw [h3]
-      norm_num
+      norm_num [h3]
   have hlow : digit3 X p = 2 := by
     unfold digit3
     rw [hsourceQ]
