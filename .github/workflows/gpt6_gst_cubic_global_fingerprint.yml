@@ -21,6 +21,7 @@ jobs:
           lake update
           lake exe cache get
           lake build GSTWorldtraceBlockLift GSTFourPowerDirectExistence
+          lake env lean -o .lake/build/lib/lean/GSTWorldtraceCoeffStability.olean GSTWorldtraceCoeffStability.lean
           lake env lean -o .lake/build/lib/lean/GSTWorldtraceQuadraticBlockLift.olean GSTWorldtraceQuadraticBlockLift.lean
           lake env lean -o .lake/build/lib/lean/GSTWorldtraceCubicBlockLift.olean GSTWorldtraceCubicBlockLift.lean
       - name: Kernel check same-row cubic original CommonTwo fingerprint
