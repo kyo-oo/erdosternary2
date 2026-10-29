@@ -86,3 +86,38 @@ provide a **kernel-checked** theorem `gst_four_power_third_wave_gate`
 without assumptions and without sorryAx; then eliminate the `hGate`
 argument in the comparator Solution.lean and run the strict type check.
 Never substitute a conditional renamed theorem.
+
+## Adversarial repair attempt at the stalled GST Equation-III collision
+
+A possible remedy to the failed all-depth telescoping was to construct a
+different four-carry-state charge U and a digit weight w such that the
+local GST derivative J(C,d)=3 U(floor((C+4d)/3))-U(C)-w*d
+
+* vanishes on the absorbing vacuum cell (0,0),
+* is nonnegative on every BAD (non-Happy) cell,
+* is strictly negative on each physical Happy cell.
+
+Wolfram's exact Reduce over four integer/real unknowns found the
+inequalities **infeasible**. A 4-cell symbolic subcertificate is:
+
+- Vacuum (0,0): J=2U0=0, so U0=0.
+- BAD (2,0): J=3U0-U2=-U2≥0, so U2≤0.
+- BAD (2,1): J=2U2-w≥0, so w≤2U2.
+- Happy (0,2): J=3U2-2w<0, so 3U2<2w≤4U2 and U2>0.
+
+This contradicts U2≤0. It is a proof that **this class of local
+one-column linear separator potentials cannot repair the collision**,
+not a refutation of hGate itself or of source-dependent two-dimensional
+GST potentials. The theorem is encoded in
+`GSTProblem406UGateSeparatorNoGo.lean`; its dedicated kernel
+audit workflow is `gpt6_problem406_u_separator_no_go.yml`.
+
+Wolfram also checked the alternative no-adjacent-22 obstruction:
+K in {6,7,12,13,18} all have no adjacent ternary 22
+within K=5..350, while K=6,12,13,18 still have CommonTwo.
+Hence no-22 classification *alone* cannot characterize the gate or
+replace the missing power-specific collision.
+
+The viable continuation must introduce an invariant that contains
+**more than one carry column or an independent source-specific phase/
+energy constraint**, since the one-column sign separator is impossible.
