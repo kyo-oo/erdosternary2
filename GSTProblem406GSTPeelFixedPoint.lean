@@ -76,7 +76,7 @@ theorem ternaryOnes_add (j t : Nat) :
 /-- Every literal original finite ternaryOnes word has source digit 1
 in every position below its length. -/
 theorem ternaryOnes_digit_one
-    (m j : Nat) (hj : j<m) :
+    (m j : Nat) (hj : j < m) :
     digit3 (ternaryOnes m) j = 1 := by
   have hN : 0<3^j := by positivity
   have hshape : ternaryOnes m =
@@ -110,7 +110,13 @@ theorem peel1_ternaryOnes_residue (m : Nat) :
       ternaryOnes m % 3^m := by
   rw [peel1_exact_nonarchimedean_fixedpoint,
     ternaryOnes_identity m]
-  simp [Nat.add_mod, Nat.mul_mod]
+  have hdiv : 3^m ∣ 3*ternaryOnes m*(3^m)^2 := by
+    refine ⟨3*ternaryOnes m*3^m, ?_⟩
+    ring
+  have hzero : (3*ternaryOnes m*(3^m)^2) % 3^m = 0 :=
+    Nat.mod_eq_zero_of_dvd hdiv
+  rw [Nat.add_mod,hzero]
+  simp
 
 /-- The precise physical orbit at exponent (3^m-1)/2 agrees with
 the m-digit all-one coordinate modulo 3^m.
@@ -119,7 +125,7 @@ theorem physical_ternaryOnes_affine_fixedpoint (m : Nat) :
     affineOrbit (ternaryOnes m) % 3^m =
       ternaryOnes m % 3^m := by
   induction m with
-  | zero => simp
+  | zero => simp [ternaryOnes, affineOrbit]
   | succ m ih =>
       have hpoly :
           peel1 (affineOrbit (ternaryOnes m)) ≡
@@ -133,13 +139,24 @@ theorem physical_ternaryOnes_affine_fixedpoint (m : Nat) :
       have htotal := hpoly.trans hfixed
       have hmul := htotal.mul_left' 3
       have hadd := hmul.add_left 1
-      simpa only [ternaryOnes, affineOrbit_three_mul_add_one,
-        Nat.pow_succ, Nat.mul_comm] using hadd
+      have haddEq :
+          (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) =
+            (1+3*ternaryOnes m)%(3*3^m) := by
+        simpa only [Nat.mul_comm] using hadd
+      calc
+        affineOrbit (ternaryOnes (m+1)) % 3^(m+1) =
+            (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) := by
+          rw [ternaryOnes, affineOrbit_three_mul_add_one, Nat.pow_succ]
+          ring
+        _ = (1+3*ternaryOnes m)%(3*3^m) := haddEq
+        _ = ternaryOnes (m+1)%3^(m+1) := by
+          rw [ternaryOnes, Nat.pow_succ]
+          ring
 
 /-- Strong physical source-word rigidity: for each m and every j<m,
 the j+1-th ternary digit of the REAL 4^((3^m-1)/2) is exactly 1. -/
 theorem physical_ternaryOnes_first_m_digits_are_one
-    (m j : Nat) (hj : j<m) :
+    (m j : Nat) (hj : j < m) :
     digit3 (4^(ternaryOnes m)) (j+1)=1 := by
   have hdiv : 3^(j+1) ∣ 3^m := Nat.pow_dvd_pow 3 (by omega)
   have hmod :
@@ -168,7 +185,7 @@ theorem physical_ternaryOnes_survives_m_rows (m : Nat) :
       ¬ (digit3 (4^(ternaryOnes m)) j = 2 ∧
          digit3 (4^((ternaryOnes m)+1)) j = 2) := by
   intro j hj1 hjm hhit
-  have hj : j-1<m := by omega
+  have hj : j-1 < m := by omega
   have heq := physical_ternaryOnes_first_m_digits_are_one m (j-1) hj
   have hshape : j-1+1=j := by omega
   rw [hshape] at heq
