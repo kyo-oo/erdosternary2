@@ -153,3 +153,50 @@ run #40791456858. The exact Ω terminal normal form is kernel green in
 run #40790148990, and arbitrary delay is kernel green in run #40790757888.
 
 The strict unconditional Erdős theorem has not been established.
+
+
+## Kernel closeout: full proof receipts for this research phase
+
+All of the following isolated dedicated GitHub Lean jobs completed successfully
+after explicit namespace, power, quotient, and exact source-state repairs:
+- Run #40790148990: GSTOmegaTerminalNormalForm.lean, exact infinite BAD
+  controller and preterminal source BAD equivalences;
+- Run #40790757888: GSTOmegaArbitraryDelay.lean, arbitrary-depth
+  clean prefixes at arbitrarily large natural exponents;
+- Run #40791677601: GSTOmegaExactDelayedEscape.lean, for ALL L>=5
+  the first digit two of 4^(4+3^L) is EXACTLY L+3;
+- Run #40791456858: GSTOmegaCanonicalBoundaryIff.lean, exact
+  canonical perfect-power all-depth controller iff preterminal BAD;
+- Run #40792308751: GSTOmegaThreeTritMultiplierLaw.lean, ALL
+  multipliers u and ALL scales L>=5 have quotient 19u mod27,
+  with exact first-hit corollaries for u≡2 (mod3) and
+  u≡1 (mod27);
+- Run #40791943598: GSTOmegaResidualFiniteSupport.lean, the
+  original GSTOmegaInfiniteBadTrace for every s,k,m is
+  EXACTLY equivalent to BAD at every position below the
+  explicitly constructed residual source cutoff.
+
+No proof in this list assumes the claimed universal Erdős conclusion.
+The last job closes the previously disconnected original Ω∞ interface,
+rather than only a parallel V2 controller model.
+
+### Adversarial proof boundary after integration
+
+The direct residual-Ω normal form does NOT prove the original
+GSTResidualOmegaTermination: a finite-source BAD sequence
+unconditionally ends in a BAD absorbing zero/zero tail, and its
+preterminal segment can itself be BAD. The all-depth theorem
+therefore has exactly the same mathematical exclusion gap,
+now isolated to one preterminal arithmetic witness.
+
+A rigorous final route must use the true canonical perfect-power
+source, its digit/carry phase dynamics and finite natural exponent
+support to force the preterminal source witness. Existing
+GSTInfiniteFourPowerNavigation.power_three_step_collision lacks
+that implication and failed its isolated kernel audit #40785543486
+at line 176 (sorryAx). The strict unconditional Problem406 comparator
+failed #40780932923 because the submitted solution still has an
+unproved hGate argument.
+
+**Primary original conjecture status after this research phase:
+OPEN / not proven by these source and kernel receipts.**
