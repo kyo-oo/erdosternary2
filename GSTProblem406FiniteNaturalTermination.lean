@@ -31,7 +31,7 @@ theorem physical_source_below_end_cut (K : Nat) :
   have hmono : 4^K ≤ 4^(K+1) := by
     rw [pow_succ]
     omega
-  have hbase : 4^(K+1) ≤ 9^(K+1) := by gcongr
+  have hbase : 4^(K+1) ≤ 9^(K+1) := by gcongr <;> norm_num
   have hnine : 9^(K+1) = 3^(2*(K+1)) := by
     calc
       9^(K+1) = (3^2)^(K+1) := by norm_num
@@ -57,7 +57,6 @@ theorem original_physical_source_digit_vanishes_above_end
     lt_of_lt_of_le (physical_source_below_end_cut K) hpow
   unfold digit3
   rw [Nat.div_eq_of_lt hlt]
-  decide
 
 /-- Original unlimited CommonTwo is EXACTLY a finite physical
 witness check with an explicit K-dependent Archimedean cutoff. -/
