@@ -62,11 +62,9 @@ theorem physical_pair_quotient_mod243
   have hsmall : 4^M < 3^(L+1) := by
     rcases hM with h | h
     · subst M
-      norm_num at *
-      omega
+      norm_num at * <;> omega
     · subst M
-      norm_num at *
-      omega
+      norm_num at * <;> omega
   have hd : 4^M / 3^(L+1) = 0 := Nat.div_eq_of_lt hsmall
   have hh := GSTWorldtraceBlockLift.pow4_whole_block_lift
     M u L 5 (by omega) (by omega)
@@ -119,7 +117,9 @@ theorem commonTwo_pure_scaled_family
     CommonTwo (u*3^L) := by
   refine ⟨L+1+j, by omega, ?_, ?_⟩
   · have h := physical_pair_digit_bridge 0 L u j hL (Or.inl rfl) hj
-    simpa only [Nat.zero_add, pow_zero, Nat.mul_one, mul_one] using (h.trans hs)
+    have h' : digit3 (4^(u*3^L)) (L+1+j) = digit3 (178*u) j := by
+      simpa only [Nat.zero_add, pow_zero, Nat.mul_one] using h
+    exact h'.trans hs
   · have h := physical_pair_digit_bridge 1 L u j hL (Or.inr rfl) hj
     have he : (u*3^L)+1=1+u*3^L := by omega
     rw [he]
@@ -137,7 +137,7 @@ theorem commonTwo_multiplier_one_mod243
     have hh : (178*u)%243=178 := by
       calc
         (178*u)%243=(178*(u%243))%243 := by simp [Nat.mul_mod]
-        _ = 178 := by rw [hu]; decide
+        _ = 178 := by simp [hu]
     have hh' : (178*u)%3^(4+1)=178%3^(4+1) := by
       simpa only [show (3:Nat)^(4+1)=243 by decide] using hh
     rw [digit3_eq_of_mod_next (178*u) 178 4 hh']
@@ -146,7 +146,7 @@ theorem commonTwo_multiplier_one_mod243
     have hh : (712*u)%243=712%243 := by
       calc
         (712*u)%243=(712*(u%243))%243 := by simp [Nat.mul_mod]
-        _ = 712%243 := by rw [hu]; simp
+        _ = 712%243 := by simp [hu]
     have hh' : (712*u)%3^(4+1)=712%3^(4+1) := by
       simpa only [show (3:Nat)^(4+1)=243 by decide] using hh
     rw [digit3_eq_of_mod_next (712*u) 712 4 hh']
