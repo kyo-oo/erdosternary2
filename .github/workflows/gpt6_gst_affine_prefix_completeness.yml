@@ -2,7 +2,7 @@ name: GST affine finite-prefix physical completeness
 on:
   push:
     branches: [gpt6/problem406-cubic-universal-research-20261029]
-    paths: [GSTFourPowerAffineOntologicalCompleteness.lean, .github/workflows/gpt6_gst_affine_prefix_completeness.yml]
+    paths: [GSTFourPowerAffinePrefixIsometry.lean, GSTFourPowerAffineOntologicalCompleteness.lean, .github/workflows/gpt6_gst_affine_prefix_completeness.yml]
   workflow_dispatch:
 permissions:
   contents: read
