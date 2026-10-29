@@ -28,11 +28,12 @@ private theorem power_quotient_affine (K m : Nat) :
   have hN : 0<N := by dsimp [N]; positivity
   have hr : A%N < N := Nat.mod_lt _ hN
   have hshape : 4^K=(1+3*(A%N))+(3*N)*(A/N) := by
-    rw [four_pow_eq_one_plus_three_affineOrbit]
     have ha : A=A%N+N*(A/N) :=
       (Nat.mod_add_div A N).symm
-    rw [ha]
-    ring
+    calc
+      4^K=1+3*A := four_pow_eq_one_plus_three_affineOrbit K
+      _ = 1+3*(A%N+N*(A/N)) := by rw [← ha]
+      _ = (1+3*(A%N))+(3*N)*(A/N) := by ring
   have hlow : 1+3*(A%N)<3*N := by omega
   have hpow : 3^(m+1)=3*N := by
     dsimp [N]
@@ -40,6 +41,7 @@ private theorem power_quotient_affine (K m : Nat) :
     ring
   rw [hshape,hpow,Nat.add_mul_div_left _ _ (by omega:0<3*N)]
   rw [Nat.div_eq_of_lt hlow]
+  dsimp only [A,N]
   omega
 
 private theorem half_power_source_quotient (m : Nat) :
@@ -55,7 +57,9 @@ private theorem half_power_source_quotient (m : Nat) :
 private theorem half_power_neighbor_quotient (m : Nat) :
     4^(halfIndex m+1)/3^(m+1)=4*(antiCoeff m/2)+1 := by
   rw [power_quotient_affine,physical_half_neighbor_decomposition]
-  have hsmall : 3^m-1<3^m := by positivity
+  have hsmall : 3^m-1<3^m := by
+    have hp : 0<3^m := by positivity
+    omega
   rw [Nat.add_mul_div_left _ _ (by positivity : 0<3^m)]
   rw [Nat.div_eq_of_lt hsmall]
   omega
@@ -80,7 +84,10 @@ theorem half_multiplier_source_nine
         8416 [MOD 19683] := hco
     have hE : antiCoeff m/2 ≡ 14049 [MOD 19683] := he
     have h := (hC.mul_left u).add hE
-    simpa [Nat.add_comm, Nat.mul_assoc] using h
+    change
+      (u*(GSTCanonicalTailLTE.lteCoeff m*4^(halfIndex m))+
+        antiCoeff m/2)%19683 = (u*8416+14049)%19683 at h
+    simpa [Nat.add_comm, Nat.mul_comm, Nat.mul_assoc] using h
   calc
     (4^(halfIndex m+u*3^m)/3^(m+1))%19683 =
       (4^(halfIndex m)/3^(m+1)+
@@ -125,7 +132,12 @@ theorem half_multiplier_neighbor_nine
         (show (antiCoeff m/2+u*
           (GSTCanonicalTailLTE.lteCoeff m*4^(halfIndex m))) ≡
             14049+8416*u [MOD 19683] from hsourceSUM).mul_left 4
-    simpa only [Nat.add_comm] using h.add_left 1
+    have h' := h.add_left 1
+    change
+      (1+4*(antiCoeff m/2+u*
+        (GSTCanonicalTailLTE.lteCoeff m*4^(halfIndex m))))%19683 =
+      (1+4*(14049+8416*u))%19683 at h'
+    simpa only [Nat.add_comm] using h'
   have hfour : 4^(halfIndex m+1)=4*4^(halfIndex m) := by
     rw [pow_succ]
     ring
