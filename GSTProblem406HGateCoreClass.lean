@@ -569,6 +569,132 @@ theorem two_wave_any_width_certificate_to_CommonTwo
 #print axioms two_wave_any_width_block_exact
 #print axioms two_wave_any_width_certificate_to_CommonTwo
 
+
+
+/-! ## Sixth postcut trit: new congruence classes from the all-window theorem
+
+The sixth quotient fingerprint uses c_L mod 729 = 664. The source
+256*c_L reduces to 127 and the physical neighbor 1024*c_L to 508.
+An additional 22 three-free residue classes mod 729 have a SAME-ROW
+two in their sixth trit. The arbitrary-width GST theorem above makes
+this extension a finite certificate application, not a new ad hoc
+physical transport axiom. -/
+
+/-- Sixth-trit GST Worldtrace coefficient stabilization at every scale
+L>=6, with exact recurrence and no universal HGate premise. -/
+theorem lteCoeff_mod729_664 (L : Nat) (hL : 6 ≤ L) :
+    GSTCanonicalTailLTE.lteCoeff L % 729 = 664 := by
+  have hstep (t : Nat) (ht : 5 ≤ t) :
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 729 =
+        GSTCanonicalTailLTE.lteCoeff t % 729 := by
+    have hdiv : 729 ∣ 3^(t+1) := by
+      have hd : 3^6 ∣ 3^(t+1) :=
+        Nat.pow_dvd_pow 3 (by omega)
+      simpa only [show (3:Nat)^6=729 by decide] using hd
+    calc
+      GSTCanonicalTailLTE.lteCoeff (t+1) % 729 =
+          (GSTCanonicalTailLTE.lteCoeff (t+1) % 3^(t+1)) % 729 :=
+            (Nat.mod_mod_of_dvd _ hdiv).symm
+      _ = (GSTCanonicalTailLTE.lteCoeff t % 3^(t+1)) % 729 := by
+            rw [GSTWorldtraceCoeffStability.coeff_step_mod]
+      _ = GSTCanonicalTailLTE.lteCoeff t % 729 :=
+            Nat.mod_mod_of_dvd _ hdiv
+  have hbase : ∀ k : Nat,
+      GSTCanonicalTailLTE.lteCoeff (5+k) % 729 = 664 := by
+    intro k
+    induction k with
+    | zero => decide
+    | succ k ih =>
+        rw [show 5+(k+1)=(5+k)+1 by omega]
+        rw [hstep (5+k) (by omega)]
+        exact ih
+  rw [show L=5+(L-5) by omega]
+  exact hbase (L-5)
+
+/-- Single coefficient-modulus reduction, for both fourth-power source
+256 and fifth-power neighbor 1024, valid for unbounded multiplier u. -/
+private theorem sixth_coefficient_product_mod729
+    (L u M m : Nat) (hL : 6 ≤ L)
+    (hm : (664*M)%729=m) :
+    (u*GSTCanonicalTailLTE.lteCoeff L*M)%729=(m*u)%729 := by
+  have hc : (GSTCanonicalTailLTE.lteCoeff L*M)%729=m := by
+    calc
+      (GSTCanonicalTailLTE.lteCoeff L*M)%729 =
+        ((GSTCanonicalTailLTE.lteCoeff L%729)*(M%729))%729 :=
+          Nat.mul_mod _ _ _
+      _ = (664*M)%729 := by
+          rw [lteCoeff_mod729_664 L hL]
+          simpa using (Nat.mul_mod 664 M 729).symm
+      _ = m := hm
+  calc
+    (u*GSTCanonicalTailLTE.lteCoeff L*M)%729 =
+        (u*(GSTCanonicalTailLTE.lteCoeff L*M))%729 := by ring
+    _ = (u*m)%729 := by
+      calc
+        (u*(GSTCanonicalTailLTE.lteCoeff L*M))%729 =
+            ((u%729)*((GSTCanonicalTailLTE.lteCoeff L*M)%729))%729 :=
+              Nat.mul_mod _ _ _
+        _ = ((u%729)*m)%729 := by rw [hc]
+        _ = (u*m)%729 := by
+              simpa using (Nat.mul_mod u m 729).symm
+    _ = (m*u)%729 := by ac_rfl
+
+/-- Exact ten-free sixth-trit residue families (22 additional classes). -/
+def SixthNewClass (r : Nat) : Prop :=
+  r=4 ∨ r=67 ∨ r=73 ∨ r=103 ∨ r=166 ∨ r=199 ∨ r=205 ∨ r=235 ∨ r=268 ∨ r=274 ∨ r=337 ∨ r=367 ∨ r=400 ∨ r=436 ∨ r=469 ∨ r=499 ∨ r=532 ∨ r=538 ∨ r=631 ∨ r=664 ∨ r=670 ∨ r=700
+
+private theorem sixth_new_classes_kernel
+    (r : Nat) (hr : SixthNewClass r) :
+    digit3 (127*r) 5=2 ∧ digit3 (508*r) 5=2 := by
+  unfold SixthNewClass at hr
+  rcases hr with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+  all_goals subst r <;> norm_num [digit3]
+
+/-- Twenty-two new modulo-729 infinite multiplier classes for every L>=6:
+the literal physical powers 4^K and 4^(K+1) share digit two at L+6. -/
+theorem commonTwo_new_sixth_trit_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : SixthNewClass (u%729)) :
+    CommonTwo (4+u*3^L) := by
+  have hpair := sixth_new_classes_kernel (u%729) hu
+  have hsource_mod : digit3 (127*u) 5 =
+      digit3 (127*(u%729)) 5 := by
+    apply digit3_eq_of_mod_next
+    change (127*u)%729=(127*(u%729))%729
+    simp [Nat.mul_mod]
+  have hneighbor_mod : digit3 (508*u) 5 =
+      digit3 (508*(u%729)) 5 := by
+    apply digit3_eq_of_mod_next
+    change (508*u)%729=(508*(u%729))%729
+    simp [Nat.mul_mod]
+  have hsource : digit3 (127*u) 5=2 := by
+    rw [hsource_mod]
+    exact hpair.1
+  have hneighbor : digit3 (508*u) 5=2 := by
+    rw [hneighbor_mod]
+    exact hpair.2
+  have hreadsource :
+      digit3 (u*GSTCanonicalTailLTE.lteCoeff L*256) 5 =
+        digit3 (127*u) 5 := by
+    apply digit3_eq_of_mod_next
+    simpa only [show (3:Nat)^(5+1)=729 by decide] using
+      (sixth_coefficient_product_mod729 L u 256 127 hL (by norm_num))
+  have hreadneighbor :
+      digit3 (u*GSTCanonicalTailLTE.lteCoeff L*1024) 5 =
+        digit3 (508*u) 5 := by
+    apply digit3_eq_of_mod_next
+    simpa only [show (3:Nat)^(5+1)=729 by decide] using
+      (sixth_coefficient_product_mod729 L u 1024 508 hL (by norm_num))
+  apply two_wave_any_width_certificate_to_CommonTwo L u 6 5
+    hL (by decide) (by omega) (by decide)
+  · rw [hreadsource]
+    exact hsource
+  · rw [hreadneighbor]
+    exact hneighbor
+
+#print axioms lteCoeff_mod729_664
+#print axioms commonTwo_new_sixth_trit_classes
+
 #print axioms neighbor_quotient_mod27
 #print axioms neighbor_three_digit_bridge
 #print axioms eleven_of_eighteen_kernel
