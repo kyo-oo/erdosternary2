@@ -139,12 +139,12 @@ theorem physical_ternaryOnes_affine_fixedpoint (m : Nat) :
       have htotal := hpoly.trans hfixed
       have hmul := htotal.mul_left' 3
       have hadd := hmul.add_left 1
-      change (1+peel1 (affineOrbit (ternaryOnes m))*3)%(3*3^m) =
-        (1+ternaryOnes m*3)%(3*3^m) at hadd
+      change (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) =
+        (1+3*ternaryOnes m)%(3*3^m) at hadd
       have haddEq :
           (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) =
             (1+3*ternaryOnes m)%(3*3^m) := by
-        simpa only [Nat.mul_comm] using hadd
+        exact hadd
       calc
         affineOrbit (ternaryOnes (m+1)) % 3^(m+1) =
             (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) := by
