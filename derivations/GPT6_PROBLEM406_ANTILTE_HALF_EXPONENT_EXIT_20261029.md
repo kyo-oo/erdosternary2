@@ -74,7 +74,7 @@ with physical digit witness at row `m+9`.
   finite experiment only.
 - Formal Lean attempt: `GSTProblem406HalfExponentEscape.lean`.
 - Strict CI: `.github/workflows/gpt6_406_half_exponent_lte.yml`.
-  Check CI success and `#print axioms` before promoting to kernel-verified.
+  Strict Lean CI **PASSED** for the original CommonTwo infinite family, with no custom axiom, no sorry, and no native_decide trust axiom: https://github.com/kyo-oo/erdosternary2/actions/runs/40890135779.
 
 ### Pointwise universal hGate boundary
 
@@ -86,3 +86,36 @@ remaining question is whether every eventual-zero natural exponent
 trit path beyond {0,1,2,3,4,7} must force some shared 2.
 No axiom, informal density, or coefficient stability for this family
 can be silently promoted to the full gate.
+
+## Extension toward arbitrary upper exponent multipliers
+
+For `m≥8`, every exponent of the form `K=H_m+u·3^m`
+retains the lower m affine digits `111...1` (neighbor `222...2`).
+Write `c_m=(4^(3^m)-1)/3^(m+1)`. The exact factorization
+`4^(3^m)=2^(2·3^m)=(2^(3^m))²` and the anti-LTE identity give
+```text
+c_m = (2^(3^m)-1)*d_m,
+4^H_m*c_m = d_m +3^(m+1)*d_m²*(4^H_m-1).
+```
+This second equation is an exact *nonlinear* source-specific
+factorization, rather than an assumed finite-state classifier.
+
+In `3^9` arithmetic, since m≥8:
+```text
+physical post-prefix A_(H_m+u·3^m) ≡ 14049+8416u (mod19683),
+corresponding next affine quotient ≡4*(14049+8416u)+1 (mod19683).
+```
+Independent exact audit of **all** 19683 multiplier residues (not a
+sample) counts 15523 residues with a same-row two in those nine
+post-prefix positions, 4160 without one in that *finite window*.
+This does not exclude the latter 4160 at larger positions.
+
+Reproduction script: `scripts/gst_406_half_exponent_lte_audit.py`.
+It separately calculates original physical powers for
+m∈{8,9,10,11,12,16,25,50,100} and
+u∈{0,1,2,3,4,13,49,243,19682}, checking the exact
+quotient residues. Local exact-integer execution PASS.
+
+The nine-trit scaled-multiplier statement above is currently a
+**mathematical derivation + exhaustive finite residue classification**;
+the standalone Lean proof formally certifies the u=0 all-m family.
