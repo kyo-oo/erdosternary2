@@ -114,9 +114,8 @@ theorem physical_allones_first_m_plus_two_source_not_two
   by_cases hlow : j < m
   · rw [ternaryOnes_digit_one m j hlow]
     decide
-  · have hpow : 3^m ≤ 3^j := by
-      gcongr
-      omega
+  · have hpow : 3^m ≤ 3^j :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
     have hlt : ternaryOnes m < 3^j :=
       lt_of_lt_of_le (ternaryOnes_lt_pow m) hpow
     unfold digit3
