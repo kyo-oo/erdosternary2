@@ -32,6 +32,8 @@ roots = [
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
+  "GSTProblem406BinaryOriginExponentScale",
+  "GSTProblem406BinaryOriginBadSurvivor",
   "GSTFourPowerThirdWave",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
