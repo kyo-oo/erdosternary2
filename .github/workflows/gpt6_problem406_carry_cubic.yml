@@ -22,6 +22,7 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
+          mkdir -p .lake/build/lib/lean
           lake env lean -o .lake/build/lib/lean/GSTProblem406CarryEntropyBound.olean GSTProblem406CarryEntropyBound.lean
       - name: Strict Lean exact cubic and entropy lower bound audit
         shell: bash
