@@ -34,7 +34,7 @@ theorem peel1_add_delta (s delta : Nat) :
 
 /-- The exact nonlinear gain is always congruent to one modulo 3. -/
 theorem peelGain_mod_three (s delta : Nat) :
-    peelGain s delta%3=1 := by
+    peelGain s delta % 3 = 1 := by
   simp [peelGain,Nat.add_mod,Nat.mul_mod]
 
 private theorem scales_for_sharp_step (m : Nat) (hm : 2<=m) :
@@ -106,7 +106,7 @@ theorem exact_unit_residual (t : Nat) :
       have hshape :
           affineOrbit (ternaryOnes (m+1)) =
           ternaryOnes (m+1)+3^((m+1)+2)*d' :=
-        sharp_peel_step m d (by dsimp [m]; omega) hdshape
+        sharp_peel_step m d (by dsimp [m]) hdshape
       have hU : (3^(m-1))%3=0 := by
         have e : m-1=t+1 := by dsimp [m]; omega
         rw [e,pow_succ]
@@ -115,7 +115,6 @@ theorem exact_unit_residual (t : Nat) :
         dsimp [d']
         rw [Nat.add_mod,Nat.mul_mod]
         rw [peelGain_mod_three,hU,hdunit]
-        norm_num
       refine ⟨d',?_,hunit⟩
       simpa [m,Nat.add_assoc,Nat.add_left_comm,Nat.add_comm] using hshape
 
@@ -128,7 +127,7 @@ theorem exact_unit_residual_all_m
         ternaryOnes m+3^(m+2)*d ∧
       d%3=1 := by
   have h : m-2+2=m := by omega
-  convert exact_unit_residual (m-2) using 1 <;> omega
+  simpa only [h] using (exact_unit_residual (m-2))
 
 #print axioms peel1_add_delta
 #print axioms peelGain_mod_three
