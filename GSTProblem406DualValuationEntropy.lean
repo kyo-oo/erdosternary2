@@ -91,8 +91,11 @@ with a fixed 10/7 normalization. -/
 theorem original_affine_even_weighted_bound (m : Nat) :
     7 * 4^m * survivingCount (2*m) 1 ≤ 10*25^m := by
   have h := original_affine_weighted_entropy_bound (2*m)
-  simpa only [show (2:Nat)^(2*m) = 4^m by
-    rw [show (4:Nat)=2^2 by decide, pow_mul]] using h
+  have h2 : (2:Nat)^(2*m) = 4^m := by
+    rw [show (4:Nat)=2^2 by decide, pow_mul]
+  have h5 : (5:Nat)^(2*m) = 25^m := by
+    rw [show (25:Nat)=5^2 by decide, pow_mul]
+  simpa only [h2, h5] using h
 
 #print axioms four_state_weighted_entropy_all_depths
 #print axioms original_affine_weighted_entropy_bound
