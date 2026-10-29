@@ -61,8 +61,7 @@ theorem physical_residual_mod243
   have htotal :
       K+81*((2*K+1)/9) =
         (r+81*((2*r+1)/9))+243*19*(K/243) := by
-    rw [hdecomp,hq]
-    ring
+    omega
   have hrhs :
       (K+81*((2*K+1)/9))%243 =
         (r+81*((2*r+1)/9))%243 := by
