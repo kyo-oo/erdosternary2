@@ -106,11 +106,9 @@ theorem any_positive_source_pair_within_eighteen
   have hmod : R%3 < 3 := Nat.mod_lt R (by decide)
   have hsplit : R%3 + 3*(R/3) = R := Nat.mod_add_div R 3
   have hbelow : R/3 < 9^m := by
-    dsimp [R] at hsmall
     omega
   have htop' : 7*(9^m-1) < 8*(R/3) := by
     have hpowpos : 0 < 9^m := by positivity
-    dsimp [R] at htop
     omega
   have hbound :=
     GSTFourPowerNo22Magnitude.no22_nine_power_bound
