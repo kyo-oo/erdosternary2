@@ -20,7 +20,8 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-          lake build GSTWorldtraceBlockLift GSTWorldtraceCoeffStability
+          lake build GSTWorldtraceBlockLift
+          lake env lean -o .lake/build/lib/lean/GSTWorldtraceCoeffStability.olean GSTWorldtraceCoeffStability.lean
       - name: Check complete quadratic GST derivation and printed axioms
         shell: bash
         run: |
