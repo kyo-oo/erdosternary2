@@ -42,3 +42,39 @@ Validation: exact modular computations for m=8,...,70 found p=m+9,
 and arithmetic residue certificate supplied above independently proves
 the entire unbounded family. Not a full universal hGate proof.
 Lean formalization and separate strict CI remain to be done.
+
+
+## Independent GST-native proof by the exact nonlinear peel1 law
+
+The same all-scale collision admits an especially direct derivation
+using existing GSTFourPowerAffineExponentPeel and the newly transplanted
+GSTProblem406GSTPeelFixedPoint. Define
+  B_m = ternaryOnes(m) + 3^m*14049,
+so B_(m+1)=1+3B_m exactly. The established exact GST polynomial is
+  peel1(x)=x+3*x*(2*x+1)^2,
+and the exact source transformation is
+  affineOrbit(ternaryOnes(m+1))
+    =1+3*peel1(affineOrbit(ternaryOnes(m))).
+
+Crucially
+  2B_m+1=3^m*28099,
+so peel1(B_m)-B_m is divisible by 3^(2m+1).
+For m>=8, 2m+1>=m+9, hence
+  peel1(B_m)==B_m (mod 3^(m+9)).
+If affineOrbit(ternaryOnes m)==B_m mod3^(m+9), multiplication of
+the congruence by 3 plus 1 and GST peel substitution gives
+  affineOrbit(ternaryOnes(m+1))
+    == 1+3B_m = B_(m+1) (mod3^(m+10)).
+The base m=8 is a finite exact certificate:
+  ternaryOnes 8 = 3280;
+  3^17=129140163;
+  B_8=92178769;
+  4^3280 mod3^18 = 276536308 = 3*B_8+1.
+Thus for ALL m>=8 the true affineOrbit source has the
+full nine-trit core residue B_m, proving the same common row m+9.
+
+Unlike a generic signed-flux or infinite controller argument, this
+proof retains the exact physical source and uses GST peel dynamics
+to generate its stable collision directly. Its implementation is
+GSTProblem406AllOnesFirstCollision.lean and is to be promoted to
+verified status only on a successful strict isolated CI receipt.
