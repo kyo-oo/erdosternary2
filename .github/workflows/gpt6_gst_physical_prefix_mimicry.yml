@@ -2,7 +2,7 @@ name: GST original physical pair prefix mimicry
 on:
   push:
     branches: [gpt6/problem406-cubic-universal-research-20261029]
-    paths: [GSTFourPowerAffinePrefixPhysicalMimicry.lean, GSTFourPowerAffineOntologicalCompleteness.lean, .github/workflows/gpt6_gst_physical_prefix_mimicry.yml]
+    paths: [GSTFourPowerAffinePrefixIsometry.lean, GSTFourPowerAffinePrefixPhysicalMimicry.lean, GSTFourPowerAffineOntologicalCompleteness.lean, .github/workflows/gpt6_gst_physical_prefix_mimicry.yml]
   workflow_dispatch:
 permissions:
   contents: read
