@@ -114,3 +114,42 @@ unconditional type.
 This work deliberately distinguishes (a) exact mathematics,
 (b) kernel-verified Lean, (c) finite Wolfram checks,
 (d) failed proof attempts, and (e) the still open universal theorem.
+
+
+## Exact two-parameter coefficient classification and natural survivor residues
+
+For every L>=5 and arbitrary natural multiplier u,
+  floor(4^(4+u*3^L)/3^(L+1)) mod 27 = 19*u mod 27.
+The proof is the exact GST Worldtrace whole-block kernel theorem,
+the pure-power seed condition 256<3^(L+1), and the
+uniform c_L mod27 =16 coefficient stabilization law.
+
+The 18 three-free multiplier residues modulo 27 split exactly:
+- first three postcut trits INCLUDE TWO for
+  r∈{1,2,4,5,7,8,11,14,16,17,20,23,25,26};
+- first three postcut trits are CLEAN for
+  r∈{10,13,19,22}.
+
+This is a *modulo-27 finite algebraic classification applied to all
+unbounded u and all L>=5*, NOT a bounded exponent scan.
+It covers 14 of the 18 three-free residue classes uniformly.
+The four survivors may still have 2s later, and the universal conjecture
+requires their escape too.
+
+The first-hit statements are stronger:
+- u≡2 mod3 → first 2 at L+1;
+- u≡1 mod27 → first 2 at L+3.
+A proof of u≡1 mod27 transports the u=1 trace using the period
+3^(L+3): difference of exponents is (u-1)*3^L,
+which is divisible by 3^(L+3).
+
+Wolfram verified the 27-class table symbolically and the quotient
+for 600 independent exact (L,u) pairs. The 2-parameter Lean module is
+GSTOmegaThreeTritMultiplierLaw.lean; await its dedicated CI for
+kernel-proof evidence. The single-parameter first-hit source theorem
+GSTOmegaExactDelayedEscape.lean is now kernel green in run #40791677601.
+The canonical perfect-power Omega boundary iff is kernel green in
+run #40791456858. The exact Ω terminal normal form is kernel green in
+run #40790148990, and arbitrary delay is kernel green in run #40790757888.
+
+The strict unconditional Erdős theorem has not been established.
