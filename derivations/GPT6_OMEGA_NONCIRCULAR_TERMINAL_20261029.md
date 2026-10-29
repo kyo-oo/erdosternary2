@@ -200,3 +200,28 @@ unproved hGate argument.
 
 **Primary original conjecture status after this research phase:
 OPEN / not proven by these source and kernel receipts.**
+
+
+## Final global congruence certificate (newly kernel-green)
+
+Module GSTOmegaResidueClassExit.lean, dedicated CI run #40792866139,
+completed successfully with no sorryAx. It kernel-proves, for every
+L>=5, every unbounded natural multiplier u with u mod3 !=0, and
+u mod27 not in {10,13,19,22}, that there is a digit two in
+4^(4+u*3^L) between positions L+1 and L+3 inclusive.
+
+The proof has three exact pieces:
+1. the universally quantified GST quotient 19u (mod27) obtained in
+   GSTOmegaThreeTritMultiplierLaw.lean, green #40792308751;
+2. a kernel-checked digit-window bridge from the quotient to three
+   consecutive actual ternary digits of the full power;
+3. 27-state Fin computation in Lean deciding exactly which of the 18
+   three-free source residues generate a 2 in those three digits.
+
+Every multiplier is unbounded: Fin 27 describes a congruence class
+and is NOT a finite upper bound on u.
+
+The new source-specific global facts and all original Ω-equivalences
+are independent of the still-open universal residual Ω termination
+proof obligation. They cannot be repackaged as a strict comparator
+pass for the entire Erdős question.
