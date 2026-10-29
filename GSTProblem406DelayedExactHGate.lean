@@ -35,13 +35,22 @@ theorem neighbor_fires_first_cut
     (GSTProblem406HGateCoreClass.two_wave_any_width_block_exact
       L u 1 hL (by decide) (by omega)).2
   have hmod : (u*GSTCanonicalTailLTE.lteCoeff L*1024)%3=2 := by
+    have h1 :
+        (u*GSTCanonicalTailLTE.lteCoeff L*1024)%3 =
+        (((u*GSTCanonicalTailLTE.lteCoeff L)%3)*(1024%3))%3 :=
+      Nat.mul_mod _ _ _
+    have h2 :
+        (u*GSTCanonicalTailLTE.lteCoeff L)%3 =
+        ((u%3)*(GSTCanonicalTailLTE.lteCoeff L%3))%3 :=
+      Nat.mul_mod _ _ _
     calc
       (u*GSTCanonicalTailLTE.lteCoeff L*1024)%3 =
-        (((u%3)*(GSTCanonicalTailLTE.lteCoeff L%3))%3*(1024%3))%3 := by
-          rw [Nat.mul_mod, Nat.mul_mod]
+        (((u*GSTCanonicalTailLTE.lteCoeff L)%3)*(1024%3))%3 := h1
+      _ = (((u%3)*(GSTCanonicalTailLTE.lteCoeff L%3))%3*(1024%3))%3 := by
+        rw [h2]
       _ = 2 := by
-          rw [hu, GSTCanonicalTailLTE.lteCoeff_mod3_one]
-          decide
+        rw [hu, GSTCanonicalTailLTE.lteCoeff_mod3_one]
+        norm_num
   change (4^(5+u*3^L)/3^(L+1))%3=2
   simpa only [show (3:Nat)^1=3 by decide] using h.trans hmod
 
@@ -81,7 +90,9 @@ theorem arbitrarily_delayed_first_original_hGate
     first_same_row_two_at_delayed_cut L 2 hL (by decide)
   refine ⟨K,L+1, ?_, ?_, ?_, ?_, ?_⟩
   · dsimp [K]
-    have hp : 1 ≤ 3^L := by positivity
+    have hp : 1 ≤ 3^L := by
+      have hpos : 0 < 3^L := pow_pos (by decide : 0 < (3:Nat)) _
+      omega
     omega
   · dsimp [L]; omega
   · simpa [K] using hfire.1
