@@ -53,9 +53,9 @@ The existing GSTPeelExtraPrecision proved the weaker equality modulo
 3^(m+2); this argument proves the NEXT 3-adic digit differs, uniformly,
 and identifies the exact normalized leading unit.
 
-Lean module: `GSTProblem406SharpPeelResidual.lean`. The precise
-kernel-verification status is the dedicated workflow receipt (do not
-promote this to kernel-proved if any run is red).
+Lean module: `GSTProblem406SharpPeelResidual.lean`. The sharp all-m physical source theorem is **strict Lean kernel PASS**:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40906148097 .
+No custom axioms or `sorryAx`.
 
 ## 2. Stronger ALL-PHYSICAL-EXPONENT theorem (new mathematical route)
 
@@ -203,3 +203,35 @@ and is explicitly NOT a universal proof.
 The proof must separate each fixed natural K from the
 infinite 3-adic survivor set using an exponent-specific
 global argument, not just fixed finite state or valuation.
+
+## 6. Strict Lean bridge for the ENTIRE class K == 4 (mod9)
+
+New `GSTProblem406GlobalSharpBase.lean` is strict kernel **PASS**:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40906257670 .
+
+It proves, for ALL NATURAL K, if `K%9=4`, then
+
+```text
+ affineOrbit K %243 =
+   (K+81*((2*K+1)/9))%243 .
+```
+
+The theorem uses a fully kernel-decided `Fin 243` statement only as a
+complete *exponent residue classifier*, and the previously proved exact
+affine prefix isometry to transport it to arbitrary, unbounded K.
+This explicitly discharges the universal 243-residue-to-all-exponent
+step: it is NOT an enumeration with K<243 as an implicit cap.
+
+The more powerful mathematical valuation identity for every
+K%9=4 is derived above using the exact q-odd factorization
+and stabilized LTE coefficients. Its **full high-m induction** has
+not yet been assembled as an independent Lean theorem, so distinguish:
+1. full all-K modulo243 formula: **Lean green**;
+2. sharp m-family v3=m+2: **Lean green**;
+3. full all-K sharp exact v3 for m>=2: **proved algebraically
+in this derivation; finite exact audit; not yet independently Lean green**;
+4. original hGate forall K>=5,K!=7: **unresolved**.
+
+Existing strict Lean work on arbitrary finite prefix completeness,
+two-trit physical cylinder density, and fixed-valuation delayed source
+survival is not used as an assumption of the global K%9=4 formula.
