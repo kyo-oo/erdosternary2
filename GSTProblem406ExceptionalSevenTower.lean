@@ -90,7 +90,7 @@ private theorem physical_digit_from_one_mod
       (u*42217*4^M)%59049 =
           ((u%59049)*42217*4^M)%59049 := by
             simp [Nat.mul_mod]
-      _ = (42217*4^M)%59049 := by rw [hu]; simp
+      _ = (42217*4^M)%59049 := by rw [hu]
   have hread :
       digit3 (4^(M+u*3^L)/3^(L+1)) 9 =
         digit3 (42217*4^M) 9 :=
@@ -155,7 +155,6 @@ private theorem physical_first_cut_two
           simp [Nat.mul_mod]
       _ = 2 := by
         rw [hu, GSTCanonicalTailLTE.lteCoeff_mod3_one, hM]
-        decide
   change (4^(M+u*3^L)/3^(L+1))%3=2
   exact hq.trans hval
 
