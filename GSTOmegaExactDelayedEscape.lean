@@ -65,7 +65,7 @@ theorem delayed_seed_quotient_mod27
   calc
     (4^(4+3^L)/3^(L+1))%27 =
         (lteCoeff L * 256)%27 := by
-          simpa only [show (4:Nat)^4=256 by decide, Nat.mul_comm] using h
+          simpa only [show (3:Nat)^3=27 by decide] using h
     _ = 19 := by
       rw [Nat.mul_mod, hc] <;> decide
 
