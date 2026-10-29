@@ -131,7 +131,61 @@ theorem original_thirdWave_exceptional_seven_tower
   exact (GSTFourPowerThirdWave.thirdWave_iff_commonTwo _).2
     (commonTwo_exceptional_seven_tower L u hL hu)
 
+/-- An entire additional third of the exceptional-seven multiplier
+directions fires already at the FIRST postcut row. For u = 2 mod 3
+the frozen LTE coefficient and both perfect-power source factors are 1
+modulo 3, giving literal digit 2 in both physical sources. -/
+private theorem physical_first_cut_two
+    (M u L : Nat) (hL : 10 ≤ L)
+    (hsmall : 4^M < 3^(L+1))
+    (hu : u%3=2) (hM : 4^M%3=1) :
+    digit3 (4^(M+u*3^L)) (L+1)=2 := by
+  have h := GSTWorldtraceBlockLift.pow4_whole_block_lift
+    M u L 1 (by decide) (by omega)
+  have hz : 4^M / 3^(L+1)=0 := Nat.div_eq_of_lt hsmall
+  have hq :
+      (4^(M+u*3^L)/3^(L+1))%3 =
+      (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%3 := by
+    simpa only [show (3:Nat)^1=3 by decide,
+      hz, Nat.zero_add] using h
+  have hval : (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%3=2 := by
+    calc
+      (u*GSTCanonicalTailLTE.lteCoeff L*4^M)%3 =
+        ((u%3)*(GSTCanonicalTailLTE.lteCoeff L%3)*(4^M%3))%3 := by
+          simp [Nat.mul_mod]
+      _ = 2 := by
+        rw [hu, GSTCanonicalTailLTE.lteCoeff_mod3_one, hM]
+        decide
+  change (4^(M+u*3^L)/3^(L+1))%3=2
+  exact hq.trans hval
+
+/-- Unconditional infinite first-row family beside the rare tenth-row
+class. Every L >= 10 and every u = 2 mod 3 is covered, without hGate. -/
+theorem commonTwo_exceptional_seven_first_cut
+    (L u : Nat) (hL : 10 ≤ L) (hu : u%3=2) :
+    CommonTwo (7+u*3^L) := by
+  have hpow : (3:Nat)^11 ≤ 3^(L+1) :=
+    Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat)) (by omega)
+  have hs : (4:Nat)^7 < 3^(L+1) :=
+    lt_of_lt_of_le (by decide : (4:Nat)^7 < 3^11) hpow
+  have hn : (4:Nat)^8 < 3^(L+1) :=
+    lt_of_lt_of_le (by decide : (4:Nat)^8 < 3^11) hpow
+  refine ⟨L+1, by omega, ?_, ?_⟩
+  · exact physical_first_cut_two 7 u L hL hs hu (by norm_num)
+  · have he : (7+u*3^L)+1=8+u*3^L := by omega
+    rw [he]
+    exact physical_first_cut_two 8 u L hL hn hu (by norm_num)
+
+/-- The original production third wave, on the full u=2 mod3 cone. -/
+theorem original_thirdWave_exceptional_seven_first_cut
+    (L u : Nat) (hL : 10 ≤ L) (hu : u%3=2) :
+    GSTFourPowerThirdWave.thirdWave (7+u*3^L) := by
+  exact (GSTFourPowerThirdWave.thirdWave_iff_commonTwo _).2
+    (commonTwo_exceptional_seven_first_cut L u hL hu)
+
 #print axioms coeff_mod59049
+#print axioms commonTwo_exceptional_seven_first_cut
+#print axioms original_thirdWave_exceptional_seven_first_cut
 #print axioms commonTwo_exceptional_seven_tower
 #print axioms original_thirdWave_exceptional_seven_tower
 
