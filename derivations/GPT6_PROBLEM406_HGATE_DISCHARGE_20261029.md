@@ -56,8 +56,7 @@ same-row residue claim with zero violations.
 
 `GSTProblem406HGateCoreIntegration.lean` transplants the new
 CommonTwo theorem into the exact type `GSTFourPowerThirdWave.thirdWave`
-and original `CreationCertificate`. Its dedicated CI should be
-read before promoting that integration to kernel-green status.
+and original `CreationCertificate`. Its dedicated isolated CI #40841697010 **PASSED** without sorryAx. The exact original gate-body and CreationCertificate are therefore kernel-proved for the 11 unbounded classes, but *not for all K*.
 
 ## Critical no-go / missing implication: hGate for every K
 
