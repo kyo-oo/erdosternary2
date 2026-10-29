@@ -42,7 +42,6 @@ theorem two_twos_force_pair (p r : Nat) (hr : r < 3^p) :
   have hsourceQ : X / 3^p = 8 := by
     dsimp [X]
     rw [Nat.add_mul_div_left _ _ hN, Nat.div_eq_of_lt hr]
-    norm_num
   have hneighbor : 4*X+1 = (4*r+1)+3^p*32 := by
     dsimp [X]
     ring
@@ -54,15 +53,28 @@ theorem two_twos_force_pair (p r : Nat) (hr : r < 3^p) :
     omega
   have hchoice :
       ((4*r+1)/3^p+32)%3=2 ∨
-      (((4*r+1)/3^p+32)/3)%3=2 := by omega
+      (((4*r+1)/3^p+32)/3)%3=2 := by
+    have hc : (4*r+1)/3^p=0 ∨ (4*r+1)/3^p=1 ∨
+        (4*r+1)/3^p=2 ∨ (4*r+1)/3^p=3 := by omega
+    rcases hc with h0 | h1 | h2 | h3
+    · left
+      rw [h0]
+      norm_num
+    · right
+      rw [h1]
+      norm_num
+    · right
+      rw [h2]
+      norm_num
+    · left
+      rw [h3]
+      norm_num
   have hlow : digit3 X p = 2 := by
     unfold digit3
     rw [hsourceQ]
-    norm_num
   have hhigh : digit3 X (p+1) = 2 := by
     unfold digit3
     rw [Nat.pow_succ, ← Nat.div_div_eq_div_mul, hsourceQ]
-    norm_num
   refine ⟨hlow,hhigh,?_⟩
   rcases hchoice with h | h
   · left
