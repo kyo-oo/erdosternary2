@@ -26,7 +26,7 @@ theorem halfIndex_succ (m : Nat) :
 
 /-- Every low ternary digit of (3^m-1)/2 is exactly one. -/
 theorem halfIndex_digit_one :
-    ∀ m j : Nat, j<m → digit3 (halfIndex m) j=1 := by
+    ∀ (m j : Nat), j < m → digit3 (halfIndex m) j = 1 := by
   intro m
   induction m with
   | zero =>
