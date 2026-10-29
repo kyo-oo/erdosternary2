@@ -24,7 +24,9 @@ theorem pow4_modeq_iff_exponent_modeq (p a b : Nat) :
     intro u v huv hpow
     have hv : v = u + (v-u) := by omega
     have hvpow : 4^v = 4^u * 4^(v-u) := by
-      rw [hv, Nat.pow_add]
+      calc
+        4^v = 4^(u+(v-u)) := congrArg (fun t : Nat => 4^t) hv
+        _ = 4^u * 4^(v-u) := by rw [pow_add]
     have hmul : 4^u * 1 ≡ 4^u * 4^(v-u) [MOD 3^(p+1)] := by
       simpa only [hvpow, Nat.mul_one] using hpow
     have hcop : Nat.Coprime (3^(p+1)) (4^u) := by
@@ -50,7 +52,9 @@ theorem pow4_modeq_iff_exponent_modeq (p a b : Nat) :
     have hmul := hperModeq.mul_left (4^u)
     have hv : v = u + (v-u) := by omega
     have hvpow : 4^v = 4^u * 4^(v-u) := by
-      rw [hv, Nat.pow_add]
+      calc
+        4^v = 4^(u+(v-u)) := congrArg (fun t : Nat => 4^t) hv
+        _ = 4^u * 4^(v-u) := by rw [pow_add]
     simpa only [hvpow, Nat.mul_one] using hmul.symm
   constructor
   · intro h
