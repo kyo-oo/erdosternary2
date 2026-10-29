@@ -1,0 +1,32 @@
+name: GST exact first physical 406 gate for half-exponents
+on:
+  push:
+    branches: [gpt6/problem406-halving-exponent-lte-20261029]
+    paths: [GSTProblem406HalfExponentFirstGate.lean, .github/workflows/gpt6_406_half_first_gate.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile arithmetic recurrence and original physical half-exponents
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerAffineOrbit
+          lake build GSTFourPowerDirectExistence
+          lake env lean -o .lake/build/lib/lean/GSTProblem406HalfExponentEscape.olean GSTProblem406HalfExponentEscape.lean
+      - name: Kernel verify first physical same-row gate at m+9 and no earlier collision
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406HalfExponentFirstGate.lean 2>&1 | tee gst-half-first-gate.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.|gst_four_power_direct_existence_inline' gst-half-first-gate.log
+          echo GST_406_EXACT_FIRST_PHYSICAL_GATE_PASS=1
