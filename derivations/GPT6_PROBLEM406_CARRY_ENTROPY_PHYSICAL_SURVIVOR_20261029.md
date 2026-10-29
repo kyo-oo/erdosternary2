@@ -188,3 +188,40 @@ mathematics at the stated finite-width modular scale; strict
 Lean verification of the wider family is tracked separately
 in the dedicated workflow. Nothing here is extrapolated to
 the remaining 74 classes or to all arbitrary K.
+
+## Explicit arbitrarily delayed physical survivors (not counterexamples)
+
+For every integer m>=3, take the genuine perfect-power exponent
+
+```text
+K_m=(3^m-1)/2 = 1+3+...+3^(m-1).
+```
+
+Then `K_m>=5`, `K_m !=7`, and the FIRST m AFFINE
+coordinate positions, equivalently physical power positions
+1,...,m, contain **no simultaneous digit 2**. This is NOT
+global absence of shared digit two.
+
+**Proof.** The elementary 3-adic lifting identity (LTE for
+`2^(odd)+1`) gives `3^(m+1) | 2^(3^m)+1`.
+This also follows by induction from `x^3+1=(x+1)(x²-x+1)`
+for `x=2^(3^m)≡-1 mod3`. Since
+`2*4^(K_m)=2^(3^m)` and
+`3*(2 A_(K_m)+1)=2*4^(K_m)+1`, we get
+
+```text
+2 A_(K_m)+1 ≡0 mod3^m
+A_(K_m) ≡(3^m-1)/2 mod3^m
+A_(K_m+1)=4 A_(K_m)+1 ≡-1 mod3^m.
+```
+
+The first m trits of the original physical affine source are
+`111...1` while those of the original neighbor are
+`222...2`; no shared 2 can occur on these m rows.
+Thus a fixed-width scan cannot discharge the universal
+statement, even if it uses exclusively physical perfect powers.
+
+This explicit sequence supplies an independent infinite-scale
+obstruction to a bounded-prefix-only argument. It is compatible
+with the target theorem because a collision can occur
+at a larger K-dependent row.
