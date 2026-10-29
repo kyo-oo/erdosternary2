@@ -77,6 +77,7 @@ theorem five_halves_survivor_bound (n : Nat) :
       · change 2^(n+1)*(survivingCount n 1+survivingCount n 2)
             ≤ 5^(n+1)*5
         rw [pow_succ, pow_succ]
+        have hPositive : 0 < 5^n := by positivity
         nlinarith [h1,h2]
 
 /-- Strong exact original physical exponent-prefix survival bound. -/
