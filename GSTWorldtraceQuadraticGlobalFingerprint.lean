@@ -85,14 +85,22 @@ theorem quadratic_fingerprint_both_physical_digits
     simpa only [Nat.mul_comm] using
       (Nat.mod_add_div K (3^L)).symm
   constructor
-  · rw [hsplit]
-    exact quadratic_fingerprint_digit_exact
-      (K%3^L) (K/3^L) L w k hw hband hk
+  · calc
+      digit3 (4^K) (L+1+k) =
+        digit3 (4^(K%3^L+(K/3^L)*3^L)) (L+1+k) := by
+          exact congrArg (fun n : Nat => digit3 (4^n) (L+1+k)) hsplit
+      _ = digit3 (quadraticFingerprint (K%3^L) (K/3^L) L) k :=
+          quadratic_fingerprint_digit_exact
+            (K%3^L) (K/3^L) L w k hw hband hk
   · have hsplit1 :
         K+1=(K%3^L+1)+(K/3^L)*3^L := by omega
-    rw [hsplit1]
-    exact quadratic_fingerprint_digit_exact
-      (K%3^L+1) (K/3^L) L w k hw hband hk
+    calc
+      digit3 (4^(K+1)) (L+1+k) =
+        digit3 (4^((K%3^L+1)+(K/3^L)*3^L)) (L+1+k) := by
+          exact congrArg (fun n : Nat => digit3 (4^n) (L+1+k)) hsplit1
+      _ = digit3 (quadraticFingerprint (K%3^L+1) (K/3^L) L) k :=
+          quadratic_fingerprint_digit_exact
+            (K%3^L+1) (K/3^L) L w k hw hband hk
 
 /-- An all-exponent axiom-free GST certificate constructor.
 No special residual class, no circular existence hypothesis,
