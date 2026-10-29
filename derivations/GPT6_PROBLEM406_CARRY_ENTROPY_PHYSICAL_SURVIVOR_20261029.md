@@ -131,3 +131,60 @@ small measure or generic 3-adic prefix exclusion.
 
 No custom axiom, custom universal hGate premise, or
 unbounded numerical extrapolation may substitute for this.
+
+## Density-one corollary for actual natural exponents
+
+By the finite exponent-prefix isometry (strict CI PASS
+https://github.com/kyo-oo/erdosternary2/actions/runs/40860951943),
+the exact noncollision automaton count at depth 2m is also the
+number of exponent residue classes K<3^(2m) whose physical pair
+4^K and 4^(K+1) has not yet met a common-two position among
+rows 1,...,2m. Therefore
+
+```text
+#{ K<3^(2m) : not CommonTwo(K) } ≤ 7^m.
+```
+
+Indeed global no-CommonTwo implies finite prefix survival.
+Consequently any infinite set of exceptional natural exponents
+has natural density zero and counting function
+`O(N^(log(7)/log(9)))` with exponent approximately 0.8856.
+
+This is a rigorous number-theoretic density-one result by
+finite-state counting and physical finite-prefix isometry.
+The standalone Lean carry bound and independent finite physical
+audit passed strict CI:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40860395471
+The specific automaton-to-physical cardinality transfer is
+explained here mathematically but is not yet separately written
+as a kernel-certified finite-set-counting declaration.
+
+## Second route: new all-scale physical hGate families
+
+A separate exact derivation in
+`GSTProblem406UnboundedPureThreePowerFamily.lean` uses
+`c_L=(4^(3^L)-1)/3^(L+1)`.
+The exact recurrence
+
+```text
+c_(L+1) = c_L + 3^(L+1) c_L^2 + 3^(2L+1) c_L^3
+```
+
+and `c_4 mod243=178` prove `c_L mod243=178`
+for EVERY L>=4. For K=u*3^L and ANY natural u, the source
+and neighbor quotient's first five trits are those of
+`178*u` and `712*u`, respectively. Thus any u with a
+common digit 2 among these two words in positions j<5 gives
+an exact original CommonTwo certificate at row `L+1+j`.
+
+In particular ALL u with u mod243=1 satisfy the fifth-trit
+condition, proving `CommonTwo(u*3^L)` for every L>=4,
+including the infinite family K=3^L.
+
+Wolfram's independent exact finite residue classification shows
+**169 of the 243 possible u residues mod243** have some common
+2 among the first five quotient trits. This is unconditional
+mathematics at the stated finite-width modular scale; strict
+Lean verification of the wider family is tracked separately
+in the dedicated workflow. Nothing here is extrapolated to
+the remaining 74 classes or to all arbitrary K.
