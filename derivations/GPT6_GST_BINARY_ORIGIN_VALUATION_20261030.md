@@ -113,8 +113,10 @@ and arbitrary finite bad ternary prefixes have real perfect-power mimics.
 The binary endpoint theorem adds a *different*, physical cross-radix invariant:
 high binary valuation alongside the *full ternary terminal word*.
 For L=2m, the proposed barrier says no positive number
-`R=q*8^m < 9^m`, `R==1 (mod3)`, survives all GST pair-collision
-rows, once m>=5. Its multiplier satisfies `q < (9/8)^m`.
+`R=2*q*8^m < 9^m`, `R==1 (mod3)`, survives all GST pair-collision
+rows, once m>=5. The leading factor 2 is required because the binary
+valuation threshold is `3m+1`. Its multiplier satisfies
+`2q < (9/8)^m`.
 
 A rigorous length-uniform theorem must now link
 2-adic divisibility to the complete GST four-state carry recurrence
