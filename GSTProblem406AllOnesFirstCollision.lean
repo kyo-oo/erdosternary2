@@ -86,7 +86,13 @@ private theorem physical_affine_stableCore_mod
         have hp : 3^((8+t)+10) = 3*3^((8+t)+9) := by
           rw [show (8+t)+10=((8+t)+9)+1 by omega, pow_succ]
           ring
-        simpa only [hp] using hadd
+        rw [hp]
+        change
+          (1+3*peel1 (affineOrbit (ternaryOnes (8+t)))) %
+              (3*3^((8+t)+9)) =
+          (1+3*stableCore (8+t)) % (3*3^((8+t)+9))
+          at hadd
+        exact hadd
       change
         affineOrbit (ternaryOnes ((8+t)+1)) % 3^((8+t)+10) =
           stableCore ((8+t)+1) % 3^((8+t)+10)
@@ -140,9 +146,7 @@ theorem commonTwo_allones_at_m_plus_nine
   have hneighborMod :
       (4*affineOrbit (ternaryOnes m)+1)%3^(m+9) =
         (4*stableCore m+1)%3^(m+9) := by
-    have heq : affineOrbit (ternaryOnes m) ≡
-        stableCore m [MOD 3^(m+9)] := hmod
-    simpa [Nat.add_comm] using ((heq.mul_left' 4).add_left 1)
+    simp [Nat.add_mod, Nat.mul_mod, hmod]
   have hn :
       digit3 (affineOrbit (ternaryOnes m+1)) (m+8) = 2 := by
     rw [affineOrbit_succ]
