@@ -132,7 +132,7 @@ theorem canonical_survivor_has_distinct_bounded_children
     intro heq
     have hnonzero : 0 < 3^p := by positivity
     have hmul : a*3^p=b*3^p := by omega
-    have : a=b := (Nat.mul_right_cancel hmul)
+    have : a=b := (Nat.mul_right_cancel hnonzero hmul)
     exact hab this
   exact ⟨A,B,hA,hB,hdiff,hsa,hsb⟩
 
