@@ -67,7 +67,7 @@ many good natural exponents, including arbitrarily large ones.
 
 **Formalization:** `GSTProblem406PhysicalCylinderExtension.lean`,
 strict workflow `.github/workflows/gpt6_problem406_physical_cylinder_extension.yml`.
-A green run is required before calling this *Lean-verified*.
+Strict Lean kernel verification **PASSED**, including `#print axioms` with no custom-axiom/sorry dependency: https://github.com/kyo-oo/erdosternary2/actions/runs/40864724061 .
 
 ## Why this is not the universal proof
 
@@ -86,3 +86,20 @@ open-density side of the topology, not the pointwise elimination.
 
 Historical comparator PASS still has its previously recorded custom
 axiom dependency; this branch does not use or reinstate that axiom.
+
+## Independent finite original-power digit census (supporting evidence only)
+
+Script: `scripts/gst_406_exact_million_exponent_audit.py`.
+An exact Python modular-integer run checked every exponent
+`0 <= K < 1,000,000` for an original source-neighbor common 2
+among rows `0..119` (no random sampling). Results:
+
+- Every K in `[5, 1_000_000)` except K=7 had a common 2 within those rows.
+- The only exponents with no such digit in 120 positions were
+  `0, 1, 2, 3, 4, 7`; for these six small exponents, an additional
+  all-digit exact integer check finds no common 2.
+- Greatest *first* hit was row 81 at K=181406, independently checked
+  using Wolfram `PowerMod` (both digits 2 at row 81 and none earlier).
+
+This is evidence only for the finite exponent range and is **not** a
+bound uniform in all K. The user's universal target remains separate.
