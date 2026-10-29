@@ -1,7 +1,6 @@
 import GSTFourPowerAffineExponentPeel
 import GSTFourPowerAffineOrbit
 import GSTFourPowerDirectResidue
-import GSTProblem406BinarySurvivorExtensions
 
 set_option maxRecDepth 1000000
 set_option maxHeartbeats 20000000
@@ -31,7 +30,6 @@ namespace GSTProblem406GSTPeelFixedPoint
 open GSTFourPowerDirectResidue
 open GSTFourPowerAffineOrbit
 open GSTFourPowerAffineExponentPeel
-open GSTProblem406BinarySurvivorExtensions
 
 /-- Natural m-digit ternary all-one exponent, defined without subtraction. -/
 def ternaryOnes : Nat → Nat
@@ -166,7 +164,9 @@ theorem physical_ternaryOnes_first_m_digits_are_one
 /-- These increasingly long ORIGINAL perfect-power pairs have no
 common-two row among the first m nontrivial physical trits. -/
 theorem physical_ternaryOnes_survives_m_rows (m : Nat) :
-    SurvivesRows (ternaryOnes m) m := by
+    ∀ j : Nat, 1 ≤ j → j ≤ m →
+      ¬ (digit3 (4^(ternaryOnes m)) j = 2 ∧
+         digit3 (4^((ternaryOnes m)+1)) j = 2) := by
   intro j hj1 hjm hhit
   have hj : j-1<m := by omega
   have heq := physical_ternaryOnes_first_m_digits_are_one m (j-1) hj
