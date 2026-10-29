@@ -144,3 +144,62 @@ Lean using the 3-adic `c_m` recurrence/alternating factor, then
 derive a **source-neighbor common-two forcing** condition from
 the normalized residual and 4-state carry law. Do not
 assume this implication: it must be proved or falsified.
+
+## 4. Decisive adversarial test: no finite offset even at FIXED valuation 2
+
+Do not extrapolate the sharp residual
+`v3(A_K-K)=v3(2K+1)+2` into a collision before
+`v3(2K+1)+C` for any absolute constant C.
+
+The new strict Lean theorem in
+`GSTProblem406FixedValuationArbitraryDelay.lean` proves
+
+```text
+ forall B : Nat, exists K : Nat, K>=5
+    and (2*K+1)%27=9
+    and forall j<B, digit3 (4^K) (j+1) != 2.
+```
+
+Dedicated rigorous kernel receipt: **PASS**
+https://github.com/kyo-oo/erdosternary2/actions/runs/40904848592.
+No custom axiom, no `sorryAx`.
+
+Proof is constructive via the true physical-affine prefix-isometry:
+for p=B+3 obtain k0<3^p with
+`A_(k0) == 4 (mod 3^p)` from finite-prefix completeness.
+Take `K=k0+3^p`. The original source still satisfies
+`A_K == 4 (mod3^p)`, so all its first p ternary trits are
+the 1,1,0,0,... word of the actual integer 4. It has NO 2
+among those positions, so no original source-neighbor CommonTwo.
+But `A_K == 4 == A_4 (mod27)` because `A_4=85`;
+the kernel-proved exact physical exponent isometry implies
+`K==4 (mod27)`. Hence `(2K+1)%27=9`, fixing
+`v3(2K+1)=2` while B was arbitrary.
+
+This does **NOT** produce a globally BAD natural exponent:
+the witness K depends on B. It proves the sharp-residual
+valuation cannot by itself supply an effective uniform
+gate-location bound, even at fixed m.
+
+Sample exact physical witnesses, generated using modular powers:
+for B around 6, K=409 (K%27=4), and for B around 8,
+K=3568 (K%27=4). The Lean theorem is fully unbounded in B,
+not a sampling extrapolation.
+
+## 5. Independent uniform sharp-residual finite audit
+
+`scripts/gst_406_sharp_residual_uniform_audit.py`
+tests **every** integer K congruent 4 mod9 in 4<=K<250000:
+27,778 exponents. For each it independently computes
+the true original source quotient from
+`pow(4,K,3^(m+4))`, with m=v3(2K+1), and verifies
+the entire normalized unit congruence at modulus
+3^(m+3). Local exact integer execution returned zero
+failures. This supports the symbolic mathematical derivation
+and is explicitly NOT a universal proof.
+
+**Exact original open implication remains:**
+`forall K>=5, K!=7 -> CommonTwo K`.
+The proof must separate each fixed natural K from the
+infinite 3-adic survivor set using an exponent-specific
+global argument, not just fixed finite state or valuation.
