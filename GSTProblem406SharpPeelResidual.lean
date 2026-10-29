@@ -106,15 +106,14 @@ theorem exact_unit_residual (t : Nat) :
       have hshape :
           affineOrbit (ternaryOnes (m+1)) =
           ternaryOnes (m+1)+3^((m+1)+2)*d' :=
-        sharp_peel_step m d (by dsimp [m]) hdshape
+        sharp_peel_step m d (by omega) hdshape
       have hU : (3^(m-1))%3=0 := by
-        have e : m-1=t+1 := by dsimp [m]; omega
+        have e : m-1=t+1 := by omega
         rw [e,pow_succ]
         simp
       have hunit : d'%3=1 := by
         dsimp [d']
-        rw [Nat.add_mod,Nat.mul_mod]
-        rw [peelGain_mod_three,hU,hdunit]
+        simp [Nat.add_mod,Nat.mul_mod,peelGain_mod_three,hU,hdunit]
       refine ⟨d',?_,hunit⟩
       simpa [m,Nat.add_assoc,Nat.add_left_comm,Nat.add_comm] using hshape
 
