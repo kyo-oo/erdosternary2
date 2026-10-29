@@ -35,6 +35,7 @@ theorem canonical_source_left_boundary_zero
     (s n : Nat) (hs : 1 ≤ s) :
     (initial s n).childCarry = 0 := by
   have h := GSTFinalPrefixOneStep6Infinite.infinite_base_carry_zero s n hs
+  change (graph (residualEnergy s 1 n) 0 (s+2)).seven.carry = 0 at h
   simpa [initial, source, width, baseRow, graphCoupledState] using h
 
 theorem canonical_source_invariant
