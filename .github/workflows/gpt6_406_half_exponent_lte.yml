@@ -1,0 +1,30 @@
+name: GST exact half-exponent anti-LTE physical CommonTwo
+on:
+  push:
+    branches: [gpt6/problem406-halving-exponent-lte-20261029]
+    paths: [GSTProblem406HalfExponentEscape.lean, .github/workflows/gpt6_406_half_exponent_lte.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build original physical affine orbit
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerAffineOrbit
+      - name: Kernel certify original half-exponent physical gate and recurrence
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406HalfExponentEscape.lean 2>&1 | tee gst-half-lte-406.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.|gst_four_power_direct_existence_inline' gst-half-lte-406.log
+          echo GST_406_HALF_EXPONENT_ALL_M_COMMON_TWO_PASS=1
