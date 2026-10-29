@@ -168,7 +168,9 @@ CommonTwo K iff there exists p where
   1<=p<floor((4K-1)/3)
   and digit3(4^K,p)=digit3(4^(K+1),p)=2.
 ```
-Its Lean certificate is checked separately. This improves the old
+Strict dedicated Lean kernel CI PASS:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40972917391 .
+This improves the old
 physical finite-search horizon from `2(K+1)+1` to `floor((4K-1)/3)`;
 it does NOT establish the witness's existence.
 
@@ -226,3 +228,30 @@ this all-L scope has been verified.
 `gst_four_power_third_wave_gate` with no hGate argument or custom
 axiom, followed by a binder-free, kernel-checked exact comparator.
 This checkpoint does not claim that outcome.
+
+## 10. Exact original small exponent base packet, strict kernel PASS
+
+The final small-K module `GSTProblem406BinaryOriginSmallCases.lean`
+proves the literal original `CommonTwo K` for EVERY
+`5<=K<=12, K!=7`, by the actual same-row physical witnesses:
+
+```text
+K   actual shared-two row p
+5           2
+6           2
+7       EXCLUDED
+8           4
+9           7
+10         10
+11         10
+12         10
+```
+
+These arithmetic witnesses were independently checked with Wolfram.
+The strict Lean kernel workflow **PASS**:
+https://github.com/kyo-oo/erdosternary2/actions/runs/40973285557 .
+
+Thus **every actual physical small-K base case has been discharged**;
+for K>=13 the exact all-depth unproved inference remains the
+source-specific exclusion of a high-binary-order, finite-word BAD trace.
+This file is an auditable checkpoint, NOT an unconditional solution.
