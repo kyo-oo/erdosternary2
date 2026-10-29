@@ -85,6 +85,29 @@ theorem original_creation_master_on_fifth_trit_new_classes
 #print axioms original_hGate_on_fifth_trit_new_classes
 #print axioms original_creation_master_on_fifth_trit_new_classes
 
+
+
+/-- Exact original HGate body on twenty-two further sixth-trit GST
+multiplier classes, all L>=6 and unbounded u. -/
+theorem original_hGate_on_sixth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : SixthNewClass (u%729)) :
+    GSTFourPowerThirdWave.thirdWave (4+u*3^L) := by
+  apply (GSTFourPowerThirdWave.thirdWave_iff_commonTwo _).2
+  exact commonTwo_new_sixth_trit_classes L u hL hu
+
+/-- The established original creation certificate on the new sixth-trit
+classes, with no universal hGate argument and no symbolic placeholder. -/
+theorem original_creation_master_on_sixth_trit_new_classes
+    (L u : Nat) (hL : 6 ≤ L)
+    (hu : SixthNewClass (u%729)) :
+    GSTFourPowerOntologicalAdapter.CreationCertificate (4^(4+u*3^L)) := by
+  apply GSTFourPowerDirectCreationMaster.commonTwo_to_creation_certificate
+  exact commonTwo_new_sixth_trit_classes L u hL hu
+
+#print axioms original_hGate_on_sixth_trit_new_classes
+#print axioms original_creation_master_on_sixth_trit_new_classes
+
 #print axioms original_hGate_on_unbounded_core
 #print axioms original_creation_master_on_unbounded_core
 
