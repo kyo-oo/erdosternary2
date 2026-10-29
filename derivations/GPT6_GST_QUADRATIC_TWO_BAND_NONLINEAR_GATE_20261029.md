@@ -116,10 +116,14 @@ The new file also states the original `thirdWave` and
 `CreationCertificate` endpoints for this family, not a new
 definition of an easier target.
 
-**Lean status:** the separate ninth-trit source+integration workflow
-[40853568897](https://github.com/kyo-oo/erdosternary2/actions/runs/40853568897)
-is the authoritative test for this NEW module;
-do not call its proof kernel-verified until that run passes.
+**Lean proof status:** nonlinear ninth-trit original physical source, neighbor,
+unbounded residue family, and direct original thirdWave / CreationCertificate
+integration are all **KERNEL-VERIFIED** in strict targeted run
+[40854333189](https://github.com/kyo-oo/erdosternary2/actions/runs/40854333189)
+at commit `6d382e5013e0fab297101a89634aed7a7c5755af`.
+The initial failed compilation (40853568897) reflected Lean simplifier and
+witness-rewrite mistakes, fixed by exact polynomial modulus factorization,
+a controlled exponent equality and explicit row-15 witness.
 
 ## 4. Unconditional boundary still outstanding
 
