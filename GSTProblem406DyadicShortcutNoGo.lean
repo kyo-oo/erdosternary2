@@ -27,7 +27,7 @@ and divisible by a high power of 4; it is not a pure power. -/
 theorem has_high_dyadic_source : 4^12 ∣ nonPureSource ∧
     nonPureSource % 3 = 1 := by
   constructor
-  · exact ⟨100, by simp only [nonPureSource]; ring⟩
+  · exact ⟨100, rfl⟩
   · decide
 
 /-- A real same-row two exists for (R,4R) at row 11. -/
@@ -48,14 +48,13 @@ theorem synthetic_parent_has_no_high_gate
            digit3 (256*nonPureSource) q.val = 2) := by decide
     exact hfinite ⟨p, hlow⟩
   · have hsize : 64*nonPureSource < 3^24 := by decide
-    have hpow : 3^24 ≤ 3^p := by
-      gcongr
-      omega
+    have hpn : 24 ≤ p := by omega
+    have hpow : 3^24 ≤ 3^p :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) hpn
     have hlt : 64*nonPureSource < 3^p := lt_of_lt_of_le hsize hpow
     have hz : digit3 (64*nonPureSource) p = 0 := by
       unfold digit3
       rw [Nat.div_eq_of_lt hlt]
-      decide
     intro h
     omega
 
