@@ -111,7 +111,7 @@ theorem physical_allones_first_m_plus_two_source_not_two
     rw [four_pow_digit_affine_shift]
     exact digit3_eq_of_mod_next _ _ j hmod
   rw [hsame]
-  by_cases hlow : j<m
+  by_cases hlow : j < m
   · rw [ternaryOnes_digit_one m j hlow]
     decide
   · have hpow : 3^m ≤ 3^j := by
@@ -130,7 +130,7 @@ theorem physical_allones_survives_m_plus_two_rows (m : Nat) :
       ¬ (digit3 (4^(ternaryOnes m)) j = 2 ∧
          digit3 (4^(ternaryOnes m+1)) j = 2) := by
   intro j hj1 hjm hhit
-  have hj : j-1<m+2 := by omega
+  have hj : j - 1 < m + 2 := by omega
   have hsource :=
     physical_allones_first_m_plus_two_source_not_two m (j-1) hj
   have hshape : j-1+1=j := by omega
