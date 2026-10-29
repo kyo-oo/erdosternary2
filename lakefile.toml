@@ -24,6 +24,7 @@ roots = [
   "GSTWorldtraceCoeffStability",
   "GSTProblem406ExceptionalSevenTower",
   "GSTProblem406ExceptionalSevenTenBand",
+  "GSTProblem406ShortSeedPhysicalWave",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
