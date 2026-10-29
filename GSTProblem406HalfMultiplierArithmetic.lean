@@ -33,8 +33,15 @@ private theorem canonical_coefficient_step_mod (m w : Nat)
     Nat.mod_eq_zero_of_dvd (dvd_mul_of_dvd_left hd1 _)
   have hz2 : (3^(2*m+1)*c^3)%3^w=0 :=
     Nat.mod_eq_zero_of_dvd (dvd_mul_of_dvd_left hd2 _)
-  rw [Nat.add_mod,Nat.add_mod,hz1,hz2]
-  simp
+  have hfirst : (c+3^(m+1)*c^2)%3^w = c%3^w := by
+    rw [Nat.add_mod,hz1]
+    simp
+  calc
+    (c+3^(m+1)*c^2+3^(2*m+1)*c^3)%3^w =
+      (((c+3^(m+1)*c^2)%3^w)+(3^(2*m+1)*c^3)%3^w)%3^w :=
+        Nat.add_mod _ _ _
+    _ = (c%3^w+0)%3^w := by rw [hfirst,hz2]
+    _ = c%3^w := by simp
 
 private theorem canonical_coefficient_mod_stable (t : Nat) :
     GSTCanonicalTailLTE.lteCoeff (8+t)%3^9 =
