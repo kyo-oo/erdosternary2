@@ -474,6 +474,97 @@ theorem commonTwo_new_fifth_trit_classes
 #print axioms neighbor_fifth_quotient_mod243
 #print axioms commonTwo_new_fifth_trit_classes
 
+
+
+/-! ## Arbitrary-window two-wave GST physical source transfer
+
+The finite fourth/fifth classifier was only the catalyst: the underlying
+Worldtrace affine block is uniform in **any window width** up to L+1.
+This is a reusable non-circular proof mechanism for discovering future
+same-row gates. It does NOT presume such a certificate exists for
+every exponent, so there is no hidden universal hGate assumption. -/
+
+/-- The full source and neighbor quotient blocks are synchronized at every
+width 1<=w<=L+1, with the ACTUAL consecutive perfect powers preserved. -/
+theorem two_wave_any_width_block_exact
+    (L u w : Nat) (hL : 6 ≤ L) (hw : 1 ≤ w)
+    (hband : w ≤ L+1) :
+    (4^(4+u*3^L)/3^(L+1))%3^w =
+      (u*GSTCanonicalTailLTE.lteCoeff L*256)%3^w ∧
+    (4^(5+u*3^L)/3^(L+1))%3^w =
+      (u*GSTCanonicalTailLTE.lteCoeff L*1024)%3^w := by
+  have hs : (4:Nat)^4 < 3^(L+1) := by
+    have h0 : (4:Nat)^4 < 3^7 := by decide
+    have h1 : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hn : (4:Nat)^5 < 3^(L+1) := by
+    have h0 : (4:Nat)^5 < 3^7 := by decide
+    have h1 : 3^7 ≤ 3^(L+1) :=
+      Nat.pow_le_pow_of_le (by decide : 1 < 3) (by omega)
+    omega
+  have hdivs : (4:Nat)^4/3^(L+1)=0 := Nat.div_eq_of_lt hs
+  have hdivn : (4:Nat)^5/3^(L+1)=0 := Nat.div_eq_of_lt hn
+  have h4 := GSTWorldtraceBlockLift.pow4_whole_block_lift
+    4 u L w hw hband
+  have h5 := GSTWorldtraceBlockLift.pow4_whole_block_lift
+    5 u L w hw hband
+  constructor
+  · simpa only [show (4:Nat)^4=256 by decide,
+        hdivs, Nat.zero_add] using h4
+  · simpa only [show (4:Nat)^5=1024 by decide,
+        hdivn, Nat.zero_add] using h5
+
+/-- Exact digit readback from ANY physical shifted tower quotient,
+when an abstract block word A matches its first w trits. -/
+private theorem any_width_block_digit_bridge
+    (M L u w k A : Nat) (hk : k < w)
+    (hwindow :
+      (4^(M+u*3^L)/3^(L+1))%3^w = A%3^w) :
+    digit3 (4^(M+u*3^L)) (L+1+k)=digit3 A k := by
+  have hdiv : 3^(k+1) ∣ 3^w := Nat.pow_dvd_pow 3 (by omega)
+  have hmod :
+      (4^(M+u*3^L)/3^(L+1))%3^(k+1)=A%3^(k+1) := by
+    calc
+      (4^(M+u*3^L)/3^(L+1))%3^(k+1) =
+          ((4^(M+u*3^L)/3^(L+1))%3^w)%3^(k+1) :=
+            (Nat.mod_mod_of_dvd _ hdiv).symm
+      _ = (A%3^w)%3^(k+1) := by rw [hwindow]
+      _ = A%3^(k+1) := Nat.mod_mod_of_dvd _ hdiv
+  have hread := digit3_eq_of_mod_next
+      (4^(M+u*3^L)/3^(L+1)) A k hmod
+  calc
+    digit3 (4^(M+u*3^L)) (L+1+k) =
+        digit3 (4^(M+u*3^L)/3^(L+1)) k := by
+          unfold digit3
+          have hp : 3^(L+1+k)=3^(L+1)*3^k := by rw [pow_add]
+          rw [hp, ← Nat.div_div_eq_div_mul]
+    _ = digit3 A k := hread
+
+/-- A general finite-width GST source-neighbor *certificate* is sufficient
+for an original common-two witness at a physical row. This works for all
+natural u and all variable widths w<=L+1; unlike a fixed prefix scan,
+it permits the observation horizon to grow with the source exponent. -/
+theorem two_wave_any_width_certificate_to_CommonTwo
+    (L u w k : Nat) (hL : 6 ≤ L) (hw : 1 ≤ w)
+    (hband : w ≤ L+1) (hk : k < w)
+    (hs : digit3 (u*GSTCanonicalTailLTE.lteCoeff L*256) k = 2)
+    (hn : digit3 (u*GSTCanonicalTailLTE.lteCoeff L*1024) k = 2) :
+    CommonTwo (4+u*3^L) := by
+  obtain ⟨h4, h5⟩ :=
+    two_wave_any_width_block_exact L u w hL hw hband
+  refine ⟨L+1+k, by omega, ?_, ?_⟩
+  · rw [any_width_block_digit_bridge 4 L u w k
+      (u*GSTCanonicalTailLTE.lteCoeff L*256) hk h4]
+    exact hs
+  · have he : (4+u*3^L)+1=5+u*3^L := by omega
+    rw [he, any_width_block_digit_bridge 5 L u w k
+      (u*GSTCanonicalTailLTE.lteCoeff L*1024) hk h5]
+    exact hn
+
+#print axioms two_wave_any_width_block_exact
+#print axioms two_wave_any_width_certificate_to_CommonTwo
+
 #print axioms neighbor_quotient_mod27
 #print axioms neighbor_three_digit_bridge
 #print axioms eleven_of_eighteen_kernel
