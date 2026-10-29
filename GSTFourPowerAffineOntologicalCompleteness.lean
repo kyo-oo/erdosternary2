@@ -53,7 +53,7 @@ theorem prefixMap_injective (p : Nat) :
 attained by some nonnegative perfect-power exponent below 3^p. -/
 theorem prefixMap_surjective (p : Nat) :
     Function.Surjective (prefixMap p) := by
-  exact (Finite.injective_iff_surjective (prefixMap p)).mp
+  exact (Finite.injective_iff_surjective).mp
     (prefixMap_injective p)
 
 /-- The residue-level result, with no abstract finite-state surrogate.
