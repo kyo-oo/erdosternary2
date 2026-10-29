@@ -220,6 +220,35 @@ theorem commonTwo_within_eighteen (K : Nat) :
     GSTProblem406ArchimedeanPhysicalEscape.CommonTwo_of_archimedean_escape
       (K+j) m hl' hh'⟩
 
+/-- Stronger global digit-pattern theorem: within every run of
+19 consecutive powers of four, at least one has a literal adjacent
+ternary block 22. This is independent of the neighbor-power carry
+machine; it follows by the sharp no-22 magnitude obstruction. -/
+theorem adjacent22_within_eighteen (K : Nat) :
+    ∃ j : Nat, j ≤ 18 ∧
+      ∃ p : Nat,
+        GSTFourPowerDirectResidue.digit3 (4^(K+j)) p = 2 ∧
+        GSTFourPowerDirectResidue.digit3 (4^(K+j)) (p+1) = 2 := by
+  obtain ⟨j,m,hj,hl,hh⟩ :=
+    archimedean_escape_within_eighteen (4^K) (by positivity)
+  refine ⟨j,hj,?_⟩
+  by_contra hNo
+  have hword :
+      GSTFourPowerNo22Magnitude.No22Ternary (4^(K+j)) := by
+    intro p hp
+    apply hNo
+    exact ⟨p,hp⟩
+  have hl' : 4^(K+j) < 9^m := by
+    simpa [pow_add, Nat.mul_comm, Nat.mul_left_comm,
+      Nat.mul_assoc] using hl
+  have hh' : 7*(9^m-1) < 8*4^(K+j) := by
+    simpa [pow_add, Nat.mul_comm, Nat.mul_left_comm,
+      Nat.mul_assoc] using hh
+  have hbound :=
+    GSTFourPowerNo22Magnitude.no22_nine_power_bound
+      (4^(K+j)) m hl' hword
+  omega
+
 /-- The exact original production third-wave predicate also fires
 within 18 exponent increments from every starting K. -/
 theorem thirdWave_within_eighteen (K : Nat) :
@@ -231,6 +260,7 @@ theorem thirdWave_within_eighteen (K : Nat) :
 #print axioms phase_cover_nineteen
 #print axioms exists_nine_envelope
 #print axioms archimedean_escape_within_eighteen
+#print axioms adjacent22_within_eighteen
 #print axioms commonTwo_within_eighteen
 #print axioms thirdWave_within_eighteen
 
