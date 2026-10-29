@@ -40,81 +40,116 @@ theorem phase_cover_nineteen
     (hlo : B ≤ A) (hhi : A < 9*B) :
     ∃ j e : Nat, j ≤ 18 ∧ PhaseHit A B j e := by
   by_cases h0 : 8*A < 9*B
-  · refine ⟨11, 7, by decide, ?_⟩
+  ·
+    refine ⟨11, 7, by decide, ?_⟩
     change 4194304*A < 4782969*B ∧ 7*(4782969*B) < 8*(4194304*A)
     omega
-  ·     by_cases h1 : 19*A < 24*B
-    · refine ⟨3, 2, by decide, ?_⟩
+  ·
+    by_cases h1 : 19*A < 24*B
+    ·
+      refine ⟨3, 2, by decide, ?_⟩
       change 64*A < 81*B ∧ 7*(81*B) < 8*(64*A)
       omega
-    ·       by_cases h2 : 7*A < 10*B
-      · refine ⟨14, 9, by decide, ?_⟩
+    ·
+      by_cases h2 : 7*A < 10*B
+      ·
+        refine ⟨14, 9, by decide, ?_⟩
         change 268435456*A < 387420489*B ∧ 7*(387420489*B) < 8*(268435456*A)
         omega
-      ·         by_cases h3 : 5*A < 8*B
-        · refine ⟨6, 4, by decide, ?_⟩
+      ·
+        by_cases h3 : 5*A < 8*B
+        ·
+          refine ⟨6, 4, by decide, ?_⟩
           change 4096*A < 6561*B ∧ 7*(6561*B) < 8*(4096*A)
           omega
-        ·           by_cases h4 : 5*A < 9*B
-          · refine ⟨17, 11, by decide, ?_⟩
+        ·
+          by_cases h4 : 5*A < 9*B
+          ·
+            refine ⟨17, 11, by decide, ?_⟩
             change 17179869184*A < 31381059609*B ∧ 7*(31381059609*B) < 8*(17179869184*A)
             omega
-          ·             by_cases h5 : 1*A < 2*B
-            · refine ⟨9, 6, by decide, ?_⟩
+          ·
+            by_cases h5 : 1*A < 2*B
+            ·
+              refine ⟨9, 6, by decide, ?_⟩
               change 262144*A < 531441*B ∧ 7*(531441*B) < 8*(262144*A)
               omega
-            ·               by_cases h6 : 53*A < 119*B
-              · refine ⟨1, 1, by decide, ?_⟩
+            ·
+              by_cases h6 : 53*A < 119*B
+              ·
+                refine ⟨1, 1, by decide, ?_⟩
                 change 4*A < 9*B ∧ 7*(9*B) < 8*(4*A)
                 omega
-              ·                 by_cases h7 : 2*A < 5*B
-                · refine ⟨12, 8, by decide, ?_⟩
+              ·
+                by_cases h7 : 2*A < 5*B
+                ·
+                  refine ⟨12, 8, by decide, ?_⟩
                   change 16777216*A < 43046721*B ∧ 7*(43046721*B) < 8*(16777216*A)
                   omega
-                ·                   by_cases h8 : 13*A < 37*B
-                  · refine ⟨4, 3, by decide, ?_⟩
+                ·
+                  by_cases h8 : 13*A < 37*B
+                  ·
+                    refine ⟨4, 3, by decide, ?_⟩
                     change 256*A < 729*B ∧ 7*(729*B) < 8*(256*A)
                     omega
-                  ·                     by_cases h9 : 5*A < 16*B
-                    · refine ⟨15, 10, by decide, ?_⟩
+                  ·
+                    by_cases h9 : 5*A < 16*B
+                    ·
+                      refine ⟨15, 10, by decide, ?_⟩
                       change 1073741824*A < 3486784401*B ∧ 7*(3486784401*B) < 8*(1073741824*A)
                       omega
-                    ·                       by_cases h10 : 5*A < 18*B
-                      · refine ⟨7, 5, by decide, ?_⟩
+                    ·
+                      by_cases h10 : 5*A < 18*B
+                      ·
+                        refine ⟨7, 5, by decide, ?_⟩
                         change 16384*A < 59049*B ∧ 7*(59049*B) < 8*(16384*A)
                         omega
-                      ·                         by_cases h11 : 1*A < 4*B
-                        · refine ⟨18, 12, by decide, ?_⟩
+                      ·
+                        by_cases h11 : 1*A < 4*B
+                        ·
+                          refine ⟨18, 12, by decide, ?_⟩
                           change 68719476736*A < 282429536481*B ∧ 7*(282429536481*B) < 8*(68719476736*A)
                           omega
-                        ·                           by_cases h12 : 2*A < 9*B
-                          · refine ⟨10, 7, by decide, ?_⟩
+                        ·
+                          by_cases h12 : 2*A < 9*B
+                          ·
+                            refine ⟨10, 7, by decide, ?_⟩
                             change 1048576*A < 4782969*B ∧ 7*(4782969*B) < 8*(1048576*A)
                             omega
-                          ·                             by_cases h13 : 17*A < 86*B
-                            · refine ⟨2, 2, by decide, ?_⟩
+                          ·
+                            by_cases h13 : 17*A < 86*B
+                            ·
+                              refine ⟨2, 2, by decide, ?_⟩
                               change 16*A < 81*B ∧ 7*(81*B) < 8*(16*A)
                               omega
-                            ·                               by_cases h14 : 3*A < 17*B
-                              · refine ⟨13, 9, by decide, ?_⟩
+                            ·
+                              by_cases h14 : 3*A < 17*B
+                              ·
+                                refine ⟨13, 9, by decide, ?_⟩
                                 change 67108864*A < 387420489*B ∧ 7*(387420489*B) < 8*(67108864*A)
                                 omega
-                              ·                                 by_cases h15 : 5*A < 32*B
-                                · refine ⟨5, 4, by decide, ?_⟩
+                              ·
+                                by_cases h15 : 5*A < 32*B
+                                ·
+                                  refine ⟨5, 4, by decide, ?_⟩
                                   change 1024*A < 6561*B ∧ 7*(6561*B) < 8*(1024*A)
                                   omega
-                                ·                                   by_cases h16 : 4*A < 29*B
-                                  · refine ⟨16, 11, by decide, ?_⟩
+                                ·
+                                  by_cases h16 : 4*A < 29*B
+                                  ·
+                                    refine ⟨16, 11, by decide, ?_⟩
                                     change 4294967296*A < 31381059609*B ∧ 7*(31381059609*B) < 8*(4294967296*A)
                                     omega
-                                  ·                                     by_cases h17 : 1*A < 8*B
-                                    · refine ⟨8, 6, by decide, ?_⟩
+                                  ·
+                                    by_cases h17 : 1*A < 8*B
+                                    ·
+                                      refine ⟨8, 6, by decide, ?_⟩
                                       change 65536*A < 531441*B ∧ 7*(531441*B) < 8*(65536*A)
                                       omega
-                                    · refine ⟨0, 1, by decide, ?_⟩
+                                    ·
+                                      refine ⟨0, 1, by decide, ?_⟩
                                       change 1*A < 9*B ∧ 7*(9*B) < 8*(1*A)
                                       omega
-
 
 /-- Every positive integer lies in a unique nine-power envelope.
 The proof uses strong induction and integer quotient/remainder, without
