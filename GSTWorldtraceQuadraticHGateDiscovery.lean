@@ -37,7 +37,24 @@ private theorem seed31_quadratic_polynomial_mod (A : Nat) :
     (31*7225*A+465*2187*7225^2*A)%19683 := by
   have htri : triangle 31=465 := by decide
   rw [htri]
-  simp only [Nat.add_mod, Nat.mul_mod, Nat.pow_mod, c6_mod19683]
+  let q := GSTCanonicalTailLTE.lteCoeff 6 / 19683
+  have hcRepr :
+      GSTCanonicalTailLTE.lteCoeff 6=7225+19683*q := by
+    have hd := Nat.mod_add_div (GSTCanonicalTailLTE.lteCoeff 6) 19683
+    dsimp [q]
+    rw [c6_mod19683] at hd
+    omega
+  calc
+    (31*GSTCanonicalTailLTE.lteCoeff 6*A +
+      465*2187*(GSTCanonicalTailLTE.lteCoeff 6)^2*A)%19683 =
+        (31*(7225+19683*q)*A+
+          465*2187*(7225+19683*q)^2*A)%19683 := by rw [hcRepr]
+    _ = ((31*7225*A+465*2187*7225^2*A)+
+          19683*(31*q*A+465*2187*(2*7225*q+19683*q^2)*A))%19683 := by
+            congr 1
+            ring
+    _ = (31*7225*A+465*2187*7225^2*A)%19683 := by
+          rw [Nat.add_mul_mod_self_left]
 
 /-- Source and neighboring full powers share an exact quadratic seed
 certificate, with only small modular arithmetic remaining. -/
@@ -120,20 +137,27 @@ theorem commonTwo_new_nonlinear_ninth_trit_family
     omega
   have hshape :
       4+u*3^6=(4+31*3^6)+3^15*(u/19683) := by
-    rw [hrepr]
-    have hp : (19683:Nat)*3^6=3^15 := by norm_num
-    rw [← hp]
-    ring
+    calc
+      4+u*3^6=4+(31+19683*(u/19683))*3^6 := by
+        exact congrArg (fun x : Nat => 4+x*3^6) hrepr
+      _ = (4+31*3^6)+3^15*(u/19683) := by
+        have hp : (19683:Nat)*3^6=3^15 := by norm_num
+        rw [← hp]
+        ring
   have hshape1 :
       (4+u*3^6)+1=(5+31*3^6)+3^15*(u/19683) := by
     omega
-  obtain ⟨_,_,hs,hn⟩ := seed31_nonlinear_physical_CommonTwo
+  have hs : digit3 (4^(4+31*3^6)) 15=2 :=
+    read_seed31_ninth_trit 4 14143
+      (by decide) (by decide) seed31_source_mod19683
+  have hn : digit3 (4^(5+31*3^6)) 15=2 :=
+    read_seed31_ninth_trit 5 17206
+      (by decide) (by decide) seed31_neighbor_mod19683
   refine ⟨15, by decide, ?_, ?_⟩
   · rw [hshape]
     exact (pow4_digit_period 15 (4+31*3^6) (u/19683)).trans hs
   · rw [hshape1]
-    exact (pow4_digit_period 15 (5+31*3^6) (u/19683)).trans
-      (by simpa only [show (4+31*3^6)+1=5+31*3^6 by decide] using hn)
+    exact (pow4_digit_period 15 (5+31*3^6) (u/19683)).trans hn
 
 /-- The nonlinear family plugs directly into the ORIGINAL thirdWave
 statement, not an artificially redefined Good or controller surrogate. -/
