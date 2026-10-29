@@ -34,6 +34,7 @@ roots = [
   "GSTFinalPurePowerResidueTransplant",
   "GSTProblem406BinaryOriginExponentScale",
   "GSTProblem406BinaryOriginBadSurvivor",
+  "GSTProblem406DualValuationEntropy",
   "GSTFourPowerThirdWave",
   "GSTFourPowerAffineBadState",
   "GSTFourPowerAffineChannelAutomaton",
