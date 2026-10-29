@@ -20,7 +20,9 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-          lake build GSTFourPowerAffinePrefixIsometry
+          lake build GSTFourPowerAffineOrbit
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerExactExponentPeriod.olean GSTFourPowerExactExponentPeriod.lean
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffinePrefixIsometry.olean GSTFourPowerAffinePrefixIsometry.lean
           lake env lean -o .lake/build/lib/lean/GSTFourPowerAffineOntologicalCompleteness.olean GSTFourPowerAffineOntologicalCompleteness.lean
       - name: Strict kernel certificate for both physical perfect-power prefixes
         shell: bash
