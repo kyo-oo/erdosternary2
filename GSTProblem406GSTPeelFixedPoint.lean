@@ -88,14 +88,14 @@ theorem ternaryOnes_digit_one
   have hquot : ternaryOnes m /3^j = ternaryOnes (m-j) := by
     rw [hshape,Nat.add_mul_div_left _ _ hN,
       Nat.div_eq_of_lt (ternaryOnes_lt_pow j)]
+    simp
   unfold digit3
   rw [hquot]
   have ht : 0 < m-j := by omega
   cases h : (m-j) with
   | zero => omega
   | succ t =>
-      rw [h,ternaryOnes]
-      norm_num
+      simp [ternaryOnes]
 
 /-- Nonlinear GST polynomial identity. -/
 theorem peel1_exact_nonarchimedean_fixedpoint (x : Nat) :
@@ -139,6 +139,8 @@ theorem physical_ternaryOnes_affine_fixedpoint (m : Nat) :
       have htotal := hpoly.trans hfixed
       have hmul := htotal.mul_left' 3
       have hadd := hmul.add_left 1
+      change (1+peel1 (affineOrbit (ternaryOnes m))*3)%(3*3^m) =
+        (1+ternaryOnes m*3)%(3*3^m) at hadd
       have haddEq :
           (1+3*peel1 (affineOrbit (ternaryOnes m)))%(3*3^m) =
             (1+3*ternaryOnes m)%(3*3^m) := by
