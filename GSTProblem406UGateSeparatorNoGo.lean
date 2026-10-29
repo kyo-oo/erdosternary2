@@ -56,7 +56,7 @@ theorem no_global_GST_happy_separator
   · norm_num at hBadTwoOne ⊢
     omega
   · norm_num at hHappyZeroTwo ⊢
-    exact hHappyZeroTwo
+    omega
 
 #print axioms no_one_column_carry_potential
 #print axioms no_global_GST_happy_separator
