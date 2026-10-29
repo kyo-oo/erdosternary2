@@ -57,7 +57,6 @@ theorem source_3829_no_pair_before_shift_seven
     have hzero : digit3 (4 * (3829 * 4^j)) p = 0 := by
       unfold digit3
       rw [Nat.div_eq_of_lt hlt]
-      decide
     omega
 
 /-- The next orbit shift DOES contain a simultaneous physical
