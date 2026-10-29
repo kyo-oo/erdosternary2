@@ -74,7 +74,11 @@ GPT6_HISTORICAL_406_COMPARATOR_AXIOM_FORENSICS_20261029.md.
   physical exponents, not the generic Omega controller.
 - GSTProblem406AllOnesFirstCollision.lean: a new GST peel1-polynomial
   direct formalization of an all-m CommonTwo witness at m+9;
-  validate the dedicated CI before promoting to kernel proven.
+  the exact CommonTwo physical witness at p=m+9 and the original
+  thirdWave body are strict Lean kernel VERIFIED, with CI run
+  #40911647994 SUCCESS (without sorryAx or custom axioms).
+  The stronger FIRST-row minimality conclusion is presently only
+  recorded as a separate complete mathematical derivation.
 
 ## Strict done criteria
 Only a theorem with the original forall n>=9 challenge type,
