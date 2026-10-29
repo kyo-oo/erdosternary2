@@ -24,7 +24,7 @@ open GSTFourPowerAffinePrefixIsometry
 open GSTFourPowerAffineOntologicalCompleteness
 
 private theorem digit3_four_ne_two (j : Nat) :
-    digit3 4 j != 2 := by
+    digit3 4 j ≠ 2 := by
   by_cases hj : j < 2
   · interval_cases j <;> norm_num [digit3]
   · have hpow : 3^2 <= 3^j :=
@@ -54,7 +54,7 @@ theorem arbitrary_delay_with_fixed_v3_two
     (B : Nat) :
     ∃ K : Nat, 5<=K ∧
       (2*K+1)%27=9 ∧
-      ∀ j : Nat, j<B → digit3 (4^K) (j+1) != 2 := by
+      ∀ j : Nat, j<B → digit3 (4^K) (j+1) ≠ 2 := by
   let p : Nat := B+3
   obtain ⟨k0,hk0,hcoord⟩ :=
     every_arbitrary_coordinate_has_physical_prefix p 4
