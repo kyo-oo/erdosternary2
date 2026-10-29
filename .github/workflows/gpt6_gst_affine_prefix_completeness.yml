@@ -20,7 +20,9 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           lake update
           lake exe cache get
-          lake build GSTFourPowerAffinePrefixIsometry
+          lake build GSTFourPowerAffineOrbit
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerExactExponentPeriod.olean GSTFourPowerExactExponentPeriod.lean
+          lake env lean -o .lake/build/lib/lean/GSTFourPowerAffinePrefixIsometry.olean GSTFourPowerAffinePrefixIsometry.lean
       - name: Kernel certify all finite original physical affine-prefix surjectivity
         shell: bash
         run: |
