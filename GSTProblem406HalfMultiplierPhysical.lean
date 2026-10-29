@@ -121,7 +121,10 @@ theorem half_multiplier_neighbor_nine
     have hE : antiCoeff m/2 ≡ 14049 [MOD 19683] :=
       antiCoeff_half_mod m hm
     have h := (hC.mul_left u).add hE
-    simpa [Nat.add_comm, Nat.mul_assoc] using h
+    change
+      (u*(GSTCanonicalTailLTE.lteCoeff m*4^(halfIndex m))+
+        antiCoeff m/2)%19683 = (u*8416+14049)%19683 at h
+    simpa [Nat.add_comm, Nat.mul_comm, Nat.mul_assoc] using h
   have hN :
       (4*(antiCoeff m/2+u*
         (GSTCanonicalTailLTE.lteCoeff m*4^(halfIndex m)))+1)%19683 =
