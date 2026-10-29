@@ -56,7 +56,7 @@ theorem two_trit_block_contracts (n M : Nat)
     (h3 : survivingCount n 3 ≤ M) :
     ∀ c : Nat, c < 4 → survivingCount (n+2) c ≤ 7*M := by
   intro c hc
-  interval_cases c <;> simp only [survivingCount, ↓reduceIte] <;> omega
+  interval_cases c <;> simp [survivingCount] <;> omega
 
 /-- Uniform finite survivor-tree count at every even ternary
 prefix depth, for every one of the four carries. -/
@@ -84,7 +84,7 @@ theorem odd_depth_contracts (m : Nat) :
   have h2 := even_depth_contracts m 2 (by omega)
   have h3 := even_depth_contracts m 3 (by omega)
   intro c hc
-  interval_cases c <;> simp only [survivingCount, ↓reduceIte] <;> omega
+  interval_cases c <;> simp [survivingCount] <;> omega
 
 /-- The physical affine pair always enters carry state one. -/
 theorem original_affine_pair_survivor_bound (m : Nat) :
