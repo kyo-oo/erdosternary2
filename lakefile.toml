@@ -28,6 +28,7 @@ roots = [
   "GSTProblem406ArchimedeanPhysicalEscape",
   "GSTProblem406SyndeticArchimedeanGate",
   "GSTProblem406UniversalMultiplicativePair",
+  "GSTProblem406SevenStepUniversalPair",
   "GSTCanonicalTailStateIso",
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
