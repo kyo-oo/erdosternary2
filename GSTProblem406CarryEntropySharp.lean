@@ -52,23 +52,31 @@ theorem five_halves_survivor_bound (n : Nat) :
       intro c hc
       interval_cases c <;> norm_num [survivingCount,weight]
   | succ n ih =>
-      have h0 := ih 0 (by decide)
-      have h1 := ih 1 (by decide)
-      have h2 := ih 2 (by decide)
-      have h3 := ih 3 (by decide)
+      have h0 : 2^n * survivingCount n 0 ≤ 4 * 5^n := by
+        simpa [weight, Nat.mul_comm] using ih 0 (by decide)
+      have h1 : 2^n * survivingCount n 1 ≤ 6 * 5^n := by
+        simpa [weight, Nat.mul_comm] using ih 1 (by decide)
+      have h2 : 2^n * survivingCount n 2 ≤ 6 * 5^n := by
+        simpa [weight, Nat.mul_comm] using ih 2 (by decide)
+      have h3 : 2^n * survivingCount n 3 ≤ 5 * 5^n := by
+        simpa [weight, Nat.mul_comm] using ih 3 (by decide)
       intro c hc
       interval_cases c
-      · simp only [survivingCount]
-        simp only [weight, if_pos, if_neg, pow_succ] at *
+      · change 2^(n+1)*(survivingCount n 0+survivingCount n 1)
+            ≤ 5^(n+1)*4
+        rw [pow_succ, pow_succ]
         nlinarith [h0,h1]
-      · simp only [survivingCount]
-        simp only [weight, if_pos, if_neg, pow_succ] at *
+      · change 2^(n+1)*(survivingCount n 0+survivingCount n 1+
+            survivingCount n 3) ≤ 5^(n+1)*6
+        rw [pow_succ, pow_succ]
         nlinarith [h0,h1,h3]
-      · simp only [survivingCount]
-        simp only [weight, if_pos, if_neg, pow_succ] at *
+      · change 2^(n+1)*(survivingCount n 0+survivingCount n 2+
+            survivingCount n 3) ≤ 5^(n+1)*6
+        rw [pow_succ, pow_succ]
         nlinarith [h0,h2,h3]
-      · simp only [survivingCount]
-        simp only [weight, if_pos, if_neg, pow_succ] at *
+      · change 2^(n+1)*(survivingCount n 1+survivingCount n 2)
+            ≤ 5^(n+1)*5
+        rw [pow_succ, pow_succ]
         nlinarith [h1,h2]
 
 /-- Strong exact original physical exponent-prefix survival bound. -/
