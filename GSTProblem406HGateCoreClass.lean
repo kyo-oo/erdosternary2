@@ -439,7 +439,10 @@ def FifthNewClass (r : Nat) : Prop :=
 private theorem fifth_new_classes_kernel :
     ∀ r : Fin 243, FifthNewClass r.val →
       digit3 (127*r.val) 4=2 ∧ digit3 (22*r.val) 4=2 := by
-  decide
+  intro r hr
+  unfold FifthNewClass at hr
+  rcases hr with h | h | h | h | h | h | h | h | h | h
+  all_goals norm_num [digit3, h]
 
 /-- For every L>=6 and every u in TEN unbounded residue classes mod243,
 there is an actual SAME-ROW source-neighbor digit pair at row L+5. -/
