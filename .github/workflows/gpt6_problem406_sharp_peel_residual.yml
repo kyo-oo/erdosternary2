@@ -2,7 +2,7 @@ name: GST exact sharp physical fixedpoint residual
 on:
   push:
     branches: [gpt6/problem406-sharp-peel-residual-20261029]
-    paths: [GSTProblem406SharpPeelResidual.lean, .github/workflows/gpt6_problem406_sharp_peel_residual.yml]
+    paths: [GSTProblem406SharpPeelResidual.lean, GSTProblem406GSTPeelExtraPrecision.lean, .github/workflows/gpt6_problem406_sharp_peel_residual.yml]
   workflow_dispatch:
 permissions:
   contents: read
