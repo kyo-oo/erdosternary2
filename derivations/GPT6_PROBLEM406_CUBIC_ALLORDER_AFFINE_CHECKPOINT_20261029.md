@@ -80,9 +80,11 @@ repeat the former custom axiom and would not close the proof.
 - `GSTProblem406DelayedExactHGate.lean`: show arbitrary delay of the
   first simultaneous physical two, with a true hit at row L+1 whenever
   L>=6 and u%3=2. This proves any constant prefix cutoff is
-  inadequate. Fixes made after tactic-only errors. Latest targeted
+  inadequate. After explicit modular residue proof repair, the targeted Lean
   workflow [40857225569](https://github.com/kyo-oo/erdosternary2/actions/runs/40857225569)
-  must be checked for final completion before promotion.
+  **PASSED**. This now proves for all L>=6 and u%3=2, the FIRST
+  simultaneous physical digit two is at row L+1, and for every
+  finite B a genuine pair has first common two strictly after B.
 - `GSTFourPowerAffineOntologicalCompleteness.lean`: use exact
   affine-prefix isometry and finite injective/surjective equivalence
   to show that every arbitrary finite ternary affine prefix is
