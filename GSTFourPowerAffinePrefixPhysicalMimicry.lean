@@ -53,7 +53,8 @@ theorem every_finite_affine_pair_prefix_is_physically_realized
       (4*affineOrbit K+1)%3^p=(4*X+1)%3^p := by
     have hsource : affineOrbit K ≡ X [MOD 3^p] := hmod
     have h := (hsource.mul_left 4).add_left 1
-    simpa [Nat.add_comm] using h
+    change (1+4*affineOrbit K)%3^p = (1+4*X)%3^p at h
+    simpa only [Nat.add_comm] using h
   refine ⟨K,hK,?_⟩
   intro j hj
   constructor
