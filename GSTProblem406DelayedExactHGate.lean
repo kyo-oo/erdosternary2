@@ -50,7 +50,6 @@ theorem neighbor_fires_first_cut
         rw [h2]
       _ = 2 := by
         rw [hu, GSTCanonicalTailLTE.lteCoeff_mod3_one]
-        norm_num
   change (4^(5+u*3^L)/3^(L+1))%3=2
   simpa only [show (3:Nat)^1=3 by decide] using h.trans hmod
 
