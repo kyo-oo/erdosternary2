@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
-          lake env lean -o GSTProblem406BinaryOriginExponentScale.olean GSTProblem406BinaryOriginExponentScale.lean 2>&1 | tee scale.log
+          lake build GSTProblem406BinaryOriginExponentScale GSTProblem406BinaryOriginBadSurvivor 2>&1 | tee scale.log
           ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' scale.log
           lake env lean GSTProblem406BinaryOriginBadSurvivor.lean 2>&1 | tee bad-survivor.log
           ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' bad-survivor.log
