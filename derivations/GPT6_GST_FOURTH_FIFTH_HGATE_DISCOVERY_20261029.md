@@ -73,8 +73,14 @@ Hence the original `CommonTwo` proposition holds for
 **all** `L>=6` and **all** multipliers u in each
 corresponding unbounded congruence class, at row `p=L+5`.
 
-Lean proof candidate:
+Lean kernel-proved theorem:
 `GSTProblem406HGateCoreClass.commonTwo_new_fifth_trit_classes`.
+The first CI attempt failed because `by decide` lacked a `Decidable` instance
+for the ten-class proposition, not because of a false residue identity.
+Commit `539ea642818c5f14718c0ef9fed7164ba5e93cf0` replaced this
+with ten explicit `norm_num` cases. The dedicated Lean source check
+[40849695938](https://github.com/kyo-oo/erdosternary2/actions/runs/40849695938)
+**PASSED**, with no errors and no `sorryAx` in printed proof dependencies.
 Wolfram tested **90 actual physical power-residue pairs** at
 `L in {6,8,11}` and `u=r+243*t`, `t=0,1,2`, and found
 zero violations. Kernel verdict must be taken from the dedicated
@@ -85,7 +91,10 @@ The integration module `GSTProblem406HGateCoreIntegration.lean` exports
 these class-specific results into both the exact `thirdWave`
 body and the existing `CreationCertificate` type.
 Its dedicated `gpt6_problem406_new_trits_integration.yml` job
-is the authoritative compilation check.
+[40849695946](https://github.com/kyo-oo/erdosternary2/actions/runs/40849695946)
+**PASSED**, compiling the explicit fourth/fifth same-row lemmas into the
+original `thirdWave` and `CreationCertificate` types, with no extra hGate
+assumption for those residue families.
 
 ## Exact finite classifier, unbounded mathematical meaning
 
