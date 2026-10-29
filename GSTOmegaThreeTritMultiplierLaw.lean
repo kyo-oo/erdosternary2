@@ -31,16 +31,18 @@ theorem quotient_mod27_all_multipliers
   have hdiv : (4:Nat)^4 / 3^(L+1) = 0 :=
     Nat.div_eq_of_lt hsmall
   have h := pow4_whole_block_lift 4 u L 3 (by omega) (by omega)
+  have h256div : (256:Nat)/3^(L+1)=0 := by
+    simpa only [show (4:Nat)^4=256 by decide] using hdiv
   have hs :
       (4^(4+u*3^L)/3^(L+1))%27 =
         (u*GSTCanonicalTailLTE.lteCoeff L*256)%27 := by
-    simpa only [show (3:Nat)^3=27 by decide, hdiv, Nat.zero_add,
-      show (4:Nat)^4=256 by decide] using h
+    simpa only [show (3:Nat)^3=27 by decide,
+      show (4:Nat)^4=256 by decide, h256div,
+      Nat.zero_add] using h
   have hc :
       (GSTCanonicalTailLTE.lteCoeff L*256)%27=19 := by
     rw [Nat.mul_mod,
-      GSTOmegaExactDelayedEscape.lteCoeff_mod27_sixteen L (by omega)]
-    decide
+      GSTOmegaExactDelayedEscape.lteCoeff_mod27_sixteen L (by omega)] <;> decide
   calc
     (4^(4+u*3^L)/3^(L+1))%27 =
         (u*GSTCanonicalTailLTE.lteCoeff L*256)%27 := hs
@@ -118,8 +120,11 @@ theorem one_mod27_core_prefix_agrees
     norm_num
   have hexp :
       4+u*3^L = (4+3^L)+3^(L+3)*(u/27) := by
-    rw [huRepr,hpower]
-    ring
+    calc
+      4+u*3^L = 4+(1+27*(u/27))*3^L := by rw [← huRepr]
+      _ = (4+3^L)+3^(L+3)*(u/27) := by
+        rw [hpower]
+        ring
   have hfactor :
       3^(L+3) = 3^p*3^(L+3-p) := by
     rw [← pow_add]
