@@ -49,6 +49,7 @@ theorem centered_equationIII (K p : Nat) :
       3 * centeredPotential K (p+1) -
         centeredPotential K p := by
   have h := unified_equationIII_graph_closed (4^K) 3 p
+  norm_num at h
   dsimp [physicalUDifference, centeredPotential]
   linarith
 
