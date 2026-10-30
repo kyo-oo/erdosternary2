@@ -28,7 +28,6 @@ interior constraint. All statements here are exact arithmetic.
 namespace GSTProblem406U2DRightBadCountermodel
 
 open GSTU2DExactCrossingCharge
-open GSTU2DSharpCrossingBlock
 open GSTFourPowerDirectResidue
 
 private def demoDigit (t p : Nat) : Nat :=
