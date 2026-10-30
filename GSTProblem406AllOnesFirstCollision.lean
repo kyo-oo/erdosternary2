@@ -222,7 +222,6 @@ private theorem stableCore_source_high (m j : Nat) :
       ← Nat.div_div_eq_div_mul]
   rw [Nat.add_mul_div_left _ _ (by positivity : 0<3^m),
       Nat.div_eq_of_lt (ternaryOnes_lt_pow m)]
-  rfl
 
 /-- The neighboring affine source above the cut reads the exact
 constant 4*14049+1, accounting for the one-unit boundary carry. -/
@@ -244,7 +243,6 @@ private theorem stableCore_neighbor_high (m j : Nat) :
       ← Nat.div_div_eq_div_mul]
   rw [Nat.add_mul_div_left _ _ (by positivity : 0<3^m),
       Nat.div_eq_of_lt hlo]
-  rfl
 
 /-- Full nine-trit sharpness: rows m through m+7 of the
 renormalized core are non-colliding. The row m+8 collision is
