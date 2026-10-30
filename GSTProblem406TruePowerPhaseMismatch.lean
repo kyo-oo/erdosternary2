@@ -46,6 +46,7 @@ theorem k8_exact_phase_mismatch_and_u_defect :
       (unifiedState (4^8) 3 5).core -
     potentialWith gstUChargeExact (4^3)
       (unifiedState (4^8) 3 4).core = 518 := by
+  unfold HappyCell
   decide
 
 /-- Falsifies the tempting but mathematically invalid *local*
@@ -70,7 +71,8 @@ theorem no_universal_local_pure_power_phase_monotonicity :
     intro j hj
     exact data.2.1 ⟨j, by omega⟩
   have hbound := h 8 1 (by simpa using data.1) hr
-  rw [show 3+(1:Nat)=4 by decide] at hbound
+  change graphPhaseWindow (4^8) 0 3 2 ≤
+    graphPhaseWindow (4^8) 3 3 2 at hbound
   have hl : graphPhaseWindow (4^8) 0 3 2 = 2 := data.2.2.1
   have hx : graphPhaseWindow (4^8) 3 3 2 = -4 := data.2.2.2.1
   rw [hl, hx] at hbound
