@@ -103,4 +103,61 @@ theorem physical_source_digit_zero_above_short_cut
 #print axioms physical_source_high_binary_order
 #print axioms physical_source_digit_zero_above_short_cut
 
+/-- The exact binary terminal exponent singled out by the physical ternary
+cut. This is deliberately the literal K-dependent source, not the larger
+class of all multiples of 2^t. -/
+def physicalBinaryThreshold (K : Nat) : Nat :=
+  (3*physicalShortCut K)/2+1
+
+/-- Exact all-exponent trichotomy, not merely high binary divisibility:
+the original source 4^K is ONE of the two extremal binary source values.
+The proof contains no CommonTwo, no hGate, and no custom axiom. -/
+theorem physical_source_exact_binary_threshold
+    (K : Nat) (hK : 13 ≤ K) :
+    (K%3=0 ∧ (4:Nat)^K = 2^(physicalBinaryThreshold K+1)) ∨
+    (K%3≠0 ∧ (4:Nat)^K = 2^(physicalBinaryThreshold K)) := by
+  have hPower : (4:Nat)^K = 2^(2*K) := by
+    calc
+      4^K = (2^2)^K := by norm_num
+      _ = 2^(2*K) := by rw [pow_mul]
+  have hc : K%3=0 ∨ K%3=1 ∨ K%3=2 := by omega
+  rcases hc with h0 | h1 | h2
+  · left
+    constructor
+    · exact h0
+    · rw [hPower]
+      congr 1
+      unfold physicalBinaryThreshold physicalShortCut
+      omega
+  · right
+    constructor
+    · omega
+    · rw [hPower]
+      congr 1
+      unfold physicalBinaryThreshold physicalShortCut
+      omega
+  · right
+    constructor
+    · omega
+    · rw [hPower]
+      congr 1
+      unfold physicalBinaryThreshold physicalShortCut
+      omega
+
+/-- Physical exponent shift K↦K+3 transports the two physical
+scales by (L,t)↦(L+4,t+6). This is an exact scale identity,
+not an assumed collision transport theorem. -/
+theorem physical_scales_at_three_step
+    (K : Nat) (hK : 13 ≤ K) :
+    physicalShortCut (K+3) = physicalShortCut K+4 ∧
+    physicalBinaryThreshold (K+3) = physicalBinaryThreshold K+6 := by
+  constructor
+  · unfold physicalShortCut
+    omega
+  · unfold physicalBinaryThreshold physicalShortCut
+    omega
+
+#print axioms physical_source_exact_binary_threshold
+#print axioms physical_scales_at_three_step
+
 end GSTProblem406BinaryOriginExponentScale
