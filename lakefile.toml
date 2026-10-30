@@ -153,3 +153,7 @@ roots = ["GST406PhysicalUTerminal"]
 [[lean_lib]]
 name = "GST406CenteredUConservationAudit"
 roots = ["GST406CenteredUConservation"]
+
+[[lean_lib]]
+name = "GST406PhysicalULocalSignAudit"
+roots = ["GST406PhysicalULocalSign"]
