@@ -48,7 +48,8 @@ private theorem finite_first_row_two :
       RowTwoGate (r.val + firstRowTwoShift r.val) ∧
       (∀ i : Fin 8, i.val < firstRowTwoShift r.val →
         ¬ RowTwoGate (r.val + i.val)) := by
-  decide
+  intro r
+  fin_cases r <;> decide
 
 private theorem finite_only_seven_has_shift_seven :
     ∀ r : Fin 9,
