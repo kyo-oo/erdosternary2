@@ -145,3 +145,7 @@ roots = ["GSTInfiniteFourPowerNavigation", "GSTFourPowerDirectExistenceFromHappy
 [[lean_lib]]
 name = "GST406BadValuationNoGo"
 roots = ["GSTProblem406BadValuationNoGo"]
+
+[[lean_lib]]
+name = "GST406PureUFiniteBoundary"
+roots = ["GSTProblem406TerminalUBoundary"]
