@@ -53,9 +53,12 @@ private theorem finite_first_row_two :
     (constructor
      · decide
      constructor
-     · decide
-     · intro i
-       fin_cases i <;> decide)
+     · apply (row_two_overlap_iff_mod9_five_or_six _).2
+       decide
+     · intro i hi hgate
+       have hres :=
+         (row_two_overlap_iff_mod9_five_or_six _).1 hgate
+       fin_cases i <;> norm_num [firstRowTwoShift] at *)
 
 private theorem finite_only_seven_has_shift_seven :
     ∀ r : Fin 9,
