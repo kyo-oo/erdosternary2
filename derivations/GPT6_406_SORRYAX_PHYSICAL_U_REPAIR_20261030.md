@@ -73,8 +73,9 @@ compatible on a genuine perfect-power source.
 In particular `phaseLeft ≤ phaseRight` at the SAME terminal
 row is false: `+2 ≤ -4` fails. Any valid collision
 transport must be **nonlocal in height**.
-Formal candidate `GSTProblem406TruePowerPhaseMismatch.lean` is
-on the research branch, with a dedicated strict Lean CI.
+Formal theorem `GSTProblem406TruePowerPhaseMismatch.k8_exact_phase_mismatch_and_u_defect`
+and its local comparison no-go are strict Lean-kernel verified:
+https://github.com/kyo-oo/erdosternary2/actions/runs/41059938777 .
 
 ## NEW kernel-verified all-K physical terminal boundary
 
@@ -121,8 +122,9 @@ SUM_{j=0}^{H-1} 3^j [ j_R(3+j)-64*j_L(3+j) ]
 
 The huge `3^H` terms CANCEL exactly, so this is the finite
 support-sensitive checksum a nonlocal GST proof can use.
-This renormalization is exact algebra from the kernel theorem;
-its standalone Lean declaration has not yet been added.
+This renormalization is now a STRICT Lean-kernel theorem
+`GSTProblem406TerminalUBoundary.pure_source_renormalized_u_checksum`.
+Axiom audit / build SUCCESS: https://github.com/kyo-oo/erdosternary2/actions/runs/41061241211 .
 
 `U_3` only depends on `4^K mod 27`, so on `K mod 9`
 (since `4^9 ≡ 1 (mod 27)`). Wolfram exact table:
