@@ -116,11 +116,14 @@ theorem sparseOne3_double (m : Nat) :
   have hp : (9:Nat)^(2*m)=9^m*9^m := by
     rw [show 2*m=m+m by omega, pow_add]
   have hsame : 8*(sparseOne3 m*(9^m+1))+1=9^m*9^m := by
+    rw [← h1]
+    ring
+  have hres : 8*sparseOne3 (2*m)+1 =
+      8*(sparseOne3 m*(9^m+1))+1 := by
     calc
-      8*(sparseOne3 m*(9^m+1))+1 =
-          (8*sparseOne3 m+1)*(9^m+1)-9^m := by ring
-      _ = 9^m*(9^m+1)-9^m := by rw [h1]
-      _ = 9^m*9^m := by ring
+      8*sparseOne3 (2*m)+1 = 9^(2*m) := h2
+      _ = 9^m*9^m := hp
+      _ = 8*(sparseOne3 m*(9^m+1))+1 := hsame.symm
   omega
 
 /-- For every binary precision T, a sparse BAD source survives
@@ -133,7 +136,8 @@ theorem arbitrary_binary_precision_divides_sparse
       simp
   | succ T ih =>
       have heven : 2 ∣ ((9:Nat)^(2^T)+1) := by
-        have hmod : ((9:Nat)^(2^T))%2=1 := by simp
+        have hmod : ((9:Nat)^(2^T))%2=1 := by
+          simp [Nat.pow_mod]
         omega
       obtain ⟨a,ha⟩ := ih
       obtain ⟨b,hb⟩ := heven
@@ -178,8 +182,9 @@ theorem bad_sources_at_arbitrarily_high_binary_precision
       cases hcase : (2:Nat)^T with
       | zero => omega
       | succ n =>
-          rw [hcase, pow_succ]
-          positivity
+          have hn : 0 < (9:Nat)^n := by positivity
+          rw [pow_succ]
+          omega
     omega
   · exact sparseOne3_mod3_one (2^T) (by positivity)
   · exact arbitrary_binary_precision_divides_sparse T
