@@ -6,6 +6,7 @@ on:
       - .github/workflows/gpt6_hgate_exact_collision_audit.yml
       - GSTFinalPrefixOneDirectU2DCollision.lean
       - GSTInfiniteFourPowerNavigation.lean
+      - GSTFinalResidualCollision.lean
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,7 +32,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re, subprocess
-          ROOTS = ['GSTFinalPrefixOneDirectU2DCollision.lean','GSTInfiniteFourPowerNavigation.lean']
+          ROOTS = ['GSTFinalPrefixOneDirectU2DCollision.lean','GSTInfiniteFourPowerNavigation.lean','GSTFinalResidualCollision.lean']
           BUILD=Path('.lake/build/lib/lean')
           rx=re.compile(r'^\s*import\s+(.+?)\s*$')
           order=[];done=set();stack=[]
@@ -64,6 +65,7 @@ jobs:
           print('EXACT_HGATE_IMPORT_CLOSURE_GREEN=1',flush=True)
           PY
       - name: Check canonical direct collision (do not suppress Lean errors)
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -72,6 +74,8 @@ jobs:
           ! grep -E 'error:|sorryAx|unsolved goals' direct-collision.log
           echo DIRECT_U2D_COLLISION_COMPILES=1
       - name: Check power-specific three-step collision (do not suppress errors)
+        if: always()
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -79,3 +83,26 @@ jobs:
           lake env lean GSTInfiniteFourPowerNavigation.lean 2>&1 | tee physical-collision.log
           ! grep -E 'error:|sorryAx|unsolved goals' physical-collision.log
           echo POWER_SPECIFIC_COLLISION_COMPILES=1
+      - name: Check original residual collision alternate (no suppressed errors)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTFinalResidualCollision.lean 2>&1 | tee residual-collision.log
+          ! grep -E 'error:|sorryAx|unsolved goals' residual-collision.log
+          echo RESIDUAL_COLLISION_COMPILES=1
+      - name: Consolidate exact collision outcomes
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for log in direct-collision.log physical-collision.log residual-collision.log; do
+            if [ ! -f "$log" ]; then echo "UNEXECUTED=$log"; exit 1; fi
+            if grep -qE 'error:|sorryAx|unsolved goals' "$log"; then
+              echo "UNRESOLVED_COLLISION=$log"
+              grep -nE 'error:|sorryAx|unsolved goals' "$log" | head -25 || true
+              exit 1
+            fi
+          done
+          echo ALL_THREE_DIRECT_COLLISIONS_AXIOM_FREE=1
