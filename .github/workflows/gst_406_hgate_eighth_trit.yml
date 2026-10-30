@@ -24,7 +24,7 @@ jobs:
       - name: Existing exact GST source modules
         run: |
           set -euo pipefail
-          lake build GSTFourPowerThirdWave GSTProblem406HGateCoreClass GSTProblem406ExceptionalSevenTower 2>&1 | tee hgate-deps.log
+          lake build GST406HGateEighthTrit 2>&1 | tee hgate-deps.log
           ! grep -E 'error:|sorryAx|unsolved goals|unknown identifier|declaration uses .sorry.' hgate-deps.log
       - name: Strict source-exact eighth-trit kernel and axiom check
         run: |
