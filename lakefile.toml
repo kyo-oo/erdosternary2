@@ -181,3 +181,8 @@ roots = ["GSTProblem406RationalPerronBound"]
 [[lean_lib]]
 name = "GST406CarryCubicRecurrence"
 roots = ["GSTProblem406CarryCubicRecurrence"]
+
+# Mathbox GST: all-height generic cubic branch countermodels (origin-sensitive).
+[[lean_lib]]
+name = "GST406CubicBranchCountermodels"
+roots = ["GSTProblem406CubicBranchCountermodels"]
