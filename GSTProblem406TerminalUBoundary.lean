@@ -128,6 +128,90 @@ theorem pure_source_terminal_u_telescope
   norm_num at h ⊢
   nlinarith [h]
 
+
+/-- Renormalizing by the stationary zero-cell U jump 10 exactly
+cancels the exponentially large terminal background. This is a
+finite all-K GST source-specific checksum. -/
+private theorem exact_three_geometric_sum (H : Nat) :
+    (2 : Int) * Finset.sum (Finset.range H)
+      (fun j => (((3^j : Nat) : Int))) =
+      (((3^H : Nat) : Int)) - 1 := by
+  induction H with
+  | zero => norm_num
+  | succ H ih =>
+    rw [Finset.sum_range_succ, pow_succ]
+    push_cast
+    omega
+
+/-- For every physical K>=13, the full original GST U-flux
+becomes a bounded *finite checksum* after subtracting the
+zero-state background jump 10 at both endpoints:
+
+  sum 3^j ((J_right - 10) - 64*(J_left - 10))
+    = -315 - initialPotential.
+
+This does not prove an automatic Happy gate. It identifies exactly
+the global interior term a noncircular BAD contradiction must bound. -/
+theorem pure_source_renormalized_u_checksum
+    (K : Nat) (hK : 13 ≤ K) :
+    let H := terminalHeight K - 3
+    Finset.sum (Finset.range H) (fun j =>
+      (((3^j : Nat) : Int)) *
+        ((gstUJumpExact
+            (graph (4^K) 3 (3+j)).seven.carry
+            (graph (4^K) 3 (3+j)).seven.digit - 10) -
+          64 * (gstUJumpExact
+            (graph (4^K) 0 (3+j)).seven.carry
+            (graph (4^K) 0 (3+j)).seven.digit - 10))) =
+      -315 - potentialWith gstUChargeExact 64
+          (unifiedState (4^K) 3 3).core := by
+  dsimp only
+  let H : Nat := terminalHeight K - 3
+  let Jr : Nat → Int := fun j =>
+    gstUJumpExact
+      (graph (4^K) 3 (3+j)).seven.carry
+      (graph (4^K) 3 (3+j)).seven.digit
+  let Jl : Nat → Int := fun j =>
+    gstUJumpExact
+      (graph (4^K) 0 (3+j)).seven.carry
+      (graph (4^K) 0 (3+j)).seven.digit
+  let U3 : Int :=
+    potentialWith gstUChargeExact 64 (unifiedState (4^K) 3 3).core
+  have hT :
+      Finset.sum (Finset.range H) (fun j =>
+        (((3^j : Nat) : Int)) * (Jr j-64*Jl j)) =
+      -315 * (((3^H : Nat) : Int)) - U3 := by
+    simpa [H, Jr, Jl, U3] using pure_source_terminal_u_telescope K hK
+  have hRewrite :
+      Finset.sum (Finset.range H) (fun j =>
+        (((3^j : Nat) : Int)) *
+          ((Jr j-10)-64*(Jl j-10))) =
+      Finset.sum (Finset.range H) (fun j =>
+        (((3^j : Nat) : Int)) * (Jr j-64*Jl j)) +
+      630 * Finset.sum (Finset.range H)
+        (fun j => (((3^j : Nat) : Int))) := by
+    calc
+      _ = Finset.sum (Finset.range H) (fun j =>
+            (((3^j : Nat) : Int)) * (Jr j-64*Jl j) +
+              630 * (((3^j : Nat) : Int))) := by
+            apply Finset.sum_congr rfl
+            intro j hj
+            ring
+      _ = Finset.sum (Finset.range H) (fun j =>
+            (((3^j : Nat) : Int)) * (Jr j-64*Jl j)) +
+          Finset.sum (Finset.range H) (fun j =>
+            630 * (((3^j : Nat) : Int))) := by
+            rw [Finset.sum_add_distrib]
+      _ = _ := by rw [Finset.mul_sum]
+  have hg := exact_three_geometric_sum H
+  change Finset.sum (Finset.range H) (fun j =>
+    (((3^j : Nat) : Int)) * ((Jr j-10)-64*(Jl j-10))) =
+      -315 - U3
+  rw [hRewrite, hT]
+  nlinarith [hg]
+
+#print axioms pure_source_renormalized_u_checksum
+
 #print axioms exact_terminal_u_potential
 #print axioms source_256_below_terminal_height
 #print axioms pure_source_terminal_u_potential
