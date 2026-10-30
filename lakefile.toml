@@ -149,3 +149,7 @@ roots = ["GSTProblem406BadValuationNoGo"]
 [[lean_lib]]
 name = "GST406PureUFiniteBoundary"
 roots = ["GSTProblem406TerminalUBoundary"]
+
+[[lean_lib]]
+name = "GST406PurePhaseMismatch"
+roots = ["GSTProblem406TruePowerPhaseMismatch"]
