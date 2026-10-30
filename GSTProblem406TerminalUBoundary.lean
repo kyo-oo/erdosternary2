@@ -57,10 +57,8 @@ theorem exact_terminal_u_potential
   have htail : E / 3^p = 0 := Nat.div_eq_of_lt (by omega)
   have hword : carryWord E p 0 3 = 0 := by
     norm_num [carryWord, graph, cell, vertex, h0, h1, h2]
-  change
-    gstUChargeExact (carry4 (4^3*E) p) -
-      (((4^3 : Nat) : Int)) * gstUChargeExact (carry4 E p) +
-        24 * ((carryWord E p 0 3 : Nat) : Int) = -315
+  simp only [potentialWith, unifiedState, graph, cell,
+    GSTCanonicalSevenAxisBridge.vertex, Nat.pow_zero, one_mul]
   norm_num [gstUChargeExact, h0, h3, hword]
 
 /-- The pure source 4^K has a completely explicit *finite* terminal
@@ -90,6 +88,7 @@ theorem source_256_below_terminal_height
       unfold terminalHeight
       rw [pow_add]
       norm_num
+      ring
 
 /-- Pure-power terminal coefficient is EXACTLY -315, for EVERY K≥13.
 This is axiom-free boundary information not used by the existing
