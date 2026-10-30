@@ -176,3 +176,8 @@ roots = ["GSTProblem406PurePowerNonlocalTransport"]
 [[lean_lib]]
 name = "GST406RationalPerronBound"
 roots = ["GSTProblem406RationalPerronBound"]
+
+# GST exact three-state compression and carry-one cubic recurrence.
+[[lean_lib]]
+name = "GST406CarryCubicRecurrence"
+roots = ["GSTProblem406CarryCubicRecurrence"]
