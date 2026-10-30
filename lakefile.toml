@@ -33,6 +33,7 @@ roots = [
   "GSTFinalPrefixOneStep6Infinite",
   "GSTFinalPurePowerResidueTransplant",
   "GSTProblem406BinaryOriginExponentScale",
+  "GSTProblem406TightPhysicalCut",
   "GSTProblem406BinaryOriginBadSurvivor",
   "GSTProblem406PhysicalCutGateEquivalence",
   "GSTProblem406BinaryOriginSmallCases",
