@@ -166,3 +166,8 @@ roots = ["GSTProblem406HGateExactOriginUpgrade"]
 [[lean_lib]]
 name = "GST406RowTwoFirstHit"
 roots = ["GSTProblem406RowTwoFirstHit"]
+
+# GST cross-branch verified all-horizon pure-power bad-prefix transport.
+[[lean_lib]]
+name = "GST406PurePowerNonlocalTransport"
+roots = ["GSTProblem406PurePowerNonlocalTransport"]
