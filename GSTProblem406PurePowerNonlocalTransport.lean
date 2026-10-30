@@ -80,7 +80,8 @@ and 4^12 have no same-row two at any p≤9. -/
 theorem true_child_eight_parent_eleven_seed :
     ChildHappyAtFour 8 ∧ ParentBadThrough 8 9 := by
   constructor
-  · decide
+  · unfold ChildHappyAtFour
+    decide
   · intro j hj hBound
     have hfinite : ∀ j : Fin 10, 1 ≤ j.val →
       ¬ (digit3 (4^(8+3)) j.val = 2 ∧
