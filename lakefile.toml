@@ -141,3 +141,7 @@ name = "GSTCanonicalSeedCountermodel"
 [[lean_lib]]
 name = "GSTProblem406DirectUniversalAttack"
 roots = ["GSTInfiniteFourPowerNavigation", "GSTFourPowerDirectExistenceFromHappy"]
+
+[[lean_lib]]
+name = "GST406BadValuationNoGo"
+roots = ["GSTProblem406BadValuationNoGo"]
