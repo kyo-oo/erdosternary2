@@ -5,6 +5,7 @@ on:
     branches: [gpt6/problem406-rowtwo-first-hit-exact-20261030]
     paths:
       - GSTProblem406RowTwoFirstHit.lean
+      - GSTProblem406PurePowerNonlocalTransport.lean
       - lakefile.toml
       - .github/workflows/gst_406_rowtwo_first_hit.yml
   workflow_dispatch:
@@ -28,8 +29,10 @@ jobs:
       - name: Type-check exact first-hit theorem and audit axioms
         run: |
           set -euo pipefail
-          lake build GST406RowTwoFirstHit 2>&1 | tee first-hit-build.log
+          lake build GST406RowTwoFirstHit GST406PurePowerNonlocalTransport 2>&1 | tee first-hit-build.log
           lake env lean GSTProblem406RowTwoFirstHit.lean 2>&1 | tee first-hit-axioms.log
-          ! grep -E 'error:|sorryAx|unsolved goals|unknown identifier|declaration uses .sorry.' first-hit-build.log first-hit-axioms.log
+          lake env lean GSTProblem406PurePowerNonlocalTransport.lean 2>&1 | tee nonlocal-axioms.log
+          ! grep -E 'error:|sorryAx|unsolved goals|unknown identifier|declaration uses .sorry.' first-hit-build.log first-hit-axioms.log nonlocal-axioms.log
           grep -F 'physical_seven_shift_row_two_sharp' first-hit-axioms.log
+          grep -F 'no_uniform_bounded_three_step_reappearance' nonlocal-axioms.log
           echo GST406_ROWTWO_FIRST_HIT_PASS=1
