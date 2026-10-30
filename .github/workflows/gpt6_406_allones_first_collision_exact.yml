@@ -1,0 +1,33 @@
+name: GST 406 All-Ones Exact First Collision Kernel
+on:
+  push:
+    branches: [gpt6/problem406-allones-exact-first-hit-20261030]
+    paths:
+      - GSTProblem406AllOnesFirstCollision.lean
+      - .github/workflows/gpt6_406_allones_first_collision_exact.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pinned Lean and Mathlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          export PATH="$HOME/.elan/bin:$PATH"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lake update
+          lake exe cache get
+          lake build GSTProblem406GSTPeelFixedPoint GSTFourPowerThirdWave
+      - name: Kernel and sorryAx audit exact all-ones first-row theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean GSTProblem406AllOnesFirstCollision.lean 2>&1 | tee allones.log
+          ! grep -E 'error:|sorryAx|unsolved goals|unknown identifier|declaration uses .sorry.' allones.log
+          grep -F 'allones_first_common_two_exact' allones.log
+          echo GST_ALLONES_EXACT_FIRST_HIT_PASS=1
