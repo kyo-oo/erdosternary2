@@ -105,8 +105,10 @@ theorem high_val_synthetic_child_has_hit_parent_all_bad :
       64*(badCounterexample/64)=badCounterexample := hshape
     have hParent4 :
       256*(badCounterexample/64)=4*badCounterexample := by
-      rw [← hshape]
-      ring
+      calc
+        256*(badCounterexample/64) =
+            4*(64*(badCounterexample/64)) := by ring
+        _ = 4*badCounterexample := by rw [hshape]
     rw [hParent,hParent4]
     exact counterexample_no_common_two_any_row p
 
