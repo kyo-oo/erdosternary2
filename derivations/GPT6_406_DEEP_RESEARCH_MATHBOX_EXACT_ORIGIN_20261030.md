@@ -61,9 +61,8 @@ transport argument (even with A mod27=1). It is **not** a
 counterexample to the original theorem: 55 is not a power 4^K.
 
 An independent WolframLanguageEvaluator computation reproduced
-all digits and the exact 41661 weighted sum. Strict Lean validation
-is performed by
-https://github.com/kyo-oo/erdosternary2/actions/workflows/gpt6_406_u2d_right_bad_countermodel.yml .
+all digits and the exact 41661 weighted sum. Strict Lean kernel validation and #print-axioms audit **PASS**:
+https://github.com/kyo-oo/erdosternary2/actions/runs/41021108173 .
 
 ## What the new countermodel says about the actual GST proof
 
@@ -137,7 +136,8 @@ A fixed ternary prefix/residue-class classification and
 a finite-state binary tag alone do not yield the missing
 origin-specific all-scale contradiction.
 
-**Status:** strict exact-origin arithmetic proved;
+**Status:** strict exact-origin arithmetic proved, strict U2D
+countermodel kernel check passed;
 U2D generic sign closure refuted by exact integer data;
 the original universal Problem 406 theorem remains open
 in the checked Lean proof tree. Production untouched.
