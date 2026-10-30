@@ -72,7 +72,6 @@ theorem physical_terminal_graph_cell
     rw [Nat.mod_eq_of_lt hsource, Nat.div_eq_of_lt hbound]
   · change ((4^t*4^K)/3^p)%3 = 0
     rw [Nat.div_eq_of_lt hsource]
-    decide
 
 /-- At all sufficiently high physical rows, the original retained
 width-three carry word is EXACTLY ZERO. -/
