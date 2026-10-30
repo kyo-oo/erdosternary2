@@ -153,3 +153,7 @@ roots = ["GSTProblem406TerminalUBoundary"]
 [[lean_lib]]
 name = "GST406PurePhaseMismatch"
 roots = ["GSTProblem406TruePowerPhaseMismatch"]
+
+[[lean_lib]]
+name = "GST406PureNonlocalTransport"
+roots = ["GSTProblem406PurePowerNonlocalTransport"]
