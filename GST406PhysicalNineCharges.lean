@@ -115,7 +115,8 @@ theorem centered_origin_all_k_nine_class (K : Nat) :
     omega
   calc
     centeredPotential K 3 =
-        centeredPotential (K%9+9*(K/9)) 3 := by rw [hre]
+        centeredPotential (K%9+9*(K/9)) 3 :=
+      congrArg (fun n : Nat => centeredPotential n 3) hre
     _ = centeredPotential (K%9) 3 :=
       centered_origin_period_multiple (K%9) (K/9)
     _ = sourceChargeNine (K%9) :=
