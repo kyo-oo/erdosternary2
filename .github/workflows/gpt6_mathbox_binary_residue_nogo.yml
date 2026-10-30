@@ -1,0 +1,34 @@
+name: GPT6 Mathbox GST Infinite Binary Residue NoGo Lean Kernel
+on:
+  push:
+    branches: [gpt6/problem406-mathbox-crossradix-origin-20261030]
+    paths:
+      - GSTProblem406MathboxBinaryResidueNoGo.lean
+      - .github/workflows/gpt6_mathbox_binary_residue_nogo.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lean and direct GST digit dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.0-rc2
+          export PATH="$HOME/.elan/bin:$PATH"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lake update
+          lake exe cache get
+          lake build GSTFourPowerDirectResidue
+      - name: Strict all-T BAD source, repunit and high 2-adic valuation kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake env lean GSTProblem406MathboxBinaryResidueNoGo.lean 2>&1 | tee mathbox-binary-nogo.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' mathbox-binary-nogo.log
+          grep -F 'bad_sources_at_arbitrarily_high_binary_precision' mathbox-binary-nogo.log
+          echo GST_MATHBOX_UNBOUNDED_BINARY_RESIDUE_NOGO_KERNEL_PASS=1
