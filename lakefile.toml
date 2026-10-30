@@ -157,3 +157,7 @@ roots = ["GSTProblem406TruePowerPhaseMismatch"]
 [[lean_lib]]
 name = "GST406PrefixOneDyadicNoGo"
 roots = ["GSTProblem406PrefixOneDyadicNoGo"]
+
+[[lean_lib]]
+name = "GST406HGateExactOriginUpgrade"
+roots = ["GSTProblem406HGateExactOriginUpgrade"]
