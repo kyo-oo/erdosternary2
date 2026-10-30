@@ -104,3 +104,21 @@ it must type-check the EXACT original challenge statement and
 have a `#print axioms` output free from `sorryAx` and all custom
 mathematical existence axioms. The same exact commit must then
 pass the comparator. No such promotion is made here.
+
+
+## Independent exact finite test, 2026-10-30
+
+The included reproducible script
+`scripts/gst_406_exact_first_hit_scan.py` computes the actual
+numbers `4^K` and `4^(K+1)` for each K, searching each positive
+ternary digit row until the source has no remaining nonzero digits.
+It does not impose a fixed digit window or use a hypothetical gate.
+
+Executed `python3 scripts/gst_406_exact_first_hit_scan.py --max-k 50000`.
+Of 49,996 exponents K=5,...,50,000, precisely K=7 lacked a
+common-two position. Maximum encountered earliest row: p=64 at
+K=26,849. New earliest-row record observations are
+`[(5,2),(8,4),(9,7),(10,10),(13,14),(39,20),(103,27),
+(165,28),(183,29),(310,40),(497,41),(3847,46),
+(13022,47),(21904,49),(25713,61),(26849,64)]`.
+These are finite computational receipts, never an all-K proof.
