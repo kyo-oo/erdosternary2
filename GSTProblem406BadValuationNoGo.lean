@@ -79,6 +79,39 @@ theorem not_universal_bad_four_thirds_bound :
   exact dvd_trans (pow_dvd_pow 2 hp)
     counterexample_exact_origin_data.2.2.1
 
+/-- Direct GST 3-step obstruction: this HIGH-2-valuation synthetic
+source has a true physical x4 shared-two at p=3, but its
+64-multiple is all-depth BAD. This does NOT claim the source is
+a pure power of 4; it refutes propagation relying only on the
+finite local carry table and a large fixed dyadic factor. -/
+theorem high_val_synthetic_child_has_hit_parent_all_bad :
+    (2:Nat)^61 ∣ (badCounterexample/64) ∧
+    digit3 (badCounterexample/64) 3=2 ∧
+    digit3 (4*(badCounterexample/64)) 3=2 ∧
+    (∀ p : Nat, 1 ≤ p →
+      ¬ (digit3 (64*(badCounterexample/64)) p=2 ∧
+         digit3 (256*(badCounterexample/64)) p=2)) := by
+  have hshape : 64*(badCounterexample/64)=badCounterexample := by
+    norm_num [badCounterexample]
+  constructor
+  · refine ⟨143, ?_⟩
+    norm_num [badCounterexample]
+  constructor
+  · norm_num [digit3,badCounterexample]
+  constructor
+  · norm_num [digit3,badCounterexample]
+  · intro p hp
+    have hParent :
+      64*(badCounterexample/64)=badCounterexample := hshape
+    have hParent4 :
+      256*(badCounterexample/64)=4*badCounterexample := by
+      rw [← hshape]
+      ring
+    rw [hParent,hParent4]
+    exact counterexample_no_common_two_any_row p
+
+#print axioms high_val_synthetic_child_has_hit_parent_all_bad
+
 #print axioms counterexample_exact_origin_data
 #print axioms counterexample_no_common_two_any_row
 #print axioms not_universal_bad_four_thirds_bound
