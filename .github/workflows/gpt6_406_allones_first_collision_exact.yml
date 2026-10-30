@@ -22,7 +22,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           lake update
           lake exe cache get
-          lake build GSTProblem406GSTPeelFixedPoint GSTFourPowerThirdWave
+          lake build GST406AllOnesExact
       - name: Kernel and sorryAx audit exact all-ones first-row theorem
         shell: bash
         run: |
