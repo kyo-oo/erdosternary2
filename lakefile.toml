@@ -171,3 +171,8 @@ roots = ["GSTProblem406RowTwoFirstHit"]
 [[lean_lib]]
 name = "GST406PurePowerNonlocalTransport"
 roots = ["GSTProblem406PurePowerNonlocalTransport"]
+
+# GST four-carry-state exact rational Perron contraction, no extra hGate.
+[[lean_lib]]
+name = "GST406RationalPerronBound"
+roots = ["GSTProblem406RationalPerronBound"]
