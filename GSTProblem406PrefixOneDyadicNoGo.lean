@@ -66,12 +66,11 @@ theorem bad_parent_at_every_row (p : Nat) :
         decide
     exact hfinite ⟨p, hp⟩
   · have hbound : badParent < 3^p :=
-      lt_of_lt_of_le exact_source_fingerprint.2.2.2.2.2.2
+      lt_of_lt_of_le exact_source_fingerprint.2.2.2.2.2
         (Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat)) (by omega))
     have hzero : GSTCanonicalSevenAxisBridge.digit3 badParent p=0 := by
       unfold GSTCanonicalSevenAxisBridge.digit3
       rw [Nat.div_eq_of_lt hbound]
-      norm_num
     have hparent :
       (graph sourceE 3 p).seven.digit =
         GSTCanonicalSevenAxisBridge.digit3 badParent p := by
