@@ -82,8 +82,12 @@ private theorem physical_eighth_block (L u : Nat) (hL : 9 ≤ L) :
   have hs : (4:Nat)^4 < 3^(L+1) := by
     have hle : (4:Nat)^4 ≤ 4^5 := by norm_num
     omega
-  have h4z : (4:Nat)^4 / 3^(L+1) = 0 := Nat.div_eq_of_lt hs
-  have h5z : (4:Nat)^5 / 3^(L+1) = 0 := Nat.div_eq_of_lt hpow
+  have h4z : (256:Nat) / 3^(L+1) = 0 := by
+    simpa only [show (4:Nat)^4 = 256 by decide] using
+      (Nat.div_eq_of_lt hs)
+  have h5z : (1024:Nat) / 3^(L+1) = 0 := by
+    simpa only [show (4:Nat)^5 = 1024 by decide] using
+      (Nat.div_eq_of_lt hpow)
   constructor
   · have h := GSTWorldtraceBlockLift.pow4_whole_block_lift
       4 u L 8 (by decide) (by omega)
