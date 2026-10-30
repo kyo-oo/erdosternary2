@@ -191,6 +191,29 @@ theorem bad_sources_at_arbitrarily_high_binary_precision
   · intro p hp hbad
     exact four_sparse_no_two (2^T) p hbad.2
 
+/-- Exact general-source collision proposition. Unlike physical 4^K,
+this predicate permits every natural source R. -/
+def GenericCommonTwo (R : Nat) : Prop :=
+  ∃ p : Nat, 1 ≤ p ∧
+    digit3 R p=2 ∧ digit3 (4*R) p=2
+
+/-- FORMAL IMPOSSIBILITY of any proposed universal separator using ONLY
+entry carry 1 and a fixed binary congruence at precision T:
+such a separator would contradict the explicit infinite BAD family.
+This is a proved negation of the weaker surrogate bridge, not
+a negation of the original genuine perfect-power theorem. -/
+theorem fixed_precision_does_not_force_generic_collision
+    (T : Nat) :
+    ¬ (∀ R : Nat, 0 < R → R%3=1 →
+       (2:Nat)^T ∣ R → GenericCommonTwo R) := by
+  intro hsep
+  obtain ⟨R,hpos,hmod,hdiv,hbad⟩ :=
+    bad_sources_at_arbitrarily_high_binary_precision T
+  obtain ⟨p,hp,hs,hn⟩ := hsep R hpos hmod hdiv
+  exact hbad p hp ⟨hs,hn⟩
+
+#print axioms fixed_precision_does_not_force_generic_collision
+
 #print axioms repunit3_closed
 #print axioms sparseOne3_closed
 #print axioms four_sparse_is_ternary_repunit
