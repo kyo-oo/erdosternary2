@@ -36,6 +36,7 @@ roots = [
   "GSTProblem406BinaryOriginBadSurvivor",
   "GSTProblem406PhysicalCutGateEquivalence",
   "GSTProblem406MathboxExactOrigin",
+  "GSTProblem406MathboxBinaryResidueNoGo",
   "GSTProblem406BinaryOriginSmallCases",
   "GSTProblem406CarryEntropyBound",
   "GSTProblem406DualValuationEntropy",
