@@ -57,15 +57,21 @@ theorem physical_source_lt_tighter_cut (K : Nat) (hK : 13 ≤ K) :
 /-- The new cut is never above the old physical four-thirds cut. -/
 theorem tighter_cut_le_old_cut (K : Nat) (hK : 13 ≤ K) :
     tighterPhysicalCut K ≤ physicalShortCut K := by
-  unfold tighterPhysicalCut physicalShortCut
-  omega
+  by_cases hBig : 28 ≤ K
+  · unfold tighterPhysicalCut physicalShortCut
+    omega
+  · have hKsmall : K ≤ 27 := by omega
+    interval_cases K <;> norm_num [tighterPhysicalCut,physicalShortCut] at *
 
 /-- The improved cutoff retains the exact high 2-adic order of 4^K. -/
 theorem tighter_cut_high_binary_order (K : Nat) (hK : 13 ≤ K) :
     (2:Nat)^((3*tighterPhysicalCut K)/2+1) ∣ 4^K := by
   have hle : (3*tighterPhysicalCut K)/2+1 ≤ 2*K := by
-    unfold tighterPhysicalCut
-    omega
+    by_cases hBig : 28 ≤ K
+    · unfold tighterPhysicalCut
+      omega
+    · have hKsmall : K ≤ 27 := by omega
+      interval_cases K <;> norm_num [tighterPhysicalCut] at *
   have hdiv : (2:Nat)^((3*tighterPhysicalCut K)/2+1) ∣
       (2:Nat)^(2*K) := pow_dvd_pow 2 hle
   simpa only [show (4:Nat)=2^2 by decide, pow_mul] using hdiv
