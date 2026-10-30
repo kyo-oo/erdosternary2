@@ -135,3 +135,8 @@ name = "GSTCoupledControllerCountermodel"
 
 [[lean_lib]]
 name = "GSTCanonicalSeedCountermodel"
+
+# Strict isolated exact first-collision mathematical kernel.
+[[lean_lib]]
+name = "GST406AllOnesExact"
+roots = ["GSTProblem406GSTPeelFixedPoint", "GSTProblem406AllOnesFirstCollision"]
