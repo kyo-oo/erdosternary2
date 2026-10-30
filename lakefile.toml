@@ -149,3 +149,7 @@ roots = ["GSTProblem406BadValuationNoGo"]
 [[lean_lib]]
 name = "GST406PhysicalUTerminalAudit"
 roots = ["GST406PhysicalUTerminal"]
+
+[[lean_lib]]
+name = "GST406CenteredUConservationAudit"
+roots = ["GST406CenteredUConservation"]
