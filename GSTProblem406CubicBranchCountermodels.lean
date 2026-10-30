@@ -52,7 +52,6 @@ private theorem bad_channel_of_finite_source
     have hz : digit3 x p=0 := by
       unfold digit3
       rw [Nat.div_eq_of_lt hsmall]
-      rfl
     omega
 
 private theorem generic_zero_source_bad :
