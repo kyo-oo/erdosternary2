@@ -47,8 +47,12 @@ theorem exact_binary_threshold_exponents
     omega
   · right
     refine ⟨h0, ?_⟩
-    unfold threshold physicalShortCut
-    omega
+    have hsplit : K % 3 = 1 ∨ K % 3 = 2 := by omega
+    rcases hsplit with h1 | h2
+    · unfold threshold physicalShortCut
+      omega
+    · unfold threshold physicalShortCut
+      omega
 
 /-- The exact original source really is exactly the report's
 two-case binary origin, rather than an arbitrary multiple of it. -/
