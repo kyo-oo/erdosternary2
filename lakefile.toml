@@ -135,3 +135,9 @@ name = "GSTCoupledControllerCountermodel"
 
 [[lean_lib]]
 name = "GSTCanonicalSeedCountermodel"
+
+# Mathbox: unconditionally compile the ACTUAL universal hGate contender.
+# No sorry imports and no axiom promotion are permitted.
+[[lean_lib]]
+name = "GSTProblem406DirectUniversalAttack"
+roots = ["GSTInfiniteFourPowerNavigation", "GSTFourPowerDirectExistenceFromHappy"]
