@@ -139,9 +139,15 @@ private theorem exact_three_geometric_sum (H : Nat) :
   induction H with
   | zero => norm_num
   | succ H ih =>
-    rw [Finset.sum_range_succ, pow_succ]
-    push_cast
-    omega
+    rw [Finset.sum_range_succ]
+    have hpow :
+        (((3^(H+1) : Nat) : Int)) =
+          3 * (((3^H : Nat) : Int)) := by
+      rw [pow_succ]
+      push_cast
+      ring
+    rw [hpow]
+    nlinarith [ih]
 
 /-- For every physical K>=13, the full original GST U-flux
 becomes a bounded *finite checksum* after subtracting the
