@@ -54,10 +54,10 @@ theorem demo_right_all_depth_bad :
          digit3 (55*4^4) p=2) := by
   intro p
   by_cases hp : p<8
-  · interval_cases p <;> norm_num [digit3]
-  · have hpow : (3:Nat)^8 ≤ 3^p := by
-      gcongr
-      omega
+  · have hp7 : p ≤ 7 := by omega
+    interval_cases p <;> norm_num [digit3] <;> omega
+  · have hpow : (3:Nat)^8 ≤ 3^p :=
+      Nat.pow_le_pow_of_le (by decide : 1 < (3:Nat)) (by omega)
     have hlt : (55:Nat)*4^3 < 3^p := by
       have hsmall : (55:Nat)*4^3 < 3^8 := by decide
       omega
