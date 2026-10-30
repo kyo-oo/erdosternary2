@@ -110,4 +110,30 @@ theorem original_commonTwo_iff_tighter_cut (K : Nat)
 #print axioms digit_zero_above_tighter_cut
 #print axioms original_commonTwo_iff_tighter_cut
 
+/-- Stronger than the old binary threshold by a margin that grows
+linearly with K: exact 24/19 physical scale certifies 19*t <=36*K+46,
+where t=floor(3*L/2)+1. -/
+theorem tighter_binary_threshold_linear (K : Nat) :
+    19*((3*tighterPhysicalCut K)/2+1) ≤ 36*K+46 := by
+  unfold tighterPhysicalCut
+  omega
+
+/-- Every true physical source K>=13 has a 2-adic valuation margin
+delta=2K-(floor(3L/2)+1) that grows at least proportionally to K:
+2K <= 19*delta+46. The source value remains EXACTLY 4^K; this
+does not assert a universal BAD-exclusion theorem. -/
+theorem physical_origin_binary_gap_linear (K : Nat) (hK : 13 ≤ K) :
+    2*K ≤ 19*(2*K-((3*tighterPhysicalCut K)/2+1))+46 := by
+  have hbound := tighter_binary_threshold_linear K
+  have hle : (3*tighterPhysicalCut K)/2+1 ≤ 2*K := by
+    by_cases hBig : 28 ≤ K
+    · unfold tighterPhysicalCut
+      omega
+    · have hKsmall : K ≤ 27 := by omega
+      interval_cases K <;> norm_num [tighterPhysicalCut] at *
+  omega
+
+#print axioms tighter_binary_threshold_linear
+#print axioms physical_origin_binary_gap_linear
+
 end GSTProblem406TightPhysicalCut
