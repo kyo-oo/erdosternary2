@@ -161,3 +161,8 @@ roots = ["GSTProblem406PrefixOneDyadicNoGo"]
 [[lean_lib]]
 name = "GST406HGateExactOriginUpgrade"
 roots = ["GSTProblem406HGateExactOriginUpgrade"]
+
+# Mathbox GST: exact first-hit row-two orbit classification and sharp 6/7 split.
+[[lean_lib]]
+name = "GST406RowTwoFirstHit"
+roots = ["GSTProblem406RowTwoFirstHit"]
