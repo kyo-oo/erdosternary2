@@ -39,6 +39,7 @@ theorem genuine_power_prefix_right_bad :
       ¬ HappyCell
         (graph (4^8) 3 (3+p.val)).seven.carry
         (graph (4^8) 3 (3+p.val)).seven.digit) := by
+  simp only [HappyCell]
   decide
 
 /-- Exact, competing phase signs in the real K=8, K+3=11
@@ -66,6 +67,7 @@ theorem genuine_power_right_later_happy :
     HappyCell
       (graph (4^8) 3 10).seven.carry
       (graph (4^8) 3 10).seven.digit := by
+  simp only [HappyCell]
   decide
 
 #print axioms genuine_power_prefix_right_bad
