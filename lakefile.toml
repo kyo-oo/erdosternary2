@@ -186,3 +186,8 @@ roots = ["GSTProblem406CarryCubicRecurrence"]
 [[lean_lib]]
 name = "GST406CubicBranchCountermodels"
 roots = ["GSTProblem406CubicBranchCountermodels"]
+
+# Original four-power eighth-trit HGate construction, isolated kernel target.
+[[lean_lib]]
+name = "GST406HGateEighthTrit"
+roots = ["GSTProblem406HGateEighthTrit"]
