@@ -1,4 +1,4 @@
-name: Bulldoze Erdos Weak Problems (271 Stanley A(2) + 404 Kernel Law + 261 Two Solutions)
+name: Bulldoze Erdos Weak Problems (271 + 404 + 261 TwoSolutions + 261 Continuum Tower)
 on:
   push:
     branches: [bulldoze/erdos-weak-problems-3-20261101]
@@ -6,6 +6,7 @@ on:
       - bulldoze/problem271-stanley-a2/StanleyA2.lean
       - bulldoze/problem404-padic-kernel/KernelLaw.lean
       - bulldoze/problem261-two-solutions/**
+      - bulldoze/problem261-continuum-tower/**
       - .github/workflows/bulldoze_erdos_weak_problems.yml
   workflow_dispatch:
 permissions:
@@ -56,8 +57,26 @@ jobs:
           grep -F "'erdos261_weakened_two_solutions' does not depend on any axioms" two-solutions.log
           grep -F "'erdos261_three_solutions' does not depend on any axioms" two-solutions.log
           echo TWO_SOLUTIONS_KERNEL_GREEN=1
+      - name: Kernel 4 - Erdos 261 CONTINUUM question, real-x tower (Kill #6)
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean bulldoze/problem261-continuum-tower/Erdos261Tower.lean 2>&1 | tee tower.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' tower.log
+          grep -F "(1, 4, 11, 26, 57, 120, 247, 502)" tower.log
+          grep -F "(2, 2)" tower.log
+          grep -F "(16, 16)" tower.log
+          grep -F "(88, 88)" tower.log
+          grep -F "(416, 416)" tower.log
+          grep -F "(1824, 1824)" tower.log
+          grep -F "(54430251538710528, 54430251538710528, 54430251538710528)" tower.log
+          grep -F "(502030460001114580558742593210417152, 502030460001114580558742593210417152, 502030460001114580558742593210417152)" tower.log
+          grep -F "'Erdos261Tower.erdos261_continuum' depends on axioms: [propext, Quot.sound]" tower.log
+          grep -F "'Erdos261Tower.tower_cauchy' depends on axioms: [propext, Quot.sound]" tower.log
+          echo TOWER_KERNEL_GREEN=1
       - name: Independent verification battery
         shell: bash
         run: |
           python3 bulldoze/scripts/verify_bulldoze.py
           python3 bulldoze/problem261-two-solutions/verify_frontiers.py
+          python3 bulldoze/problem261-continuum-tower/verify_tower261.py

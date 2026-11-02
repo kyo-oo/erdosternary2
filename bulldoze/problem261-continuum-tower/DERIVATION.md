@@ -120,18 +120,23 @@ the page itself (edit 2025-12-01) records the question unresolved. If
 any comment already contains the tower construction, this package's
 value reduces to the census + the walls + the formalization.
 
-## 6. THE FORMAL PACKAGE (in active compile war)
+## 6. THE FORMAL PACKAGE (KERNEL-GREEN — compile war WON, rounds 1–12)
 
 `Erdos261Tower.lean`: core-only (no Mathlib — the disk could not fit
 the Mathlib olean cache; the CI runners can). All-scaled-Nat encoding:
 `P f M = Σ_{a ≤ M, f a} a·2^{M-a}`, `sameValue` as the all-Nat
 ε-tolerance relation, `checkpoint_eq` (exact boundary equality of
 partial values for ALL σ), `tower_sameValue`, `tower_cauchy`,
-`F_injective`, and the main theorem `erdos261_continuum`. Zero-axiom
-target (everything computable). Status at this commit: the mathematics
-is fully verified by the battery; the Lean file is mid-compile-war
-(~31 errors remaining from ~130 initial; the §-map is complete and the
-remaining errors are core-API grind, ledger lessons below).
+`F_injective`, and the main theorem `erdos261_continuum`.
+
+**FINAL STATUS: 0 errors, 0 sorry. Axioms of erdos261_continuum:
+[propext, Quot.sound] (no Classical.choice).** Receipts (compiler
+#eval, exact): mfun family (1, 4, 11, 26, 57, 120, 247, 502); halving
+(2,2), (16,16), (88,88), (416,416), (1824,1824); checkpoints K=4, K=5
+identical across all σ; towerRat K=6 =
+125507615000278645139685648302604303/166153499473114484112975882535043072
+for all σ (= x* ≈ 0.7553714811). The war: ~130 initial → 31 → 15 → 7
+→ 1 → 0 across rounds 1–12 (sessions 009–010).
 
 ### Compile-war ledger additions (Lean 4.33.0-rc2 core-only)
 19. `lemma` is GONE from core Lean 4.33 — use `theorem` only.
@@ -166,6 +171,40 @@ remaining errors are core-API grind, ledger lessons below).
 - Borwein–Loring [BoLo90]; Tengely–Ulas–Zygadło arXiv:2008.01501.
 - Kill #5 (this branch): the weakened question, zero-axiom.
 - Kill #2 (`gpt6/erdos-one-shots-2-20261101`): the greedy-walk theorem.
+
+### Compile-war ledger lessons (rounds 9–12, the winning rounds)
+29. `cases hσ : σ k` (equation-form) replaces `rcases Bool.eq_false_or_true`
+    — the latter is NOT core. The equation-form leaves hσ : σ k = false
+    ready for downstream rw, and the goal is untouched when σ k does
+    not occur syntactically in it.
+30. omega's nonlinear atomization is SYNTAX-SENSITIVE: `2 * q * X`
+    (= (2*q)*X), `q * 2`, `X * X` and `(k+1)*(k+1)` are all DISTINCT
+    atoms. Before the final omega, normalize multiplicands with
+    `rw [hrhs] at h` (e.g. `(n-1+2)*P` → `(n+1)*P`); state helpers in
+    the EXACT syntactic form the goal uses (`q * 2`, not `2 * q`).
+31. rw does NOT beta-reduce after instantiation: listMapCongr
+    per-element goals arrive as beta-redexes; `show` the reduced form
+    first. A pattern containing the FREE x can never match the BOUND
+    x✝ inside a redex — the #1 silent rewrite failure.
+32. rw's auto-rfl fires only at reducible transparency: `if false = true
+    then A else 0 = 0` is NOT auto-closed (instDecidableEqBool is not
+    reducible), but an explicit `rfl` (default transparency) closes it.
+33. `∀ σ τ, A ∧ B` parses as `∀ σ τ, (A ∧ B)` — the binder SWALLOWS the
+    conjunction. In ∃-statements write `((∀ σ τ, A) ∧ B)` explicitly,
+    or the anonymous constructor elaborates against a Pi and dies.
+34. ≤-chains through an equality link: `Nat.le_trans h (Nat.le_of_eq
+    h')`; rw can NEVER use a ≤-hypothesis as a rule.
+35. After `simp only [seg]` the seg applications are GONE — any rw
+    whose pattern is a `seg f n M` application fails. Normalize the
+    raw map-forms with omega-equalities instead (`rw [← hcount2]`
+    rewrites the range count `c + 1` → `n + c + 1 - n` to match the
+    unfolded RHS).
+36. `mfun 0 - 1 = 0` is NOT omega-provable (mfun 0 opaque) — `by
+    decide` (kernel computes mfun 0 = pow2 2 - 3 = 1).
+37. `pow2_sq`'s `k ≤ 4` branch MUST split k = 4 (decide: 25 ≤ 32) from
+    k = 3 (decide: 16 ≤ 16); `Nat.eq_or_lt_of_le h4` then `subst` +
+    `decide`. The case hypothesis 4 ≤ k+1 from auto-generalized
+    induction IS available to omega (inaccessible names included).
 
 ### Compile-war round-8 diagnoses (for the next session — top remaining errors)
 - 194: split the final omega into a 3-step calc (hexp / hmid ≤ 2B / 2B ≤ 2X).

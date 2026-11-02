@@ -191,12 +191,15 @@ theorem pow2_sq (k : Nat) (hk : 4 ≤ k) : k * k ≤ pow2 k := by
         have hexp : (k + 1) * (k + 1) = k * k + k + (k + 1) := by
           rw [Nat.add_mul, Nat.mul_add, Nat.mul_one, Nat.one_mul]
         omega
-      · have hk4 : k = 3 := by omega
-        subst hk4
-        have hp : pow2 (3 + 1) = 2 * pow2 3 := pow2_succ_eq 3
-        have hp3 : pow2 3 = 8 := by decide
-        rw [hp, hp3]
-        decide
+      · rcases Nat.eq_or_lt_of_le h4 with heq | hlt
+        · subst heq
+          decide
+        · have hk3 : k = 3 := by omega
+          subst hk3
+          have hp : pow2 (3 + 1) = 2 * pow2 3 := pow2_succ_eq 3
+          have hp3 : pow2 3 = 8 := by decide
+          rw [hp, hp3]
+          decide
 
 -- ===========================================================================
 -- §3  THE HALVING FAMILY — SEPARATION ARITHMETIC (pure Nat)
@@ -240,7 +243,7 @@ theorem mfun_lt_of_lt {a b : Nat} (h : a < b) : mfun a < mfun b := by
       · have hlt := ih h'
         have hs := mfun_lt_succ b
         omega
-      · subst h'
+      · rw [h']
         exact mfun_lt_succ b
 
 theorem mfun_le_of_le {a b : Nat} (h : a ≤ b) : mfun a ≤ mfun b := by
@@ -269,12 +272,12 @@ theorem region_unique {k j : Nat} (a : Nat)
   rcases Nat.lt_or_ge k j with hlt | hge
   · have hmono : mfun (k + 1) ≤ mfun j := mfun_le_of_le (by omega)
     have hsep := mfun_sep k
-    exact region_disj hlt a h1' h2' (by omega)
+    exact (region_disj hlt a h1' h2' (by omega) h2).elim
   · rcases Nat.lt_or_ge j k with hlt' | hge'
     · have hmono : mfun (j + 1) ≤ mfun k := mfun_le_of_le (by omega)
       have hsep := mfun_sep j
-      exact region_disj hlt' a h1 h2 (by omega)
-    · exact absurd hge (by omega)
+      exact (region_disj hlt' a h1 h2 (by omega) h2').elim
+    · omega
 
 -- ===========================================================================
 -- §4  THE SCALED-HALVING IDENTITY (pure Nat)
@@ -326,8 +329,6 @@ theorem halving_region (k : Nat) :
   have hp : pow2 (k + 2) = 2 * pow2 (k + 1) := pow2_succ_eq (k + 1)
   have hsplit : (mfun k + 2) * pow2 (k + 1) = mfun k * pow2 (k + 1) + 2 * pow2 (k + 1) := by
     rw [Nat.add_mul]
-  omega
-
   omega
 
 -- ===========================================================================
@@ -461,8 +462,8 @@ theorem P_split (f : Nat → Bool) (M d : Nat) :
   rw [hnorm, range_split M d, List.map_append, List.sum_append]
   have hfirst : (List.range (M + 1)).map (fun a => if f a then a * pow2 (M + d - a) else 0)
       = (List.range (M + 1)).map (fun a => if f a then a * pow2 (M - a) * pow2 d else 0) := by
-    refine listMapCongr (fun a _ => ?_)
-    have ham : a ≤ M := List.mem_range.mp (by simp)
+    refine listMapCongr (fun a ha => ?_)
+    have ham : a ≤ M := Nat.le_of_lt_succ (List.mem_range.mp ha)
     have hidx : M + d - a = (M - a) + d := by omega
     rw [hidx, pow2_add, Nat.mul_assoc]
   rw [hfirst, sum_ite_mul_const]
@@ -472,19 +473,17 @@ theorem P_split (f : Nat → Bool) (M d : Nat) :
       = (List.range d).map
           (fun x => if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1 + x)) else 0) := by
     rw [List.map_map]
+    exact listMapCongr (fun x _ => rfl)
   rw [hsecond]
-  have hsegdef : seg f (M + 1) (M + d)
-      = (List.range (M + d + 1 - (M + 1))).map
-          (fun x => if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1) - x) else 0) |>.sum :=
-        rfl
-  rw [hsegdef]
-  have hcount : M + d + 1 - (M + 1) = d := by omega
+  have hcount : M + 1 + d - (M + 1) = d := by omega
   rw [hcount]
   have hexp : ∀ x ∈ List.range d,
       (fun x => if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1) - x) else 0) x
         = (fun x => if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1 + x)) else 0) x := by
-    intro x _
-    have hxd : x < d := List.mem_range.mp (by simp)
+    intro x hx
+    have hxd : x < d := List.mem_range.mp hx
+    show (if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1) - x) else 0)
+        = (if f (M + 1 + x) then (M + 1 + x) * pow2 (M + d - (M + 1 + x)) else 0)
     have : M + d - (M + 1) - x = M + d - (M + 1 + x) := by omega
     rw [this]
   rw [listMapCongr hexp]
@@ -494,7 +493,8 @@ theorem P_split' (f : Nat → Bool) (M N : Nat) (hMN : M ≤ N) (hM : 1 ≤ M) :
   have hd : (M - 1) + (N - M + 1) = N := by omega
   rw [← hd]
   have hM1 : M - 1 + 1 = M := by omega
-  rw [P_split, hM1]
+  have hpow : pow2 (M - 1 + (N - M + 1) - M + 1) = pow2 (N - M + 1) := by rw [hd]
+  rw [P_split, hM1, hpow]
 
 -- ===========================================================================
 -- §7  THE REGION LAW AND THE CHECKPOINT THEOREM
@@ -506,7 +506,7 @@ theorem seg_region (σ : Nat → Bool) (k : Nat) :
     seg (F σ) (mfun k) (mfun k + k + 1) = mfun k * pow2 (k + 1) := by
   have hcount : mfun k + k + 1 + 1 - mfun k = k + 2 := by omega
   simp only [seg, hcount]
-  rcases Bool.eq_false_or_true (σ k) with hσ | hσ
+  cases hσ : σ k
   · -- σ k = false: x = 0 term is 0; x ≥ 1 terms are the intSum terms
     have hv : ∀ x, 1 ≤ x → x ≤ k + 1 → F σ (mfun k + x) = true := by
       intro x hx1 hx2
@@ -515,22 +515,36 @@ theorem seg_region (σ : Nat → Bool) (k : Nat) :
       rfl
     have h0 : F σ (mfun k + 0) = false := by
       rw [Nat.add_zero, F_P σ k, hσ]
-      rfl
-    rw [sum_range_shift
+    have hr : k + 1 + 1 = k + 2 := by omega
+    rw [← hr]
+    have hsegform : (List.range (k + 1 + 1)).map
+          (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (mfun k + k + 1 - mfun k - x) else 0)
+        = (List.range (k + 1 + 1)).map
+          (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (k + 1 - x) else 0) := by
+      refine listMapCongr (fun x _ => ?_)
+      have hexp : mfun k + k + 1 - mfun k - x = k + 1 - x := by omega
+      rw [hexp]
+    rw [hsegform, sum_range_shift
       (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (k + 1 - x) else 0) (k + 1)]
+    show (if F σ (mfun k + 0) then (mfun k + 0) * pow2 (k + 1 - 0) else 0)
+        + ((List.range (k + 1)).map
+            (fun x => if F σ (mfun k + (x + 1)) then (mfun k + (x + 1)) * pow2 (k + 1 - (x + 1)) else 0)).sum
+        = mfun k * pow2 (k + 1)
     have hterm0 : (if F σ (mfun k + 0) then (mfun k + 0) * pow2 (k + 1 - 0) else 0) = 0 := by
       rw [h0]
-      omega
+      rfl
     rw [hterm0, Nat.zero_add]
     have hcongr : (List.range (k + 1)).map
           (fun x => if F σ (mfun k + (x + 1)) then (mfun k + (x + 1)) * pow2 (k + 1 - (x + 1)) else 0)
         = (List.range (k + 1)).map (fun i => (mfun k + i + 1) * pow2 (k + 1 - i - 1)) := by
-      refine listMapCongr (fun x _ => ?_)
+      refine listMapCongr (fun x hx => ?_)
+      have hxk : x < k + 1 := List.mem_range.mp hx
       have hvx := hv (x + 1) (by omega) (by omega)
       rw [hvx]
       simp only [if_pos]
+      have hbr2 : mfun k + (x + 1) = mfun k + x + 1 := by omega
       have hexp : k + 1 - (x + 1) = k + 1 - x - 1 := by omega
-      rw [hexp]
+      rw [hbr2, hexp]
     rw [hcongr]
     exact halving_region k
   · -- σ k = true: x = 0 term is the answer; x ≥ 1 terms are 0
@@ -541,19 +555,31 @@ theorem seg_region (σ : Nat → Bool) (k : Nat) :
       rfl
     have h0 : F σ (mfun k + 0) = true := by
       rw [Nat.add_zero, F_P σ k, hσ]
-      rfl
-    rw [sum_range_shift
+    have hr : k + 1 + 1 = k + 2 := by omega
+    rw [← hr]
+    have hsegform : (List.range (k + 1 + 1)).map
+          (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (mfun k + k + 1 - mfun k - x) else 0)
+        = (List.range (k + 1 + 1)).map
+          (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (k + 1 - x) else 0) := by
+      refine listMapCongr (fun x _ => ?_)
+      have hexp : mfun k + k + 1 - mfun k - x = k + 1 - x := by omega
+      rw [hexp]
+    rw [hsegform, sum_range_shift
       (fun x => if F σ (mfun k + x) then (mfun k + x) * pow2 (k + 1 - x) else 0) (k + 1)]
+    show (if F σ (mfun k + 0) then (mfun k + 0) * pow2 (k + 1 - 0) else 0)
+        + ((List.range (k + 1)).map
+            (fun x => if F σ (mfun k + (x + 1)) then (mfun k + (x + 1)) * pow2 (k + 1 - (x + 1)) else 0)).sum
+        = mfun k * pow2 (k + 1)
     have hterm0 : (if F σ (mfun k + 0) then (mfun k + 0) * pow2 (k + 1 - 0) else 0)
         = mfun k * pow2 (k + 1) := by
       rw [h0]
-      simp only [if_pos]
-      omega
+      rfl
     rw [hterm0]
     have hzero : (List.range (k + 1)).map
           (fun x => if F σ (mfun k + (x + 1)) then (mfun k + (x + 1)) * pow2 (k + 1 - (x + 1)) else 0)
         = (List.range (k + 1)).map (fun _ => 0) := by
-      refine listMapCongr (fun x _ => ?_)
+      refine listMapCongr (fun x hx => ?_)
+      have hxk : x < k + 1 := List.mem_range.mp hx
       have hvx := hv (x + 1) (by omega) (by omega)
       rw [hvx]
       rfl
@@ -561,7 +587,7 @@ theorem seg_region (σ : Nat → Bool) (k : Nat) :
     have hsum0 : ((List.range (k + 1)).map (fun _ => 0)).sum = 0 := by
       induction (List.range (k + 1)) with
       | nil => rfl
-      | cons a t ih => rw [List.map_cons, List.sum_cons, ih]; omega
+      | cons a t ih => rw [List.map_cons, List.sum_cons, ih]
     rw [hsum0, Nat.add_zero]
 
 /-- Scale reduction of a segment whose tail lies in a gap. -/
@@ -576,9 +602,11 @@ theorem seg_scale (f : Nat → Bool) (n c M' : Nat) (hnc : n + c ≤ M')
       (fun x => if f (n + x) then (n + x) * pow2 (M' - n - x) else 0)
       = (List.range (M' - n - c)).map (fun _ => 0) := by
     rw [List.map_map]
-    refine listMapCongr (fun x _ => ?_)
+    refine listMapCongr (fun x hx => ?_)
+    have hx2 : x < M' - n - c := List.mem_range.mp hx
     have hx : n + (c + 1 + x) = n + c + 1 + x := by omega
     have hfalse := hgap (n + c + 1 + x) (by omega) (by omega)
+    rw [← hx] at hfalse
     show (if f (n + (c + 1 + x)) then (n + (c + 1 + x)) * pow2 (M' - n - (c + 1 + x)) else 0) = 0
     rw [hfalse]
     rfl
@@ -586,7 +614,7 @@ theorem seg_scale (f : Nat → Bool) (n c M' : Nat) (hnc : n + c ≤ M')
   have hsum0 : ((List.range (M' - n - c)).map (fun _ => 0)).sum = 0 := by
     induction (List.range (M' - n - c)) with
     | nil => rfl
-    | cons a t ih => rw [List.map_cons, List.sum_cons, ih]; omega
+    | cons a t ih => rw [List.map_cons, List.sum_cons, ih]
   rw [hsum0, Nat.add_zero]
   -- first part: rescale by 2^{M'−n−c}
   have hfirst : (List.range (c + 1)).map
@@ -594,17 +622,13 @@ theorem seg_scale (f : Nat → Bool) (n c M' : Nat) (hnc : n + c ≤ M')
       = (List.range (c + 1)).map
           (fun x => if f (n + x) then (n + x) * pow2 (n + c - n - x) * pow2 (M' - n - c) else 0) := by
     refine listMapCongr (fun x hx => ?_)
-    have hxc : x ≤ c := List.mem_range.mp hx
+    have hxc : x ≤ c := Nat.le_of_lt_succ (List.mem_range.mp hx)
     have hexp : M' - n - x = (n + c - n - x) + (M' - n - c) := by omega
     rw [hexp, pow2_add, ← Nat.mul_assoc]
   rw [hfirst, sum_ite_mul_const]
   -- the remaining seg-def normalization
-  have hsegdef : seg f n (n + c)
-      = (List.range (n + c + 1 - n)).map
-          (fun x => if f (n + x) then (n + x) * pow2 (n + c - n - x) else 0) |>.sum :=
-        rfl
   have hcount2 : n + c + 1 - n = c + 1 := by omega
-  rw [hsegdef, hcount2]
+  rw [← hcount2]
 
 /-- The segment over [m K, m (K+1) − 1] is σ-free. -/
 theorem seg_tower (σ : Nat → Bool) (K : Nat) :
@@ -616,14 +640,15 @@ theorem seg_tower (σ : Nat → Bool) (K : Nat) :
   have hle : mfun K + (K + 1) ≤ mfun (K + 1) - 1 := by
     have := mfun_sep K
     omega
-  rw [seg_scale (F σ) (mfun K) (K + 1) (mfun (K + 1) - 1) hle hgap, seg_region]
+  rw [seg_scale (F σ) (mfun K) (K + 1) (mfun (K + 1) - 1) hle hgap]
+  have hbr : mfun K + (K + 1) = mfun K + K + 1 := by omega
+  rw [hbr, seg_region]
   have hp : pow2 (K + 1) * pow2 (mfun (K + 1) - 1 - mfun K - (K + 1))
       = pow2 (mfun (K + 1) - 1 - mfun K) := by
     rw [← pow2_add]
     congr 1
     omega
-  rw [hp, Nat.mul_assoc]
-  omega
+  rw [Nat.mul_assoc, hp]
 
 /-- THE CHECKPOINT THEOREM: partial values at region boundaries are
 EXACTLY equal for all tower representations. -/
@@ -631,10 +656,11 @@ theorem checkpoint_eq (σ τ : Nat → Bool) (K : Nat) :
     P (F σ) (mfun K - 1) = P (F τ) (mfun K - 1) := by
   induction K with
   | zero =>
-      have h0 : mfun 0 - 1 = 0 := by omega
+      have h0 : mfun 0 - 1 = 0 := by decide
       rw [h0, P_zero, P_zero]
   | succ K ih =>
       have hM : 1 ≤ mfun K := mfun_pos K
+      have hsep := mfun_sep K
       have hsplitσ := P_split' (F σ) (mfun K) (mfun (K + 1) - 1) (by omega) hM
       have hsplitτ := P_split' (F τ) (mfun K) (mfun (K + 1) - 1) (by omega) hM
       rw [hsplitσ, hsplitτ, seg_tower σ K, seg_tower τ K, ih]
@@ -644,35 +670,38 @@ theorem checkpoint_eq (σ τ : Nat → Bool) (K : Nat) :
 -- ===========================================================================
 
 /-- Full-segment identity (from the scaled-halving at m = n−1). -/
-theorem full_seg_identity (n M : Nat) (hn : 1 ≤ n) :
+theorem full_seg_identity (n M : Nat) (hn : 1 ≤ n) (hnM : n ≤ M + 1) :
     ((List.range (M + 1 - n)).map (fun x => (n + x) * pow2 (M - n - x))).sum + (M + 2)
       = (n + 1) * pow2 (M + 1 - n) := by
-  have hj : M + 1 - n = (M - n) + 1 := by omega
   have h := halving_nat (n - 1) (M + 1 - n)
   have hconv : intSum (n - 1) (M + 1 - n)
       = ((List.range (M + 1 - n)).map (fun x => (n + x) * pow2 (M - n - x))).sum := by
     unfold intSum
-    refine listMapCongr (fun i _ => ?_)
-    have hi : i < M + 1 - n := List.mem_range.mp (by simp)
-    have h1 : (n - 1) + i + 1 = n + i := by omega
-    have h2 : M + 1 - n - i - 1 = M - n - i := by omega
-    rw [h1, h2]
+    have hmap : (List.range (M + 1 - n)).map (fun i => (n - 1 + i + 1) * pow2 (M + 1 - n - i - 1))
+        = (List.range (M + 1 - n)).map (fun x => (n + x) * pow2 (M - n - x)) := by
+      refine listMapCongr (fun i hi => ?_)
+      have hilt : i < M + 1 - n := List.mem_range.mp hi
+      have h1 : (n - 1) + i + 1 = n + i := by omega
+      have h2 : M + 1 - n - i - 1 = M - n - i := by omega
+      rw [h1, h2]
+    rw [hmap]
   rw [hconv] at h
   have hmid : (n - 1) + (M + 1 - n) + 2 = M + 2 := by omega
-  have hrhs : (n - 1 + 2) = n + 1 := by omega
+  have hrhs : n - 1 + 2 = n + 1 := by omega
+  rw [hrhs] at h
   omega
 
 /-- Segment bound. -/
-theorem seg_bound (f : Nat → Bool) (n M : Nat) (hn : 1 ≤ n) :
+theorem seg_bound (f : Nat → Bool) (n M : Nat) (hn : 1 ≤ n) (hnM : n ≤ M + 1) :
     seg f n M ≤ (n + 1) * pow2 (M + 1 - n) := by
-  have hle : (List.range (M + 1 - n)).map
-        (fun x => if f (n + x) then (n + x) * pow2 (M - n - x) else 0)
-      ≤ (List.range (M + 1 - n)).map (fun x => (n + x) * pow2 (M - n - x)) :=
+  have hid := full_seg_identity n M hn hnM
+  have hle : ((List.range (M + 1 - n)).map
+        (fun x => if f (n + x) then (n + x) * pow2 (M - n - x) else 0)).sum
+      ≤ ((List.range (M + 1 - n)).map (fun x => (n + x) * pow2 (M - n - x))).sum :=
     sum_le_sum_of_forall (fun x _ => by
-      cases f (n + x) with
-      | true => omega
-      | false => omega)
-  have hid := full_seg_identity n M hn
+      show (if f (n + x) then (n + x) * pow2 (M - n - x) else 0)
+          ≤ (n + x) * pow2 (M - n - x)
+      split <;> omega)
   unfold seg
   omega
 
@@ -693,9 +722,8 @@ theorem tower_select (p q : Nat) (hp : 0 < p) (hq : 0 < q) :
         Nat.mul_le_mul_right _ (by omega)
   have hbridge : (2 * q) * (mfun (2 * q + 5) - 1)
       = 2 * (q * (mfun (2 * q + 5) - 1)) := by
-    rw [Nat.mul_assoc, Nat.mul_assoc, Nat.mul_comm 2 q]
-    omega
-  have hqa : 2 * q ≤ q * (mfun (2 * q + 5) - 1) := Nat.mul_le_mul_left q (by omega)
+    rw [Nat.mul_assoc]
+  have hqa : q * 2 ≤ q * (mfun (2 * q + 5) - 1) := Nat.mul_le_mul_left q (by omega)
   have hlast : pow2 (mfun (2 * q + 5) - 1) ≤ p * pow2 (mfun (2 * q + 5) - 1) := by
     exact Nat.le_mul_of_pos_left _ hp
   have hgoalform : q * (mfun (2 * q + 5) + 1)
@@ -719,8 +747,8 @@ theorem tower_sameValue (σ τ : Nat → Bool) : sameValue (F σ) (F τ) := by
   have hsσ := P_split' (F σ) (mfun K) M hM hmK
   have hsτ := P_split' (F τ) (mfun K) M hM hmK
   have hcp := checkpoint_eq σ τ K
-  have hbdσ := seg_bound (F σ) (mfun K) M hmK
-  have hbdτ := seg_bound (F τ) (mfun K) M hmK
+  have hbdσ := seg_bound (F σ) (mfun K) M hmK (by omega)
+  have hbdτ := seg_bound (F τ) (mfun K) M hmK (by omega)
   have hnorm : M + 1 - mfun K = M - mfun K + 1 := by omega
   rw [hnorm] at hbdσ hbdτ
   have hpow : pow2 (mfun K - 1) * pow2 (M - mfun K + 1) = pow2 M := by
@@ -729,13 +757,14 @@ theorem tower_sameValue (σ τ : Nat → Bool) : sameValue (F σ) (F τ) := by
     omega
   have hqB : q * ((mfun K + 1) * pow2 (M - mfun K + 1)) ≤ p * pow2 M := by
     have hstep1 : q * ((mfun K + 1) * pow2 (M - mfun K + 1))
-        = (q * (mfun K + 1)) * pow2 (M - mfun K + 1) := Nat.mul_assoc q _ _
+        = (q * (mfun K + 1)) * pow2 (M - mfun K + 1) := (Nat.mul_assoc q _ _).symm
     have hstep2 : (p * pow2 (mfun K - 1)) * pow2 (M - mfun K + 1) = p * pow2 M := by
-      rw [← Nat.mul_assoc, hpow]
+      rw [Nat.mul_assoc, hpow]
     have hle : (q * (mfun K + 1)) * pow2 (M - mfun K + 1)
         ≤ (p * pow2 (mfun K - 1)) * pow2 (M - mfun K + 1) :=
           Nat.mul_le_mul_right _ hK
-    rw [hstep1, hle, hstep2]
+    rw [hstep1]
+    exact Nat.le_trans hle (Nat.le_of_eq hstep2)
   -- assembly, direction 1
   have hchain1 : q * P (F σ) M ≤ q * P (F τ) M + p * pow2 M := by
     rw [hsσ, hsτ]
@@ -789,8 +818,8 @@ theorem tower_cauchy (σ : Nat → Bool) :
   intro M₁ M₂ hN h12
   have hs₁ := P_split' (F σ) (mfun K) M₁ hN hmK
   have hs₂ := P_split' (F σ) (mfun K) M₂ (by omega) hmK
-  have hbd₁ := seg_bound (F σ) (mfun K) M₁ hmK
-  have hbd₂ := seg_bound (F σ) (mfun K) M₂ hmK
+  have hbd₁ := seg_bound (F σ) (mfun K) M₁ hmK (by omega)
+  have hbd₂ := seg_bound (F σ) (mfun K) M₂ hmK (by omega)
   have hnorm₁ : M₁ + 1 - mfun K = M₁ - mfun K + 1 := by omega
   have hnorm₂ : M₂ + 1 - mfun K = M₂ - mfun K + 1 := by omega
   rw [hnorm₁] at hbd₁
@@ -801,13 +830,14 @@ theorem tower_cauchy (σ : Nat → Bool) :
     omega
   have hqB : q * ((mfun K + 1) * pow2 (M₂ - mfun K + 1)) ≤ p * pow2 M₂ := by
     have hstep1 : q * ((mfun K + 1) * pow2 (M₂ - mfun K + 1))
-        = (q * (mfun K + 1)) * pow2 (M₂ - mfun K + 1) := Nat.mul_assoc q _ _
+        = (q * (mfun K + 1)) * pow2 (M₂ - mfun K + 1) := (Nat.mul_assoc q _ _).symm
     have hstep2 : (p * pow2 (mfun K - 1)) * pow2 (M₂ - mfun K + 1) = p * pow2 M₂ := by
-      rw [← Nat.mul_assoc, hpow]
+      rw [Nat.mul_assoc, hpow]
     have hle : (q * (mfun K + 1)) * pow2 (M₂ - mfun K + 1)
         ≤ (p * pow2 (mfun K - 1)) * pow2 (M₂ - mfun K + 1) :=
           Nat.mul_le_mul_right _ hK
-    rw [hstep1, hle, hstep2]
+    rw [hstep1]
+    exact Nat.le_trans hle (Nat.le_of_eq hstep2)
   -- rescale the M₁-partial to scale M₂
   have hrescale : P (F σ) M₁ * pow2 (M₂ - M₁)
       = P (F σ) (mfun K - 1) * pow2 (M₂ - mfun K + 1)
@@ -840,8 +870,8 @@ theorem tower_cauchy (σ : Nat → Bool) :
       have hresc : (mfun K + 1) * pow2 (M₁ - mfun K + 1) * pow2 (M₂ - M₁)
           = (mfun K + 1) * pow2 (M₂ - mfun K + 1) := by
         rw [Nat.mul_assoc, ← pow2_add]
-        congr 1
-        omega
+        have hsum : M₁ - mfun K + 1 + (M₂ - M₁) = M₂ - mfun K + 1 := by omega
+        rw [hsum]
       have hstep : seg (F σ) (mfun K) M₁ * pow2 (M₂ - M₁)
           ≤ (mfun K + 1) * pow2 (M₁ - mfun K + 1) * pow2 (M₂ - M₁) :=
             Nat.mul_le_mul_right _ hbd₁
@@ -882,35 +912,11 @@ theorem tower_cauchy (σ : Nat → Bool) :
 
 theorem F_injective : Function.Injective (F) := by
   intro σ τ hστ
-  cases hf : Function.funext_iff.mpr (fun n => by
-    cases hq : σ n with
-    | true =>
-        cases ht : τ n with
-        | true => rfl
-        | false =>
-            exfalso
-            have h1 : F σ (mfun n) = σ n := F_P σ n
-            have h2 : F τ (mfun n) = τ n := F_P τ n
-            rw [← hστ] at h1
-            rw [hq, ht] at h1 h2
-            simp at h1
-    | false =>
-        cases ht : τ n with
-        | true =>
-            exfalso
-            have h1 : F σ (mfun n) = σ n := F_P σ n
-            have h2 : F τ (mfun n) = τ n := F_P τ n
-            rw [← hστ] at h1
-            rw [hq, ht] at h1 h2
-            simp at h2
-        | false => rfl) with
-  | intro h hfun =>
-      have h1 : F σ (mfun 0) = σ 0 := F_P σ 0
-      have h2 : F τ (mfun 0) = τ 0 := F_P τ 0
-      rw [← hστ] at h1
-      rw [hfun] at h2
-      rw [h1] at h2
-      exact absurd h2 (by cases σ 0 <;> cases τ 0 <;> simp)
+  apply funext
+  intro n
+  have h1 : F σ (mfun n) = σ n := F_P σ n
+  have h2 : F τ (mfun n) = τ n := F_P τ n
+  rw [← h1, ← h2, hστ]
 
 /-- **ERDŐS #261 — THE CONTINUUM QUESTION (REAL-x VARIANT): YES.**
 There is an explicit real x* = Σ_k m k/2^{m k} (the tower value, the
@@ -921,11 +927,12 @@ value existing by tower_cauchy). Since there are 2^{ℵ₀} binary
 sequences, x* has at least 2^{ℵ₀} distinct representations. -/
 theorem erdos261_continuum :
     ∃ G : (Nat → Bool) → (Nat → Bool),
-      Function.Injective G ∧ ∀ σ τ, sameValue (G σ) (G τ)
+      Function.Injective G ∧ ((∀ σ τ, sameValue (G σ) (G τ))
         ∧ ∀ σ, ∀ p q : Nat, 0 < p → 0 < q → ∃ N, ∀ M₁ M₂, N ≤ M₁ → M₁ ≤ M₂ →
           q * (P (G σ) M₁ * pow2 (M₂ - M₁)) ≤ q * P (G σ) M₂ + p * pow2 M₂
-            ∧ q * P (G σ) M₂ ≤ q * (P (G σ) M₁ * pow2 (M₂ - M₁)) + p * pow2 M₂ := by
-  exact ⟨F, F_injective, fun σ τ => tower_sameValue σ τ, fun σ => tower_cauchy σ⟩
+            ∧ q * P (G σ) M₂ ≤ q * (P (G σ) M₁ * pow2 (M₂ - M₁)) + p * pow2 M₂) := by
+  exact Exists.intro F (And.intro F_injective
+    (And.intro (fun σ τ => tower_sameValue σ τ) (fun σ => tower_cauchy σ)))
 
 -- ===========================================================================
 -- §10  RECEIPTS (all #eval — compiler-evaluated, exact) + AXIOM GATES
