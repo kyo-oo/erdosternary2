@@ -166,3 +166,23 @@ remaining errors are core-API grind, ledger lessons below).
 - Borwein–Loring [BoLo90]; Tengely–Ulas–Zygadło arXiv:2008.01501.
 - Kill #5 (this branch): the weakened question, zero-axiom.
 - Kill #2 (`gpt6/erdos-one-shots-2-20261101`): the greedy-walk theorem.
+
+### Compile-war round-8 diagnoses (for the next session — top remaining errors)
+- 194: split the final omega into a 3-step calc (hexp / hmid ≤ 2B / 2B ≤ 2X).
+- 244: `subst` eliminated `b` — use `rw [h']; exact mfun_lt_succ b` instead.
+- 272/276: region_disj now takes FIVE args (h4 added) — calls need
+  `... (by omega) h2` / `... (by omega) h2'`; the final absurd is
+  `absurd hlt' (by omega)` (direction!).
+- 331: halving_region's trailing omega has no goals — delete it.
+- 465: hfirst still has `(by simp)` — the file text uses `if f a then`
+  (no `= true`) — use the bound variable `ha` for mem_range.
+- 473: after `rw [List.map_map]` add `exact listMapCongr (fun x _ => rfl)`.
+- 477: `X |>.sum` parses badly in the hsegdef have — use explicit
+  `List.sum (List.map ...)` parenthesization.
+- 493: P_split' — add `have hseg : seg f M (M-1+(N-M+1)) = seg f M N := by rw [hd]`
+  and `rw [hM1, hseg]` at the end.
+- 509: `Bool.eq_false_or_true` NOT core — use `cases hσ : σ k with`.
+- 581-597: seg_region — first prove a `hsegform` (listMapCongr with
+  per-term exponent normalization `mfun k + k + 1 - mfun k - x = k + 1 - x`
+  and the range-count rewrite `mfun k + k + 1 + 1 - mfun k = k + 2`),
+  then run the sum_range_shift machinery on the normalized form.
