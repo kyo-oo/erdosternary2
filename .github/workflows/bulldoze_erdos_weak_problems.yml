@@ -1,10 +1,11 @@
-name: Bulldoze Erdos Weak Problems (271 Stanley A(2) + 404 Kernel Law)
+name: Bulldoze Erdos Weak Problems (271 Stanley A(2) + 404 Kernel Law + 261 Two Solutions)
 on:
   push:
     branches: [bulldoze/erdos-weak-problems-3-20261101]
     paths:
       - bulldoze/problem271-stanley-a2/StanleyA2.lean
       - bulldoze/problem404-padic-kernel/KernelLaw.lean
+      - bulldoze/problem261-two-solutions/**
       - .github/workflows/bulldoze_erdos_weak_problems.yml
   workflow_dispatch:
 permissions:
@@ -43,7 +44,20 @@ jobs:
           grep -F "[10, 10]" kernel-law.log
           grep -F "(3, 7, 10)" kernel-law.log
           echo KERNEL_LAW_GREEN=1
+      - name: Kernel 3 - Erdos 261 weakened two-solutions question (Kill #5)
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean bulldoze/problem261-two-solutions/TwoSolutions.lean 2>&1 | tee two-solutions.log
+          ! grep -E 'error:|sorryAx|unknown identifier|unsolved goals|declaration uses .sorry.' two-solutions.log
+          test "$(grep -cF '(1 : Rat)/2' two-solutions.log)" -ge 3
+          grep -F "(128, 128, 128)" two-solutions.log
+          grep -F "(104, 104)" two-solutions.log
+          grep -F "'erdos261_weakened_two_solutions' does not depend on any axioms" two-solutions.log
+          grep -F "'erdos261_three_solutions' does not depend on any axioms" two-solutions.log
+          echo TWO_SOLUTIONS_KERNEL_GREEN=1
       - name: Independent verification battery
         shell: bash
         run: |
           python3 bulldoze/scripts/verify_bulldoze.py
+          python3 bulldoze/problem261-two-solutions/verify_frontiers.py
